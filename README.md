@@ -10,7 +10,7 @@ Try .NET is inline code runner and playground that enables people to experiment 
 - A place where you can post issues about the [Try .NET](https://try.dot.net).
 - We will posting the Try .NET roadmap shortly. 
 ### Interactive Experiences Online
-The .NET online code experiences are growing and we are just one of a few out there. Other .NET online code experiences are:
+The number of .NET online code experiences are growing and we are just one of a few out there. Other .NET online code experiences are:
 
 - [dotnetfiddle](https://dotnetfiddle.net/)
 - [sharplab io](https://sharplab.io/)
