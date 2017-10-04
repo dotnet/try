@@ -14,12 +14,15 @@ Try .NET is inline code runner and playground that enables people to experiment 
 ## Examples of the Try .NET 
 
 ### Learn C# with interactive tutorials 
-![repl](https://user-images.githubusercontent.com/2546640/31154776-60fc3820-a877-11e7-9330-ba7cdaa7e639.gif)
+
 [Link to C# quick start](https://docs.microsoft.com/en-us/dotnet/csharp/quick-starts/)
+![repl](https://user-images.githubusercontent.com/2546640/31154776-60fc3820-a877-11e7-9330-ba7cdaa7e639.gif)
+
 
 **About the C# Quick starts:**  You'll learn the basics of C# syntax and how to work with data types like strings, numbers, and booleans. It's all interactive, and you'll be writing code within minutes. These first lessons assume no prior knowledge of programming or the C# language.
 
 ### Interactive Documentation 
+
 *coming soon to docs.microsoft.com*
 
 ![snippet](https://user-images.githubusercontent.com/2546640/31156287-a357ca5e-a881-11e7-88b9-100d09712a40.gif)
