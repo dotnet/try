@@ -30,7 +30,7 @@ Run the snippets in the docs.
 
 Try .NET is the code runner behind the interactive tutorials and snippets. If you would like to explore in its raw state, [check out here](https://try.dot.net/).
 
-![try](https://user-images.githubusercontent.com/2546640/31156529-ea4491da-a882-11e7-8900-6975fb70f17b.gif)
+![try](https://user-images.githubusercontent.com/2546640/31156674-e8515290-a883-11e7-88fa-7326726b8bdb.gif)
 
 ### Interactive Experiences Online
 The number of .NET online code experiences are growing and we are just one of a few out there. Other .NET online code experiences are:
