@@ -1,4 +1,4 @@
-
+ it
 # Welcome to the Try.NET Repo 
 
 ## What is Try.NET ?
@@ -31,7 +31,7 @@ Run the snippets in the docs.
 
 ### Explore Try .NET 
 
-Try .NET is the code runner behind the interactive tutorials and snippets. If you would like to explore in its raw state, [check out here](https://try.dot.net/).
+Try .NET is the code runner behind the interactive tutorials and snippets. If you would like to explore in its raw state, [check it out here](https://try.dot.net/).
 
 ![try](https://user-images.githubusercontent.com/2546640/31156674-e8515290-a883-11e7-88fa-7326726b8bdb.gif)
 
