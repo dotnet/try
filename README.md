@@ -9,7 +9,7 @@ Try .NET is an inline code runner and playground that enables people to experime
 ### What is the repo for?
 - A place where you can post issues about the [Try .NET](https://docs.microsoft.com/en-us/dotnet/api/system.datetime?view=netframework-4.7.2#invoke-constructors).
 
-- We will be posting the Try .NET roadmap shortly. 
+- [Please read and comment on our roadmap](https://github.com/dotnet/try/wiki/Product-Roadmap).
 - **Please Note:** The code for Try .NET is not currently hosted on GitHub.  
 
 ## Examples of the Try .NET 
