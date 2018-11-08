@@ -1,4 +1,3 @@
-
 # Welcome to the Try.NET Repo 
 
 ## What is Try.NET ?
@@ -8,7 +7,8 @@ Try .NET is an inline code runner and playground that enables people to experime
 **Note**: Currently,Try .NET only supports C# but we do plan to enable support F# and VB in the near future. 
 
 ### What is the repo for?
-- A place where you can post issues about the [Try .NET](https://try.dot.net),
+- A place where you can post issues about the [Try .NET](https://docs.microsoft.com/en-us/dotnet/api/system.datetime?view=netframework-4.7.2#invoke-constructors).
+
 - We will be posting the Try .NET roadmap shortly. 
 - **Please Note:** The code for Try .NET is not currently hosted on GitHub.  
 
@@ -24,7 +24,6 @@ Try .NET is an inline code runner and playground that enables people to experime
 
 ### Interactive Documentation 
 
-*coming soon to docs.microsoft.com*
 
 ![snippet](https://user-images.githubusercontent.com/2546640/31156287-a357ca5e-a881-11e7-88b9-100d09712a40.gif)
 
@@ -32,9 +31,11 @@ Run the snippets in the docs.
 
 ### Explore Try .NET 
 
-Try .NET is the code runner behind the interactive tutorials and snippets. If you would like to explore in its raw state, [check it out here](https://try.dot.net/).
+Try .NET is the code runner behind the interactive tutorials and snippets. If you would like to explore in its raw state, [check it out here](https://www.microsoft.com/net/platform/try-dotnet).
 
-![try](https://user-images.githubusercontent.com/2546640/31156674-e8515290-a883-11e7-88fa-7326726b8bdb.gif)
+![web11 2](https://user-images.githubusercontent.com/2546640/48210733-f526a800-e345-11e8-9a1b-ba0beebbad3b.gif)
+
+
 
 ### Interactive Experiences Online
 The number of .NET online code experiences are growing and we are just one of a few out there. Other .NET online code experiences are:
