@@ -1,10 +1,10 @@
-# Welcome to the Try.NET Repo 
+# Welcome to the Try .NET Repo 
 
-## What is Try.NET ?
+## What is Try .NET ?
 
 Try .NET is an inline code runner and playground that enables people to experiment and learn about C# in the browser. 
 
-**Note**: Currently,Try .NET only supports C# but we do plan to enable support F# and VB in the near future. 
+**Note**: Currently, Try .NET only supports C# but we do plan to enable support F# and VB in the near future. 
 
 ### What is the repo for?
 - A place where you can post issues about the [Try .NET](https://docs.microsoft.com/en-us/dotnet/api/system.datetime?view=netframework-4.7.2#invoke-constructors).
@@ -42,10 +42,10 @@ The number of .NET online code experiences are growing and we are just one of a 
 
 - [dotnetfiddle](https://dotnetfiddle.net/)
 - [sharplab io](https://sharplab.io/)
-- [rextester]( http://rextester.com/)
+- [rextester]( https://rextester.com/)
 - [repl.it](https://repl.it/languages/csharp)
 - [C# pad](https://csharppad.com/)
-- [Learn CS](http://www.learncs.org/)
+- [Learn CS](https://learncs.org/)
 - [Tech.io](https://tech.io/snippet?l=csharp)
 - [ideone](https://ideone.com/)
 
