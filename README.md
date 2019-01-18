@@ -7,7 +7,7 @@ Try .NET is an inline code runner and playground that enables people to experime
 **Note**: Currently,Try .NET only supports C# but we do plan to enable support F# and VB in the near future. 
 
 ### What is the repo for?
-- A place where you can post issues about the [Try .NET](https://try.dot.net/).
+- A place where you can post issues about [Try .NET](https://dotnet.microsoft.com/platform/try-dotnet).
 
 - [Please read and comment on our roadmap](https://github.com/dotnet/try/wiki/Product-Roadmap).
 - **Please Note:** The code for Try .NET is not currently hosted on GitHub.  
