@@ -11,7 +11,7 @@ Please provide as much information as you can.
 - docs.microsoft.com
 - microsoft.com/net/learn/dotnet/in-browser-tutorial
 - [Noda Time](https://nodatime.org/2.3.x/userguide/recipes)
-- try.dot.net - *Please note: this is our prodcution site*
+- try.dot.net - *Please note: this is our production site*
 
 **What kind of error was it?**
 - User Interface (UI):  For example the output never displayed 
