@@ -1,0 +1,90 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\myapp.csproj": {}
+  },
+  "projects": {
+    "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\myapp.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\myapp.csproj",
+        "projectName": "myapp",
+        "projectPath": "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\myapp.csproj",
+        "packagesPath": "C:\\Users\\Maria Naggaga\\.nuget\\packages\\",
+        "outputPath": "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\dev\\NuGet.Config",
+          "C:\\Users\\Maria Naggaga\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore-tooling/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/aspnet-entityframeworkcore/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/aspnet-extensions/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {},
+          "https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json": {},
+          "https://msazure.pkgs.visualstudio.com/_packaging/MLS/nuget/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.0": {
+          "dependencies": {
+            "Microsoft.NETCore.Platforms": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.0.0-preview3.19128.7, )",
+              "autoReferenced": true
+            },
+            "Microsoft.WindowsDesktop.App": {
+              "include": "None",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.0.0-preview3-27504-2, )",
+              "autoReferenced": true
+            },
+            "System.CommandLine.DragonFruit": {
+              "target": "Package",
+              "version": "[0.2.0-alpha.19176.2, )"
+            },
+            "System.CommandLine.Experimental": {
+              "target": "Package",
+              "version": "[0.2.0-alpha.19176.2, )"
+            },
+            "runtime.win-x64.Microsoft.NETCore.DotNetAppHost": {
+              "include": "None",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.0.0-preview3-27503-5, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,412 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETCoreApp,Version=v3.0": {
+      "Microsoft.CSharp/4.4.1": {
+        "type": "package",
+        "compile": {
+          "ref/netcoreapp2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp2.0/_._": {}
+        }
+      },
+      "Microsoft.NETCore.Platforms/3.0.0-preview3.19128.7": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/_._": {}
+        }
+      },
+      "Microsoft.NETCore.Targets/2.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/_._": {}
+        }
+      },
+      "Microsoft.WindowsDesktop.App/3.0.0-preview3-27504-2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "2.0.0",
+          "Microsoft.NETCore.Targets": "2.0.0"
+        },
+        "compile": {
+          "ref/netcoreapp3.0/_._": {}
+        },
+        "build": {
+          "build/netcoreapp3.0/_._": {}
+        }
+      },
+      "runtime.win-x64.Microsoft.NETCore.DotNetAppHost/3.0.0-preview3-27503-5": {
+        "type": "package",
+        "runtimeTargets": {
+          "runtimes/win-x64/native/_._": {
+            "assetType": "native",
+            "rid": "win-x64"
+          }
+        }
+      },
+      "System.CommandLine.DragonFruit/0.2.0-alpha.19176.2": {
+        "type": "package",
+        "dependencies": {
+          "System.CommandLine.Experimental": "0.2.0-alpha.19176.2",
+          "System.CommandLine.Rendering": "0.2.0-alpha.19176.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.CommandLine.DragonFruit.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.CommandLine.DragonFruit.dll": {}
+        },
+        "build": {
+          "build/netstandard2.0/System.CommandLine.DragonFruit.props": {},
+          "build/netstandard2.0/System.CommandLine.DragonFruit.targets": {}
+        }
+      },
+      "System.CommandLine.Experimental/0.2.0-alpha.19176.2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CSharp": "4.4.1"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.CommandLine.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.CommandLine.dll": {}
+        }
+      },
+      "System.CommandLine.Rendering/0.2.0-alpha.19176.2": {
+        "type": "package",
+        "dependencies": {
+          "System.CommandLine.Experimental": "0.2.0-alpha.19176.2"
+        },
+        "compile": {
+          "lib/netstandard2.0/System.CommandLine.Rendering.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.CommandLine.Rendering.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Microsoft.CSharp/4.4.1": {
+      "sha512": "A5hI3gk6WpcBI0QGZY6/d5CCaYUxJgi7iENn1uYEng+Olo8RfI5ReGVkjXjeu3VR3srLvVYREATXa2M0X7FYJA==",
+      "type": "package",
+      "path": "microsoft.csharp/4.4.1",
+      "files": [
+        ".nupkg.metadata",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net45/_._",
+        "lib/netcore50/Microsoft.CSharp.dll",
+        "lib/netcoreapp2.0/_._",
+        "lib/netstandard1.3/Microsoft.CSharp.dll",
+        "lib/netstandard2.0/Microsoft.CSharp.dll",
+        "lib/portable-net45+win8+wp8+wpa81/_._",
+        "lib/win8/_._",
+        "lib/wp80/_._",
+        "lib/wpa81/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "microsoft.csharp.4.4.1.nupkg.sha512",
+        "microsoft.csharp.nuspec",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net45/_._",
+        "ref/netcore50/Microsoft.CSharp.dll",
+        "ref/netcore50/Microsoft.CSharp.xml",
+        "ref/netcore50/de/Microsoft.CSharp.xml",
+        "ref/netcore50/es/Microsoft.CSharp.xml",
+        "ref/netcore50/fr/Microsoft.CSharp.xml",
+        "ref/netcore50/it/Microsoft.CSharp.xml",
+        "ref/netcore50/ja/Microsoft.CSharp.xml",
+        "ref/netcore50/ko/Microsoft.CSharp.xml",
+        "ref/netcore50/ru/Microsoft.CSharp.xml",
+        "ref/netcore50/zh-hans/Microsoft.CSharp.xml",
+        "ref/netcore50/zh-hant/Microsoft.CSharp.xml",
+        "ref/netcoreapp2.0/_._",
+        "ref/netstandard1.0/Microsoft.CSharp.dll",
+        "ref/netstandard1.0/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/de/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/es/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/fr/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/it/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/ja/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/ko/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/ru/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/zh-hans/Microsoft.CSharp.xml",
+        "ref/netstandard1.0/zh-hant/Microsoft.CSharp.xml",
+        "ref/netstandard2.0/Microsoft.CSharp.dll",
+        "ref/netstandard2.0/Microsoft.CSharp.xml",
+        "ref/portable-net45+win8+wp8+wpa81/_._",
+        "ref/win8/_._",
+        "ref/wp80/_._",
+        "ref/wpa81/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
+    "Microsoft.NETCore.Platforms/3.0.0-preview3.19128.7": {
+      "sha512": "4/k52fBHvM1RNPoBMik0Y3wIovsUGaTadNGH75iLGjQCJPRq2UBivEkhYrYkIFnu+K9kTYJcmXCDF6SFzMBrqA==",
+      "type": "package",
+      "path": "microsoft.netcore.platforms/3.0.0-preview3.19128.7",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/netstandard1.0/_._",
+        "microsoft.netcore.platforms.3.0.0-preview3.19128.7.nupkg.sha512",
+        "microsoft.netcore.platforms.nuspec",
+        "runtime.json",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
+    "Microsoft.NETCore.Targets/2.0.0": {
+      "sha512": "odP/tJj1z6GylFpNo7pMtbd/xQgTC3Ex2If63dRTL38bBNMwsBnJ+RceUIyHdRBC0oik/3NehYT+oECwBhIM3Q==",
+      "type": "package",
+      "path": "microsoft.netcore.targets/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/netstandard1.0/_._",
+        "microsoft.netcore.targets.2.0.0.nupkg.sha512",
+        "microsoft.netcore.targets.nuspec",
+        "runtime.json",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
+    "Microsoft.WindowsDesktop.App/3.0.0-preview3-27504-2": {
+      "sha512": "t7Iw6nkx03aOXgZ7L2ZJLN7hGY7FlUaxIyH6UbGhjHCJABxfV8Bx3xOe6E63xa1HVeoccCAdNPctTX2s2zj5SQ==",
+      "type": "package",
+      "path": "microsoft.windowsdesktop.app/3.0.0-preview3-27504-2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "build/netcoreapp3.0/Microsoft.WindowsDesktop.App.targets",
+        "build/netcoreapp3.0/ref-mscorlib/System.ComponentModel.dll",
+        "build/netcoreapp3.0/ref-mscorlib/System.Runtime.CompilerServices.VisualC.dll",
+        "build/netcoreapp3.0/ref-mscorlib/System.Runtime.dll",
+        "build/netcoreapp3.0/ref-mscorlib/mscorlib.dll",
+        "microsoft.windowsdesktop.app.3.0.0-preview3-27504-2.nupkg.sha512",
+        "microsoft.windowsdesktop.app.nuspec",
+        "ref/netcoreapp3.0/Accessibility.dll",
+        "ref/netcoreapp3.0/Microsoft.Win32.Registry.dll",
+        "ref/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll",
+        "ref/netcoreapp3.0/PresentationCore-CommonResources.dll",
+        "ref/netcoreapp3.0/PresentationCore.dll",
+        "ref/netcoreapp3.0/PresentationFramework.Aero.dll",
+        "ref/netcoreapp3.0/PresentationFramework.Aero2.dll",
+        "ref/netcoreapp3.0/PresentationFramework.AeroLite.dll",
+        "ref/netcoreapp3.0/PresentationFramework.Classic.dll",
+        "ref/netcoreapp3.0/PresentationFramework.Luna.dll",
+        "ref/netcoreapp3.0/PresentationFramework.Royale.dll",
+        "ref/netcoreapp3.0/PresentationFramework.dll",
+        "ref/netcoreapp3.0/PresentationUI.dll",
+        "ref/netcoreapp3.0/ReachFramework.dll",
+        "ref/netcoreapp3.0/System.CodeDom.dll",
+        "ref/netcoreapp3.0/System.Configuration.ConfigurationManager.dll",
+        "ref/netcoreapp3.0/System.Design.dll",
+        "ref/netcoreapp3.0/System.Drawing.Common.dll",
+        "ref/netcoreapp3.0/System.Drawing.Design.dll",
+        "ref/netcoreapp3.0/System.Drawing.dll",
+        "ref/netcoreapp3.0/System.Printing.dll",
+        "ref/netcoreapp3.0/System.Security.AccessControl.dll",
+        "ref/netcoreapp3.0/System.Security.Cryptography.Cng.dll",
+        "ref/netcoreapp3.0/System.Security.Cryptography.Pkcs.dll",
+        "ref/netcoreapp3.0/System.Security.Cryptography.ProtectedData.dll",
+        "ref/netcoreapp3.0/System.Security.Cryptography.Xml.dll",
+        "ref/netcoreapp3.0/System.Security.Permissions.dll",
+        "ref/netcoreapp3.0/System.Security.Principal.Windows.dll",
+        "ref/netcoreapp3.0/System.Windows.Controls.Ribbon.dll",
+        "ref/netcoreapp3.0/System.Windows.Extensions.dll",
+        "ref/netcoreapp3.0/System.Windows.Forms.Design.Editors.dll",
+        "ref/netcoreapp3.0/System.Windows.Forms.Design.dll",
+        "ref/netcoreapp3.0/System.Windows.Forms.dll",
+        "ref/netcoreapp3.0/System.Windows.Input.Manipulations.dll",
+        "ref/netcoreapp3.0/System.Windows.Presentation.dll",
+        "ref/netcoreapp3.0/System.Xaml.dll",
+        "ref/netcoreapp3.0/UIAutomationClient.dll",
+        "ref/netcoreapp3.0/UIAutomationClientSideProviders.dll",
+        "ref/netcoreapp3.0/UIAutomationProvider.dll",
+        "ref/netcoreapp3.0/UIAutomationTypes.dll",
+        "ref/netcoreapp3.0/WindowsBase.dll",
+        "ref/netcoreapp3.0/WindowsFormsIntegration.dll",
+        "runtime.json",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    },
+    "runtime.win-x64.Microsoft.NETCore.DotNetAppHost/3.0.0-preview3-27503-5": {
+      "sha512": "9xq1NTCrWg3A4/6K/COActt25NJaw1a6bx0CTIkgbYv2TkpveKXZCCSFyDnT5Ff9nBvZkBq4Y4r/tZNIU5T8pg==",
+      "type": "package",
+      "path": "runtime.win-x64.microsoft.netcore.dotnetapphost/3.0.0-preview3-27503-5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "runtime.win-x64.microsoft.netcore.dotnetapphost.3.0.0-preview3-27503-5.nupkg.sha512",
+        "runtime.win-x64.microsoft.netcore.dotnetapphost.nuspec",
+        "runtimes/win-x64/native/apphost.exe",
+        "runtimes/win-x64/native/comhost.dll",
+        "version.txt"
+      ]
+    },
+    "System.CommandLine.DragonFruit/0.2.0-alpha.19176.2": {
+      "sha512": "t+XZMDNM6G2ntr1V5v6+ohieoxvgaPQ5Ua4vwf1L4ezDtOsYEJuF6DYye9MNn/St7DxdPrGfk2nZ+j93yRmYeA==",
+      "type": "package",
+      "path": "system.commandline.dragonfruit/0.2.0-alpha.19176.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "build/netstandard2.0/System.CommandLine.DragonFruit.props",
+        "build/netstandard2.0/System.CommandLine.DragonFruit.targets",
+        "lib/netstandard2.0/System.CommandLine.DragonFruit.dll",
+        "lib/netstandard2.0/System.CommandLine.DragonFruit.pdb",
+        "system.commandline.dragonfruit.0.2.0-alpha.19176.2.nupkg.sha512",
+        "system.commandline.dragonfruit.nuspec"
+      ]
+    },
+    "System.CommandLine.Experimental/0.2.0-alpha.19176.2": {
+      "sha512": "QYV7dkj6eb1xWJiHHS/hN1eOKL9Z/IqDyl/nsulzY78I+Upcdy8EibbI9mg8sz0ePywGKOiXSePrBjkQSiQe7w==",
+      "type": "package",
+      "path": "system.commandline.experimental/0.2.0-alpha.19176.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/System.CommandLine.dll",
+        "lib/netstandard2.0/System.CommandLine.pdb",
+        "system.commandline.experimental.0.2.0-alpha.19176.2.nupkg.sha512",
+        "system.commandline.experimental.nuspec"
+      ]
+    },
+    "System.CommandLine.Rendering/0.2.0-alpha.19176.2": {
+      "sha512": "F0F8OYy/GblG4aU1U45I+6re3Fs/hiMMrAiJSyhNf9ifBfpkllbqdJHnlvvgH1dNNlg5egh6p+mn9azFg1B9ww==",
+      "type": "package",
+      "path": "system.commandline.rendering/0.2.0-alpha.19176.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/System.CommandLine.Rendering.dll",
+        "lib/netstandard2.0/System.CommandLine.Rendering.pdb",
+        "system.commandline.rendering.0.2.0-alpha.19176.2.nupkg.sha512",
+        "system.commandline.rendering.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETCoreApp,Version=v3.0": [
+      "Microsoft.NETCore.Platforms >= 3.0.0-preview3.19128.7",
+      "Microsoft.WindowsDesktop.App >= 3.0.0-preview3-27504-2",
+      "System.CommandLine.DragonFruit >= 0.2.0-alpha.19176.2",
+      "System.CommandLine.Experimental >= 0.2.0-alpha.19176.2",
+      "runtime.win-x64.Microsoft.NETCore.DotNetAppHost >= 3.0.0-preview3-27503-5"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Maria Naggaga\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\myapp.csproj",
+      "projectName": "myapp",
+      "projectPath": "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\myapp.csproj",
+      "packagesPath": "C:\\Users\\Maria Naggaga\\.nuget\\packages\\",
+      "outputPath": "C:\\dev\\try\\try\\Samples\\Beginners\\myapp\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\dev\\NuGet.Config",
+        "C:\\Users\\Maria Naggaga\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netcoreapp3.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore-tooling/index.json": {},
+        "https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json": {},
+        "https://dotnetfeed.blob.core.windows.net/aspnet-entityframeworkcore/index.json": {},
+        "https://dotnetfeed.blob.core.windows.net/aspnet-extensions/index.json": {},
+        "https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json": {},
+        "https://dotnetfeed.blob.core.windows.net/dotnet-windowsdesktop/index.json": {},
+        "https://msazure.pkgs.visualstudio.com/_packaging/MLS/nuget/v3/index.json": {}
+      },
+      "frameworks": {
+        "netcoreapp3.0": {
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netcoreapp3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[3.0.0-preview3.19128.7, )",
+            "autoReferenced": true
+          },
+          "Microsoft.WindowsDesktop.App": {
+            "include": "None",
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[3.0.0-preview3-27504-2, )",
+            "autoReferenced": true
+          },
+          "System.CommandLine.DragonFruit": {
+            "target": "Package",
+            "version": "[0.2.0-alpha.19176.2, )"
+          },
+          "System.CommandLine.Experimental": {
+            "target": "Package",
+            "version": "[0.2.0-alpha.19176.2, )"
+          },
+          "runtime.win-x64.Microsoft.NETCore.DotNetAppHost": {
+            "include": "None",
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[3.0.0-preview3-27503-5, )",
+            "autoReferenced": true
+          }
+        },
+        "imports": [
+          "net461"
+        ],
+        "assetTargetFallback": true,
+        "warn": true
+      }
+    }
+  }
+}
