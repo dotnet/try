@@ -1,96 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
+
 namespace myapp
 {
-    class Program
+    public class PascalsTriangle
     {
-        static void Main(string region = null,
-            string session = null,
-            string package = null,
-            string project = null,
-            string[] args = null)
-        {
-            switch(region)
-            {
-                case "intro":
-                    Intro();
-                    break;
-                case "strings":
-                    Strings();
-                    break;
-                case "variables":
-                    Variables();
-                    break;
-                case "interpolation":
-                    Interpolation();
-                    break;
-                case "methods":
-                    Methods();
-                    break;
-                case "collections":
-                    Collections();
-                    break;
-                case "handcoded":
-                    PascalsTriangle.HardCoded();
-                    break;
-                case "handcoded-answer":
-                    PascalsTriangle.MoreHardCoded();
-                    break;
-                case "more-arrays":
-                    PascalsTriangle.ArraysOfArrays();
-                    break;
-                case "initialize-in-loop":
-                    PascalsTriangle.InitInLoops();
-                    break;
-            }
-        }
-        public static void Intro()
-        {
-            #region intro
-            Console.WriteLine("Hello World!");
-            #endregion
-        }
-        public static void Strings()
-        {
-            #region strings
-            Console.WriteLine("Hello Rain");
-            #endregion
-        }
-        public static void Variables()
-        {
-            #region variables
-            var name = "Rain";
-            Console.WriteLine("Hello " + name + "!");
-            #endregion
-        }
-        
-        public static void Interpolation()
-        {
-            #region interpolation
-            var name = "Rain";
-            Console.WriteLine($"Hello {name}!");
-            #endregion
-        }
-        public static void Methods()
-        {
-            #region methods
-            var name ="Rain";
-            Console.WriteLine($"Hello {name.ToUpper()}!");
-            #endregion
-        }
-        public static void Collections()
-        {
-            #region collections
-            var names = new List<string> { "Rain", "Sage", "Lee" };
-            foreach (var name in names)
-            {
-                Console.WriteLine($"Hello {name.ToUpper()}!");
-            }
-            #endregion
-        }
-
-        public static void PascalsTriangleHardCoded()
+        public static void HardCoded()
         {
             #region handcoded
             int[] row0 = new int[] { 1 };
@@ -108,7 +22,7 @@ namespace myapp
             #endregion
         }
 
-        public static void PascalsTriangleMoreHardCoded()
+        public static void MoreHardCoded()
         {
             #region handcoded-answer
             int[] row0 = new int[] { 1 };
@@ -136,7 +50,7 @@ namespace myapp
             #endregion
         }
 
-        public static void PascalsTriangleArraysOfArrays()
+        public static void ArraysOfArrays()
         {
             #region more-arrays
             int[][] triangle = new int[5][];
@@ -155,9 +69,10 @@ namespace myapp
             #endregion
         }
 
-        public static void PascalsTriangleInitInLoops()
+        public static void InitInLoops()
         {
             #region initialize-in-loop
+            
             int[][] triangle = new int[5][];
             for (int rowIndex = 0; rowIndex < 5; rowIndex++)
             {
@@ -178,7 +93,7 @@ namespace myapp
             #endregion
         }
 
-        public static void PascalsTriangleFormattings()
+        public static void Formattings()
         {
             #region formatting
             const int MaxRows = 5;

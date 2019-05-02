@@ -3,7 +3,7 @@
 ### Methods
 A **method** is a block of code that implements some action. `ToUpper()` is a method you can invoke on a string, like the *name* variable. It will return the same string, converted to uppercase.
 ``` cs --region methods --source-file .\myapp\Program.cs --project .\myapp\myapp.csproj 
-var name ="Rain";
+var name ="BUILD";
 Console.WriteLine($"Hello {name.ToUpper()}!");
 ```
 ### Collections
@@ -18,5 +18,4 @@ Replace the *name* variable with a *names* variable that has a list of names. Th
           Console.WriteLine($"Hello {name.ToUpper()}!");
      }
 ```
-#### Previous - [Strings & Variables](./Strings.md)
-#### Home - [Home](./README.md) 
+#### Previous - [Strings & Variables &laquo;](./Strings.md) Home - [Home](../README.md) 

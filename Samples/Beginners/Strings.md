@@ -24,6 +24,4 @@ Start with including a `$` before the opening quotes of the string. Now, place a
 var name = "Rain";
 Console.WriteLine($"Hello {name}!");
 ```
-#### Next - [Methods](./Methods.md)
-#### Previous - [Hello World](./HelloWorld.md)
-#### Home - [Home](./README.md)
+#### Next: [Methods &raquo;](./Methods.md)  Previous: [Hello World &laquo;](./HelloWorld.md)    Home - [Home](../README.md)
