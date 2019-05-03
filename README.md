@@ -34,6 +34,38 @@ Once you have successfully installed `dotnet try` global tool, enter the command
 
 | Command        | Purpose                                |
 |----------------|----------------------------------------|
-| `demo`         | launches getting started documentation |
-| `verify`       | compiler for documentation             |
+| `demo`         | Learn how to create Try .NET content with an interactive demo |
+| `verify`       | Verify Markdown files in the target directory and its children.            |
 ## Getting Started
+
+You can get started using either one of the options below. 
+
+**Option1**: `dotnet try demo` 
+- Create a new folder.
+- `cd` to your new folder.
+- Run command `dotnet try demo` 
+
+**Option 2**: Starting from scratch.
+1. Go to the terminal and create a folder called `mydoc`.
+2. `cd` to the `mydoc` and create a new console app with the following command
+ ```console
+    > dotnet new console -o myApp
+```
+This will create a console app with the files `myApp.csproj` and `Program.cs`.
+
+3. Open `mydoc` in Visual Studio Code. 
+
+4. Create a file called `doc.md`. Inside that file, add some text and a code fence:
+
+````markdown
+# My Interactive Document:
+
+```cs --source-file ./myApp/Program.cs --project ./myApp/myApp.csproj
+```
+````
+5. Now, navigate back to the `mydoc` folder and run the following command:
+
+    ```console
+    > dotnet try
+    ```
+You have created your first C# interactive developer experience. You should now be able to run your console app and see the result in the browser.  
