@@ -1,5 +1,5 @@
 # Try .NET <img src ="https://user-images.githubusercontent.com/2546640/56708992-deee8780-66ec-11e9-9991-eb85abb1d10a.png" width="80px" alt="dotnet bot in space" align ="right">
-|| [**Basics**](#basics) • [**Experiences**](#experiences) || [**Installation**]() • [**Getting Started**]() || [**Samples**](Samples) ||
+|| [**Basics**](#basics) • [**Experiences**](#experiences) || [**Setup**](#setup) • [**Getting Started**](#getting-started) || [**Samples**](Samples) ||
 
 ![Try_.NET Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
@@ -24,8 +24,16 @@ Microsoft Docs uses Try .NET to create interactive documentation. Users can run 
 
 Try .NET enables .NET developers to create interactive markdown files.
 To make your markdown files interactive, you will need to [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0), the dotnet try global tool(*coming soon*) and [Visual Studio](https://visualstudio.microsoft.com/) / [VS Code](https://code.visualstudio.com/)(or any other editor of your choice). 
+![interactive_doc](https://user-images.githubusercontent.com/2546640/57158389-47a2c780-6db1-11e9-96ad-8c6e9ab52853.png)
 
-![interactive_doc](https://user-images.githubusercontent.com/2546640/57150149-7f9f1000-6d9b-11e9-8743-de59b1097720.png)
-## Installation
+## Setup
+Before you get can start creating interactive documentation, you will need to install the following: 
+- [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0)
+- [dotnet try global tool](*coming soon*)
+Once you have successfully installed `dotnet try` global tool, enter the command `dotnet try -h` you will see a list of commands:
 
-## Getting Started 
+| Command        | Purpose                                |
+|----------------|----------------------------------------|
+| `demo`         | launches getting started documentation |
+| `verify`       | compiler for documentation             |
+## Getting Started
