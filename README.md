@@ -53,7 +53,7 @@ You can get started using either one of the options below.
 ```
 This will create a console app with the files `myApp.csproj` and `Program.cs`.
 
-3. Open `mydoc` in Visual Studio Code. 
+3. Open `mydoc`folder in Visual Studio Code. 
 
 4. Create a file called `doc.md`. Inside that file, add some text and a code fence:
 
