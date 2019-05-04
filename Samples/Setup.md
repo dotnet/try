@@ -6,8 +6,6 @@
 - Go to your terminal 
 - Install the [Try .NET tools]()
 `dotnet install -g dotnet-try`
-- Install the [Try .NET tools]()
-`dotnet install -g dotnet-try`
 - Navigate to the Samples directory of this repository and, type the following  `dotnet try`.
 ![dotnet try](https://user-images.githubusercontent.com/2546640/57164943-ab35f080-6dc3-11e9-8230-ee521e00e428.gif)
 - This will launch the browser.
