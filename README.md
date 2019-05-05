@@ -47,7 +47,7 @@ You can get started using either one of the options below.
 
 **Option 2**: Starting from scratch.
 1. Go to the terminal and create a folder called `mydoc`.
-2. `cd` to the `mydoc` and create a new console app with the following command
+2. `cd` to the `mydoc` folder and create a new console app with the following command
  ```console
     > dotnet new console -o myApp
 ```
