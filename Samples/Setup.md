@@ -2,7 +2,7 @@
 
 ### How do get started with a Try .NET enabled repo?
 - Clone this repo
-- Install [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0)
+- Install .NET Core SDK [3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0) and [2.1](https://dotnet.microsoft.com/download/dotnet-core/2.1) currently dotnet try global tool targets 2.1. 
 - Go to your terminal 
 - Install the [Try .NET tools]()
 `dotnet install -g dotnet-try`
