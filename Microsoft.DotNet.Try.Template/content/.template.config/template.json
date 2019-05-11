@@ -1,0 +1,15 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "Microsoft",
+    "classifications": [ "Common", "Console", "Try .NET", "Interactive Documentation" ],
+    "tags": {
+        "language": "C#",
+        "type": "project"
+      },
+    "identity": "Microsoft.DotNet.Try.Template",
+    "defaultName": "Microsoft.DotNet.Try.Template",
+    "name": "Sample project for interactive documentation",
+    "shortName": "try",
+    "sourceName": "Microsoft.DotNet.Try.Template",
+    "preferNameDirectory": true
+}
