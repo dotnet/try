@@ -3,6 +3,9 @@
 
 ![Try_.NET Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
+*Please note that the dotnet try global tool isn't listed on NuGet yet. We will post the link as soon as it is available.*
+
+
 ## Basics
 **What is Try .NET**: Try .NET is an interactive documentation generator for .NET Core.
 
