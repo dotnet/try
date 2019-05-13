@@ -1,0 +1,10 @@
+{
+  "requestId": "TestRun",
+  "succeeded": true,
+  "output": [
+    "Hello world!",
+    ""
+  ],
+  "exception": null,
+  "diagnostics": []
+}

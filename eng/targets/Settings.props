@@ -1,0 +1,10 @@
+<Project>
+
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>dotnet organization</Authors>
+    <PackageTags>dotnet try</PackageTags>
+    <Copyright>$(CopyrightMicrosoft)</Copyright>
+  </PropertyGroup>
+
+</Project>

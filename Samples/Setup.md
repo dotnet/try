@@ -1,13 +1,11 @@
 ![dotnet try Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
-Please note that the dotnet try global tool isn't listed on NuGet yet. We will post the link as soon as it is available. 
-
 ### How do get started with a Try .NET enabled repo?
 - Clone this repo
 - Install .NET Core SDK [3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0) and [2.1](https://dotnet.microsoft.com/download/dotnet-core/2.1) currently dotnet try global tool targets 2.1. 
 - Go to your terminal 
-- Install the [Try .NET tools](**Coming Soon**)
-`dotnet tool install -g dotnet-try`
+- Install the [Try .NET tools](https://www.nuget.org/packages/dotnet-try/)
+`dotnet tool install --global dotnet-try --version 1.0.19264.11`
 - Navigate to the Samples directory of this repository and, type the following  `dotnet try`.
 ![dotnet try](https://user-images.githubusercontent.com/2546640/57164943-ab35f080-6dc3-11e9-8230-ee521e00e428.gif)
 - This will launch the browser.

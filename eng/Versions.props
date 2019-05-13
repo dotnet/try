@@ -1,0 +1,48 @@
+<Project>
+  <PropertyGroup>
+    <!-- opt-out properties -->
+    <UsingToolSourceLink>false</UsingToolSourceLink>
+    <!-- opt-in properties -->
+    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+    <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MajorVersion>1</MajorVersion>
+    <MinorVersion>0</MinorVersion>
+    <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
+    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- package settings -->
+    <PackageDescription>Package for Try .NET</PackageDescription>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/dotnet/try</PackageProjectUrl>
+    <PublishRepositoryUrl>false</PublishRepositoryUrl>
+    <RepositoryUrl>https://github.com/dotnet/try</RepositoryUrl>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!--
+    Mimic the build number calculation from here:
+    https://github.com/dotnet/arcade/blob/ce8e852e418ca52d28e562f9697fbb926d0b0bb1/src/Microsoft.DotNet.Arcade.Sdk/tools/Version.BeforeCommonTargets.targets#L24-L36
+    -->
+    <OfficialBuildId Condition="'$(OfficialBuildId)' == ''">42424242.42</OfficialBuildId>
+    <_BuildNumber>$(OfficialBuildId)</_BuildNumber>
+    <_BuildNumberYY>$(_BuildNumber.Substring(2, 2))</_BuildNumberYY>
+    <_BuildNumberMM>$(_BuildNumber.Substring(4, 2))</_BuildNumberMM>
+    <_BuildNumberDD>$(_BuildNumber.Substring(6, 2))</_BuildNumberDD>
+    <_BuildNumberR>$(_BuildNumber.Substring(9))</_BuildNumberR>
+    <VersionSuffixDateStamp>$([MSBuild]::Add($([MSBuild]::Add($([MSBuild]::Multiply($(_BuildNumberYY), 1000)), $([MSBuild]::Multiply($(_BuildNumberMM), 50)))), $(_BuildNumberDD)))</VersionSuffixDateStamp>
+
+    <!-- Ensure assembly and package verions look like `1.0.19257.1` -->
+    <VersionPrefix>$(MajorVersion).$(MinorVersion).$(VersionSuffixDateStamp)</VersionPrefix>
+    <AssemblyVersion>$(VersionPrefix).$(_BuildNumberR)</AssemblyVersion>
+    <PackageVersion>$(VersionPrefix).$(_BuildNumberR)</PackageVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreSources>
+      $(RestoreSources);
+      https://dotnet.myget.org/F/dotnet-try/api/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+    </RestoreSources>
+  </PropertyGroup>
+</Project>

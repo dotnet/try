@@ -1,0 +1,164 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net45+win8</AssetTargetFallback>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>dotnet-try</PackageId>
+    <ToolCommandName>dotnet-try</ToolCommandName>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
+    <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise and Markdig aren't strongly signed -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="bin\**" />
+    <Compile Remove="node_modules\**" />
+    <Compile Remove="TestResults\**" />
+    <Content Remove="bin\**" />
+    <Content Remove="node_modules\**" />
+    <Content Remove="TestResults\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="bin\**" />
+    <None Remove="node_modules\**" />
+    <None Remove="TestResults\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ClientConfiguration" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Clockwise" Version="1.0.261-beta" />
+    <PackageReference Include="ConfigurationExtensions" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="DictionaryExtensions" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="EnvironmentExtensions" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="LoggerExtensions" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Markdig" Version="0.16.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="0.7.0" />
+    <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.7" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.1.1" />
+    <PackageReference Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
+    <PackageReference Include="Pocket.Disposable" Version="1.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Pocket.TypeDiscovery" Version="0.4.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="PocketLogger" Version="0.3.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="PocketLogger.For.ApplicationInsights" Version="0.4.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="PocketLogger.Subscribe" Version="0.6.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="system.commandline.experimental" Version="0.2.0-alpha.19261.1" />
+    <PackageReference Include="System.Reactive" Version="4.1.3" />
+    <PackageReference Include="TaskExtensions" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="VersionSensor" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
+  </ItemGroup>
+  <ImportGroup>
+    <Import Project="AssemblyInfo.props" Condition="Exists('AssemblyInfo.props')" />
+  </ImportGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.ClientApi\Microsoft.DotNet.Try.Protocol.ClientApi.csproj" />
+    <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
+    <ProjectReference Include="..\MLS.Blazor\MLS.Blazor.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Try.Jupyter\Microsoft.DotNet.Try.Jupyter.csproj" />
+    <ProjectReference Include="..\MLS.HumanizerRunner\MLS.HumanizerRunner.csproj" />
+    <ProjectReference Include="..\MLS.Repositories\MLS.Repositories.csproj" />
+    <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\MLS.PackageTool\MLS.PackageTool.csproj" />
+    <EmbeddedResource Include="..\MLS.PackageTool\Program.cs" />
+    <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
+      <LogicalName>demo.zip</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Target Name="BuildCss"
+          Inputs="$(MSBuildThisFileDirectory)..\MLS.Styles\sass\trydotnet.scss"
+          Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css"
+          BeforeTargets="BeforeBuild">
+
+    <PropertyGroup>
+      <_TryDotNetCssExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
+    </PropertyGroup>
+
+    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
+    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
+    <Exec Command="npm run release -- $(MSBuildThisFileDirectory)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
+
+    <ItemGroup>
+      <FileWrites Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" />
+
+      <!-- if the file already existed then it'll already be in the @(Content) item group -->
+      <Content Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" Condition="'$(_TryDotNetCssExists)' != 'true'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyDemoFiles">
+    <ItemGroup>
+      <DemoFiles Include="$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.cs;$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.md;$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.csproj;$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.config" Exclude="**/bin/**; **/obj/**" SkipUnchangedFiles="true" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(DemoFiles)" DestinationFolder="$(IntermediateOutputPath)demo\%(RecursiveDir)" />
+  </Target>
+
+  <Target Name="ZipDemo"
+          BeforeTargets="PrepareForBuild"
+          DependsOnTargets="CopyDemoFiles">
+    <ZipDirectory SourceDirectory="$(IntermediateOutputPath)demo" DestinationFile="$(IntermediateOutputPath)\demo.zip" Overwrite="true" />
+  </Target>
+</Project>

@@ -1,0 +1,22 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- Reset $(BuildEpoch) whenever $(VersionPrefix) increments. We subtract this from YYYYMMDD portion of build
+           number below to obtain the fourth part of file version that must fit in 16 bits. We can produce builds 
+           for seven years from every epoch reset. -->
+
+    <!-- When running on VSO (for official builds) use a real number. -->
+    <Version>$(CDP_FILE_VERSION_NUMERIC)</Version>
+
+
+
+    <!-- Prepare assembly metadata -->
+    <Authors>Microsoft Corporation</Authors>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <InformationalVersion>$(CDP_FILE_VERSION_NUMERIC)</InformationalVersion>
+
+    <!-- Saving Commit Hash -->
+    <Description>Commit Hash: $(CDP_COMMIT_ID)</Description>
+  </PropertyGroup>
+</Project>

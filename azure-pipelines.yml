@@ -1,0 +1,85 @@
+# CI and PR triggers
+trigger:
+- master
+pr:
+- master
+
+variables:
+  - name: _TeamName
+    value: DotNetTry
+  - name: _BuildConfig
+    value: Release
+  - name: _PublishUsingPipelines
+    value: false
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: BlazorTemplateVersion
+    value: 0.7.0
+  - name: TryDotNetPackagesPath
+    value: $(Build.SourcesDirectory)\artifacts\.trydotnet\packages
+
+jobs:
+- template: /eng/common/templates/jobs/jobs.yml
+  parameters:
+    enableMicrobuild: true
+    enablePublishBuildArtifacts: true
+    enablePublishTestResults: true
+    enablePublishBuildAssets: true
+    enablePublishUsingPipelines: $(_PublishUsingPipelines)
+    enableTelemetry: true
+    helixRepo: dotnet/try
+    jobs:
+    - job: Windows_NT
+      pool:
+        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          name: NetCorePublic-Int-Pool
+          queue: buildpool.windows.10.amd64.vs2017.open
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          name: NetCoreInternal-Int-Pool
+          queue: buildpool.windows.10.amd64.vs2017
+      variables:
+      # Enable signing for internal, non-PR builds
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        - name: _SignType
+          value: Real
+        - name: _BuildArgs
+          value: /p:SignType=$(_SignType)
+            /p:DotNetSignType=$(_SignType)
+            /p:MicroBuild_SigningEnabled=true
+            /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+            /p:TeamName=$(_TeamName)
+            /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+            /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+            /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+      # else
+      - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        - name: _SignType
+          value: Test
+        - name: _BuildArgs
+          value: /p:SignType=$(_SignType)
+      steps:
+      - script: git config --global core.longpaths true
+        displayName: Enable `git clean` to handle long paths
+
+      - checkout: self
+        clean: true
+
+      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        displayName: Install Blazor templates
+
+      - script: |
+          robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
+          :: robocopy return codes are terrible; 1 means files were copied
+          if "%errorlevel%" == "1" exit /b 0
+          exit /b 1
+        displayName: Prevent test directory crawling
+
+      - script: eng\CIBuild.cmd
+          -configuration $(_BuildConfig)
+          -prepareMachine
+          -sign
+          -test
+          $(_BuildArgs)
+        displayName: Build / Test
+        env:
+          TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)

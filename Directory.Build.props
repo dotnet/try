@@ -1,0 +1,17 @@
+<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" Condition="'$(DisableArcade)' != '1'" />
+  <Import Project="eng\targets\Settings.props" />
+
+  <PropertyGroup>
+    <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
+    
+    <!-- private repo, don't do source-link -->
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+    <EnableSourceLink>false</EnableSourceLink>
+
+    <!-- NuGet: A stable release of a package should not have a prerelease dependency. -->
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+  </PropertyGroup>
+
+</Project>
