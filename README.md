@@ -8,10 +8,6 @@
 
 **Please Note**: At the moment Try .NET only works with C# documentation. 
 
-**What is the repo for?**
-- A place where you can post issues about [Try .NET](https://github.com/dotnet/try/issues).
-- **Note:** The code for Try .NET is not currently hosted on GitHub.*(Coming soon)*
-
 ## Contribution Guidelines
 As we are still in the early stages of our development and as a result, we are unable to take any feature PRs at the moment but, we do intend to do this in the future.
 Please feel free to file any bugs reports under our issues. And if you have any feature suggestion, please submit them under our issues using the community suggestions label.
