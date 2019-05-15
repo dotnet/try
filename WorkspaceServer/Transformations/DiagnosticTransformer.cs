@@ -159,7 +159,7 @@ namespace WorkspaceServer.Transformations
                 {
                     var lineText = line.ToString();
                     var startCharacter = diagnostic.Location.GetMappedLineSpan().Span.Start.Character;
-                    if (startCharacter < lineText.Length)
+                    if (startCharacter <= lineText.Length)
                     {
                         var partToFind = lineText.Substring(startCharacter);
                         var charOffset = sourceText.Lines[lineOffset].ToString().IndexOf(partToFind, StringComparison.Ordinal);
