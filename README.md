@@ -1,5 +1,5 @@
 # Try .NET <img src ="https://user-images.githubusercontent.com/2546640/56708992-deee8780-66ec-11e9-9991-eb85abb1d10a.png" width="80px" alt="dotnet bot in space" align ="right">
-|| [**Basics**](#basics) • [**Experiences**](#experiences) || [**Setup**](#setup) • [**Getting Started**](#getting-started) || [**Samples**](Samples) ||
+|| [**Basics**](#basics) • [**Contribution Guidelines**](#contribution) • [**Experiences**](#experiences) || [**Setup**](#setup) • [**Getting Started**](#getting-started) || [**Samples**](Samples) ||
 
 ![Try_.NET Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
@@ -8,9 +8,9 @@
 
 **Please Note**: At the moment Try .NET only works with C# documentation. 
 
-**What is the repo for?**
-- A place where you can post issues about [Try .NET](https://github.com/dotnet/try/issues).
-- **Note:** The code for Try .NET is not currently hosted on GitHub.*(Coming soon)*
+## Contribution Guidelines
+As we are still in the early stages of our development and as a result, we are unable to take any feature PRs at the moment but, we do intend to do this in the future.
+Please feel free to file any bugs reports under our issues. And if you have any feature suggestion, please submit them under our issues using the community suggestions label.
 
 ## Experiences 
  Use Try .NET to create executable C# snippets for your websites or,  interactive markdown files that users can run on their machine. 
@@ -28,8 +28,11 @@ To make your markdown files interactive, you will need to [.NET Core 3.0 SDK](ht
 
 ## Setup
 Before you get can start creating interactive documentation, you will need to install the following: 
-- [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0)
-- [dotnet try global tool](*coming soon*)
+- [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0) and [2.1](https://dotnet.microsoft.com/download/dotnet-core/2.1) currently `dotnet try` global tool targets 2.1.
+- [dotnet try global tool](https://www.nuget.org/packages/dotnet-try/)
+
+`dotnet tool install --global dotnet-try --version 1.0.19264.11`
+
 Once you have successfully installed `dotnet try` global tool, enter the command `dotnet try -h` you will see a list of commands:
 
 | Command        | Purpose                                |
@@ -47,7 +50,7 @@ You can get started using either one of the options below.
 
 **Option 2**: Starting from scratch.
 1. Go to the terminal and create a folder called `mydoc`.
-2. `cd` to the `mydoc` and create a new console app with the following command
+2. `cd` to the `mydoc` folder and create a new console app with the following command
  ```console
     > dotnet new console -o myApp
 ```
@@ -71,3 +74,4 @@ You have created your first C# interactive developer experience. You should now 
 
 **Option 3**: Explore our [samples folders](Samples). 
 - Read our quick [setup guide](Samples/Setup.md). 
+
