@@ -29,11 +29,7 @@ To make your markdown files interactive, you will need to [.NET Core 3.0 SDK](ht
 ## Setup
 Before you get can start creating interactive documentation, you will need to install the following: 
 - [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0)
-
-dotnet try global tool
-dotnet tool install --global dotnet-try --version 1.0.19264.11
-
-- [dotnet try global tool](https://www.nuget.org/packages/dotnet-try/)
+- [dotnet try global tool](https://www.nuget.org/packages/dotnet-try/) via `dotnet tool install --global dotnet-try`
 Once you have successfully installed `dotnet try` global tool, enter the command `dotnet try -h` you will see a list of commands:
 
 | Command        | Purpose                                |
