@@ -89,6 +89,14 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        - task: PublishBuildArtifacts@1
+          displayName: Publish packages to artifacts container
+          inputs:
+            pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
+            artifactName: packages
+            artifactType: container
+
 - template: /eng/common/templates/jobs/jobs.yml
   parameters:
     enableMicrobuild: true
