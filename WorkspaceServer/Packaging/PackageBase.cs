@@ -103,7 +103,7 @@ namespace WorkspaceServer.Packaging
                 var args = $"/bl:{FullBuildBinlogFileName}";
                 if (projectFile?.Exists == true)
                 {
-                    args = $"{projectFile.FullName} {args}";
+                    args = $@"""{projectFile.FullName}"" {args}";
                 }
 
                 operation.Info("Building package {name} in {directory}", Name, Directory);

@@ -31,7 +31,7 @@ namespace WorkspaceServer
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(templateName));
             }
 
-            return Execute($"new {templateName} {args}", budget);
+            return Execute($@"new ""{templateName}"" {args}", budget);
         }
 
         public Task<CommandLineResult> AddPackage(string packageId, string version = null, Budget budget = null)
@@ -45,7 +45,7 @@ namespace WorkspaceServer
 
         public Task<CommandLineResult> AddReference(FileInfo projectToReference, Budget budget = null)
         {
-            return Execute($"add reference {projectToReference.FullName}", budget);
+            return Execute($@"add reference ""{projectToReference.FullName}""", budget);
         }
 
         public Task<CommandLineResult> Build(string args = null, Budget budget = null) =>
@@ -69,7 +69,7 @@ namespace WorkspaceServer
 
         public async Task<IEnumerable<string>> ToolList(DirectoryInfo directory, Budget budget = null)
         {
-            var result = await Execute("tool list".AppendArgs($"--tool-path {directory.FullName}"), budget);
+            var result = await Execute("tool list".AppendArgs($@"--tool-path ""{directory.FullName}"""), budget);
             if (result.ExitCode != 0)
             {
                 return Enumerable.Empty<string>();
@@ -93,10 +93,10 @@ namespace WorkspaceServer
             DirectoryInfo addSource = null, 
             Budget budget = null)
         {
-            var args = $"{packageName} --tool-path {toolPath.FullName} --version 1.0.0";
+            var args = $@"{packageName} --tool-path ""{toolPath.FullName}"" --version 1.0.0";
             if (addSource != null)
             {
-                args += $" --add-source \"{addSource}\"";
+                args += $@" --add-source ""{addSource}""";
             }
 
             return Execute("tool install".AppendArgs(args), budget);

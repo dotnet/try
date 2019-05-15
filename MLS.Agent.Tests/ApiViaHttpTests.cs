@@ -459,6 +459,83 @@ namespace FibonacciTest
         }
 
         [Fact]
+        public async Task A_console_project_can_be_used_to_get_type_completion_with_a_space_in_the_name()
+        {
+            #region bufferSources
+
+            var program = @"using System;
+using System.Linq;
+
+namespace FibonacciTest
+{
+    public class Program
+    {
+        public static void Main()
+        {
+            foreach (var i in FibonacciGenerator.Fibonacci().Take(20))
+            {
+                Console.WriteLine(i);
+            }
+        }       
+    }
+}".EnforceLF();
+
+            var generator = @"using System.Collections.Generic;
+using System;
+namespace FibonacciTest
+{
+    public static class FibonacciGenerator
+    {
+        public static IEnumerable<int> Fibonacci()
+        {
+            int current = 1, next = 1;
+            while (true)
+            {
+                yield return current;
+                next = current + (current = next);
+                Cons$$
+            }
+        }
+    }
+}".EnforceLF();
+
+            #endregion
+            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace(), "a space");
+            var (processed, position) = CodeManipulation.ProcessMarkup(generator);
+            var log = new LogEntryList();
+            using (LogEvents.Subscribe(log.Add))
+            using (var agent = new AgentService())
+            {
+                var json =
+                    new WorkspaceRequest(activeBufferId: "generators/FibonacciGenerator.cs",
+                                        requestId: "TestRun",
+                                         workspace: Workspace.FromSources(
+                                             package.Name,
+                                             ("Program.cs", program, 0),
+                                             ("generators/FibonacciGenerator.cs", processed, position)
+                                         )).ToJson();
+
+                var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    @"/workspace/completion")
+                {
+                    Content = new StringContent(
+                        json,
+                        Encoding.UTF8,
+                        "application/json")
+                };
+
+                var response = await agent.SendAsync(request);
+
+                var result = await response
+                    .EnsureSuccess()
+                    .DeserializeAs<CompletionResult>();
+                result.Items.Should().NotBeNullOrEmpty();
+                result.Items.Should().Contain(completion => completion.SortText == "Console");
+            }
+        }
+
+        [Fact]
         public async Task A_console_project_can_be_used_to_get_diagnostics()
         {
             #region bufferSources

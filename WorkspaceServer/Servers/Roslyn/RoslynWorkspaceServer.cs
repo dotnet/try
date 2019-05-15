@@ -314,8 +314,9 @@ namespace WorkspaceServer.Servers.Roslyn
         {
             var dotnet = new Dotnet(package.Directory);
 
+            var commandName = $@"""{package.EntryPointAssemblyPath.FullName}""";
             var commandLineResult = await dotnet.Execute(
-                                        package.EntryPointAssemblyPath.FullName.AppendArgs(commandLineArgs),
+                                        commandName.AppendArgs(commandLineArgs),
                                         budget);
 
             budget.RecordEntry(UserCodeCompleted);
@@ -359,7 +360,7 @@ namespace WorkspaceServer.Servers.Roslyn
             var dotnet = new Dotnet(package.Directory);
 
             var commandLineResult = await dotnet.VSTest(
-                                        $"--logger:trx {package.EntryPointAssemblyPath}",
+                                        $@"--logger:trx ""{package.EntryPointAssemblyPath}""",
                                         budget);
 
             budget.RecordEntry(UserCodeCompleted);

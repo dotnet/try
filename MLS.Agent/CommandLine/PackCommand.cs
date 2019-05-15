@@ -63,7 +63,7 @@ namespace MLS.Agent.CommandLine
                     versionArg = $"/p:PackageVersion={options.Version}";
                 }
 
-                result = await dotnet.Pack($"/p:PackageId={name} /p:ToolCommandName={name} {versionArg} {projectFilePath} -o {options.OutputDirectory.FullName}");
+                result = await dotnet.Pack($@"/p:PackageId=""{name}"" /p:ToolCommandName=""{name}"" {versionArg} ""{projectFilePath}"" -o ""{options.OutputDirectory.FullName}""");
 
                 result.ThrowOnFailure("Package build failed.");
 

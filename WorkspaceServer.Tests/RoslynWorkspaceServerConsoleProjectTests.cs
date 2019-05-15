@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -38,6 +38,48 @@ namespace WorkspaceServer.Tests
                 }}
             ",
                 workspaceType: package.Name);
+        }
+
+        [Fact]
+        public async Task Run_succeeds_with_spaces_in_project_path()
+        {
+            var (server, build) = await GetRunnerAndWorkspaceBuild("a space");
+
+            var workspace = new Workspace(
+                workspaceType: build.Name,
+                files: new[] { new File("Program.cs", SourceCodeProvider.ConsoleProgramSingleRegion) },
+                buffers: new[] { new Buffer("Program.cs@alpha", @"Console.WriteLine(""something"");", 0) });
+
+
+            var result = await server.Run(new WorkspaceRequest(workspace));
+
+            result.Should().BeEquivalentTo(new
+            {
+                Succeeded = true,
+                Output = new[] { "something", ""},
+                Exception = (string)null, // we already display the error in Output
+            }, config => config.ExcludingMissingMembers());
+        }
+
+        [Fact(Skip = "Fix this")]
+        public async Task Run_returns_emoji()
+        {
+            var (server, build) = await GetRunnerAndWorkspaceBuild("a space");
+
+            var workspace = new Workspace(
+                workspaceType: build.Name,
+                files: new[] { new File("Program.cs", SourceCodeProvider.ConsoleProgramSingleRegion) },
+                buffers: new[] { new Buffer("Program.cs@alpha", @"Console.WriteLine(""😊"");", 0) });
+
+
+            var result = await server.Run(new WorkspaceRequest(workspace));
+
+            result.Should().BeEquivalentTo(new
+            {
+                Succeeded = true,
+                Output = new[] { "😊", "" },
+                Exception = (string)null, // we already display the error in Output
+            }, config => config.ExcludingMissingMembers());
         }
 
         [Fact]
