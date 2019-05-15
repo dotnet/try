@@ -16,7 +16,7 @@ variables:
   - name: BlazorTemplateVersion
     value: 0.7.0
   - name: TryDotNetPackagesPath
-    value: $(Build.SourcesDirectory)\artifacts\.trydotnet\packages
+    value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
 jobs:
 - template: /eng/common/templates/jobs/jobs.yml
@@ -85,6 +85,76 @@ jobs:
           -sign
           -test
           $(_BuildArgs)
+        displayName: Build / Test
+        env:
+          TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+- template: /eng/common/templates/jobs/jobs.yml
+  parameters:
+    enableMicrobuild: true
+    enablePublishBuildArtifacts: true
+    enablePublishTestResults: true
+    enablePublishBuildAssets: false
+    enablePublishUsingPipelines: $(_PublishUsingPipelines)
+    enableTelemetry: true
+    helixRepo: dotnet/try
+    jobs:
+    - job: Linux
+      pool:
+        ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          name: NetCorePublic-Int-Pool
+          queue: buildpool.ubuntu.1604.amd64.open
+        ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          name: NetCoreInternal-Int-Pool
+          queue: buildpool.ubuntu.1604.amd64
+      variables:
+      # Enable signing for internal, non-PR builds
+      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+        - name: _SignType
+          value: Test
+        - name: _BuildArgs
+          value: /p:SignType=$(_SignType)
+            /p:DotNetSignType=$(_SignType)
+            /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+            /p:TeamName=$(_TeamName)
+            /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+      # else
+      - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+        - name: _SignType
+          value: Test
+        - name: _BuildArgs
+          value: /p:SignType=$(_SignType)
+      steps:
+      - script: git config --global core.longpaths true
+        displayName: Enable `git clean` to handle long paths
+
+      - checkout: self
+        clean: true
+
+      - task: NodeTool@0
+        displayName: Add NodeJS/npm
+        inputs:
+          versionSpec: '>=11'
+
+      - task: UseDotNet@2
+        displayName: Add dotnet
+        inputs:
+          packageType: sdk
+          version: 2.1.503
+          installationPath: $(Agent.ToolsDirectory)/dotnet
+
+      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        displayName: Install Blazor templates
+
+      - script: |
+          mkdir -p "$(Build.SourcesDirectory)/artifacts"
+          cp eng/resources/* "$(Build.SourcesDirectory)/artifacts"
+        displayName: Prevent test directory crawling
+
+      - script: ./eng/cibuild.sh
+          --configuration $(_BuildConfig)
+          --prepareMachine
+          --test
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
