@@ -11,7 +11,7 @@
 **Please Note**: At the moment Try .NET only works with C# documentation. 
 
 ## Contribution Guidelines
-As we are still in the early stages of our development and as a result, we are unable to take any feature PRs at the moment but, we do intend to do this in the future.
+As we are still in the early stages of our development, we are unable to take any feature PRs at the moment but, we do intend to do this in the future.
 Please feel free to file any bugs reports under our issues. And if you have any feature suggestion, please submit them under our issues using the community suggestions label.
 
 ## Experiences 
@@ -34,6 +34,10 @@ Before you get can start creating interactive documentation, you will need to in
 - [dotnet try global tool](https://www.nuget.org/packages/dotnet-try/)
 
 `dotnet tool install --global dotnet-try --version 1.0.19264.11`
+
+Updating to the latest version of the tool is easy just run the command below 
+
+`dotnet tool update -g dotnet-try`
 
 Once you have successfully installed `dotnet try` global tool, enter the command `dotnet try -h` you will see a list of commands:
 
@@ -74,5 +78,6 @@ This will create a console app with the files `myApp.csproj` and `Program.cs`.
 ```
 You have created your first C# interactive developer experience. You should now be able to run your console app and see the result in the browser. 
 
-**Option 3**: Explore our [samples folders](Samples). 
+**Option 3**: Explore our [samples Branch](https://github.com/dotnet/try/tree/samples). 
+- Clone [this](https://github.com/dotnet/try/tree/samples) repo(checkout the samples branch `git checkout samples`)
 - Read our quick [setup guide](Samples/Setup.md). 
