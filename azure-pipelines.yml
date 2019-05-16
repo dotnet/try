@@ -24,7 +24,7 @@ jobs:
     enableMicrobuild: true
     enablePublishBuildArtifacts: true
     enablePublishTestResults: true
-    enablePublishBuildAssets: true
+    enablePublishBuildAssets: false
     enablePublishUsingPipelines: $(_PublishUsingPipelines)
     enableTelemetry: true
     helixRepo: dotnet/try
