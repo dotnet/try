@@ -18,4 +18,4 @@ Replace the *name* variable with a *names* variable that has a list of names. Th
           Console.WriteLine($"Hello {name.ToUpper()}!");
      }
 ```
-#### Previous - [Strings & Variables &laquo;](./Strings.md) Home - [Home](../README.md) 
+#### Previous - [Strings & Variables &laquo;](./Strings.md) Home - [Home](../Readme.md) 

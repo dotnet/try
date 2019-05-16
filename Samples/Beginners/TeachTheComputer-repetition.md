@@ -26,4 +26,4 @@ foreach (int[] row in triangle)
 
 Try to modify the sample at the top of the page using these instructions. Run when you don't have red squiggles under your code. If the output window turns red, you may have the wrong indices in your array. Once you've got this working,  continue for a bit more changes.
 
-#### Next: [Build the triangle &raquo;](./TeachTheComputer-repetition-2.md)     Previous: [Teach the computer &laquo;](./TeachTheComputer.md)      Home: [Home](../README.md)
+#### Next: [Build the triangle &raquo;](./TeachTheComputer-repetition-2.md)     Previous: [Teach the computer &laquo;](./TeachTheComputer.md)      Home: [Home](../Readme.md)

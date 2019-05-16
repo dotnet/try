@@ -35,4 +35,4 @@ A good way to teach the computer is to start by exploring the problem yourself. 
 
 The format of the output doesn't form a nice triangle yet. Let's concentrate on the values first. Try and add a couple more rows to the triangle. Copy and paste the `row2` line and add rows 3 and 4. Do the same with the `foreach` loops that write the values.
 
-#### Next: [Less repetition &raquo;](./TeachTheComputer-repetition.md) Home: [Home](../README.md)
+#### Next: [Less repetition &raquo;](./TeachTheComputer-repetition.md) Home: [Home](../Readme.md)

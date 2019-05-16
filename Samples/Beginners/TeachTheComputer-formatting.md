@@ -29,4 +29,4 @@ Then, replace all instances of `5` with `MaxRows`. Now, if you change `MaxRows`,
 
 You've finished this tutorial. You've taught the computer to do some of your math homework.
 
-#### Previous: [Build the triangle &laquo;](./TeachTheComputer-repetition-2.md) Home: [Home](../README.md)
+#### Previous: [Build the triangle &laquo;](./TeachTheComputer-repetition-2.md) Home: [Home](../Readme.md)
