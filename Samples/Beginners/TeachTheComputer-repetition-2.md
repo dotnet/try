@@ -38,4 +38,4 @@ for (int column = 1; column < rowIndex; column++)
 
 Try to modify the sample at the top of the page using these instructions. Then continue to see the answer and improve the formatting.
 
-#### Next: [Improve formatting &raquo;](./TeachTheComputer-formatting.md) Previous: [Less repetition &laquo;](./TeachTheComputer-repetition.md) Home: [Home](../README.md)
+#### Next: [Improve formatting &raquo;](./TeachTheComputer-formatting.md) Previous: [Less repetition &laquo;](./TeachTheComputer-repetition.md) Home: [Home](../Readme.md)
