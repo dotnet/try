@@ -13,7 +13,7 @@ namespace Snippets
             string package = null,
             string project = null,
             string[] args = null)
-        {
+        {    
 #region Main
             switch (region)
             {

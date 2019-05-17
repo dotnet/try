@@ -131,7 +131,8 @@ namespace MLS.Agent.Tools
                         RedirectStandardError = true,
                         RedirectStandardOutput = true,
                         RedirectStandardInput = true,
-                        WorkingDirectory = workingDir?.FullName
+                        WorkingDirectory = workingDir?.FullName ?? string.Empty,
+                        StandardOutputEncoding = Encoding.UTF8
                     }
                 };
 
