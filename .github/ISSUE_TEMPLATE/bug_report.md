@@ -18,19 +18,25 @@ Please provide as much information as you can.
 **If it occurred online, please provide the URL where it happened**
 
 **What kind of error was it?**
-- User Interface (UI):  For example the output never displayed 
-- Service Error: For example "The service is temporarily unavailable. We are working on it"
-- Other :
+- [ ] User Interface (UI):  For example the output never displayed 
+- [ ] Service Error: For example "The service is temporarily unavailable. We are working on it"
+- [ ] Other:
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. Windows 10, macOS]
- - Browser [e.g. Chrome, Edge, Safari]
+ - OS
+    - [ ] Windows 10
+    - [ ] macOS
+    - [ ] Linux (Please specify distro)
+ - Browser 
+    - [ ] Chrome
+    - [ ] Edge
+    - [ ] Safari
 
 **Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, Safari]
- - Version [e.g. 22]
+ - [ ] Device: [e.g. iPhone6]
+ - [ ] OS: [e.g. iOS8.1]
+ - [ ] Browser [e.g. stock browser, Safari]
+ - [ ] Version [e.g. 22]
