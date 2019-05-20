@@ -67,15 +67,14 @@ namespace WorkspaceServer.Tests
             return (packageName, nupkg.Directory);
         }
 
-        public static async Task<Package> InstalledPackageWithBlazorEnabled([CallerMemberName] string testName = null)
+        public static async Task<IPackage> InstalledPackageWithBlazorEnabled([CallerMemberName] string testName = null)
         {
             var (packageName, addSource) = await NupkgWithBlazorEnabled(testName);
             var destination = Package.DefaultPackagesDirectory;
             await InstallCommand.Do(new InstallOptions(addSource, packageName, destination), new TestConsole());
 
-            var strategy = new LocalToolInstallingPackageDiscoveryStrategy(destination);
-            var builder = await strategy.Locate(new PackageDescriptor(packageName));
-            return (Package)builder.GetPackage();
+            var strategy = new WebAssemblyAssetFinder(destination);
+            return await strategy.Find<IPackage>(packageName);
         }
 
         public static string SimpleWorkspaceRequestAsJson(

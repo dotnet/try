@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.CodeAnalysis.Operations;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer
@@ -25,8 +26,11 @@ namespace WorkspaceServer
 
         public PackageRegistry(
             bool createRebuildablePackages = false,
+            DirectoryInfo addSource = null,
+            IEnumerable<IPackageFinder> packageFinders = null,
             params IPackageDiscoveryStrategy[] additionalStrategies)
-            : this(new IPackageDiscoveryStrategy[]
+            : this(addSource,
+                  new IPackageDiscoveryStrategy[]
                    {
                        new ProjectFilePackageDiscoveryStrategy(createRebuildablePackages),
                        new DirectoryPackageDiscoveryStrategy(createRebuildablePackages)
@@ -35,6 +39,7 @@ namespace WorkspaceServer
         }
 
         private PackageRegistry(
+            DirectoryInfo addSource,
             IEnumerable<IPackageDiscoveryStrategy> strategies,
             IEnumerable<IPackageFinder> packageFinders = null)
         {
@@ -47,8 +52,8 @@ namespace WorkspaceServer
 
                 _strategies.Add(strategy);
             }
-
-            _packageFinders = packageFinders?.ToList() ?? GetDefaultPackageFinders().ToList();
+            
+            _packageFinders = packageFinders?.ToList() ?? GetDefaultPackageFinders(addSource).ToList();
         }
 
         public void Add(string name, Action<PackageBuilder> configure)
@@ -69,7 +74,7 @@ namespace WorkspaceServer
         }
 
         public async Task<T> Get<T>(string packageName, Budget budget = null)
-            where T : IPackage
+            where T : class, IPackage
         {
             if (packageName == "script")
             {
@@ -90,7 +95,7 @@ namespace WorkspaceServer
         }
 
         private async Task<IPackage> GetPackage2<T>(PackageDescriptor descriptor)
-            where T : IPackage
+            where T : class, IPackage
         {
             foreach (var packgeFinder in _packageFinders)
             {
@@ -132,8 +137,9 @@ namespace WorkspaceServer
         public static PackageRegistry CreateForTryMode(DirectoryInfo project, DirectoryInfo addSource = null)
         {
             var registry = new PackageRegistry(
-                true,
-                new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource));
+                true, 
+                addSource,
+                additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource));
 
             registry.Add(project.Name, builder =>
             {
@@ -147,8 +153,8 @@ namespace WorkspaceServer
         public static PackageRegistry CreateForHostedMode()
         {
             var registry = new PackageRegistry(
-                false, 
-                new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory));
+                false,
+                additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory));
 
             registry.Add("console",
                          packageBuilder =>
@@ -229,10 +235,12 @@ namespace WorkspaceServer
         IEnumerator IEnumerable.GetEnumerator() =>
             GetEnumerator();
 
-        private static IEnumerable<IPackageFinder> GetDefaultPackageFinders()
+        private static IEnumerable<IPackageFinder> GetDefaultPackageFinders(DirectoryInfo addSource)
         {
             yield return new PackageNameIsFullyQualifiedPath();
             yield return new FindPackageInDefaultLocation(new FileSystemDirectoryAccessor(Package.DefaultPackagesDirectory));
+            yield return new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource);
+            //yield return new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource);
         }
 
         Task<T> IPackageFinder.Find<T>(PackageDescriptor descriptor)

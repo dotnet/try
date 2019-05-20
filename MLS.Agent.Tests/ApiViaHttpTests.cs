@@ -802,7 +802,7 @@ namespace FibonacciTest
                 result.Should().Contain("Loading...");
             }
         }
-        
+
         [Fact]
         public async Task Can_serve_humanizer_code_runner()
         {

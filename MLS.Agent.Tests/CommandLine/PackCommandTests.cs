@@ -72,10 +72,8 @@ namespace MLS.Agent.Tests.CommandLine
 
             await tool.Prepare();
 
-            var projectDirectory = await tool.LocateProjects();
-            var subDirectories = projectDirectory.GetDirectories();
-            subDirectories.Should().Contain(d => d.Name == "packTarget");
-            subDirectories.Should().Contain(d => d.Name == $"runner-{packageName}");
+            var wasmDirectory = await tool.LocateWasmAsset();
+            wasmDirectory.Should().NotBeNull();
 
         }
 

@@ -7,6 +7,6 @@ namespace WorkspaceServer.Packaging
 {
     public interface IPackageFinder
     {
-        Task<T> Find<T>(PackageDescriptor descriptor) where T : IPackage;
+        Task<T> Find<T>(PackageDescriptor descriptor) where T : class, IPackage;
     }
 }

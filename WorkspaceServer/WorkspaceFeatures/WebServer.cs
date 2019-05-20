@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Tools;
 using Pocket;
+using WorkspaceServer.Packaging;
 using static Pocket.Logger;
 using Package = WorkspaceServer.Packaging.Package;
 
@@ -20,9 +21,9 @@ namespace WorkspaceServer.Features
         private readonly AsyncLazy<Uri> _listeningAtUri;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
-        public WebServer(Package package)
+        public WebServer(IPackage package)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            this.package = (Package)package ?? throw new ArgumentNullException(nameof(package));
 
             _listeningAtUri = new AsyncLazy<Uri>(RunKestrel);
 

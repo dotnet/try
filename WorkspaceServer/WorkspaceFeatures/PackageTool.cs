@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.WorkspaceFeatures
 {
@@ -27,11 +28,24 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public string Name { get; }
 
-        public async Task<DirectoryInfo> LocateProjects()
+        public async Task<DirectoryInfo> LocateBuildAsset()
         {
-            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateProjects, _workingDirectory);
+            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateBuildAsset, _workingDirectory);
             var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
             return projectDirectory;
+        }
+
+        public async Task<WebAssemblyAsset> LocateWasmAsset()
+        {
+            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateWasmAsset, _workingDirectory);
+            var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
+
+            if (!projectDirectory.Exists)
+            {
+                return null;
+            }
+
+            return new WebAssemblyAsset(new FileSystemDirectoryAccessor(projectDirectory));
         }
 
         public Task Prepare()
