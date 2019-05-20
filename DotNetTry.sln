@@ -49,6 +49,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLS.PackageTool", "MLS.Pack
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLS.HumanizerRunner", "MLS.HumanizerRunner\MLS.HumanizerRunner.csproj", "{1020AE11-EBBE-41B5-9621-A804F1754154}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTool.Tests", "PackageTool.Tests\PackageTool.Tests.csproj", "{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +141,10 @@ Global
 		{1020AE11-EBBE-41B5-9621-A804F1754154}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1020AE11-EBBE-41B5-9621-A804F1754154}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1020AE11-EBBE-41B5-9621-A804F1754154}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,6 +171,7 @@ Global
 		{7EAD5482-90CC-4252-AF91-553A4B81D8E0} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 		{227874FB-6C92-4865-B43F-9FBD6C36BC4B} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 		{1020AE11-EBBE-41B5-9621-A804F1754154} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
+		{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D6CD99BA-B16B-4570-8910-225CBDFFA3AD}
