@@ -19,7 +19,7 @@ Please feel free to file any bugs reports under our issues. And if you have any 
 
 **Websites** 
 
-Microsoft Docs uses Try .NET to create interactive documentation. Users can run and edit code al in the browser.
+Microsoft Docs uses Try .NET to create interactive documentation. Users can run and edit code all in the browser.
 ![Try NET_online](https://user-images.githubusercontent.com/2546640/57144765-c850cc00-6d8f-11e9-982d-50d2b6dc3591.gif)
 
 **Interactive .NET documentation**
