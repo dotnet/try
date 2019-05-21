@@ -21,8 +21,10 @@ namespace WorkspaceServer
             // Uri.IsWellFormed will return false for path-like strings:
             // (https://docs.microsoft.com/en-us/dotnet/api/system.uri.iswellformeduristring?view=netcore-2.2)
             if (Uri.IsWellFormedUriString(value, UriKind.Absolute) && 
-                Uri.TryCreate(value, UriKind.Absolute, out _uri))
+                Uri.TryCreate(value, UriKind.Absolute, out var uri)
+                && uri.Scheme != null)
             {
+                _uri = uri;
             }
             else
             {
