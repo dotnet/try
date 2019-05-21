@@ -26,7 +26,7 @@ namespace WorkspaceServer
 
         public PackageRegistry(
             bool createRebuildablePackages = false,
-            DirectoryInfo addSource = null,
+            PackageSource addSource = null,
             IEnumerable<IPackageFinder> packageFinders = null,
             params IPackageDiscoveryStrategy[] additionalStrategies)
             : this(addSource,
@@ -39,7 +39,7 @@ namespace WorkspaceServer
         }
 
         private PackageRegistry(
-            DirectoryInfo addSource,
+            PackageSource addSource,
             IEnumerable<IPackageDiscoveryStrategy> strategies,
             IEnumerable<IPackageFinder> packageFinders = null)
         {
@@ -134,7 +134,7 @@ namespace WorkspaceServer
             });
         }
 
-        public static PackageRegistry CreateForTryMode(DirectoryInfo project, DirectoryInfo addSource = null)
+        public static PackageRegistry CreateForTryMode(DirectoryInfo project, PackageSource addSource = null)
         {
             var registry = new PackageRegistry(
                 true, 
@@ -235,12 +235,11 @@ namespace WorkspaceServer
         IEnumerator IEnumerable.GetEnumerator() =>
             GetEnumerator();
 
-        private static IEnumerable<IPackageFinder> GetDefaultPackageFinders(DirectoryInfo addSource)
+        private static IEnumerable<IPackageFinder> GetDefaultPackageFinders(PackageSource addSource)
         {
             yield return new PackageNameIsFullyQualifiedPath();
             yield return new FindPackageInDefaultLocation(new FileSystemDirectoryAccessor(Package.DefaultPackagesDirectory));
             yield return new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource);
-            //yield return new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource);
         }
 
         Task<T> IPackageFinder.Find<T>(PackageDescriptor descriptor)

@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MLS.Agent.CommandLine;
+using WorkspaceServer;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,7 +24,7 @@ namespace MLS.Agent.Tests.CommandLine
         private TryGitHubOptions _tryGitHubOptions;
         private PackOptions _packOptions;
         private InstallOptions _installOptions;
-        private DirectoryInfo _install_packageSource;
+        private PackageSource _install_packageSource;
         private VerifyOptions _verifyOptions;
         private DemoOptions _demoOptions;
         private JupyterOptions _jupyter_Options;
@@ -305,7 +306,7 @@ namespace MLS.Agent.Tests.CommandLine
             await _parser.InvokeAsync($"install --add-source {expectedPackageSource} the-package", console);
 
             _installOptions.PackageName.Should().Be("the-package");
-            _install_packageSource.FullName.Should().Be(expectedPackageSource);
+            _install_packageSource.ToString().Should().Be(expectedPackageSource);
         }
 
         [Fact]

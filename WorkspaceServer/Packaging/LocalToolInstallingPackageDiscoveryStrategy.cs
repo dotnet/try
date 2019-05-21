@@ -13,9 +13,9 @@ namespace WorkspaceServer.Packaging
     {
         private readonly DirectoryInfo _workingDirectory;
         private readonly ToolPackageLocator _locator;
-        private readonly DirectoryInfo _addSource;
+        private readonly PackageSource _addSource;
 
-        public LocalToolInstallingPackageDiscoveryStrategy(DirectoryInfo workingDirectory, DirectoryInfo addSource = null)
+        public LocalToolInstallingPackageDiscoveryStrategy(DirectoryInfo workingDirectory, PackageSource addSource = null)
         { 
             _workingDirectory = workingDirectory;
             _locator = new ToolPackageLocator(workingDirectory);

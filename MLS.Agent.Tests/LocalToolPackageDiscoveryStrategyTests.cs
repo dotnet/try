@@ -9,6 +9,7 @@ using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
 using Xunit;
 using Xunit.Abstractions;
+using WorkspaceServer;
 
 namespace MLS.Agent.Tests
 {
@@ -58,7 +59,7 @@ namespace MLS.Agent.Tests
             var console = new TestConsole();
             var asset = await LocalToolHelpers.CreateTool(console);
 
-            var strategy = new LocalToolInstallingPackageDiscoveryStrategy(asset, asset);
+            var strategy = new LocalToolInstallingPackageDiscoveryStrategy(asset, new PackageSource(asset.FullName));
             var package = await strategy.Locate(new PackageDescriptor("blazor-console"));
             package.Should().NotBeNull();
         }
