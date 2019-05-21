@@ -53,7 +53,7 @@ namespace WorkspaceServer
                 _strategies.Add(strategy);
             }
             
-            _packageFinders = packageFinders?.ToList() ?? GetDefaultPackageFinders(addSource).ToList();
+            _packageFinders = packageFinders?.ToList() ?? GetDefaultPackageFinders().ToList();
         }
 
         public void Add(string name, Action<PackageBuilder> configure)
@@ -136,9 +136,11 @@ namespace WorkspaceServer
 
         public static PackageRegistry CreateForTryMode(DirectoryInfo project, PackageSource addSource = null)
         {
+            var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource));
             var registry = new PackageRegistry(
                 true, 
                 addSource,
+                finders,
                 additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource));
 
             registry.Add(project.Name, builder =>
@@ -153,8 +155,7 @@ namespace WorkspaceServer
         public static PackageRegistry CreateForHostedMode()
         {
             var registry = new PackageRegistry(
-                false,
-                additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory));
+                false);
 
             registry.Add("console",
                          packageBuilder =>
@@ -235,11 +236,10 @@ namespace WorkspaceServer
         IEnumerator IEnumerable.GetEnumerator() =>
             GetEnumerator();
 
-        private static IEnumerable<IPackageFinder> GetDefaultPackageFinders(PackageSource addSource)
+        private static IEnumerable<IPackageFinder> GetDefaultPackageFinders()
         {
             yield return new PackageNameIsFullyQualifiedPath();
             yield return new FindPackageInDefaultLocation(new FileSystemDirectoryAccessor(Package.DefaultPackagesDirectory));
-            yield return new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource);
         }
 
         Task<T> IPackageFinder.Find<T>(PackageDescriptor descriptor)
