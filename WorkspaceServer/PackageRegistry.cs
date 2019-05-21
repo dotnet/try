@@ -34,7 +34,8 @@ namespace WorkspaceServer
                    {
                        new ProjectFilePackageDiscoveryStrategy(createRebuildablePackages),
                        new DirectoryPackageDiscoveryStrategy(createRebuildablePackages)
-                   }.Concat(additionalStrategies))
+                   }.Concat(additionalStrategies),
+                  packageFinders)
         {
         }
 
