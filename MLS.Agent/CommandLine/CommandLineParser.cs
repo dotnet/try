@@ -137,10 +137,10 @@ namespace MLS.Agent.CommandLine
                 command.AddOption(new Option(
                                       "--add-package-source",
                                       "Specify an additional NuGet package source",
-                                      new Argument<DirectoryInfo>(new DirectoryInfo(Directory.GetCurrentDirectory()))
+                                      new Argument<PackageSource>(new PackageSource(Directory.GetCurrentDirectory()))
                                       {
                                           Name = "NuGet source"
-                                      }.ExistingOnly()));
+                                      }));
 
                 command.AddOption(new Option(
                                       "--package",
@@ -339,7 +339,7 @@ namespace MLS.Agent.CommandLine
                 installCommand.IsHidden = true;
 
                 var option = new Option("--add-source",
-                                        argument: new Argument<DirectoryInfo>().ExistingOnly());
+                                        argument: new Argument<PackageSource>());
 
                 installCommand.AddOption(option);
 
