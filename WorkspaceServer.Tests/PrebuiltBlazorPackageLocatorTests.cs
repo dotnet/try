@@ -28,7 +28,7 @@ namespace WorkspaceServer.Tests
         public async Task Discovers_built_blazor_package()
         {
             var (packageName, addSource) = await Create.NupkgWithBlazorEnabled();
-            await InstallCommand.Do(new InstallOptions(addSource, packageName), new TestConsole());
+            await InstallCommand.Do(new InstallOptions(new PackageSource(addSource.FullName), packageName), new TestConsole());
             var locator = new PrebuiltBlazorPackageLocator();
 
             var asset = await locator.Locate(packageName);

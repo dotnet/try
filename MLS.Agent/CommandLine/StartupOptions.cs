@@ -6,6 +6,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
+using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
@@ -34,7 +35,7 @@ namespace MLS.Agent.CommandLine
             string id = null,
             string regionId = null,
             DirectoryInfo dir = null,
-            DirectoryInfo addPackageSource = null,
+            PackageSource addPackageSource = null,
             Uri uri = null,
             DirectoryInfo logPath = null,
             bool verbose = false,
@@ -64,7 +65,7 @@ namespace MLS.Agent.CommandLine
         public string Id { get; }
         public string RegionId { get; }
         public DirectoryInfo Dir { get; }
-        public DirectoryInfo AddPackageSource { get; }
+        public PackageSource AddPackageSource { get; }
         public Uri Uri { get; set; }
         public bool Production { get; }
         public bool IsLanguageService { get; set; }
