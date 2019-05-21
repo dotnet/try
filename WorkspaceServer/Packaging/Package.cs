@@ -602,6 +602,11 @@ namespace WorkspaceServer.Packaging
             return $"{Name} ({Directory.FullName})";
         }
 
+        public Task<Workspace> CreateRoslynWorkspaceAsync(Budget budget)
+        {
+            return CreateRoslynWorkspaceForRunAsync(budget);
+        }
+
         protected SyntaxTree CreateInstrumentationEmitterSyntaxTree()
         {
             var resourceName = "WorkspaceServer.Servers.Roslyn.Instrumentation.InstrumentationEmitter.cs";

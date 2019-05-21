@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Clockwise;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MLS.Agent.Tools;
@@ -15,10 +14,9 @@ using static Pocket.Logger<WorkspaceServer.Packaging.PackageBase>;
 namespace WorkspaceServer.Packaging
 {
     public abstract class PackageBase : 
-        IPackage, 
         IHaveADirectory,
-        IMightSupportBlazor
-        , IHaveADirectoryAccessor
+        IMightSupportBlazor, 
+        IHaveADirectoryAccessor
     {
         IDirectoryAccessor IHaveADirectoryAccessor.Directory => new FileSystemDirectoryAccessor(Directory);
 

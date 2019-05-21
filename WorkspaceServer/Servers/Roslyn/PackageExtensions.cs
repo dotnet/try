@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
+using WorkspaceServer.Packaging;
 using WorkspaceServer.Servers.Roslyn.Instrumentation;
 using static System.Environment;
 using Package = WorkspaceServer.Packaging.Package;
@@ -162,16 +163,63 @@ Source
             package.GetCompilation(sources, sourceCodeKind, defaultUsings, () => package.CreateRoslynWorkspaceForRunAsync(budget), budget);
 
         public static Task<(Compilation compilation, IReadOnlyCollection<Document> documents)> GetCompilationForLanguageServices(
-          this Package package,
+          this ICreateWorkspace package,
           IReadOnlyCollection<SourceFile> sources,
           SourceCodeKind sourceCodeKind,
           IEnumerable<string> defaultUsings,
           Budget budget) =>
-            package.GetCompilation(sources, sourceCodeKind, defaultUsings, () => package.CreateRoslynWorkspaceForLanguageServicesAsync(budget), budget);
+            package.GetCompilation(sources, sourceCodeKind, defaultUsings, () => package.CreateRoslynWorkspaceAsync(budget), budget);
 
         private static Document GetActiveDocument(IEnumerable<Document> documents, BufferId activeBufferId)
         {
             return documents.First(d => d.Name.Equals(activeBufferId.FileName));
+        }
+
+        public static async Task<(Compilation compilation, IReadOnlyCollection<Document> documents)> GetCompilation(
+           this IPackage package,
+           IReadOnlyCollection<SourceFile> sources,
+           SourceCodeKind sourceCodeKind,
+           IEnumerable<string> defaultUsings,
+           Func<Task<Microsoft.CodeAnalysis.Workspace>> workspaceFactory,
+           Budget budget)
+        {
+            var workspace = await workspaceFactory();
+
+            var currentSolution = workspace.CurrentSolution;
+            var project = currentSolution.Projects.First();
+            var projectId = project.Id;
+            foreach (var source in sources)
+            {
+                if (currentSolution.Projects
+                    .SelectMany(p => p.Documents)
+                    .FirstOrDefault(d => d.IsMatch(source)) is Document document)
+                {
+                    // there's a pre-existing document, so overwrite its contents
+                    document = document.WithText(source.Text);
+                    document = document.WithSourceCodeKind(sourceCodeKind);
+                    currentSolution = document.Project.Solution;
+                }
+                else
+                {
+                    var docId = DocumentId.CreateNewId(projectId, $"{package.Name}.Document");
+
+                    currentSolution = currentSolution.AddDocument(docId, source.Name, source.Text);
+                    currentSolution = currentSolution.WithDocumentSourceCodeKind(docId, sourceCodeKind);
+                }
+            }
+
+
+            project = currentSolution.GetProject(projectId);
+            var usings = defaultUsings?.ToArray() ?? Array.Empty<string>();
+            if (usings.Length > 0)
+            {
+                var options = (CSharpCompilationOptions)project.CompilationOptions;
+                project = project.WithCompilationOptions(options.WithUsings(usings));
+            }
+
+            var compilation = await project.GetCompilationAsync().CancelIfExceeds(budget);
+
+            return (compilation, project.Documents.ToArray());
         }
     }
 }

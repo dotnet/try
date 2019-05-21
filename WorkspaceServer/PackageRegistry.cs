@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
-using Microsoft.CodeAnalysis.Operations;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer
@@ -86,7 +85,10 @@ namespace WorkspaceServer
 
             // FIX: (Get) move this into the cache
             var package = await GetPackage2<T>(descriptor);
+            if (package != null)
+            {
 
+            }
             if (package == null)
             {
                 package = await GetPackageFromPackageBuilder<T>(packageName, budget, descriptor);
@@ -98,9 +100,21 @@ namespace WorkspaceServer
         private async Task<IPackage> GetPackage2<T>(PackageDescriptor descriptor)
             where T : class, IPackage
         {
-            foreach (var packgeFinder in _packageFinders)
+            foreach (var packageFinder in _packageFinders)
             {
-                if (await packgeFinder.Find<T>(descriptor) is T pkg)
+                var package = await packageFinder.Find<IPackage>(descriptor);
+                if(package != null)
+                {
+                    if (package is Package2 package2)
+                    {
+                        var theStuff = package2.Assets.OfType<T>().FirstOrDefault();
+                        if(theStuff != null)
+                        {
+                            return theStuff;
+                        }
+                    }
+                }
+                if (package is T pkg)
                 {
                    return pkg;
                 }
