@@ -10,9 +10,9 @@ using MLS.Agent.Tools;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using System.Linq;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
 {
-    public class TemplateTests
+    class ProjectTemplateTests
     {
         private string _pathToTemplateCsproj;
 

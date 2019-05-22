@@ -53,6 +53,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTool.Tests", "Packag
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.Template", "Microsoft.DotNet.Try.Template\content\Microsoft.DotNet.Try.Template.csproj", "{9395C81D-C557-4681-8C4C-D5C1F160CD58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Try.ProjectTemplate.Tests", "Microsoft.DotNet.Try.ProjectTemplate.Tests\Microsoft.DotNet.Try.ProjectTemplate.Tests.csproj", "{1F1A7554-1E88-4514-8602-EC00899E0C49}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,10 @@ Global
 		{9395C81D-C557-4681-8C4C-D5C1F160CD58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9395C81D-C557-4681-8C4C-D5C1F160CD58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9395C81D-C557-4681-8C4C-D5C1F160CD58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

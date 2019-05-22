@@ -10,16 +10,7 @@
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="..\Microsoft.DotNet.Try.Template\content\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Microsoft.DotNet.Try.Template\content\**" Link="template\%(RecursiveDir)%(Filename)%(Extension)">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  
-
+ 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.6.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.9.0" />
