@@ -148,6 +148,49 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="BuildJsApi"
+          Inputs="$(MSBuildThisFileDirectory)..\MLS.Trydotnet.js\"
+          Outputs="$(MSBuildThisFileDirectory)wwwroot\api\trydotnet.css"
+          BeforeTargets="BeforeBuild">
+
+    <PropertyGroup>
+      <_TryDotNetJsApiExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetJsApiExists>
+    </PropertyGroup>
+
+    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Trydotnet.js" />
+    <Exec Command="npm run ciCreateDir -- $(MSBuildThisFileDirectory)wwwroot/api" WorkingDirectory=" $(MSBuildThisFileDirectory..\MLS.Trydotnet.js" />
+    <Exec Command="npm run build" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Trydotnet.js" />
+    <Exec Command="npm run ciMinify -- --output $(MSBuildThisFileDirectory)wwwroot/api/trydotnet.min.js" WorkingDirectory=" $(MSBuildThisFileDirectory..\MLS.Trydotnet.js" />
+
+    <ItemGroup>
+      <FileWrites Include="$(MSBuildThisFileDirectory)wwwroot\api\trydotnet.css" />
+
+      <!-- if the file already existed then it'll already be in the @(Content) item group -->
+      <Content Include="$(MSBuildThisFileDirectory)wwwroot\api\trydotnet.css" Condition="'$(_TryDotNetJsApiExists)' != 'true'" />
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="BuildClient"
+          Inputs="$(MSBuildThisFileDirectory)..\MLS.Client\"
+          Outputs="$(MSBuildThisFileDirectory)wwwroot\client\trydotnet.css"
+          BeforeTargets="BeforeBuild">
+
+    <PropertyGroup>
+      <_TryDotNetClientExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetClientExists>
+    </PropertyGroup>
+
+    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Client" />
+    <Exec Command="npm run buildCi -- --output-path $(MSBuildThisFileDirectory)wwwroot/client" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Client" />
+
+
+    <ItemGroup>
+      <FileWrites Include="$(MSBuildThisFileDirectory)wwwroot\client\trydotnet.css" />
+
+      <!-- if the file already existed then it'll already be in the @(Content) item group -->
+      <Content Include="$(MSBuildThisFileDirectory)wwwroot\client\trydotnet.css" Condition="'$(_TryDotNetClientExists)' != 'true'" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="CopyDemoFiles">
     <ItemGroup>
       <DemoFiles Include="$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.cs;$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.md;$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.csproj;$(MSBuildProjectDirectory)/../docs/GettingStarted/**/*.config" Exclude="**/bin/**; **/obj/**" SkipUnchangedFiles="true" />
