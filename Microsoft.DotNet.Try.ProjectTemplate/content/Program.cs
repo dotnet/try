@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Try.Template
+namespace Microsoft.DotNet.Try.ProjectTemplate
 {
     public class Program
     {

@@ -6,10 +6,10 @@
         "language": "C#",
         "type": "project"
       },
-    "identity": "Microsoft.DotNet.Try.Template",
-    "defaultName": "Microsoft.DotNet.Try.Template",
+    "identity": "Microsoft.DotNet.Try.ProjectTemplate",
+    "defaultName": "Microsoft.DotNet.Try.ProjectTemplate",
     "name": "Sample project for interactive documentation",
     "shortName": "try",
-    "sourceName": "Microsoft.DotNet.Try.Template",
+    "sourceName": "Microsoft.DotNet.Try.ProjectTemplate",
     "preferNameDirectory": true
 }

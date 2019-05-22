@@ -51,9 +51,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLS.HumanizerRunner", "MLS.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTool.Tests", "PackageTool.Tests\PackageTool.Tests.csproj", "{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.Template", "Microsoft.DotNet.Try.Template\content\Microsoft.DotNet.Try.Template.csproj", "{9395C81D-C557-4681-8C4C-D5C1F160CD58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.ProjectTemplate", "Microsoft.DotNet.Try.ProjectTemplate\content\Microsoft.DotNet.Try.ProjectTemplate.csproj", "{9395C81D-C557-4681-8C4C-D5C1F160CD58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Try.ProjectTemplate.Tests", "Microsoft.DotNet.Try.ProjectTemplate.Tests\Microsoft.DotNet.Try.ProjectTemplate.Tests.csproj", "{1F1A7554-1E88-4514-8602-EC00899E0C49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.ProjectTemplate.Tests", "Microsoft.DotNet.Try.ProjectTemplate.Tests\Microsoft.DotNet.Try.ProjectTemplate.Tests.csproj", "{1F1A7554-1E88-4514-8602-EC00899E0C49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
