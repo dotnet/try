@@ -370,3 +370,15 @@ MLS\.Agent/wwwroot/api/
 MLS\.Agent/wwwroot/client/
 
 *.trx
+
+Microsoft\.DotNet\.Try\.Client/src/asp\.net\.style\.app\.css\.d\.ts
+
+Microsoft\.DotNet\.Try\.Client/src/dot\.net\.style\.app\.css\.d\.ts
+
+Microsoft\.DotNet\.Try\.Client/src/github\.style\.app\.css\.d\.ts
+
+Microsoft\.DotNet\.Try\.Client/src/mscomdocs\.style\.app\.css\.d\.ts
+
+Microsoft\.DotNet\.Try\.js/\.rpt2_cache/
+
+Microsoft\.DotNet\.Try\.js/dist/

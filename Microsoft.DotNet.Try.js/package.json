@@ -38,7 +38,7 @@
     "rollup": "1.1.2",
     "rollup-plugin-commonjs": "9.2.0",
     "rollup-plugin-node-resolve": "4.0.0",
-    "rollup-plugin-typescript2": "0.19.2",
+    "rollup-plugin-typescript2": "0.21.1",
     "source-map-loader": "0.2.4",
     "source-map-support": "0.5.10",
     "ts-mocha": "2.0.0",
