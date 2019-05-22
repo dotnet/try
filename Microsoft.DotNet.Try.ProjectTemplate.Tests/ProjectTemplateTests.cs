@@ -48,7 +48,6 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                 () => directoryAccessor,
                 PackageRegistry.CreateForTryMode(outputDirectory));
 
-            resultCode.Should().Be(0);
             console.Out
                        .ToString()
                        .EnforceLF()
@@ -56,6 +55,8 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                        .Should()
                        .Match(
                            $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line 7:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
+
+            resultCode.Should().Be(0);
 
         }
 
