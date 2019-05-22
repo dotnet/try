@@ -16,4 +16,12 @@
     <PackageReference Include="FluentAssertions" Version="5.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="..\Microsoft.DotNet.Try.Template\content\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Microsoft.DotNet.Try.Template\content\**" Link="template\%(RecursiveDir)%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
