@@ -128,7 +128,7 @@
   </ItemGroup>
 
   <Target Name="BuildCss"
-          Inputs="$(MSBuildThisFileDirectory)..\MLS.Styles\sass\trydotnet.scss"
+          Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss"
           Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css"
           BeforeTargets="BeforeBuild">
 
@@ -136,9 +136,9 @@
       <_TryDotNetCssExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
     </PropertyGroup>
 
-    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
-    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
-    <Exec Command="npm run release -- $(MSBuildThisFileDirectory)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
+    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
+    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
+    <Exec Command="npm run release -- $(MSBuildThisFileDirectory)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
 
     <ItemGroup>
       <FileWrites Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" />
@@ -150,10 +150,10 @@
 
   <Target Name="GatherInputs">
     <PropertyGroup>
-      <ClientInputDir>$(MSBuildThisFileDirectory)..\MLS.Client</ClientInputDir>
+      <ClientInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Client</ClientInputDir>
       <ClientOutputDir>$(MSBuildThisFileDirectory)wwwroot/client</ClientOutputDir>
       <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
-      <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)..\MLS.Trydotnet.js</TryDotNetJsInputDir>
+      <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
       <TryDotNetJsOutputDir>$(MSBuildThisFileDirectory)wwwroot/api</TryDotNetJsOutputDir>
       <TryDotNetJsFile>$(TryDotNetJsOutputDir)/trydotnet.min.js</TryDotNetJsFile>
       <TryDotNetJsMap>$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
