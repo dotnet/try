@@ -1,5 +1,5 @@
 {
-  "name": "mls.styles",
+  "name": "trydotnet-styles",
   "version": "1.0.0",
   "description": "css for trydotnet",
   "main": "sass/trydotnet.scss",
