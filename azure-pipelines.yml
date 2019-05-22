@@ -88,6 +88,15 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
+      - task: PublishTestResults@2
+        displayName: Publish NPM Test Results
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '*.trx'
+          searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults'
+        continueOnError: true
+        condition: always()
+
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - task: PublishBuildArtifacts@1
           displayName: Publish packages to artifacts container
@@ -160,3 +169,12 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+      - task: PublishTestResults@2
+        displayName: Publish NPM Test Results
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '*.trx'
+          searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults'
+        continueOnError: true
+        condition: always()

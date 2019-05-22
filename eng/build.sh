@@ -39,5 +39,7 @@ function TestUsingNPM() {
 . "$scriptroot/common/build.sh" $args
 
 # directly invoke npm tests
-TestUsingNPM "$scriptroot/../MLS.Client"
-TestUsingNPM "$scriptroot/../MLS.Trydotnet.js"
+if [[ "$run_tests" == "true" ]]; then
+    TestUsingNPM "$scriptroot/../MLS.Client"
+    TestUsingNPM "$scriptroot/../MLS.Trydotnet.js"
+fi
