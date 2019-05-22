@@ -22,5 +22,5 @@ catch {
     Write-Host $_
     Write-Host $_.Exception
     Write-Host $_.ScriptStackTrace
-    ExitWithExitCode 1
+    exit 1
 }
