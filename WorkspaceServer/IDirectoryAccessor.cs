@@ -21,6 +21,8 @@ namespace WorkspaceServer
 
         IEnumerable<RelativeFilePath> GetAllFilesRecursively();
 
+        IEnumerable<RelativeFilePath> GetAllFiles();
+
         IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively();
 
         FileSystemInfo GetFullyQualifiedPath(RelativePath path);

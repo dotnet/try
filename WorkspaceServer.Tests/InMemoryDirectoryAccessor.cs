@@ -149,12 +149,22 @@ namespace WorkspaceServer.Tests
                    };
         }
 
+       
         public IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively()
         {
             return _files.Keys
                          .OfType<DirectoryInfo>()
                          .Select(key => new RelativeDirectoryPath(
                                           Path.GetRelativePath(WorkingDirectory.FullName, key.FullName)));
+        }
+
+        public IEnumerable<RelativeFilePath> GetAllFiles()
+        {
+            return _files.Keys
+                .OfType<FileInfo>()
+                .Where(key => key.Directory == null)
+                .Select(key => new RelativeFilePath(
+                    Path.GetRelativePath(WorkingDirectory.FullName, key.FullName)));
         }
 
         public IEnumerable<RelativeFilePath> GetAllFilesRecursively()

@@ -18,7 +18,7 @@ namespace WorkspaceServer.Packaging
             foreach (var csproj in directory.GetAllFilesRecursively()
                                             .Where(f => f.Extension == ".csproj"))
             {
-                assets.Add(new ProjectAsset(directory.GetDirectoryAccessorForRelativePath(csproj.Directory)));
+                assets.Add(new ProjectAsset(directory.GetDirectoryAccessorForRelativePath(csproj.Directory), csproj.FileName));
             }
 
             return
