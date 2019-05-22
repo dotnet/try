@@ -368,3 +368,5 @@ MLS\.Client/src/mscomdocs\.style\.app\.css\.d\.ts
 MLS\.Agent/wwwroot/api/
 
 MLS\.Agent/wwwroot/client/
+
+*.trx
