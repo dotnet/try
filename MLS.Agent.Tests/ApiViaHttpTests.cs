@@ -802,19 +802,6 @@ namespace FibonacciTest
                 result.Should().Contain("Loading...");
             }
         }
-
-        [Fact]
-        public async Task Can_serve_humanizer_code_runner()
-        {
-            using (var agent = new AgentService())
-            {
-                var response = await agent.GetAsync(@"/LocalCodeRunner/humanizer.api");
-
-                response.EnsureSuccess();
-                var result = await response.Content.ReadAsStringAsync();
-                result.Should().Contain("Loading...");
-            }
-        }
         
         [Fact]
         public async Task Can_serve_nodatime_code_runner()
