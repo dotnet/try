@@ -67,8 +67,8 @@ namespace WorkspaceServer.Packaging
 
         private Task<Unit> CleanDirectoryAsync()
         {
-            var to_clean = Directory.GetDirectories("obj");
-            foreach (var directoryInfo in to_clean)
+            var toClean = Directory.GetDirectories("obj");
+            foreach (var directoryInfo in toClean)
             {
                 directoryInfo.Delete(true);
             }
