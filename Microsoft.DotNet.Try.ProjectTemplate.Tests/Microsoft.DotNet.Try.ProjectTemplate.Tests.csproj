@@ -18,10 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="..\Microsoft.DotNet.Try.ProjectTemplate\content\**" />
+    <Compile Remove="..\Microsoft.DotNet.Try.ProjectTemplate\Tutorial\content\**" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Microsoft.DotNet.Try.ProjectTemplate\content\**" Link="template\%(RecursiveDir)%(Filename)%(Extension)">
+    <None Include="..\Microsoft.DotNet.Try.ProjectTemplate\Tutorial\content\**" Link="template\%(RecursiveDir)%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

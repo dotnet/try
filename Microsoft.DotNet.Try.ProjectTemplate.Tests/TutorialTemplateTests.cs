@@ -12,11 +12,11 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
 {
-    public class ProjectTemplateTests
+    public class TutorialTemplateTests
     {
         private string _pathToTemplateCsproj;
 
-        public ProjectTemplateTests()
+        public TutorialTemplateTests()
         {
             _pathToTemplateCsproj = Path.Combine(Directory.GetCurrentDirectory(), "template");
         }
