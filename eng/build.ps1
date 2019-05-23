@@ -14,8 +14,8 @@ try {
 
     # directly invoke npm tests
     if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
-        TestUsingNPM "$PSScriptRoot\..\MLS.Client"
-        TestUsingNPM "$PSScriptRoot\..\MLS.Trydotnet.js"
+        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
+        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
     }
 }
 catch {
