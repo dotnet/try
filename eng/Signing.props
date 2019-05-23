@@ -27,8 +27,6 @@
     <FileSignInfo Include="MsBuildPipeLogger.Logger.dll" CertificateName="None" />
     <FileSignInfo Include="Buildalyzer.Workspaces.dll" CertificateName="None" />
     <FileSignInfo Include="Clockwise.dll" CertificateName="None" />
-    <FileSignInfo Include="Humanizer.dll" CertificateName="None" />
-    <FileSignInfo Include="Humanizer.resources.dll" CertificateName="None" />
     <FileSignInfo Include="Markdig.dll" CertificateName="None" />
     <FileSignInfo Include="MessagePack.dll" CertificateName="None" />
     <FileSignInfo Include="Mono.Cecil.Mdb.dll" CertificateName="None" />

@@ -199,14 +199,6 @@ namespace WorkspaceServer
                              packageBuilder.AddPackageReference("Newtonsoft.Json");
                          });
 
-            registry.Add("humanizer.api",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("classlib");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                             packageBuilder.AddPackageReference("Humanizer");
-                         });
-
             // Todo: soemething about nodatime 2.3 makes blazor toolchain fail to build
             registry.Add("blazor-nodatime.api",
                          packageBuilder =>
