@@ -145,7 +145,7 @@ jobs:
       - task: NodeTool@0
         displayName: Add NodeJS/npm
         inputs:
-          versionSpec: '>=11'
+          versionSpec: '>=12'
 
       - task: UseDotNet@2
         displayName: Add dotnet
