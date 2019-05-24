@@ -5,26 +5,26 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.DotNet.Try.ProjectTemplate.Tutorial</PackageId>
-    <NuspecFile>Microsoft.DotNet.Try.ProjectTemplate.Tutorial.nuspec</NuspecFile>
     <IsPackable>true</IsPackable>
     <PackageDescription> A template for getting started with interactive documentation</PackageDescription>
     <PackageType>Template</PackageType>
   </PropertyGroup>
 
-    
-
   <PropertyGroup>
-    <PackProjectInputFile>$.\content\Microsoft.DotNet.ProjectTemplate.Tutorial.csproj</PackProjectInputFile>
+  <ContentTargetFolders>content</ContentTargetFolders>
+		<IncludeContentInPack>true</IncludeContentInPack>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
     <NoBuild>True</NoBuild>
-    <ExcludeFromPackage>
-        Microsoft.DotNet.Try.ProjectTemplate.csproj
-    </ExcludeFromPackage>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="content/**/*" Exclude="$(ExcludeFromPackage)" >
-        <PackagePath>content\</PackagePath>
-    </Content>
-  </ItemGroup>
+ <ItemGroup>
+		<Directory Include="content" />
+		<Content Include="content/**/*.*" />
+	</ItemGroup>
+
+	<!-- Ignore source code (if any) in the content folder; it's part of the template(s) -->
+	<ItemGroup>
+		<Compile Remove="content/**/*.cs" />
+	</ItemGroup>
 
 </Project>
