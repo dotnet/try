@@ -53,7 +53,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTool.Tests", "Packag
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.ProjectTemplate.Tests", "Microsoft.DotNet.Try.ProjectTemplate.Tests\Microsoft.DotNet.Try.ProjectTemplate.Tests.csproj", "{1F1A7554-1E88-4514-8602-EC00899E0C49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.ProjectTemplate.Tutorial", "Microsoft.DotNet.Try.ProjectTemplate\Tutorial\content\Microsoft.DotNet.Try.ProjectTemplate.Tutorial.csproj", "{352987B3-368A-4EB6-9F00-286F7A11DA4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ProjectTemplate", "Microsoft.DotNet.Try.ProjectTemplate\Tutorial\Microsoft.DotNet.ProjectTemplate.csproj", "{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,10 +153,10 @@ Global
 		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F1A7554-1E88-4514-8602-EC00899E0C49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{352987B3-368A-4EB6-9F00-286F7A11DA4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{352987B3-368A-4EB6-9F00-286F7A11DA4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{352987B3-368A-4EB6-9F00-286F7A11DA4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{352987B3-368A-4EB6-9F00-286F7A11DA4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -185,7 +185,7 @@ Global
 		{1020AE11-EBBE-41B5-9621-A804F1754154} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 		{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
 		{1F1A7554-1E88-4514-8602-EC00899E0C49} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
-		{352987B3-368A-4EB6-9F00-286F7A11DA4D} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
+		{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D6CD99BA-B16B-4570-8910-225CBDFFA3AD}
