@@ -8,6 +8,23 @@
     <NuspecFile>Microsoft.DotNet.Try.ProjectTemplate.Tutorial.nuspec</NuspecFile>
     <IsPackable>true</IsPackable>
     <PackageDescription> A template for getting started with interactive documentation</PackageDescription>
+    <PackageType>Template</PackageType>
   </PropertyGroup>
+
+    
+
+  <PropertyGroup>
+    <PackProjectInputFile>$.\content\Microsoft.DotNet.ProjectTemplate.Tutorial.csproj</PackProjectInputFile>
+    <NoBuild>True</NoBuild>
+    <ExcludeFromPackage>
+        Microsoft.DotNet.Try.ProjectTemplate.csproj
+    </ExcludeFromPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="content/**/*" Exclude="$(ExcludeFromPackage)" >
+        <PackagePath>content\</PackagePath>
+    </Content>
+  </ItemGroup>
 
 </Project>
