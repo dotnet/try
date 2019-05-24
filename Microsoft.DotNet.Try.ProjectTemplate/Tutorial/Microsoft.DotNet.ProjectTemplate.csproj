@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
     <PackageId>Microsoft.DotNet.Try.ProjectTemplate.Tutorial</PackageId>
     <IsPackable>true</IsPackable>
     <PackageDescription> A template for getting started with interactive documentation</PackageDescription>
