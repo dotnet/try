@@ -1,10 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Buildalyzer.Workspaces;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Buildalyzer;
 using Microsoft.CodeAnalysis;
@@ -58,6 +60,27 @@ namespace WorkspaceServer.Servers.Roslyn
                 catch (IOException)
                 {
                     return false;
+                }
+            }
+        }
+
+        public static async Task DoWhenFileAvailable(
+            this FileInfo file, Action action)
+        {
+            const int waitAmount = 100;
+            var attemptCount = 1;
+            while (file.Exists && attemptCount <= 10)
+            {
+                await Task.Delay(waitAmount * attemptCount);
+                attemptCount++;
+
+                try
+                {
+                    action();
+                    break;
+                }
+                catch(IOException){
+
                 }
             }
         }

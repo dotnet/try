@@ -107,18 +107,17 @@ namespace WorkspaceServer.Packaging
                     operation.Error("Exception building workspace", exception);
                     throw;
                 }
-
-                var binLog = this.FindLatestBinLog();
-                await binLog.WaitForFileAvailable();
                 var manager = new AnalyzerManager();
-                var results = manager.Analyze(binLog.FullName);
-
-                if (results.Count == 0)
+                var binLog = this.FindLatestBinLog();
+                AnalyzerResults results = null;
+                await binLog.DoWhenFileAvailable(() => results = manager.Analyze(binLog.FullName));
+               
+                if (results?.Count == 0)
                 {
                     throw new InvalidOperationException("The build log seems to contain no solutions or projects");
                 }
 
-                var result = results.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
+                var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
                 if (result != null)
                 {
                     if (result.Succeeded)
