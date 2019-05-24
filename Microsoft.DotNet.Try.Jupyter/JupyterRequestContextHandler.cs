@@ -9,7 +9,7 @@ using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Microsoft.DotNet.Try.Protocol;
 using Newtonsoft.Json.Linq;
 using WorkspaceServer;
-using WorkspaceServer.Servers.Roslyn;
+using WorkspaceServer.Servers;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 
 namespace Microsoft.DotNet.Try.Jupyter
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
                     var workspaceRequest = new WorkspaceRequest(workspace);
 
-                    var server = new RoslynWorkspaceServer(new PackageRegistry());
+                    var server = new WorkspaceServerMultiplexer(new PackageRegistry());
 
                     var result = await server.Run(workspaceRequest);
 

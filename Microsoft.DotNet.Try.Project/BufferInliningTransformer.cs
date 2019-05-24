@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
@@ -112,6 +113,12 @@ namespace Microsoft.DotNet.Try.Project
 
         private static async Task InjectBufferAtSpan(Viewport viewPort, Buffer sourceBuffer, ICollection<Buffer> buffers, IDictionary<string, SourceFile> files, TextSpan span)
         {
+            if (Path.GetExtension(sourceBuffer.Id.FileName) == ".fs")
+            {
+                await FSharpMethods.InjectBufferAtSpan(viewPort, sourceBuffer, buffers, files, span);
+                return;
+            }
+
             var tree = CSharpSyntaxTree.ParseText(viewPort.Destination.Text.ToString());
             var textChange = new TextChange(
                 span,

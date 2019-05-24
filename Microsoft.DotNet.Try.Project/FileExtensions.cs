@@ -86,6 +86,16 @@ namespace Microsoft.DotNet.Try.Project
                 }
             }
 
+            if (System.IO.Path.GetExtension(fileName) == ".fs")
+            {
+                foreach (var r in FSharpMethods.ExtractRegions(code, fileName))
+                {
+                    yield return r;
+                }
+
+                yield break;
+            }
+
             var sourceCodeText = code.ToString();
             var root = CSharpSyntaxTree.ParseText(sourceCodeText).GetRoot();
 

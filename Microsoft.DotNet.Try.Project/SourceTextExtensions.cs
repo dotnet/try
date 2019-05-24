@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -116,6 +117,11 @@ namespace Microsoft.DotNet.Try.Project
                 return regions;
             }
 
+            if (Path.GetExtension(fileName) == ".fs")
+            {
+                return FSharpMethods.ExtractBuffers(code, fileName);
+            }
+
             var sourceCodeText = code.ToString();
             var root = CSharpSyntaxTree.ParseText(sourceCodeText).GetRoot();
             var extractedRegions = new List<Buffer>();
@@ -144,4 +150,3 @@ namespace Microsoft.DotNet.Try.Project
         }
     }
 }
-
