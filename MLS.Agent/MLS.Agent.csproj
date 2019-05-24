@@ -196,6 +196,7 @@
     </PropertyGroup>
 
     <Exec Command="npm i" WorkingDirectory="$(ClientInputDir)" />
+    <Exec Command="npm i typescript@2.7" WorkingDirectory="$(ClientInputDir)" />    
     <Exec Command="npm run buildCi -- --output-path $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
 
     <ItemGroup>
