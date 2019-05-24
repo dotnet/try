@@ -40,6 +40,10 @@ namespace WorkspaceServer.Servers.Roslyn
         public static async Task WaitForFileAvailable(
             this FileInfo file)
         {
+            if (file == null)
+            {
+                return;
+            }
             const int waitAmount = 100;
             var attemptCount = 1;
             while (file.Exists && attemptCount <= 10 && !IsAvailable())
@@ -67,6 +71,10 @@ namespace WorkspaceServer.Servers.Roslyn
         public static async Task DoWhenFileAvailable(
             this FileInfo file, Action action)
         {
+            if (file == null)
+            {
+                return;
+            }
             const int waitAmount = 100;
             var attemptCount = 1;
             while (file.Exists && attemptCount <= 10)

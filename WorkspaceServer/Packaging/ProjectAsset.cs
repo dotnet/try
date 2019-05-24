@@ -29,7 +29,7 @@ namespace WorkspaceServer.Packaging
         private readonly FileInfo _lastBuildErrorLogFile;
         private PipelineStep<AnalyzerResult> _projectBuildStep;
         private PipelineStep<Workspace> _workspaceStep;
-        private PipelineStep<Unit> _cleanupStep;
+        private PipelineStep<AnalyzerResult> _cleanupStep;
 
         public string Name { get; }
 
@@ -60,20 +60,37 @@ namespace WorkspaceServer.Packaging
             Directory = DirectoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath(".")) as DirectoryInfo;
             _lastBuildErrorLogFile = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./.trydotnet-builderror")) as FileInfo;
 
-            _cleanupStep = new PipelineStep<Unit>(CleanDirectoryAsync);
-            _projectBuildStep = _cleanupStep.Then((_)=> BuildProjectAsync());
+            _cleanupStep = new PipelineStep<AnalyzerResult>(LoadResultOrCleanAsync);
+            _projectBuildStep = _cleanupStep.Then(BuildProjectAsync);
             _workspaceStep = _projectBuildStep.Then(BuildWorkspaceAsync);
         }
 
-        private Task<Unit> CleanDirectoryAsync()
+        private async Task<AnalyzerResult> LoadResultOrCleanAsync()
         {
+            AnalyzerResults results = null;
+            var binLog = this.FindLatestBinLog();
+            if (binLog != null)
+            {
+                results = await TryLoadAnalyzerResultsAsync(binLog);
+            }
+
+            var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
+            if (result != null)
+            {
+                if (result.Succeeded)
+                {
+                    return result;
+                }
+            }
+
+            binLog?.DoWhenFileAvailable(() => binLog.Delete());
             var toClean = Directory.GetDirectories("obj");
             foreach (var directoryInfo in toClean)
             {
                 directoryInfo.Delete(true);
             }
 
-            return Task.FromResult(Unit.Default);
+            return result;
         }
 
         private Task<Workspace> BuildWorkspaceAsync(AnalyzerResult result)
@@ -91,8 +108,12 @@ namespace WorkspaceServer.Packaging
             throw new InvalidOperationException("Failed creating workspace");
         }
 
-        private async Task<AnalyzerResult> BuildProjectAsync()
+        private async Task<AnalyzerResult> BuildProjectAsync(AnalyzerResult result)
         {
+            if (result != null)
+            {
+
+            }
             using (var operation = Log.OnEnterAndConfirmOnExit())
             {
                 try
@@ -107,17 +128,22 @@ namespace WorkspaceServer.Packaging
                     operation.Error("Exception building workspace", exception);
                     throw;
                 }
-                var manager = new AnalyzerManager();
+
                 var binLog = this.FindLatestBinLog();
-                AnalyzerResults results = null;
-                await binLog.DoWhenFileAvailable(() => results = manager.Analyze(binLog.FullName));
-               
+
+                if (binLog == null)
+                {
+                    throw new InvalidOperationException("Failed to build");
+                }
+
+                var results = await TryLoadAnalyzerResultsAsync(binLog);
+
                 if (results?.Count == 0)
                 {
                     throw new InvalidOperationException("The build log seems to contain no solutions or projects");
                 }
 
-                var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
+                result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
                 if (result != null)
                 {
                     if (result.Succeeded)
@@ -129,6 +155,17 @@ namespace WorkspaceServer.Packaging
 
                 throw new InvalidOperationException("Failed to build");
             }
+        }
+
+        private async Task<AnalyzerResults> TryLoadAnalyzerResultsAsync(FileInfo binLog)
+        {
+            AnalyzerResults results = null;
+            await binLog.DoWhenFileAvailable(() =>
+            {
+                var manager = new AnalyzerManager();
+                results = manager.Analyze(binLog.FullName);
+            });
+            return results;
         }
 
         public Task<Workspace> CreateRoslynWorkspaceAsync(Budget budget)
