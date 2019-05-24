@@ -9,20 +9,20 @@
   </PropertyGroup>
 
   <PropertyGroup>
-  <ContentTargetFolders>content</ContentTargetFolders>
-		<IncludeContentInPack>true</IncludeContentInPack>
-		<IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
     <NoBuild>True</NoBuild>
   </PropertyGroup>
 
- <ItemGroup>
-		<Directory Include="content" />
-		<Content Include="content/**/*.*" />
-	</ItemGroup>
+  <ItemGroup>
+    <Directory Include="content" />
+    <Content Include="content/**/*.*" />
+  </ItemGroup>
 
-	<!-- Ignore source code (if any) in the content folder; it's part of the template(s) -->
-	<ItemGroup>
-		<Compile Remove="content/**/*.cs" />
-	</ItemGroup>
+  <!-- Ignore source code (if any) in the content folder; it's part of the template(s) -->
+  <ItemGroup>
+    <Compile Remove="content/**/*.cs" />
+  </ItemGroup>
 
 </Project>
