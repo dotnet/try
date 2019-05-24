@@ -66,7 +66,7 @@ jobs:
       - task: NodeTool@0
         displayName: Add NodeJS/npm
         inputs:
-          versionSpec: '>=11'
+          versionSpec: '>=12'
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
         displayName: Install Blazor templates
