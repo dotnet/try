@@ -67,19 +67,19 @@ namespace WorkspaceServer.Packaging
 
         private async Task<AnalyzerResult> LoadResultOrCleanAsync()
         {
-            AnalyzerResults results = null;
             var binLog = this.FindLatestBinLog();
             if (binLog != null)
             {
-                results = await TryLoadAnalyzerResultsAsync(binLog);
-            }
+                var results = await TryLoadAnalyzerResultsAsync(binLog);
+                var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
 
-            var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
-            if (result != null)
-            {
-                if (result.Succeeded)
+                var didCompile = DidPerformCoreCompile(result);
+                if (result != null)
                 {
-                    return result;
+                    if (result.Succeeded && didCompile)
+                    {
+                        return result;
+                    }
                 }
             }
 
@@ -90,7 +90,20 @@ namespace WorkspaceServer.Packaging
                 directoryInfo.Delete(true);
             }
 
-            return result;
+            return null;
+        }
+
+        private bool DidPerformCoreCompile(AnalyzerResult result)
+        {
+            if (result == null)
+            {
+                return false;
+            }
+
+            var sourceCount = result.SourceFiles?.Length ?? 0;
+            var compilerInputs = result.GetCompileInputs()?.Length ?? 0;
+
+            return compilerInputs > 0 && sourceCount > 0;
         }
 
         private Task<Workspace> BuildWorkspaceAsync(AnalyzerResult result)
