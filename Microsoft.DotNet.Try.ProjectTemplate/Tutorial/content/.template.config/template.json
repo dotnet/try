@@ -14,7 +14,7 @@
     "identity": "Microsoft.DotNet.Try.ProjectTemplate.Tutorial",
     "defaultName": "Microsoft.DotNet.Try.ProjectTemplate.Tutorial",
     "name": "Interactive documentation template",
-    "shortName": "try",
+    "shortName": "trydotnet-tutorial",
     "sourceName": "Microsoft.DotNet.Try.ProjectTemplate.Tutorial",
     "preferNameDirectory": true
 }
