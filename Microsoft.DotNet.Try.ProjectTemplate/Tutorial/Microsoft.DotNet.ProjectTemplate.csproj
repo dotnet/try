@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Microsoft.DotNet.Try.ProjectTemplate.Tutorial</PackageId>
     <IsPackable>true</IsPackable>
-    <PackageDescription> A template for getting started with interactive documentation</PackageDescription>
+    <PackageDescription> A template for interactive documentation with Try.NET</PackageDescription>
     <PackageType>Template</PackageType>
   </PropertyGroup>
 
