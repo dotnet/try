@@ -4,58 +4,62 @@ using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Servers.FSharp;
 using WorkspaceServer.Servers.Roslyn;
+using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Servers
 {
     public class WorkspaceServerMultiplexer : IWorkspaceServer
     {
+        private IPackageFinder _packageFinder;
         private IWorkspaceServer _roslynWorkspaceServer;
         private IWorkspaceServer _fsharpWorksapceServer;
 
-        public WorkspaceServerMultiplexer(IPackageFinder packageRegistry)
+        public WorkspaceServerMultiplexer(IPackageFinder packageFinder)
         {
-            _roslynWorkspaceServer = new RoslynWorkspaceServer(packageRegistry);
-            _fsharpWorksapceServer = new FSharpWorkspaceServer(packageRegistry);
+            _packageFinder = packageFinder;
+            _roslynWorkspaceServer = new RoslynWorkspaceServer(packageFinder);
+            _fsharpWorksapceServer = new FSharpWorkspaceServer(packageFinder);
         }
 
-        public Task<CompileResult> Compile(WorkspaceRequest request, Budget budget = null)
+        public async Task<CompileResult> Compile(WorkspaceRequest request, Budget budget = null)
         {
-            return IsFSharpWorkspaceRequest(request)
-                ? _fsharpWorksapceServer.Compile(request, budget)
-                : _roslynWorkspaceServer.Compile(request, budget);
+            return await IsFSharpWorkspaceRequest(request.Workspace)
+                ? await _fsharpWorksapceServer.Compile(request, budget)
+                : await _roslynWorkspaceServer.Compile(request, budget);
         }
 
-        public Task<CompletionResult> GetCompletionList(WorkspaceRequest request, Budget budget = null)
+        public async Task<CompletionResult> GetCompletionList(WorkspaceRequest request, Budget budget = null)
         {
-            return IsFSharpWorkspaceRequest(request)
-                ? _fsharpWorksapceServer.GetCompletionList(request, budget)
-                : _roslynWorkspaceServer.GetCompletionList(request, budget);
+            return await IsFSharpWorkspaceRequest(request.Workspace)
+                ? await _fsharpWorksapceServer.GetCompletionList(request, budget)
+                : await _roslynWorkspaceServer.GetCompletionList(request, budget);
         }
 
-        public Task<DiagnosticResult> GetDiagnostics(WorkspaceRequest request, Budget budget = null)
+        public async Task<DiagnosticResult> GetDiagnostics(WorkspaceRequest request, Budget budget = null)
         {
-            return IsFSharpWorkspaceRequest(request)
-                ? _fsharpWorksapceServer.GetDiagnostics(request, budget)
-                : _roslynWorkspaceServer.GetDiagnostics(request, budget);
+            return await IsFSharpWorkspaceRequest(request.Workspace)
+                ? await _fsharpWorksapceServer.GetDiagnostics(request, budget)
+                : await _roslynWorkspaceServer.GetDiagnostics(request, budget);
         }
 
-        public Task<SignatureHelpResult> GetSignatureHelp(WorkspaceRequest request, Budget budget = null)
+        public async Task<SignatureHelpResult> GetSignatureHelp(WorkspaceRequest request, Budget budget = null)
         {
-            return IsFSharpWorkspaceRequest(request)
-                ? _fsharpWorksapceServer.GetSignatureHelp(request, budget)
-                : _roslynWorkspaceServer.GetSignatureHelp(request, budget);
+            return await IsFSharpWorkspaceRequest(request.Workspace)
+                ? await _fsharpWorksapceServer.GetSignatureHelp(request, budget)
+                : await _roslynWorkspaceServer.GetSignatureHelp(request, budget);
         }
 
-        public Task<RunResult> Run(WorkspaceRequest request, Budget budget = null)
+        public async Task<RunResult> Run(WorkspaceRequest request, Budget budget = null)
         {
-            return IsFSharpWorkspaceRequest(request)
-                ? _fsharpWorksapceServer.Run(request, budget)
-                : _roslynWorkspaceServer.Run(request, budget);
+            return await IsFSharpWorkspaceRequest(request.Workspace)
+                ? await _fsharpWorksapceServer.Run(request, budget)
+                : await _roslynWorkspaceServer.Run(request, budget);
         }
 
-        private bool IsFSharpWorkspaceRequest(WorkspaceRequest request)
+        private async Task<bool> IsFSharpWorkspaceRequest(Workspace workspace)
         {
-            return request.Workspace.WorkspaceType.EndsWith(".fsproj");
+            var package = await _packageFinder.Find<Package>(workspace.WorkspaceType);
+            return package.Initializer.Language == "F#";
         }
     }
 }

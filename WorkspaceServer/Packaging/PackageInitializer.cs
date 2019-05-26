@@ -15,11 +15,14 @@ namespace WorkspaceServer.Packaging
 
         public string Template { get; }
 
+        public string Language { get; }
+
         public string ProjectName { get; }
 
         public PackageInitializer(
-            string template, 
+            string template,
             string projectName,
+            string language = null,
             Func<DirectoryInfo, Budget, Task> afterCreate = null)
         {
             if (string.IsNullOrWhiteSpace(template))
@@ -35,8 +38,8 @@ namespace WorkspaceServer.Packaging
             this.afterCreate = afterCreate;
 
             Template = template;
-
             ProjectName = projectName;
+            Language = language ?? GetLanguageFromProjectName(ProjectName);
         }
 
         public virtual async Task Initialize(
@@ -49,7 +52,7 @@ namespace WorkspaceServer.Packaging
 
             var result = await dotnet
                              .New(Template,
-                                  args: $"--name \"{ProjectName}\" --output \"{directory.FullName}\"",
+                                  args: $"--name \"{ProjectName}\" --language \"{Language}\" --output \"{directory.FullName}\"",
                                   budget: budget);
             result.ThrowOnFailure($"Error initializing in {directory.FullName}");
 
@@ -57,6 +60,17 @@ namespace WorkspaceServer.Packaging
             {
                 await afterCreate(directory, budget);
             }
+        }
+
+        private static string GetLanguageFromProjectName(string projectName)
+        {
+            if (projectName.EndsWith(".fsproj", StringComparison.OrdinalIgnoreCase))
+            {
+                return "F#";
+            }
+
+            // default to C#
+            return "C#";
         }
     }
 }

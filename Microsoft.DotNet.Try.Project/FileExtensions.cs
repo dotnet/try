@@ -26,7 +26,6 @@ namespace Microsoft.DotNet.Try.Project
 
         public static IEnumerable<Viewport> ExtractViewPorts(this SourceFile sourceFile)
         {
-            
             var code = sourceFile.Text;
             var fileName = sourceFile.Name;
             var regions = ExtractRegions(code, fileName);

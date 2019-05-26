@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,7 +33,7 @@ namespace Microsoft.DotNet.Try.Project
                 includeInstrumentation: source.IncludeInstrumentation);
         }
 
-        private static async Task<(Protocol.File[] files, Buffer[] buffers)> InlineBuffersAsync(Workspace source)
+        protected async Task<(Protocol.File[] files, Buffer[] buffers)> InlineBuffersAsync(Workspace source)
         {
             var files = (source.Files ?? Array.Empty<Protocol.File>()).ToDictionary(f => f.Name, f =>
              {
@@ -82,7 +81,7 @@ namespace Microsoft.DotNet.Try.Project
 
             return (processedFiles, processedBuffers);
         }
-        private static Task InjectBuffer(Viewport viewPort, Buffer sourceBuffer, ICollection<Buffer> buffers, IDictionary<string, SourceFile> files,
+        protected Task InjectBuffer(Viewport viewPort, Buffer sourceBuffer, ICollection<Buffer> buffers, IDictionary<string, SourceFile> files,
             BufferInjectionPoints bufferIdInjectionPoints)
         {
             TextSpan targetSpan;
@@ -111,14 +110,8 @@ namespace Microsoft.DotNet.Try.Project
             return new TextSpan(viewPortRegion.Start, 0);
         }
 
-        private static async Task InjectBufferAtSpan(Viewport viewPort, Buffer sourceBuffer, ICollection<Buffer> buffers, IDictionary<string, SourceFile> files, TextSpan span)
+        protected virtual async Task InjectBufferAtSpan(Viewport viewPort, Buffer sourceBuffer, ICollection<Buffer> buffers, IDictionary<string, SourceFile> files, TextSpan span)
         {
-            if (Path.GetExtension(sourceBuffer.Id.FileName) == ".fs")
-            {
-                await FSharpMethods.InjectBufferAtSpan(viewPort, sourceBuffer, buffers, files, span);
-                return;
-            }
-
             var tree = CSharpSyntaxTree.ParseText(viewPort.Destination.Text.ToString());
             var textChange = new TextChange(
                 span,

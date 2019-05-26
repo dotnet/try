@@ -18,7 +18,7 @@ namespace WorkspaceServer.Servers.FSharp
     public partial class FSharpWorkspaceServer : IWorkspaceServer
     {
         private readonly IPackageFinder _packageFinder;
-        private readonly IWorkspaceTransformer _transformer = new BufferInliningTransformer();
+        private readonly IWorkspaceTransformer _transformer = new FSharpBufferInliningTransformer();
 
         public FSharpWorkspaceServer(IPackageFinder packageRegistry)
         {
