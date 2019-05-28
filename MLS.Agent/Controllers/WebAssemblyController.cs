@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
-using MLS.Agent.Markdown;
-using Recipes;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;
 
@@ -23,7 +15,7 @@ namespace MLS.Agent.Controllers
         private StartupOptions _startupOptions;
         private PackageRegistry _registry;
 
-        public WebAssemblyController(StartupOptions startupOptions, PackageRegistry packageRegistry)
+        public WebAssemblyController(PackageRegistry packageRegistry)
         {
             _registry = packageRegistry ?? throw new ArgumentNullException(nameof(packageRegistry));
         }
@@ -33,7 +25,6 @@ namespace MLS.Agent.Controllers
         [Route("/LocalCodeRunner/{packageName}/{*requestedPath}")]
         public async Task<IActionResult> GetFile(string packageName, string requestedPath = "Index.html")
         {
-           
             var package = await _registry.Get<Package2>(packageName);
             var asset = package.Assets.OfType<WebAssemblyAsset>().FirstOrDefault();
             if (asset == null)
