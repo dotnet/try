@@ -23,13 +23,13 @@ namespace WorkspaceServer.Packaging
         ICreateWorkspaceForRun,
         IHaveADirectory
     {
-        private readonly IDirectoryAccessor _directoryAccessor;
         private const string FullBuildBinlogFileName = "package_fullBuild.binlog";
         private readonly FileInfo _projectFile;
         private readonly FileInfo _lastBuildErrorLogFile;
-        private PipelineStep<AnalyzerResult> _projectBuildStep;
-        private PipelineStep<Workspace> _workspaceStep;
-        private PipelineStep<AnalyzerResult> _cleanupStep;
+        private readonly PipelineStep<AnalyzerResult> _projectBuildStep;
+        private readonly PipelineStep<Workspace> _workspaceStep;
+        private readonly PipelineStep<AnalyzerResult> _cleanupStep;
+        private readonly FileSystemInfo _lockFile;
 
         public string Name { get; }
 
@@ -56,41 +56,54 @@ namespace WorkspaceServer.Packaging
                 _projectFile = directoryAccessor.GetFullyQualifiedFilePath(csprojFileName);
             }
 
-            Name = _projectFile.Name;
+            
             Directory = DirectoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath(".")) as DirectoryInfo;
+
+            Name = _projectFile?.Name ?? Directory?.Name;
+
             _lastBuildErrorLogFile = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./.trydotnet-builderror")) as FileInfo;
 
             _cleanupStep = new PipelineStep<AnalyzerResult>(LoadResultOrCleanAsync);
             _projectBuildStep = _cleanupStep.Then(BuildProjectAsync);
             _workspaceStep = _projectBuildStep.Then(BuildWorkspaceAsync);
+            _lockFile = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(".trydotnet-lock"));
         }
 
         private async Task<AnalyzerResult> LoadResultOrCleanAsync()
         {
-            var binLog = this.FindLatestBinLog();
-            if (binLog != null)
+            FileStream fileStream = null;
+            try
             {
-                var results = await TryLoadAnalyzerResultsAsync(binLog);
-                var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
-
-                var didCompile = DidPerformCoreCompile(result);
-                if (result != null)
+                fileStream = File.Create(_lockFile.FullName, 1, FileOptions.DeleteOnClose);
+                var binLog = this.FindLatestBinLog();
+                if (binLog != null)
                 {
-                    if (result.Succeeded && didCompile)
+                    var results = await TryLoadAnalyzerResultsAsync(binLog);
+                    var result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
+
+                    var didCompile = DidPerformCoreCompile(result);
+                    if (result != null)
                     {
-                        return result;
+                        if (result.Succeeded && didCompile)
+                        {
+                            return result;
+                        }
                     }
                 }
-            }
 
-            binLog?.DoWhenFileAvailable(() => binLog.Delete());
-            var toClean = Directory.GetDirectories("obj");
-            foreach (var directoryInfo in toClean)
+                binLog?.DoWhenFileAvailable(() => binLog.Delete());
+                var toClean = Directory.GetDirectories("obj");
+                foreach (var directoryInfo in toClean)
+                {
+                    directoryInfo.Delete(true);
+                }
+
+                return null;
+            }
+            finally
             {
-                directoryInfo.Delete(true);
+                fileStream.Dispose();
             }
-
-            return null;
         }
 
         private bool DidPerformCoreCompile(AnalyzerResult result)
@@ -125,48 +138,59 @@ namespace WorkspaceServer.Packaging
         {
             if (result != null)
             {
-
+                return result;
             }
-            using (var operation = Log.OnEnterAndConfirmOnExit())
+
+            FileStream fileStream = null;
+            try
             {
-                try
+                fileStream = File.Create(_lockFile.FullName, 1, FileOptions.DeleteOnClose);
+                using (var operation = Log.OnEnterAndConfirmOnExit())
                 {
-                    operation.Info("Attempting building package {name}", Name);
-                    await DotnetBuild();
-                    operation.Info("Workspace built");
-                    operation.Succeed();
-                }
-                catch (Exception exception)
-                {
-                    operation.Error("Exception building workspace", exception);
-                    throw;
-                }
-
-                var binLog = this.FindLatestBinLog();
-
-                if (binLog == null)
-                {
-                    throw new InvalidOperationException("Failed to build");
-                }
-
-                var results = await TryLoadAnalyzerResultsAsync(binLog);
-
-                if (results?.Count == 0)
-                {
-                    throw new InvalidOperationException("The build log seems to contain no solutions or projects");
-                }
-
-                result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
-                if (result != null)
-                {
-                    if (result.Succeeded)
+                    try
                     {
-                        return result;
+                        operation.Info("Attempting building package {name}", Name);
+                        await DotnetBuild();
+                        operation.Info("Workspace built");
+                        operation.Succeed();
                     }
+                    catch (Exception exception)
+                    {
+                        operation.Error("Exception building workspace", exception);
+                        throw;
+                    }
+
+                    var binLog = this.FindLatestBinLog();
+
+                    if (binLog == null)
+                    {
+                        throw new InvalidOperationException("Failed to build");
+                    }
+
+                    var results = await TryLoadAnalyzerResultsAsync(binLog);
+
+                    if (results?.Count == 0)
+                    {
+                        throw new InvalidOperationException("The build log seems to contain no solutions or projects");
+                    }
+
+                    result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
+                    if (result != null)
+                    {
+                        if (result.Succeeded)
+                        {
+                            return result;
+                        }
+
+                        throw new InvalidOperationException("Failed to build");
+                    }
+
                     throw new InvalidOperationException("Failed to build");
                 }
-
-                throw new InvalidOperationException("Failed to build");
+            }
+            finally
+            {
+                fileStream?.Dispose();
             }
         }
 
