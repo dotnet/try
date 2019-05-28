@@ -185,11 +185,10 @@ namespace FibonacciTest
 }".EnforceLF();
 
             #endregion
-
-            var package = await Package.Copy(await Default.ConsoleWorkspace());
+           
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
 
-            var workspace = new Workspace(workspaceType: package.Name, buffers: new[]
+            var workspace = new Workspace(workspaceType: "console", buffers: new[]
             {
                 new Buffer("Program.cs", program),
                 new Buffer("generators/FibonacciGenerator.cs", processed, position)
