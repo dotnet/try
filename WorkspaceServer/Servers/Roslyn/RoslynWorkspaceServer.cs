@@ -32,7 +32,7 @@ namespace WorkspaceServer.Servers.Roslyn
     {
         private readonly IPackageFinder _packageFinder;
         private const int defaultBudgetInSeconds = 30;
-        private readonly ConcurrentDictionary<string, AsyncLock> locks = new ConcurrentDictionary<string, AsyncLock>();
+        private static readonly ConcurrentDictionary<string, AsyncLock> locks = new ConcurrentDictionary<string, AsyncLock>();
         private readonly IWorkspaceTransformer _transformer = new BufferInliningTransformer();
         private static readonly string UserCodeCompleted = nameof(UserCodeCompleted);
 
