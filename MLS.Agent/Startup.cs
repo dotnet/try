@@ -170,13 +170,6 @@ namespace MLS.Agent
                     builder.UseBlazor<MLS.Blazor.Program>();
                 });
 
-                app.Map("/LocalCodeRunner/humanizer.api", builder =>
-                {
-                    builder.UsePathBase("/LocalCodeRunner/humanizer/");
-                    builder.EnableCachingBlazorContent();
-                    builder.UseBlazor<MLS.HumanizerRunner.Program>();
-                });
-
                 var budget = new Budget();
                 _disposables.Add(() => budget.Cancel());
                 BlazorPackageConfiguration.Configure(app, app.ApplicationServices, packageRegistry, budget, !StartupOptions.IsLanguageService);

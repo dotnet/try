@@ -110,7 +110,6 @@
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
     <ProjectReference Include="..\MLS.Blazor\MLS.Blazor.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Jupyter\Microsoft.DotNet.Try.Jupyter.csproj" />
-    <ProjectReference Include="..\MLS.HumanizerRunner\MLS.HumanizerRunner.csproj" />
     <ProjectReference Include="..\MLS.Repositories\MLS.Repositories.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
@@ -127,10 +126,7 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="BuildCss"
-          Inputs="$(MSBuildThisFileDirectory)..\MLS.Styles\sass\trydotnet.scss"
-          Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css"
-          BeforeTargets="BeforeBuild">
+  <Target Name="BuildCss" Inputs="$(MSBuildThisFileDirectory)..\MLS.Styles\sass\trydotnet.scss" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" BeforeTargets="BeforeBuild">
 
     <PropertyGroup>
       <_TryDotNetCssExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
@@ -156,9 +152,7 @@
     <Copy SourceFiles="@(DemoFiles)" DestinationFolder="$(IntermediateOutputPath)demo\%(RecursiveDir)" />
   </Target>
 
-  <Target Name="ZipDemo"
-          BeforeTargets="PrepareForBuild"
-          DependsOnTargets="CopyDemoFiles">
+  <Target Name="ZipDemo" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyDemoFiles">
     <ZipDirectory SourceDirectory="$(IntermediateOutputPath)demo" DestinationFile="$(IntermediateOutputPath)\demo.zip" Overwrite="true" />
   </Target>
 </Project>
