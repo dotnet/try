@@ -802,7 +802,27 @@ namespace FibonacciTest
                 result.Should().Contain("Loading...");
             }
         }
-        
+
+        [Fact]
+        public async Task Can_serve_from_webassembly_controller()
+        {
+            var (name, addSource) = await Create.NupkgWithBlazorEnabled();
+            using (var agent = new AgentService(new StartupOptions(addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName))))
+            {
+                var response = await agent.GetAsync($@"/LocalCodeRunner/{name}");
+
+                response.EnsureSuccess();
+                var result = await response.Content.ReadAsStringAsync();
+                result.Should().Contain("Loading...");
+
+                response = await agent.GetAsync($@"/LocalCodeRunner/{name}/interop.js");
+
+                response.EnsureSuccess();
+                result = await response.Content.ReadAsStringAsync();
+                result.Should().Contain("DotNet.invokeMethodAsync");
+            }
+        }
+
         [Fact]
         public async Task Can_serve_nodatime_code_runner()
         {
