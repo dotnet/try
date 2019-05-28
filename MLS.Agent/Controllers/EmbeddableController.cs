@@ -41,7 +41,7 @@ namespace MLS.Agent.Controllers
 
         private string GetClientParameters()
         {
-            var referrer = HttpContext.Request.Headers["referer"].ToString();
+            var referrer = "http://localhost:4242"; //HttpContext.Request.Headers["referer"].ToString();
 
             if (!string.IsNullOrWhiteSpace(referrer) && Uri.TryCreate(referrer, UriKind.Absolute, out var uri))
             {

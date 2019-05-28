@@ -827,6 +827,12 @@ namespace FibonacciTest
                 response.EnsureSuccess();
                 var result = await response.Content.ReadAsStringAsync();
                 result.Should().Contain("Loading...");
+
+                response = await agent.GetAsync($@"/LocalCodeRunner/{name}/interop.js");
+
+                response.EnsureSuccess();
+                result = await response.Content.ReadAsStringAsync();
+                result.Should().Contain("DotNet.invokeMethodAsync");
             }
         }
 

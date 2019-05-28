@@ -29,19 +29,12 @@ namespace MLS.Agent.Controllers
         }
 
         [HttpGet]
-        [Route("/LocalCodeRunner/{package}")]
-        [Route("/LocalCodeRunner/{package}/")]
-        [Route("/LocalCodeRunner/{package}/{*requestedPath}")]
-        public async Task<IActionResult> GetFile(string package, string requestedPath)
+        [Route("/LocalCodeRunner/{packageName}/")]
+        [Route("/LocalCodeRunner/{packageName}/{*requestedPath}")]
+        public async Task<IActionResult> GetFile(string packageName, string requestedPath = "Index.html")
         {
-            var end = requestedPath.IndexOf("/");
-            if (end == -1)
-            {
-                end = requestedPath.Length;
-            }
-
-            var firstSegment = requestedPath.Substring(0, end);
-            var package = await _registry.Get<Package2>(firstSegment);
+           
+            var package = await _registry.Get<Package2>(packageName);
             var asset = package.Assets.OfType<WebAssemblyAsset>().FirstOrDefault();
             if (asset == null)
             {
