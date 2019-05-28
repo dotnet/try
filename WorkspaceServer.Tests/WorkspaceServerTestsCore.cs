@@ -25,7 +25,10 @@ namespace WorkspaceServer.Tests
         protected abstract Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
             [CallerMemberName] string testName = null);
 
-        protected abstract ILanguageService GetLanguageService(
-            [CallerMemberName] string testName = null);
+        protected abstract ILanguageService GetLanguageService();
+
+        protected abstract ICodeCompiler GetCodeCompiler();
+
+        protected abstract ICodeRunner GetCodeRunner();
     }
 }

@@ -729,9 +729,10 @@ namespace FibonacciTest
             throw new NotImplementedException();
         }
 
-        protected override ILanguageService GetLanguageService([CallerMemberName] string testName = null)
-        {
-            return new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
-        }
+        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+
+        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+
+        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
     }
 }

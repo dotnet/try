@@ -28,8 +28,13 @@ namespace WorkspaceServer.Tests
         {
             return Task.FromResult(((ICodeRunner)new ScriptingWorkspaceServer(),(Package) new NonrebuildablePackage("script")));
         }
-        protected override ILanguageService GetLanguageService(
-            [CallerMemberName] string testName = null) => new RoslynWorkspaceServer(
+        protected override ILanguageService GetLanguageService()=>new RoslynWorkspaceServer(
+            PackageRegistry.CreateForHostedMode());
+
+        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(
+            PackageRegistry.CreateForHostedMode());
+
+        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(
             PackageRegistry.CreateForHostedMode());
 
         [Fact]

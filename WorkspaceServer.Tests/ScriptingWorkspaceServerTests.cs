@@ -24,15 +24,19 @@ namespace WorkspaceServer.Tests
         {
         }
 
-        protected override Workspace CreateWorkspaceWithMainContaining(string text, Package package) => 
+        protected override Workspace CreateWorkspaceWithMainContaining(string text, Package package) =>
             Workspace.FromSource(text, workspaceType: "script");
 
         protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
             [CallerMemberName] string testName = null) =>
-            Task.FromResult<(ICodeRunner , Package )>((new ScriptingWorkspaceServer(), new NonrebuildablePackage("script")));
+            Task.FromResult<(ICodeRunner, Package)>((new ScriptingWorkspaceServer(), new NonrebuildablePackage("script")));
 
-        protected override ILanguageService GetLanguageService([CallerMemberName] string testName = null) =>
+        protected override ILanguageService GetLanguageService() =>
             throw new NotImplementedException();
+
+        protected override ICodeCompiler GetCodeCompiler() => throw new NotImplementedException();
+
+        protected override ICodeRunner GetCodeRunner() => throw new NotImplementedException();
 
         [Fact]
         public async Task Response_shows_fragment_return_value()
@@ -52,7 +56,7 @@ $""{person.Name} is {person.Age} year(s) old""", "script");
             {
                 Succeeded = true,
                 Output = new string[] { },
-                Exception = (string) null,
+                Exception = (string)null,
                 ReturnValue = $"Jeff is 20 year(s) old",
             }, config => config.ExcludingMissingMembers());
         }
@@ -100,7 +104,7 @@ public static class Hello
             {
                 Succeeded = true,
                 Output = new[] { "Hello there!", "" },
-                Exception = (string) null,
+                Exception = (string)null,
             }, config => config.ExcludingMissingMembers());
         }
 

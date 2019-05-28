@@ -166,9 +166,15 @@ namespace FibonacciTest
             throw new NotImplementedException();
         }
 
-        protected override ILanguageService GetLanguageService([CallerMemberName] string testName = null)
+        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+        protected override ICodeCompiler GetCodeCompiler()
         {
-            return new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+            throw new NotImplementedException();
+        }
+
+        protected override ICodeRunner GetCodeRunner()
+        {
+            throw new NotImplementedException();
         }
     }
 }
