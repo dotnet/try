@@ -20,11 +20,6 @@ namespace WorkspaceServer.Tests
         {
         }
 
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(string testName = null)
-        {
-            return Task.FromResult(((ICodeRunner)new ScriptingWorkspaceServer(),(Package) new NonrebuildablePackage("script")));
-        }
-
         [Fact]
         public async Task Get_diagnostics()
         {

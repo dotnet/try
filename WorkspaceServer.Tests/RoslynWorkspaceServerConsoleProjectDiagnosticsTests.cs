@@ -160,21 +160,8 @@ namespace FibonacciTest
             result.Diagnostics.Should().Contain(diagnostics => diagnostics.Message == "generators/FibonacciGenerator.cs(14,17): error CS0246: The type or namespace name \'adddd\' could not be found (are you missing a using directive or an assembly reference?)");
         }
 
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
-            [CallerMemberName] string testName = null)
-        {
-            throw new NotImplementedException();
-        }
-
         protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
-        protected override ICodeCompiler GetCodeCompiler()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override ICodeRunner GetCodeRunner()
-        {
-            throw new NotImplementedException();
-        }
+        protected override ICodeCompiler GetCodeCompiler() => throw new NotImplementedException();
+        protected override ICodeRunner GetCodeRunner() => throw new NotImplementedException();
     }
 }

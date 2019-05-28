@@ -38,10 +38,10 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task When_run_fails_to_compile_then_diagnostics_are_aligned_with_buffer_span()
         {
-            var (server, build) = await GetRunnerAndWorkspace();
+            var server = GetCodeCompiler();
 
             var workspace = new Workspace(
-                workspaceType: build.Name,
+                workspaceType: "blazor-console",
                 files: new[] { new File("Program.cs", SourceCodeProvider.ConsoleProgramSingleRegion) },
                 buffers: new[] { new Buffer("Program.cs@alpha", @"Console.WriteLine(banana);", 0) });
 
@@ -60,10 +60,10 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Compile_with_active_buffer_id_includes_diagnostics_on_edge_of_region()
         {
-            var (server, build) = await GetRunnerAndWorkspace();
+            var server = GetCodeCompiler();
 
             var workspace = new Workspace(
-                workspaceType: build.Name,
+                workspaceType: "blazor-console",
                 files: new[] { new File("Program.cs", "using System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\nnamespace MyCodeSample\r\n{\r\npublic class Program\r\n {\r\n public static void Main()\r\n {\r\n #region code\r\n #endregion\r\n }\r\n }\r\n}") },
                 buffers: new[] { new Buffer("Program.cs@code", @"var x = 3", 0) });
 
@@ -81,10 +81,10 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Compile_can_succeed_and_run()
         {
-            var (server, build) = await GetRunnerAndWorkspace();
+            var server = GetCodeCompiler();
 
             var workspace = new Workspace(
-                workspaceType: build.Name,
+                workspaceType: "blazor-console",
                 files: new[] { new File("Program.cs", SourceCodeProvider.ConsoleProgramSingleRegion) },
                 buffers: new[] { new Buffer("Program.cs@alpha", @"Console.WriteLine(2);", 0) });
 
@@ -102,14 +102,6 @@ namespace WorkspaceServer.Tests
             main.Invoke(null, new [] { new string[] { } });
         }
 
-        protected async Task<(ICodeCompiler server, Package workspace)> GetRunnerAndWorkspace(
-            [CallerMemberName] string testName = null)
-        {
-            var workspace = await Create.NetstandardWorkspaceCopy(testName);
-
-            var server = new RoslynWorkspaceServer(workspace);
-
-            return (server, workspace);
-        }
+        protected ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
     }
 }

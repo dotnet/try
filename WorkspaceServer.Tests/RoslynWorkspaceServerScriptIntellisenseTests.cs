@@ -23,11 +23,7 @@ namespace WorkspaceServer.Tests
         public RoslynWorkspaceServerScriptIntellisenseTests(ITestOutputHelper output) : base(output)
         {
         }
-
-        protected override  Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(string testName = null)
-        {
-            return Task.FromResult(((ICodeRunner)new ScriptingWorkspaceServer(),(Package) new NonrebuildablePackage("script")));
-        }
+     
         protected override ILanguageService GetLanguageService()=>new RoslynWorkspaceServer(
             PackageRegistry.CreateForHostedMode());
 

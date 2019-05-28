@@ -1,9 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
@@ -721,12 +719,6 @@ namespace FibonacciTest
             sample.Parameters.ElementAt(1).Name.Should().Be("arg");
             sample.Parameters.ElementAt(1).Label.Should().Be("params object[] arg");
             sample.Parameters.ElementAt(1).Documentation.Value.Should().Contain("An array of objects to write using format.");
-        }
-
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
-            [CallerMemberName] string testName = null)
-        {
-            throw new NotImplementedException();
         }
 
         protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
