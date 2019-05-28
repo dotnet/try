@@ -21,6 +21,7 @@ namespace WorkspaceServer
 
         private readonly ConcurrentDictionary<string, Task<PackageBuilder>> _packageBuilders = new ConcurrentDictionary<string, Task<PackageBuilder>>();
         private readonly ConcurrentDictionary<string, Task<IPackage>> _packages = new ConcurrentDictionary<string, Task<IPackage>>();
+        private readonly ConcurrentDictionary<PackageDescriptor, Task<IPackage>> _packages2 = new ConcurrentDictionary<PackageDescriptor, Task<IPackage>>();
         private readonly List<IPackageDiscoveryStrategy> _strategies = new List<IPackageDiscoveryStrategy>();
 
         public PackageRegistry(
@@ -85,24 +86,23 @@ namespace WorkspaceServer
 
             // FIX: (Get) move this into the cache
             var package = await GetPackage2<T>(descriptor);
-            if (package != null)
-            {
 
-            }
-            if (package == null)
+            if (package == null || !(package is T))
             {
                 package = await GetPackageFromPackageBuilder<T>(packageName, budget, descriptor);
             }
 
-            return (T) package;
+            return (T)package;
         }
 
-        private async Task<IPackage> GetPackage2<T>(PackageDescriptor descriptor)
+        private Task<IPackage> GetPackage2<T>(PackageDescriptor descriptor)
             where T : class, IPackage
         {
-            foreach (var packageFinder in _packageFinders)
+            return _packages2.GetOrAdd(descriptor, async descriptor2 =>
             {
-                var package = await packageFinder.Find<IPackage>(descriptor);
+                foreach (var packageFinder in _packageFinders)
+                {
+                   var package = await packageFinder.Find<IPackage>(descriptor);
                 if(package != null)
                 {
                     if (package is Package2 package2)
@@ -117,10 +117,11 @@ namespace WorkspaceServer
                 if (package is T pkg)
                 {
                    return pkg;
-                }
-            }
+            }    }
+            
 
-            return default;
+                return default;
+            });
         }
 
         private Task<IPackage> GetPackageFromPackageBuilder<T>(string packageName, Budget budget, PackageDescriptor descriptor)

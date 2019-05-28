@@ -176,7 +176,6 @@ namespace MLS.Agent
 
                 app.UseDefaultFiles()
                    .UseStaticFilesFromToolLocation()
-                   .UseRouter(new StaticFilesProxyRouter())
                    .UseMvc();
 
                 operation.Succeed();

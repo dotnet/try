@@ -82,7 +82,7 @@ namespace MLS.PackageTool
             Path.Combine(Path.GetDirectoryName(AssemblyLocation()), "project", "build");
 
         public static string WasmDirectoryLocation() =>
-            Path.Combine(Path.GetDirectoryName(AssemblyLocation()), "project", "wasm");
+            Path.Combine(Path.GetDirectoryName(AssemblyLocation()), "project", "wasm", "MLS.Blazor", "dist");
 
         public static string AssemblyLocation()
         {
