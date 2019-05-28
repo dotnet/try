@@ -12,7 +12,6 @@ namespace MLS.Agent.Controllers
 {
     public class WebAssemblyController : Controller
     {
-        private StartupOptions _startupOptions;
         private PackageRegistry _registry;
 
         public WebAssemblyController(PackageRegistry packageRegistry)
