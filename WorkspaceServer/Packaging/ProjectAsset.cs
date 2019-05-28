@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
 using Buildalyzer;
 using Clockwise;
@@ -29,7 +28,6 @@ namespace WorkspaceServer.Packaging
         private readonly PipelineStep<AnalyzerResult> _projectBuildStep;
         private readonly PipelineStep<Workspace> _workspaceStep;
         private readonly PipelineStep<AnalyzerResult> _cleanupStep;
-        private readonly FileSystemInfo _lockFile;
 
         public string Name { get; }
 
@@ -45,18 +43,18 @@ namespace WorkspaceServer.Packaging
 
             if (string.IsNullOrWhiteSpace(csprojFileName))
             {
-                var firstProject = directoryAccessor.GetAllFiles().FirstOrDefault(f => f.Extension == ".csproj");
+                var firstProject = DirectoryAccessor.GetAllFiles().FirstOrDefault(f => f.Extension == ".csproj");
                 if (firstProject != null)
                 {
-                    _projectFile = directoryAccessor.GetFullyQualifiedFilePath(firstProject.FileName);
+                    _projectFile = DirectoryAccessor.GetFullyQualifiedFilePath(firstProject.FileName);
                 }
             }
             else
             {
-                _projectFile = directoryAccessor.GetFullyQualifiedFilePath(csprojFileName);
+                _projectFile = DirectoryAccessor.GetFullyQualifiedFilePath(csprojFileName);
             }
 
-            
+
             Directory = DirectoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath(".")) as DirectoryInfo;
 
             Name = _projectFile?.Name ?? Directory?.Name;
@@ -66,15 +64,13 @@ namespace WorkspaceServer.Packaging
             _cleanupStep = new PipelineStep<AnalyzerResult>(LoadResultOrCleanAsync);
             _projectBuildStep = _cleanupStep.Then(BuildProjectAsync);
             _workspaceStep = _projectBuildStep.Then(BuildWorkspaceAsync);
-            _lockFile = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(".trydotnet-lock"));
+
         }
 
         private async Task<AnalyzerResult> LoadResultOrCleanAsync()
         {
-            FileStream fileStream = null;
-            try
+            using (await FileLock.TryCreateAsync(DirectoryAccessor))
             {
-                fileStream = File.Create(_lockFile.FullName, 1, FileOptions.DeleteOnClose);
                 var binLog = this.FindLatestBinLog();
                 if (binLog != null)
                 {
@@ -99,10 +95,6 @@ namespace WorkspaceServer.Packaging
                 }
 
                 return null;
-            }
-            finally
-            {
-                fileStream?.Dispose();
             }
         }
 
@@ -141,10 +133,9 @@ namespace WorkspaceServer.Packaging
                 return result;
             }
 
-            FileStream fileStream = null;
-            try
+            using (await FileLock.TryCreateAsync(DirectoryAccessor))
             {
-                fileStream = File.Create(_lockFile.FullName, 1, FileOptions.DeleteOnClose);
+
                 using (var operation = Log.OnEnterAndConfirmOnExit())
                 {
                     try
@@ -188,10 +179,6 @@ namespace WorkspaceServer.Packaging
                     throw new InvalidOperationException("Failed to build");
                 }
             }
-            finally
-            {
-                fileStream?.Dispose();
-            }
         }
 
         private async Task<AnalyzerResults> TryLoadAnalyzerResultsAsync(FileInfo binLog)
@@ -232,7 +219,7 @@ namespace WorkspaceServer.Packaging
                 }
 
                 operation.Info("Building package {name} in {directory}", Name, Directory);
-                
+
                 var result = await new Dotnet(Directory).Build(args: args);
 
                 if (result.ExitCode != 0)
