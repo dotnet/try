@@ -87,7 +87,7 @@ namespace WorkspaceServer
             // FIX: (Get) move this into the cache
             var package = await GetPackage2<T>(descriptor);
 
-            if (package == null || !(package is T))
+            if (!(package is T))
             {
                 package = await GetPackageFromPackageBuilder<T>(packageName, budget, descriptor);
             }
@@ -119,6 +119,7 @@ namespace WorkspaceServer
                         return pkg;
                     }
                 }
+
                 return default;
             });
         }
