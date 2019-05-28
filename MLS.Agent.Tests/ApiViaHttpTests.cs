@@ -804,7 +804,7 @@ namespace FibonacciTest
         }
 
         [Fact]
-        public async Task Can_serve_from_blazor_controller()
+        public async Task Can_serve_from_webassembly_controller()
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled();
             using (var agent = new AgentService(new StartupOptions(addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName))))
