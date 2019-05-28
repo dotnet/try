@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Microsoft.DotNet.Try.ProjectTemplate.Tutorial</PackageId>
+    <IsPackable>true</IsPackable>
+    <PackageDescription> A template for interactive documentation with Try.NET</PackageDescription>
+    <PackageType>Template</PackageType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoBuild>True</NoBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Directory Include="content" />
+    <Content Include="content/**/*.*" />
+  </ItemGroup>
+
+  <!-- Ignore source code (if any) in the content folder; it's part of the template(s) -->
+  <ItemGroup>
+    <Compile Remove="content/**/*.cs" />
+  </ItemGroup>
+
+</Project>
