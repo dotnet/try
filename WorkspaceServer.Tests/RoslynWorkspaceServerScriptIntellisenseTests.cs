@@ -1,37 +1,22 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
-using WorkspaceServer.Servers.Roslyn;
-using WorkspaceServer.Servers.Scripting;
-using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
-using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
 {
-    public class RoslynWorkspaceServerScriptIntellisenseTests : WorkspaceServerTestsCore
+    public class RoslynWorkspaceServerScriptIntellisenseTests : RoslynWorkspaceServerTestsCore
     {
         public RoslynWorkspaceServerScriptIntellisenseTests(ITestOutputHelper output) : base(output)
         {
         }
-     
-        protected override ILanguageService GetLanguageService()=>new RoslynWorkspaceServer(
-            PackageRegistry.CreateForHostedMode());
-
-        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(
-            PackageRegistry.CreateForHostedMode());
-
-        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(
-            PackageRegistry.CreateForHostedMode());
 
         [Fact]
         public async Task Get_signature_help_for_invalid_location_return_empty()

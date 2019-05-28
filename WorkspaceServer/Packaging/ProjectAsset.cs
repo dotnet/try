@@ -102,7 +102,7 @@ namespace WorkspaceServer.Packaging
             }
             finally
             {
-                fileStream.Dispose();
+                fileStream?.Dispose();
             }
         }
 

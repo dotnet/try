@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
-using WorkspaceServer.Servers.Roslyn;
 using Xunit;
 using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
@@ -14,9 +13,9 @@ using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
 {
-    public class RoslynWorkspaceServerConsoleProjectIntellisenseTests : WorkspaceServerTestsCore
+    public class RoslynWorkspaceServerTestsConsoleProjectIntellisenseTests : RoslynWorkspaceServerTestsCore
     {
-        public RoslynWorkspaceServerConsoleProjectIntellisenseTests(ITestOutputHelper output) : base(output)
+        public RoslynWorkspaceServerTestsConsoleProjectIntellisenseTests(ITestOutputHelper output) : base(output)
         {
         }
 
@@ -708,7 +707,7 @@ namespace FibonacciTest
 
             result.Signatures.Should().NotBeNullOrEmpty();
 
-            var sample = result.Signatures.Where(e => e.Label == "void Console.WriteLine(string format, params object[] arg)").First();
+            var sample = result.Signatures.First(e => e.Label == "void Console.WriteLine(string format, params object[] arg)");
             sample.Documentation.Value.Should().Contain("Writes the text representation of the specified array of objects, followed by the current line terminator, to the standard output stream using the specified format information.");
             sample.Parameters.Should().HaveCount(2);
 
@@ -720,11 +719,5 @@ namespace FibonacciTest
             sample.Parameters.ElementAt(1).Label.Should().Be("params object[] arg");
             sample.Parameters.ElementAt(1).Documentation.Value.Should().Contain("An array of objects to write using format.");
         }
-
-        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
-
-        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
-
-        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
     }
 }
