@@ -13,7 +13,7 @@ using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer
 {
-    public class PackageRegistry : 
+    public class PackageRegistry :
         IPackageFinder,
         IEnumerable<Task<PackageBuilder>>
     {
@@ -53,7 +53,7 @@ namespace WorkspaceServer
 
                 _strategies.Add(strategy);
             }
-            
+
             _packageFinders = packageFinders?.ToList() ?? GetDefaultPackageFinders().ToList();
         }
 
@@ -102,24 +102,23 @@ namespace WorkspaceServer
             {
                 foreach (var packageFinder in _packageFinders)
                 {
-                   var package = await packageFinder.Find<IPackage>(descriptor);
-                if(package != null)
-                {
-                    if (package is Package2 package2)
+                    var package = await packageFinder.Find<IPackage>(descriptor);
+                    if (package != null)
                     {
-                        var theStuff = package2.Assets.OfType<T>().FirstOrDefault();
-                        if(theStuff != null)
+                        if (package is Package2 package2)
                         {
-                            return theStuff;
+                            var theStuff = package2.Assets.OfType<T>().FirstOrDefault();
+                            if (theStuff != null)
+                            {
+                                return theStuff;
+                            }
                         }
                     }
+                    if (package is T pkg)
+                    {
+                        return pkg;
+                    }
                 }
-                if (package is T pkg)
-                {
-                   return pkg;
-            }    }
-            
-
                 return default;
             });
         }
@@ -154,7 +153,7 @@ namespace WorkspaceServer
         {
             var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource));
             var registry = new PackageRegistry(
-                true, 
+                true,
                 addSource,
                 finders,
                 additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource));
@@ -225,7 +224,7 @@ namespace WorkspaceServer
                              packageBuilder.AddPackageReference("Newtonsoft.Json");
                              packageBuilder.EnableBlazor(registry);
                          });
-                         
+
             registry.Add("blazor-ms.logging",
                          packageBuilder =>
                          {
