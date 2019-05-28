@@ -612,11 +612,7 @@ namespace FibonacciTest
         [Fact]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_output_shows_web_response()
         {
-            var workspaceType = await Create.WebApiWorkspaceCopy();
-            var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(
-                workspaceType.Directory,
-                workspaceType.Directory.Name);
-
+            var workspace = new Workspace(workspaceType:"aspnet.webapi", buffers:new []{new Buffer("empty.cs", "")});
             var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/api/values", "get"), requestId: "TestRun");
 
             var json = request.ToJson();
