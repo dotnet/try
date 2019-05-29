@@ -89,7 +89,7 @@ namespace WorkspaceServer
 
             if (!(package is T))
             {
-                package = await GetPackageFromPackageBuilder<T>(packageName, budget, descriptor);
+                package = await GetPackageFromPackageBuilder(packageName, budget, descriptor);
             }
 
             return (T)package;
@@ -107,10 +107,10 @@ namespace WorkspaceServer
                     {
                         if (package is Package2 package2)
                         {
-                            var theStuff = package2.Assets.OfType<T>().FirstOrDefault();
-                            if (theStuff != null)
+                            var packageAsset = package2.Assets.OfType<T>().FirstOrDefault();
+                            if (packageAsset != null)
                             {
-                                return theStuff;
+                                return packageAsset;
                             }
                         }
                     }
@@ -124,8 +124,7 @@ namespace WorkspaceServer
             });
         }
 
-        private Task<IPackage> GetPackageFromPackageBuilder<T>(string packageName, Budget budget, PackageDescriptor descriptor)
-            where T : IPackage
+        private Task<IPackage> GetPackageFromPackageBuilder(string packageName, Budget budget, PackageDescriptor descriptor)
         {
             return _packages.GetOrAdd(packageName, async name =>
             {

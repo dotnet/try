@@ -59,7 +59,7 @@ namespace WorkspaceServer.Packaging
 
         private async Task<AnalyzerResult> LoadResultOrCleanAsync()
         {
-            using (await FileLock.TryCreateAsync(DirectoryAccessor))
+            using (await DirectoryAccessor.TryLockAsync())
             {
                 var binLog = this.FindLatestBinLog();
                 if (binLog != null)
@@ -123,7 +123,7 @@ namespace WorkspaceServer.Packaging
                 return result;
             }
 
-            using (await FileLock.TryCreateAsync(DirectoryAccessor))
+            using (await DirectoryAccessor.TryLockAsync())
             {
 
                 using (var operation = Log.OnEnterAndConfirmOnExit())
@@ -156,14 +156,10 @@ namespace WorkspaceServer.Packaging
                     }
 
                     result = results?.FirstOrDefault(p => p.ProjectFilePath == _projectFile.FullName);
-                    if (result != null)
-                    {
-                        if (result.Succeeded)
-                        {
-                            return result;
-                        }
 
-                        throw new InvalidOperationException("Failed to build");
+                    if (result?.Succeeded == true)
+                    {
+                        return result;
                     }
 
                     throw new InvalidOperationException("Failed to build");

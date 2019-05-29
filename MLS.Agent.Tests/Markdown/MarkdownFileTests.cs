@@ -136,7 +136,7 @@ namespace BasicConsoleApp
 ```")
                                   };
 
-                var project = new MarkdownProject(dirAccessor, PackageRegistry.CreateForHostedMode());
+                var project = new MarkdownProject(dirAccessor, Default.PackageFinder);
                 project.TryGetMarkdownFile(new RelativeFilePath("docs/Readme.md"), out var markdownFile).Should().BeTrue();
                 var htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml((await markdownFile.ToHtmlContentAsync()).ToString());

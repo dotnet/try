@@ -13,6 +13,7 @@ using Xunit;
 using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
+using WorkspaceServer.Tests.Packaging;
 
 namespace WorkspaceServer.Tests
 {
@@ -76,7 +77,7 @@ namespace WorkspaceServer.Tests
 
             await original.CreateRoslynWorkspaceForLanguageServicesAsync(new TimeBudget(30.Seconds()));
 
-            var copy = await Package.Copy(original);
+            var copy = await PackageUtilities.Copy(original);
 
             await copy.CreateRoslynWorkspaceForLanguageServicesAsync(new TimeBudget(30.Seconds()));
 
@@ -180,7 +181,7 @@ namespace WorkspaceServer.Tests
         [InlineData("blazor-nodatime.api", true, Skip = "Requires package design changes")]
         public async Task CanSupportBlazor_indicates_whether_the_package_supports_Blazor(string packageName, bool expected)
         {
-            var registry = PackageRegistry.CreateForHostedMode();
+            var registry = Default.PackageFinder;
             var package = await registry.Get<IMightSupportBlazor>(packageName);
             package.CanSupportBlazor.Should().Be(expected);
         }

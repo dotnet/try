@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Buildalyzer.Workspaces;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Buildalyzer;
 using Microsoft.CodeAnalysis;
@@ -42,8 +41,9 @@ namespace WorkspaceServer.Servers.Roslyn
         {
             if (file == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(file));
             }
+
             const int waitAmount = 100;
             var attemptCount = 1;
             while (file.Exists && attemptCount <= 10 && !IsAvailable())
@@ -73,22 +73,26 @@ namespace WorkspaceServer.Servers.Roslyn
         {
             if (file == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(file));
             }
+
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
             const int waitAmount = 100;
             var attemptCount = 1;
             while (file.Exists && attemptCount <= 10)
             {
-                await Task.Delay(waitAmount * attemptCount);
-                attemptCount++;
-
                 try
                 {
                     action();
                     break;
                 }
                 catch(IOException){
-
+                    await Task.Delay(waitAmount * attemptCount);
+                    attemptCount++;
                 }
             }
         }
@@ -136,12 +140,7 @@ namespace WorkspaceServer.Servers.Roslyn
                                     .GetFiles("*.runtimeconfig.json", SearchOption.AllDirectories)
                                     .FirstOrDefault();
 
-            if (runtimeConfig != null)
-            {
-                return RuntimeConfig.GetTargetFramework(runtimeConfig);
-            }
-
-            return "netstandard2.0";
+            return runtimeConfig != null ? RuntimeConfig.GetTargetFramework(runtimeConfig) : "netstandard2.0";
         }
     }
 }

@@ -9,18 +9,14 @@ namespace WorkspaceServer.Tests
 {
     public abstract class RoslynWorkspaceServerTestsCore : WorkspaceServerTestsCore
     {
-        private IPackageFinder _packageFinder;
-
         protected RoslynWorkspaceServerTestsCore(ITestOutputHelper output) : base(output)
         {
         }
 
-        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(GetPackageFinder());
+        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(Default.PackageFinder);
 
-        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(GetPackageFinder());
+        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(Default.PackageFinder);
 
-        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(GetPackageFinder());
-
-        private IPackageFinder GetPackageFinder() => _packageFinder ?? (_packageFinder = PackageRegistry.CreateForHostedMode());
+        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(Default.PackageFinder);
     }
 }

@@ -110,13 +110,15 @@ namespace WorkspaceServer.Tests
         }
 
         [Fact]
-        public async Task When_invalidate_while_producing_a_value_the_consumer_waiting_will_wait_for_lastest_production_to_be_finish()
+        public async Task When_invalidated_while_producing_a_value_the_consumer_waiting_will_wait_for_latest_production_to_be_finished()
         {
             var seed = 0;
             var consumerBarrier = new Barrier(2);
             var producerBarrier = new Barrier(2);
+
             var producer = new PipelineStep<int>(() =>
             {
+                // will require all consumer to reach this point to move on
                 producerBarrier.SignalAndWait(2.Seconds());
                 return Task.FromResult(Interlocked.Increment(ref seed));
             });
@@ -124,6 +126,7 @@ namespace WorkspaceServer.Tests
             var firstConsumer = Task.Run(() =>
                 {
                     var task = producer.GetLatestAsync();
+                    // block waiting for the other consumer
                     consumerBarrier.SignalAndWait(2.Seconds());
                     return task;
                 }
@@ -131,9 +134,12 @@ namespace WorkspaceServer.Tests
 
             var secondConsumer = Task.Run(() =>
                 {
+                    // now both consumer reached the barrier
                     consumerBarrier.SignalAndWait(2.Seconds());
                     producer.Invalidate();
+                    // let the firs request fire
                     producerBarrier.RemoveParticipant();
+                    // second request after invalidation
                     var task = producer.GetLatestAsync();
                     return task;
                 }

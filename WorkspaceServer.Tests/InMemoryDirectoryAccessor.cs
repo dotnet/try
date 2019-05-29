@@ -6,12 +6,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
+using Recipes;
 
 namespace WorkspaceServer.Tests
 {
     public class InMemoryDirectoryAccessor : IDirectoryAccessor, IEnumerable
     {
+        private readonly AsyncLock _lock = new AsyncLock();
         private readonly DirectoryInfo _rootDirToAddFiles;
 
         private Dictionary<FileSystemInfo, string> _files = new Dictionary<FileSystemInfo, string>(
@@ -144,12 +147,17 @@ namespace WorkspaceServer.Tests
         {
             var newPath = WorkingDirectory.Combine(relativePath);
             return new InMemoryDirectoryAccessor(newPath)
-                   {
-                       _files = _files
-                   };
+            {
+                _files = _files
+            };
         }
 
-       
+        public Task<IDisposable> TryLockAsync()
+        {
+            return Task.FromResult<IDisposable>(_lock.LockAsync());
+        }
+
+
         public IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively()
         {
             return _files.Keys
@@ -162,7 +170,7 @@ namespace WorkspaceServer.Tests
         {
             return _files.Keys
                 .OfType<FileInfo>()
-                .Where(key => key.Directory == null)
+                .Where(key => key.Directory.FullName == WorkingDirectory.FullName)
                 .Select(key => new RelativeFilePath(
                     Path.GetRelativePath(WorkingDirectory.FullName, key.FullName)));
         }
