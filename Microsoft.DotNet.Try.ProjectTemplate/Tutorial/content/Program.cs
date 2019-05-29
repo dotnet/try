@@ -3,6 +3,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
 {
+    ///<param name="region">Takes in the --region option from the code fence options in markdown</param>
+    ///<param name="session">Takes in the --session option from the code fence options in markdown</param>
+    ///<param name="package">Takes in the --package option from the code fence options in markdown</param>
+    ///<param name="project">Takes in the --project option from the code fence options in markdown</param>
+    ///<param name="args">Takes in any additional arguments passed in the code fence options in markdown</param>
     public class Program
     {
         static int Main(
@@ -16,8 +21,6 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
             {
                 "HelloWorld" => HelloWorld(),
                 "DateTime" => DateTime(),
-                "Guid" => Guid(),
-                "EmptyRegion" => EmptyRegion(),
                 _ => EmptyRegion()
             };
         }
@@ -38,14 +41,6 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
             return 0;
         }
 
-        public static int Guid()
-        {
-            #region Guid
-            Console.WriteLine(System.Guid.NewGuid());
-            #endregion
-            return 0;
-        }
-        
         public static int EmptyRegion()
         {
             #region EmptyRegion

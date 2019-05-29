@@ -1,15 +1,51 @@
-## My interactive documentation
+# Creating interactive documentation with Try .NET
 
-This is how you can create an interactive documentation for your projects. In your code fences just add the `--source-file` and `--project` options to specify your content file and your project file as well as the region name if any. `dotnet try` tool will extract the source code from the specified file and execute the code. 
+## Setup
+Before getting started with the sample above, you need to install the `dotnet try` global tool. In a terminal execute
 
-Just begin by typing `dotnet try` in the command prompt.
+```console
+dotnet tool install --global dotnet-try
+```
+
+Once installed you can execute 
+```console
+dotnet try -h
+```
+and see the list of available commands.
+
+## Executing your first sample
+
+In the directory of the project execute 
+```console
+dotnet try
+```
+This should launch a browser window. The following code fence will be replaced by the editor and you can execute the code by hitting the run button.
 
 ```cs --source-file ./Program.cs --project ./Microsoft.DotNet.Try.ProjectTemplate.Tutorial.csproj --region HelloWorld
 ```
 
-Congrats you have run your first sample.
+## What's happening behind the scenes
 
-Lets see how we can use the code from another region
+Code fences are a standard way to include code in your markdown files. The only change you need to do is to add few options in the first line of your code snippet. If you notice the above code snippet, there are three options in action.
 
-```cs --source-file ./Program.cs --project ./Microsoft.DotNet.Try.ProjectTemplate.Tutorial.csproj --region DateTime
+| Option                                 | What it does                                                                                                                |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `--project ./Microsoft.DotNet.Try.ProjectTemplate.Tutorial.csproj` | Points to the project that the sample is part of. (Optional. Defaults to any .csproj in the same folder as the `.md` file.) |
+| `--region HelloWorld`                        | Identifes a C# code `#region` to focus on. (Optional. If not specified, the whole file is displayed in the editor.)         |
+| `--source-file ./Program.cs`  | Points to the file where the sample code is pulled from.  
+
+If you navigate back to Program.cs you will be able to see the various regions and the context in which your code is being execute. As an exercise, try to change the region in the previous code snippet to `DateTime`  and then refresh the browser. You should be able to see the text that is a part of the `DateTime` region now.
+
+## Learn More
+
+The above are the basic to get you started with creating your own interactive documentation. To learn more about the `dotnet try` features, at the command line execute
+
+```console
+dotnet try demo
 ```
+
+This interactive demo will walk you through the various features in `dotnet try`.
+
+## Feedback
+
+We love to hear from you. If you have any suggestions or feedback please reach out to us on [GitHub](https://github.com/dotnet/try)
