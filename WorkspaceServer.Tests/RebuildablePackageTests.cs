@@ -35,13 +35,13 @@ namespace WorkspaceServer.Tests
             var ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var newFile = Path.Combine(package.Directory.FullName, "Sample.cs");
-            ws.CurrentSolution.Projects.First().Documents.Should().NotContain(d => d.FilePath == newFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == newFile);
 
             File.WriteAllText(newFile, "//this is a new file");
 
             ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
-            ws.CurrentSolution.Projects.First().Documents.Should().Contain(d => d.FilePath == newFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFile);
         }
 
         [Fact]
@@ -85,13 +85,13 @@ namespace WorkspaceServer.Tests
             var ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var existingFile = Path.Combine(package.Directory.FullName, "Program.cs");
-            ws.CurrentSolution.Projects.First().Documents.Should().Contain(d => d.FilePath == existingFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == existingFile);
 
             File.Delete(existingFile);
             await Task.Delay(1000);
 
             ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
-            ws.CurrentSolution.Projects.First().Documents.Should().NotContain(d => d.FilePath == existingFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == existingFile);
         }
 
         [Fact]
@@ -127,8 +127,8 @@ namespace WorkspaceServer.Tests
 
             var workspaces = await Task.WhenAll(workspace1, workspace2);
 
-            workspaces[0].CurrentSolution.Projects.First().Documents.Should().Contain(p => p.FilePath.EndsWith("Sample.cs"));
-            workspaces[1].CurrentSolution.Projects.First().Documents.Should().Contain(p => p.FilePath.EndsWith("Sample.cs"));
+            workspaces[0].CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath.EndsWith("Sample.cs"));
+            workspaces[1].CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath.EndsWith("Sample.cs"));
         }
     }
 }
