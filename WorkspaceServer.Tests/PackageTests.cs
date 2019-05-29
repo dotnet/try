@@ -181,7 +181,7 @@ namespace WorkspaceServer.Tests
         [InlineData("blazor-nodatime.api", true, Skip = "Requires package design changes")]
         public async Task CanSupportBlazor_indicates_whether_the_package_supports_Blazor(string packageName, bool expected)
         {
-            var registry = PackageRegistry.CreateForHostedMode();
+            var registry = Default.PackageFinder;
             var package = await registry.Get<IMightSupportBlazor>(packageName);
             package.CanSupportBlazor.Should().Be(expected);
         }

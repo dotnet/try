@@ -34,11 +34,10 @@ namespace WorkspaceServer.Tests
             result.Diagnostics.Should().Contain(diagnostics => diagnostics.Message == "(1,1): error CS0103: The name \'addd\' does not exist in the current context");
         }
 
-        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(
-            PackageRegistry.CreateForHostedMode());
+        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(Default.PackageFinder);
 
-        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(Default.PackageFinder);
 
-        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(Default.PackageFinder);
     }
 }

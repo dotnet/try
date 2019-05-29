@@ -8,14 +8,14 @@ namespace WorkspaceServer.Tests
 {
     public static class Default
     {
-        private static readonly PackageRegistry DefaultPackages = PackageRegistry.CreateForHostedMode();
+        public static PackageRegistry PackageFinder { get; } = PackageRegistry.CreateForHostedMode();
 
-        public static async Task<Package> ConsoleWorkspace() =>  await DefaultPackages.Get<Package>("console");
+        public static async Task<Package> ConsoleWorkspace() =>  await PackageFinder.Get<Package>("console");
 
-        public static async Task<Package> WebApiWorkspace() =>  await DefaultPackages.Get<Package>("aspnet.webapi");
+        public static async Task<Package> WebApiWorkspace() =>  await PackageFinder.Get<Package>("aspnet.webapi");
 
-        public static async Task<Package> XunitWorkspace() =>  await DefaultPackages.Get<Package>("xunit");
+        public static async Task<Package> XunitWorkspace() =>  await PackageFinder.Get<Package>("xunit");
 
-        public static async Task<Package> NetstandardWorkspace() =>  await DefaultPackages.Get<Package>("blazor-console");
+        public static async Task<Package> NetstandardWorkspace() =>  await PackageFinder.Get<Package>("blazor-console");
     }
 }

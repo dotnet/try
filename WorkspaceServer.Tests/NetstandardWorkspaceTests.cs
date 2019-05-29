@@ -102,6 +102,6 @@ namespace WorkspaceServer.Tests
             main.Invoke(null, new [] { new string[] { } });
         }
 
-        protected ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
+        protected ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(Default.PackageFinder);
     }
 }

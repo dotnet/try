@@ -15,32 +15,31 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests.Packaging;
-using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
 {
     public class WorkspaceServerRegistryTests : IDisposable
     {
-        private readonly CompositeDisposable disposables = new CompositeDisposable();
-        private readonly PackageRegistry registry = PackageRegistry.CreateForHostedMode();
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        private readonly PackageRegistry _registry = Default.PackageFinder;
 
         public WorkspaceServerRegistryTests(ITestOutputHelper output)
         {
-            disposables.Add(output.SubscribeToPocketLogger());
-            disposables.Add(VirtualClock.Start());
+            _disposables.Add(output.SubscribeToPocketLogger());
+            _disposables.Add(VirtualClock.Start());
         }
 
-        public void Dispose() => disposables.Dispose();
+        public void Dispose() => _disposables.Dispose();
 
-        [Fact]
+        [Fact(Skip = "this api is deprecated, to be replaced")]
         public async Task Workspaces_can_be_registered_to_be_created_using_dotnet_new()
         {
             var packageName = PackageUtilities.CreateDirectory(nameof(Workspaces_can_be_registered_to_be_created_using_dotnet_new)).Name;
 
-            registry.Add(packageName,
+            _registry.Add(packageName,
                          options => options.CreateUsingDotnet("console"));
 
-            var package = await registry.Get<ICreateWorkspaceForRun>(packageName);
+            var package = await _registry.Get<ICreateWorkspaceForRun>(packageName);
 
             var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
@@ -53,14 +52,14 @@ namespace WorkspaceServer.Tests
         {
             var workspaceId = PackageUtilities.CreateDirectory(nameof(NuGet_packages_can_be_added_during_initialization)).Name;
 
-            registry.Add(workspaceId,
+            _registry.Add(workspaceId,
                          options =>
                          {
                              options.CreateUsingDotnet("console");
                              options.AddPackageReference("Twilio", "5.9.2");
                          });
 
-            var workspaceServer = new RoslynWorkspaceServer(registry);
+            var workspaceServer = new RoslynWorkspaceServer(_registry);
 
             var workspace = Workspace.FromSource(
                 @"
@@ -92,7 +91,7 @@ namespace Twilio_try.dot.net_sample
         {
             var unregisteredWorkspace = await Default.ConsoleWorkspace();
 
-            var package = await registry.Get<ICreateWorkspaceForRun>(unregisteredWorkspace.Name);
+            var package = await _registry.Get<ICreateWorkspaceForRun>(unregisteredWorkspace.Name);
 
             var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
@@ -103,7 +102,7 @@ namespace Twilio_try.dot.net_sample
         public async Task When_workspace_was_not_registered_then_GetWorkspaceServer_will_return_a_working_server()
         {
             var unregisteredWorkspace = await Default.ConsoleWorkspace();
-            var server = new RoslynWorkspaceServer(registry);
+            var server = new RoslynWorkspaceServer(_registry);
 
             var workspaceRequest = WorkspaceRequestFactory.CreateRequestFromDirectory(unregisteredWorkspace.Directory, unregisteredWorkspace.Name);
 
@@ -121,14 +120,14 @@ namespace Twilio_try.dot.net_sample
 
             var childDirectory = parentDirectory.CreateSubdirectory(workspaceName);
 
-            registry.Add(
+            _registry.Add(
                 workspaceName,
                 builder =>
                 {
                     builder.Directory = childDirectory;
                 });
 
-            var workspace = await registry.Get<IHaveADirectory>(workspaceName);
+            var workspace = await _registry.Get<IHaveADirectory>(workspaceName);
 
             workspace.Directory.Should().Be(childDirectory);
         }
