@@ -1,12 +1,14 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.CommandLine;
 using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Clockwise;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
@@ -19,6 +21,32 @@ namespace WorkspaceServer.Tests
 {
     public static class Create
     {
+        public static async Task<IPackage> NewPackage(string name, DirectoryInfo directory, Action<PackageBuilder> configure = null, bool createRebuildablePackage = false)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
+            }
+            if (directory == null)
+            {
+                throw new ArgumentNullException(nameof(directory));
+            }
+            
+            var packageBuilder = new PackageBuilder(name)
+            {
+                Directory = directory,
+                CreateRebuildablePackage = createRebuildablePackage
+            };
+
+
+            configure?.Invoke(packageBuilder);
+            var package =  packageBuilder.GetPackage();
+
+            await package.EnsureReady(new Budget());
+
+            return package;
+        }
+
         public static async Task<Package> ConsoleWorkspaceCopy([CallerMemberName] string testName = null, bool isRebuildable = false, IScheduler buildThrottleScheduler = null) =>
             await PackageUtilities.Copy(
                 await Default.ConsoleWorkspace(),

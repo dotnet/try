@@ -33,7 +33,7 @@ namespace WorkspaceServer.Packaging
 
         public DirectoryInfo Directory { get; set; }
 
-        public bool CreateRebuildablePackage { get; internal set; }
+        public bool CreateRebuildablePackage { get; set; }
 
         public bool BlazorSupported { get; private set; }
 

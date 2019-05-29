@@ -4,22 +4,16 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using Clockwise;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Pocket;
-using WorkspaceServer.Models.Execution;
 using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Tests.CodeSamples;
-using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
-using static Pocket.Logger;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
-using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
 {
@@ -93,7 +87,7 @@ namespace WorkspaceServer.Tests
 
             result.Succeeded.Should().BeTrue();
 
-            var bytes = System.Convert.FromBase64String(result.Base64Assembly);
+            var bytes = Convert.FromBase64String(result.Base64Assembly);
             var assembly = Assembly.Load(bytes);
             var main = assembly.GetTypes().
                 SelectMany(t => t.GetMethods())

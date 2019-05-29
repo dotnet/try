@@ -768,10 +768,24 @@ namespace FibonacciTest
         {
             Clock.Reset();
 
-            var workspace =
-                workspaceType == "script"
-                    ? Workspace.FromSource(code, "script")
-                    : Workspace.FromSource(code, (await Create.ConsoleWorkspaceCopy()).Name);
+            Workspace workspace = null;
+            if (workspaceType == "script")
+            {
+                workspace = Workspace.FromSource(code, "script");
+            }
+            else
+            {
+                var package = Create.EmptyWorkspace();
+                var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
+                {
+                    packageBuilder.CreateUsingDotnet("console");
+                    packageBuilder.TrySetLanguageVersion("8.0");
+                    packageBuilder.AddPackageReference("Newtonsoft.Json");
+                });
+                workspace = Workspace.FromSource(code, build.Name);
+            }
+                    
+                    
 
             var requestJson = new WorkspaceRequest(workspace).ToJson();
             var response = await CallRun(requestJson, 10000);

@@ -47,8 +47,15 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task If_the_project_file_is_changed_then_the_workspace_reflects_the_changes()
         {
-            var package = (RebuildablePackage)await Create.ConsoleWorkspaceCopy(isRebuildable: true);
-            var ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+            var package = Create.EmptyWorkspace();
+            var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
+            {
+                packageBuilder.CreateUsingDotnet("console");
+                packageBuilder.TrySetLanguageVersion("8.0");
+                packageBuilder.AddPackageReference("Newtonsoft.Json");
+            }) as ICreateWorkspaceForRun;
+
+            var ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var references = ws.CurrentSolution.Projects.First().MetadataReferences;
             references.Should().NotContain(reference =>
@@ -67,8 +74,15 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task If_an_existing_file_is_deleted_then_the_workspace_does_not_include_the_file()
         {
-            var package = (RebuildablePackage)await Create.ConsoleWorkspaceCopy(isRebuildable: true);
-            var ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+            var package = Create.EmptyWorkspace();
+            var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
+            {
+                packageBuilder.CreateUsingDotnet("console");
+                packageBuilder.TrySetLanguageVersion("8.0");
+                packageBuilder.AddPackageReference("Newtonsoft.Json");
+            }, true) as ICreateWorkspaceForRun;
+
+            var ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var existingFile = Path.Combine(package.Directory.FullName, "Program.cs");
             ws.CurrentSolution.Projects.First().Documents.Should().Contain(d => d.FilePath == existingFile);
@@ -76,7 +90,7 @@ namespace WorkspaceServer.Tests
             File.Delete(existingFile);
             await Task.Delay(1000);
 
-            ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+            ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
             ws.CurrentSolution.Projects.First().Documents.Should().NotContain(d => d.FilePath == existingFile);
         }
 

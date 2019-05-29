@@ -46,7 +46,15 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Project_file_path_workspace_can_be_discovered_and_run_with_buffer_inlining()
         {
-            var workspace = (await Create.ConsoleWorkspaceCopy()).Directory;
+            var package = Create.EmptyWorkspace("a space");
+            var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
+            {
+                packageBuilder.CreateUsingDotnet("console");
+                packageBuilder.TrySetLanguageVersion("8.0");
+                packageBuilder.AddPackageReference("Newtonsoft.Json");
+            }) as IHaveADirectory;
+
+            var workspace = build.Directory;
             var csproj = workspace.GetFiles("*.csproj")[0];
             var programCs = workspace.GetFiles("*.cs")[0];
 
