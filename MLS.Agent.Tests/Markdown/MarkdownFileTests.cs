@@ -280,6 +280,16 @@ using System;
             }
 
             [Fact]
+            public async Task Should_emit_math_rendering()
+            {
+                var html = await RenderHtml(
+                    ("Readme.md", @"$$\sum ^{n}_{i=0}\left(x_{i}+a_{i}y_{i}\right)$$"));
+
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(html);
+            }
+
+            [Fact]
             public async Task Should_emit_pre_style_for_hidden_blocks()
             {
                 var codeContent = @"using System;
