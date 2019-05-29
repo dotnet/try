@@ -1,23 +1,21 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
-using WorkspaceServer.Servers.Roslyn;
 using Xunit;
 using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
-using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
 {
-    public class RoslynWorkspaceServerConsoleProjectDiagnosticsTests : WorkspaceServerTestsCore
+    public class RoslynWorkspaceServerTestsConsoleProjectDiagnosticsTests : RoslynWorkspaceServerTestsCore
     {
-        public RoslynWorkspaceServerConsoleProjectDiagnosticsTests(ITestOutputHelper output) : base(output)
+       
+
+        public RoslynWorkspaceServerTestsConsoleProjectDiagnosticsTests(ITestOutputHelper output) : base(output)
         {
         }
 
@@ -160,15 +158,6 @@ namespace FibonacciTest
             result.Diagnostics.Should().Contain(diagnostics => diagnostics.Message == "generators/FibonacciGenerator.cs(14,17): error CS0246: The type or namespace name \'adddd\' could not be found (are you missing a using directive or an assembly reference?)");
         }
 
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
-            [CallerMemberName] string testName = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override ILanguageService GetLanguageService([CallerMemberName] string testName = null)
-        {
-            return new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
-        }
+      
     }
 }

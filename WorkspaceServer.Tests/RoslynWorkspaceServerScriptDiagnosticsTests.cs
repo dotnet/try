@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
@@ -22,11 +20,6 @@ namespace WorkspaceServer.Tests
         {
         }
 
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(string testName = null)
-        {
-            return Task.FromResult(((ICodeRunner)new ScriptingWorkspaceServer(),(Package) new NonrebuildablePackage("script")));
-        }
-
         [Fact]
         public async Task Get_diagnostics()
         {
@@ -41,8 +34,10 @@ namespace WorkspaceServer.Tests
             result.Diagnostics.Should().Contain(diagnostics => diagnostics.Message == "(1,1): error CS0103: The name \'addd\' does not exist in the current context");
         }
 
-        protected override ILanguageService GetLanguageService(
-            [CallerMemberName] string testName = null) => new RoslynWorkspaceServer(
-            PackageRegistry.CreateForHostedMode());
+        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(Default.PackageFinder);
+
+        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(Default.PackageFinder);
+
+        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(Default.PackageFinder);
     }
 }

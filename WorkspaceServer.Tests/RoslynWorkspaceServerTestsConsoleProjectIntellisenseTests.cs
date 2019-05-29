@@ -1,14 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
-using WorkspaceServer.Servers.Roslyn;
+using WorkspaceServer.Tests.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
@@ -16,9 +14,9 @@ using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
 {
-    public class RoslynWorkspaceServerConsoleProjectIntellisenseTests : WorkspaceServerTestsCore
+    public class RoslynWorkspaceServerTestsConsoleProjectIntellisenseTests : RoslynWorkspaceServerTestsCore
     {
-        public RoslynWorkspaceServerConsoleProjectIntellisenseTests(ITestOutputHelper output) : base(output)
+        public RoslynWorkspaceServerTestsConsoleProjectIntellisenseTests(ITestOutputHelper output) : base(output)
         {
         }
 
@@ -188,11 +186,10 @@ namespace FibonacciTest
 }".EnforceLF();
 
             #endregion
-
-            var package = await Package.Copy(await Default.ConsoleWorkspace());
+           
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
 
-            var workspace = new Workspace(workspaceType: package.Name, buffers: new[]
+            var workspace = new Workspace(workspaceType: "console", buffers: new[]
             {
                 new Buffer("Program.cs", program),
                 new Buffer("generators/FibonacciGenerator.cs", processed, position)
@@ -697,7 +694,7 @@ namespace FibonacciTest
             #endregion
 
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
-            var package = await Package.Copy(await Default.ConsoleWorkspace());
+            var package = await PackageUtilities.Copy(await Default.ConsoleWorkspace());
             var workspace = new Workspace(workspaceType: package.Name, buffers: new[]
             {
                 new Buffer("Program.cs", program),
@@ -710,7 +707,7 @@ namespace FibonacciTest
 
             result.Signatures.Should().NotBeNullOrEmpty();
 
-            var sample = result.Signatures.Where(e => e.Label == "void Console.WriteLine(string format, params object[] arg)").First();
+            var sample = result.Signatures.First(e => e.Label == "void Console.WriteLine(string format, params object[] arg)");
             sample.Documentation.Value.Should().Contain("Writes the text representation of the specified array of objects, followed by the current line terminator, to the standard output stream using the specified format information.");
             sample.Parameters.Should().HaveCount(2);
 
@@ -721,17 +718,6 @@ namespace FibonacciTest
             sample.Parameters.ElementAt(1).Name.Should().Be("arg");
             sample.Parameters.ElementAt(1).Label.Should().Be("params object[] arg");
             sample.Parameters.ElementAt(1).Documentation.Value.Should().Contain("An array of objects to write using format.");
-        }
-
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
-            [CallerMemberName] string testName = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override ILanguageService GetLanguageService([CallerMemberName] string testName = null)
-        {
-            return new RoslynWorkspaceServer(PackageRegistry.CreateForHostedMode());
         }
     }
 }

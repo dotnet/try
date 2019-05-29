@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
+using System.Threading.Tasks;
 using Markdig;
 using Microsoft.DotNet.Try.Markdown;
 using Recipes;
@@ -40,6 +42,11 @@ namespace MLS.Agent.Markdown
                 return Enumerable.Empty<RelativeFilePath>();
             }
 
+            public IEnumerable<RelativeFilePath> GetAllFiles()
+            {
+                return Enumerable.Empty<RelativeFilePath>();
+            }
+
             public IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively()
             {
                 return Enumerable.Empty<RelativeDirectoryPath>();
@@ -53,6 +60,11 @@ namespace MLS.Agent.Markdown
             public IDirectoryAccessor GetDirectoryAccessorForRelativePath(RelativeDirectoryPath relativePath)
             {
                 return this;
+            }
+
+            public Task<IDisposable> TryLockAsync()
+            {
+                return Task.FromResult(Disposable.Empty);
             }
 
             public void WriteAllText(RelativeFilePath path, string text)

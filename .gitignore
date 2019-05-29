@@ -9,7 +9,6 @@
 *.user
 *.userosscache
 *.sln.docstates
-*NCrunch*
 .trydotnet-*
 
 # User-specific files (MonoDevelop/Xamarin Studio)

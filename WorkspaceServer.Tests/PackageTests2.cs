@@ -19,8 +19,8 @@ namespace WorkspaceServer.Tests
             var directoryAccessor = new InMemoryDirectoryAccessor();
 
             var package = new Package2("the-package", directoryAccessor);
-
-            var projectAsset = new ProjectAsset(directoryAccessor);
+            directoryAccessor.Add(("mainProject.csproj",""));
+            var projectAsset = new ProjectAsset(directoryAccessor, "mainProject.csproj");
             package.Add(projectAsset);
 
             package.Assets.Should().Contain(a => a == projectAsset);
@@ -30,10 +30,10 @@ namespace WorkspaceServer.Tests
         public void An_asset_must_be_in_a_subdirectory_of_the_package()
         {
             var directoryAccessor = new InMemoryDirectoryAccessor();
-
+            directoryAccessor.Add(("./2/mainProject.csproj", ""));
             var package = new Package2("1", directoryAccessor.GetDirectoryAccessorForRelativePath("1"));
 
-            var projectAsset = new ProjectAsset(directoryAccessor.GetDirectoryAccessorForRelativePath("2"));
+            var projectAsset = new ProjectAsset(directoryAccessor.GetDirectoryAccessorForRelativePath("2"), "mainProject.csproj");
 
             package.Invoking(p => p.Add(projectAsset)).Should()
                    .Throw<ArgumentException>()

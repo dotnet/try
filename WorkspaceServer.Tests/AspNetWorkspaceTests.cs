@@ -36,9 +36,11 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Run_starts_the_kestrel_server_and_provides_a_WebServer_feature_that_can_receive_requests()
         {
-            var (server, package) = await GetRunnerAndWorkspace();
+            var registry = Default.PackageFinder;
+            var server = new RoslynWorkspaceServer(registry);
+            var package = await registry.Get<IHaveADirectory>("aspnet.webapi");
 
-            var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, package.Name);
+            var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, "aspnet.webapi");
 
             using (var runResult = await server.Run(new WorkspaceRequest(workspace, "Program.cs")))
             {
@@ -51,16 +53,6 @@ namespace WorkspaceServer.Tests
 
                 result.Should().Equal("value1", "value2");
             }
-        }
-
-        protected async Task<(ICodeRunner server, Package workspace)> GetRunnerAndWorkspace(
-            [CallerMemberName] string testName = null)
-        {
-            var package = await Create.WebApiWorkspaceCopy(testName);
-
-            var server = new RoslynWorkspaceServer(new PackageRegistry());
-
-            return (server, package);
         }
     }
 }

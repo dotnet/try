@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Buildalyzer.Workspaces;
@@ -38,6 +39,11 @@ namespace WorkspaceServer.Servers.Roslyn
         public static async Task WaitForFileAvailable(
             this FileInfo file)
         {
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
             const int waitAmount = 100;
             var attemptCount = 1;
             while (file.Exists && attemptCount <= 10 && !IsAvailable())
@@ -58,6 +64,35 @@ namespace WorkspaceServer.Servers.Roslyn
                 catch (IOException)
                 {
                     return false;
+                }
+            }
+        }
+
+        public static async Task DoWhenFileAvailable(
+            this FileInfo file, Action action)
+        {
+            if (file == null)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            const int waitAmount = 100;
+            var attemptCount = 1;
+            while (file.Exists && attemptCount <= 10)
+            {
+                try
+                {
+                    action();
+                    break;
+                }
+                catch(IOException){
+                    await Task.Delay(waitAmount * attemptCount);
+                    attemptCount++;
                 }
             }
         }
@@ -105,12 +140,7 @@ namespace WorkspaceServer.Servers.Roslyn
                                     .GetFiles("*.runtimeconfig.json", SearchOption.AllDirectories)
                                     .FirstOrDefault();
 
-            if (runtimeConfig != null)
-            {
-                return RuntimeConfig.GetTargetFramework(runtimeConfig);
-            }
-
-            return "netstandard2.0";
+            return runtimeConfig != null ? RuntimeConfig.GetTargetFramework(runtimeConfig) : "netstandard2.0";
         }
     }
 }

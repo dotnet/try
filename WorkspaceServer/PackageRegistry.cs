@@ -9,12 +9,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
-using Microsoft.CodeAnalysis.Operations;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer
 {
-    public class PackageRegistry : 
+    public class PackageRegistry :
         IPackageFinder,
         IEnumerable<Task<PackageBuilder>>
     {
@@ -54,7 +53,7 @@ namespace WorkspaceServer
 
                 _strategies.Add(strategy);
             }
-            
+
             _packageFinders = packageFinders?.ToList() ?? GetDefaultPackageFinders().ToList();
         }
 
@@ -88,9 +87,9 @@ namespace WorkspaceServer
             // FIX: (Get) move this into the cache
             var package = await GetPackage2<T>(descriptor);
 
-            if (package == null || !(package is T))
+            if (!(package is T))
             {
-                package = await GetPackageFromPackageBuilder<T>(packageName, budget, descriptor);
+                package = await GetPackageFromPackageBuilder(packageName, budget, descriptor);
             }
 
             return (T)package;
@@ -101,9 +100,21 @@ namespace WorkspaceServer
         {
             return _packages2.GetOrAdd(descriptor, async descriptor2 =>
             {
-                foreach (var packgeFinder in _packageFinders)
+                foreach (var packageFinder in _packageFinders)
                 {
-                    if (await packgeFinder.Find<T>(descriptor) is T pkg)
+                    var package = await packageFinder.Find<IPackage>(descriptor);
+                    if (package != null)
+                    {
+                        if (package is Package2 package2)
+                        {
+                            var packageAsset = package2.Assets.OfType<T>().FirstOrDefault();
+                            if (packageAsset != null)
+                            {
+                                return packageAsset;
+                            }
+                        }
+                    }
+                    if (package is T pkg)
                     {
                         return pkg;
                     }
@@ -113,8 +124,7 @@ namespace WorkspaceServer
             });
         }
 
-        private Task<IPackage> GetPackageFromPackageBuilder<T>(string packageName, Budget budget, PackageDescriptor descriptor)
-            where T : IPackage
+        private Task<IPackage> GetPackageFromPackageBuilder(string packageName, Budget budget, PackageDescriptor descriptor)
         {
             return _packages.GetOrAdd(packageName, async name =>
             {
@@ -143,7 +153,7 @@ namespace WorkspaceServer
         {
             var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource));
             var registry = new PackageRegistry(
-                true, 
+                true,
                 addSource,
                 finders,
                 additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource));
@@ -214,7 +224,7 @@ namespace WorkspaceServer
                              packageBuilder.AddPackageReference("Newtonsoft.Json");
                              packageBuilder.EnableBlazor(registry);
                          });
-                         
+
             registry.Add("blazor-ms.logging",
                          packageBuilder =>
                          {

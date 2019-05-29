@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
+using FluentAssertions.Extensions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
@@ -46,13 +47,16 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Project_file_path_workspace_can_be_discovered_and_run_with_buffer_inlining()
         {
-            var workspace = (await Create.ConsoleWorkspaceCopy()).Directory;
+            var package = Create.EmptyWorkspace("a space");
+            var build = await Create.NewPackage(package.Name, package.Directory, Create.ConsoleConfiguration) as IHaveADirectory;
+
+            var workspace = build.Directory;
             var csproj = workspace.GetFiles("*.csproj")[0];
             var programCs = workspace.GetFiles("*.cs")[0];
 
             var output = Guid.NewGuid().ToString();
             var ws = new Workspace(
-                files: new[] {  new File(programCs.FullName, SourceCodeProvider.ConsoleProgramSingleRegion) },
+                files: new[] { new File(programCs.FullName, SourceCodeProvider.ConsoleProgramSingleRegion) },
                 buffers: new[] { new Buffer(new BufferId(programCs.FullName, "alpha"), $"Console.WriteLine(\"{output}\");") },
                 workspaceType: csproj.FullName);
 
@@ -66,24 +70,19 @@ namespace MLS.Agent.Tests
             result.ShouldSucceedWithOutput(output);
         }
 
-        private async Task<(string packageName, DirectoryInfo addSource)> CreateLocalTool(IConsole console)
+        private async Task<(string packageName, DirectoryInfo packageLocation)> CreateLocalTool(IConsole console)
         {
             // Keep project name short to work around max path issues
             var projectName = Guid.NewGuid().ToString("N").Substring(0, 8);
+            var build = await Create.NewPackage(projectName, Create.ConsoleConfiguration) as IHaveADirectory;
 
-            var copy = Create.EmptyWorkspace(
-                initializer: new PackageInitializer(
-                    "console",
-                    projectName));
-
-            await copy.CreateRoslynWorkspaceForRunAsync(new Budget());
-
+            var ws = await ((ICreateWorkspaceForRun)build).CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
             var packageLocation = new DirectoryInfo(
-                Path.Combine(copy.Directory.FullName, "pack-output"));
+                Path.Combine(build.Directory.FullName, "pack-output"));
 
             var packageName = await PackCommand.Do(
                 new PackOptions(
-                    copy.Directory,
+                    build.Directory,
                     outputDirectory: packageLocation,
                     enableBlazor: false),
                 console);

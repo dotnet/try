@@ -27,6 +27,7 @@ using Microsoft.Net.Http.Headers;
 using HtmlAgilityPack;
 using System.Web;
 using MLS.Agent.Controllers;
+using WorkspaceServer.Tests.Packaging;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
 
@@ -82,8 +83,7 @@ namespace MLS.Agent.Tests
         public async Task The_workspace_endpoint_compiles_code_using_dotnet_when_a_non_script_workspace_type_is_specified()
         {
             var output = Guid.NewGuid().ToString();
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
-            var requestJson = Create.SimpleWorkspaceRequestAsJson(output, package.Name);
+            var requestJson = Create.SimpleWorkspaceRequestAsJson(output, "console");
 
             var response = await CallRun(requestJson);
 
@@ -100,7 +100,7 @@ namespace MLS.Agent.Tests
         public async Task The_workspace_endpoint_will_prevent_compiling_if_is_in_language_service_mode()
         {
             var output = Guid.NewGuid().ToString();
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
+            var package = await PackageUtilities.Copy(await Default.ConsoleWorkspace());
 
             var requestJson = Create.SimpleWorkspaceRequestAsJson(output, package.Name);
 
@@ -112,12 +112,12 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task When_a_non_script_workspace_type_is_specified_then_code_fragments_cannot_be_compiled_successfully()
         {
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
+           
             var requestJson =
                 new WorkspaceRequest(
                     Workspace.FromSource(
                         @"Console.WriteLine(""hello!"");",
-                        workspaceType: package.Name,
+                        workspaceType: "console",
                         id: "Program.cs")).ToJson();
 
             var response = await CallRun(requestJson);
@@ -201,8 +201,8 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task A_script_snippet_workspace_can_be_used_to_get_completions()
         {
-            var (processed, position) = WorkspaceServer.Tests.CodeManipulation.ProcessMarkup("Console.$$");
-            using (var agent = new AgentService())
+            var (processed, position) = CodeManipulation.ProcessMarkup("Console.$$");
+            using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
             {
                 var json = new WorkspaceRequest(
                         requestId: "TestRun",
@@ -346,7 +346,6 @@ namespace FibonacciTest
     }
 }".EnforceLF();
             #endregion
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
             var log = new LogEntryList();
             using (LogEvents.Subscribe(log.Add))
@@ -356,7 +355,7 @@ namespace FibonacciTest
                     new WorkspaceRequest(activeBufferId: "generators/FibonacciGenerator.cs",
                                          requestId: "TestRun",
                                          workspace: Workspace.FromSources(
-                                             package.Name,
+                                             "console",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -423,7 +422,6 @@ namespace FibonacciTest
 }".EnforceLF();
 
             #endregion
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
             var log = new LogEntryList();
             using (LogEvents.Subscribe(log.Add))
@@ -433,7 +431,7 @@ namespace FibonacciTest
                     new WorkspaceRequest(activeBufferId: "generators/FibonacciGenerator.cs",
                                         requestId: "TestRun",
                                          workspace: Workspace.FromSources(
-                                             package.Name,
+                                             "console",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -500,7 +498,7 @@ namespace FibonacciTest
 }".EnforceLF();
 
             #endregion
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace(), "a space");
+            var package = await PackageUtilities.Copy(await Default.ConsoleWorkspace(), "a space");
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
             var log = new LogEntryList();
             using (LogEvents.Subscribe(log.Add))
@@ -578,7 +576,6 @@ namespace FibonacciTest
 }".EnforceLF();
 
             #endregion
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
             var log = new LogEntryList();
             using (LogEvents.Subscribe(log.Add))
@@ -588,7 +585,7 @@ namespace FibonacciTest
                     new WorkspaceRequest(activeBufferId: "generators/FibonacciGenerator.cs",
                                         requestId: "TestRun",
                                          workspace: Workspace.FromSources(
-                                             package.Name,
+                                             "console",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -613,14 +610,10 @@ namespace FibonacciTest
             }
         }
 
-        [Fact]
+        [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_output_shows_web_response()
         {
-            var workspaceType = await Create.WebApiWorkspaceCopy();
-            var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(
-                workspaceType.Directory,
-                workspaceType.Directory.Name);
-
+            var workspace = new Workspace(workspaceType:"aspnet.webapi", buffers:new []{new Buffer("empty.cs", "")});
             var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/api/values", "get"), requestId: "TestRun");
 
             var json = request.ToJson();
@@ -648,10 +641,10 @@ namespace FibonacciTest
                 "]");
         }
 
-        [Fact(Skip = "WIP")]
+        [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_standard_out_is_available_on_response()
         {
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.WebApiWorkspace());
+            var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
             await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(10.Minutes()));
             var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, package.Directory.Name);
 
@@ -669,10 +662,10 @@ namespace FibonacciTest
             throw new NotImplementedException();
         }
 
-        [Fact]
+        [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_fails_then_diagnostics_are_returned()
         {
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.WebApiWorkspace());
+            var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
             await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(10.Minutes()));
             var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, package.Directory.Name);
             var nonCompilingBuffer = new Buffer("broken.cs", "this does not compile", 0);
@@ -696,9 +689,8 @@ namespace FibonacciTest
         public async Task When_Run_times_out_in_console_workspace_server_code_then_the_response_code_is_504()
         {
             var code = @"public class Program { public static void Main()  {  Console.WriteLine();  }  }";
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
            
-            var workspace = Workspace.FromSource(code.EnforceLF(), package.Name);
+            var workspace = Workspace.FromSource(code.EnforceLF(), "console");
 
             var requestJson = new WorkspaceRequest(workspace).ToJson();
 
@@ -776,10 +768,19 @@ namespace FibonacciTest
         {
             Clock.Reset();
 
-            var workspace =
-                workspaceType == "script"
-                    ? Workspace.FromSource(code, "script")
-                    : Workspace.FromSource(code, (await Create.ConsoleWorkspaceCopy()).Name);
+            Workspace workspace = null;
+            if (workspaceType == "script")
+            {
+                workspace = Workspace.FromSource(code, "script");
+            }
+            else
+            {
+                var package = Create.EmptyWorkspace();
+                var build = await Create.NewPackage(package.Name, package.Directory, Create.ConsoleConfiguration);
+                workspace = Workspace.FromSource(code, build.Name);
+            }
+                    
+                    
 
             var requestJson = new WorkspaceRequest(workspace).ToJson();
             var response = await CallRun(requestJson, 10000);
@@ -874,12 +875,11 @@ namespace FibonacciTest
         [Fact]
         public async Task Returns_200_if_the_package_exists()
         {
-            var package = await Create.ConsoleWorkspaceCopy();
             var packageVersion = "1.0.0";
 
             using(var agent = new AgentService())
             {
-                var response = await agent.GetAsync($@"/packages/{package.Name}/{packageVersion}");
+                var response = await agent.GetAsync($@"/packages/console/{packageVersion}");
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
             }
         }
@@ -900,12 +900,12 @@ namespace FibonacciTest
         [Fact]
         public async Task Returns_blazor_false_if_the_package_does_not_contain_blazor_runner()
         {
-            var package = await Create.ConsoleWorkspaceCopy();
+         
             var packageVersion = "1.0.0";
 
             using (var agent = new AgentService())
             {
-                var response = await agent.GetAsync($@"/packages/{package.Name}/{packageVersion}");
+                var response = await agent.GetAsync($@"/packages/console/{packageVersion}");
                 response.Should().BeSuccessful();
                 var result = await response.Content.ReadAsStringAsync();
                 result.FromJsonTo<Package>()

@@ -63,7 +63,7 @@ namespace BasicConsoleApp
                  ("Program.cs", fileContent),
                  ("sample.csproj", "")
             };
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var document =
 $@"```{language} --source-file Program.cs
 ```";
@@ -81,7 +81,7 @@ $@"```{language} --source-file Program.cs
 
             var testDir = TestAssets.SampleConsole;
             var directoryAccessor = new InMemoryDirectoryAccessor(testDir);
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var document = @"
 ```js  --source-file Program.cs
 console.log(""Hello World"");
@@ -100,7 +100,7 @@ console.log(""Hello World"");
 
             var testDir = TestAssets.SampleConsole;
             var directoryAccessor = new InMemoryDirectoryAccessor(testDir);
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var document = @"
 ```cs
 Console.WriteLine(""Hello World"");
@@ -117,7 +117,7 @@ Console.WriteLine(""Hello World"");
             {
                 ("sample.csproj", "")
             };
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var document =
 @"```cs --source-file DOESNOTEXIST
 ```";
@@ -133,7 +133,7 @@ Console.WriteLine(""Hello World"");
             {
                 ("Program.cs", "")
             };
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var document =
 @"```cs  --source-file Program.cs
 ```";
@@ -155,7 +155,7 @@ Console.WriteLine(""Hello World"");
             var document =
 $@"```cs --project {projectPath}  --source-file Program.cs
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             html.Should().Contain($"Project not found: ./{projectPath}");
@@ -172,7 +172,7 @@ $@"```cs --project {projectPath}  --source-file Program.cs
                 ("src/sample/sample.csproj", "")
             };
 
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
 
             var package = "../src/sample/sample.csproj";
             var document =
@@ -277,7 +277,7 @@ namespace BasicConsoleApp
             var document =
 @"```cs --source-file Program.cs --region codeRegion
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             var htmlDocument = new HtmlDocument();
@@ -307,7 +307,7 @@ Console.WriteLine(""Hello World"");
             var document =
 $@"```cs --source-file {filename} --region codeRegion
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             var htmlDocument = new HtmlDocument();
@@ -337,7 +337,7 @@ Console.WriteLine(""Hello World"");
             var document =
                 $@"```cs --source-file {sourceFile} --destination-file {destinationFile} --region codeRegion
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             var htmlDocument = new HtmlDocument();
@@ -366,7 +366,7 @@ Console.WriteLine(""Hello World"");
             var document =
 $@"```cs --source-file Program.cs --region {region}
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             var htmlDocument = new HtmlDocument();
@@ -391,7 +391,7 @@ $@"```cs --source-file Program.cs --region {region}
             var document =
 $@"```cs --source-file Program.cs --region {region}
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             var htmlDocument = new HtmlDocument();
@@ -422,7 +422,7 @@ $@"```cs --source-file Program.cs --region {region}
             var document =
                 $@"```cs --source-file Program.cs --region {region}
 ```";
-            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode()).Build();
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
 
             var htmlDocument = new HtmlDocument();
@@ -446,7 +446,7 @@ $@"```cs --source-file Program.cs --region {region}
                 $@"```cs --source-file Program.cs --session {session}
 ```";
             var pipeline = new MarkdownPipelineBuilder()
-                           .UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode())
+                           .UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder)
                            .Build();
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
@@ -473,7 +473,7 @@ $@"```cs --source-file Program.cs --region {region}
                 @"```cs --source-file Program.cs
 ```";
             var pipeline = new MarkdownPipelineBuilder()
-                           .UseCodeBlockAnnotations(directoryAccessor, PackageRegistry.CreateForHostedMode())
+                           .UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder)
                            .Build();
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
