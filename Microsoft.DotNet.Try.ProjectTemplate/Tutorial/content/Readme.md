@@ -1,4 +1,4 @@
-# Creating interactive documentation with dotnet-try
+# Creating interactive documentation with Try .NET
 
 ## Setup
 Before getting started with the sample above, you need to install the `dotnet try` global tool. In a terminal execute
