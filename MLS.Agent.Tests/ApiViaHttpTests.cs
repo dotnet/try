@@ -202,7 +202,7 @@ namespace MLS.Agent.Tests
         public async Task A_script_snippet_workspace_can_be_used_to_get_completions()
         {
             var (processed, position) = CodeManipulation.ProcessMarkup("Console.$$");
-            using (var agent = new AgentService())
+            using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
             {
                 var json = new WorkspaceRequest(
                         requestId: "TestRun",
@@ -610,7 +610,7 @@ namespace FibonacciTest
             }
         }
 
-        [Fact]
+        [Fact(Skip = "WIP")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_output_shows_web_response()
         {
             var workspace = new Workspace(workspaceType:"aspnet.webapi", buffers:new []{new Buffer("empty.cs", "")});
@@ -662,7 +662,7 @@ namespace FibonacciTest
             throw new NotImplementedException();
         }
 
-        [Fact]
+        [Fact(Skip = "WIP")]
         public async Task When_aspnet_webapi_workspace_request_fails_then_diagnostics_are_returned()
         {
             var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
