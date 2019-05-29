@@ -440,7 +440,7 @@ This is the end of the file"));
                         "),
                         ("Program.cs", "")
                     },
-                    new PackageRegistry(),
+                    Default.PackageFinder,
                     defaultCodeBlockAnnotations
                 );
 
@@ -464,7 +464,7 @@ This is the end of the file"));
 
                 var markdownProject = new MarkdownProject(
                     directoryAccessor,
-                    new PackageRegistry());
+                    Default.PackageFinder);
 
                 var markdownFile = markdownProject.GetAllMarkdownFiles().Single();
                 var html = (await markdownFile.ToHtmlContentAsync()).ToString();
