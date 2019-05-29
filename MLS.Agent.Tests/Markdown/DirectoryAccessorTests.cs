@@ -43,6 +43,25 @@ namespace MLS.Agent.Tests.Markdown
         }
 
         [Fact]
+        public void It_can_retrieve_all_files_at_root()
+        {
+            var directory = GetDirectory(TestAssets.SampleConsole);
+
+            var files = directory.GetAllFiles();
+
+            files.Should()
+                .Contain(new RelativeFilePath("BasicConsoleApp.csproj"))
+                .And
+                .Contain(new RelativeFilePath("Program.cs"))
+                .And
+                .Contain(new RelativeFilePath("Readme.md"))
+                .And
+                .NotContain(new RelativeFilePath("Subdirectory/AnotherProgram.cs"))
+                .And
+                .NotContain(new RelativeFilePath("Subdirectory/Tutorial.md"));
+        }
+
+        [Fact]
         public void GetAllFilesRecursively_does_not_return_directories()
         {
             var directory = GetDirectory(TestAssets.SampleConsole);

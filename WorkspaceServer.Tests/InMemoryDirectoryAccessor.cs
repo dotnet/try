@@ -170,7 +170,7 @@ namespace WorkspaceServer.Tests
         {
             return _files.Keys
                 .OfType<FileInfo>()
-                .Where(key => key.Directory == null)
+                .Where(key => key.Directory.FullName == WorkingDirectory.FullName)
                 .Select(key => new RelativeFilePath(
                     Path.GetRelativePath(WorkingDirectory.FullName, key.FullName)));
         }

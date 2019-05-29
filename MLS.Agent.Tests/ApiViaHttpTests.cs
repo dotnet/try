@@ -610,7 +610,7 @@ namespace FibonacciTest
             }
         }
 
-        [Fact(Skip = "WIP")]
+        [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_output_shows_web_response()
         {
             var workspace = new Workspace(workspaceType:"aspnet.webapi", buffers:new []{new Buffer("empty.cs", "")});
@@ -641,7 +641,7 @@ namespace FibonacciTest
                 "]");
         }
 
-        [Fact(Skip = "WIP")]
+        [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_standard_out_is_available_on_response()
         {
             var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
@@ -662,7 +662,7 @@ namespace FibonacciTest
             throw new NotImplementedException();
         }
 
-        [Fact(Skip = "WIP")]
+        [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_fails_then_diagnostics_are_returned()
         {
             var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
