@@ -14,7 +14,6 @@ using Pocket;
 using WorkspaceServer.Servers.Roslyn;
 using static Pocket.Logger<WorkspaceServer.Packaging.ProjectAsset>;
 
-
 namespace WorkspaceServer.Packaging
 {
     public class ProjectAsset : PackageAsset,
@@ -30,8 +29,7 @@ namespace WorkspaceServer.Packaging
         private readonly PipelineStep<AnalyzerResult> _cleanupStep;
 
         public string Name { get; }
-
-
+        
         public DirectoryInfo Directory { get; }
 
         public ProjectAsset(IDirectoryAccessor directoryAccessor, string csprojFileName = null) : base(directoryAccessor)
@@ -43,28 +41,20 @@ namespace WorkspaceServer.Packaging
 
             if (string.IsNullOrWhiteSpace(csprojFileName))
             {
-                var firstProject = DirectoryAccessor.GetAllFiles().FirstOrDefault(f => f.Extension == ".csproj");
-                if (firstProject != null)
-                {
-                    _projectFile = DirectoryAccessor.GetFullyQualifiedFilePath(firstProject.FileName);
-                }
+                var firstProject = DirectoryAccessor.GetAllFiles().Single(f => f.Extension == ".csproj");
+                _projectFile = DirectoryAccessor.GetFullyQualifiedFilePath(firstProject.FileName);
             }
             else
             {
                 _projectFile = DirectoryAccessor.GetFullyQualifiedFilePath(csprojFileName);
             }
 
-
-            Directory = DirectoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath(".")) as DirectoryInfo;
-
+            Directory = DirectoryAccessor.GetFullyQualifiedRoot();
             Name = _projectFile?.Name ?? Directory?.Name;
-
-            _lastBuildErrorLogFile = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./.trydotnet-builderror")) as FileInfo;
-
+            _lastBuildErrorLogFile = directoryAccessor.GetFullyQualifiedFilePath(".trydotnet-builderror");
             _cleanupStep = new PipelineStep<AnalyzerResult>(LoadResultOrCleanAsync);
             _projectBuildStep = _cleanupStep.Then(BuildProjectAsync);
             _workspaceStep = _projectBuildStep.Then(BuildWorkspaceAsync);
-
         }
 
         private async Task<AnalyzerResult> LoadResultOrCleanAsync()

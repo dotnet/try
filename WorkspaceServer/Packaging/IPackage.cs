@@ -27,6 +27,7 @@ namespace WorkspaceServer.Packaging
     {
         bool CanSupportBlazor { get; }
     }
+
     public interface ICreateWorkspace : IPackage
     {
         Task<Workspace> CreateRoslynWorkspaceAsync(Budget budget);
