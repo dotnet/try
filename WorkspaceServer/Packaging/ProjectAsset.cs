@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Buildalyzer;
 using Clockwise;
 using Microsoft.CodeAnalysis;
-using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Tools;
 using Pocket;
 using WorkspaceServer.Servers.Roslyn;
