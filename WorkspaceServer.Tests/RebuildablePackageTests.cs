@@ -48,12 +48,7 @@ namespace WorkspaceServer.Tests
         public async Task If_the_project_file_is_changed_then_the_workspace_reflects_the_changes()
         {
             var package = Create.EmptyWorkspace();
-            var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
-            {
-                packageBuilder.CreateUsingDotnet("console");
-                packageBuilder.TrySetLanguageVersion("8.0");
-                packageBuilder.AddPackageReference("Newtonsoft.Json");
-            }) as ICreateWorkspaceForRun;
+            var build = await Create.NewPackage(package.Name, package.Directory, Create.ConsoleConfiguration) as ICreateWorkspaceForRun;
 
             var ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
@@ -75,12 +70,7 @@ namespace WorkspaceServer.Tests
         public async Task If_an_existing_file_is_deleted_then_the_workspace_does_not_include_the_file()
         {
             var package = Create.EmptyWorkspace();
-            var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
-            {
-                packageBuilder.CreateUsingDotnet("console");
-                packageBuilder.TrySetLanguageVersion("8.0");
-                packageBuilder.AddPackageReference("Newtonsoft.Json");
-            }, true) as ICreateWorkspaceForRun;
+            var build = await Create.NewPackage(package.Name, package.Directory, Create.ConsoleConfiguration, true) as ICreateWorkspaceForRun;
 
             var ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 

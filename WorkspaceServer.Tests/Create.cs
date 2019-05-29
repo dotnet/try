@@ -21,6 +21,20 @@ namespace WorkspaceServer.Tests
 {
     public static class Create
     {
+        public static Action<PackageBuilder> ConsoleConfiguration { get; } = packageBuilder =>
+        {
+            packageBuilder.CreateUsingDotnet("console");
+            packageBuilder.TrySetLanguageVersion("8.0");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+        };
+
+        public static Task<IPackage> NewPackage(string name, Action<PackageBuilder> configure = null, bool createRebuildablePackage = false)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            var package = EmptyWorkspace(name);
+            return NewPackage(package.Name, package.Directory, configure, createRebuildablePackage);
+        }
+
         public static async Task<IPackage> NewPackage(string name, DirectoryInfo directory, Action<PackageBuilder> configure = null, bool createRebuildablePackage = false)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -31,7 +45,7 @@ namespace WorkspaceServer.Tests
             {
                 throw new ArgumentNullException(nameof(directory));
             }
-            
+
             var packageBuilder = new PackageBuilder(name)
             {
                 Directory = directory,
@@ -40,7 +54,7 @@ namespace WorkspaceServer.Tests
 
 
             configure?.Invoke(packageBuilder);
-            var package =  packageBuilder.GetPackage();
+            var package = packageBuilder.GetPackage();
 
             await package.EnsureReady(new Budget());
 

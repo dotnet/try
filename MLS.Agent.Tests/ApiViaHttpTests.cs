@@ -776,12 +776,7 @@ namespace FibonacciTest
             else
             {
                 var package = Create.EmptyWorkspace();
-                var build = await Create.NewPackage(package.Name, package.Directory, packageBuilder =>
-                {
-                    packageBuilder.CreateUsingDotnet("console");
-                    packageBuilder.TrySetLanguageVersion("8.0");
-                    packageBuilder.AddPackageReference("Newtonsoft.Json");
-                });
+                var build = await Create.NewPackage(package.Name, package.Directory, Create.ConsoleConfiguration);
                 workspace = Workspace.FromSource(code, build.Name);
             }
                     
