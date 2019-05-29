@@ -12,7 +12,6 @@ using WorkspaceServer.Servers.Roslyn;
 using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions.Extensions;
-using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests.Packaging;
 
@@ -45,45 +44,6 @@ namespace WorkspaceServer.Tests
 
             var project = workspace.CurrentSolution.Projects.First();
             project.MetadataReferences.Count.Should().BeGreaterThan(0);
-        }
-
-        [Fact]
-        public async Task NuGet_packages_can_be_added_during_initialization()
-        {
-            var workspaceId = PackageUtilities.CreateDirectory(nameof(NuGet_packages_can_be_added_during_initialization)).Name;
-
-            _registry.Add(workspaceId,
-                         options =>
-                         {
-                             options.CreateUsingDotnet("console");
-                             options.AddPackageReference("Twilio", "5.9.2");
-                         });
-
-            var workspaceServer = new RoslynWorkspaceServer(_registry);
-
-            var workspace = Workspace.FromSource(
-                @"
-using System;
-using Twilio.Clients;
-using Twilio.Rest.Api.V2010.Account;
-using Twilio.Types;
-
-namespace Twilio_try.dot.net_sample
-{
-    class Program
-    {
-        static void Main()
-        {
-            var sendFromPhoneNumber = new PhoneNumber(""TWILIO_PHONE_NUMBER"");
-            var sendToPhoneNumber = new PhoneNumber(""RECIPIENT_PHONE_NUMBER"");
-        }
-    }
-}",
-                workspaceType: workspaceId);
-
-            var result = await workspaceServer.Run(new WorkspaceRequest(workspace));
-
-            result.Succeeded.Should().BeTrue(because: "compilation can't succeed unless the NuGet package has been restored.");
         }
 
         [Fact]
