@@ -13,6 +13,7 @@ using Xunit;
 using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
+using WorkspaceServer.Tests.Packaging;
 
 namespace WorkspaceServer.Tests
 {
@@ -76,7 +77,7 @@ namespace WorkspaceServer.Tests
 
             await original.CreateRoslynWorkspaceForLanguageServicesAsync(new TimeBudget(30.Seconds()));
 
-            var copy = await Package.Copy(original);
+            var copy = await PackageUtilities.Copy(original);
 
             await copy.CreateRoslynWorkspaceForLanguageServicesAsync(new TimeBudget(30.Seconds()));
 

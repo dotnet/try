@@ -44,8 +44,7 @@ namespace WorkspaceServer.Packaging
         public string Name { get; }
 
         public DirectoryInfo Directory { get; set; }
-
-        protected bool IsDirectoryCreated { get; set; }
+       
 
         protected Task<bool> EnsureCreated() => _lazyCreation.ValueAsync();
 

@@ -27,6 +27,7 @@ using Microsoft.Net.Http.Headers;
 using HtmlAgilityPack;
 using System.Web;
 using MLS.Agent.Controllers;
+using WorkspaceServer.Tests.Packaging;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
 
@@ -99,7 +100,7 @@ namespace MLS.Agent.Tests
         public async Task The_workspace_endpoint_will_prevent_compiling_if_is_in_language_service_mode()
         {
             var output = Guid.NewGuid().ToString();
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace());
+            var package = await PackageUtilities.Copy(await Default.ConsoleWorkspace());
 
             var requestJson = Create.SimpleWorkspaceRequestAsJson(output, package.Name);
 
@@ -497,7 +498,7 @@ namespace FibonacciTest
 }".EnforceLF();
 
             #endregion
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.ConsoleWorkspace(), "a space");
+            var package = await PackageUtilities.Copy(await Default.ConsoleWorkspace(), "a space");
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
             var log = new LogEntryList();
             using (LogEvents.Subscribe(log.Add))
@@ -643,7 +644,7 @@ namespace FibonacciTest
         [Fact(Skip = "WIP")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_standard_out_is_available_on_response()
         {
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.WebApiWorkspace());
+            var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
             await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(10.Minutes()));
             var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, package.Directory.Name);
 
@@ -664,7 +665,7 @@ namespace FibonacciTest
         [Fact]
         public async Task When_aspnet_webapi_workspace_request_fails_then_diagnostics_are_returned()
         {
-            var package = await WorkspaceServer.Packaging.Package.Copy(await Default.WebApiWorkspace());
+            var package = await PackageUtilities.Copy(await Default.WebApiWorkspace());
             await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(10.Minutes()));
             var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, package.Directory.Name);
             var nonCompilingBuffer = new Buffer("broken.cs", "this does not compile", 0);

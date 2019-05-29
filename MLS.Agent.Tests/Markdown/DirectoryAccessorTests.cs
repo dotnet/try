@@ -10,6 +10,7 @@ using Microsoft.DotNet.Try.Markdown;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
+using WorkspaceServer.Tests.Packaging;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using static Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
@@ -244,7 +245,7 @@ namespace MLS.Agent.Tests.Markdown
     {
         public override IDirectoryAccessor CreateDirectory([CallerMemberName]string testName = null)
         {
-            var directory = Package.CreateDirectory(testName);
+            var directory = PackageUtilities.CreateDirectory(testName);
 
             return new FileSystemDirectoryAccessor(directory);
         }

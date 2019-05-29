@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
+using WorkspaceServer.Tests.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
@@ -693,7 +694,7 @@ namespace FibonacciTest
             #endregion
 
             var (processed, position) = CodeManipulation.ProcessMarkup(generator);
-            var package = await Package.Copy(await Default.ConsoleWorkspace());
+            var package = await PackageUtilities.Copy(await Default.ConsoleWorkspace());
             var workspace = new Workspace(workspaceType: package.Name, buffers: new[]
             {
                 new Buffer("Program.cs", program),

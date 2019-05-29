@@ -12,6 +12,7 @@ using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using Recipes;
 using WorkspaceServer.Packaging;
+using WorkspaceServer.Tests.Packaging;
 using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
@@ -19,26 +20,26 @@ namespace WorkspaceServer.Tests
     public static class Create
     {
         public static async Task<Package> ConsoleWorkspaceCopy([CallerMemberName] string testName = null, bool isRebuildable = false, IScheduler buildThrottleScheduler = null) =>
-            await Package.Copy(
+            await PackageUtilities.Copy(
                 await Default.ConsoleWorkspace(),
                 testName,
                 isRebuildable,
                 buildThrottleScheduler);
 
         public static async Task<Package> WebApiWorkspaceCopy([CallerMemberName] string testName = null) =>
-            await Package.Copy(
+            await PackageUtilities.Copy(
                 await Default.WebApiWorkspace(),
                 testName);
 
         public static async Task<Package> XunitWorkspaceCopy([CallerMemberName] string testName = null) =>
-            await Package.Copy(
+            await PackageUtilities.Copy(
                 await Default.XunitWorkspace(),
                 testName);
 
         public static async Task<Package> NetstandardWorkspaceCopy(
             [CallerMemberName] string testName = null,
             DirectoryInfo parentDirectory = null) =>
-            await Package.Copy(
+            await PackageUtilities.Copy(
                 await Default.NetstandardWorkspace(),
                 testName,
                 parentDirectory: parentDirectory);
@@ -47,10 +48,10 @@ namespace WorkspaceServer.Tests
         {
             if (!isRebuildablePackage)
             {
-                return new NonrebuildablePackage(directory: Package.CreateDirectory(testName), initializer: initializer);
+                return new NonrebuildablePackage(directory: PackageUtilities.CreateDirectory(testName), initializer: initializer);
             }
 
-            return new RebuildablePackage(directory: Package.CreateDirectory(testName), initializer: initializer);
+            return new RebuildablePackage(directory: PackageUtilities.CreateDirectory(testName), initializer: initializer);
         }
 
         public static async Task<(string packageName, DirectoryInfo addSource)> NupkgWithBlazorEnabled([CallerMemberName] string testName = null)

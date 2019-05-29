@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.Packaging;
+using WorkspaceServer.Tests.Packaging;
 using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Tests
@@ -34,7 +35,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Workspaces_can_be_registered_to_be_created_using_dotnet_new()
         {
-            var packageName = Package.CreateDirectory(nameof(Workspaces_can_be_registered_to_be_created_using_dotnet_new)).Name;
+            var packageName = PackageUtilities.CreateDirectory(nameof(Workspaces_can_be_registered_to_be_created_using_dotnet_new)).Name;
 
             registry.Add(packageName,
                          options => options.CreateUsingDotnet("console"));
@@ -50,7 +51,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task NuGet_packages_can_be_added_during_initialization()
         {
-            var workspaceId = Package.CreateDirectory(nameof(NuGet_packages_can_be_added_during_initialization)).Name;
+            var workspaceId = PackageUtilities.CreateDirectory(nameof(NuGet_packages_can_be_added_during_initialization)).Name;
 
             registry.Add(workspaceId,
                          options =>
@@ -114,7 +115,7 @@ namespace Twilio_try.dot.net_sample
         [Fact]
         public async Task Workspace_can_be_registered_in_directory_other_than_the_default()
         {
-            var parentDirectory = Package.CreateDirectory(nameof(Workspace_can_be_registered_in_directory_other_than_the_default));
+            var parentDirectory = PackageUtilities.CreateDirectory(nameof(Workspace_can_be_registered_in_directory_other_than_the_default));
 
             var workspaceName = "a";
 
