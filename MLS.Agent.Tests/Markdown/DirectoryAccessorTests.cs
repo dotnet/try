@@ -10,6 +10,7 @@ using Microsoft.DotNet.Try.Markdown;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
+using WorkspaceServer.Tests.Packaging;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using static Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
@@ -39,6 +40,25 @@ namespace MLS.Agent.Tests.Markdown
                  .Contain(new RelativeFilePath("Subdirectory/AnotherProgram.cs"))
                  .And
                  .Contain(new RelativeFilePath("Subdirectory/Tutorial.md"));
+        }
+
+        [Fact]
+        public void It_can_retrieve_all_files_at_root()
+        {
+            var directory = GetDirectory(TestAssets.SampleConsole);
+
+            var files = directory.GetAllFiles();
+
+            files.Should()
+                .Contain(new RelativeFilePath("BasicConsoleApp.csproj"))
+                .And
+                .Contain(new RelativeFilePath("Program.cs"))
+                .And
+                .Contain(new RelativeFilePath("Readme.md"))
+                .And
+                .NotContain(new RelativeFilePath("Subdirectory/AnotherProgram.cs"))
+                .And
+                .NotContain(new RelativeFilePath("Subdirectory/Tutorial.md"));
         }
 
         [Fact]
@@ -244,7 +264,7 @@ namespace MLS.Agent.Tests.Markdown
     {
         public override IDirectoryAccessor CreateDirectory([CallerMemberName]string testName = null)
         {
-            var directory = Package.CreateDirectory(testName);
+            var directory = PackageUtilities.CreateDirectory(testName);
 
             return new FileSystemDirectoryAccessor(directory);
         }

@@ -13,20 +13,21 @@ using Xunit;
 using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
+using WorkspaceServer.Tests.Packaging;
 
 namespace WorkspaceServer.Tests
 {
     public partial class PackageTests : IDisposable
     {
-        private readonly CompositeDisposable disposables = new CompositeDisposable();
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         public PackageTests(ITestOutputHelper output)
         {
-            disposables.Add(output.SubscribeToPocketLogger());
-            disposables.Add(VirtualClock.Start());
+            _disposables.Add(output.SubscribeToPocketLogger());
+            _disposables.Add(VirtualClock.Start());
         }
 
-        public void Dispose() => disposables.Dispose();
+        public void Dispose() => _disposables.Dispose();
 
         [Fact]
         public async Task A_package_is_not_initialized_more_than_once()
@@ -76,7 +77,7 @@ namespace WorkspaceServer.Tests
 
             await original.CreateRoslynWorkspaceForLanguageServicesAsync(new TimeBudget(30.Seconds()));
 
-            var copy = await Package.Copy(original);
+            var copy = await PackageUtilities.Copy(original);
 
             await copy.CreateRoslynWorkspaceForLanguageServicesAsync(new TimeBudget(30.Seconds()));
 
@@ -176,11 +177,11 @@ namespace WorkspaceServer.Tests
         [Theory]
         [InlineData("console", false)]
         [InlineData("nodatime.api", false)]
-        [InlineData("blazor-console", true, Skip = "Requires package design changes")]
-        [InlineData("blazor-nodatime.api", true, Skip = "Requires package design changes")]
+        //[InlineData("blazor-console", true, Skip = "Requires package design changes")]
+        //[InlineData("blazor-nodatime.api", true, Skip = "Requires package design changes")]
         public async Task CanSupportBlazor_indicates_whether_the_package_supports_Blazor(string packageName, bool expected)
         {
-            var registry = PackageRegistry.CreateForHostedMode();
+            var registry = Default.PackageFinder;
             var package = await registry.Get<IMightSupportBlazor>(packageName);
             package.CanSupportBlazor.Should().Be(expected);
         }

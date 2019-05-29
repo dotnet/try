@@ -12,7 +12,6 @@ using Xunit;
 using Xunit.Abstractions;
 using static Pocket.Logger<WorkspaceServer.Tests.WorkspaceServerTests>;
 using DiagnosticSeverity = Microsoft.DotNet.Try.Protocol.DiagnosticSeverity;
-using Package = WorkspaceServer.Packaging.Package;
 using Workspace = Microsoft.DotNet.Try.Protocol.Workspace;
 
 namespace WorkspaceServer.Tests
@@ -20,21 +19,19 @@ namespace WorkspaceServer.Tests
     public abstract class WorkspaceServerTests : WorkspaceServerTestsCore
     {
         protected abstract Workspace CreateWorkspaceWithMainContaining(
-            string text,
-            Package package);
+            string text);
 
         [Fact]
         public async Task Diagnostic_logs_do_not_show_up_in_captured_console_output()
         {
             using (LogEvents.Subscribe(e => Console.WriteLine(e.ToLogString())))
             {
-                var (server, build) = await GetRunnerAndWorkspaceBuild();
+                var server = GetCodeRunner();
 
                 var result = await server.Run(
                     new WorkspaceRequest(
                         CreateWorkspaceWithMainContaining(
-                            "Console.WriteLine(\"hi!\");",
-                            build))
+                            "Console.WriteLine(\"hi!\");"))
                     );
 
                 result.Output
@@ -52,7 +49,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Response_indicates_when_compile_is_successful_and_signature_is_like_a_console_app()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var workspace = Workspace.FromSource(@"
 using System;
@@ -63,7 +60,7 @@ public static class Hello
     {
     }
 }
-", workspaceType: build.Name);
+", workspaceType: "console");
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -76,8 +73,8 @@ public static class Hello
         public async Task Response_shows_program_output_when_compile_is_successful_and_signature_is_like_a_console_app()
         {
             var output = nameof(Response_shows_program_output_when_compile_is_successful_and_signature_is_like_a_console_app);
-            
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+
+            var server = GetCodeRunner();
 
             var workspace = Workspace.FromSource($@"
 using System;
@@ -88,7 +85,7 @@ public static class Hello
     {{
         Console.WriteLine(""{output}"");
     }}
-}}", workspaceType: build.Name);
+}}", workspaceType: "console");
 
 
             var result = await server.Run(new WorkspaceRequest(workspace));
@@ -99,12 +96,12 @@ public static class Hello
         [Fact]
         public async Task Response_shows_program_output_when_compile_is_successful_and_signature_is_a_fragment_containing_console_output()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
 var person = new { Name = ""Jeff"", Age = 20 };
 var s = $""{person.Name} is {person.Age} year(s) old"";
-Console.Write(s);", build);
+Console.Write(s);");
 
 
             var result = await server.Run(new WorkspaceRequest(request));
@@ -115,10 +112,10 @@ Console.Write(s);", build);
         [Fact]
         public async Task When_compile_is_unsuccessful_then_no_exceptions_are_shown()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
-Console.WriteLine(banana);", build);
+Console.WriteLine(banana);");
 
             var result = await server.Run(new WorkspaceRequest(request));
             result.Succeeded.Should().BeFalse();
@@ -128,10 +125,10 @@ Console.WriteLine(banana);", build);
         [Fact]
         public async Task When_compile_is_unsuccessful_then_diagnostics_are_displayed_in_output()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
-Console.WriteLine(banana);", build);
+Console.WriteLine(banana);");
 
             var result = await server.Run(new WorkspaceRequest(request));
             result.Succeeded.Should().BeFalse();
@@ -143,13 +140,13 @@ Console.WriteLine(banana);", build);
         [Fact]
         public async Task Multi_line_console_output_is_captured_correctly_a()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
 Console.WriteLine(1);
 Console.WriteLine(2);
 Console.WriteLine(3);
-Console.WriteLine(4);", build);
+Console.WriteLine(4);");
 
 
             var result = await server.Run(new WorkspaceRequest(request));
@@ -160,13 +157,13 @@ Console.WriteLine(4);", build);
         [Fact]
         public async Task Multi_line_console_output_is_captured_correctly()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
 Console.WriteLine(1);
 Console.WriteLine(2);
 Console.WriteLine(3);
-Console.WriteLine(4);", build);
+Console.WriteLine(4);");
 
 
             var result = await server.Run(new WorkspaceRequest(request));
@@ -178,14 +175,14 @@ Console.WriteLine(4);", build);
         public async Task Whitespace_is_preserved_in_multi_line_output()
         {
 
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
-            
+            var server = GetCodeRunner();
+
             var request = CreateWorkspaceWithMainContaining(@"
 Console.WriteLine();
 Console.WriteLine(1);
 Console.WriteLine();
 Console.WriteLine();
-Console.WriteLine(2);", build);
+Console.WriteLine(2);");
 
             var result = await server.Run(new WorkspaceRequest(request));
 
@@ -195,14 +192,14 @@ Console.WriteLine(2);", build);
         [Fact]
         public async Task Multi_line_console_output_is_captured_correctly_when_an_exception_is_thrown()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
 Console.WriteLine(1);
 Console.WriteLine(2);
 throw new Exception(""oops!"");
 Console.WriteLine(3);
-Console.WriteLine(4);", build);
+Console.WriteLine(4);");
 
 
             var timeBudget = new TimeBudget(10.Minutes());
@@ -217,9 +214,9 @@ Console.WriteLine(4);", build);
         [Fact]
         public async Task When_the_users_code_throws_on_first_line_then_it_is_returned_as_an_exception_property()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
-            var request = CreateWorkspaceWithMainContaining(@"throw new Exception(""oops!"");", build);
+            var request = CreateWorkspaceWithMainContaining(@"throw new Exception(""oops!"");");
 
 
             var result = await server.Run(new WorkspaceRequest(request));
@@ -230,10 +227,10 @@ Console.WriteLine(4);", build);
         [Fact]
         public async Task When_the_users_code_throws_on_subsequent_line_then_it_is_returned_as_an_exception_property()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var request = CreateWorkspaceWithMainContaining(@"
-throw new Exception(""oops!"");", build);
+throw new Exception(""oops!"");");
 
 
             var result = await server.Run(new WorkspaceRequest(request));
@@ -244,7 +241,7 @@ throw new Exception(""oops!"");", build);
         [Fact]
         public async Task When_a_public_void_Main_with_no_parameters_is_present_it_is_invoked()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var workspace = Workspace.FromSource(@"
 using System;
@@ -255,7 +252,7 @@ public static class Hello
     {
         Console.WriteLine(""Hello there!"");
     }
-}", workspaceType: build.Name);
+}", workspaceType: "console");
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -265,8 +262,8 @@ public static class Hello
         [Fact]
         public async Task When_a_public_void_Main_with_parameters_is_present_it_is_invoked()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
-            
+            var server = GetCodeRunner();
+
             var workspace = Workspace.FromSource(@"
 using System;
 
@@ -276,7 +273,7 @@ public static class Hello
     {
         Console.WriteLine(""Hello there!"");
     }
-}", workspaceType: build.Name);
+}", workspaceType: "console");
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -286,7 +283,7 @@ public static class Hello
         [Fact]
         public async Task When_an_internal_void_Main_with_no_parameters_is_present_it_is_invoked()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var workspace = Workspace.FromSource(@"
 using System;
@@ -297,7 +294,7 @@ public static class Hello
     {
         Console.WriteLine(""Hello there!"");
     }
-}", workspaceType: build.Name);
+}", workspaceType:"console");
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -309,7 +306,7 @@ public static class Hello
         [Fact]
         public async Task When_an_internal_void_Main_with_parameters_is_present_it_is_invoked()
         {
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var workspace = Workspace.FromSource(@"
 using System;
@@ -320,7 +317,7 @@ public static class Hello
     {
         Console.WriteLine(""Hello there!"");
     }
-}", workspaceType: build.Name);
+}", workspaceType: "console");
 
 
             var result = await server.Run(new WorkspaceRequest(workspace));
@@ -334,7 +331,7 @@ public static class Hello
         {
             var output = nameof(Response_shows_warnings_with_successful_compilation);
 
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var workspace = CreateWorkspaceWithMainContaining($@"
 using System;
@@ -347,7 +344,7 @@ public static class Hello
         var a = 0;
         Console.WriteLine(""{output}"");
     }}
-}}", build);
+}}");
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -361,7 +358,7 @@ public static class Hello
         {
             var output = nameof(Response_shows_warnings_when_compilation_fails);
 
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var workspace = CreateWorkspaceWithMainContaining($@"
 using System;
@@ -373,7 +370,7 @@ public static class Hello
         var a = 0;
         Console.WriteLine(""{output}"")
     }}
-}}", build);
+}}");
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 

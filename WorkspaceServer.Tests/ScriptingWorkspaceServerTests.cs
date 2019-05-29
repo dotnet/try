@@ -24,15 +24,16 @@ namespace WorkspaceServer.Tests
         {
         }
 
-        protected override Workspace CreateWorkspaceWithMainContaining(string text, Package package) => 
+        protected override Workspace CreateWorkspaceWithMainContaining(string text) =>
             Workspace.FromSource(text, workspaceType: "script");
+      
 
-        protected override Task<(ICodeRunner runner, Package workspace)> GetRunnerAndWorkspaceBuild(
-            [CallerMemberName] string testName = null) =>
-            Task.FromResult<(ICodeRunner , Package )>((new ScriptingWorkspaceServer(), new NonrebuildablePackage("script")));
-
-        protected override ILanguageService GetLanguageService([CallerMemberName] string testName = null) =>
+        protected override ILanguageService GetLanguageService() =>
             throw new NotImplementedException();
+
+        protected override ICodeCompiler GetCodeCompiler() => throw new NotImplementedException();
+
+        protected override ICodeRunner GetCodeRunner() => new ScriptingWorkspaceServer();
 
         [Fact]
         public async Task Response_shows_fragment_return_value()
@@ -42,7 +43,7 @@ namespace WorkspaceServer.Tests
 var person = new { Name = ""Jeff"", Age = 20 };
 $""{person.Name} is {person.Age} year(s) old""", "script");
 
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -52,7 +53,7 @@ $""{person.Name} is {person.Age} year(s) old""", "script");
             {
                 Succeeded = true,
                 Output = new string[] { },
-                Exception = (string) null,
+                Exception = (string)null,
                 ReturnValue = $"Jeff is 20 year(s) old",
             }, config => config.ExcludingMissingMembers());
         }
@@ -62,7 +63,7 @@ $""{person.Name} is {person.Age} year(s) old""", "script");
         {
             var workspace = Workspace.FromSource(@"
 Console.WriteLine(banana);", "script");
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -92,7 +93,7 @@ public static class Hello
                 workspaceType: "script",
                 usings: new[] { "System.Threading" });
 
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -100,7 +101,7 @@ public static class Hello
             {
                 Succeeded = true,
                 Output = new[] { "Hello there!", "" },
-                Exception = (string) null,
+                Exception = (string)null,
             }, config => config.ExcludingMissingMembers());
         }
 
@@ -117,7 +118,7 @@ public static class Hello
         Console.WriteLine(""Hello there!"");
     }
 }", workspaceType: "script");
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -137,7 +138,7 @@ public static class Hello
         Console.WriteLine(""Hello there!"");
     }
 }", workspaceType: "script");
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -164,7 +165,7 @@ public static class Hello
                 workspaceType: "script",
                 files: new[] { new File("Main.cs", fileCode) },
                 buffers: new[] { new Buffer(@"Main.cs@toReplace", @"Console.WriteLine(""Hello there!"");", 0) });
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -190,7 +191,7 @@ public static class Hello
                 files: new[] { new File("Main.cs", fileCode) },
                 buffers: new[] { new Buffer(@"Main.cs@toReplace", @"Console.WriteLine(banana);", 0) });
 
-            var (server, build) = await GetRunnerAndWorkspaceBuild();
+            var server = GetCodeRunner();
             var result = await server.Run(new WorkspaceRequest(workspace));
 
             result.Should().BeEquivalentTo(new

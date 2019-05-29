@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 
 namespace WorkspaceServer.Packaging
 {
@@ -14,14 +13,6 @@ namespace WorkspaceServer.Packaging
         }
 
         public IDirectoryAccessor DirectoryAccessor { get; }
-    }
-
-    public class ProjectAsset : PackageAsset
-    {
-
-        public ProjectAsset(IDirectoryAccessor directoryAccessor) : base(directoryAccessor)
-        {
-        }
     }
 
     public class WebAssemblyAsset : PackageAsset

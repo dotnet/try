@@ -41,6 +41,8 @@ namespace MLS.Agent.Controllers
 
         private string GetClientParameters()
         {
+            // Uncomment to enable testing /ide without going through orchestrator
+            // var referrer = "http://localhost:4242"; 
             var referrer = HttpContext.Request.Headers["referer"].ToString();
 
             if (!string.IsNullOrWhiteSpace(referrer) && Uri.TryCreate(referrer, UriKind.Absolute, out var uri))

@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                        .Trim()
                        .Should()
                        .Match(
-                           $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line 7:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
+                           $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line 24:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
 
             resultCode.Should().Be(0);
 

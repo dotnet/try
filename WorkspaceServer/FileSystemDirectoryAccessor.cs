@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
+using WorkspaceServer.Packaging;
 using WorkspaceServer.Servers.Roslyn;
 
 namespace WorkspaceServer
@@ -75,6 +77,12 @@ namespace WorkspaceServer
             return new FileSystemDirectoryAccessor(new DirectoryInfo(absolutePath));
         }
 
+        public Task<IDisposable> TryLockAsync()
+        {
+            return FileLock.TryCreateAsync(this);
+        }
+
+
         public IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively()
         {
             var directories = _rootDirectory.GetDirectories("*", SearchOption.AllDirectories);
@@ -89,6 +97,14 @@ namespace WorkspaceServer
 
             return files.Select(f =>
                                     new RelativeFilePath(PathUtilities.GetRelativePath(_rootDirectory.FullName, f.FullName)));
+        }
+
+        public IEnumerable<RelativeFilePath> GetAllFiles()
+        {
+            var files = _rootDirectory.GetFiles("*", SearchOption.TopDirectoryOnly);
+
+            return files.Select(f =>
+                new RelativeFilePath(PathUtilities.GetRelativePath(_rootDirectory.FullName, f.FullName)));
         }
 
         public override string ToString() => _rootDirectory.FullName;

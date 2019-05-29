@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace WorkspaceServer.Packaging
 {
-    public class Package2 :
-        IPackage,
+    public class Package2 : 
         IHaveADirectory,
         IHaveADirectoryAccessor,
         IMightSupportBlazor

@@ -11,7 +11,6 @@ using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
 using WorkspaceServer.Tests;
-using WorkspaceServer;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,7 +39,7 @@ namespace MLS.Agent.Tests.Markdown
             [Fact]
             public async Task Renders_html_content_for_files_in_subdirectories()
             {
-                var html = await RenderHtml(("Subdirectory/Tutorial.md", "This is a sample *tutorial file*"));
+                var html = await RenderHtml(("SubDirectory/Tutorial.md", "This is a sample *tutorial file*"));
 
                 html.Should().Contain("<em>tutorial file</em>");
             }
@@ -136,7 +135,7 @@ namespace BasicConsoleApp
 ```")
                                   };
 
-                var project = new MarkdownProject(dirAccessor, PackageRegistry.CreateForHostedMode());
+                var project = new MarkdownProject(dirAccessor, Default.PackageFinder);
                 project.TryGetMarkdownFile(new RelativeFilePath("docs/Readme.md"), out var markdownFile).Should().BeTrue();
                 var htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml((await markdownFile.ToHtmlContentAsync()).ToString());
@@ -425,8 +424,8 @@ This is the end of the file"));
             [Fact]
             public async Task Package_option_defaults_to_startup_options()
             {
-                var expectedPackage = "console";
-                var expectedPackageVersion = "1.2.3";
+                const string expectedPackage = "console";
+                const string expectedPackageVersion = "1.2.3";
 
                 var defaultCodeBlockAnnotations = new StartupOptions(
                     package: expectedPackage,
@@ -440,7 +439,7 @@ This is the end of the file"));
                         "),
                         ("Program.cs", "")
                     },
-                    new PackageRegistry(),
+                    Default.PackageFinder,
                     defaultCodeBlockAnnotations
                 );
 
@@ -464,7 +463,7 @@ This is the end of the file"));
 
                 var markdownProject = new MarkdownProject(
                     directoryAccessor,
-                    new PackageRegistry());
+                    Default.PackageFinder);
 
                 var markdownFile = markdownProject.GetAllMarkdownFiles().Single();
                 var html = (await markdownFile.ToHtmlContentAsync()).ToString();

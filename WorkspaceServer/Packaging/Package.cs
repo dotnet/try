@@ -35,7 +35,7 @@ namespace WorkspaceServer.Packaging
         ICreateWorkspaceForRun
     {
         internal const string DesignTimeBuildBinlogFileName = "package_designTimeBuild.binlog";
-        private static readonly object _createDirectoryLock = new object();
+     
 
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _packageBuildSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _packagePublishSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
@@ -515,91 +515,16 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-        public static async Task<Package> Copy(
-            Package fromPackage,
-            string folderNameStartsWith = null,
-            bool isRebuildable = false,
-            IScheduler buildThrottleScheduler = null,
-            DirectoryInfo parentDirectory = null)
-        {
-            if (fromPackage == null)
-            {
-                throw new ArgumentNullException(nameof(fromPackage));
-            }
-
-            await fromPackage.EnsureReady(new Budget());
-
-            folderNameStartsWith = folderNameStartsWith ?? fromPackage.Name;
-            parentDirectory = parentDirectory ?? fromPackage.Directory.Parent;
-
-            var destination =
-                CreateDirectory(folderNameStartsWith,
-                                parentDirectory);
-
-            fromPackage.Directory.CopyTo(destination);
-
-            var binLogs = destination.GetFiles("*.binlog");
-
-            foreach (var fileInfo in binLogs)
-            {
-                fileInfo.Delete();
-            }
-
-            Package copy;
-            if (isRebuildable)
-            {
-                copy = new RebuildablePackage(directory: destination, name: destination.Name, buildThrottleScheduler: buildThrottleScheduler)
-                       {
-                           IsDirectoryCreated = true
-                       };
-            }
-            else
-            {
-                copy = new NonrebuildablePackage(directory: destination, name: destination.Name, buildThrottleScheduler: buildThrottleScheduler)
-                       {
-                           IsDirectoryCreated = true
-                       };
-            }
-
-            Log.Info(
-                "Copied workspace {from} to {to}",
-                fromPackage,
-                copy);
-
-            return copy;
-        }
-
-        public static DirectoryInfo CreateDirectory(
-            string folderNameStartsWith,
-            DirectoryInfo parentDirectory = null)
-        {
-            if (string.IsNullOrWhiteSpace(folderNameStartsWith))
-            {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(folderNameStartsWith));
-            }
-
-            parentDirectory = parentDirectory ?? DefaultPackagesDirectory;
-
-            DirectoryInfo created;
-
-            lock (_createDirectoryLock)
-            {
-                if (!parentDirectory.Exists)
-                {
-                    parentDirectory.Create();
-                }
-
-                var existingFolders = parentDirectory.GetDirectories($"{folderNameStartsWith}.*");
-
-                created = parentDirectory.CreateSubdirectory($"{folderNameStartsWith}.{existingFolders.Length + 1}");
-            }
-
-            return created;
-        }
+       
 
         public override string ToString()
         {
             return $"{Name} ({Directory.FullName})";
+        }
+
+        public Task<Workspace> CreateRoslynWorkspaceAsync(Budget budget)
+        {
+            return CreateRoslynWorkspaceForRunAsync(budget);
         }
 
         protected SyntaxTree CreateInstrumentationEmitterSyntaxTree()

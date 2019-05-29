@@ -32,7 +32,7 @@ namespace WorkspaceServer.Servers.Roslyn
     {
         private readonly IPackageFinder _packageFinder;
         private const int defaultBudgetInSeconds = 30;
-        private readonly ConcurrentDictionary<string, AsyncLock> locks = new ConcurrentDictionary<string, AsyncLock>();
+        private static readonly ConcurrentDictionary<string, AsyncLock> locks = new ConcurrentDictionary<string, AsyncLock>();
         private readonly IWorkspaceTransformer _transformer = new BufferInliningTransformer();
         private static readonly string UserCodeCompleted = nameof(UserCodeCompleted);
 
@@ -49,7 +49,7 @@ namespace WorkspaceServer.Servers.Roslyn
         public async Task<CompletionResult> GetCompletionList(WorkspaceRequest request, Budget budget)
         {
             budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
-            var package = await _packageFinder.Find<Package>(request.Workspace.WorkspaceType);
+            var package = await _packageFinder.Find<ICreateWorkspace>(request.Workspace.WorkspaceType);
 
             var processed = await _transformer.TransformAsync(request.Workspace);
             var sourceFiles = processed.GetSourceFiles();
@@ -119,7 +119,7 @@ namespace WorkspaceServer.Servers.Roslyn
         {
             budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
 
-            var package = await _packageFinder.Find<Package>(request.Workspace.WorkspaceType);
+            var package = await _packageFinder.Find<ICreateWorkspace>(request.Workspace.WorkspaceType);
 
             var processed = await _transformer.TransformAsync(request.Workspace);
 
@@ -160,7 +160,7 @@ namespace WorkspaceServer.Servers.Roslyn
         {
             budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
 
-            var package = await _packageFinder.Find<Package>(request.Workspace.WorkspaceType);
+            var package = await _packageFinder.Find<ICreateWorkspace>(request.Workspace.WorkspaceType);
 
             var workspace = await _transformer.TransformAsync(request.Workspace);
 

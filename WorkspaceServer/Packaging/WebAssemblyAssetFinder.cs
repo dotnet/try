@@ -23,7 +23,7 @@ namespace WorkspaceServer.Packaging
             _addSource = addSource;
         }
 
-        async Task<IMightSupportBlazor> IPackageFinder.Find<IMightSupportBlazor>(PackageDescriptor descriptor)
+        async Task<TPackage> IPackageFinder.Find<TPackage>(PackageDescriptor descriptor)
         {
             if (descriptor.IsPathSpecified)
             {
@@ -34,10 +34,10 @@ namespace WorkspaceServer.Packaging
             if (candidate.Exists)
             {
                 var package = await CreatePackage(descriptor, candidate);
-                return (IMightSupportBlazor)package;
+                return package as TPackage;
             }
 
-            return (IMightSupportBlazor)(await TryInstallAndLocateTool(descriptor));
+            return (await TryInstallAndLocateTool(descriptor) as TPackage);
         }
 
         private async Task<IPackage> TryInstallAndLocateTool(PackageDescriptor packageDesciptor)

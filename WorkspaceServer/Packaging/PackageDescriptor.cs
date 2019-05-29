@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace WorkspaceServer.Packaging
 {
@@ -26,6 +27,23 @@ namespace WorkspaceServer.Packaging
         public string Version { get; }
 
         internal bool IsPathSpecified { get; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PackageDescriptor descriptor &&
+                   Name == descriptor.Name &&
+                   Version == descriptor.Version &&
+                   IsPathSpecified == descriptor.IsPathSpecified;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -858720875;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Version);
+            hashCode = hashCode * -1521134295 + IsPathSpecified.GetHashCode();
+            return hashCode;
+        }
 
         public override string ToString() => Name;
     }
