@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 function TestUsingNPM([string] $testPath) {
     Push-Location $testPath
-    npm i
+    Start-Process -PassThru -WindowStyle Hidden -Wait npm i
     npm run ciTest
     Pop-Location
 }
