@@ -207,11 +207,10 @@ namespace MLS.Agent
         private void LaunchBrowser(IBrowserLauncher browserLauncher, IDirectoryAccessor directoryAccessor)
         {
             var processName = Process.GetCurrentProcess().ProcessName;
+            var portToLaunch = processName == "dotnet" ||
+                      processName == "dotnet.exe" ? 4242 : StartupOptions.Port;
 
-            var uri = processName == "dotnet" ||
-                      processName == "dotnet.exe"
-                          ? new Uri("http://localhost:4242")
-                          : new Uri("http://localhost:5000");
+            var uri = new Uri($"http://localhost:{portToLaunch}");
 
             if (StartupOptions.Uri != null &&
                 !StartupOptions.Uri.IsAbsoluteUri)
