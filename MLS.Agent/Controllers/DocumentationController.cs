@@ -120,6 +120,12 @@ namespace MLS.Agent.Controllers
     <script src=""/api/trydotnet.min.js?v={_cacheBuster}""></script>
     <link rel=""stylesheet"" href=""/css/trydotnet.css?v={_cacheBuster}"">  
     <link rel=""icon"" type=""image/png"" href=""favicon-32x32.png"">
+    <script type=""text/x-mathjax-config"">
+    MathJax.Hub.Config({{
+        tex2jax: {{inlineMath: [[""$"",""$""],[""\\("",""\\)""]]}}
+    }});
+    </script>
+    <script type=""text/javascript"" src=""/mathjax/MathJax.js?config=TeX-AMS_HTML-full""></script>
     <title>dotnet try - {markdownFile.Path.Value.HtmlEncode()}</title>
 </head>
 
