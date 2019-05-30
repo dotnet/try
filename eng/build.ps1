@@ -7,7 +7,7 @@ function TestUsingNPM([string] $testPath) {
     Start-Process -PassThru -WindowStyle Hidden -Wait npm "i"
     Write-Host "Testing"
     $test = Start-Process -PassThru -WindowStyle Hidden -Wait npm "run ciTest"
-    Write-Host "Done with code "+$test.ExitCode
+    Write-Host "Done with code $($test.ExitCode)"
     Pop-Location
     return $test.ExitCode
 }
