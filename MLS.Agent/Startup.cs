@@ -40,6 +40,7 @@ namespace MLS.Agent
         {
             () => Logger<Program>.Log.Event("AgentStopping")
         };
+        private IHttpContextAccessor _httpContextAccessor;
 
         public Startup(
             IHostingEnvironment env,
@@ -155,8 +156,10 @@ namespace MLS.Agent
             IApplicationLifetime lifetime,
             IBrowserLauncher browserLauncher,
             IDirectoryAccessor directoryAccessor,
-            PackageRegistry packageRegistry)
+            PackageRegistry packageRegistry,
+            IHttpContextAccessor httpContextAccessor)
         {
+            _httpContextAccessor = httpContextAccessor;
             using (var operation = Log.OnEnterAndConfirmOnExit())
             {
                 lifetime.ApplicationStopping.Register(() => _disposables.Dispose());
@@ -211,7 +214,7 @@ namespace MLS.Agent
             var uri = processName == "dotnet" ||
                       processName == "dotnet.exe"
                           ? new Uri("http://localhost:4242")
-                          : new Uri("http://localhost:5000");
+                          : new Uri($"http://localhost:{StartupOptions.Port}");
 
             if (StartupOptions.Uri != null &&
                 !StartupOptions.Uri.IsAbsoluteUri)

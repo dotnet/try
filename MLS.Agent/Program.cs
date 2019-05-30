@@ -120,6 +120,13 @@ namespace MLS.Agent
                 Log.Trace("Received Key: {key}", options.Key);
             }
 
+            var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+
+            var uri = processName == "dotnet" ||
+                      processName == "dotnet.exe"
+                          ? new Uri("http://localhost:4242")
+                          : new Uri($"http://localhost:{options.Port}");
+
             var webHost = new WebHostBuilder()
                           .UseKestrel()
                           .UseContentRoot(Directory.GetCurrentDirectory())
@@ -139,6 +146,7 @@ namespace MLS.Agent
                           })
                           .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
+                          .UseUrls(uri.ToString())
                           .Build();
 
             return webHost;
