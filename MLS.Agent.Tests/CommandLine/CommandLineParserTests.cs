@@ -222,6 +222,13 @@ namespace MLS.Agent.Tests.CommandLine
         }
 
         [Fact]
+        public async Task Takes_5000_as_the_default_port()
+        {
+            await _parser.InvokeAsync("", _console);
+            _start_options.Port.Should().Be(5000);
+        }
+
+        [Fact]
         public void Parse_application_insights_key_without_parameter_fails_the_parse()
         {
             var result = _parser.Parse("hosted --ai-key");
