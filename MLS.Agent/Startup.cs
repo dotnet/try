@@ -9,6 +9,7 @@ using System.Net.Mime;
 using Clockwise;
 using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.DotNet.Try.Markdown;
@@ -147,6 +148,8 @@ namespace MLS.Agent
                     options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.All;
                 });
 
+                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
                 operation.Succeed();
             }
         }
@@ -185,8 +188,9 @@ namespace MLS.Agent
 
                 if (StartupOptions.Mode == StartupMode.Try)
                 {
+                    var uri = new Uri(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses.First());
                     Clock.Current
-                         .Schedule(_ => LaunchBrowser(browserLauncher,directoryAccessor), TimeSpan.FromSeconds(1));
+                         .Schedule(_ => LaunchBrowser(browserLauncher,directoryAccessor, uri), TimeSpan.FromSeconds(1));
                 }
             }
         }
@@ -207,15 +211,8 @@ namespace MLS.Agent
             });
         }
 
-        private void LaunchBrowser(IBrowserLauncher browserLauncher, IDirectoryAccessor directoryAccessor)
+        private void LaunchBrowser(IBrowserLauncher browserLauncher, IDirectoryAccessor directoryAccessor, Uri uri)
         {
-            var processName = Process.GetCurrentProcess().ProcessName;
-
-            var uri = processName == "dotnet" ||
-                      processName == "dotnet.exe"
-                          ? new Uri("http://localhost:4242")
-                          : new Uri($"http://localhost:{StartupOptions.Port}");
-
             if (StartupOptions.Uri != null &&
                 !StartupOptions.Uri.IsAbsoluteUri)
             {
