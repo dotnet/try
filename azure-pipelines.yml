@@ -1,8 +1,10 @@
 # CI and PR triggers
 trigger:
 - master
+- feature/*
 pr:
 - master
+- feature/*
 
 variables:
   - name: _TeamName
