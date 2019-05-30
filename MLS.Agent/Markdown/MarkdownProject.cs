@@ -119,11 +119,11 @@ namespace MLS.Agent.Markdown
                 var relativeAccessor = DirectoryAccessor.GetDirectoryAccessorForRelativePath(filePath.Directory);
 
                 return new MarkdownPipelineBuilder()
-                    .Use<MathExtension>()
                     .UseCodeBlockAnnotations(
                         relativeAccessor,
                         _packageRegistry,
                         defaultAnnotations)
+                    .UseMathematics()
                     .UseAdvancedExtensions()
                     .Build();
             });
