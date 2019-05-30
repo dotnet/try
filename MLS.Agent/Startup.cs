@@ -159,10 +159,8 @@ namespace MLS.Agent
             IApplicationLifetime lifetime,
             IBrowserLauncher browserLauncher,
             IDirectoryAccessor directoryAccessor,
-            PackageRegistry packageRegistry,
-            IHttpContextAccessor httpContextAccessor)
+            PackageRegistry packageRegistry)
         {
-            _httpContextAccessor = httpContextAccessor;
             using (var operation = Log.OnEnterAndConfirmOnExit())
             {
                 lifetime.ApplicationStopping.Register(() => _disposables.Dispose());

@@ -120,10 +120,7 @@ namespace MLS.Agent
                 Log.Trace("Received Key: {key}", options.Key);
             }
 
-            var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-
-            var uri = processName == "dotnet" ||
-                      processName == "dotnet.exe"
+           var uri = IsInToolMode()
                           ? new Uri("http://localhost:4242")
                           : new Uri($"http://localhost:{options.Port}");
 
@@ -150,6 +147,12 @@ namespace MLS.Agent
                           .Build();
 
             return webHost;
+        }
+
+        private static bool IsInToolMode()
+        {
+            var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            return processName == "dotnet" || processName == "dotnet.exe";
         }
     }
 }
