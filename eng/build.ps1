@@ -2,13 +2,11 @@ Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
 
 function TestUsingNPM([string] $testPath) {
-    Push-Location $testPath
     Write-Host "Installing packages"
-    Start-Process -PassThru -WindowStyle Hidden -Wait npm "i"
+    Start-Process -PassThru -WindowStyle Hidden -WorkingDirectory $testPath -Wait npm "i"
     Write-Host "Testing"
-    $test = Start-Process -PassThru -WindowStyle Hidden -Wait npm "run ciTest"
+    $test = Start-Process -PassThru -WindowStyle Hidden -WorkingDirectory $testPath -Wait npm "run ciTest"
     Write-Host "Done with code $($test.ExitCode)"
-    Pop-Location
     return $test.ExitCode
 }
 
