@@ -181,6 +181,11 @@ namespace MLS.Agent.CommandLine
                                       "Enable verbose logging to the console",
                                       new Argument<bool>()));
 
+                command.AddOption(new Option(
+                                        "--port",
+                                        "Specify the port to launch the dotnet try process",
+                                        new Argument<int>()));
+
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {
                     services.AddSingleton(_ => PackageRegistry.CreateForTryMode(
