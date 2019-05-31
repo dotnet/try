@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Markdig;
+using Markdig.Extensions.Mathematics;
 using Microsoft.DotNet.Try.Markdown;
 using Recipes;
 using WorkspaceServer;
@@ -71,7 +72,7 @@ namespace MLS.Agent.Markdown
             {
             }
         }
-      
+
         internal IDirectoryAccessor DirectoryAccessor { get; }
 
         private readonly PackageRegistry _packageRegistry;
@@ -85,7 +86,7 @@ namespace MLS.Agent.Markdown
         }
 
         public MarkdownProject(
-            IDirectoryAccessor directoryAccessor, 
+            IDirectoryAccessor directoryAccessor,
             PackageRegistry packageRegistry,
             IDefaultCodeBlockAnnotations defaultAnnotations = null)
         {
@@ -118,11 +119,12 @@ namespace MLS.Agent.Markdown
                 var relativeAccessor = DirectoryAccessor.GetDirectoryAccessorForRelativePath(filePath.Directory);
 
                 return new MarkdownPipelineBuilder()
-                    .UseAdvancedExtensions()
                     .UseCodeBlockAnnotations(
-                        relativeAccessor, 
-                        _packageRegistry, 
+                        relativeAccessor,
+                        _packageRegistry,
                         defaultAnnotations)
+                    .UseMathematics()
+                    .UseAdvancedExtensions()
                     .Build();
             });
         }
