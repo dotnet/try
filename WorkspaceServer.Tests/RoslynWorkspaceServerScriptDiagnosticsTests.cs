@@ -26,12 +26,12 @@ namespace WorkspaceServer.Tests
             var code = @"addd";
             var (processed, markLocation) = CodeManipulation.ProcessMarkup(code);
 
-            var ws = new Workspace(buffers: new[] { new Buffer("", processed, markLocation) });
-            var request = new WorkspaceRequest(ws, activeBufferId: "");
+            var ws = new Workspace(buffers: new[] { new Buffer("file.csx", processed, markLocation) });
+            var request = new WorkspaceRequest(ws, activeBufferId: "file.csx");
             var server = GetLanguageService();
             var result = await server.GetDiagnostics(request);
             result.Diagnostics.Should().NotBeEmpty();
-            result.Diagnostics.Should().Contain(diagnostics => diagnostics.Message == "(1,1): error CS0103: The name \'addd\' does not exist in the current context");
+            result.Diagnostics.Should().Contain(diagnostics => diagnostics.Message == "file.csx(1,1): error CS0103: The name \'addd\' does not exist in the current context");
         }
 
         protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(Default.PackageFinder);

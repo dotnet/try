@@ -48,8 +48,8 @@ public class Program
 }";
             var (processed, markLocation) = CodeManipulation.ProcessMarkup(code);
 
-            var ws = new Workspace(buffers: new[] { new Buffer("", processed, markLocation) });
-            var request = new WorkspaceRequest(ws, activeBufferId: "");
+            var ws = new Workspace(buffers: new[] { new Buffer("file.csx", processed, markLocation) });
+            var request = new WorkspaceRequest(ws, activeBufferId: "file.csx");
             var server = GetLanguageService();
             var result = await server.GetSignatureHelp(request);
             result.Should().NotBeNull();
@@ -85,8 +85,8 @@ public class Program
   }
 }";
             var (processed, markLocation) = CodeManipulation.ProcessMarkup(code);
-            var ws = new Workspace( buffers: new[] { new Buffer("", processed, markLocation) });
-            var request = new WorkspaceRequest(ws, activeBufferId: "");
+            var ws = new Workspace( buffers: new[] { new Buffer("file.csx", processed, markLocation) });
+            var request = new WorkspaceRequest(ws, activeBufferId: "file.csx");
             var server = GetLanguageService();
             var result = await server.GetSignatureHelp(request);
             result.Signatures.Should().NotBeEmpty();
