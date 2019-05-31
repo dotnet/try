@@ -95,7 +95,7 @@ jobs:
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '*.trx'
-          searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults'
+          searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
         continueOnError: true
         condition: always()
 

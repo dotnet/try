@@ -43,6 +43,3 @@ if [[ "$run_tests" == "true" ]]; then
     TestUsingNPM "$scriptroot/../Microsoft.DotNet.Try.Client"
     TestUsingNPM "$scriptroot/../Microsoft.DotNet.Try.js"
 fi
-
-TestUsingNPM "$scriptroot/../Microsoft.DotNet.Try.Client"
-TestUsingNPM "$scriptroot/../Microsoft.DotNet.Try.js"
