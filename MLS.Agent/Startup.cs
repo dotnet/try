@@ -41,7 +41,6 @@ namespace MLS.Agent
         {
             () => Logger<Program>.Log.Event("AgentStopping")
         };
-        private IHttpContextAccessor _httpContextAccessor;
 
         public Startup(
             IHostingEnvironment env,
@@ -147,8 +146,6 @@ namespace MLS.Agent
                 {
                     options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.All;
                 });
-
-                services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
                 operation.Succeed();
             }
