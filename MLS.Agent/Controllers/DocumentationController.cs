@@ -148,7 +148,7 @@ namespace MLS.Agent.Controllers
         showMathMenuMSIE: false
     });
     </script>
-    <script type=""text/javascript"" src=""/mathjax/MathJax.js?config=TeX-AMS_SVG""></script>".ToHtmlContent();
+    <script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_SVG""></script>".ToHtmlContent();
 
         private async Task<IHtmlContent> OneColumnLayoutScaffold(string hostUrl, MarkdownFile markdownFile) =>
             Layout(hostUrl, markdownFile,
