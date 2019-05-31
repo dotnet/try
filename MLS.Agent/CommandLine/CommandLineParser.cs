@@ -184,7 +184,7 @@ namespace MLS.Agent.CommandLine
                 command.AddOption(new Option(
                                         "--port",
                                         "Specify the port for dotnet try to listen on",
-                                        new Argument<int>()));
+                                        new Argument<int>(9000)));
 
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {
