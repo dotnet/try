@@ -23,10 +23,7 @@ namespace Microsoft.DotNet.Try.Markdown
         protected override AnnotatedCodeBlock CreateFencedBlock(BlockProcessor processor) =>
             new AnnotatedCodeBlock(this, _order++);
 
-        protected bool ParseCodeOptions(
-            BlockProcessor state,
-            ref StringSlice line,
-            IFencedBlock fenced)
+        protected bool ParseCodeOptions(BlockProcessor state, ref StringSlice line, IFencedBlock fenced, char openingCharacter)
         {
             if (!(fenced is AnnotatedCodeBlock codeLinkBlock))
             {

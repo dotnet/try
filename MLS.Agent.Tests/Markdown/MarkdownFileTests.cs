@@ -280,6 +280,49 @@ using System;
             }
 
             [Fact]
+            public async Task Should_emit_math_inline_block_rendering()
+            {
+                var html = await RenderHtml(
+                    ("Readme.md", @"this is math inline $$\sum ^{n}_{i=0}\left(x_{i}+a_{i}y_{i}\right)$$"));
+
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(html);
+
+                var math = htmlDocument.DocumentNode
+                    .SelectSingleNode("//span");
+
+                math.HasClass("math").Should().BeTrue();
+                math.InnerText.Should().Match(@"\(\sum ^{n}_{i=0}\left(x_{i}+a_{i}y_{i}\right)\)");
+            }
+
+            [Fact]
+            public async Task Should_emit_math_block_rendering()
+            {
+                var html = await RenderHtml(
+                    ("Readme.md", @"$$
+\begin{equation}
+  \int_0^\infty \frac{x^3}{e^x-1}\,dx = \frac{\pi^4}{15}
+  \label{eq:sample}
+\end{equation}
+$$"));
+
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(html);
+
+                var math = htmlDocument.DocumentNode
+                    .SelectSingleNode("//div");
+
+                math.HasClass("math").Should().BeTrue();
+                math.InnerText.EnforceLF().Should().Match(@"
+\[
+\begin{equation}
+  \int_0^\infty \frac{x^3}{e^x-1}\,dx = \frac{\pi^4}{15}
+  \label{eq:sample}
+\end{equation}
+\]".EnforceLF());
+            }
+
+            [Fact]
             public async Task Should_emit_pre_style_for_hidden_blocks()
             {
                 var codeContent = @"using System;

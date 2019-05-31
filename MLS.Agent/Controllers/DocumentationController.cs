@@ -120,6 +120,7 @@ namespace MLS.Agent.Controllers
     <script src=""/api/trydotnet.min.js?v={_cacheBuster}""></script>
     <link rel=""stylesheet"" href=""/css/trydotnet.css?v={_cacheBuster}"">  
     <link rel=""icon"" type=""image/png"" href=""favicon-32x32.png"">
+    {MathSupport()}
     <title>dotnet try - {markdownFile.Path.Value.HtmlEncode()}</title>
 </head>
 
@@ -137,6 +138,17 @@ namespace MLS.Agent.Controllers
 </body>
 
 </html>".ToHtmlContent();
+
+        private IHtmlContent MathSupport() =>
+            @"
+    <script type=""text/x-mathjax-config"">
+        MathJax.Hub.Config({
+        tex2jax: {inlineMath: [[""$"",""$""],[""\\("",""\\)""]]},       
+        showMathMenu: false,
+        showMathMenuMSIE: false
+    });
+    </script>
+    <script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_SVG""></script>".ToHtmlContent();
 
         private async Task<IHtmlContent> OneColumnLayoutScaffold(string hostUrl, MarkdownFile markdownFile) =>
             Layout(hostUrl, markdownFile,
