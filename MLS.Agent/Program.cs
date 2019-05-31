@@ -120,7 +120,7 @@ namespace MLS.Agent
                 Log.Trace("Received Key: {key}", options.Key);
             }
 
-           var uri = IsInToolMode()
+           var uri = IsLaunchedForDevelopment()
                           ? new Uri("http://localhost:4242")
                           : new Uri($"http://localhost:{options.Port}");
 
@@ -149,7 +149,7 @@ namespace MLS.Agent
             return webHost;
         }
 
-        private static bool IsInToolMode()
+        private static bool IsLaunchedForDevelopment()
         {
             var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             return processName == "dotnet" || processName == "dotnet.exe";
