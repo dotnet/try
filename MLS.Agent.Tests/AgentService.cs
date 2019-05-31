@@ -5,6 +5,8 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
@@ -41,11 +43,17 @@ namespace MLS.Agent.Tests
 
         public void Dispose() => _disposables.Dispose();
 
-        private TestServer CreateTestServer() => new TestServer(CreateWebHostBuilder());
+        private TestServer CreateTestServer()
+        {
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
+            return new TestServer(CreateWebHostBuilder(), featureCollection);
+        }
 
         private IWebHostBuilder CreateWebHostBuilder()
         {
             var builder = new WebHostBuilder()
+                          .UseUrls("http://localhost:4242")
                           .ConfigureServices(c =>
                           {
                               if (_directoryAccessor != null)
