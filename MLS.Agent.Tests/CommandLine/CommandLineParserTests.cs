@@ -218,16 +218,9 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parses_the_port()
         {
             await _parser.InvokeAsync("--port 6000", _console);
-            _start_options.Port.Should().Be(6000);
+            _start_options.Port.Should().Be("6000");
         }
-
-        [Fact]
-        public async Task Takes_1517_as_the_default_port()
-        {
-            await _parser.InvokeAsync("", _console);
-            _start_options.Port.Should().Be(1517);
-        }
-
+        
         [Fact]
         public void Parse_application_insights_key_without_parameter_fails_the_parse()
         {
