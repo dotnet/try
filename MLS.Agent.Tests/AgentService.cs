@@ -53,7 +53,6 @@ namespace MLS.Agent.Tests
         private IWebHostBuilder CreateWebHostBuilder()
         {
             var builder = new WebHostBuilder()
-                          .UseUrls("http://localhost:4242")
                           .ConfigureServices(c =>
                           {
                               if (_directoryAccessor != null)
@@ -68,7 +67,8 @@ namespace MLS.Agent.Tests
                               });
                           })
                           .UseTestEnvironment()
-                          .UseStartup<Startup>();
+                          .UseStartup<Startup>()
+                          .WithConfigureApplicationUrl(_options);
 
             return builder;
         }
