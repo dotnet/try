@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
             {
             "HelloWorld" => HelloWorld(),
             "DateTime" => DateTime(),
-            _ => throw new ArgumentException("A --region argument must be passed", "region")
+            _ => throw new ArgumentException("A --region argument must be passed", nameof(region))
         };
         }
 
