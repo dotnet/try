@@ -3,13 +3,17 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
 {
-    ///<param name="region">Takes in the --region option from the code fence options in markdown</param>
-    ///<param name="session">Takes in the --session option from the code fence options in markdown</param>
-    ///<param name="package">Takes in the --package option from the code fence options in markdown</param>
-    ///<param name="project">Takes in the --project option from the code fence options in markdown</param>
-    ///<param name="args">Takes in any additional arguments passed in the code fence options in markdown</param>
+    ///<summary>This program uses <a href="https://github.com/dotnet/command-line-api/wiki/DragonFruit-overview">System.CommandLine DragonFruit</a> to accept arguments from command line.
+    ///<example>Execute: dotnet run --region "HelloWorld" to see the output</example>
+    ///</summary>
     public class Program
     {
+        ///<param name="region">Takes in the --region option from the code fence options in markdown</param>
+        ///<param name="session">Takes in the --session option from the code fence options in markdown</param>
+        ///<param name="package">Takes in the --package option from the code fence options in markdown</param>
+        ///<param name="project">Takes in the --project option from the code fence options in markdown</param>
+        ///<param name="args">Takes in any additional arguments passed in the code fence options in markdown</param>
+        ///<see>To learn more see <a href="https://aka.ms/learntdn">our documentation</a></see>
         static int Main(
             string region = null,
             string session = null,
@@ -25,7 +29,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
             };
         }
 
-        public static int HelloWorld()
+        internal static int HelloWorld()
         {
             #region HelloWorld
             Console.WriteLine("Hello World!");
@@ -33,7 +37,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
             return 0;
         }
 
-        public static int DateTime()
+        internal static int DateTime()
         {
             #region DateTime
             Console.WriteLine(System.DateTime.Now);
@@ -41,9 +45,10 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
             return 0;
         }
 
-        public static int EmptyRegion()
+        internal static int EmptyRegion()
         {
             #region EmptyRegion
+            Console.WriteLine(@"No region was specified at the command line. Try specifying ""DateTime"" or ""HelloWorld"" region");
             #endregion
             return 0;
         }
