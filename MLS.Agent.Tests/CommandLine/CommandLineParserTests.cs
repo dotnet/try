@@ -222,10 +222,10 @@ namespace MLS.Agent.Tests.CommandLine
         }
 
         [Fact]
-        public async Task Takes_9000_as_the_default_port()
+        public async Task Takes_1517_as_the_default_port()
         {
             await _parser.InvokeAsync("", _console);
-            _start_options.Port.Should().Be(5000);
+            _start_options.Port.Should().Be(1517);
         }
 
         [Fact]
