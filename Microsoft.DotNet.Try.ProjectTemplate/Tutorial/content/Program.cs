@@ -23,10 +23,10 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
         {
             return region switch
             {
-                "HelloWorld" => HelloWorld(),
-                "DateTime" => DateTime(),
-                _ => EmptyRegion()
-            };
+            "HelloWorld" => HelloWorld(),
+            "DateTime" => DateTime(),
+            _ => throw new ArgumentException("A --region argument must be passed", "region")
+        };
         }
 
         internal static int HelloWorld()
@@ -41,14 +41,6 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
         {
             #region DateTime
             Console.WriteLine(System.DateTime.Now);
-            #endregion
-            return 0;
-        }
-
-        internal static int EmptyRegion()
-        {
-            #region EmptyRegion
-            Console.WriteLine(@"No region was specified at the command line. Try specifying ""DateTime"" or ""HelloWorld"" region");
             #endregion
             return 0;
         }
