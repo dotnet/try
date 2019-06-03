@@ -120,9 +120,6 @@ namespace MLS.Agent
                 Log.Trace("Received Key: {key}", options.Key);
             }
 
-           var uri = IsLaunchedForDevelopment()
-                          ? new Uri("http://localhost:4242")
-                          : new Uri($"https://localhost:{options.Port}");
 
             var webHost = new WebHostBuilder()
                           .UseKestrel()
@@ -143,16 +140,10 @@ namespace MLS.Agent
                           })
                           .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
-                          .UseUrls(uri.ToString())
+                          .WithConfigureApplicationUrl(options)
                           .Build();
 
             return webHost;
-        }
-
-        private static bool IsLaunchedForDevelopment()
-        {
-            var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            return processName == "dotnet" || processName == "dotnet.exe";
         }
     }
 }
