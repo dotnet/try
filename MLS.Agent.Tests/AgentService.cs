@@ -45,6 +45,8 @@ namespace MLS.Agent.Tests
 
         private TestServer CreateTestServer()
         {
+            //We need to set the feature collection to be not null,
+            //so that the ServerFeatures(like the urls to use) can be configured and used
             var featureCollection = new FeatureCollection();
             featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
             return new TestServer(CreateWebHostBuilder(), featureCollection);
