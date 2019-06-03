@@ -1,0 +1,6 @@
+{
+    "reporterEnabled": "spec,mocha-trx-reporter",
+    "mochaTrxReporterReporterOptions": {
+        "output": "../artifacts/TestResults/Release/Microsoft.DotNet.Try.Client.trx"
+    }
+}

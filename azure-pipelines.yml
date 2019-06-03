@@ -68,7 +68,7 @@ jobs:
       - task: NodeTool@0
         displayName: Add NodeJS/npm
         inputs:
-          versionSpec: '>=11'
+          versionSpec: '>=12'
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
         displayName: Install Blazor templates
@@ -89,6 +89,15 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+      - task: PublishTestResults@2
+        displayName: Publish NPM Test Results
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '*.trx'
+          searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
+        continueOnError: true
+        condition: always()
 
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - task: PublishBuildArtifacts@1
@@ -138,7 +147,7 @@ jobs:
       - task: NodeTool@0
         displayName: Add NodeJS/npm
         inputs:
-          versionSpec: '>=11'
+          versionSpec: '>=12'
 
       - task: UseDotNet@2
         displayName: Add dotnet
@@ -162,3 +171,12 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+      - task: PublishTestResults@2
+        displayName: Publish NPM Test Results
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '*.trx'
+          searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
+        continueOnError: true
+        condition: always()

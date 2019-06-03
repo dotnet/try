@@ -126,21 +126,83 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="BuildCss" Inputs="$(MSBuildThisFileDirectory)..\MLS.Styles\sass\trydotnet.scss" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" BeforeTargets="BeforeBuild">
+  <Target Name="BuildCss"
+          Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss"
+          Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css"
+          BeforeTargets="BeforeBuild">
 
     <PropertyGroup>
       <_TryDotNetCssExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
     </PropertyGroup>
 
-    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
-    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
-    <Exec Command="npm run release -- $(MSBuildThisFileDirectory)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\MLS.Styles" />
+    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
+    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
+    <Exec Command="npm run release -- $(MSBuildThisFileDirectory)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
 
     <ItemGroup>
       <FileWrites Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" />
 
       <!-- if the file already existed then it'll already be in the @(Content) item group -->
       <Content Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" Condition="'$(_TryDotNetCssExists)' != 'true'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GatherInputs">
+    <PropertyGroup>
+      <ClientInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Client</ClientInputDir>
+      <ClientOutputDir>$(MSBuildThisFileDirectory)wwwroot/client</ClientOutputDir>
+      <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
+      <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
+      <TryDotNetJsOutputDir>$(MSBuildThisFileDirectory)wwwroot/api</TryDotNetJsOutputDir>
+      <TryDotNetJsFile>$(TryDotNetJsOutputDir)/trydotnet.min.js</TryDotNetJsFile>
+      <TryDotNetJsMap>$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
+    </PropertyGroup>
+    <ItemGroup>
+      <ClientInputFiles Include="$(ClientInputDir)\**" />
+      <TryDotNetJsInput Include="$(TryDotNetJsInputDir)\**" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BuildTryDotNetJs"
+          Inputs="@(TryDotNetJsInput)"
+          Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)"
+          DependsOnTargets="GatherInputs"
+          BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <_TryDotNetMinJsExists Condition="Exists('$(TryDotNetJsFile)')">true</_TryDotNetMinJsExists>
+    </PropertyGroup>
+
+    <Exec Command="npm i" WorkingDirectory="$(TryDotNetJsInputDir)" />
+    <MakeDir Directories="$(TryDotNetJsOutputDir)" />
+    <Exec Command="npm run build" WorkingDirectory="$(TryDotNetJsInputDir)" />
+    <Exec Command="npm run ciMinify -- --output $(TryDotNetJsFile)" WorkingDirectory="$(TryDotNetJsInputDir)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(TryDotNetJsFile);$(TryDotNetJsMap)" />
+
+      <!-- if the file already existed then it'll already be in the @(Content) item group -->
+      <Content Include="$(TryDotNetJsFile);$(TryDotNetJsMap)" Condition="'$(_TryDotNetMinJsExists)' != 'true'" />
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="BuildClient"
+          Inputs="@(ClientInputFiles)"
+          Outputs="$(ClientOutputFile)"
+          DependsOnTargets="GatherInputs"
+          BeforeTargets="BeforeBuild">
+
+    <PropertyGroup>
+      <_TryDotNetClientExists Condition="Exists('$(ClientOutputFile)')">true</_TryDotNetClientExists>
+    </PropertyGroup>
+
+    <Exec Command="npm i" WorkingDirectory="$(ClientInputDir)" /> 
+    <Exec Command="npm run buildCi -- --output-path $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(ClientOutputDir)\**" />
+
+      <!-- if the file already existed then it'll already be in the @(Content) item group -->
+      <Content Include="$(ClientOutputDir)\**" Condition="'$(_TryDotNetClientExists)' != 'true'" />
     </ItemGroup>
   </Target>
 

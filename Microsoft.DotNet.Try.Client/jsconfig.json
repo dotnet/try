@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES6"
+    },
+    "exclude": [
+        "node_modules",
+        "obj",
+        "bin",
+        "wwwroot",
+        "Properties",
+        "etc",
+        "Controllers"
+    ]
+}
