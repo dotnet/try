@@ -25,7 +25,7 @@ namespace MLS.Agent
             }
             else
             {
-                uri = new Uri($"https://localhost:{FreeTcpPort()}");
+                uri = new Uri($"https://localhost:{GetFreePort()}");
             }
 
             return builder.UseUrls(uri.ToString());
@@ -37,7 +37,7 @@ namespace MLS.Agent
             return processName == "dotnet" || processName == "dotnet.exe";
         }
 
-        static int FreeTcpPort()
+        private static int GetFreePort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
