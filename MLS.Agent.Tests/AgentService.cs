@@ -68,7 +68,7 @@ namespace MLS.Agent.Tests
                           })
                           .UseTestEnvironment()
                           .UseStartup<Startup>()
-                          .WithConfigureApplicationUrl(_options);
+                          .WithConfiguredApplicationUrl(_options);
 
             return builder;
         }

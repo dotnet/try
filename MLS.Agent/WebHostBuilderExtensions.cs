@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Net;
+using System.Net.Sockets;
 using Microsoft.AspNetCore.Hosting;
 using MLS.Agent.CommandLine;
 
@@ -9,11 +11,22 @@ namespace MLS.Agent
 {
     public static class WebHostBuilderExtensions
     {
-        public static IWebHostBuilder WithConfigureApplicationUrl(this IWebHostBuilder builder, StartupOptions options)
+        public static IWebHostBuilder WithConfiguredApplicationUrl(this IWebHostBuilder builder, StartupOptions options)
         {
-            var uri = IsLaunchedForDevelopment()
-                          ? new Uri("http://localhost:4242")
-                          : new Uri($"https://localhost:{options.Port}");
+            Uri uri;
+
+            if (IsLaunchedForDevelopment())
+            {
+                uri = new Uri("http://localhost:4242");
+            }
+            else if (!string.IsNullOrEmpty(options.Port))
+            {
+                uri = new Uri($"https://localhost:{options.Port}");
+            }
+            else
+            {
+                uri = new Uri($"https://localhost:{FreeTcpPort()}");
+            }
 
             return builder.UseUrls(uri.ToString());
         }
@@ -22,6 +35,15 @@ namespace MLS.Agent
         {
             var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
             return processName == "dotnet" || processName == "dotnet.exe";
+        }
+
+        static int FreeTcpPort()
+        {
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            return port;
         }
     }
 }
