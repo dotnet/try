@@ -122,7 +122,7 @@ namespace MLS.Agent
 
            var uri = IsLaunchedForDevelopment()
                           ? new Uri("http://localhost:4242")
-                          : new Uri($"http://localhost:{options.Port}");
+                          : new Uri($"https://localhost:{options.Port}");
 
             var webHost = new WebHostBuilder()
                           .UseKestrel()
