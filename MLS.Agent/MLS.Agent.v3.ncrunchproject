@@ -2,7 +2,9 @@
   <Settings>
     <AdditionalFilesToIncludeForProject>
       <Value>..\docs\**.*</Value>
-      <Value>..\MLS.Styles\**.*</Value>
+      <Value>..\Microsoft.DotNet.Try.Client\**.*</Value>
+      <Value>..\Microsoft.DotNet.Try.js\**.*</Value>
+      <Value>..\Microsoft.DotNet.Try.Styles\**.*</Value>
     </AdditionalFilesToIncludeForProject>
   </Settings>
 </ProjectConfiguration>
