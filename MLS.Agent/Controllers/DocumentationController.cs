@@ -12,6 +12,8 @@ using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
 using Recipes;
+using WorkspaceServer;
+using WorkspaceServer.Packaging;
 
 namespace MLS.Agent.Controllers
 {
@@ -19,13 +21,16 @@ namespace MLS.Agent.Controllers
     {
         private readonly MarkdownProject _markdownProject;
         private readonly StartupOptions _startupOptions;
+        private readonly PackageRegistry _packageRegistry;
         private static readonly string _cacheBuster = VersionSensor.Version().AssemblyVersion;
 
-        public DocumentationController(MarkdownProject markdownProject, StartupOptions startupOptions)
+        public DocumentationController(MarkdownProject markdownProject, StartupOptions startupOptions, PackageRegistry packageRegistry)
         {
             _markdownProject = markdownProject ??
                                throw new ArgumentNullException(nameof(markdownProject));
             _startupOptions = startupOptions;
+            _packageRegistry = packageRegistry ??
+                               throw new ArgumentNullException(nameof(packageRegistry));
         }
 
         [HttpGet]
@@ -77,7 +82,7 @@ namespace MLS.Agent.Controllers
 
             }
 
-            
+
 
             var content = maxEditorPerSession <= 1
                               ? await OneColumnLayoutScaffold(
@@ -110,7 +115,44 @@ namespace MLS.Agent.Controllers
             return new HtmlString(sb.ToString());
         }
 
-        private IHtmlContent Layout(string hostUrl, MarkdownFile markdownFile, IHtmlContent content) =>
+        private async Task<AutoEnableOptions> GetAutoEnableOptions()
+        {
+            bool useBlazor;
+
+            if (_startupOptions.Package != null)
+            {
+                var package = await _packageRegistry.Get<Package2>(_startupOptions.Package);
+                useBlazor = package.CanSupportBlazor;
+            }
+            else
+            {
+                useBlazor = false;
+            }
+
+            var requestUri = Request.GetUri();
+
+            var hostUrl = $"{requestUri.Scheme}://{requestUri.Authority}";
+            return new AutoEnableOptions(hostUrl, useBlazor);
+        }
+
+        private class AutoEnableOptions
+        {
+            public AutoEnableOptions(string apiBaseAddress, bool useBlazor)
+            {
+                ApiBaseAddress = apiBaseAddress;
+                UseBlazor = useBlazor;
+            }
+
+            public string ApiBaseAddress { get; }
+
+            public bool UseBlazor { get; }
+        }
+
+        private IHtmlContent Layout(
+            string hostUrl,
+            MarkdownFile markdownFile,
+            IHtmlContent content,
+            AutoEnableOptions autoEnableOptions) =>
             $@"
 <!DOCTYPE html>
 <html lang=""en"">
@@ -133,7 +175,7 @@ namespace MLS.Agent.Controllers
     {Footer()}
 
     <script>
-        trydotnet.autoEnable({{ apiBaseAddress: new URL(""{hostUrl}""), useBlazor:false }});
+        trydotnet.autoEnable({{ apiBaseAddress: new URL(""{autoEnableOptions.ApiBaseAddress}""), useBlazor: {autoEnableOptions.UseBlazor.ToString().ToLowerInvariant()} }});
     </script>
 </body>
 
@@ -151,21 +193,24 @@ namespace MLS.Agent.Controllers
     <script type=""text/javascript"" src=""https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_SVG""></script>".ToHtmlContent();
 
         private async Task<IHtmlContent> OneColumnLayoutScaffold(string hostUrl, MarkdownFile markdownFile) =>
-            Layout(hostUrl, markdownFile,
-                   $@"
-            <div id=""documentation-container"" class=""markdown-body"">
+            Layout(
+                hostUrl, 
+                markdownFile,
+                await DocumentationDiv(markdownFile),
+                await GetAutoEnableOptions());
+
+        private static async Task<IHtmlContent> DocumentationDiv(MarkdownFile markdownFile) =>
+            $@"<div id=""documentation-container"" class=""markdown-body"">
                 {await markdownFile.ToHtmlContentAsync()}
-            </div>".ToHtmlContent());
+            </div>".ToHtmlContent();
 
         private async Task<IHtmlContent> TwoColumnLayoutScaffold(string hostUrl, MarkdownFile markdownFile) =>
             Layout(hostUrl, markdownFile,
-                   $@"
-            <div id=""documentation-container"" class=""markdown-body"">
-                {await markdownFile.ToHtmlContentAsync()}
-            </div>
+                   $@"{await DocumentationDiv(markdownFile)}
             <div class=""control-column"">
                 {await SessionControlsHtml(markdownFile, _startupOptions.EnablePreviewFeatures)}
-            </div>".ToHtmlContent());
+            </div>".ToHtmlContent(),
+                   await GetAutoEnableOptions());
 
         private IHtmlContent Index(string html) =>
             $@"

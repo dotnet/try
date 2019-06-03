@@ -108,7 +108,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Scaffolding_HTML_includes_trydotnet_js_autoEnable_invocation()
+        public async Task Scaffolding_HTML_includes_trydotnet_js_autoEnable_invocation_with_useBlazor_defaulting_to_false()
         {
             using (var agent = new AgentService(new StartupOptions(dir: TestAssets.SampleConsole)))
             {
@@ -121,13 +121,46 @@ namespace MLS.Agent.Tests
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
 
-                var script = document.DocumentNode
-                                     .Descendants("body")
-                                     .Single()
-                                     .Descendants("script")
-                                     .FirstOrDefault(s => s.InnerHtml.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor:false });"));
+                var scripts = document.DocumentNode
+                                      .Descendants("body")
+                                      .Single()
+                                      .Descendants("script")
+                                      .Select(s => s.InnerHtml);
 
-                script.Should().NotBeNull();
+                scripts.Should()
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: false });"));
+            }
+        }
+
+        [Fact]
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_Blazor()
+        {
+            var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
+
+            var startupOptions = new StartupOptions(
+                dir: TestAssets.SampleConsole,
+                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
+                package: name);
+
+            using (var agent = new AgentService(startupOptions))
+            {
+                var response = await agent.GetAsync(@"Subdirectory/Tutorial.md");
+
+                response.Should().BeSuccessful();
+
+                var html = await response.Content.ReadAsStringAsync();
+
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
+
+                var scripts = document.DocumentNode
+                                      .Descendants("body")
+                                      .Single()
+                                      .Descendants("script")
+                                      .Select(s => s.InnerHtml);
+
+                scripts.Should()
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
             }
         }
 
