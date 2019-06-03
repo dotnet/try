@@ -84,7 +84,7 @@ namespace MLS.Agent.Tests
                 new PackOptions(
                     build.Directory,
                     outputDirectory: packageLocation,
-                    enableBlazor: false),
+                    enableWasm: false),
                 console);
 
             return (packageName, packageLocation);

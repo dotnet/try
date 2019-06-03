@@ -965,6 +965,35 @@ namespace FibonacciTest
             }
         }
 
+        [Fact]
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_Blazor()
+        {
+            var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
+
+            var startupOptions = new StartupOptions(
+                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
+
+            using (var agent = new AgentService(startupOptions))
+            {
+                var response = await agent.GetAsync(@"Subdirectory/Tutorial.md");
+
+                response.Should().BeSuccessful();
+
+                var html = await response.Content.ReadAsStringAsync();
+
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
+
+                var scripts = document.DocumentNode
+                                      .Descendants("body")
+                                      .Single()
+                                      .Descendants("script")
+                                      .Select(s => s.InnerHtml);
+
+                scripts.Should()
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+            }
+        }
         private class FailedRunResult : Exception
         {
             internal FailedRunResult(string message) : base(message)

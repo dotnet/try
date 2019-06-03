@@ -9,6 +9,7 @@ using System.Reactive.Concurrency;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
@@ -103,7 +104,7 @@ namespace WorkspaceServer.Tests
             var asset = await NetstandardWorkspaceCopy(testName, destination);
             var packageName = asset.Directory.Name;
             var console = new TestConsole();
-            await PackCommand.Do(new PackOptions(asset.Directory, enableBlazor: true, packageName: packageName), console);
+            await PackCommand.Do(new PackOptions(asset.Directory, enableWasm: true, packageName: packageName), console);
             var nupkg = asset.Directory.GetFiles("*.nupkg").Single();
 
             return (packageName, nupkg.Directory);

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -115,7 +116,7 @@ namespace MLS.Agent.Controllers
             return new HtmlString(sb.ToString());
         }
 
-        private async Task<AutoEnableOptions> GetAutoEnableOptions()
+        private async Task<AutoEnableOptions> GetAutoEnableOptions(MarkdownFile file)
         {
             bool useBlazor;
 
@@ -126,7 +127,12 @@ namespace MLS.Agent.Controllers
             }
             else
             {
-                useBlazor = false;
+                var blocks = await file.GetAnnotatedCodeBlocks();
+                var packageUsesBlazor = await Task.WhenAll(blocks
+                    .Select(b => b.ProjectOrPackageName())
+                    .Select(async name => (await _packageRegistry.Get<IMightSupportBlazor>(name))?.CanSupportBlazor ?? false));
+
+                useBlazor = packageUsesBlazor.Any(p => p == true);
             }
 
             var requestUri = Request.GetUri();
@@ -197,7 +203,7 @@ namespace MLS.Agent.Controllers
                 hostUrl, 
                 markdownFile,
                 await DocumentationDiv(markdownFile),
-                await GetAutoEnableOptions());
+                await GetAutoEnableOptions(markdownFile));
 
         private static async Task<IHtmlContent> DocumentationDiv(MarkdownFile markdownFile) =>
             $@"<div id=""documentation-container"" class=""markdown-body"">
@@ -210,7 +216,7 @@ namespace MLS.Agent.Controllers
             <div class=""control-column"">
                 {await SessionControlsHtml(markdownFile, _startupOptions.EnablePreviewFeatures)}
             </div>".ToHtmlContent(),
-                   await GetAutoEnableOptions());
+                   await GetAutoEnableOptions(markdownFile));
 
         private IHtmlContent Index(string html) =>
             $@"

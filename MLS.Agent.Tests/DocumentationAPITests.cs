@@ -164,6 +164,47 @@ namespace MLS.Agent.Tests
             }
         }
 
+
+        [Fact]
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_not_specified_and_supports_Blazor()
+        {
+            var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
+
+            var startupOptions = new StartupOptions(
+                dir: TestAssets.SampleConsole,
+                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
+
+            var text = $@"
+```cs --package {name}
+```";
+
+            var path = Path.Combine(TestAssets.SampleConsole.FullName, "BlazorTutorial.md");
+            File.WriteAllText(path, text);
+
+            using (var agent = new AgentService(startupOptions))
+            {
+                var response = await agent.GetAsync(@"/BlazorTutorial.md");
+
+                response.Should().BeSuccessful();
+
+                var html = await response.Content.ReadAsStringAsync();
+
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
+
+                var scripts = document.DocumentNode
+                                      .Descendants("body")
+                                      .Single()
+                                      .Descendants("script")
+                                      .Select(s => s.InnerHtml);
+
+                scripts.Should()
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+            }
+
+            File.Delete(path);
+        }
+
         [Fact]
         public async Task When_relative_uri_is_specified_then_it_opens_to_that_page()
         {

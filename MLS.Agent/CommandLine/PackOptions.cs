@@ -15,19 +15,19 @@ namespace MLS.Agent.CommandLine
             DirectoryInfo packTarget, 
             string version = null, 
             DirectoryInfo outputDirectory = null, 
-            bool enableBlazor = false,
+            bool enableWasm = false,
             string packageName = null)
         {
             PackTarget = packTarget ?? throw new ArgumentNullException(nameof(packTarget));
             OutputDirectory = outputDirectory ?? packTarget;
-            EnableBlazor = enableBlazor;
+            EnableWasm = enableWasm;
             Version = version;
             _packageName = packageName;
         }
 
         public DirectoryInfo PackTarget { get; }
         public DirectoryInfo OutputDirectory { get; }
-        public bool EnableBlazor { get; }
+        public bool EnableWasm { get; }
         public string Version { get; }
         public string PackageName
         {

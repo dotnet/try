@@ -30,7 +30,7 @@ namespace MLS.Agent.Tests
                 var console = new TestConsole();
                 var temp = directory.Directory;
                 var asset = (await Create.ConsoleWorkspaceCopy()).Directory;
-                await PackCommand.Do(new PackOptions(asset, outputDirectory: temp, enableBlazor: false), console);
+                await PackCommand.Do(new PackOptions(asset, outputDirectory: temp, enableWasm: false), console);
                 var result = await Tools.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} console --tool-path {temp.FullName}");
                 output.WriteLine(string.Join("\n", result.Error));
                 result.ExitCode.Should().Be(0);

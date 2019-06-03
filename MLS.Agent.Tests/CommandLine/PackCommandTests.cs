@@ -38,7 +38,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var console = new TestConsole();
 
-            await PackCommand.Do(new PackOptions(asset.Directory, enableBlazor: true), console);
+            await PackCommand.Do(new PackOptions(asset.Directory, enableWasm: true), console);
 
             asset.Directory
                  .GetFiles()
@@ -55,7 +55,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var console = new TestConsole();
 
-            await PackCommand.Do(new PackOptions(asset.Directory, enableBlazor: true), console);
+            await PackCommand.Do(new PackOptions(asset.Directory, enableWasm: true), console);
 
             asset.Directory
                  .GetFiles()
