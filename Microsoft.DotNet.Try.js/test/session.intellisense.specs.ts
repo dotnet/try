@@ -22,7 +22,7 @@ describe.skip("a user", () => {
     describe("with a trydotnet session", () => {
         it("can request completion list", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "Console.W" }])
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "Console.W" }] })
             session.openProject(project);
             let completionListResult = await session.getCompletionList("program.cs", 9);
             completionListResult.should.not.be.null;
@@ -30,7 +30,7 @@ describe.skip("a user", () => {
 
         it("can request completion list with a scope", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "var a = 10; #region controller Console.W #endregion" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "var a = 10; #region controller Console.W #endregion" }] });
             session.openProject(project);
             let completionListResult = await session.getCompletionList("program.cs", 9, "controller");
             completionListResult.should.not.be.null;
@@ -38,7 +38,7 @@ describe.skip("a user", () => {
 
         it("can request signature help", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "Console.Write()" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "Console.Write()" }] });
             session.openProject(project);
 
             let singatureHelpResult = await session.getSignatureHelp("program.cs", 14);
@@ -47,7 +47,7 @@ describe.skip("a user", () => {
 
         it("can request signature help with a scope", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "var a = 10; #region controller Console.Write() #endregion" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "var a = 10; #region controller Console.Write() #endregion" }] });
             session.openProject(project);
 
             let singatureHelpResult = await session.getSignatureHelp("program.cs", 14, "controller");

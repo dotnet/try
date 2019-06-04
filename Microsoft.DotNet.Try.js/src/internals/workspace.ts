@@ -13,6 +13,7 @@ import { isNullOrUndefined, isNullOrUndefinedOrWhitespace } from "../stringExten
 
 export interface IWorkspace {
     workspaceType: string;
+    langauge?: string;
     files?: IWorkspaceFile[];
     buffers?: IWorkspaceBuffer[];
     usings?: string[];
@@ -66,8 +67,12 @@ export class Workspace {
 
         this.openDocuments = {};
         this.workspace = {
-            workspaceType: project.package
+            workspaceType: project.package       
         };
+
+        if(!isNullOrUndefinedOrWhitespace(project.language)){
+            this.workspace.langauge = project.language;
+        }
 
         if (project.usings) {
             this.workspace.usings = JSON.parse(JSON.stringify(project.usings));

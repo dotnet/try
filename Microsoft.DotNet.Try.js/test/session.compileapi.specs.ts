@@ -38,7 +38,7 @@ describe("a user", () => {
 
             registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
 
-            let project = await createProject("console", [{ name: "program.cs", content: "" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "" }] });
             session.openProject(project);
 
             let result = await session.compile();

@@ -213,8 +213,10 @@ function internalAutoEnable(
         let files: SourceFile[] = [];
         let packageName: string = null;
         let packageVersion: string = null;
+        let language: string = "csharp";
         let documentsToOpen: DocumentsToOpen = {};
         let editorCount = -1;
+
         for (let codeSource of session.codeSources) {
             editorCount++;
 
@@ -222,7 +224,6 @@ function internalAutoEnable(
             let code = getCode(codeSource);
 
             let pacakgeAttribute = codeSource.dataset.trydotnetPackage;
-
             if (!isNullOrUndefinedOrWhitespace(pacakgeAttribute)) {
                 packageName = pacakgeAttribute;
             }
@@ -231,6 +232,12 @@ function internalAutoEnable(
             if (!isNullOrUndefinedOrWhitespace(packageVersionAttribute)) {
 
                 packageVersion = packageVersionAttribute;
+            }
+
+            
+            let languageAttribute = codeSource.dataset.trydotnetLanguage;
+            if (!isNullOrUndefinedOrWhitespace(languageAttribute)) {
+                language = languageAttribute;
             }
 
             let editorId = getTrydotnetEditorId(codeSource);
@@ -282,12 +289,16 @@ function internalAutoEnable(
         }
 
         let prj: Project = {
-            package: packageName,
+            package: packageName,            
             files: mergeFiles(files, includes, sessionId)
         };
 
         if (!isNullOrUndefinedOrWhitespace(packageVersion)) {
             prj.packageVersion = packageVersion;
+        }
+
+        if (!isNullOrUndefinedOrWhitespace(language)) {
+            prj.language = language;
         }
 
         let documentsToInclude = getDocumentsToInclude(includes, sessionId);
