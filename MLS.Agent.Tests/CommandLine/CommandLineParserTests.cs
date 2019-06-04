@@ -218,7 +218,7 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parses_the_port()
         {
             await _parser.InvokeAsync("--port 6000", _console);
-            _start_options.Port.Should().Be("6000");
+            _start_options.Port.Should().Be(6000);
         }
         
         [Fact]

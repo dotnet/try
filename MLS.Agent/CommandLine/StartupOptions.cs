@@ -43,7 +43,7 @@ namespace MLS.Agent.CommandLine
             string package = null,
             string packageVersion = null,
             ParseResult parseResult = null,
-            string port = null)
+            int? port = null)
         {
             _parseResult = parseResult;
             LogPath = logPath;
@@ -100,6 +100,6 @@ namespace MLS.Agent.CommandLine
         public string Package { get; }
 
         public string PackageVersion { get; }
-        public string Port { get; }
+        public int? Port { get; }
     }
 }
