@@ -30,7 +30,7 @@ describe("a workspace", () => {
         ws.fromProject(project);
         ws.isModified().should.be.true;
         let request = ws.toSetWorkspaceRequests();
-        request.workspace.langauge.should.be.equal("csharp");
+        request.workspace.language.should.be.equal("csharp");
     });
 
     it("is retains the language of hte project", async () => {
@@ -39,7 +39,7 @@ describe("a workspace", () => {
         ws.fromProject(project);
         ws.isModified().should.be.true;
         let request = ws.toSetWorkspaceRequests();
-        request.workspace.langauge.should.be.equal("fsharp");
+        request.workspace.language.should.be.equal("fsharp");
     });
 
     it("is marked as modified when a document is opened", async () => {

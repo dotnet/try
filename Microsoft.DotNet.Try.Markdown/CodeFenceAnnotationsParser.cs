@@ -22,10 +22,11 @@ namespace Microsoft.DotNet.Try.Markdown
 
         public CodeFenceAnnotationsParser(
             IDefaultCodeBlockAnnotations defaultAnnotations = null,
-            Action<Command> configureCsharpCommand = null)
+            Action<Command> configureCsharpCommand = null,
+            Action<Command> configureFsharpCommand = null)
         {
             _defaultAnnotations = defaultAnnotations;
-            _parser = CreateOptionsParser(configureCsharpCommand);
+            _parser = CreateOptionsParser(configureCsharpCommand, configureFsharpCommand);
             _modelBinder = new Lazy<ModelBinder>(CreateModelBinder);
         }
 
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.Try.Markdown
 
             var result = _parser.Parse(line);
 
-            if (!_supportedLanguages.Contains( result.CommandResult.Name) ||
+            if (!_supportedLanguages.Contains(result.CommandResult.Name) ||
                 result.Tokens.Count == 1)
             {
                 return CodeFenceOptionsParseResult.None;
@@ -65,25 +66,27 @@ namespace Microsoft.DotNet.Try.Markdown
 
             var annotations = (CodeBlockAnnotations)_modelBinder.Value.CreateInstance(new BindingContext(result));
 
-            annotations.Language = result.Tokens.First().Value;
-            annotations.NormalizedLanguage = result.CommandResult.Name;
-            annotations.RunArgs = Untokenize(result);
-
             return CodeFenceOptionsParseResult.Succeeded(annotations);
         }
 
-        private static string Untokenize(ParseResult result) =>
-            string.Join(" ", result.Tokens
-                                   .Select(t => t.Value)
-                                   .Skip(1)
-                                   .Select(t => Regex.IsMatch(t, @".*\s.*")
-                                                    ? $"\"{t}\""
-                                                    : t));
+        private Parser CreateOptionsParser(
+            Action<Command> configureCsharpCommand = null,
+            Action<Command> configureFsharpCommand = null)
+        {
 
-        private Parser CreateOptionsParser(Action<Command> configureCsharpCommand = null)
+            var languageCommands = new[]
+            {
+                CreateCsharpCommand(configureCsharpCommand),
+                CreateFsharpCommand(configureFsharpCommand)
+            };
+            _supportedLanguages = new HashSet<string>(languageCommands.Select(c => c.Name));
+            return new Parser(new RootCommand(symbols: languageCommands));
+        }
+
+        private IEnumerable<Option> CreateCommandOptions()
         {
             var packageOption = new Option(PackageOptionName,
-                                           argument: new Argument<string>());
+                argument: new Argument<string>());
 
             if (_defaultAnnotations?.Package is string defaultPackage)
             {
@@ -91,40 +94,30 @@ namespace Microsoft.DotNet.Try.Markdown
             }
 
             var packageVersionOption = new Option(PackageVersionOptionName,
-                                                  argument: new Argument<string>());
+                argument: new Argument<string>());
 
             if (_defaultAnnotations?.PackageVersion is string defaultPackageVersion)
             {
                 packageVersionOption.Argument.SetDefaultValue(defaultPackageVersion);
             }
 
-            var languageCommands = new[]
-            {
-                CreateCsharpCommand(configureCsharpCommand, packageOption, packageVersionOption),
-                CreateFsharpCommand(configureCsharpCommand, packageOption, packageVersionOption)
-            };
-            _supportedLanguages = new HashSet<string>(languageCommands.Select(c => c.Name));
-            return new Parser(new RootCommand( symbols: languageCommands));
+            yield return new Option("--destination-file", argument: new Argument<RelativeFilePath>());
+            yield return new Option("--editable", argument: new Argument<bool>(defaultValue: true));
+            yield return new Option("--hidden", argument: new Argument<bool>(defaultValue: false));
+            yield return new Option("--region", argument: new Argument<string>());
+            yield return packageOption;
+            yield return packageVersionOption;
+            yield return new Option("--session", argument: new Argument<string>());
         }
 
-        private static Command CreateCsharpCommand(Action<Command> configureCsharpCommand, Option packageOption,
-            Option packageVersionOption)
+        private Command CreateCsharpCommand(Action<Command> configureCsharpCommand)
         {
-            var csharp = new Command("csharp")
+            var csharp = new Command("csharp");
+
+            foreach (var commandOption in CreateCommandOptions())
             {
-                new Option("--destination-file",
-                    argument: new Argument<RelativeFilePath>()),
-                new Option("--editable",
-                    argument: new Argument<bool>(defaultValue: true)),
-                new Option("--hidden",
-                    argument: new Argument<bool>(defaultValue: false)),
-                new Option("--region",
-                    argument: new Argument<string>()),
-                packageOption,
-                packageVersionOption,
-                new Option("--session",
-                    argument: new Argument<string>())
-            };
+                csharp.AddOption(commandOption);
+            }
 
             configureCsharpCommand?.Invoke(csharp);
 
@@ -136,26 +129,16 @@ namespace Microsoft.DotNet.Try.Markdown
             return csharp;
         }
 
-        private static Command CreateFsharpCommand(Action<Command> configureCsharpCommand, Option packageOption,
-            Option packageVersionOption)
+        private Command CreateFsharpCommand(Action<Command> configureFsharpCommand)
         {
-            var fsharp = new Command("fsharp")
-            {
-                new Option("--destination-file",
-                    argument: new Argument<RelativeFilePath>()),
-                new Option("--editable",
-                    argument: new Argument<bool>(defaultValue: true)),
-                new Option("--hidden",
-                    argument: new Argument<bool>(defaultValue: false)),
-                new Option("--region",
-                    argument: new Argument<string>()),
-                packageOption,
-                packageVersionOption,
-                new Option("--session",
-                    argument: new Argument<string>())
-            };
+            var fsharp = new Command("fsharp");
 
-            configureCsharpCommand?.Invoke(fsharp);
+            foreach (var commandOption in CreateCommandOptions())
+            {
+                fsharp.AddOption(commandOption);
+            }
+
+            configureFsharpCommand?.Invoke(fsharp);
 
             fsharp.AddAlias("FS");
             fsharp.AddAlias("F#");

@@ -140,7 +140,7 @@ export interface IWorkspaceState
 
 export interface IWorkspace {
     workspaceType: string;
-    langauge?: string;
+    language?: string;
     files?: IWorkspaceFile[];
     buffers: IWorkspaceBuffer[];
     usings?: string[];

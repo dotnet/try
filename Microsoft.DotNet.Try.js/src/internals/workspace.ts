@@ -13,7 +13,7 @@ import { isNullOrUndefined, isNullOrUndefinedOrWhitespace } from "../stringExten
 
 export interface IWorkspace {
     workspaceType: string;
-    langauge?: string;
+    language?: string;
     files?: IWorkspaceFile[];
     buffers?: IWorkspaceBuffer[];
     usings?: string[];
@@ -71,7 +71,7 @@ export class Workspace {
         };
 
         if(!isNullOrUndefinedOrWhitespace(project.language)){
-            this.workspace.langauge = project.language;
+            this.workspace.language = project.language;
         }
 
         if (project.usings) {

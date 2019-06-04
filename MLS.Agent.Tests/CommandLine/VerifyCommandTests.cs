@@ -146,7 +146,7 @@ This is some sample code:
                     ("Program.cs", CompilingProgramCs),
                     ("support.fs", "let a = 0"),
                     ("doc.md", @"
-```fs --source-file support.fs
+```fs --source-file support.fs --project some.csproj
 ```
 ")
                 }.CreateFiles();
