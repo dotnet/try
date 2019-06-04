@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Try.Markdown
 {
     public class AnnotatedCodeBlock : FencedCodeBlock
     {
-        protected readonly List<string> _diagnostics = new List<string>();
+        private readonly List<string> _diagnostics = new List<string>();
         private string _sourceCode;
         private bool _initialized;
 

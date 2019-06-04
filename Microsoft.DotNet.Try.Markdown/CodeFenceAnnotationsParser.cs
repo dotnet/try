@@ -13,17 +13,18 @@ namespace Microsoft.DotNet.Try.Markdown
 {
     public class CodeFenceAnnotationsParser
     {
-        private readonly IDefaultCodeBlockAnnotations defaultAnnotations;
+        private readonly IDefaultCodeBlockAnnotations _defaultAnnotations;
         private readonly Parser _parser;
         private readonly Lazy<ModelBinder> _modelBinder;
-        private string packageOptionName = "--package";
-        private string packageVersionOptionName = "--package-version";
+        private HashSet<string> _supportedLanguages;
+        private const string PackageOptionName = "--package";
+        private const string PackageVersionOptionName = "--package-version";
 
         public CodeFenceAnnotationsParser(
             IDefaultCodeBlockAnnotations defaultAnnotations = null,
             Action<Command> configureCsharpCommand = null)
         {
-            this.defaultAnnotations = defaultAnnotations;
+            _defaultAnnotations = defaultAnnotations;
             _parser = CreateOptionsParser(configureCsharpCommand);
             _modelBinder = new Lazy<ModelBinder>(CreateModelBinder);
         }
@@ -37,21 +38,21 @@ namespace Microsoft.DotNet.Try.Markdown
             if (parserContext.TryGetDefaultCodeBlockAnnotations(out var defaults))
             {
                 if (defaults.Package != null &&
-                    !line.Contains(packageOptionName))
+                    !line.Contains(PackageOptionName))
                 {
-                    line += $" {packageOptionName} {defaults.Package}";
+                    line += $" {PackageOptionName} {defaults.Package}";
                 }
 
                 if (defaults.PackageVersion != null &&
-                    !line.Contains(packageVersionOptionName))
+                    !line.Contains(PackageVersionOptionName))
                 {
-                    line += $" {packageVersionOptionName} {defaults.PackageVersion}";
+                    line += $" {PackageVersionOptionName} {defaults.PackageVersion}";
                 }
             }
 
             var result = _parser.Parse(line);
 
-            if (result.CommandResult.Name != "csharp" ||
+            if (!_supportedLanguages.Contains( result.CommandResult.Name) ||
                 result.Tokens.Count == 1)
             {
                 return CodeFenceOptionsParseResult.None;
@@ -61,15 +62,14 @@ namespace Microsoft.DotNet.Try.Markdown
             {
                 return CodeFenceOptionsParseResult.Failed(new List<string>(result.Errors.Select(e => e.Message)));
             }
-            else
-            {
-                var annotations = (CodeBlockAnnotations) _modelBinder.Value.CreateInstance(new BindingContext(result));
 
-                annotations.Language = result.Tokens.First().Value;
-                annotations.RunArgs = Untokenize(result);
+            var annotations = (CodeBlockAnnotations)_modelBinder.Value.CreateInstance(new BindingContext(result));
 
-                return CodeFenceOptionsParseResult.Succeeded(annotations);
-            }
+            annotations.Language = result.Tokens.First().Value;
+            annotations.NormalizedLanguage = result.CommandResult.Name;
+            annotations.RunArgs = Untokenize(result);
+
+            return CodeFenceOptionsParseResult.Succeeded(annotations);
         }
 
         private static string Untokenize(ParseResult result) =>
@@ -82,37 +82,49 @@ namespace Microsoft.DotNet.Try.Markdown
 
         private Parser CreateOptionsParser(Action<Command> configureCsharpCommand = null)
         {
-            var packageOption = new Option(packageOptionName,
+            var packageOption = new Option(PackageOptionName,
                                            argument: new Argument<string>());
 
-            if (defaultAnnotations?.Package is string defaultPackage)
+            if (_defaultAnnotations?.Package is string defaultPackage)
             {
                 packageOption.Argument.SetDefaultValue(defaultPackage);
             }
 
-            var packageVersionOption = new Option(packageVersionOptionName,
+            var packageVersionOption = new Option(PackageVersionOptionName,
                                                   argument: new Argument<string>());
 
-            if (defaultAnnotations?.PackageVersion is string defaultPackageVersion)
+            if (_defaultAnnotations?.PackageVersion is string defaultPackageVersion)
             {
                 packageVersionOption.Argument.SetDefaultValue(defaultPackageVersion);
             }
 
+            var languageCommands = new[]
+            {
+                CreateCsharpCommand(configureCsharpCommand, packageOption, packageVersionOption),
+                CreateFsharpCommand(configureCsharpCommand, packageOption, packageVersionOption)
+            };
+            _supportedLanguages = new HashSet<string>(languageCommands.Select(c => c.Name));
+            return new Parser(new RootCommand( symbols: languageCommands));
+        }
+
+        private static Command CreateCsharpCommand(Action<Command> configureCsharpCommand, Option packageOption,
+            Option packageVersionOption)
+        {
             var csharp = new Command("csharp")
-                         {
-                             new Option("--destination-file",
-                                        argument: new Argument<RelativeFilePath>()),
-                             new Option("--editable",
-                                        argument: new Argument<bool>(defaultValue: true)),
-                             new Option("--hidden",
-                                        argument: new Argument<bool>(defaultValue: false)),
-                             new Option("--region",
-                                        argument: new Argument<string>()),
-                             packageOption,
-                             packageVersionOption,
-                             new Option("--session",
-                                        argument: new Argument<string>())
-                         };
+            {
+                new Option("--destination-file",
+                    argument: new Argument<RelativeFilePath>()),
+                new Option("--editable",
+                    argument: new Argument<bool>(defaultValue: true)),
+                new Option("--hidden",
+                    argument: new Argument<bool>(defaultValue: false)),
+                new Option("--region",
+                    argument: new Argument<string>()),
+                packageOption,
+                packageVersionOption,
+                new Option("--session",
+                    argument: new Argument<string>())
+            };
 
             configureCsharpCommand?.Invoke(csharp);
 
@@ -121,8 +133,36 @@ namespace Microsoft.DotNet.Try.Markdown
             csharp.AddAlias("CSHARP");
             csharp.AddAlias("cs");
             csharp.AddAlias("c#");
+            return csharp;
+        }
 
-            return new Parser(new RootCommand { csharp });
+        private static Command CreateFsharpCommand(Action<Command> configureCsharpCommand, Option packageOption,
+            Option packageVersionOption)
+        {
+            var fsharp = new Command("fsharp")
+            {
+                new Option("--destination-file",
+                    argument: new Argument<RelativeFilePath>()),
+                new Option("--editable",
+                    argument: new Argument<bool>(defaultValue: true)),
+                new Option("--hidden",
+                    argument: new Argument<bool>(defaultValue: false)),
+                new Option("--region",
+                    argument: new Argument<string>()),
+                packageOption,
+                packageVersionOption,
+                new Option("--session",
+                    argument: new Argument<string>())
+            };
+
+            configureCsharpCommand?.Invoke(fsharp);
+
+            fsharp.AddAlias("FS");
+            fsharp.AddAlias("F#");
+            fsharp.AddAlias("FSHARP");
+            fsharp.AddAlias("fs");
+            fsharp.AddAlias("f#");
+            return fsharp;
         }
     }
 }

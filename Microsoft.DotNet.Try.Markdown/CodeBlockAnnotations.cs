@@ -5,6 +5,7 @@ using System;
 using System.CommandLine;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Microsoft.DotNet.Try.Markdown
 {
@@ -49,6 +50,7 @@ namespace Microsoft.DotNet.Try.Markdown
         public bool Editable { get; }
         public bool Hidden { get; }
         public string Language { get; set; }
+        public string NormalizedLanguage { get; set; }
 
         public virtual Task<CodeBlockContentFetchResult> TryGetExternalContent() => 
             Task.FromResult(CodeBlockContentFetchResult.None);
@@ -63,6 +65,11 @@ namespace Microsoft.DotNet.Try.Markdown
             if (PackageVersion != null)
             {
                 block.AddAttribute("data-trydotnet-package-version", PackageVersion);
+            }
+
+            if (!string.IsNullOrWhiteSpace(NormalizedLanguage))
+            {
+                block.AddAttribute("data-trydotnet-language", NormalizedLanguage);
             }
 
             return Task.CompletedTask;
