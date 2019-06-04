@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
@@ -13,6 +14,7 @@ using MLS.Agent.Markdown;
 using WorkspaceServer;
 using WorkspaceServer.Servers.Roslyn;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
+using File = Microsoft.DotNet.Try.Protocol.File;
 
 namespace MLS.Agent.CommandLine
 {
@@ -135,6 +137,17 @@ namespace MLS.Agent.CommandLine
                                            .Select(b => b.ProjectOrPackageName())
                                            .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
 
+                var language = session
+                    .Select(b => b.Language())
+                    .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
+
+                if (!ProjectIsCompatibleWithLanguage(projectOrPackageName, language))
+                {
+                    SetError();
+
+                    console.Out.WriteLine($"    Build failed as project {projectOrPackageName} is not compatible with language {language}");
+                }
+
                 var editableCodeBlocks = session.Where(b => b.Annotations.Editable).ToList();
 
                 var buffers = editableCodeBlocks
@@ -165,6 +178,7 @@ namespace MLS.Agent.CommandLine
 
                 var workspace = new Workspace(
                     workspaceType: projectOrPackageName,
+                    language: language,
                     files: files.ToArray(),
                     buffers: buffers.ToArray());
 
@@ -173,7 +187,7 @@ namespace MLS.Agent.CommandLine
 
                 var processed = await mergeTransformer.TransformAsync(workspace);
                 processed = await inliningTransformer.TransformAsync(processed);
-                processed = new Workspace(usings: processed.Usings, workspaceType: processed.WorkspaceType, files: processed.Files);
+                processed = new Workspace(usings: processed.Usings, workspaceType: processed.WorkspaceType, language:processed.Language, files: processed.Files);
 
                 var result = await workspaceServer.Value.Compile(new WorkspaceRequest(processed));
 
@@ -256,6 +270,29 @@ namespace MLS.Agent.CommandLine
                     console.Out.WriteLine($"\t\t{diagnostic}");
                 }
             }
+        }
+
+        private static bool ProjectIsCompatibleWithLanguage(string projectOrPackageName, string language)
+        {
+            var extenstion = Path.GetExtension(projectOrPackageName)?.ToLowerInvariant();
+            var supported = true;
+            if (!string.IsNullOrWhiteSpace(extenstion))
+            {
+                switch (extenstion)
+                {
+                    case ".csproj":
+                        supported = StringComparer.OrdinalIgnoreCase.Compare(language, "csharp") == 0;
+                        break;
+
+                    case ".fsproj":
+                        supported = StringComparer.OrdinalIgnoreCase.Compare(language, "fsharp") == 0;
+                        break;
+                    default:
+                        supported = false;
+                        break;
+                }
+            }
+            return supported;
         }
     }
 }

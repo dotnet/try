@@ -136,6 +136,41 @@ This is some sample code:
             }
 
             [Fact]
+            public async Task Fails_if_language_is_not_compatible_with_backing_project()
+            {
+                var root = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
+
+                var directoryAccessor = new InMemoryDirectoryAccessor(root, root)
+                {
+                    ("some.csproj", CsprojContents),
+                    ("Program.cs", CompilingProgramCs),
+                    ("support.fs", "let a = 0"),
+                    ("doc.md", @"
+```fs --source-file support.fs
+```
+")
+                }.CreateFiles();
+
+                var console = new TestConsole();
+
+                await VerifyCommand.Do(
+                    new VerifyOptions(root),
+                    console,
+                    () => directoryAccessor,
+                    PackageRegistry.CreateForTryMode(root));
+
+                _output.WriteLine(console.Out.ToString());
+
+                console.Out
+                    .ToString()
+                    .EnforceLF()
+                    .Trim()
+                    .Should()
+                    .Match(
+                        $"*Build failed as project {root}{Path.DirectorySeparatorChar}some.csproj is not compatible with language fsharp*".EnforceLF());
+            }
+
+            [Fact]
             public async Task When_non_editable_code_blocks_do_not_contain_errors_then_validation_succeeds()
             {
                 var root = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
