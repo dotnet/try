@@ -133,7 +133,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_Blazor()
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_wasmrunner()
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
@@ -166,7 +166,7 @@ namespace MLS.Agent.Tests
 
 
         [Fact]
-        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_not_specified_and_supports_Blazor()
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_not_specified_and_supports_wasmrunner()
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
