@@ -19,7 +19,7 @@ namespace MLS.Agent
             {
                 uri = new Uri("http://localhost:4242");
             }
-            else if (!string.IsNullOrEmpty(options.Port))
+            else if (options.Port.HasValue)
             {
                 uri = new Uri($"https://localhost:{options.Port}");
             }
