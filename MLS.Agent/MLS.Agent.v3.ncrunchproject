@@ -5,6 +5,7 @@
       <Value>..\Microsoft.DotNet.Try.Client\**.*</Value>
       <Value>..\Microsoft.DotNet.Try.js\**.*</Value>
       <Value>..\Microsoft.DotNet.Try.Styles\**.*</Value>
+      <Value>wwwroot\**.*</Value>
     </AdditionalFilesToIncludeForProject>
   </Settings>
 </ProjectConfiguration>
