@@ -30,5 +30,10 @@ namespace MLS.Agent.Markdown
                 (block.Annotations as LocalCodeBlockAnnotations)?.Project?.FullName ??
                 block.Annotations?.Package;
         }
+        public static string Language(this AnnotatedCodeBlock block)
+        {
+            return
+                (block.Annotations as LocalCodeBlockAnnotations)?.NormalizedLanguage;
+        }
     }
 }
