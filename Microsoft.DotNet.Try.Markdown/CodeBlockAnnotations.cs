@@ -4,6 +4,7 @@
 using System;
 using System.CommandLine;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -38,19 +39,23 @@ namespace Microsoft.DotNet.Try.Markdown
             {
                 Session = $"Run{++_sessionIndex}";
             }
+
+            NormalizedLanguage = parseResult?.CommandResult.Name;
+            Language = parseResult?.Tokens.First().Value;
+            RunArgs = runArgs ?? Untokenize(parseResult);
         }
 
         public virtual string Package { get; }
         public RelativeFilePath DestinationFile { get; }
         public string Region { get; }
-        public string RunArgs { get; set; }
+        public string RunArgs { get; }
         public ParseResult ParseResult { get; }
         public string PackageVersion { get; }
         public string Session { get; }
         public bool Editable { get; }
         public bool Hidden { get; }
-        public string Language { get; set; }
-        public string NormalizedLanguage { get; set; }
+        public string Language { get; }
+        public string NormalizedLanguage { get; }
 
         public virtual Task<CodeBlockContentFetchResult> TryGetExternalContent() => 
             Task.FromResult(CodeBlockContentFetchResult.None);
@@ -74,5 +79,15 @@ namespace Microsoft.DotNet.Try.Markdown
 
             return Task.CompletedTask;
         }
+
+        private static string Untokenize(ParseResult result) =>
+            result == null 
+                ? null 
+                : string.Join(" ", result.Tokens
+                    .Select(t => t.Value)
+                    .Skip(1)
+                    .Select(t => Regex.IsMatch(t, @".*\s.*")
+                        ? $"\"{t}\"" 
+                        : t));
     }
 }

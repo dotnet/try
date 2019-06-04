@@ -20,18 +20,24 @@ namespace MLS.Agent.Markdown
         public LocalCodeFenceAnnotationsParser(
             IDirectoryAccessor directoryAccessor,
             PackageRegistry packageRegistry,
-            IDefaultCodeBlockAnnotations defaultAnnotations = null) : base(defaultAnnotations, csharp =>
-        {
-            AddProjectOption(csharp, directoryAccessor);
-            AddSourceFileOption(csharp);
-        })
+            IDefaultCodeBlockAnnotations defaultAnnotations = null) : base(defaultAnnotations,
+                csharp =>
+            {
+                AddCsharpProjectOption(csharp, directoryAccessor);
+                AddSourceFileOption(csharp);
+            },
+                fsharp =>
+                {
+                    AddFsharpProjectOption(fsharp, directoryAccessor);
+                    AddSourceFileOption(fsharp);
+                })
         {
             _directoryAccessor = directoryAccessor;
             _packageRegistry = packageRegistry ?? throw new ArgumentNullException(nameof(packageRegistry));
         }
 
         public override CodeFenceOptionsParseResult TryParseCodeFenceOptions(
-            string line, 
+            string line,
             MarkdownParserContext context = null)
         {
             var result = base.TryParseCodeFenceOptions(line, context);
@@ -57,7 +63,7 @@ namespace MLS.Agent.Markdown
             return new ModelBinder(typeof(LocalCodeBlockAnnotations));
         }
 
-        private static void AddSourceFileOption(Command csharp)
+        private static void AddSourceFileOption(Command command)
         {
             var sourceFileArg = new Argument<RelativeFilePath>(
                                     result =>
@@ -76,46 +82,58 @@ namespace MLS.Agent.Markdown
 
                                         return ArgumentResult.Failure($"Error parsing the filename: {filename}");
                                     })
-                                {
-                                    Name = "SourceFile",
-                                    Arity = ArgumentArity.ZeroOrOne
-                                };
+            {
+                Name = "SourceFile",
+                Arity = ArgumentArity.ZeroOrOne
+            };
 
             var sourceFileOption = new Option("--source-file",
                                               argument: sourceFileArg);
 
-            csharp.AddOption(sourceFileOption);
+            command.AddOption(sourceFileOption);
+        }
+
+        private static void AddCsharpProjectOption(
+            Command command,
+            IDirectoryAccessor directoryAccessor)
+        {
+            AddProjectOption(command, directoryAccessor, ".csproj");
+        }
+
+        private static void AddFsharpProjectOption(
+            Command command,
+            IDirectoryAccessor directoryAccessor)
+        {
+            AddProjectOption(command,directoryAccessor, ".fsproj");
         }
 
         private static void AddProjectOption(
-            Command csharp,
-            IDirectoryAccessor directoryAccessor)
+            Command command,
+            IDirectoryAccessor directoryAccessor,
+            string projectFileExtension)
         {
             var projectOptionArgument = new Argument<FileInfo>(result =>
-                                        {
-                                            var projectPath = new RelativeFilePath(result.Tokens.Select(t => t.Value).Single());
+            {
+                var projectPath = new RelativeFilePath(result.Tokens.Select(t => t.Value).Single());
 
-                                            if (directoryAccessor.FileExists(projectPath))
-                                            {
-                                                return ArgumentResult.Success(directoryAccessor.GetFullyQualifiedPath(projectPath));
-                                            }
+                if (directoryAccessor.FileExists(projectPath))
+                {
+                    return ArgumentResult.Success(directoryAccessor.GetFullyQualifiedPath(projectPath));
+                }
 
-                                            return ArgumentResult.Failure($"Project not found: {projectPath.Value}");
-                                        })
-                                        {
-                                            Name = "project",
-                                            Arity = ArgumentArity.ExactlyOne
-                                        };
+                return ArgumentResult.Failure($"Project not found: {projectPath.Value}");
+            })
+            {
+                Name = "project",
+                Arity = ArgumentArity.ExactlyOne
+            };
 
             projectOptionArgument.SetDefaultValue(() =>
             {
                 var rootDirectory = directoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath("."));
                 var projectFiles = directoryAccessor.GetAllFilesRecursively()
-                                                    .Where(file =>
-                                                    {
-                                                        return directoryAccessor.GetFullyQualifiedPath(file.Directory).FullName == rootDirectory.FullName && file.Extension == ".csproj";
-                                                    })
-                                                    .ToArray();
+                    .Where(file => directoryAccessor.GetFullyQualifiedPath(file.Directory).FullName == rootDirectory.FullName && file.Extension == projectFileExtension)
+                    .ToArray();
 
                 if (projectFiles.Length == 1)
                 {
@@ -126,9 +144,9 @@ namespace MLS.Agent.Markdown
             });
 
             var projectOption = new Option("--project",
-                                           argument: projectOptionArgument);
+                argument: projectOptionArgument);
 
-            csharp.Add(projectOption);
+            command.Add(projectOption);
         }
     }
 }

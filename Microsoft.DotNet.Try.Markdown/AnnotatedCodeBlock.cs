@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Try.Markdown
 
             AddAttributeIfNotNull("data-trydotnet-region", annotations.Region);
             AddAttributeIfNotNull("data-trydotnet-session-id", annotations.Session);
-            AddAttribute("class", $"language-{annotations.Language}");
+            AddAttribute("class", $"language-{annotations.NormalizedLanguage}");
         }
 
         public void RenderTo(
