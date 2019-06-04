@@ -51,6 +51,9 @@ namespace WorkspaceServer
         public Task<CommandLineResult> Build(string args = null, Budget budget = null) =>
             Execute("build".AppendArgs(args), budget);
 
+        public Task<CommandLineResult> Clean(Budget budget = null) =>
+            Execute("clean", budget);
+
         public Task<CommandLineResult> Execute(string args, Budget budget = null) =>
             CommandLine.Execute(
                 Path,

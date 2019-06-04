@@ -100,6 +100,15 @@ namespace WorkspaceServer.Servers.Roslyn
         public static FileInfo GetProjectFile(this IHaveADirectory packageBase) =>
             packageBase.Directory.GetFiles("*.csproj").FirstOrDefault();
 
+        public static void CleanObjFolder(this IHaveADirectory packageBase)
+        {
+            var targets = packageBase.Directory.GetDirectories("obj");
+            foreach (var target in targets)
+            {
+                target.Delete(true);
+            }
+        }
+
         public static FileInfo FindLatestBinLog(this IHaveADirectory package) =>
             package.FindBinLogs().OrderByDescending(f => f.LastWriteTimeUtc).FirstOrDefault();
 

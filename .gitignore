@@ -348,3 +348,18 @@ healthchecksdb
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
+
+wwwroot/api/
+
+wwwroot/client/
+
+MLS\.Agent/wwwroot/api/
+
+MLS\.Agent/wwwroot/client/
+
+*.trx
+
+
+Microsoft\.DotNet\.Try\.js/\.rpt2_cache/
+
+Microsoft\.DotNet\.Try\.js/dist/

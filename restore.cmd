@@ -1,2 +1,2 @@
 @echo off
-powershell -noprofile -executionPolicy RemoteSigned -file "%~dp0eng\common\build.ps1" -restore -binaryLog %*
+powershell -noprofile -executionPolicy RemoteSigned -file "%~dp0eng\build.ps1" -restore -binaryLog %*
