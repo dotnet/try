@@ -129,7 +129,7 @@ namespace MLS.Agent.Controllers
             {
                 var blocks = await file.GetAnnotatedCodeBlocks();
                 var packageUsesBlazor = await Task.WhenAll(blocks
-                    .Select(b => b.ProjectOrPackageName())
+                    .Select(b => b.PackageName())
                     .Select(async name => (await _packageRegistry.Get<IMightSupportBlazor>(name))?.CanSupportBlazor ?? false));
 
                 useBlazor = packageUsesBlazor.Any(p => p == true);

@@ -170,39 +170,40 @@ namespace MLS.Agent.Tests
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
-            var startupOptions = new StartupOptions(
-                dir: TestAssets.SampleConsole,
-                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
-
-            var text = $@"
+            using (var dir = DisposableDirectory.Create())
+            {
+                var text = $@"
 ```cs --package {name}
 ```";
 
-            var path = Path.Combine(TestAssets.SampleConsole.FullName, "BlazorTutorial.md");
-            File.WriteAllText(path, text);
+                var path = Path.Combine(dir.Directory.FullName, "BlazorTutorial.md");
+                File.WriteAllText(path, text);
 
-            using (var agent = new AgentService(startupOptions))
-            {
-                var response = await agent.GetAsync(@"/BlazorTutorial.md");
+                var startupOptions = new StartupOptions(
+                    dir: dir.Directory,
+                    addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
 
-                response.Should().BeSuccessful();
+                using (var agent = new AgentService(startupOptions))
+                {
+                    var response = await agent.GetAsync(@"/BlazorTutorial.md");
 
-                var html = await response.Content.ReadAsStringAsync();
+                    response.Should().BeSuccessful();
 
-                var document = new HtmlDocument();
-                document.LoadHtml(html);
+                    var html = await response.Content.ReadAsStringAsync();
 
-                var scripts = document.DocumentNode
-                                      .Descendants("body")
-                                      .Single()
-                                      .Descendants("script")
-                                      .Select(s => s.InnerHtml);
+                    var document = new HtmlDocument();
+                    document.LoadHtml(html);
 
-                scripts.Should()
-                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+                    var scripts = document.DocumentNode
+                                          .Descendants("body")
+                                          .Single()
+                                          .Descendants("script")
+                                          .Select(s => s.InnerHtml);
+
+                    scripts.Should()
+                           .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+                }
             }
-
-            File.Delete(path);
         }
 
         [Fact]
