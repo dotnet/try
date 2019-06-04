@@ -56,6 +56,7 @@ namespace WorkspaceServer.Models.Execution
                 workspace.Files,
                 workspace.Buffers.Concat(new[] { new Buffer(BufferId.Parse(id), text) }).ToArray(),
                 workspace.WorkspaceType,
+                workspace.Language,
                 workspace.IncludeInstrumentation);
 
         public static Workspace RemoveBuffer(
@@ -66,6 +67,7 @@ namespace WorkspaceServer.Models.Execution
                 workspace.Files,
                 workspace.Buffers.Where(b => b.Id.ToString() != id).ToArray(),
                 workspace.WorkspaceType,
+                workspace.Language,
                 workspace.IncludeInstrumentation);
 
         public static Workspace ReplaceBuffer(
@@ -85,6 +87,7 @@ namespace WorkspaceServer.Models.Execution
                          .ToArray(),
                 workspace.Buffers,
                 workspace.WorkspaceType,
+                workspace.Language,
                 workspace.IncludeInstrumentation);
 
         public static Workspace ReplaceFile(
@@ -99,6 +102,7 @@ namespace WorkspaceServer.Models.Execution
                          .ToArray(),
                 workspace.Buffers,
                 workspace.WorkspaceType,
+                workspace.Language,
                 workspace.IncludeInstrumentation);
 
     }
