@@ -141,7 +141,7 @@ namespace MLS.Agent.CommandLine
                     .Select(b => b.Language())
                     .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
 
-                if (!ProjectIsCompatibleWithLanguage(projectOrPackageName, language))
+                if (!ProjectIsCompatibleWithLanguage( new UriOrFileInfo(projectOrPackageName), language))
                 {
                     SetError();
 
@@ -272,12 +272,12 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        private static bool ProjectIsCompatibleWithLanguage(string projectOrPackageName, string language)
+        private static bool ProjectIsCompatibleWithLanguage(UriOrFileInfo projectOrPackage, string language)
         {
-            var extension = Path.GetExtension(projectOrPackageName)?.ToLowerInvariant();
             var supported = true;
-            if (!string.IsNullOrWhiteSpace(extension))
+            if (projectOrPackage.IsFile)
             {
+                var extension = projectOrPackage.FileExtension.ToLowerInvariant();
                 switch (extension)
                 {
                     case ".csproj":
