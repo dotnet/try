@@ -220,7 +220,16 @@ namespace MLS.Agent.Tests.CommandLine
             await _parser.InvokeAsync("--port 6000", _console);
             _start_options.Port.Should().Be(6000);
         }
-        
+
+        [Fact]
+        public void Negative_port_fails_the_parse()
+        {
+            _parser.Parse("--port -1")
+                   .Errors
+                   .Should()
+                   .Contain(e => e.Message == "Invalid argument for --port. Negative port number is not allowed");
+        }
+
         [Fact]
         public void Parse_application_insights_key_without_parameter_fails_the_parse()
         {
