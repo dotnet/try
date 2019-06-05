@@ -1,25 +1,6 @@
 # Creating interactive documentation with Try .NET
 
-## Setup
-Before getting started with the sample above, you need to install the `dotnet try` global tool. In a terminal execute
-
-```console
-dotnet tool install --global dotnet-try
-```
-
-Once installed you can execute 
-```console
-dotnet try -h
-```
-and see the list of available commands.
-
-## Executing your first sample
-
-In the directory of the project execute 
-```console
-dotnet try
-```
-This should launch a browser window. The following code fence will be replaced by the editor and you can execute the code by hitting the run button.
+## This code fence will run the HelloWorld method from Program.cs
 
 ```cs --source-file ./Program.cs --project ./Microsoft.DotNet.Try.ProjectTemplate.Tutorial.csproj --region HelloWorld
 ```
@@ -38,7 +19,7 @@ If you navigate back to Program.cs you will be able to see the various regions a
 
 ## Learn More
 
-The above are the basic to get you started with creating your own interactive documentation. To learn more about the `dotnet try` features, at the command line execute
+To learn more about the `dotnet try` features, at the command line execute
 
 ```console
 dotnet try demo
