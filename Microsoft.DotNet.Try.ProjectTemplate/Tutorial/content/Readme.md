@@ -26,12 +26,12 @@ This should launch a browser window. The following code fence will be replaced b
 
 ## What's happening behind the scenes
 
-Code fences are a standard way to include code in your markdown files. The only change you need to do is to add few options in the first line of your code snippet. If you notice the above code snippet, there are three options in action.
+Code fences are a standard way to include code in your markdown files. The only change you need to make is to add few options in the first line of your code snippet. If you notice the above code snippet, there are three options in use.
 
 | Option                                 | What it does                                                                                                                |
 |----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | `--project ./Microsoft.DotNet.Try.ProjectTemplate.Tutorial.csproj` | Points to the project that the sample is part of. (Optional. Defaults to any .csproj in the same folder as the `.md` file.) |
-| `--region HelloWorld`                        | Identifes a C# code `#region` to focus on. (Optional. If not specified, the whole file is displayed in the editor.)         |
+| `--region HelloWorld`                        | Identifies a C# code `#region` to focus on. (Optional. If not specified, the whole file is displayed in the editor.)         |
 | `--source-file ./Program.cs`  | Points to the file where the sample code is pulled from.  
 
 If you navigate back to Program.cs you will be able to see the various regions and the context in which your code is being execute. As an exercise, try to change the region in the previous code snippet to `DateTime`  and then refresh the browser. You should be able to see the text that is a part of the `DateTime` region now.

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
 {
-    ///<summary>This program uses <a href="https://github.com/dotnet/command-line-api/wiki/DragonFruit-overview">System.CommandLine DragonFruit</a> to accept arguments from command line.
+    ///<summary>This program uses <a href="https://github.com/dotnet/command-line-api/wiki/DragonFruit-overview">System.CommandLine.DragonFruit</a> to accept command line arguments from command line.
     ///<example>Execute: dotnet run --region "HelloWorld" to see the output</example>
     ///</summary>
     public class Program
