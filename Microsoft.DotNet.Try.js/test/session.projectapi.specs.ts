@@ -22,7 +22,7 @@ describe("a user", () => {
     describe("with a trydotnet session", () => {
         it("can open a project", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "" }] });
             await session.openProject(project);
         });
     });

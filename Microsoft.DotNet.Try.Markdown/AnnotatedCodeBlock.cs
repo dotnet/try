@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Try.Markdown
 {
     public class AnnotatedCodeBlock : FencedCodeBlock
     {
-        protected readonly List<string> _diagnostics = new List<string>();
+        private readonly List<string> _diagnostics = new List<string>();
         private string _sourceCode;
         private bool _initialized;
 
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Try.Markdown
 
             AddAttributeIfNotNull("data-trydotnet-region", annotations.Region);
             AddAttributeIfNotNull("data-trydotnet-session-id", annotations.Session);
-            AddAttribute("class", $"language-{annotations.Language}");
+            AddAttribute("class", $"language-{annotations.NormalizedLanguage}");
         }
 
         public void RenderTo(

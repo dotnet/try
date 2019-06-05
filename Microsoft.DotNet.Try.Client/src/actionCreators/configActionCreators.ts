@@ -57,9 +57,9 @@ export function enablePreviewFeatures(): Action {
     };
 }
 
-export function configureBlazor(): Action {
+export function configureWasmRunner(): Action {
     return {
-        type: types.CONFIGURE_BLAZOR
+        type: types.CONFIGURE_WASMRUNNER
     };
 }
 export function enableInstrumentation(): Action {

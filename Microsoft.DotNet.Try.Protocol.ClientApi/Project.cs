@@ -12,12 +12,16 @@ namespace Microsoft.DotNet.Try.Protocol.ClientApi
     [JsonConverter(typeof(ProjectJsonConverter))]
     public class Project : FeatureContainer
     {
+        private const string DefaultLanguage = "csharp";
+
         public string ProjectTemplate { get; }
 
         public SourceFile[] Files { get; }
 
+        public string Language { get; }
 
-        public Project(string projectTemplate, IEnumerable<SourceFile> files)
+
+        public Project(string projectTemplate,  IEnumerable<SourceFile> files, string language = DefaultLanguage)
         {
             if (string.IsNullOrWhiteSpace(projectTemplate))
             {
@@ -39,6 +43,8 @@ namespace Microsoft.DotNet.Try.Protocol.ClientApi
 
             ProjectTemplate = projectTemplate;
 
+            Language = string.IsNullOrWhiteSpace(language) ? DefaultLanguage : language;
+
         }
 
         private class ProjectJsonConverter : FeatureContainerConverter<Project>
@@ -46,6 +52,7 @@ namespace Microsoft.DotNet.Try.Protocol.ClientApi
             protected override void AddProperties(Project container, JObject o)
             {
                 o.Add(new JProperty("projectTemplate", container.ProjectTemplate));
+                o.Add(new JProperty("language", container.Language));
                 o.Add(new JProperty("files", JArray.FromObject(container.Files)));
             }
         }

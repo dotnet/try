@@ -32,7 +32,7 @@ describe("A user", () => {
     describe("with a trydotnet session", () => {
         it("can open a document", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "file content" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             await session.openProject(project);
             let document = await session.openDocument({ fileName: "program.cs" });
 
@@ -42,7 +42,7 @@ describe("A user", () => {
 
         it("creates a empty document when the project does not have a matching file", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "file content" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             await session.openProject(project);
 
             let document = await session.openDocument({ fileName: "program_two.cs" });
@@ -53,7 +53,7 @@ describe("A user", () => {
 
         it("creates a empty document when using region and the project does not have a matching file", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "file content" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             await session.openProject(project);
 
             let document = await session.openDocument({ fileName: "program_two.cs", region: "controller" });
@@ -64,7 +64,7 @@ describe("A user", () => {
 
         it("can open a document with region as identifier", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let project = await createProject("console", [{ name: "program.cs", content: "//pre\n#region controller\n//content\n e#endregion\n//post/n" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n//content\n e#endregion\n//post/n" }] });
             await session.openProject(project);
 
             registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
@@ -83,7 +83,7 @@ describe("A user", () => {
             let editorState = { content: "", documentId: "" };
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let defaultEditor = session.getTextEditor();
-            let project = await createProject("console", [{ name: "program.cs", content: "file content" }]);
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             registerForRequestIdGeneration(configuration, editorIFrame, dom.window, _r => "TestRun0");
             await session.openProject(project);
             registerForEditorMessages(configuration, editorIFrame, dom.window, editorState);
@@ -99,7 +99,7 @@ describe("A user", () => {
                 let editorState = { content: "", documentId: "" };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
                 let defaultEditor = session.getTextEditor();
-                let project = await createProject("console", [{ name: "program.cs", content: "file content" }]);
+                let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
                 await session.openProject(project);
                 registerForRequestIdGeneration(configuration, editorIFrame, dom.window, _r => "TestRun1");
 
@@ -116,7 +116,7 @@ describe("A user", () => {
                 let editorState = { content: "", documentId: "" };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
                 let defaultEditor = session.getTextEditor();
-                let project = await createProject("console", [{ name: "program.cs", content: "file content" }]);
+                let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
                 await session.openProject(project);
                 registerForRequestIdGeneration(configuration, editorIFrame, dom.window, _r => "TestRun2");
                 registerForEditorMessages(configuration, editorIFrame, dom.window, editorState);
@@ -135,11 +135,12 @@ describe("A user", () => {
                 let session = await createReadySessionWithMultipleEditors(configuration, editorIFrames, dom.window);
 
                 let project = await createProject(
-                    "console",
-                    [
-                        { name: "program.cs", content: "the program" },
-                        { name: "otherFile.cs", content: "other file content" }
-                    ]);
+                    {
+                        packageName: "console", files: [
+                            { name: "program.cs", content: "the program" },
+                            { name: "otherFile.cs", content: "other file content" }
+                        ]
+                    });
 
                 await session.openProject(project);
 
@@ -171,11 +172,12 @@ describe("A user", () => {
                 let session = await createReadySessionWithMultipleEditors(configuration, editorIFrames, dom.window);
 
                 let project = await createProject(
-                    "console",
-                    [
-                        { name: "program.cs", content: "the program" },
-                        { name: "otherFile.cs", content: "other file content" }
-                    ]);
+                    {
+                        packageName: "console", files: [
+                            { name: "program.cs", content: "the program" },
+                            { name: "otherFile.cs", content: "other file content" }
+                        ]
+                    });
 
                 await session.openProject(project);
 

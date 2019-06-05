@@ -10,12 +10,12 @@ namespace Microsoft.DotNet.Try.Markdown
 {
     public class AnnotatedCodeBlockParser : FencedBlockParserBase<AnnotatedCodeBlock>
     {
-        private readonly CodeFenceAnnotationsParser codeFenceAnnotationsParser;
+        private readonly CodeFenceAnnotationsParser _codeFenceAnnotationsParser;
         private int _order;
 
         public AnnotatedCodeBlockParser(CodeFenceAnnotationsParser codeFenceAnnotationsParser)
         {
-            this.codeFenceAnnotationsParser = codeFenceAnnotationsParser ?? throw new ArgumentNullException(nameof(codeFenceAnnotationsParser));
+            _codeFenceAnnotationsParser = codeFenceAnnotationsParser ?? throw new ArgumentNullException(nameof(codeFenceAnnotationsParser));
             OpeningCharacters = new[] { '`' };
             InfoParser = ParseCodeOptions;
         }
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Try.Markdown
                 return false;
             }
 
-            var result = codeFenceAnnotationsParser.TryParseCodeFenceOptions(line.ToString(),
+            var result = _codeFenceAnnotationsParser.TryParseCodeFenceOptions(line.ToString(),
                 state.Context);
 
             switch (result)

@@ -28,7 +28,7 @@ export type ServiceErrorHandler = (
 
 export type AutoEnablerConfiguration = {
     apiBaseAddress: URL,
-    useBlazor?:boolean;
+    useWasmRunner?:boolean;
     debug?:boolean;
     runResultHandler?: RunResultHandler;
     serviceErrorHandler?: ServiceErrorHandler;
