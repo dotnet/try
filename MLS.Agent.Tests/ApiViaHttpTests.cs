@@ -28,6 +28,7 @@ using HtmlAgilityPack;
 using System.Web;
 using MLS.Agent.Controllers;
 using WorkspaceServer.Tests.Packaging;
+using WorkspaceServer.Tests.TestUtility;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
 
@@ -898,7 +899,7 @@ namespace FibonacciTest
         }
 
         [Fact]
-        public async Task Returns_blazor_false_if_the_package_does_not_contain_blazor_runner()
+        public async Task Returns_IsWasmSupported_false_if_the_package_does_not_contain_wasm_runner()
         {
          
             var packageVersion = "1.0.0";
@@ -909,14 +910,14 @@ namespace FibonacciTest
                 response.Should().BeSuccessful();
                 var result = await response.Content.ReadAsStringAsync();
                 result.FromJsonTo<Package>()
-                      .IsBlazorSupported
+                      .IsWasmSupported
                       .Should()
                       .BeFalse();
             }
         }
 
         [Fact]
-        public async Task Returns_blazor_true_if_the_package_contains_blazor()
+        public async Task Returns_IsWasmSupported_true_if_the_package_contains_wasm_runner()
         {
             var package = await Create.InstalledPackageWithBlazorEnabled();
             var packageVersion = "1.0.0";
@@ -927,7 +928,7 @@ namespace FibonacciTest
                 response.Should().BeSuccessful();
                 var result = await response.Content.ReadAsStringAsync();
                 result.FromJsonTo<Package>()
-                      .IsBlazorSupported
+                      .IsWasmSupported
                       .Should()
                       .BeTrue();
             }
@@ -965,6 +966,37 @@ namespace FibonacciTest
             }
         }
 
+        [Fact]
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useWasmRunner_is_true_when_package_is_specified_and_supports_Wasm()
+        {
+            var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
+
+            var startupOptions = new StartupOptions(
+                dir: TestAssets.SampleConsole,
+                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
+                package: name);
+
+            using (var agent = new AgentService(startupOptions))
+            {
+                var response = await agent.GetAsync(@"/Subdirectory/Tutorial.md");
+
+                response.Should().BeSuccessful();
+
+                var html = await response.Content.ReadAsStringAsync();
+
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
+
+                var scripts = document.DocumentNode
+                                      .Descendants("body")
+                                      .Single()
+                                      .Descendants("script")
+                                      .Select(s => s.InnerHtml);
+
+                scripts.Should()
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
+            }
+        }
         private class FailedRunResult : Exception
         {
             internal FailedRunResult(string message) : base(message)

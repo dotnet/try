@@ -29,7 +29,7 @@ export const RUN_CODE_RESULT_SPECIFIED = "RUN_CODE_RESULT_SPECIFIED";
 export const SET_WORKSPACE_TYPE = "SET_WORKSPACE_TYPE";
 export const SET_ADDITIONAL_USINGS = "SET_ADDITIONAL_USINGS";
 export const RUN_CLICKED = "RUN_CLICKED";
-export const CONFIGURE_BLAZOR = "CONFIGURE_BLAZOR";
+export const CONFIGURE_WASMRUNNER = "CONFIGURE_WASMRUNNER";
 export const CONFIGURE_CLIENT = "CONFIGURE_CLIENT";
 export const CONFIGURE_EDITOR_ID = "CONFIGURE_EDITOR_ID";
 export const ENABLE_TELEMETRY = "ENABLE_TELEMETRY";
@@ -63,8 +63,8 @@ export const CANNOT_MOVE_PREV = "CANNOT_MOVE_PREV";
 export const CAN_MOVE_NEXT = "CAN_MOVE_NEXT";
 export const CAN_MOVE_PREV = "CAN_MOVE_PREV";
 
-export const SEND_BLAZOR_MESSAGE = "SEND_BLAZOR_MESSAGE";
-export const BLAZOR_READY = "BLAZOR_READY";
+export const SEND_WASMRUNNER_MESSAGE = "SEND_WASMRUNNER_MESSAGE";
+export const WASMRUNNER_READY = "WASMRUNNER_READY";
 
 export const OPERATION_ID_GENERATED = "OPERATION_ID_GENERATED";
 
@@ -99,11 +99,11 @@ export type Action =
         operationId: string,
         requestId: string
     } | {
-        type: typeof SEND_BLAZOR_MESSAGE,
+        type: typeof SEND_WASMRUNNER_MESSAGE,
         payload: object,
         callback: (arg: any) => void
     } | {
-        type: typeof BLAZOR_READY,
+        type: typeof WASMRUNNER_READY,
         editorId?: string
     } | {
         type: typeof LOAD_CODE_REQUEST,
@@ -230,7 +230,7 @@ export type Action =
     } | {
         type: typeof CONFIGURE_ENABLE_PREVIEW
     } | {
-        type: typeof CONFIGURE_BLAZOR
+        type: typeof CONFIGURE_WASMRUNNER
     } | {
         type: typeof COMPILE_CODE_FAILURE,
         requestId?: string,

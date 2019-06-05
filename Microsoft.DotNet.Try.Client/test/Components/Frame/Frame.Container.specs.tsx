@@ -38,9 +38,9 @@ suite("<Frame />", () => {
             </Provider>);
         expect(wrapper.html()).to.equal(null);
     });
-    it("loads stuff if blazor is true", () => {
+    it("loads stuff if wasmRunner is true", () => {
         store.configure([
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
             actions.notifyHostProvidedConfiguration({
                 hostOrigin: new URL("http://try")
             })
@@ -54,9 +54,9 @@ suite("<Frame />", () => {
         wrapper.html().should.not.equal(null);
     });
     
-    it("dispatches ready when it receives a message from blazor", () => {
+    it("dispatches ready when it receives a message from wasmRunner", () => {
         store.configure([
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
             actions.configureEditorId("editor-id"),
             actions.notifyHostProvidedConfiguration({
                 hostOrigin: new URL("http://try")
@@ -75,7 +75,7 @@ suite("<Frame />", () => {
         store.getActions().should.deep.equal(
             [
                 actions.hostRunReady("editor-id"),
-                actions.blazorReady("editor-id")]
+                actions.wasmRunnerReady("editor-id")]
         );
     });
 });

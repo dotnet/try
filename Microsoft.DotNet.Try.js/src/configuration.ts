@@ -7,7 +7,7 @@ export type Configuration = {
     hostOrigin?: string,
     trydotnetOrigin?: string,
     debug?: boolean,
-    useBlazor?: boolean,
+    useWasmRunner?: boolean,
     enablePreviewFeatures?: boolean,
     enableGithubPanel?: boolean,
     editorConfiguration?: MonacoEditorConfiguration,

@@ -76,14 +76,14 @@ const defaultServiceErrorHandler = (
 };
 
 export function autoEnable(
-    { apiBaseAddress, useBlazor = true, debug = false, runResultHandler = defaultRunResultHandler, serviceErrorHandler = defaultServiceErrorHandler }: AutoEnablerConfiguration,
+    { apiBaseAddress, useWasmRunner = true, debug = false, runResultHandler = defaultRunResultHandler, serviceErrorHandler = defaultServiceErrorHandler }: AutoEnablerConfiguration,
     documentToScan?: HTMLDocument,
     mainWindow?: Window
 ): Promise<TryDotNetSession[]> {
     return internalAutoEnable(
         {
             apiBaseAddress: apiBaseAddress,
-            useBlazor: useBlazor,
+            useWasmRunner: useWasmRunner,
             debug: debug,
             runResultHandler: runResultHandler,
             serviceErrorHandler: serviceErrorHandler
@@ -304,7 +304,7 @@ function internalAutoEnable(
         let documentsToInclude = getDocumentsToInclude(includes, sessionId);
         let config: Configuration = {
             debug: configuration.debug,
-            useBlazor: configuration.useBlazor,
+            useWasmRunner: configuration.useWasmRunner,
             hostOrigin: doc.location.origin,
             trydotnetOrigin: apiBaseAddress ? apiBaseAddress.href : null,
             editorConfiguration: {

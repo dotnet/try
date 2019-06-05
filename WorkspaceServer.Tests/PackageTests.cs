@@ -179,11 +179,11 @@ namespace WorkspaceServer.Tests
         [InlineData("nodatime.api", false)]
         //[InlineData("blazor-console", true, Skip = "Requires package design changes")]
         //[InlineData("blazor-nodatime.api", true, Skip = "Requires package design changes")]
-        public async Task CanSupportBlazor_indicates_whether_the_package_supports_Blazor(string packageName, bool expected)
+        public async Task CanSupportBlazor_indicates_whether_the_package_supports_Wasm_runner(string packageName, bool expected)
         {
             var registry = Default.PackageFinder;
-            var package = await registry.Get<IMightSupportBlazor>(packageName);
-            package.CanSupportBlazor.Should().Be(expected);
+            var package = await registry.Get<ICanSupportWasm>(packageName);
+            package.CanSupportWasm.Should().Be(expected);
         }
     }
 }

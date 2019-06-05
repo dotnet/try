@@ -11,11 +11,11 @@ namespace MLS.Agent.Tests
 {
     public static class LocalToolHelpers
     {
-        public static async Task<DirectoryInfo> CreateTool(TestConsole console)
+        public static async Task<(DirectoryInfo, string)> CreateTool(TestConsole console)
         {
             var asset = await Create.NetstandardWorkspaceCopy();
             await PackCommand.Do(new PackOptions(asset.Directory), console);
-            return asset.Directory;
+            return (asset.Directory, asset.Name);
         }
     }
 }

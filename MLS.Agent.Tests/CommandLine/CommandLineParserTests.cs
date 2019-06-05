@@ -274,6 +274,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             await _parser.InvokeAsync($"pack {expected}", console);
             _packOptions.PackTarget.FullName.Should().Be(expected);
+            _packOptions.EnableWasm.Should().Be(false);
         }
 
         [Fact]
@@ -285,6 +286,16 @@ namespace MLS.Agent.Tests.CommandLine
 
             await _parser.InvokeAsync($"pack {directoryName} --version {expectedVersion}", console);
             _packOptions.Version.Should().Be(expectedVersion);
+        }
+
+        [Fact]
+        public async Task Pack_parses_enable_wasm()
+        {
+            var console = new TestConsole();
+            var directoryName = Path.GetDirectoryName(typeof(PackCommand).Assembly.Location);
+
+            await _parser.InvokeAsync($"pack {directoryName} --enable-wasm", console);
+            _packOptions.EnableWasm.Should().Be(true);
         }
 
         [Fact]

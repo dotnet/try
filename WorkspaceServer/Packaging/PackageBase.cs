@@ -15,7 +15,7 @@ namespace WorkspaceServer.Packaging
 {
     public abstract class PackageBase : 
         IHaveADirectory,
-        IMightSupportBlazor, 
+        ICanSupportWasm, 
         IHaveADirectoryAccessor
     {
         IDirectoryAccessor IHaveADirectoryAccessor.Directory => new FileSystemDirectoryAccessor(Directory);
@@ -69,7 +69,7 @@ namespace WorkspaceServer.Packaging
             budget.RecordEntry();
         }
 
-        public bool CanSupportBlazor
+        public bool CanSupportWasm
         {
             get
             {

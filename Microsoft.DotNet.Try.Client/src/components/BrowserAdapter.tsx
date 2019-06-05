@@ -90,16 +90,16 @@ const configureStore = function (
 
     let workspaceParameter = query.get("workspace");
     let workspaceTypeParameter = query.get("workspaceType");    
-    let useBlazor =  (!!(query.get("useBlazor"))) === true;
+    let useWasmRunner =  (!!(query.get("useWasmRunner"))) === true;
 
     // Access query string of parent window
     let clientParams = props.iframeWindow.getClientParameters();
     if (clientParams.workspaceType) {
         workspaceTypeParameter = clientParams.workspaceType;
     }
-    if( clientParams.hasOwnProperty("useBlazor") && clientParams.useBlazor !== null && clientParams.useBlazor !== undefined){
-        // useBlazor can be set via clientParameters
-        useBlazor = useBlazor || ( (!!(clientParams.useBlazor)) === true);
+    if( clientParams.hasOwnProperty("useWasmRunner") && clientParams.useWasmRunner !== null && clientParams.useWasmRunner !== undefined){
+        // useWasmRunner can be set via clientParameters
+        useWasmRunner = useWasmRunner || ( (!!(clientParams.useWasmRunner)) === true);
     }
 
     // Get attributes from the srcript element that contains bundeljs
@@ -120,8 +120,8 @@ const configureStore = function (
         }
     }
 
-    if (useBlazor) {
-        store.dispatch(actions.configureBlazor());
+    if (useWasmRunner) {
+        store.dispatch(actions.configureWasmRunner());
     }
 
     if ((!!(query.get("waitForConfiguration"))) !== false) {
@@ -278,7 +278,7 @@ export interface ClientParameters {
     workspaceType?: string;
     scaffold?: string;
     referrer?: URL;
-    useBlazor?: boolean;
+    useWasmRunner?: boolean;
 }
 
 export type ICanPostMessage = { postMessage: (message: Object, targetOrigin: string) => void };

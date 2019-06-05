@@ -322,6 +322,8 @@ namespace MLS.Agent.CommandLine
                                                  "The version of the Try .NET package",
                                                  new Argument<string>()));
 
+                packCommand.AddOption(new Option("--enable-wasm", "Enables web assembly code execution"));
+
                 packCommand.Handler = CommandHandler.Create<PackOptions, IConsole>(
                     (options, console) =>
                     {

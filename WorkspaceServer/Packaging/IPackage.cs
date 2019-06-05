@@ -23,9 +23,9 @@ namespace WorkspaceServer.Packaging
         IDirectoryAccessor Directory { get; }
     }
 
-    public interface IMightSupportBlazor : IPackage
+    public interface ICanSupportWasm : IPackage
     {
-        bool CanSupportBlazor { get; }
+        bool CanSupportWasm { get; }
     }
 
     public interface ICreateWorkspace : IPackage

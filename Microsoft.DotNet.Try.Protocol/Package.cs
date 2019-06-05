@@ -5,11 +5,11 @@ namespace Microsoft.DotNet.Try.Protocol
 {
     public class Package
     {
-        public bool IsBlazorSupported { get; }
+        public bool IsWasmSupported { get; }
 
-        public Package(bool isBlazorSupported)
+        public Package(bool isWasmSupported)
         {
-            IsBlazorSupported = isBlazorSupported;
+            IsWasmSupported = isWasmSupported;
         }
     }
 }

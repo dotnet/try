@@ -96,17 +96,17 @@ export function outputUpdated(newOutput: string[]): Action {
     };
 }
 
-function sendBlazorMessage<TResult>(payload: object, callback: (arg: TResult) => void): Action {
+function sendWasmRunnerMessage<TResult>(payload: object, callback: (arg: TResult) => void): Action {
     return {
-        type: types.SEND_BLAZOR_MESSAGE,
+        type: types.SEND_WASMRUNNER_MESSAGE,
         callback: callback,
         payload: payload
     };
 }
 
-export function blazorReady(editorId: string): Action {
+export function wasmRunnerReady(editorId: string): Action {
     return {
-        type: types.BLAZOR_READY,
+        type: types.WASMRUNNER_READY,
         editorId: editorId
     };
 }
@@ -127,7 +127,7 @@ export function run(requestId?: string, parameters: { [key: string]: any } = {})
         dispatch(runRequest(requestIdentifier));
 
         if (state.config.useLocalCodeRunner) {
-            return runUsingBlazor(state, request, parameters, state.config.client, state.config.applicationInsightsClient, dispatch);
+            return runUsingWasmRunner(state, request, parameters, state.config.client, state.config.applicationInsightsClient, dispatch);
         }
         else {
             return runOnAgent(request, state.config.client, state.config.applicationInsightsClient, dispatch);
@@ -170,7 +170,7 @@ function isCompileResult(response: any): response is ICompileResponse {
     return response.base64assembly !== undefined;
 }
 
-async function runUsingBlazor(state: IState, request: IRunRequest, parameters: { [key: string]: any }, client: IMlsClient, applicationInsightsClient: IApplicationInsightsClient, dispatch: ThunkDispatch<IState, void, AnyAction>): Promise<Action> {
+async function runUsingWasmRunner(state: IState, request: IRunRequest, parameters: { [key: string]: any }, client: IMlsClient, applicationInsightsClient: IApplicationInsightsClient, dispatch: ThunkDispatch<IState, void, AnyAction>): Promise<Action> {
     let response: ICompileResponse;
     if (state.compile.workspaceVersion === state.workspace.sequenceNumber) {
         response = state.compile;
@@ -208,7 +208,7 @@ async function runUsingBlazor(state: IState, request: IRunRequest, parameters: {
             requestId: request.requestId
         };
 
-        return dispatch(sendBlazorMessage<WasmCodeRunnerResponse>(wasmRunRequest,
+        return dispatch(sendWasmRunnerMessage<WasmCodeRunnerResponse>(wasmRunRequest,
             (runResponse: WasmCodeRunnerResponse) => {
                 if (isCompileResult(runResponse)) {
                     return;

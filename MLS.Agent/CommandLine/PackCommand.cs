@@ -29,7 +29,7 @@ namespace MLS.Agent.CommandLine
                 var temp_projects_build = temp_projects.CreateSubdirectory("build");
                 options.PackTarget.CopyTo(temp_projects_build);
 
-                if (options.EnableBlazor)
+                if (options.EnableWasm)
                 {
                     string runnerDirectoryName = $"wasm";
                     var temp_projects_wasm = temp_projects.CreateSubdirectory(runnerDirectoryName);

@@ -128,12 +128,12 @@ namespace MLS.Agent.Tests
                                       .Select(s => s.InnerHtml);
 
                 scripts.Should()
-                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: false });"));
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: false });"));
             }
         }
 
         [Fact]
-        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_Blazor()
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_wasmrunner()
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
@@ -160,7 +160,49 @@ namespace MLS.Agent.Tests
                                       .Select(s => s.InnerHtml);
 
                 scripts.Should()
-                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
+            }
+        }
+
+
+        [Fact]
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_not_specified_and_supports_wasmrunner()
+        {
+            var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
+
+            using (var dir = DisposableDirectory.Create())
+            {
+                var text = $@"
+```cs --package {name}
+```";
+
+                var path = Path.Combine(dir.Directory.FullName, "BlazorTutorial.md");
+                File.WriteAllText(path, text);
+
+                var startupOptions = new StartupOptions(
+                    dir: dir.Directory,
+                    addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
+
+                using (var agent = new AgentService(startupOptions))
+                {
+                    var response = await agent.GetAsync(@"/BlazorTutorial.md");
+
+                    response.Should().BeSuccessful();
+
+                    var html = await response.Content.ReadAsStringAsync();
+
+                    var document = new HtmlDocument();
+                    document.LoadHtml(html);
+
+                    var scripts = document.DocumentNode
+                                          .Descendants("body")
+                                          .Single()
+                                          .Descendants("script")
+                                          .Select(s => s.InnerHtml);
+
+                    scripts.Should()
+                           .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
+                }
             }
         }
 

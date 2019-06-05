@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -115,37 +116,42 @@ namespace MLS.Agent.Controllers
             return new HtmlString(sb.ToString());
         }
 
-        private async Task<AutoEnableOptions> GetAutoEnableOptions()
+        private async Task<AutoEnableOptions> GetAutoEnableOptions(MarkdownFile file)
         {
-            bool useBlazor;
+            bool useWasmRunner;
 
             if (_startupOptions.Package != null)
             {
                 var package = await _packageRegistry.Get<Package2>(_startupOptions.Package);
-                useBlazor = package.CanSupportBlazor;
+                useWasmRunner = package.CanSupportWasm;
             }
             else
             {
-                useBlazor = false;
+                var blocks = await file.GetAnnotatedCodeBlocks();
+                var packageUsesWasm = await Task.WhenAll(blocks
+                    .Select(b => b.PackageName())
+                    .Select(async name => (await _packageRegistry.Get<ICanSupportWasm>(name))?.CanSupportWasm ?? false));
+
+                useWasmRunner = packageUsesWasm.Any(p => p);
             }
 
             var requestUri = Request.GetUri();
 
             var hostUrl = $"{requestUri.Scheme}://{requestUri.Authority}";
-            return new AutoEnableOptions(hostUrl, useBlazor);
+            return new AutoEnableOptions(hostUrl, useWasmRunner);
         }
 
         private class AutoEnableOptions
         {
-            public AutoEnableOptions(string apiBaseAddress, bool useBlazor)
+            public AutoEnableOptions(string apiBaseAddress, bool useWasmRunner)
             {
                 ApiBaseAddress = apiBaseAddress;
-                UseBlazor = useBlazor;
+                UseWasmRunner = useWasmRunner;
             }
 
             public string ApiBaseAddress { get; }
 
-            public bool UseBlazor { get; }
+            public bool UseWasmRunner { get; }
         }
 
         private IHtmlContent Layout(
@@ -175,7 +181,7 @@ namespace MLS.Agent.Controllers
     {Footer()}
 
     <script>
-        trydotnet.autoEnable({{ apiBaseAddress: new URL(""{autoEnableOptions.ApiBaseAddress}""), useBlazor: {autoEnableOptions.UseBlazor.ToString().ToLowerInvariant()} }});
+        trydotnet.autoEnable({{ apiBaseAddress: new URL(""{autoEnableOptions.ApiBaseAddress}""), useWasmRunner: {autoEnableOptions.UseWasmRunner.ToString().ToLowerInvariant()} }});
     </script>
 </body>
 
@@ -197,7 +203,7 @@ namespace MLS.Agent.Controllers
                 hostUrl, 
                 markdownFile,
                 await DocumentationDiv(markdownFile),
-                await GetAutoEnableOptions());
+                await GetAutoEnableOptions(markdownFile));
 
         private static async Task<IHtmlContent> DocumentationDiv(MarkdownFile markdownFile) =>
             $@"<div id=""documentation-container"" class=""markdown-body"">
@@ -210,7 +216,7 @@ namespace MLS.Agent.Controllers
             <div class=""control-column"">
                 {await SessionControlsHtml(markdownFile, _startupOptions.EnablePreviewFeatures)}
             </div>".ToHtmlContent(),
-                   await GetAutoEnableOptions());
+                   await GetAutoEnableOptions(markdownFile));
 
         private IHtmlContent Index(string html) =>
             $@"
