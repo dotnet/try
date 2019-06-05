@@ -123,16 +123,16 @@ namespace MLS.Agent.Controllers
             if (_startupOptions.Package != null)
             {
                 var package = await _packageRegistry.Get<Package2>(_startupOptions.Package);
-                useWasmRunner = package.CanSupportBlazor;
+                useWasmRunner = package.CanSupportWasm;
             }
             else
             {
                 var blocks = await file.GetAnnotatedCodeBlocks();
-                var packageUsesBlazor = await Task.WhenAll(blocks
+                var packageUsesWasm = await Task.WhenAll(blocks
                     .Select(b => b.PackageName())
                     .Select(async name => (await _packageRegistry.Get<ICanSupportWasm>(name))?.CanSupportWasm ?? false));
 
-                useWasmRunner = packageUsesBlazor.Any(p => p == true);
+                useWasmRunner = packageUsesWasm.Any(p => p);
             }
 
             var requestUri = Request.GetUri();

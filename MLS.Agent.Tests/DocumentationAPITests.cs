@@ -201,7 +201,7 @@ namespace MLS.Agent.Tests
                                           .Select(s => s.InnerHtml);
 
                     scripts.Should()
-                           .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+                           .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
                 }
             }
         }

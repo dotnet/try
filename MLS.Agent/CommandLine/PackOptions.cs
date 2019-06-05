@@ -37,12 +37,10 @@ namespace MLS.Agent.CommandLine
                 {
                     return _packageName;
                 }
-                else
-                {
-                    var csproj = PackTarget.GetFiles("*.csproj").Single();
-                   _packageName = Path.GetFileNameWithoutExtension(csproj.Name);
-                    return _packageName;
-                }
+
+                var csproj = PackTarget.GetFiles("*.csproj").Single();
+                _packageName = Path.GetFileNameWithoutExtension(csproj.Name);
+                return _packageName;
             }
         }
     }

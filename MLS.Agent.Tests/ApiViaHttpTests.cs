@@ -909,7 +909,7 @@ namespace FibonacciTest
                 response.Should().BeSuccessful();
                 var result = await response.Content.ReadAsStringAsync();
                 result.FromJsonTo<Package>()
-                      .IsBlazorSupported
+                      .IsWasmSupported
                       .Should()
                       .BeFalse();
             }
@@ -927,7 +927,7 @@ namespace FibonacciTest
                 response.Should().BeSuccessful();
                 var result = await response.Content.ReadAsStringAsync();
                 result.FromJsonTo<Package>()
-                      .IsBlazorSupported
+                      .IsWasmSupported
                       .Should()
                       .BeTrue();
             }
@@ -966,7 +966,7 @@ namespace FibonacciTest
         }
 
         [Fact]
-        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useBlazor_is_true_when_package_is_specified_and_supports_Blazor()
+        public async Task Scaffolding_HTML_trydotnet_js_autoEnable_useWasmRunner_is_true_when_package_is_specified_and_supports_Wasm()
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
@@ -975,7 +975,7 @@ namespace FibonacciTest
 
             using (var agent = new AgentService(startupOptions))
             {
-                var response = await agent.GetAsync(@"Subdirectory/Tutorial.md");
+                var response = await agent.GetAsync(@"TestProjects/Subdirectory/Tutorial.md");
 
                 response.Should().BeSuccessful();
 
@@ -991,7 +991,7 @@ namespace FibonacciTest
                                       .Select(s => s.InnerHtml);
 
                 scripts.Should()
-                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useBlazor: true });"));
+                       .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
             }
         }
         private class FailedRunResult : Exception
