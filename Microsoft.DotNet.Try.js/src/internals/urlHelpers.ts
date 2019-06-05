@@ -17,8 +17,8 @@ export function generateEditorUrl(configuration: Configuration, messageBusId: st
         url.searchParams.append("debug", "true");
     }
 
-    if(!!configuration.useBlazor === true){
-        url.searchParams.append("useBlazor", "true");
+    if(!!configuration.useWasmRunner === true){
+        url.searchParams.append("useWasmRunner", "true");
     }
 
     buildQueryString(url, packageName);

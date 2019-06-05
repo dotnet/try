@@ -63,8 +63,8 @@ namespace MLS.Agent.Controllers
             [JsonProperty("workspaceType", NullValueHandling = NullValueHandling.Ignore)]
             public string WorkspaceType { get; set; }
 
-            [JsonProperty("useBlazor", NullValueHandling = NullValueHandling.Ignore)]
-            public bool? UseBlazor { get; set; }
+            [JsonProperty("useWasmRunner", NullValueHandling = NullValueHandling.Ignore)]
+            public bool? UseWasmRunner { get; set; }
 
             [JsonProperty("scaffold", NullValueHandling = NullValueHandling.Ignore)]
             public string Scaffold { get; set; }

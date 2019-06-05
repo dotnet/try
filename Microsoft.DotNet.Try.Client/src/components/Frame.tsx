@@ -129,15 +129,15 @@ export class Frame extends React.Component<IFrameProps, IFrameState>
 export const mapStateToProps = (state: IState): IFrameProps => {
 
     let newProps: IFrameProps = {
-        postMessageData: state.blazor && state.blazor.payload,
+        postMessageData: state.wasmRunner && state.wasmRunner.payload,
         isActive: state.config.useLocalCodeRunner,
-        sequence: state.blazor.sequence,
+        sequence: state.wasmRunner.sequence,
         editorId: state.config.editorId
     };
 
-    newProps.postMessageData = state.blazor && state.blazor.payload;
-    newProps.sequence = state.blazor.sequence;
-    newProps.postMessageCallback = state.blazor && state.blazor.callback;
+    newProps.postMessageData = state.wasmRunner && state.wasmRunner.payload;
+    newProps.sequence = state.wasmRunner.sequence;
+    newProps.postMessageCallback = state.wasmRunner && state.wasmRunner.callback;
     return newProps;
 };
 
@@ -145,7 +145,7 @@ const mapDispatchToProps: MapDispatchToProps<IFrameProps, IFrameProps> = (dispat
     return ({
         ready: (id) => { 
             dispatch(notificationActions.hostRunReady(id));
-            dispatch(runActions.blazorReady(id)); 
+            dispatch(runActions.wasmRunnerReady(id)); 
         }
     });
 };

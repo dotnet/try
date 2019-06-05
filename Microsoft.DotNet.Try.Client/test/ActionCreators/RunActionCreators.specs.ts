@@ -316,7 +316,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
 
 
@@ -338,7 +338,7 @@ describe("RUN Action Creators", () => {
             data: response
         };
 
-        store.getState().blazor.callback(blazorResult);
+        store.getState().wasmRunner.callback(blazorResult);
         chai.expect(mockAiClient.dependencies.length).to.eq(0);
         chai.expect(mockAiClient.events.length).to.eq(1);
         chai.expect(mockAiClient.exceptions.length).to.eq(0);
@@ -356,7 +356,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
 
         await store.dispatch(actions.run());
@@ -380,7 +380,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
 
         await store.dispatch(actions.run());
@@ -404,7 +404,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
         let mockAiClient = new ObservableAIClient();
 
@@ -423,7 +423,7 @@ describe("RUN Action Creators", () => {
             data: response
         };
 
-        store.getState().blazor.callback(blazorResult);
+        store.getState().wasmRunner.callback(blazorResult);
         chai.expect(mockAiClient.dependencies.length).to.eq(0);
         let event = mockAiClient.events.find(e => e.name === "Blazor.Success");
         // tslint:disable-next-line:no-unused-expression-chai
@@ -431,7 +431,7 @@ describe("RUN Action Creators", () => {
         chai.expect(mockAiClient.exceptions.length).to.eq(0);
     });
 
-    it("runWithBlazor does not compile if the workspace hasn't changed", async () => {
+    it("runWithWasmRunner does not compile if the workspace hasn't changed", async () => {
 
         let compileCount = 0;
 
@@ -448,7 +448,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
 
         chai.expect(compileCount).to.eq(0);
@@ -459,7 +459,7 @@ describe("RUN Action Creators", () => {
         chai.expect(compileCount).to.eq(1);
     });
 
-    it("runWithBlazor compiles if the workspace has changed", async () => {
+    it("runWithWasmRunner compiles if the workspace has changed", async () => {
 
         let compileCount = 0;
 
@@ -476,7 +476,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
 
         chai.expect(compileCount).to.eq(0);
@@ -489,7 +489,7 @@ describe("RUN Action Creators", () => {
         chai.expect(compileCount).to.eq(2);
     });
 
-    it("runWithBlazor passes additional parameters in the RunRequest", async () => {
+    it("runWithWasmRunner passes additional parameters in the RunRequest", async () => {
         const stubClient = {
             compile: (args: IRunRequest): any => {
                 return {
@@ -503,7 +503,7 @@ describe("RUN Action Creators", () => {
         store.configure([
             setWorkspace(defaultWorkspace),
             actions.setWorkspaceType("blazor-console"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
         ]);
         let mockAiClient = new ObservableAIClient();
 
@@ -522,10 +522,10 @@ describe("RUN Action Creators", () => {
             data: response
         };
 
-        store.getState().blazor.callback(blazorResult);
+        store.getState().wasmRunner.callback(blazorResult);
         chai.expect(mockAiClient.dependencies.length).to.eq(0);
         let event = mockAiClient.events.find(e => e.name === "Blazor.Success");
-        let wasmRunRequestAction = store.getActions().find(a => a.type === types.SEND_BLAZOR_MESSAGE);
+        let wasmRunRequestAction = store.getActions().find(a => a.type === types.SEND_WASMRUNNER_MESSAGE);
 
         // tslint:disable-next-line:no-unused-expression-chai
         chai.expect(wasmRunRequestAction).not.to.be.undefined;

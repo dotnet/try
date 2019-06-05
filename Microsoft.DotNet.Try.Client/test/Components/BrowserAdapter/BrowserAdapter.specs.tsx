@@ -487,7 +487,7 @@ describe("<BrowserAdapter />", () => {
         recordedActions.should.deep.equal(expectedActions);
     });
 
-    it("waits for blazor to become ready", () => {
+    it("waits for wasmRunner to become ready", () => {
         const consoleWorkspace = {
             ...emptyWorkspace,
             workspaceType: "blazor-console",
@@ -514,7 +514,7 @@ describe("<BrowserAdapter />", () => {
             actions.setWorkspaceType("blazor-console"),
             actions.setWorkspace(consoleWorkspace),
             actions.setActiveBuffer("Program.cs"),
-            actions.configureBlazor(),
+            actions.configureWasmRunner(),
             actions.enableClientTelemetry(new NullAIClient()),
             actions.setWorkspace(scaffoldWorkspace),
             actions.setActiveBuffer("file.cs@scaffold"),
@@ -538,7 +538,7 @@ describe("<BrowserAdapter />", () => {
         params.set("scaffold", "Method");
 
         mount(
-            <MemoryRouter initialEntries={[`?workspaceType=blazor-console&debug=true&editorId=foo&useBlazor=true`]}>
+            <MemoryRouter initialEntries={[`?workspaceType=blazor-console&debug=true&editorId=foo&useWasmRunner=true`]}>
                 <BrowserAdapter log={recordAction}
                     setCookie={setCookie}
                     getCookie={getCookie}

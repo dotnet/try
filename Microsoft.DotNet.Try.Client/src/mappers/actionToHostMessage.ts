@@ -91,7 +91,7 @@ export default function formatEventMessage(toLog: AnyAction, srcUri: string, edi
             }
             break;
 
-        case types.BLAZOR_READY:
+        case types.WASMRUNNER_READY:
             result = <ApiMessage><unknown>{
                 type: HOST_LISTENER_READY_EVENT
             };

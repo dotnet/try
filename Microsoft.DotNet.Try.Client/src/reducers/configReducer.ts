@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { Action, CONFIGURE_CLIENT, CONFIGURE_CODE_SOURCE, CONFIGURE_COMPLETION_PROVIDER, CONFIGURE_VERSION, CONFIGURE_BLAZOR, NOTIFY_HOST_PROVIDED_CONFIGURATION, ENABLE_TELEMETRY, CONFIGURE_EDITOR_ID } from "../constants/ActionTypes";
+import { Action, CONFIGURE_CLIENT, CONFIGURE_CODE_SOURCE, CONFIGURE_COMPLETION_PROVIDER, CONFIGURE_VERSION, CONFIGURE_WASMRUNNER, NOTIFY_HOST_PROVIDED_CONFIGURATION, ENABLE_TELEMETRY, CONFIGURE_EDITOR_ID } from "../constants/ActionTypes";
 import { IConfigState } from "../IState";
 
 const defaultCodeFragment = `using System;
@@ -73,7 +73,7 @@ export default function configReducer(state: IConfigState = initialState, action
                 ...state,
                 completionProvider: action.completionProvider
             };
-        case CONFIGURE_BLAZOR:
+        case CONFIGURE_WASMRUNNER:
             return {
                 ...state,
                 useLocalCodeRunner: true

@@ -10,7 +10,7 @@ import compile from "./compileReducer";
 import ui from "./uiReducer";
 import workspace from "./workspaceReducer";
 import workspaceInfo from "./workspaceInfoReducer";
-import blazor from "./blazorReducer";
+import wasmRunner from "./wasmRunnerReducer";
 
 export default combineReducers<IState>({
     config,
@@ -20,5 +20,5 @@ export default combineReducers<IState>({
     workspace,
     workspaceInfo,
     compile,
-    blazor
+    wasmRunner
 });

@@ -85,7 +85,7 @@ describe("a user", () => {
             notifyEditorReadyWithId(configuration, dom.window, "codeSession::0");
         });
 
-        it("can create a session with blazor enabled", (done: Done) => {
+        it("can create a session with wasm runner enabled", (done: Done) => {
             let configuration = {
                 hostOrigin: "https://docs.microsoft.com"
             };
@@ -111,17 +111,17 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useBlazor: true}, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useWasmRunner: true}, dom.window.document, dom.window).then(() => {
                 let iframe = dom.window.document.querySelector<HTMLIFrameElement>("body>iframe");
                 let src = iframe.getAttribute("src");
                 var url = new URL(src);
-                url.searchParams.get("useBlazor").should.be.equal("true");
+                url.searchParams.get("useWasmRunner").should.be.equal("true");
                 done();
             });
             notifyEditorReadyWithId(configuration, dom.window, "codeSession::0");
         });
 
-        it("can create a session with blazor disabled", (done: Done) => {
+        it("can create a session with wasm runner disabled", (done: Done) => {
             let configuration = {
                 hostOrigin: "https://docs.microsoft.com"
             };
@@ -147,11 +147,11 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useBlazor: false}, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useWasmRunner: false}, dom.window.document, dom.window).then(() => {
                 let iframe = dom.window.document.querySelector<HTMLIFrameElement>("body>iframe");
                 let src = iframe.getAttribute("src");
                 var url = new URL(src);
-                expect( url.searchParams.get("useBlazor")).to.be.null;
+                expect( url.searchParams.get("useWasmRunner")).to.be.null;
                 done();
             });
             notifyEditorReadyWithId(configuration, dom.window, "codeSession::0");
