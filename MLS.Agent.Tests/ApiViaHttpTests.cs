@@ -31,6 +31,7 @@ using WorkspaceServer.Tests.Packaging;
 using WorkspaceServer.Tests.TestUtility;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {
@@ -810,6 +811,22 @@ namespace FibonacciTest
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled();
             using (var agent = new AgentService(new StartupOptions(addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName))))
+            {
+                var response = await agent.GetAsync($@"/LocalCodeRunner/{name}");
+
+                response.EnsureSuccess();
+                var result = await response.Content.ReadAsStringAsync();
+                result.Should().Contain("Loading...");
+
+                response = await agent.GetAsync($@"/LocalCodeRunner/{name}/interop.js");
+
+                response.EnsureSuccess();
+                result = await response.Content.ReadAsStringAsync();
+                result.Should().Contain("DotNet.invokeMethodAsync");
+            }
+
+            // Now do the same thing in hosted mode using the already installed package
+            using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
             {
                 var response = await agent.GetAsync($@"/LocalCodeRunner/{name}");
 

@@ -151,7 +151,7 @@ namespace WorkspaceServer
 
         public static PackageRegistry CreateForTryMode(DirectoryInfo project, PackageSource addSource = null)
         {
-            var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource));
+            var finders = GetDefaultPackageFinders().Append(new PackageInstallingWebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource));
             var registry = new PackageRegistry(
                 true,
                 addSource,
@@ -169,8 +169,10 @@ namespace WorkspaceServer
 
         public static PackageRegistry CreateForHostedMode()
         {
+            var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory));
             var registry = new PackageRegistry(
-                false);
+                createRebuildablePackages: false,
+                packageFinders: finders);
 
             registry.Add("console",
                          packageBuilder =>

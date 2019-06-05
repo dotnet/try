@@ -4,23 +4,17 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Clockwise;
-using Pocket;
 using WorkspaceServer.WorkspaceFeatures;
 
 namespace WorkspaceServer.Packaging
 {
     public class WebAssemblyAssetFinder : IPackageFinder
     {
-        private readonly DirectoryInfo _workingDirectory;
-        private readonly ToolPackageLocator _locator;
-        private readonly PackageSource _addSource;
+        protected readonly DirectoryInfo _workingDirectory;
 
-        public WebAssemblyAssetFinder(DirectoryInfo workingDirectory, PackageSource addSource = null)
+        public WebAssemblyAssetFinder(DirectoryInfo workingDirectory)
         {
             _workingDirectory = workingDirectory;
-            _locator = new ToolPackageLocator(workingDirectory);
-            _addSource = addSource;
         }
 
         async Task<TPackage> IPackageFinder.Find<TPackage>(PackageDescriptor descriptor)
@@ -37,35 +31,10 @@ namespace WorkspaceServer.Packaging
                 return package as TPackage;
             }
 
-            return (await TryInstallAndLocateTool(descriptor) as TPackage);
-        }
-
-        private async Task<IPackage> TryInstallAndLocateTool(PackageDescriptor packageDesciptor)
-        {
-            var dotnet = new Dotnet();
-
-            var installationResult = await dotnet.ToolInstall(
-                packageDesciptor.Name,
-                _workingDirectory,
-                _addSource,
-                new Budget());
-
-            if (installationResult.ExitCode != 0)
-            {
-                Logger<LocalToolInstallingPackageDiscoveryStrategy>.Log.Warning($"Tool not installed: {packageDesciptor.Name}");
-                return null;
-            }
-
-            var tool = new PackageTool(packageDesciptor.Name, _workingDirectory);
-            if (tool.Exists)
-            {
-                return await CreatePackage(packageDesciptor, tool);
-            }
-
             return null;
         }
 
-        private async Task<IPackage> CreatePackage(PackageDescriptor descriptor, PackageTool tool)
+        protected async Task<IPackage> CreatePackage(PackageDescriptor descriptor, PackageTool tool)
         {
             await tool.Prepare();
             var wasmAsset = await tool.LocateWasmAsset();
@@ -78,5 +47,6 @@ namespace WorkspaceServer.Packaging
 
             return null;
         }
+
     }
 }
