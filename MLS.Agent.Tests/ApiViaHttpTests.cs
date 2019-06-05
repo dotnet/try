@@ -975,7 +975,7 @@ namespace FibonacciTest
 
             using (var agent = new AgentService(startupOptions))
             {
-                var response = await agent.GetAsync(@"TestProjects/Subdirectory/Tutorial.md");
+                var response = await agent.GetAsync(@"TestProjects/SampleConsole/Subdirectory/Tutorial.md");
 
                 response.Should().BeSuccessful();
 
