@@ -57,7 +57,7 @@ namespace MLS.Agent.Tests
         public async Task Installs_tool_from_package_source_when_requested()
         {
             var console = new TestConsole();
-            var asset = await LocalToolHelpers.CreateTool(console);
+            var (asset, name) = await LocalToolHelpers.CreateTool(console);
 
             var strategy = new LocalToolInstallingPackageDiscoveryStrategy(asset, new PackageSource(asset.FullName));
             var package = await strategy.Locate(new PackageDescriptor("blazor-console"));

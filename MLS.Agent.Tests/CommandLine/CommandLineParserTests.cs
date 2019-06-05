@@ -274,7 +274,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             await _parser.InvokeAsync($"pack {expected}", console);
             _packOptions.PackTarget.FullName.Should().Be(expected);
-            _packOptions.EnableWasm.Should().Should().Be(false);
+            _packOptions.EnableWasm.Should().Be(false);
         }
 
         [Fact]
