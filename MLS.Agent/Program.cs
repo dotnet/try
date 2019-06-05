@@ -140,7 +140,7 @@ namespace MLS.Agent
                           })
                           .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
-                          .WithConfiguredApplicationUrl(options)
+                          .ConfigureUrlUsingPort(options.Port)
                           .Build();
 
             return webHost;
