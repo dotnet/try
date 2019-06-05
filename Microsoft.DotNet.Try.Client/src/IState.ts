@@ -13,7 +13,7 @@ export default interface IState {
     ui: IUiState;
     workspace: IWorkspaceState;
     workspaceInfo: IWorkspaceInfo;
-    blazor: IBlazorState;
+    wasmRunner: IWasmRunnerState;
 }
 
 export interface ICompileState
@@ -38,7 +38,7 @@ export interface IUiState {
     enableBranding?: boolean;
 }
 
-export interface IBlazorState {
+export interface IWasmRunnerState {
     payload: object;
     callback: (obj: any) => void;
     sequence: number;
@@ -135,11 +135,12 @@ export interface IWorkspaceState
 {
     workspace: IWorkspace;
     sequenceNumber: number;
-    useBlazor: boolean;
+    useWasmRunner: boolean;
 }
 
 export interface IWorkspace {
     workspaceType: string;
+    language?: string;
     files?: IWorkspaceFile[];
     buffers: IWorkspaceBuffer[];
     usings?: string[];

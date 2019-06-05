@@ -6,8 +6,8 @@ import reducer from "../../src/reducers/workspaceReducer";
 import { fibonacciCode, emptyWorkspace } from "../testResources";
 import { IWorkspace, IWorkspaceState } from "../../src/IState";
 
-function createState(workspace: IWorkspace, useBlazor: boolean = false): IWorkspaceState {
-  return { workspace, sequenceNumber: 0, useBlazor: useBlazor };
+function createState(workspace: IWorkspace, useWasmRunner: boolean = false): IWorkspaceState {
+  return { workspace, sequenceNumber: 0, useWasmRunner: useWasmRunner };
 }
 
 describe("workspace Reducer", () => {
@@ -27,7 +27,7 @@ describe("workspace Reducer", () => {
     reducer(createState({ ...emptyWorkspace }), action).workspace.buffers[0].content.should.deep.equal(fibonacciCode);
   });
 
-  it("setWorkspace does not replace workspace type if blazor is enabled", () => {
+  it("setWorkspace does not replace workspace type if wasmRunner is enabled", () => {
     const newWorkspace = {
       workspaceType: "blazor-blah",
       files: [{ name: "Program.cs", text: fibonacciCode }],
@@ -35,7 +35,7 @@ describe("workspace Reducer", () => {
     };
     
     let intialState = createState(newWorkspace);
-    let firstState = reducer(intialState, actions.configureBlazor());
+    let firstState = reducer(intialState, actions.configureWasmRunner());
     
     const action = actions.setWorkspace({...newWorkspace, workspaceType: "something-bad"});
     let finalState = reducer(firstState, action);
@@ -43,7 +43,7 @@ describe("workspace Reducer", () => {
     finalState.workspace.workspaceType.should.equals("blazor-blah");
   });
 
-  it("setWorkspace does replace workspace types when blazor is not enabled", () => {
+  it("setWorkspace does replace workspace types when wasmRunner is not enabled", () => {
     const newWorkspace = {
       workspaceType: "something-cool",
       files: [{ name: "Program.cs", text: fibonacciCode }],
@@ -77,9 +77,9 @@ describe("workspace Reducer", () => {
       .workspace.includeInstrumentation.should.equal(false);
   })
 
-  it("reacts to useBlazor", () => {
-    const action = actions.configureBlazor();
+  it("reacts to useWasmRunner", () => {
+    const action = actions.configureWasmRunner();
 
-    reducer(createState({ ...emptyWorkspace }), action).useBlazor.should.equal(true);
+    reducer(createState({ ...emptyWorkspace }), action).useWasmRunner.should.equal(true);
   });
 });

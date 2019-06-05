@@ -6,12 +6,15 @@ using System.IO;
 
 namespace WorkspaceServer
 {
-    public class PackageSource
+    public class UriOrFileInfo
     {
-        readonly DirectoryInfo _directory;
+        readonly FileInfo _fileInfo;
         readonly Uri _uri;
+        public bool IsFile { get; }
 
-        public PackageSource(string value)
+        public string FileExtension { get; }
+
+        public UriOrFileInfo(string value)
         {
             if (value == null)
             {
@@ -20,21 +23,26 @@ namespace WorkspaceServer
 
             // Uri.IsWellFormed will return false for path-like strings:
             // (https://docs.microsoft.com/en-us/dotnet/api/system.uri.iswellformeduristring?view=netcore-2.2)
-            if (Uri.IsWellFormedUriString(value, UriKind.Absolute) && 
+            if (Uri.IsWellFormedUriString(value, UriKind.Absolute) &&
                 Uri.TryCreate(value, UriKind.Absolute, out var uri)
                 && uri?.Scheme != null)
             {
                 _uri = uri;
+                IsFile = false;
             }
             else
             {
-                _directory = new DirectoryInfo(value);
+                _fileInfo = new FileInfo(value);
+                IsFile = true;
+                FileExtension = _fileInfo.Extension;
             }
         }
 
+     
+
         public override string ToString()
         {
-            return _directory?.ToString() ?? _uri.ToString();
+            return _fileInfo?.ToString() ?? _uri.ToString();
         }
     }
 }

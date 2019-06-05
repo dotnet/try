@@ -67,14 +67,14 @@ namespace BasicConsoleApp
             var document =
 $@"```{language} --source-file Program.cs
 ```";
-            string html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
+            var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
             html.Should().Contain(fileContent.HtmlEncode().ToString());
         }
 
         [Fact]
-        public async Task Does_not_insert_code_when_specified_language_is_not_csharp()
+        public async Task Does_not_insert_code_when_specified_language_is_not_supported()
         {
-            string expectedValue =
+            var expectedValue =
 @"<pre><code class=""language-js"">console.log(&quot;Hello World&quot;);
 </code></pre>
 ".EnforceLF();
@@ -90,27 +90,34 @@ console.log(""Hello World"");
             html.Should().Contain(expectedValue);
         }
 
-        [Fact]
-        public async Task Does_not_insert_code_when_csharp_is_specified_but_no_additional_options()
+        [Theory]
+        [InlineData("cs", "language-cs")]
+        [InlineData("csharp", "language-csharp")]
+        [InlineData("c#", "language-c#")]
+        [InlineData("fs", "language-fs")]
+        [InlineData("fsharp", "language-fsharp")]
+        [InlineData("f#", "language-f#")]
+        public async Task Does_not_insert_code_when_supported_language_is_specified_but_no_additional_options(string fenceLanguage, string expectedClass)
         {
-            string expectedValue =
-@"<pre><code class=""language-cs"">Console.WriteLine(&quot;Hello World&quot;);
+            var expectedValue =
+$@"<pre><code class=""{expectedClass}"">Console.WriteLine(&quot;Hello World&quot;);
 </code></pre>
 ".EnforceLF();
 
             var testDir = TestAssets.SampleConsole;
             var directoryAccessor = new InMemoryDirectoryAccessor(testDir);
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
-            var document = @"
-```cs
+            var document = $@"
+```{fenceLanguage}
 Console.WriteLine(""Hello World"");
 ```";
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
             html.Should().Contain(expectedValue);
         }
+     
 
         [Fact]
-        public async Task Error_messsage_is_displayed_when_the_linked_file_does_not_exist()
+        public async Task Error_message_is_displayed_when_the_linked_file_does_not_exist()
         {
             var testDir = TestAssets.SampleConsole;
             var directoryAccessor = new InMemoryDirectoryAccessor(testDir)
@@ -188,6 +195,38 @@ $@"```cs --project {package} --source-file ../src/sample/Program.cs
 
             var fullProjectPath = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(package));
             output.Value.Should().Be(fullProjectPath.FullName);
+        }
+
+        [Theory]
+        [InlineData("cs", "Program.cs", "sample.csproj", "csharp")]
+        [InlineData("c#", "Program.cs", "sample.csproj", "csharp")]
+        [InlineData("fs", "Program.fs", "sample.fsproj", "fsharp")]
+        [InlineData("f#", "Program.fs", "sample.fsproj", "fsharp")]
+        public async Task Sets_the_trydotnet_language_attribute_using_the_fence_command(string fenceLanguage, string fileName, string projectName, string expectedLanguage)
+        {
+            var rootDirectory = TestAssets.SampleConsole;
+            var currentDir = new DirectoryInfo(Path.Combine(rootDirectory.FullName, "docs"));
+            var directoryAccessor = new InMemoryDirectoryAccessor(currentDir, rootDirectory)
+            {
+                ($"src/sample/{fileName}", ""),
+                ($"src/sample/{projectName}", "")
+            };
+
+            var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor, Default.PackageFinder).Build();
+
+            var package = $"../src/sample/{projectName}";
+            var document =
+                $@"```{fenceLanguage} --project {package} --source-file ../src/sample/{fileName}
+```";
+
+            var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
+
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(html);
+            var trydotnetLanguage = htmlDocument.DocumentNode
+                .SelectSingleNode("//pre/code").Attributes["data-trydotnet-language"];
+
+            trydotnetLanguage.Value.Should().Be(expectedLanguage);
         }
 
         [Fact]

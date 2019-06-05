@@ -15,7 +15,7 @@ const initialState: IWorkspaceState = {
         usings: []
     },
     sequenceNumber: 0,
-    useBlazor: false,
+    useWasmRunner: false,
 };
 
 export default function workspaceReducer(state: IWorkspaceState = initialState, action: Action) : IWorkspaceState {
@@ -23,10 +23,10 @@ export default function workspaceReducer(state: IWorkspaceState = initialState, 
         return state;
     }
     switch (action.type) {
-        case types.CONFIGURE_BLAZOR:
+        case types.CONFIGURE_WASMRUNNER:
             return {
                 ...state,
-                useBlazor: true
+                useWasmRunner: true
             };
         case types.LOAD_CODE_SUCCESS:
             return setWorkspaceBuffer(state, action.sourceCode, action.bufferId);
@@ -36,7 +36,7 @@ export default function workspaceReducer(state: IWorkspaceState = initialState, 
                 false
             );
         case types.SET_WORKSPACE:
-            return {workspace: preserveOriginalBlazorWorkspaceType(state, cloneWorkspace(action.workspace)), sequenceNumber: state.sequenceNumber, useBlazor: state.useBlazor};
+            return {workspace: preserveOriginalBlazorWorkspaceType(state, cloneWorkspace(action.workspace)), sequenceNumber: state.sequenceNumber, useWasmRunner: state.useWasmRunner};
         case types.SET_ADDITIONAL_USINGS:
             return setWorkspaceUsings(state, action.additionalUsings);
         case types.SET_INSTRUMENTATION:
@@ -48,7 +48,7 @@ export default function workspaceReducer(state: IWorkspaceState = initialState, 
                     workspaceType: action.workspaceType
                 },
                 sequenceNumber: state.sequenceNumber + 1,
-                useBlazor: state.useBlazor
+                useWasmRunner: state.useWasmRunner
             };
         default:
             return state;
@@ -57,7 +57,7 @@ export default function workspaceReducer(state: IWorkspaceState = initialState, 
 
 function preserveOriginalBlazorWorkspaceType(originalState: IWorkspaceState, newWorkspace: IWorkspace) : IWorkspace
 {
-    if (originalState.useBlazor)
+    if (originalState.useWasmRunner)
     {
         newWorkspace.workspaceType = originalState.workspace.workspaceType;
     }
@@ -68,17 +68,17 @@ function preserveOriginalBlazorWorkspaceType(originalState: IWorkspaceState, new
 function setWorkspaceBuffer(state: IWorkspaceState, codeFragment: string, bufferId: string) : IWorkspaceState {
     const ret = cloneWorkspace(state.workspace);
     setBufferContent(ret, bufferId, codeFragment);
-    return {workspace: ret, sequenceNumber: state.sequenceNumber + 1, useBlazor: state.useBlazor};
+    return {workspace: ret, sequenceNumber: state.sequenceNumber + 1, useWasmRunner: state.useWasmRunner};
 }
 
 function setWorkspaceUsings(state: IWorkspaceState, additionalUsings: string[]): IWorkspaceState {
     const ret = cloneWorkspace(state.workspace);
     ret.usings = [...additionalUsings];
-    return {workspace: ret, sequenceNumber: state.sequenceNumber + 1, useBlazor: state.useBlazor};
+    return {workspace: ret, sequenceNumber: state.sequenceNumber + 1, useWasmRunner: state.useWasmRunner};
 }
 
 function setWorkspaceInstrumentation(state: IWorkspaceState, enabled: boolean): IWorkspaceState {
     const ret = cloneWorkspace(state.workspace);
     ret.includeInstrumentation = enabled;
-    return {workspace: ret, sequenceNumber: state.sequenceNumber + 1, useBlazor: state.useBlazor};
+    return {workspace: ret, sequenceNumber: state.sequenceNumber + 1, useWasmRunner: state.useWasmRunner};
 }

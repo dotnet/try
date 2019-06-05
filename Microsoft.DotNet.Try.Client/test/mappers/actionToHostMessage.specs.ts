@@ -79,14 +79,14 @@ describe("actionToHostMessage mapper", function () {
         result.should.deep.equal(expectedResult);
     });
     
-    it("maps BLAZOR_READY to HostListenerReady message", function () {
+    it("maps WASMRUNNER_READY to HostListenerReady message", function () {
         var expectedResult = {
             type: "HostListenerReady",
             messageOrigin: "https://try.dot.net",
             editorId: "listenerA"
         };
 
-        var result = map(action.blazorReady("listenerA"), "https://try.dot.net", null);
+        var result = map(action.wasmRunnerReady("listenerA"), "https://try.dot.net", null);
         result.should.deep.equal(expectedResult);
     });
 

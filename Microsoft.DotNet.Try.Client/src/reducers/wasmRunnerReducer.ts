@@ -3,19 +3,19 @@
 
 import * as types from "../constants/ActionTypes";
 import { Action } from "../constants/ActionTypes";
-import { IBlazorState } from "../IState";
+import { IWasmRunnerState } from "../IState";
 
 
 
-const initialState: IBlazorState = {
+const initialState: IWasmRunnerState = {
     callback: undefined,
     payload: undefined,
     sequence: 0
 };
 
-export default function blazorReducer(state: IBlazorState = initialState, action: Action): IBlazorState {
+export default function wasmRunnerReducer(state: IWasmRunnerState = initialState, action: Action): IWasmRunnerState {
     switch (action.type) {
-        case types.SEND_BLAZOR_MESSAGE:
+        case types.SEND_WASMRUNNER_MESSAGE:
             return {
                 callback: action.callback,
                 payload: action.payload,

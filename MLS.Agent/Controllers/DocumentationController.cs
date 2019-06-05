@@ -118,12 +118,12 @@ namespace MLS.Agent.Controllers
 
         private async Task<AutoEnableOptions> GetAutoEnableOptions(MarkdownFile file)
         {
-            bool useBlazor;
+            bool useWasmRunner;
 
             if (_startupOptions.Package != null)
             {
                 var package = await _packageRegistry.Get<Package2>(_startupOptions.Package);
-                useBlazor = package.CanSupportWasm;
+                useWasmRunner = package.CanSupportBlazor;
             }
             else
             {
@@ -132,26 +132,26 @@ namespace MLS.Agent.Controllers
                     .Select(b => b.PackageName())
                     .Select(async name => (await _packageRegistry.Get<ICanSupportWasm>(name))?.CanSupportWasm ?? false));
 
-                useBlazor = packageUsesBlazor.Any(p => p == true);
+                useWasmRunner = packageUsesBlazor.Any(p => p == true);
             }
 
             var requestUri = Request.GetUri();
 
             var hostUrl = $"{requestUri.Scheme}://{requestUri.Authority}";
-            return new AutoEnableOptions(hostUrl, useBlazor);
+            return new AutoEnableOptions(hostUrl, useWasmRunner);
         }
 
         private class AutoEnableOptions
         {
-            public AutoEnableOptions(string apiBaseAddress, bool useBlazor)
+            public AutoEnableOptions(string apiBaseAddress, bool useWasmRunner)
             {
                 ApiBaseAddress = apiBaseAddress;
-                UseBlazor = useBlazor;
+                UseWasmRunner = useWasmRunner;
             }
 
             public string ApiBaseAddress { get; }
 
-            public bool UseBlazor { get; }
+            public bool UseWasmRunner { get; }
         }
 
         private IHtmlContent Layout(
@@ -181,7 +181,7 @@ namespace MLS.Agent.Controllers
     {Footer()}
 
     <script>
-        trydotnet.autoEnable({{ apiBaseAddress: new URL(""{autoEnableOptions.ApiBaseAddress}""), useBlazor: {autoEnableOptions.UseBlazor.ToString().ToLowerInvariant()} }});
+        trydotnet.autoEnable({{ apiBaseAddress: new URL(""{autoEnableOptions.ApiBaseAddress}""), useWasmRunner: {autoEnableOptions.UseWasmRunner.ToString().ToLowerInvariant()} }});
     </script>
 </body>
 
