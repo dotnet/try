@@ -27,11 +27,13 @@ suite("Workspace Action Creators", () => {
     it("initialise with default workspace", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace({
                 workspaceType: "script",
                 files: [],
                 buffers: [{ id: "Program.cs", content: "", position: 0 }],
-                usings: []                
+                usings: [],
+                language: "csharp"          
             }),
             actions.setActiveBuffer("Program.cs")
         ];
@@ -42,6 +44,7 @@ suite("Workspace Action Creators", () => {
     it("initialise with workspace parameter", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(defaultWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")
@@ -61,11 +64,13 @@ suite("Workspace Action Creators", () => {
     it("initialise with from parameter", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace({
                 workspaceType: "script",
                 files: [],
                 buffers: [{ id: "Program.cs", content: "", position: 0 }],
                 usings: [],
+                language: "csharp"
             }),
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("http://source.com")
@@ -79,6 +84,7 @@ suite("Workspace Action Creators", () => {
         const expectedActions = [
             actions.error("parameter loading", "cannot define `workspace` and `from` simultaneously"),
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(newWorkSpace),
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")
@@ -92,6 +98,7 @@ suite("Workspace Action Creators", () => {
         const expectedActions = [
             actions.error("parameter loading", "cannot define `workspace` and `workspaceTypeParameter` simultaneously"),
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(newWorkSpace),
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")

@@ -39,6 +39,7 @@ const initialState: IConfigState = {
         files: [],
         buffers: [{ id: "Program.cs", content: defaultCodeFragment, position: 0 }],
         usings: [],
+        language:"csharp"
     },
     defaultCodeFragment,
     version: 1,
