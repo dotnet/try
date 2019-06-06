@@ -182,20 +182,15 @@ namespace MLS.Agent.CommandLine
                                       "Enable verbose logging to the console",
                                       new Argument<bool>()));
 
-                var portArgument = new Argument<int>()
-                {
-                    Arity = ArgumentArity.ZeroOrOne,
-                };
+                var portArgument = new Argument<ushort>();
 
-                portArgument.AddValidator(symbolResult =>
-                {
-                    if (symbolResult.Tokens.Count == 1)
+                portArgument.AddValidator(symbolResult =>{
+                    
+                    if(symbolResult.Tokens
+                    .Select(t => t.Value)
+                    .Where(value => !ushort.TryParse(value, out ushort result)).Count() >0)
                     {
-                        var portNumber = Int64.Parse(symbolResult.Tokens.Single().Value);
-                        if (portNumber < 0)
-                        {
-                            return "Invalid argument for --port. Negative port number is not allowed";
-                        }
+                        return "Invalid argument for --port option";
                     }
 
                     return null;
