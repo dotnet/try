@@ -18,7 +18,7 @@
     },
     "MLS.Agent": {
       "commandName": "Project",
-      "commandLineArgs": "../docs",
+      "commandLineArgs": "hosted",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

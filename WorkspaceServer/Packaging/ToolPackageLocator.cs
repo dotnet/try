@@ -43,7 +43,7 @@ namespace WorkspaceServer.Packaging
         public async Task<DirectoryInfo> PrepareToolAndLocateAssetDirectory(PackageTool tool)
         {
             await tool.Prepare();
-            return await tool.LocateBuildAsset();
+            return (await tool.LocateProjectAsset()).DirectoryAccessor.GetFullyQualifiedRoot();
         }
     }
 }

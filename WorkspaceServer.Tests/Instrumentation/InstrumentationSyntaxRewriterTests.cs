@@ -166,7 +166,7 @@ namespace WorkspaceServer.Tests.Instrumentation
             Assert.Contains("\\\"name\\\":\\\"args\\\"", treeString);
         }
 
-        [Fact]
+        [Fact(Skip = "Needs moved onto Package2")]
         public async void Syntax_Tree_Has_Same_Language_As_Package()
         {
             var package = await Create.ConsoleWorkspaceCopy();

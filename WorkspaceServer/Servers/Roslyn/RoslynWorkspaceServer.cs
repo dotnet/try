@@ -412,9 +412,10 @@ namespace WorkspaceServer.Servers.Roslyn
             BufferId activeBufferId,
             Budget budget)
         {
-            var package = await _packageFinder.Find<Package>(workspace.WorkspaceType);
+            var package = await _packageFinder.Find<ICreateWorkspace>(workspace.WorkspaceType);
             workspace = await _transformer.TransformAsync(workspace);
-            var compilation = await package.Compile(workspace, budget, activeBufferId);
+            var sources = workspace.GetSourceFiles();
+            var (compilation, documents) = await package.GetCompilation(sources, SourceCodeKind.Regular, workspace.Usings, () => package.CreateRoslynWorkspaceAsync(budget), budget);
             var (diagnosticsInActiveBuffer, allDiagnostics) = workspace.MapDiagnostics(activeBufferId, compilation.GetDiagnostics());
 
             budget.RecordEntryAndThrowIfBudgetExceeded();

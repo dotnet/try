@@ -28,11 +28,11 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public string Name { get; }
 
-        public async Task<DirectoryInfo> LocateBuildAsset()
+        public async Task<ProjectAsset> LocateProjectAsset()
         {
             var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateBuildAsset, _workingDirectory);
             var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
-            return projectDirectory;
+            return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
         }
 
         public async Task<WebAssemblyAsset> LocateWasmAsset()
