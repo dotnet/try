@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -102,14 +103,21 @@ namespace Microsoft.DotNet.Try.Project
             int regionTagStartIndex = text.IndexOf(FSharpRegionStart);
             while (regionTagStartIndex >= 0)
             {
-                var regionLabelEndIndex = text.IndexOf('\n', regionTagStartIndex);
                 var regionLabelStartIndex = regionTagStartIndex + FSharpRegionStart.Length;
+                var regionLabelEndIndex = text.IndexOf('\n', regionTagStartIndex);
                 var regionLabel = text.Substring(regionLabelStartIndex, regionLabelEndIndex - regionLabelStartIndex).Trim();
                 var regionTagEndIndex = text.IndexOf(FSharpRegionEnd, regionTagStartIndex);
                 if (regionTagEndIndex >= 0)
                 {
                     var regionEndTagLastIndex = regionTagEndIndex + FSharpRegionEnd.Length;
-                    var contentSpan = new TextSpan(regionLabelEndIndex, regionTagEndIndex - regionLabelEndIndex);
+
+                    var contentStart = regionLabelEndIndex + 1; // swallow newline
+
+                    var newlineBeforeEndRegionTag = text.LastIndexOf('\n', regionTagEndIndex);
+                    var endRegionIndentOffset = regionTagEndIndex - newlineBeforeEndRegionTag;
+                    var contentEnd = regionTagEndIndex - endRegionIndentOffset;
+
+                    var contentSpan = new TextSpan(contentStart, contentEnd - contentStart);
                     var regionSpan = new TextSpan(regionTagStartIndex, regionEndTagLastIndex - regionTagStartIndex);
                     extractedRegions.Add((new BufferId(fileName, regionLabel), contentSpan, regionSpan));
 
@@ -147,7 +155,7 @@ namespace Microsoft.DotNet.Try.Project
                     return FormatSourceCodeCSharp(sourceCode);
                 case ".fs":
                 case ".fsx":
-                    return sourceCode;
+                    return FormatSourceCodeFSharp(sourceCode);
                 default:
                     throw new InvalidOperationException($"Unsupported file extension '{extension}'");
             }
@@ -159,6 +167,17 @@ namespace Microsoft.DotNet.Try.Project
             var cw = new AdhocWorkspace();
             var formattedCode = Formatter.Format(tree.GetRoot(), cw);
             return formattedCode.ToFullString();
+        }
+
+        private static string FormatSourceCodeFSharp(string sourceCode)
+        {
+            // dedent lines the number of spaces before the first non-space character
+            var dedentedCode = sourceCode.TrimStart(' ');
+            var dedentLevel = sourceCode.Length - dedentedCode.Length;
+            var lines = sourceCode.Split('\n');
+            var dedentedLines = lines.Select(l => l.Length > dedentLevel ? l.Substring(dedentLevel) : string.Empty);
+            var formattedCode = string.Join("\n", dedentedLines);
+            return formattedCode;
         }
     }
 }

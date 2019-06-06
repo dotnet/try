@@ -82,8 +82,10 @@ namespace Microsoft.DotNet.Try.Project.Tests
             var result = transformer.Extract(files, workspaceType: "console");
             result.Should().NotBeNull();
 
-            result.Buffers.Should().Contain(found => found.Id == "Program.fs@alpha" && found.Content == "\n    let sum = numbers |> Seq.sum\n    ");
-            result.Buffers.Should().Contain(found => found.Id == "Program.fs@beta" && found.Content == "\n    printfn \"The sum was %d\" sum\n    ");
+            result.Buffers.Should().Contain(found => found.Id == "Program.fs@alpha" && found.Content == "let sum = numbers |> Seq.sum");
+
+            // ensure buffer lines were dedented to the level of the `//#region` marker
+            result.Buffers.Should().Contain(found => found.Id == "Program.fs@beta" && found.Content.EnforceLF() == "printfn \"The sum was %d\" sum\nprintfn \"goodbye\"");
             result.Files.Should().NotBeNullOrEmpty();
             result.Files.Should().Contain(found => found.Name == "Program.fs" && found.Text == SourceCodeProvider.FSharpConsoleProgramMultipleRegions);
         }

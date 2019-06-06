@@ -182,6 +182,7 @@ let main(args: string[]) =
     //#endregion
     //#region beta
     printfn ""The sum was %d"" sum
+    printfn ""goodbye""
     //#endregion
     0
 ".EnforceLF();
