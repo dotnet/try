@@ -36,7 +36,8 @@ export const emptyWorkspace: IWorkspace = {
   workspaceType: "script",
   files: [],
   buffers: [{ id: "Program.cs", content: "", position: 0 }],
-  usings: []
+  usings: [],
+  language:"csharp"
 };
 
 export const defaultWorkspace: IWorkspace = {

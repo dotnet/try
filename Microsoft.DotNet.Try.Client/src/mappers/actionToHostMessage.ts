@@ -5,9 +5,8 @@ import * as types from "../constants/ActionTypes";
 
 import { AnyAction } from "redux";
 import { AnyApiMessage, CREATE_PROJECT_RESPONSE, ApiMessage, CREATE_REGIONS_FROM_SOURCEFILES_RESPONSE, CREATE_OPERATION_ID_RESPONSE, MONACO_READY_EVENT, HOST_LISTENER_READY_EVENT, RUN_STARTED_EVENT, CODE_CHANGED_EVENT, RUN_COMPLETED_EVENT, CAN_MOVE_TO_NEXT_INSTRUMENTATION_RESPONSE, CAN_MOVE_TO_PREVIOUS_INSTRUMENTATION_RESPONSE, SERVICE_ERROR_RESPONSE, HOST_EDITOR_READY_EVENT, HOST_RUN_READY_EVENT } from "../constants/ApiMessageTypes";
-function isNullOrUndefined(input: string): boolean {
-    return (input === undefined || input === null);
-}
+import { isNullOrUndefined } from "../utilities/stringUtilities";
+
 export default function formatEventMessage(toLog: AnyAction, srcUri: string, editorId: string): AnyApiMessage {
     var result: AnyApiMessage = null;
 
