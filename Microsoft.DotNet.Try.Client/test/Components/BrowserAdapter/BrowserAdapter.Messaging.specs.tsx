@@ -81,6 +81,7 @@ describe("BrowserAdapter Messaging", () => {
     it("forwards translated host messages if ?hostOrigin=... is specified and matches", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -123,6 +124,7 @@ describe("BrowserAdapter Messaging", () => {
     it("forwards setSourceCode message", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -161,6 +163,7 @@ describe("BrowserAdapter Messaging", () => {
     it("does not forward host messages if ?hostOrigin=... is specified but does not match", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -241,6 +244,7 @@ describe("BrowserAdapter Messaging", () => {
     it("hides the editor at startup when ?waitForConfiguration=true", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.hideEditor(),

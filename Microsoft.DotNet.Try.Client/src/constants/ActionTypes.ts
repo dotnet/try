@@ -14,6 +14,7 @@ import {
 import { IHostConfiguration } from "./IHostConfiguration";
 import { IApplicationInsightsClient } from "../ApplicationInsights";
 import { Project, SourceFileRegion } from "../clientApiProtocol";
+import { SupportedLanguages } from "./supportedLangauges";
 
 export const COMPILE_CODE_REQUEST = "COMPILE_CODE_REQUEST";
 export const COMPILE_CODE_SUCCESS = "COMPILE_CODE_SUCCESS";
@@ -27,6 +28,7 @@ export const RUN_CODE_SUCCESS = "RUN_CODE_SUCCESS";
 export const RUN_CODE_FAILURE = "RUN_CODE_FAILURE";
 export const RUN_CODE_RESULT_SPECIFIED = "RUN_CODE_RESULT_SPECIFIED";
 export const SET_WORKSPACE_TYPE = "SET_WORKSPACE_TYPE";
+export const SET_WORKSPACE_LANGUAGE = "SET_WORKSPACE_LANGUAGE";
 export const SET_ADDITIONAL_USINGS = "SET_ADDITIONAL_USINGS";
 export const RUN_CLICKED = "RUN_CLICKED";
 export const CONFIGURE_WASMRUNNER = "CONFIGURE_WASMRUNNER";
@@ -118,6 +120,9 @@ export type Action =
     } | {
         type: typeof SET_WORKSPACE_TYPE,
         workspaceType: string
+    } | {
+        type: typeof SET_WORKSPACE_LANGUAGE,
+        workspaceLanguage: SupportedLanguages
     } | {
         type: typeof SET_ADDITIONAL_USINGS,
         additionalUsings: string[]

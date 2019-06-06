@@ -10,7 +10,8 @@ const initialState: IMonacoState = {
     editor: undefined,
     editorOptions: { selectOnLineNumbers: true },
     displayedCode: undefined,
-    bufferId: "Program.cs"
+    bufferId: "Program.cs",
+    language: "csharp"
 };
 
 export default function monacoReducer(state: IMonacoState = initialState, action: Action): IMonacoState {
@@ -54,6 +55,12 @@ export default function monacoReducer(state: IMonacoState = initialState, action
             return {
                 ...state,
                 themes: action.themes
+            };
+        }
+        case types.SET_WORKSPACE_LANGUAGE: {
+            return {
+                ...state,
+                language: action.workspaceLanguage
             };
         }
         default:

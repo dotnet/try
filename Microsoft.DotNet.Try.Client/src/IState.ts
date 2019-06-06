@@ -5,6 +5,7 @@ import IMlsClient from "./IMlsClient";
 import * as monacoEditor from "monaco-editor";
 import { ICodeEditorForTryDotNet } from "./constants/ICodeEditorForTryDotNet";
 import { IApplicationInsightsClient } from "./ApplicationInsights";
+import { SupportedLanguages } from "./constants/supportedLangauges";
 export default interface IState {
     compile: ICompileState;
     config: IConfigState;
@@ -16,8 +17,7 @@ export default interface IState {
     wasmRunner: IWasmRunnerState;
 }
 
-export interface ICompileState
-{
+export interface ICompileState {
     succeeded?: boolean;
     diagnostics?: IDiagnostic[];
     base64assembly?: string;
@@ -114,6 +114,7 @@ export interface IMonacoState {
     theme?: string;
     themes?: { [x: string]: monacoEditor.editor.IStandaloneThemeData };
     bufferId?: string;
+    language?: SupportedLanguages;
     [x: string]: any;
 }
 
@@ -131,8 +132,7 @@ export interface IConfigState {
     editorId?: string;
 }
 
-export interface IWorkspaceState
-{
+export interface IWorkspaceState {
     workspace: IWorkspace;
     sequenceNumber: number;
     useWasmRunner: boolean;

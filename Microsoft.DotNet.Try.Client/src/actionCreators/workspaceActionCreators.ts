@@ -12,8 +12,8 @@ import { loadSource } from "./sourceCodeActionCreators";
 import * as uiActions from "./uiActionCreators";
 import { IStore } from "../IStore";
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
-import { string } from "prop-types";
 import { isNullOrUndefinedOrWhitespace } from "../utilities/stringUtilities";
+import { SupportedLanguages, toSupportedLanguage } from "../constants/supportedLangauges";
 
 export function setWorkspaceInfo(workspaceInfo: IWorkspaceInfo): Action {
     return {
@@ -40,6 +40,13 @@ export function setWorkspaceType(workspaceType: string): Action {
     return {
         type: types.SET_WORKSPACE_TYPE as typeof types.SET_WORKSPACE_TYPE,
         workspaceType: workspaceType
+    };
+}
+
+export function setWorkspaceLanguage(workspaceLanguage: SupportedLanguages): Action {
+    return {
+        type: types.SET_WORKSPACE_LANGUAGE as typeof types.SET_WORKSPACE_LANGUAGE,
+        workspaceLanguage: workspaceLanguage
     };
 }
 
@@ -106,7 +113,7 @@ export const LoadWorkspaceFromGist: ActionCreator<ThunkAction<Promise<Action>, I
             return dispatch(setWorkspaceAndActiveBuffer(workspaceInfo.workspace, activeBufferId));
         };
 
-export function configureWorkspace(configuration: { store: IStore, workspaceParameter?: string, workspaceTypeParameter?: string, language?: string, fromParameter?: string, bufferIdParameter?: string, fromGistParameter?: string, canShowGitHubPanelQueryParameter?: string }) {
+export function configureWorkspace(configuration: { store: IStore, workspaceParameter?: string, workspaceTypeParameter?: string, language?: SupportedLanguages, fromParameter?: string, bufferIdParameter?: string, fromGistParameter?: string, canShowGitHubPanelQueryParameter?: string }) {
     let bufferId = "Program.cs";
     if (configuration.bufferIdParameter) {
         bufferId = decodeURIComponent(configuration.bufferIdParameter);
@@ -120,9 +127,7 @@ export function configureWorkspace(configuration: { store: IStore, workspacePara
         usings: []
     };
 
-    if (!isNullOrUndefinedOrWhitespace(configuration.language)) {
-        workspace.language = configuration.language;
-    }
+
 
     if (configuration.workspaceParameter) {
         if (configuration.fromParameter) {
@@ -140,7 +145,13 @@ export function configureWorkspace(configuration: { store: IStore, workspacePara
         }
     }
 
+    if (!isNullOrUndefinedOrWhitespace(configuration.language)) {
+        workspace.language = configuration.language;
+    } else if (isNullOrUndefinedOrWhitespace(workspace.language)) {
+        workspace.language = "csharp";
+    }
     configuration.store.dispatch(setWorkspaceType(workspace.workspaceType));
+    configuration.store.dispatch(setWorkspaceLanguage(toSupportedLanguage(workspace.language)));
     configuration.store.dispatch(setWorkspace(workspace));
     configuration.store.dispatch(setActiveBuffer(bufferId));
 

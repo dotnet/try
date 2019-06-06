@@ -11,7 +11,8 @@ describe("Monaco Reducer", () => {
             editor: undefined,
             editorOptions: { selectOnLineNumbers: true },
             displayedCode: undefined,
-            bufferId: "Program.cs"
+            bufferId: "Program.cs",
+            language: "csharp"
         });
     });
 
@@ -86,6 +87,19 @@ describe("Monaco Reducer", () => {
         const result = {
             salt: 1,
             editor: monaco
+        };
+
+        reducer(originalState, action)
+            .should.deep.equal(result).and.not.equal(originalState);
+    });
+
+    it("should handle SET_WORKSPACE_LANGUAGE and update state", () => {
+       
+        const originalState = { salt: 1 };
+        const action = actions.setWorkspaceLanguage("fsharp");
+        const result = {
+            salt: 1,
+            language:"fsharp"
         };
 
         reducer(originalState, action)

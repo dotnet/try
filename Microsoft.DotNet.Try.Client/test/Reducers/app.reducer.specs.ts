@@ -32,7 +32,8 @@ describe("app.reducer", () => {
                 selectOnLineNumbers: true
             },
             displayedCode: undefined,
-            bufferId: "Program.cs"
+            bufferId: "Program.cs",
+            language: "csharp"
         };
 
         reducer(undefined, { type: undefined }).monaco.should.deep.equal(expectedConfig);
