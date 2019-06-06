@@ -31,11 +31,11 @@ suite("Workspace Action Creators", () => {
                 workspaceType: "script",
                 files: [],
                 buffers: [{ id: "Program.cs", content: "", position: 0 }],
-                usings: [],
+                usings: []                
             }),
             actions.setActiveBuffer("Program.cs")
         ];
-        configureWorkspace(store);
+        configureWorkspace({ store });
         store.getActions().should.deep.equal(expectedActions);
     });
 
@@ -46,14 +46,14 @@ suite("Workspace Action Creators", () => {
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")
         ];
-        configureWorkspace(store, encodeWorkspace(defaultWorkspace));
+        configureWorkspace({ store, workspaceParameter: encodeWorkspace(defaultWorkspace) });
         store.getActions().should.deep.equal(expectedActions);
     });
 
     it("sets instrumentation", () => {
         const expectedAction = {
-         type: types.SET_INSTRUMENTATION,
-         enabled: true
+            type: types.SET_INSTRUMENTATION,
+            enabled: true
         };
         setInstrumentation(true).should.deep.equal(expectedAction);
     });
@@ -70,7 +70,7 @@ suite("Workspace Action Creators", () => {
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("http://source.com")
         ];
-        configureWorkspace(store, undefined, undefined, encodeURIComponent("http://source.com"));
+        configureWorkspace({ store, fromParameter: encodeURIComponent("http://source.com") });
         store.getActions().should.deep.equal(expectedActions);
     });
 
@@ -83,7 +83,7 @@ suite("Workspace Action Creators", () => {
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")
         ];
-        configureWorkspace(store, encodeWorkspace(newWorkSpace), undefined, encodeURIComponent("http://source.com"));
+        configureWorkspace({ store, workspaceParameter: encodeWorkspace(newWorkSpace), fromParameter: encodeURIComponent("http://source.com") });
         store.getActions().should.deep.equal(expectedActions);
     });
 
@@ -96,7 +96,7 @@ suite("Workspace Action Creators", () => {
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")
         ];
-        configureWorkspace(store, encodeWorkspace(newWorkSpace), encodeURIComponent("console"));
+        configureWorkspace({ store, workspaceParameter: encodeWorkspace(newWorkSpace), workspaceTypeParameter: encodeURIComponent("console") });
         store.getActions().should.deep.equal(expectedActions);
     });
 
@@ -242,7 +242,7 @@ class C
                 }],
                 files: [{
                     name: "foo.cs",
-                text:`using System;
+                    text: `using System;
 class C
 {
 public static void Main()

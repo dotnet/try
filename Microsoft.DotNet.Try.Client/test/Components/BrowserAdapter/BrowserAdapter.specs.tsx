@@ -327,7 +327,7 @@ describe("<BrowserAdapter />", () => {
     it("initialises workspace from gist", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
-            actions.setWorkspace({ workspaceType: "script", usings: [], files: [], buffers: [{ id: "FibonacciGenerator.cs", content: "", position: 0 }] }),
+            actions.setWorkspace({ workspaceType: "script", language: "csharp", usings: [], files: [], buffers: [{ id: "FibonacciGenerator.cs", content: "", position: 0 }] }),
             actions.setActiveBuffer("FibonacciGenerator.cs"),
             actions.setCodeSource("gist::df44833326fcc575e8169fccb9d41fc7"),
             actions.enableClientTelemetry(new NullAIClient()),

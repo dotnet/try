@@ -12,6 +12,8 @@ import { loadSource } from "./sourceCodeActionCreators";
 import * as uiActions from "./uiActionCreators";
 import { IStore } from "../IStore";
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
+import { string } from "prop-types";
+import { isNullOrUndefinedOrWhitespace } from "../utilities/stringUtilities";
 
 export function setWorkspaceInfo(workspaceInfo: IWorkspaceInfo): Action {
     return {
@@ -104,10 +106,10 @@ export const LoadWorkspaceFromGist: ActionCreator<ThunkAction<Promise<Action>, I
             return dispatch(setWorkspaceAndActiveBuffer(workspaceInfo.workspace, activeBufferId));
         };
 
-export function configureWorkspace(store: IStore, workspaceParameter?: string, workspaceTypeParameter?: string, fromParameter?: string, bufferIdParameter?: string, fromGistParameter?: string, canShowGitHubPanelQueryParameter?: string) {
+export function configureWorkspace(configuration: { store: IStore, workspaceParameter?: string, workspaceTypeParameter?: string, language?: string, fromParameter?: string, bufferIdParameter?: string, fromGistParameter?: string, canShowGitHubPanelQueryParameter?: string }) {
     let bufferId = "Program.cs";
-    if (bufferIdParameter) {
-        bufferId = decodeURIComponent(bufferIdParameter);
+    if (configuration.bufferIdParameter) {
+        bufferId = decodeURIComponent(configuration.bufferIdParameter);
     }
 
     let LoadFromWorkspace = false;
@@ -115,48 +117,52 @@ export function configureWorkspace(store: IStore, workspaceParameter?: string, w
         workspaceType: "script",
         files: [],
         buffers: [{ id: bufferId, content: "", position: 0 }],
-        usings: [],
+        usings: []
     };
 
-    if (workspaceParameter) {
-        if (fromParameter) {
-            store.dispatch(error("parameter loading", "cannot define `workspace` and `from` simultaneously"));
+    if (!isNullOrUndefinedOrWhitespace(configuration.language)) {
+        workspace.language = configuration.language;
+    }
+
+    if (configuration.workspaceParameter) {
+        if (configuration.fromParameter) {
+            configuration.store.dispatch(error("parameter loading", "cannot define `workspace` and `from` simultaneously"));
         }
-        if (workspaceTypeParameter) {
-            store.dispatch(error("parameter loading", "cannot define `workspace` and `workspaceTypeParameter` simultaneously"));
+        if (configuration.workspaceTypeParameter) {
+            configuration.store.dispatch(error("parameter loading", "cannot define `workspace` and `workspaceTypeParameter` simultaneously"));
         }
         LoadFromWorkspace = true;
-        workspace = decodeWorkspace(workspaceParameter);
+        workspace = decodeWorkspace(configuration.workspaceParameter);
 
     } else {
-        if (workspaceTypeParameter) {
-            workspace.workspaceType = decodeURIComponent(workspaceTypeParameter);
+        if (configuration.workspaceTypeParameter) {
+            workspace.workspaceType = decodeURIComponent(configuration.workspaceTypeParameter);
         }
     }
 
-    store.dispatch(setWorkspaceType(workspace.workspaceType));
-    store.dispatch(setWorkspace(workspace));
-    store.dispatch(setActiveBuffer(bufferId));
+    configuration.store.dispatch(setWorkspaceType(workspace.workspaceType));
+    configuration.store.dispatch(setWorkspace(workspace));
+    configuration.store.dispatch(setActiveBuffer(bufferId));
 
     if (LoadFromWorkspace) {
-        store.dispatch(setCodeSource("workspace"));
+        configuration.store.dispatch(setCodeSource("workspace"));
     }
-    else if (fromGistParameter) {
-        if (canShowGitHubPanelQueryParameter) {
-            let canShowGitHubPanel = decodeURIComponent(canShowGitHubPanelQueryParameter) === "true";
+    else if (configuration.fromGistParameter) {
+        if (configuration.canShowGitHubPanelQueryParameter) {
+            let canShowGitHubPanel = decodeURIComponent(configuration.canShowGitHubPanelQueryParameter) === "true";
             if (canShowGitHubPanel) {
-                store.dispatch(uiActions.canShowGitHubPanel(true));
+                configuration.store.dispatch(uiActions.canShowGitHubPanel(true));
             }
             else {
-                store.dispatch(uiActions.canShowGitHubPanel(false));
+                configuration.store.dispatch(uiActions.canShowGitHubPanel(false));
             }
         }
-        const fromGist = `gist::${decodeURIComponent(fromGistParameter)}`;
-        store.dispatch(setCodeSource(fromGist));
+        const fromGist = `gist::${decodeURIComponent(configuration.fromGistParameter)}`;
+        configuration.store.dispatch(setCodeSource(fromGist));
     }
-    else if (fromParameter) {
-        const from = decodeURIComponent(fromParameter);
-        store.dispatch(setCodeSource(from));
+    else if (configuration.fromParameter) {
+        const from = decodeURIComponent(configuration.fromParameter);
+        configuration.store.dispatch(setCodeSource(from));
     }
 }
 
