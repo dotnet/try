@@ -25,9 +25,13 @@ namespace Microsoft.DotNet.Try.Project
 
             var startPosition = diagnostic.Location.GetLineSpan().Span.Start;
 
+            var diagnosticFilePath = diagnostic?.Location.SourceTree?.FilePath
+                ?? bufferId?.FileName // F# doesn't have a source tree
+                ?? diagnostic?.Location.GetLineSpan().Path;
+
             var location =
                 diagnostic.Location != null
-                    ? $"{diagnostic.Location.SourceTree?.FilePath}({startPosition.Line + 1},{startPosition.Character + 1}): {GetMessagePrefix()}"
+                    ? $"{diagnosticFilePath}({startPosition.Line + 1},{startPosition.Character + 1}): {GetMessagePrefix()}"
                     : null;
 
             return new SerializableDiagnostic(diagnostic.Location?.SourceSpan.Start ?? throw new ArgumentException(nameof(diagnostic.Location)),

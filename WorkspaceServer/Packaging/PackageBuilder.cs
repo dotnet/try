@@ -37,11 +37,12 @@ namespace WorkspaceServer.Packaging
 
         public bool BlazorSupported { get; private set; }
 
-        public void CreateUsingDotnet(string template, string projectName = null)
+        public void CreateUsingDotnet(string template, string projectName = null, string language = null)
         {
             PackageInitializer = new PackageInitializer(
                template,
                projectName ?? PackageName,
+               language,
                AfterCreate);
         }
 

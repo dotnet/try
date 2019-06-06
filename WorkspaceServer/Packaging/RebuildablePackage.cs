@@ -29,12 +29,14 @@ namespace WorkspaceServer.Packaging
 
         private static bool IsProjectFile(string fileName)
         {
-            return fileName.EndsWith(".csproj", StringComparison.InvariantCultureIgnoreCase);
+            return fileName.EndsWith(".csproj", StringComparison.InvariantCultureIgnoreCase)
+                || fileName.EndsWith(".fsproj", StringComparison.InvariantCultureIgnoreCase);
         }
 
         private static bool IsCodeFile(string fileName)
         {
-            return fileName.EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase);
+            return fileName.EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase)
+                || fileName.EndsWith(".fs", StringComparison.InvariantCultureIgnoreCase);
         }
 
         private static bool IsBuildLogFile(string fileName)

@@ -10,7 +10,7 @@ using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Middleware;
 using Pocket;
 using WorkspaceServer;
-using WorkspaceServer.Servers.Roslyn;
+using WorkspaceServer.Servers;
 using static Pocket.Logger<MLS.Agent.Controllers.LanguageServicesController>;
 
 namespace MLS.Agent.Controllers
@@ -33,9 +33,9 @@ namespace MLS.Agent.Controllers
         public static RequestDescriptor SignatureHelpApi => new RequestDescriptor(SignatureHelpRoute, timeoutMs: 60000);
 
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        private readonly RoslynWorkspaceServer _workspaceServer;
+        private readonly IWorkspaceServer _workspaceServer;
 
-        public LanguageServicesController(RoslynWorkspaceServer workspaceServer)
+        public LanguageServicesController(IWorkspaceServer workspaceServer)
         {
             _workspaceServer = workspaceServer ?? throw new ArgumentNullException(nameof(workspaceServer));
         }

@@ -66,10 +66,12 @@ namespace Microsoft.DotNet.Try.Protocol
             string workspaceType,
             string id = "Program.cs",
             string[] usings = null,
+            string language = DefaultLanguage,
             int position = 0)
         {
             return new Workspace(
                 workspaceType: workspaceType,
+                language: language,
                 buffers: new[]
                 {
                     new Buffer(BufferId.Parse(id ?? throw new ArgumentNullException(nameof(id))), source, position)
@@ -79,9 +81,11 @@ namespace Microsoft.DotNet.Try.Protocol
 
         public static Workspace FromSources(
             string workspaceType = null,
+            string language = DefaultLanguage,
             params (string id, string content, int position)[] sources) =>
             new Workspace(
                 workspaceType: workspaceType,
+                language: language,
                 buffers: sources.Select(s => new Buffer(BufferId.Parse(s.id), s.content, s.position)).ToArray());
     }
 }

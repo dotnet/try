@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>$(NoWarn);2003</NoWarn><!-- AssemblyInformationalVersionAttribute contains a non-standard value -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) AND '$(OS)' == 'Windows_NT'">
+    <!-- the 2.1.503 F# compiler can produce PDBs that can't properly be converted, see https://github.com/Microsoft/visualfsharp/issues/5976 -->
+    <PublishWindowsPdb>false</PublishWindowsPdb>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.6.2" />
+    <PackageReference Include="FSharp.Compiler.Service" Version="28.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.1.0-beta3-final" />
+  </ItemGroup>
+
+</Project>

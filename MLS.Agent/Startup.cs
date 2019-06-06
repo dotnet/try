@@ -27,7 +27,7 @@ using Newtonsoft.Json.Serialization;
 using Pocket;
 using Recipes;
 using WorkspaceServer;
-using WorkspaceServer.Servers.Roslyn;
+using WorkspaceServer.Servers;
 using static Pocket.Logger<MLS.Agent.Startup>;
 using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
 using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
@@ -81,7 +81,7 @@ namespace MLS.Agent
 
                 services.AddSingleton(Configuration);
 
-                services.AddSingleton(c => new RoslynWorkspaceServer(c.GetRequiredService<PackageRegistry>()));
+                services.AddSingleton<IWorkspaceServer>(c => new WorkspaceServerMultiplexer(c.GetRequiredService<PackageRegistry>()));
 
                 services.TryAddSingleton<IBrowserLauncher>(c => new BrowserLauncher());
 

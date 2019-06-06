@@ -8,13 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Middleware;
 using Pocket;
-using WorkspaceServer;
 using WorkspaceServer.Models.Execution;
-using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using WorkspaceServer.Features;
 using static Pocket.Logger<MLS.Agent.Controllers.RunController>;
 using MLS.Agent.CommandLine;
+using WorkspaceServer.Servers;
 
 namespace MLS.Agent.Controllers
 {
@@ -24,12 +23,12 @@ namespace MLS.Agent.Controllers
         public static RequestDescriptor RunApi => new RequestDescriptor(RunRoute, timeoutMs:600000);
 
         private readonly StartupOptions _options;
-        private readonly RoslynWorkspaceServer _workspaceServer;
+        private readonly IWorkspaceServer _workspaceServer;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         public RunController(
             StartupOptions options,
-            RoslynWorkspaceServer workspaceServer)
+            IWorkspaceServer workspaceServer)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _workspaceServer = workspaceServer;

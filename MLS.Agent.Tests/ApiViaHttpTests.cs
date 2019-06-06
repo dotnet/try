@@ -357,7 +357,8 @@ namespace FibonacciTest
                     new WorkspaceRequest(activeBufferId: "generators/FibonacciGenerator.cs",
                                          requestId: "TestRun",
                                          workspace: Workspace.FromSources(
-                                             "console",
+                                             workspaceType:"console",
+                                             language:"csharp",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -434,6 +435,7 @@ namespace FibonacciTest
                                         requestId: "TestRun",
                                          workspace: Workspace.FromSources(
                                              "console",
+                                             language: "csharp",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -511,6 +513,7 @@ namespace FibonacciTest
                                         requestId: "TestRun",
                                          workspace: Workspace.FromSources(
                                              package.Name,
+                                             language: "csharp",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -588,6 +591,7 @@ namespace FibonacciTest
                                         requestId: "TestRun",
                                          workspace: Workspace.FromSources(
                                              "console",
+                                             language: "csharp",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();

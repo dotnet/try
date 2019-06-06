@@ -131,8 +131,8 @@ namespace WorkspaceServer.Transformations
             int paddingSize)
         {
             // this diagnostics does not apply to viewport
-            if (diagnostic.Location!= Location.None 
-                && !string.IsNullOrWhiteSpace(diagnostic.Location.SourceTree.FilePath) 
+            if (diagnostic.Location!= Location.None
+                && !string.IsNullOrWhiteSpace(diagnostic.Location.SourceTree?.FilePath)
                 && !diagnostic.Location.SourceTree.FilePath.Contains(viewport.Destination.Name))
             {
                 return null;

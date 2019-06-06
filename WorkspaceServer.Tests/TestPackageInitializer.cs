@@ -14,17 +14,18 @@ namespace WorkspaceServer.Tests
         public int InitializeCount { get; private set; }
 
         public TestPackageInitializer(
-            string template, 
-            string projectName, 
-            Func<DirectoryInfo, Budget, Task> afterCreate = null) : 
-            base(template, projectName, afterCreate)
+            string template,
+            string projectName,
+            string language = null,
+            Func<DirectoryInfo, Budget, Task> afterCreate = null) :
+            base(template, projectName, language, afterCreate)
         {
         }
+
         public override Task Initialize(DirectoryInfo directory, Budget budget = null)
         {
             InitializeCount++;
             return base.Initialize(directory, budget);
         }
-
     }
 }
