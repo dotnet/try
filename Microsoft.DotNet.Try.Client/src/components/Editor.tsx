@@ -77,6 +77,7 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
         let defineTheme = (name: string, theme: monacoEditor.editor.IStandaloneThemeData) => monacoModule.editor.defineTheme(name, theme);
 
         this.setState({
+            ...this.state,
             defineTheme: defineTheme,
             editorLanguage: this.props.editorLanguage
         });
@@ -133,17 +134,17 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
 
         this.setState({
             ...this.state,
+            editorLanguage: this.props.editorLanguage,
             editor,
             setTheme: (t) => monacoModule.editor.setTheme(t),
             diagnosticsAdapter: new DiagnosticsAdapter(monacoModule, editor),
             instrumentationAdapter: new InstrumentationAdapter(editor),
-            monacoModule: monacoModule,
-            editorLanguage: this.props.editorLanguage
+            monacoModule: monacoModule
         });
-     
+
         if (this.props.showCompletions) {
-            let language = this.state.editorLanguage;
-            let monaco = this.state.monacoModule;
+            let language = this.props.editorLanguage;
+            let monaco = monacoModule;
             let capturedEditor = this;
             this.setupLangaugeServices(monaco, language, capturedEditor);
         }
@@ -156,8 +157,6 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
     }
 
     private setupLangaugeServices = (monaco: typeof monacoEditor, language: SupportedLanguages, capturedEditor: Editor) => {
-        console.log("----diego");
-        console.log(language);
         monaco.languages.registerCompletionItemProvider(language,
             {
                 provideCompletionItems: async function (
@@ -183,23 +182,23 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
                 triggerCharacters: ["."]
             });
 
-            monaco.languages.registerSignatureHelpProvider(language,
-                {
-                    provideSignatureHelp: async function (
-                        model: monacoEditor.editor.ITextModel,
-                        position: monacoEditor.Position,
-                        _token: monacoEditor.CancellationToken) {
-                        let client = capturedEditor.props.client;
-                        let workspace = cloneWorkspace(capturedEditor.props.workspace);
-                        let activeBuffer = capturedEditor.props.activeBufferId;
-                        setBufferContent(workspace, activeBuffer, model.getValue());
-                        let result = await client.getSignatureHelp(workspace, activeBuffer, model.getOffsetAt(position));
-                        capturedEditor.setDiagnostics(result.diagnostics);
-                        return result;
-                    },
-                    signatureHelpTriggerCharacters: ["("]
-                }
-            );
+        monaco.languages.registerSignatureHelpProvider(language,
+            {
+                provideSignatureHelp: async function (
+                    model: monacoEditor.editor.ITextModel,
+                    position: monacoEditor.Position,
+                    _token: monacoEditor.CancellationToken) {
+                    let client = capturedEditor.props.client;
+                    let workspace = cloneWorkspace(capturedEditor.props.workspace);
+                    let activeBuffer = capturedEditor.props.activeBufferId;
+                    setBufferContent(workspace, activeBuffer, model.getValue());
+                    let result = await client.getSignatureHelp(workspace, activeBuffer, model.getOffsetAt(position));
+                    capturedEditor.setDiagnostics(result.diagnostics);
+                    return result;
+                },
+                signatureHelpTriggerCharacters: ["("]
+            }
+        );
     }
 
     private defineThemes = (defineTheme: (name: string, themeData: monacoEditor.editor.IStandaloneThemeData) => void) => {
@@ -272,10 +271,14 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
             this.queueDiagnosticsUpdateRequest();
         }
 
-        if (this.props.editorLanguage !== oldProps.editorLanguage) {
-            if (this.props.showCompletions) {
-                this.setState({...this.state, editorLanguage: this.props.editorLanguage});                
-                let language = this.state.editorLanguage;
+        if (this.state && (this.props.editorLanguage !== oldProps.editorLanguage)) {
+            this.setState({
+                ...this.state,
+                editorLanguage: this.props.editorLanguage
+            });
+
+            if (this.state && this.state.monacoModule && this.props.showCompletions) {
+                let language = this.props.editorLanguage;
                 let monaco = this.state.monacoModule;
                 let capturedEditor = this;
                 this.setupLangaugeServices(monaco, language, capturedEditor);
@@ -379,7 +382,6 @@ const mapStateToProps = (state: IState): IEditorProps => {
         instrumentationEnabled: state.workspace.workspace.includeInstrumentation,
         editorLanguage: state.monaco.language
     };
-
     return props;
 };
 

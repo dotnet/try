@@ -33,6 +33,7 @@ export const setWorkspaceAndActiveBuffer: ActionCreator<ThunkAction<Promise<Acti
     (workspace: IWorkspace, activeBufferId: string) =>
         async (dispatch: ThunkDispatch<IState, void, Action>): Promise<Action> => {
             dispatch(setWorkspace(workspace));
+            dispatch(setWorkspaceLanguage(toSupportedLanguage(workspace.language)));
             return dispatch(setActiveBufferAndLoadCode(activeBufferId));
         };
 

@@ -16,7 +16,7 @@ let config = merge(common, {
     output: {
         filename: "bundle.js",
         sourceMapFilename: "bundle.js.map",
-        path: path.resolve(APP_DIR, "../", "../", "wwwroot", "client"),
+        path: path.resolve(APP_DIR, "../", "../", "MLS.Agent", "wwwroot", "client"),
         publicPath: "/client/"
     },
     module: {

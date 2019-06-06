@@ -89,7 +89,6 @@ const configureStore = function (
     let workspaceParameter = query.get("workspace");
     let workspaceTypeParameter = query.get("workspaceType");
     let useWasmRunner = (!!(query.get("useWasmRunner"))) === true;
-    let language = "csharp";
 
     // Access query string of parent window
     let clientParams = props.iframeWindow.getClientParameters();
@@ -112,7 +111,7 @@ const configureStore = function (
         store,
         workspaceParameter,
         workspaceTypeParameter,
-        language,
+        language: "csharp",
         fromParameter,
         bufferIdParameter,
         fromGistParameter,
