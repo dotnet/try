@@ -146,7 +146,7 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
             let language = this.props.editorLanguage;
             let monaco = monacoModule;
             let capturedEditor = this;
-            this.setupLangaugeServices(monaco, language, capturedEditor);
+            this.setupLanguageServices(monaco, language, capturedEditor);
         }
 
         window.addEventListener("resize", () => editor.layout());
@@ -156,7 +156,7 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
             .subscribe((event) => this.textChangedEventHandler(event));
     }
 
-    private setupLangaugeServices = (monaco: typeof monacoEditor, language: SupportedLanguages, capturedEditor: Editor) => {
+    private setupLanguageServices = (monaco: typeof monacoEditor, language: SupportedLanguages, capturedEditor: Editor) => {
         monaco.languages.registerCompletionItemProvider(language,
             {
                 provideCompletionItems: async function (
@@ -281,7 +281,7 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
                 let language = this.props.editorLanguage;
                 let monaco = this.state.monacoModule;
                 let capturedEditor = this;
-                this.setupLangaugeServices(monaco, language, capturedEditor);
+                this.setupLanguageServices(monaco, language, capturedEditor);
             }
         }
     }
