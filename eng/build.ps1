@@ -13,6 +13,9 @@ function TestUsingNPM([string] $testPath) {
 try {
     # invoke regular build/test script
     . (Join-Path $PSScriptRoot "common\build.ps1") @args
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
 
     # directly invoke npm tests
     if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
