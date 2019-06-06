@@ -21,6 +21,7 @@ import { CreateProjectFromGistRequest, CreateRegionsFromFilesRequest } from "../
 
 import { Subject, interval } from "rxjs";
 import { debounce } from "rxjs/operators";
+import { SupportedLanguages } from "../constants/supportedLanguages";
 
 export interface IEditorProps {
     completionProvider?: string;
@@ -40,6 +41,7 @@ export interface IEditorProps {
     workspace?: IWorkspace;
     instrumentationEnabled?: boolean;
     updateDiagnostics?: (diagnostics: IDiagnostic[]) => void;
+    editorLanguage?: SupportedLanguages;
 }
 
 export interface IEditorState {
@@ -49,6 +51,7 @@ export interface IEditorState {
     diagnosticsAdapter: DiagnosticsAdapter;
     instrumentationAdapter: InstrumentationAdapter;
     monacoModule: typeof monacoEditor;
+    editorLanguage: SupportedLanguages;
 }
 
 export interface TextChangedEvent {
@@ -74,7 +77,8 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
         let defineTheme = (name: string, theme: monacoEditor.editor.IStandaloneThemeData) => monacoModule.editor.defineTheme(name, theme);
 
         this.setState({
-            defineTheme: defineTheme
+            defineTheme: defineTheme,
+            editorLanguage: this.props.editorLanguage
         });
 
         this.defineThemes(defineTheme);
@@ -128,41 +132,58 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
         }
 
         this.setState({
+            ...this.state,
             editor,
             setTheme: (t) => monacoModule.editor.setTheme(t),
             diagnosticsAdapter: new DiagnosticsAdapter(monacoModule, editor),
             instrumentationAdapter: new InstrumentationAdapter(editor),
-            monacoModule: monacoModule
+            monacoModule: monacoModule,
+            editorLanguage: this.props.editorLanguage
         });
-
+     
         if (this.props.showCompletions) {
+            let language = this.state.editorLanguage;
+            let monaco = this.state.monacoModule;
             let capturedEditor = this;
-            monacoModule.languages.registerCompletionItemProvider("csharp",
-                {
-                    provideCompletionItems: async function (
-                        model: monacoEditor.editor.ITextModel,
-                        position: monacoEditor.Position,
-                        _token: monacoEditor.CancellationToken,
-                        _context: monacoEditor.languages.CompletionContext) {
-                        capturedEditor.completionPosition = position;
-                        let client = capturedEditor.props.client;
-                        let workspace = cloneWorkspace(capturedEditor.props.workspace);
-                        let activeBuffer = capturedEditor.props.activeBufferId;
-                        setBufferContent(workspace, activeBuffer, model.getValue());
+            this.setupLangaugeServices(monaco, language, capturedEditor);
+        }
 
-                        let completionResult = await client.getCompletionList(
-                            workspace,
-                            activeBuffer,
-                            model.getOffsetAt(position),
-                            capturedEditor.props.completionProvider);
-                        capturedEditor.completionItems = completionResult.items;
-                        capturedEditor.setDiagnostics(completionResult.diagnostics);
-                        return capturedEditor.completionItems;
-                    },
-                    triggerCharacters: ["."]
-                });
+        window.addEventListener("resize", () => editor.layout());
+        this.props.editorDidMount(editor, monacoModule);
+        this.contentChangedChannel
+            .pipe(debounce(() => interval(1000)))
+            .subscribe((event) => this.textChangedEventHandler(event));
+    }
 
-            monacoModule.languages.registerSignatureHelpProvider("csharp",
+    private setupLangaugeServices = (monaco: typeof monacoEditor, language: SupportedLanguages, capturedEditor: Editor) => {
+        console.log("----diego");
+        console.log(language);
+        monaco.languages.registerCompletionItemProvider(language,
+            {
+                provideCompletionItems: async function (
+                    model: monacoEditor.editor.ITextModel,
+                    position: monacoEditor.Position,
+                    _token: monacoEditor.CancellationToken,
+                    _context: monacoEditor.languages.CompletionContext) {
+                    capturedEditor.completionPosition = position;
+                    let client = capturedEditor.props.client;
+                    let workspace = cloneWorkspace(capturedEditor.props.workspace);
+                    let activeBuffer = capturedEditor.props.activeBufferId;
+                    setBufferContent(workspace, activeBuffer, model.getValue());
+
+                    let completionResult = await client.getCompletionList(
+                        workspace,
+                        activeBuffer,
+                        model.getOffsetAt(position),
+                        capturedEditor.props.completionProvider);
+                    capturedEditor.completionItems = completionResult.items;
+                    capturedEditor.setDiagnostics(completionResult.diagnostics);
+                    return capturedEditor.completionItems;
+                },
+                triggerCharacters: ["."]
+            });
+
+            monaco.languages.registerSignatureHelpProvider(language,
                 {
                     provideSignatureHelp: async function (
                         model: monacoEditor.editor.ITextModel,
@@ -179,13 +200,6 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
                     signatureHelpTriggerCharacters: ["("]
                 }
             );
-        }
-
-        window.addEventListener("resize", () => editor.layout());
-        this.props.editorDidMount(editor, monacoModule);
-        this.contentChangedChannel
-            .pipe(debounce(() => interval(1000)))
-            .subscribe((event) => this.textChangedEventHandler(event));
     }
 
     private defineThemes = (defineTheme: (name: string, themeData: monacoEditor.editor.IStandaloneThemeData) => void) => {
@@ -254,9 +268,18 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
             this.state.instrumentationAdapter.clearInstrumentation();
         }
 
-        if(this.props && oldProps && oldProps.workspace !== this.props.workspace)
-        {
+        if (this.props && oldProps && oldProps.workspace !== this.props.workspace) {
             this.queueDiagnosticsUpdateRequest();
+        }
+
+        if (this.props.editorLanguage !== oldProps.editorLanguage) {
+            if (this.props.showCompletions) {
+                this.setState({...this.state, editorLanguage: this.props.editorLanguage});                
+                let language = this.state.editorLanguage;
+                let monaco = this.state.monacoModule;
+                let capturedEditor = this;
+                this.setupLangaugeServices(monaco, language, capturedEditor);
+            }
         }
     }
 
@@ -303,7 +326,7 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
             (<ReactMonacoEditor
                 editorDidMount={this.editorDidMount}
                 editorWillMount={this.editorWillMount}
-                language="csharp"
+                language={this.props.editorLanguage}
                 options={this.props.editorOptions}
                 onChange={this.onChange}
                 value={this.props.sourceCode}
@@ -316,7 +339,7 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
         completionProvider: "",
         editorDidMount: (_editor: monacoEditor.editor.IEditor) => { },
         editorWillMount: (_editor: typeof monacoEditor) => { },
-        editorOptions: {scrollBeyondLastLine: false},
+        editorOptions: { scrollBeyondLastLine: false },
         showEditor: true,
         sourceCodeDidChange: (_sourceCode: string) => { },
         client:
@@ -335,13 +358,14 @@ export class Editor extends React.Component<IEditorProps, IEditorState> {
         },
         showCompletions: true,
         activeBufferId: "Program.cs",
+        editorLanguage: "csharp"
     };
 }
 
 const mapStateToProps = (state: IState): IEditorProps => {
     var props: IEditorProps = {
         completionProvider: state.config.completionProvider,
-        editorOptions: {...state.monaco.editorOptions, scrollBeyondLastLine: false},
+        editorOptions: { ...state.monaco.editorOptions, scrollBeyondLastLine: false },
         showEditor: state.ui.showEditor,
         sourceCode: state.monaco.displayedCode,
         theme: state.monaco.theme,
@@ -352,7 +376,8 @@ const mapStateToProps = (state: IState): IEditorProps => {
         compileState: state.compile,
         activeBufferId: state.monaco.bufferId,
         workspace: state.workspace.workspace,
-        instrumentationEnabled: state.workspace.workspace.includeInstrumentation
+        instrumentationEnabled: state.workspace.workspace.includeInstrumentation,
+        editorLanguage: state.monaco.language
     };
 
     return props;

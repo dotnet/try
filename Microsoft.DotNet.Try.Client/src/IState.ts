@@ -5,7 +5,7 @@ import IMlsClient from "./IMlsClient";
 import * as monacoEditor from "monaco-editor";
 import { ICodeEditorForTryDotNet } from "./constants/ICodeEditorForTryDotNet";
 import { IApplicationInsightsClient } from "./ApplicationInsights";
-import { SupportedLanguages } from "./constants/supportedLangauges";
+import { SupportedLanguages } from "./constants/supportedLanguages";
 export default interface IState {
     compile: ICompileState;
     config: IConfigState;

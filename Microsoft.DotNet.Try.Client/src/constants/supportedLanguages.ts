@@ -13,11 +13,11 @@ export function isLanguageSupported(language: string): boolean {
     }
 }
 
-export function toSupportedLanguage(langauge:string) : SupportedLanguages{
-    if (isLanguageSupported(langauge)){
-        return <SupportedLanguages>langauge;
+export function toSupportedLanguage(language:string) : SupportedLanguages{
+    if (isLanguageSupported(language)){
+        return <SupportedLanguages>language;
     }
 
-    throw new Error(`language ${langauge} is not supported`);
+    throw new Error(`language ${language} is not supported`);
 }
 

@@ -14,7 +14,7 @@ import {
 import { IHostConfiguration } from "./IHostConfiguration";
 import { IApplicationInsightsClient } from "../ApplicationInsights";
 import { Project, SourceFileRegion } from "../clientApiProtocol";
-import { SupportedLanguages } from "./supportedLangauges";
+import { SupportedLanguages } from "./supportedLanguages";
 
 export const COMPILE_CODE_REQUEST = "COMPILE_CODE_REQUEST";
 export const COMPILE_CODE_SUCCESS = "COMPILE_CODE_SUCCESS";

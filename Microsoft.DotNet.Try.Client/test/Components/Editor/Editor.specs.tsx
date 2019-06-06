@@ -370,7 +370,8 @@ describe("{ Editor }", () => {
     describe("Registers the language services and provides the result to monaco in the correct format", () => {
         const workspace: IWorkspace = {
             workspaceType: "someWorkspace",
-            buffers: []
+            buffers: [],
+            language: "csharp"
         };
 
         const codeEditor = {
