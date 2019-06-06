@@ -13,7 +13,7 @@ import * as uiActions from "./uiActionCreators";
 import { IStore } from "../IStore";
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import { isNullOrUndefinedOrWhitespace } from "../utilities/stringUtilities";
-import { SupportedLanguages, toSupportedLanguage } from "../constants/supportedLangauges";
+import { SupportedLanguages, toSupportedLanguage } from "../constants/supportedLanguages";
 
 export function setWorkspaceInfo(workspaceInfo: IWorkspaceInfo): Action {
     return {
@@ -126,8 +126,6 @@ export function configureWorkspace(configuration: { store: IStore, workspacePara
         buffers: [{ id: bufferId, content: "", position: 0 }],
         usings: []
     };
-
-
 
     if (configuration.workspaceParameter) {
         if (configuration.fromParameter) {
