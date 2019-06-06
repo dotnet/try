@@ -224,10 +224,10 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void Negative_port_fails_the_parse()
         {
-            _parser.Parse("--port -1")
+            _parser.Parse("--port -8090")
                    .Errors
                    .Should()
-                   .Contain(e => e.Message == "Invalid argument for --port. Negative port number is not allowed");
+                   .Contain(e => e.Message == "Invalid argument for --port option");
         }
 
         [Fact]
