@@ -9,7 +9,6 @@ namespace WorkspaceServer.Packaging
 {
     public interface IPackageInitializer
     {
-        string Language { get; }
         Task Initialize(
             DirectoryInfo directory,
             Budget budget = null);
