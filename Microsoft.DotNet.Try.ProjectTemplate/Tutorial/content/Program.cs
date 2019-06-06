@@ -23,10 +23,10 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tutorial
         {
             return region switch
             {
-            "HelloWorld" => HelloWorld(),
-            "DateTime" => DateTime(),
-            _ => throw new ArgumentException("A --region argument must be passed", nameof(region))
-        };
+                "HelloWorld" => HelloWorld(),
+                "DateTime" => DateTime(),
+                _ => throw new ArgumentException("A --region argument must be passed", nameof(region))
+            };
         }
 
         internal static int HelloWorld()
