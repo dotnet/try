@@ -65,5 +65,17 @@ namespace Microsoft.DotNet.Try.Project.Tests
             buffer.Content.Should().Be("Console.WriteLine();");
             buffer.AbsolutePosition.Should().Be(18);
         }
+
+        [Fact]
+        public void Can_create_buffer_from_fsharp_file()
+        {
+            var file = FileGenerator.Create("Program.fs", SourceCodeProvider.FSharpConsoleProgramMultipleRegions);
+            var buffers = BufferGenerator.CreateBuffers(file).ToList();
+
+            buffers.Should().NotBeNullOrEmpty();
+            buffers.Count.Should().Be(2);
+            buffers.Should().Contain(b => b.Id == "Program.fs@alpha");
+            buffers.Should().Contain(b => b.Id == "Program.fs@beta");
+        }
     }
 }

@@ -69,5 +69,23 @@ namespace Microsoft.DotNet.Try.Project.Tests
 
             result.Buffers.First().Content.Replace("\r\n", "\n").Should().Be(expectedCode);
         }
+
+        [Fact]
+        public void it_generates_a_file_and_buffers_workspace_from_fsharp()
+        {
+            var files = new[]
+            {
+                new File("Program.fs", SourceCodeProvider.FSharpConsoleProgramMultipleRegions),
+            };
+
+            var transformer = new BufferFromRegionExtractor();
+            var result = transformer.Extract(files, workspaceType: "console");
+            result.Should().NotBeNull();
+
+            result.Buffers.Should().Contain(found => found.Id == "Program.fs@alpha" && found.Content == "\n    let sum = numbers |> Seq.sum\n    ");
+            result.Buffers.Should().Contain(found => found.Id == "Program.fs@beta" && found.Content == "\n    printfn \"The sum was %d\" sum\n    ");
+            result.Files.Should().NotBeNullOrEmpty();
+            result.Files.Should().Contain(found => found.Name == "Program.fs" && found.Text == SourceCodeProvider.FSharpConsoleProgramMultipleRegions);
+        }
     }
 }
