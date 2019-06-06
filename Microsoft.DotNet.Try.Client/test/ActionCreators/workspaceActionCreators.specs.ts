@@ -73,9 +73,9 @@ suite("Workspace Action Creators", () => {
                 language: "csharp"
             }),
             actions.setActiveBuffer("Program.cs"),
-            actions.setCodeSource("http://source.com")
+            actions.setCodeSource("http://www.microsoft.com")
         ];
-        configureWorkspace({ store, fromParameter: encodeURIComponent("http://source.com") });
+        configureWorkspace({ store, fromParameter: encodeURIComponent("http://www.microsoft.com") });
         store.getActions().should.deep.equal(expectedActions);
     });
 
@@ -89,7 +89,7 @@ suite("Workspace Action Creators", () => {
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace")
         ];
-        configureWorkspace({ store, workspaceParameter: encodeWorkspace(newWorkSpace), fromParameter: encodeURIComponent("http://source.com") });
+        configureWorkspace({ store, workspaceParameter: encodeWorkspace(newWorkSpace), fromParameter: encodeURIComponent("http://www.microsoft.com") });
         store.getActions().should.deep.equal(expectedActions);
     });
 
