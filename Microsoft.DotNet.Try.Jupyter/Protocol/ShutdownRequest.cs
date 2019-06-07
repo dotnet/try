@@ -5,7 +5,8 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    public class ShutdownRequestReply
+    [JupyterMessageType(MessageTypeValues.KernelShutdownRequest)]
+    public class ShutdownRequest
     {
         [JsonProperty("restart")]
         public bool Restart { get; set; }

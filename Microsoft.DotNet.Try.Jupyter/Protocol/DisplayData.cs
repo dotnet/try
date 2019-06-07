@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
+    [JupyterMessageType(MessageTypeValues.DisplayData)]
     public class DisplayData
     {
         [JsonProperty("source", NullValueHandling = NullValueHandling.Ignore)]

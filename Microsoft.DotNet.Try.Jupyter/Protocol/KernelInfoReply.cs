@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
+    [JupyterMessageType(MessageTypeValues.KernelInfoReply)]
     public class KernelInfoReply
     {
         [JsonProperty("protocol_version")]

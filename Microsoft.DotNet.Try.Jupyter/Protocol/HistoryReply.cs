@@ -1,15 +1,16 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    public abstract class Stream
+    [JupyterMessageType(MessageTypeValues.HistoryReply)]
+    public class HistoryReply
     {
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("text")]
-        public string Text { get; set; }
+        [JsonProperty("history")]
+        public List<JObject> History { get; set; } = new List<JObject>();
     }
 }

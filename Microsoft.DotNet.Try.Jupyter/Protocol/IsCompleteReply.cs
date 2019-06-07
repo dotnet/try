@@ -5,7 +5,8 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    public class IsCompleteResponse
+    [JupyterMessageType(MessageTypeValues.IsCompleteReply)]
+    public class IsCompleteReply
     {
         //One of 'complete', 'incomplete', 'invalid', 'unknown'
         [JsonProperty("status")]

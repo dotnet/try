@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         public const string CompleteRequest = "complete_request";
 
+        public const string CompleteReply = "complete_reply";
+
         public const string IsCompleteRequest = "is_complete_request";
 
         public const string IsCompleteReply = "is_complete_reply";
@@ -37,5 +39,24 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         public const string UpdateDisplayData = "update_display_data";
 
+        public const string IntrospectionRequest = "inspect_request";
+
+        public const string IntrospectionReply = "inspect_reply";
+
+        public const string HistoryRequest = "history_request";
+
+        public const string HistoryReply = "history_reply";
+
+        public const string ClearOutput = "clear_output";
+
+        public const string InputRequest = "input_request";
+
+        public const string InputReply = "input_reply";
+
+        public const string CommOpen = "comm_open";
+
+        public const string CommClose = "comm_close";
+
+        public const string CommMsg = "comm_msg";
     }
 }

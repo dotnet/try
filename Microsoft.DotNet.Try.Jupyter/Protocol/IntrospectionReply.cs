@@ -5,11 +5,12 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    public class IntrospectionResponse
+    [JupyterMessageType(MessageTypeValues.IntrospectionReply)]
+    public class IntrospectionReply
     {
-        public static IntrospectionResponse Ok(string source, object data, object metaData) => new IntrospectionResponse{Status = StatusValues.Ok, Source = source, Data = data, MetaData = metaData};
-        public static IntrospectionResponse Error(string source, object data, object metaData) => new IntrospectionResponse { Status = StatusValues.Error, Source = source, Data = data, MetaData = metaData };
-        protected IntrospectionResponse()
+        public static IntrospectionReply Ok(string source, object data, object metaData) => new IntrospectionReply{Status = StatusValues.Ok, Source = source, Data = data, MetaData = metaData};
+        public static IntrospectionReply Error(string source, object data, object metaData) => new IntrospectionReply { Status = StatusValues.Error, Source = source, Data = data, MetaData = metaData };
+        protected IntrospectionReply()
         {
             Source = string.Empty;
             Data = new object();

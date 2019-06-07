@@ -16,12 +16,16 @@ namespace Microsoft.DotNet.Try.Jupyter
 {
     public class JupyterRequestContextHandler : ICommandHandler<JupyterRequestContext>
     {
-        private readonly PackageRegistry _packageRegistry;
         private int _executionCount;
+        private readonly WorkspaceServerMultiplexer _server;
 
         public JupyterRequestContextHandler(PackageRegistry packageRegistry)
         {
-            _packageRegistry = packageRegistry ?? throw new ArgumentNullException(nameof(packageRegistry));
+            if (packageRegistry == null)
+            {
+                throw new ArgumentNullException(nameof(packageRegistry));
+            }
+            _server = new WorkspaceServerMultiplexer(packageRegistry);
         }
 
         public async Task<ICommandDeliveryResult> Handle(
@@ -37,22 +41,11 @@ namespace Microsoft.DotNet.Try.Jupyter
 
                     var code = executeRequest.Code;
 
-                    var workspace = new Workspace(
-                        files: new[]
-                               {
-                                   new File("Program.cs", Scaffold())
-                               },
-                        buffers:new[]
-                                {
-                                    new Buffer(new BufferId("Program.cs", "main"), code), 
-                                },
-                        workspaceType: "console");
+                    var workspace = CreateScaffoldWorkspace(code);
 
                     var workspaceRequest = new WorkspaceRequest(workspace);
 
-                    var server = new WorkspaceServerMultiplexer(new PackageRegistry());
-
-                    var result = await server.Run(workspaceRequest);
+                    var result = await _server.Run(workspaceRequest);
 
                     var messageBuilder = delivery.Command.Builder;
                     var ioPubChannel = delivery.Command.IoPubChannel;
@@ -178,7 +171,29 @@ namespace Microsoft.DotNet.Try.Jupyter
             return delivery.Complete();
         }
 
-        private static string Scaffold() =>
+        private static Workspace CreateScaffoldWorkspace(string code)
+        {
+            var workspace = CreateCsharpScaffold(code);
+            return workspace;
+        }
+
+        private static Workspace CreateCsharpScaffold(string code)
+        {
+            var workspace = new Workspace(
+                files: new[]
+                {
+                    new File("Program.cs", CsharpScaffold())
+                },
+                buffers: new[]
+                {
+                    new Buffer(new BufferId("Program.cs", "main"), code),
+                },
+                workspaceType: "console",
+                language: "csharp");
+            return workspace;
+        }
+
+        private static string CsharpScaffold() =>
             @"
 using System;
 using System.Collections.Generic;
