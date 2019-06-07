@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
     [JupyterMessageType(MessageTypeValues.CommClose)]
-    public class CommClose
+    public class CommClose : JupyterMessageContent
     {
         [JsonProperty("comm_id")]
         public string CommId { get; set; }

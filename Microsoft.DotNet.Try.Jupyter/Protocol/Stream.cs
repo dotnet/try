@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    public abstract class Stream
+    public abstract class Stream : JupyterMessageContent
     {
         [JsonProperty("name")]
         public string Name { get; set; }

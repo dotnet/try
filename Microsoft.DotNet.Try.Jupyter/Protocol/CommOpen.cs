@@ -7,23 +7,13 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
     [JupyterMessageType(MessageTypeValues.CommOpen)]
-    public class CommOpen
+    public class CommOpen : JupyterMessageContent
     {
         [JsonProperty("comm_id")]
         public string CommId { get; set; }
 
         [JsonProperty("target_name")]
         public string TargetName { get; set; }
-
-        [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
-        public object Data { get; } = new JObject();
-    }
-
-    [JupyterMessageType(MessageTypeValues.CommClose)]
-    public class CommClose
-    {
-        [JsonProperty("comm_id")]
-        public string CommId { get; set; }
 
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
         public object Data { get; } = new JObject();

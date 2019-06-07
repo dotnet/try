@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
     [JupyterMessageType(MessageTypeValues.CompleteRequest)]
-    public class CompleteRequest
+    public class CompleteRequest : JupyterMessageContent
     {
         [JsonProperty("code")]
         public string Code { get; set; }

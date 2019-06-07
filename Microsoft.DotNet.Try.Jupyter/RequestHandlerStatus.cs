@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 ExecutionState = status
             };
 
-            var statusMessage = _messageBuilder.CreateMessage(MessageTypeValues.Status, JObject.FromObject(content), _requestHeader);
+            var statusMessage = _messageBuilder.CreateMessage(content, _requestHeader);
 
             _messageSender.Send(statusMessage);
         }

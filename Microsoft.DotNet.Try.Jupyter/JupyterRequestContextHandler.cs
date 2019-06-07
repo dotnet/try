@@ -56,7 +56,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                         _executionCount++;
 
                         var executeInput = messageBuilder.CreateMessage(
-                            MessageTypeValues.ExecuteInput,
                             new ExecuteInput
                             {
                                 Code = code,
@@ -72,7 +71,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
                     
                     // executeResult data
-                    var executeResultData = new ExecuteResult()
+                    var executeResultData = new ExecuteResult
                     {
                         Data = new JObject
                         {
@@ -98,7 +97,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 
                         // send to server
                         var executeReply = messageBuilder.CreateMessage(
-                            MessageTypeValues.ExecuteReply, 
                             executeReplyPayload, 
                             delivery.Command.Request.Header);
 
@@ -125,7 +123,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 
                         // send to server
                         var executeReply = messageBuilder.CreateMessage(
-                            MessageTypeValues.ExecuteReply, 
                             executeReplyPayload, 
                             delivery.Command.Request.Header);
 
@@ -137,7 +134,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                         {
                             // send on io
                             var error = messageBuilder.CreateMessage(
-                                MessageTypeValues.Error, 
                                 errorContent, 
                                 delivery.Command.Request.Header);
                             ioPubChannel.Send(error);
@@ -148,7 +144,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                                 Text = errorContent.EValue
                             };
                             var stream = messageBuilder.CreateMessage(
-                                MessageTypeValues.Stream, 
                                 stdErr, 
                                 delivery.Command.Request.Header);
                             ioPubChannel.Send(stream);
@@ -159,7 +154,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                     {
                         // send on io
                         var executeResultMessage = messageBuilder.CreateMessage(
-                            MessageTypeValues.ExecuteResult,
                             executeResultData,
                             delivery.Command.Request.Header);
                         ioPubChannel.Send(executeResultMessage);
