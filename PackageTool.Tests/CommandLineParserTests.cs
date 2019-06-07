@@ -22,7 +22,7 @@ namespace MLS.PackageTool.Tests
         {
             _output = output;
             _parser = CommandLineParser.Create(
-                getBuildAsset: (_) => { _command = PackageToolConstants.LocateBuildAsset; },
+                getBuildAsset: (_) => { _command = PackageToolConstants.LocateProjectAsset; },
                 getWasmAsset: (_) => { _command = PackageToolConstants.LocateWasmAsset; },
                 prepare: (_) => {
                     _command = "prepare-package";
@@ -33,8 +33,8 @@ namespace MLS.PackageTool.Tests
         [Fact]
         public async Task Parse_locate_build_locates_build()
         {
-            await _parser.InvokeAsync(PackageToolConstants.LocateBuildAsset, _console);
-            _command.Should().Be(PackageToolConstants.LocateBuildAsset);
+            await _parser.InvokeAsync(PackageToolConstants.LocateProjectAsset, _console);
+            _command.Should().Be(PackageToolConstants.LocateProjectAsset);
         }
 
         [Fact]

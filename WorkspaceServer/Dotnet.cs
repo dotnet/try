@@ -95,7 +95,7 @@ namespace WorkspaceServer
             // dotnet tool install  doesn't like it if directory arguments end with "/"
             if (path.EndsWith("\\"))
             {
-                return path.Substring(0, path.Length - 2);
+                return path.Substring(0, path.Length - 1);
             }
 
             return path;

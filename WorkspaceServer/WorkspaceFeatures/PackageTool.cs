@@ -30,7 +30,7 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public async Task<ProjectAsset> LocateProjectAsset()
         {
-            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateBuildAsset, DirectoryAccessor.GetFullyQualifiedRoot());
+            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateProjectAsset, DirectoryAccessor.GetFullyQualifiedRoot());
             var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
             return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
         }

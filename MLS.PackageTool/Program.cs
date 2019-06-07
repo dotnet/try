@@ -15,7 +15,7 @@ namespace MLS.PackageTool
 {
     public class PackageToolConstants
     {
-        public const string LocateBuildAsset = "locate-build-asset";
+        public const string LocateProjectAsset = "locate-project-asset";
         public const string LocateWasmAsset = "locate-wasm-asset";
         public const string PreparePackage = "prepare-package";
     }
@@ -116,7 +116,7 @@ namespace MLS.PackageTool
 
             Command LocateBuildAsset()
             {
-                return new Command(PackageToolConstants.LocateBuildAsset)
+                return new Command(PackageToolConstants.LocateProjectAsset)
                 {
                     Handler = CommandHandler.Create(getBuildAsset)
                 };

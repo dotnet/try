@@ -38,11 +38,11 @@ namespace WorkspaceServer.Packaging
         protected async Task<IPackage> CreatePackage(PackageDescriptor descriptor, PackageTool tool)
         {
             await tool.Prepare();
-            var buildAsset = await tool.LocateProjectAsset();
-            if (buildAsset != null)
+            var projectAsset = await tool.LocateProjectAsset();
+            if (projectAsset != null)
             {
                 var package = new Package2(descriptor.Name, tool.DirectoryAccessor);
-                package.Add(buildAsset);
+                package.Add(projectAsset);
 
                 var wasmAsset = await tool.LocateWasmAsset();
                 if (wasmAsset != null)
