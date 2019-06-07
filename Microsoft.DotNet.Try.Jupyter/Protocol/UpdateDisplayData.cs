@@ -3,6 +3,7 @@
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
+    [JupyterMessageType(MessageTypeValues.UpdateDisplayData)]
     public class UpdateDisplayData : DisplayData
     {
     }

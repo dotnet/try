@@ -5,11 +5,12 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    public abstract class Stream
+    [JupyterMessageType(MessageTypeValues.InputRequest)]
+    public class InputRequest
     {
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("text")]
-        public string Text { get; set; }
+        [JsonProperty("prompt")]
+        public string Prompt { get; set; }
+        [JsonProperty("password")]
+        public bool Password { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
+    [JupyterMessageType(MessageTypeValues.ExecuteResult)]
     public class ExecuteResult : DisplayData
     {
         [JsonProperty("execution_count", NullValueHandling = NullValueHandling.Ignore)]
