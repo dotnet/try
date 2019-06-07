@@ -68,7 +68,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var exe = Path.Combine(asset.Directory.FullName, packageName);
 
-            var tool = new WorkspaceServer.WorkspaceFeatures.PackageTool(packageName, asset.Directory);
+            var tool = new WorkspaceServer.WorkspaceFeatures.PackageTool(packageName, new FileSystemDirectoryAccessor(asset.Directory));
 
             await tool.Prepare();
 

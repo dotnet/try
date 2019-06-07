@@ -28,7 +28,7 @@ namespace WorkspaceServer.Packaging
 
                 if (directory.FileExists(exeName))
                 {
-                    var tool = new PackageTool(package.Name, directory.GetFullyQualifiedRoot());
+                    var tool = new PackageTool(package.Name, directory);
                     var exePath = directory.GetFullyQualifiedFilePath(exeName);
 
                     var toolDirectory = await _toolPackageLocator.PrepareToolAndLocateAssetDirectory(tool);

@@ -20,7 +20,7 @@ namespace MLS.Agent.CommandLine
                 options.Location,
                 options.AddSource)).ThrowOnFailure();
 
-            var tool = new WorkspaceServer.WorkspaceFeatures.PackageTool(options.PackageName, options.Location);
+            var tool = new WorkspaceServer.WorkspaceFeatures.PackageTool(options.PackageName, new FileSystemDirectoryAccessor(options.Location));
             await tool.Prepare();
         }
     }

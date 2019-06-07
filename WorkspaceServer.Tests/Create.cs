@@ -116,7 +116,7 @@ namespace WorkspaceServer.Tests
             var destination = Package.DefaultPackagesDirectory;
             await InstallCommand.Do(new InstallOptions(new PackageSource(addSource.FullName), packageName, destination), new TestConsole());
 
-            var strategy = new WebAssemblyAssetFinder(destination);
+            var strategy = new WebAssemblyAssetFinder(new FileSystemDirectoryAccessor(destination));
             return await strategy.Find<IPackage>(packageName);
         }
 

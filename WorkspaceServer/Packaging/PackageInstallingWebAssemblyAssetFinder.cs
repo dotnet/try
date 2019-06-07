@@ -13,7 +13,7 @@ namespace WorkspaceServer.Packaging
     {
         private readonly PackageSource _addSource;
 
-        public PackageInstallingWebAssemblyAssetFinder(DirectoryInfo workingDirectory, PackageSource addSource = null)
+        public PackageInstallingWebAssemblyAssetFinder(IDirectoryAccessor workingDirectory, PackageSource addSource = null)
             : base(workingDirectory)
         {
             _addSource = addSource;
@@ -42,7 +42,7 @@ namespace WorkspaceServer.Packaging
 
             var installationResult = await dotnet.ToolInstall(
                 packageDesciptor.Name,
-                _workingDirectory,
+                _workingDirectory.GetFullyQualifiedRoot(),
                 _addSource,
                 new Budget());
 

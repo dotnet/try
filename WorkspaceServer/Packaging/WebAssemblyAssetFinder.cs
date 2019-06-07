@@ -11,9 +11,9 @@ namespace WorkspaceServer.Packaging
 {
     public class WebAssemblyAssetFinder : IPackageFinder
     {
-        protected readonly DirectoryInfo _workingDirectory;
+        protected readonly IDirectoryAccessor _workingDirectory;
 
-        public WebAssemblyAssetFinder(DirectoryInfo workingDirectory)
+        public WebAssemblyAssetFinder(IDirectoryAccessor workingDirectory)
         {
             _workingDirectory = workingDirectory;
         }
@@ -41,7 +41,7 @@ namespace WorkspaceServer.Packaging
             var buildAsset = await tool.LocateProjectAsset();
             if (buildAsset != null)
             {
-                var package = new Package2(descriptor.Name, new FileSystemDirectoryAccessor(buildAsset.DirectoryAccessor.GetFullyQualifiedRoot().Parent));
+                var package = new Package2(descriptor.Name, tool.DirectoryAccessor);
                 package.Add(buildAsset);
 
                 var wasmAsset = await tool.LocateWasmAsset();

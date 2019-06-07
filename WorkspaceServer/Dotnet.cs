@@ -90,13 +90,24 @@ namespace WorkspaceServer
                 .Select(s => s.Split(separator, StringSplitOptions.RemoveEmptyEntries)[2]);
         }
 
+        private string RemoveTrailingSlash(string path)
+        {
+            // dotnet tool install  doesn't like it if directory arguments end with "/"
+            if (path.EndsWith("\\"))
+            {
+                return path.Substring(0, path.Length - 2);
+            }
+
+            return path;
+        }
+
         public Task<CommandLineResult> ToolInstall(
             string packageName, 
             DirectoryInfo toolPath,
             PackageSource addSource = null, 
             Budget budget = null)
         {
-            var args = $@"{packageName} --tool-path ""{toolPath.FullName}"" --version 1.0.0";
+            var args = $@"{packageName} --tool-path ""{RemoveTrailingSlash(toolPath.FullName)}"" --version 1.0.0";
             if (addSource != null)
             {
                 args += $@" --add-source ""{addSource}""";
