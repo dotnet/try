@@ -21,6 +21,7 @@ using WorkspaceServer;
 
 namespace MLS.Agent.Tests
 {
+    [LogToPocketLogger("TestLog")]
     public class WorkspaceDiscoveryTests : ApiViaHttpTestsBase
     {
         public WorkspaceDiscoveryTests(ITestOutputHelper output) : base(output)

@@ -35,6 +35,7 @@ using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {
+    [LogToPocketLogger("TestLog")]
     public class ApiViaHttpTests : ApiViaHttpTestsBase
     {
         public ApiViaHttpTests(ITestOutputHelper output) : base(output)

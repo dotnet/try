@@ -13,7 +13,7 @@ using Xunit;
 
 namespace WorkspaceServer.Tests
 {
-    [LogToPocketLogger("PipelineStepTestsLog")]
+    [LogToPocketLogger("TestLog")]
     public class PipelineStepTests
     {
         [Fact]

@@ -22,7 +22,7 @@ using Pocket.For.Xunit;
 
 namespace WorkspaceServer.Tests
 {
-    [LogToPocketLogger("AspNetWorkspaceTestsLog")]
+    [LogToPocketLogger("TestLog")]
     public class AspNetWorkspaceTests : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();

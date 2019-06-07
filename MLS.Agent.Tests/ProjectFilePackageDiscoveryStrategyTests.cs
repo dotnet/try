@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using Pocket.For.Xunit;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkspaceServer.Packaging;
@@ -10,6 +11,7 @@ using Xunit;
 
 namespace MLS.Agent.Tests
 {
+    [LogToPocketLogger("TestLog")]
     public class ProjectFilePackageDiscoveryStrategyTests
     {
         [Fact]

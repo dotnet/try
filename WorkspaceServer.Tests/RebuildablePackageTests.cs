@@ -13,9 +13,11 @@ using System.IO;
 using FluentAssertions.Extensions;
 using System.Linq;
 using Microsoft.Reactive.Testing;
+using Pocket.For.Xunit;
 
 namespace WorkspaceServer.Tests
 {
+    [LogToPocketLogger("TestLog")]
     public class RebuildablePackageTests : IDisposable
     {
         private readonly CompositeDisposable disposables = new CompositeDisposable();

@@ -13,6 +13,7 @@ using WorkspaceServer;
 
 namespace MLS.Agent.Tests
 {
+    [LogToPocketLogger("TestLog")]
     public class LocalToolPackageDiscoveryStrategyTests
     {
         private readonly ITestOutputHelper output;
