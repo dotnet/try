@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
     [JupyterMessageType(MessageTypeValues.IntrospectionReply)]
-    public class IntrospectionReply
+    public class IntrospectionReply : JupyterMessageContent
     {
         public static IntrospectionReply Ok(string source, object data, object metaData) => new IntrospectionReply{Status = StatusValues.Ok, Source = source, Data = data, MetaData = metaData};
         public static IntrospectionReply Error(string source, object data, object metaData) => new IntrospectionReply { Status = StatusValues.Error, Source = source, Data = data, MetaData = metaData };
