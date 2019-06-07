@@ -7,11 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Pocket.For.Xunit;
 using WorkspaceServer.Packaging;
 using Xunit;
 
 namespace WorkspaceServer.Tests
 {
+    [LogToPocketLogger("PipelineStepTestsLog")]
     public class PipelineStepTests
     {
         [Fact]

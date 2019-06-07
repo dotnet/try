@@ -18,9 +18,11 @@ using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 using Package = WorkspaceServer.Packaging.Package;
+using Pocket.For.Xunit;
 
 namespace WorkspaceServer.Tests
 {
+    [LogToPocketLogger("AspNetWorkspaceTestsLog")]
     public class AspNetWorkspaceTests : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
