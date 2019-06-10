@@ -15,6 +15,8 @@ variables:
     value: .NETCore
   - name: BlazorTemplateVersion
     value: 0.7.0
+  - name: DotNetSdkVersion
+    value: 2.1.503
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -67,6 +69,13 @@ jobs:
         displayName: Add NodeJS/npm
         inputs:
           versionSpec: '>=11'
+
+      - task: UseDotNet@2
+        displayName: Add dotnet
+        inputs:
+          packageType: sdk
+          version: $(DotNetSdkVersion)
+          installationPath: $(Agent.ToolsDirectory)\dotnet
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
         displayName: Install Blazor templates
@@ -142,7 +151,7 @@ jobs:
         displayName: Add dotnet
         inputs:
           packageType: sdk
-          version: 2.1.503
+          version: $(DotNetSdkVersion)
           installationPath: $(Agent.ToolsDirectory)/dotnet
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
