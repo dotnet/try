@@ -18,7 +18,7 @@ using Xunit;
 
 namespace MLS.Agent.Tests
 {
-    [LogToPocketLogger("TestLog")]
+    
     public class DocumentationAPITests
     {
         [Fact]

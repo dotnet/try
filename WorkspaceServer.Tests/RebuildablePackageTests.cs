@@ -17,7 +17,7 @@ using Pocket.For.Xunit;
 
 namespace WorkspaceServer.Tests
 {
-    [LogToPocketLogger("TestLog")]
+    
     public class RebuildablePackageTests : IDisposable
     {
         private readonly CompositeDisposable disposables = new CompositeDisposable();

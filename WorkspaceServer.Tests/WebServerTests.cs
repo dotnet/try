@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests
 {
-    [LogToPocketLogger("TestLog")]
+    
     public class WebServerTests : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
