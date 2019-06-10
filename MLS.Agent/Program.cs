@@ -12,18 +12,16 @@ using Pocket.For.ApplicationInsights;
 using Recipes;
 using Serilog.Sinks.RollingFileAlternate;
 using System;
-using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Jupyter;
-using WorkspaceServer.Servers.Roslyn;
 using static Pocket.Logger<MLS.Agent.Program>;
 using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
-using WorkspaceServer;
 using MLS.Agent.CommandLine;
+using WorkspaceServer.Servers;
 
 namespace MLS.Agent
 {
@@ -45,7 +43,7 @@ namespace MLS.Agent
         private static readonly Assembly[] assembliesEmittingPocketLoggerLogs = {
             typeof(Startup).Assembly,
             typeof(AsyncLazy<>).Assembly,
-            typeof(RoslynWorkspaceServer).Assembly,
+            typeof(IWorkspaceServer).Assembly,
             typeof(Shell).Assembly
         };
 
@@ -120,6 +118,7 @@ namespace MLS.Agent
                 Log.Trace("Received Key: {key}", options.Key);
             }
 
+
             var webHost = new WebHostBuilder()
                           .UseKestrel()
                           .UseContentRoot(Directory.GetCurrentDirectory())
@@ -139,6 +138,7 @@ namespace MLS.Agent
                           })
                           .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
+                          .ConfigureUrlUsingPort(options.Port)
                           .Build();
 
             return webHost;

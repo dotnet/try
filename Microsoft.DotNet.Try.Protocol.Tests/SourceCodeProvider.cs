@@ -169,5 +169,22 @@ namespace TryNodaTime
         }
     }
 }";
+
+        public static string FSharpConsoleProgramMultipleRegions =>
+            @"//
+module FSharpConsole
+
+[<EntryPoint>]
+let main(args: string[]) =
+    let numbers = seq { 1; 2; 3; 4 }
+    //#region alpha
+    let sum = numbers |> Seq.sum
+    //#endregion
+    //#region beta
+    printfn ""The sum was %d"" sum
+    printfn ""goodbye""
+    //#endregion
+    0
+".EnforceLF();
     }
 }

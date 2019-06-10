@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Middleware;
 using Pocket;
-using WorkspaceServer.Servers.Roslyn;
+using WorkspaceServer.Servers;
 using static Pocket.Logger<MLS.Agent.Controllers.CompileController>;
 
 namespace MLS.Agent.Controllers
@@ -19,11 +19,11 @@ namespace MLS.Agent.Controllers
         public static RequestDescriptor CompileApi => new RequestDescriptor(CompileRoute, timeoutMs: 600000);
 
 
-        private readonly RoslynWorkspaceServer _workspaceServer;
+        private readonly IWorkspaceServer _workspaceServer;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         public CompileController(
-            RoslynWorkspaceServer workspaceServer)
+            IWorkspaceServer workspaceServer)
         {
             _workspaceServer = workspaceServer;
         }

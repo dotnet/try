@@ -98,6 +98,7 @@ describe("hostMessageToAction mapper", () => {
             actions.setWorkspaceInfo(info),
             actions.canShowGitHubPanel(false),
             actions.setWorkspace(info.workspace),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setActiveBuffer("FibonacciGenerator.cs"),
             actions.setCodeSource("workspace"),
             actions.loadCodeRequest("workspace"),
@@ -136,6 +137,7 @@ describe("hostMessageToAction mapper", () => {
 
         const expectedActions = [
             actions.setWorkspace(workspace),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setActiveBuffer("Program.cs@codeRegion"),
             actions.setCodeSource("workspace"),
             actions.loadCodeRequest("workspace"),

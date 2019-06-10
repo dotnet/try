@@ -300,5 +300,46 @@ Console.Write(2);
                 processed.Files[0].Text.EnforceLF().Should().Be(expectedFileContent);
             }
         }
+
+        [Fact]
+        public async Task FSharp_buffer_can_be_injected_into_region()
+        {
+            var original = new Workspace(
+                files: new[]
+                {
+                    new Protocol.File("Program.fs", SourceCodeProvider.FSharpConsoleProgramMultipleRegions)
+                },
+                buffers: new[]
+                {
+                    // original:
+                    // |    let sum = numbers |> Seq.sum
+                    // with newlines:
+                    // |    let sum =
+                    // |        numbers
+                    // |        |> Seq.sum
+                    // e.g., the buffer lines are indented 0, 4, 4 spaces while the resultant backing file
+                    // should be indented 4, 8, 8.
+                    new Buffer("Program.fs@alpha",
+@"let sum =
+    numbers
+    |> Seq.sum".EnforceLF())
+                });
+            var processor = new FSharpBufferInliningTransformer();
+
+            var processed = await processor.TransformAsync(original);
+            processed.Should().NotBeNull();
+            processed.Files.Should().NotBeEmpty();
+            var newCode = processed.Files.ElementAt(0).Text;
+
+            newCode.Should().NotBe(original.Files.ElementAt(0).Text);
+            newCode.EnforceLF().Should().Contain(
+@"
+    //#region alpha
+    let sum =
+        numbers
+        |> Seq.sum
+    //#endregion
+".EnforceLF());
+        }
     }
 }

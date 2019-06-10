@@ -5,6 +5,8 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
@@ -41,7 +43,14 @@ namespace MLS.Agent.Tests
 
         public void Dispose() => _disposables.Dispose();
 
-        private TestServer CreateTestServer() => new TestServer(CreateWebHostBuilder());
+        private TestServer CreateTestServer()
+        {
+            //We need to set the feature collection to be not null,
+            //so that the ServerFeatures(like the urls to use) can be configured and used
+            var featureCollection = new FeatureCollection();
+            featureCollection.Set<IServerAddressesFeature>(new ServerAddressesFeature());
+            return new TestServer(CreateWebHostBuilder(), featureCollection);
+        }
 
         private IWebHostBuilder CreateWebHostBuilder()
         {
@@ -60,7 +69,8 @@ namespace MLS.Agent.Tests
                               });
                           })
                           .UseTestEnvironment()
-                          .UseStartup<Startup>();
+                          .UseStartup<Startup>()
+                          .ConfigureUrlUsingPort(_options.Port);
 
             return builder;
         }

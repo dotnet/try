@@ -122,7 +122,8 @@ namespace WorkspaceServer.Tests
 
         public static string SimpleWorkspaceRequestAsJson(
             string consoleOutput = "Hello!",
-            string workspaceType = null)
+            string workspaceType = null,
+            string workspaceLanguage = "csharp")
         {
             var workspace = Workspace.FromSource(
                 SimpleConsoleAppCodeWithoutNamespaces(consoleOutput),

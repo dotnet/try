@@ -38,7 +38,8 @@ namespace MLS.Agent.Controllers
         private static IEnumerable<SourceFileRegion> ExtractRegions(SourceFile sourceFile)
         {
             var sc = SourceText.From(sourceFile.Content);
-            var regions = sc.ExtractRegions(sourceFile.Name).Select(region => new SourceFileRegion(region.id, region.content)).ToArray();
+            var regions = sc.ExtractRegions(sourceFile.Name).Select(
+                region => new SourceFileRegion(region.bufferId.ToString(), sc.ToString(region.span).FormatSourceCode(sourceFile.Name))).ToArray();
             return regions;
         }
 

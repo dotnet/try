@@ -28,7 +28,7 @@ using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Servers.Roslyn
 {
-    public class RoslynWorkspaceServer : ILanguageService, ICodeRunner, ICodeCompiler
+    public class RoslynWorkspaceServer : IWorkspaceServer
     {
         private readonly IPackageFinder _packageFinder;
         private const int defaultBudgetInSeconds = 30;
@@ -304,7 +304,7 @@ namespace WorkspaceServer.Servers.Roslyn
             }
         }
 
-        private static async Task<RunResult> RunConsoleAsync(
+        internal static async Task<RunResult> RunConsoleAsync(
             Package package,
             IEnumerable<SerializableDiagnostic> diagnostics,
             Budget budget,

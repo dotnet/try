@@ -52,7 +52,7 @@ namespace WorkspaceServer.Tests
             var initializer = new PackageInitializer(
                 "console",
                 "test",
-                async (_, __) =>
+                afterCreate: async (_, __) =>
                 {
                     await Task.Yield();
                     afterCreateCallCount++;

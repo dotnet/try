@@ -21,8 +21,9 @@ namespace WorkspaceServer.Packaging
             Budget budget = null)
         {
             var projectFile = packageDescriptor.Name;
+            var extension = Path.GetExtension(projectFile);
 
-            if (Path.GetExtension(projectFile) == ".csproj" && File.Exists(projectFile))
+            if ((extension == ".csproj" || extension == ".fsproj") && File.Exists(projectFile))
             {
                 PackageBuilder packageBuilder = new PackageBuilder(packageDescriptor.Name);
                 packageBuilder.CreateRebuildablePackage = _createRebuildablePackage;

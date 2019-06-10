@@ -28,14 +28,14 @@ namespace MLS.Agent.Tests.ApiContracts
     ""files"": [],
     ""buffers"": [
       {{
-        ""id"": """",
+        ""id"": ""file.cs"",
         ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{{\n  public static void Main()\n  {{\n    foreach (var i in Fibonacci().Take(20))\n    {{\n      Console.\n    }}\n  }}\n\n  private static IEnumerable<int> Fibonacci()\n  {{\n    int current = 1, next = 1;\n\n    while (true) \n    {{\n      yield return current;\n      next = current + (current = next);\n    }}\n  }}\n}}\n"",
         ""position"": 0
       }}
     ],
     ""usings"": []
   }},
-  ""activeBufferId"": """",
+  ""activeBufferId"": ""file.cs"",
   ""position"": 187
 }}";
 
@@ -46,14 +46,14 @@ namespace MLS.Agent.Tests.ApiContracts
     ""files"": [],
     ""buffers"": [
       {{
-        ""id"": """",
+        ""id"": ""file.cs"",
         ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{{\n  public static void Main()\n  {{\n    foreach (var i in Fibonacci().Take(20))\n    {{\n      Console.\n    }}\n  }}\n\n  private static IEnumerable<int> Fibonacci()\n  {{\n    int current = 1, next = 1;\n\n    while (true) \n    {{\n      yield return current;\n      next = current + (current = next);\n    }}\n  }}\n}}\n"",
         ""position"": 187
       }}
     ],
     ""usings"": []
   }},
-  ""activeBufferId"": """"
+  ""activeBufferId"": ""file.cs""
 }}";
 
             var responseToOldFormatRequest = await CallCompletion(oldFormatRequest);
@@ -83,14 +83,14 @@ namespace MLS.Agent.Tests.ApiContracts
     ""files"": [],
     ""buffers"": [
       {{
-        ""id"": """",
+        ""id"": ""file.cs"",
         ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{{\n  public static void Main()\n  {{\n    foreach (var i in Fibonacci().Take(20))\n    {{\n      Console.WriteLine()\n    }}\n  }}\n\n  private static IEnumerable<int> Fibonacci()\n  {{\n    int current = 1, next = 1;\n\n    while (true) \n    {{\n      yield return current;\n      next = current + (current = next);\n    }}\n  }}\n}}\n"",
         ""position"": 0
       }}
     ],
     ""usings"": []
   }},
-  ""activeBufferId"": """",
+  ""activeBufferId"": ""file.cs"",
   ""position"": 197
 }}";
 
@@ -101,14 +101,14 @@ namespace MLS.Agent.Tests.ApiContracts
     ""files"": [],
     ""buffers"": [
       {{
-        ""id"": """",
+        ""id"": ""file.cs"",
         ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\npublic class Program\n{{\n  public static void Main()\n  {{\n    foreach (var i in Fibonacci().Take(20))\n    {{\n      Console.WriteLine()\n    }}\n  }}\n\n  private static IEnumerable<int> Fibonacci()\n  {{\n    int current = 1, next = 1;\n\n    while (true) \n    {{\n      yield return current;\n      next = current + (current = next);\n    }}\n  }}\n}}\n"",
         ""position"": 197
       }}
     ],
     ""usings"": []
   }},
-  ""activeBufferId"": """"
+  ""activeBufferId"": ""file.cs""
 }}";
 
             var responseToOldFormatRequest = await CallSignatureHelp(oldFormatRequest);

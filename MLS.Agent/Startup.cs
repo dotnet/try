@@ -9,6 +9,7 @@ using System.Net.Mime;
 using Clockwise;
 using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.DotNet.Try.Markdown;
@@ -26,7 +27,7 @@ using Newtonsoft.Json.Serialization;
 using Pocket;
 using Recipes;
 using WorkspaceServer;
-using WorkspaceServer.Servers.Roslyn;
+using WorkspaceServer.Servers;
 using static Pocket.Logger<MLS.Agent.Startup>;
 using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
 using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
@@ -80,7 +81,7 @@ namespace MLS.Agent
 
                 services.AddSingleton(Configuration);
 
-                services.AddSingleton(c => new RoslynWorkspaceServer(c.GetRequiredService<PackageRegistry>()));
+                services.AddSingleton<IWorkspaceServer>(c => new WorkspaceServerMultiplexer(c.GetRequiredService<PackageRegistry>()));
 
                 services.TryAddSingleton<IBrowserLauncher>(c => new BrowserLauncher());
 
@@ -182,8 +183,9 @@ namespace MLS.Agent
 
                 if (StartupOptions.Mode == StartupMode.Try)
                 {
+                    var uri = new Uri(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses.First());
                     Clock.Current
-                         .Schedule(_ => LaunchBrowser(browserLauncher,directoryAccessor), TimeSpan.FromSeconds(1));
+                         .Schedule(_ => LaunchBrowser(browserLauncher,directoryAccessor, uri), TimeSpan.FromSeconds(1));
                 }
             }
         }
@@ -204,15 +206,8 @@ namespace MLS.Agent
             });
         }
 
-        private void LaunchBrowser(IBrowserLauncher browserLauncher, IDirectoryAccessor directoryAccessor)
+        private void LaunchBrowser(IBrowserLauncher browserLauncher, IDirectoryAccessor directoryAccessor, Uri uri)
         {
-            var processName = Process.GetCurrentProcess().ProcessName;
-
-            var uri = processName == "dotnet" ||
-                      processName == "dotnet.exe"
-                          ? new Uri("http://localhost:4242")
-                          : new Uri("http://localhost:5000");
-
             if (StartupOptions.Uri != null &&
                 !StartupOptions.Uri.IsAbsoluteUri)
             {

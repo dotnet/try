@@ -6,6 +6,7 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
@@ -53,7 +54,7 @@ namespace MLS.Agent.CommandLine
             IConsole console,
             StartServer startServer = null,
             InvocationContext context = null);
-     
+
         public static Parser Create(
             StartServer startServer = null,
             Demo demo = null,
@@ -91,8 +92,8 @@ namespace MLS.Agent.CommandLine
             pack = pack ??
                    PackCommand.Do;
 
-             install = install??
-              InstallCommand.Do;
+            install = install ??
+             InstallCommand.Do;
             services = services ??
              new ServiceCollection();
 
@@ -181,6 +182,25 @@ namespace MLS.Agent.CommandLine
                                       "Enable verbose logging to the console",
                                       new Argument<bool>()));
 
+                var portArgument = new Argument<ushort>();
+
+                portArgument.AddValidator(symbolResult =>{
+                    
+                    if(symbolResult.Tokens
+                    .Select(t => t.Value)
+                    .Where(value => !ushort.TryParse(value, out ushort result)).Count() >0)
+                    {
+                        return "Invalid argument for --port option";
+                    }
+
+                    return null;
+                });
+
+                command.AddOption(new Option(
+                                        "--port",
+                                        "Specify the port for dotnet try to listen on",
+                                        portArgument));
+
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {
                     services.AddSingleton(_ => PackageRegistry.CreateForTryMode(
@@ -245,7 +265,7 @@ namespace MLS.Agent.CommandLine
             Command Demo()
             {
                 var demoCommand = new Command(
-                    "demo", 
+                    "demo",
                     "Learn how to create Try .NET content with an interactive demo")
                 {
                     new Option("--output", "Where should the demo project be written to?")
@@ -278,15 +298,15 @@ namespace MLS.Agent.CommandLine
 
                 return github;
             }
-            
+
             Command Jupyter()
             {
                 var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel");
                 jupyterCommand.IsHidden = true;
                 var connectionFileArgument = new Argument<FileInfo>
-                                             {
-                                                 Name = "ConnectionFile"
-                                             }.ExistingOnly();
+                {
+                    Name = "ConnectionFile"
+                }.ExistingOnly();
                 jupyterCommand.Argument = connectionFileArgument;
 
                 jupyterCommand.Handler = CommandHandler.Create<JupyterOptions, IConsole, InvocationContext>((options, console, context) =>

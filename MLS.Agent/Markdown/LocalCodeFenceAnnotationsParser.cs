@@ -22,10 +22,10 @@ namespace MLS.Agent.Markdown
             PackageRegistry packageRegistry,
             IDefaultCodeBlockAnnotations defaultAnnotations = null) : base(defaultAnnotations,
                 csharp =>
-            {
-                AddCsharpProjectOption(csharp, directoryAccessor);
-                AddSourceFileOption(csharp);
-            },
+                {
+                    AddCsharpProjectOption(csharp, directoryAccessor);
+                    AddSourceFileOption(csharp);
+                },
                 fsharp =>
                 {
                     AddFsharpProjectOption(fsharp, directoryAccessor);

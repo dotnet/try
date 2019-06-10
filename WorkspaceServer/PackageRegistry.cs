@@ -244,6 +244,12 @@ namespace WorkspaceServer
                              packageBuilder.EnableBlazor(registry);
                          });
 
+            registry.Add("fsharp-console",
+                         packageBuilder =>
+                         {
+                             packageBuilder.CreateUsingDotnet("console", language: "F#");
+                         });
+
             return registry;
         }
 

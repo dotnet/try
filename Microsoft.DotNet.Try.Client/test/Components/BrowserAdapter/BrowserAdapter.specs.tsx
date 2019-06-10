@@ -73,6 +73,7 @@ describe("<BrowserAdapter />", () => {
     it("dispatches LOAD_SOURCE_REQUEST to the Store", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -106,6 +107,7 @@ describe("<BrowserAdapter />", () => {
     it("dispatches `from` query parameter to the Store", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("http://sample.com/"),
@@ -145,6 +147,7 @@ describe("<BrowserAdapter />", () => {
     it("dispatches `hostOrigin` query parameter to the Store", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -178,6 +181,7 @@ describe("<BrowserAdapter />", () => {
         const consoleWorkspace = { ...emptyWorkspace, workspaceType: "console" };
         const expectedActions = [
             actions.setWorkspaceType("console"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(consoleWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -212,6 +216,7 @@ describe("<BrowserAdapter />", () => {
 
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(defaultWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.setCodeSource("workspace"),
@@ -245,6 +250,7 @@ describe("<BrowserAdapter />", () => {
     it("dispatches `completion` query parameter to the Store", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.setCompletionProvider("pythia"),
@@ -278,6 +284,7 @@ describe("<BrowserAdapter />", () => {
     it("dispatches CONFIGURE_ENABLE_PREVIEW to the Store", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(emptyWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -327,7 +334,8 @@ describe("<BrowserAdapter />", () => {
     it("initialises workspace from gist", () => {
         const expectedActions = [
             actions.setWorkspaceType("script"),
-            actions.setWorkspace({ workspaceType: "script", usings: [], files: [], buffers: [{ id: "FibonacciGenerator.cs", content: "", position: 0 }] }),
+            actions.setWorkspaceLanguage("csharp"),
+            actions.setWorkspace({ workspaceType: "script", language: "csharp", usings: [], files: [], buffers: [{ id: "FibonacciGenerator.cs", content: "", position: 0 }] }),
             actions.setActiveBuffer("FibonacciGenerator.cs"),
             actions.setCodeSource("gist::df44833326fcc575e8169fccb9d41fc7"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -360,6 +368,7 @@ describe("<BrowserAdapter />", () => {
         const consoleWorkspace = { ...emptyWorkspace, workspaceType: "somethingCool" };
         const expectedActions = [
             actions.setWorkspaceType("somethingCool"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(consoleWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -394,6 +403,7 @@ describe("<BrowserAdapter />", () => {
         const consoleWorkspace = { ...emptyWorkspace, workspaceType: "somethingCool" };
         const expectedActions = [
             actions.setWorkspaceType("somethingCool"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(consoleWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -449,6 +459,7 @@ describe("<BrowserAdapter />", () => {
         };
         const expectedActions = [
             actions.setWorkspaceType("somethingCool"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(consoleWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.enableClientTelemetry(new NullAIClient()),
@@ -512,6 +523,7 @@ describe("<BrowserAdapter />", () => {
         };
         const expectedActions = [
             actions.setWorkspaceType("blazor-console"),
+            actions.setWorkspaceLanguage("csharp"),
             actions.setWorkspace(consoleWorkspace),
             actions.setActiveBuffer("Program.cs"),
             actions.configureWasmRunner(),

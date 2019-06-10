@@ -53,28 +53,26 @@ const embed = (props: BrowserAdapterProps) => {
         configureInstrumentation(store, query);
         configureHostListener(store, props.iframeWindow);
 
-        
-      
-       
-        if (store.getState().config.useLocalCodeRunner)
-        {
+
+
+
+        if (store.getState().config.useLocalCodeRunner) {
             store.dispatch(actions.configureEditorId(editorId));
             store.dispatch(actions.hostEditorReady(editorId));
         }
-        else
-        {
+        else {
             store.dispatch(actions.hostListenerReady(editorId));
             store.dispatch(actions.hostEditorReady(editorId));
             store.dispatch(actions.hostRunReady(editorId));
         }
 
         store.dispatch(actions.loadSource());
-        
+
         return (
             <Provider store={store}>
                 {props.children}
             </Provider>
-        );       
+        );
     };
 };
 
@@ -85,21 +83,22 @@ const configureStore = function (
         props.hostWindow,
         query,
         srcUri,
-        hostOrigin, 
+        hostOrigin,
         editorId));
 
     let workspaceParameter = query.get("workspace");
-    let workspaceTypeParameter = query.get("workspaceType");    
-    let useWasmRunner =  (!!(query.get("useWasmRunner"))) === true;
+    let workspaceTypeParameter = query.get("workspaceType");
+    let useWasmRunner = (!!(query.get("useWasmRunner"))) === true;
 
     // Access query string of parent window
     let clientParams = props.iframeWindow.getClientParameters();
-    if (clientParams.workspaceType) {
+    if (clientParams && clientParams.workspaceType) {
         workspaceTypeParameter = clientParams.workspaceType;
     }
-    if( clientParams.hasOwnProperty("useWasmRunner") && clientParams.useWasmRunner !== null && clientParams.useWasmRunner !== undefined){
+
+    if (clientParams && clientParams.hasOwnProperty("useWasmRunner") && clientParams.useWasmRunner !== null && clientParams.useWasmRunner !== undefined) {
         // useWasmRunner can be set via clientParameters
-        useWasmRunner = useWasmRunner || ( (!!(clientParams.useWasmRunner)) === true);
+        useWasmRunner = useWasmRunner || ((!!(clientParams.useWasmRunner)) === true);
     }
 
     // Get attributes from the srcript element that contains bundeljs
@@ -108,7 +107,16 @@ const configureStore = function (
     let fromGistParameter = query.get("fromGist");
     let canShowGitHubPanelQueryParameter = query.get("canShowGitHubPanel");
 
-    configureWorkspace(store, workspaceParameter, workspaceTypeParameter, fromParameter, bufferIdParameter, fromGistParameter, canShowGitHubPanelQueryParameter);
+    configureWorkspace({
+        store,
+        workspaceParameter,
+        workspaceTypeParameter,
+        language: "csharp",
+        fromParameter,
+        bufferIdParameter,
+        fromGistParameter,
+        canShowGitHubPanelQueryParameter
+    });
 
     if (query.get("completion")) {
         let completionProvider = decodeURIComponent(query.get("completion"));
@@ -131,7 +139,7 @@ const configureStore = function (
 
     store.dispatch(actions.enableClientTelemetry(props.aiFactory(referrer)));
 
-    if (clientParams.scaffold) {
+    if (clientParams && clientParams.scaffold) {
         store.dispatch(applyScaffolding(clientParams.scaffold,
             "file.cs",
             ["System", "System.Collections.Generic", "System.Linq"]));
@@ -143,11 +151,11 @@ const configureStore = function (
         props.getCookie,
         aiClient,
         apiBaseAddress);
-    
+
     store.dispatch(actions.setClient(client));
 
     store.dispatch(actions.configureBranding());
-    
+
     setupTelemetryMiddleware(aiClient, store);
 
     return store;
@@ -208,7 +216,7 @@ const getMiddleware = function (log: ActionLogger,
         getMiddlewareForLogger((toLog: AnyAction) => {
             let result = actionToHostMessage(toLog, srcUri, editorId);
 
-            if (result) {               
+            if (result) {
                 hostWindow.postMessage(result, hostOrigin.href);
             }
 

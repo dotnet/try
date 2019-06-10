@@ -13,7 +13,7 @@ const config: webpack.Configuration = {
     output: {
         filename: "bundle.js",
         sourceMapFilename: "bundle.js.map",
-        path: path.resolve(__dirname, "../", "wwwroot", "client"),
+        path: path.resolve(__dirname, "../", "../", "MLS.Agent", "wwwroot", "client"),
         publicPath: "/client/"
     },
     module: {

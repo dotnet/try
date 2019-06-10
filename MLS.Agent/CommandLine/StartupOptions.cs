@@ -42,7 +42,8 @@ namespace MLS.Agent.CommandLine
             bool enablePreviewFeatures = false,
             string package = null,
             string packageVersion = null,
-            ParseResult parseResult = null)
+            ParseResult parseResult = null,
+            ushort? port = null)
         {
             _parseResult = parseResult;
             LogPath = logPath;
@@ -59,6 +60,7 @@ namespace MLS.Agent.CommandLine
             EnablePreviewFeatures = enablePreviewFeatures;
             Package = package;
             PackageVersion = packageVersion;
+            Port = port;
         }
 
         public bool EnablePreviewFeatures { get; }
@@ -98,5 +100,6 @@ namespace MLS.Agent.CommandLine
         public string Package { get; }
 
         public string PackageVersion { get; }
+        public ushort? Port { get; }
     }
 }
