@@ -97,6 +97,13 @@ namespace MLS.Agent.CommandLine
             services = services ??
              new ServiceCollection();
 
+            var dirArgument = new Argument<DirectoryInfo>
+            {
+                Arity = ArgumentArity.ZeroOrOne,
+                Name = nameof(StartupOptions.Dir).ToLower(),
+                Description = "Specify the path to the root directory for your documentation"
+            }.ExistingOnly();
+
             var rootCommand = StartInTryMode();
 
             rootCommand.AddCommand(StartInHostedMode());
@@ -121,19 +128,16 @@ namespace MLS.Agent.CommandLine
                    })
                    .Build();
 
+
             RootCommand StartInTryMode()
             {
                 var command = new RootCommand
                 {
                     Name = "dotnet-try",
-                    Description = ".NET interactive documentation in your browser"
+                    Description = "Interactive documentation in your browser"
                 };
-                command.AddArgument(new Argument<DirectoryInfo>
-                {
-                    Arity = ArgumentArity.ZeroOrOne,
-                    Name = nameof(StartupOptions.Dir).ToLower(),
-                    Description = "Specify the path to the root directory for your documentation"
-                }.ExistingOnly());
+                
+                command.AddArgument(dirArgument);
 
                 command.AddOption(new Option(
                                       "--add-package-source",
@@ -184,11 +188,11 @@ namespace MLS.Agent.CommandLine
 
                 var portArgument = new Argument<ushort>();
 
-                portArgument.AddValidator(symbolResult =>{
-                    
-                    if(symbolResult.Tokens
-                    .Select(t => t.Value)
-                    .Where(value => !ushort.TryParse(value, out ushort result)).Count() >0)
+                portArgument.AddValidator(symbolResult =>
+                {
+                    if (symbolResult.Tokens
+                                    .Select(t => t.Value)
+                                    .Count(value => !ushort.TryParse(value, out _)) > 0)
                     {
                         return "Invalid argument for --port option";
                     }
@@ -378,17 +382,13 @@ namespace MLS.Agent.CommandLine
 
             Command Verify()
             {
-                var dir = new Argument<DirectoryInfo>(() => new DirectoryInfo(Directory.GetCurrentDirectory()))
+                var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                    Name = nameof(VerifyOptions.Dir).ToLower(),
-                    Description = "Specify the path to the root directory"
-                }.ExistingOnly();
+                    dirArgument
+                };
 
-                var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.");
-
-                verifyCommand.AddArgument(dir);
-
-                verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>((options, console, startupOptions) =>
+                verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
+                    (options, console, startupOptions) =>
                 {
                     return verify(options, console, startupOptions);
                 });
