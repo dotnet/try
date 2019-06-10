@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
@@ -28,8 +27,40 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         [JsonProperty("nbconvert_exporter", NullValueHandling = NullValueHandling.Ignore)]
         public string NbConvertExporter { get; set; }
+    }
 
-        [JsonProperty("help_links")]
-        public List<Link> HelpLinks { get;  } = new List<Link>();
+    public class CSharpLanguageInfo : LanguageInfo
+    {
+        public CSharpLanguageInfo(string version = "7.3")
+        {
+            Name = "C#";
+            Version = version;
+            MimeType = "text/x-csharp";
+            FileExtension = ".cs";
+            PygmentsLexer = "c#";
+        }
+    }
+
+    public class FSharpLanguageInfo : LanguageInfo
+    {
+        public FSharpLanguageInfo(string version = "4.5")
+        {
+            Name = "F#";
+            Version = version;
+            MimeType = "text/x-fsharp";
+            FileExtension = ".fs";
+            PygmentsLexer = "fsharp";
+        }
+    }
+
+    public class VBnetLanguageInfo : LanguageInfo
+    {
+        public VBnetLanguageInfo(string version = "15.0"){
+            Name = "VB.Net";
+            Version = version;
+            MimeType = "text/x-vbnet";
+            FileExtension = ".vb";
+            PygmentsLexer = "vbnet";
+        }
     }
 }

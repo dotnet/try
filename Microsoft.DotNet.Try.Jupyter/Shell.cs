@@ -125,14 +125,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                                       ProtocolVersion = "5.1.0",
                                       Implementation = ".NET",
                                       ImplementationVersion = "5.1.0",
-                                      LanguageInfo = new LanguageInfo
-                                                     {
-                                                         Name = "C#",
-                                                         Version = typeof(string).Assembly.ImageRuntimeVersion.Substring(1),
-                                                         MimeType = "text/x-csharp",
-                                                         FileExtension = ".cs",
-                                                         PygmentsLexer = "c#"
-                                                     }
+                                      LanguageInfo = new CSharpLanguageInfo()
                                   };
 
             var replyMessage = new Message

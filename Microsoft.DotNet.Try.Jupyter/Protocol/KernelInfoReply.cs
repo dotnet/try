@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
@@ -22,5 +23,8 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         [JsonProperty("banner")]
         public string Banner { get; set; }
+
+        [JsonProperty("help_links")]
+        public List<Link> HelpLinks { get; } = new List<Link>();
     }
 }
