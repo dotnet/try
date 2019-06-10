@@ -14,30 +14,30 @@ namespace WorkspaceServer.WorkspaceFeatures
 {
     public class PackageTool
     {
-        private readonly DirectoryInfo _workingDirectory;
         private Lazy<FileInfo> _path { get; }
 
-        public PackageTool(string name, DirectoryInfo workingDirectory)
+        public PackageTool(string name, IDirectoryAccessor directoryAccessor)
         {
-            this.Name = name;
-            this._workingDirectory = workingDirectory;
+            Name = name;
+            DirectoryAccessor = directoryAccessor;
             _path = new Lazy<FileInfo>(() => FindTool());
         }
 
+        public IDirectoryAccessor DirectoryAccessor { get; }
         public bool Exists => _path.Value != null && _path.Value.Exists;
 
         public string Name { get; }
 
-        public async Task<DirectoryInfo> LocateBuildAsset()
+        public async Task<ProjectAsset> LocateProjectAsset()
         {
-            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateBuildAsset, _workingDirectory);
+            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateProjectAsset, DirectoryAccessor.GetFullyQualifiedRoot());
             var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
-            return projectDirectory;
+            return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
         }
 
         public async Task<WebAssemblyAsset> LocateWasmAsset()
         {
-            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateWasmAsset, _workingDirectory);
+            var result = await CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.LocateWasmAsset, DirectoryAccessor.GetFullyQualifiedRoot());
             var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
 
             if (!projectDirectory.Exists)
@@ -50,13 +50,12 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public Task Prepare()
         {
-            return CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.PreparePackage, _workingDirectory);
+            return CommandLine.Execute(_path.Value, MLS.PackageTool.PackageToolConstants.PreparePackage, DirectoryAccessor.GetFullyQualifiedRoot());
         }
 
         FileInfo FindTool()
         {
-            var exeName = Path.Combine(_workingDirectory.FullName, Name.ExecutableName());
-            var fileInfo = new FileInfo(exeName);
+            var fileInfo = DirectoryAccessor.GetFullyQualifiedFilePath(Name.ExecutableName());
 
             if (!fileInfo.Exists)
             {

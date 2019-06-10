@@ -95,33 +95,41 @@ namespace WorkspaceServer
             return (T)package;
         }
 
-        private Task<IPackage> GetPackage2<T>(PackageDescriptor descriptor)
+        private async Task<IPackage> GetPackage2<T>(PackageDescriptor descriptor)
             where T : class, IPackage
         {
-            return _packages2.GetOrAdd(descriptor, async descriptor2 =>
+            var package = await ( _packages2.GetOrAdd(descriptor, async descriptor2 =>
             {
                 foreach (var packageFinder in _packageFinders)
                 {
-                    var package = await packageFinder.Find<IPackage>(descriptor);
-                    if (package != null)
+                    var package2 = await packageFinder.Find<Package2>(descriptor);
+                    if (package2 != null)
                     {
-                        if (package is Package2 package2)
-                        {
-                            var packageAsset = package2.Assets.OfType<T>().FirstOrDefault();
-                            if (packageAsset != null)
-                            {
-                                return packageAsset;
-                            }
-                        }
-                    }
-                    if (package is T pkg)
-                    {
-                        return pkg;
+                        return package2;
                     }
                 }
 
                 return default;
-            });
+            }));
+
+            if (package != null)
+            {
+                if (package is T pkg)
+                {
+                    return pkg;
+                }
+
+                if (package is Package2 package2)
+                {
+                    var packageAsset = package2.Assets.OfType<T>().FirstOrDefault();
+                    if (packageAsset != null)
+                    {
+                        return packageAsset;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private Task<IPackage> GetPackageFromPackageBuilder(string packageName, Budget budget, PackageDescriptor descriptor)
@@ -151,7 +159,7 @@ namespace WorkspaceServer
 
         public static PackageRegistry CreateForTryMode(DirectoryInfo project, PackageSource addSource = null)
         {
-            var finders = GetDefaultPackageFinders().Append(new PackageInstallingWebAssemblyAssetFinder(Package.DefaultPackagesDirectory, addSource));
+            var finders = GetDefaultPackageFinders().Append(new PackageInstallingWebAssemblyAssetFinder(new FileSystemDirectoryAccessor(Package.DefaultPackagesDirectory), addSource));
             var registry = new PackageRegistry(
                 true,
                 addSource,
@@ -169,7 +177,7 @@ namespace WorkspaceServer
 
         public static PackageRegistry CreateForHostedMode()
         {
-            var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(Package.DefaultPackagesDirectory));
+            var finders = GetDefaultPackageFinders().Append(new WebAssemblyAssetFinder(new FileSystemDirectoryAccessor(Package.DefaultPackagesDirectory)));
             var registry = new PackageRegistry(
                 createRebuildablePackages: false,
                 packageFinders: finders);

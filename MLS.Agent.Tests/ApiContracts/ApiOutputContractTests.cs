@@ -179,7 +179,7 @@ namespace MLS.Agent.Tests.ApiContracts
             this.Assent(result.FormatJson(), configuration);
         }
 
-        [Fact]
+        [Fact(Skip = "Needs moved onto Package2")]
         public async Task The_instrumentation_contract_has_not_been_broken()
         {
             var requestJson = new WorkspaceRequest(

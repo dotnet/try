@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Logging.StructuredLogger;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -10,9 +11,9 @@ namespace WorkspaceServer.Packaging
 {
     public class WebAssemblyAssetFinder : IPackageFinder
     {
-        protected readonly DirectoryInfo _workingDirectory;
+        protected readonly IDirectoryAccessor _workingDirectory;
 
-        public WebAssemblyAssetFinder(DirectoryInfo workingDirectory)
+        public WebAssemblyAssetFinder(IDirectoryAccessor workingDirectory)
         {
             _workingDirectory = workingDirectory;
         }
@@ -37,12 +38,18 @@ namespace WorkspaceServer.Packaging
         protected async Task<IPackage> CreatePackage(PackageDescriptor descriptor, PackageTool tool)
         {
             await tool.Prepare();
-            var wasmAsset = await tool.LocateWasmAsset();
-            if (wasmAsset != null)
+            var projectAsset = await tool.LocateProjectAsset();
+            if (projectAsset != null)
             {
-                var package = new Package2(descriptor.Name, new FileSystemDirectoryAccessor(wasmAsset.DirectoryAccessor.GetFullyQualifiedRoot().Parent));
-                package.Add(wasmAsset);
-                return package;
+                var package = new Package2(descriptor.Name, tool.DirectoryAccessor);
+                package.Add(projectAsset);
+
+                var wasmAsset = await tool.LocateWasmAsset();
+                if (wasmAsset != null)
+                {
+                    package.Add(wasmAsset);
+                    return package;
+                }
             }
 
             return null;
