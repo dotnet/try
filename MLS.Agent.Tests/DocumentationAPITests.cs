@@ -18,7 +18,6 @@ using Xunit;
 
 namespace MLS.Agent.Tests
 {
-    
     public class DocumentationAPITests
     {
         [Fact]
