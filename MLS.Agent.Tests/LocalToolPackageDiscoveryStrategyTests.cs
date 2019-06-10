@@ -10,10 +10,11 @@ using WorkspaceServer.Tests;
 using Xunit;
 using Xunit.Abstractions;
 using WorkspaceServer;
+using System.IO;
+using System.Linq;
 
 namespace MLS.Agent.Tests
 {
-    
     public class LocalToolPackageDiscoveryStrategyTests
     {
         private readonly ITestOutputHelper output;
@@ -30,14 +31,15 @@ namespace MLS.Agent.Tests
             {
                 var console = new TestConsole();
                 var temp = directory.Directory;
-                var asset = (await Create.ConsoleWorkspaceCopy()).Directory;
-                await PackCommand.Do(new PackOptions(asset, outputDirectory: temp, enableWasm: false), console);
-                var result = await Tools.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} console --tool-path {temp.FullName}");
+                var package = await Create.ConsoleWorkspaceCopy();
+                File.Move(package.Directory.GetFiles("*.csproj").First().FullName, Path.Combine(package.Directory.FullName, "not-console.csproj"));
+                await PackCommand.Do(new PackOptions(package.Directory, outputDirectory: temp, enableWasm: false), console);
+                var result = await Tools.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} not-console --tool-path {temp.FullName}");
                 output.WriteLine(string.Join("\n", result.Error));
                 result.ExitCode.Should().Be(0);
 
                 var strategy = new LocalToolInstallingPackageDiscoveryStrategy(temp);
-                var tool = await strategy.Locate(new PackageDescriptor("console"));
+                var tool = await strategy.Locate(new PackageDescriptor("not-console"));
                 tool.Should().NotBeNull();
             }
         }

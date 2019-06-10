@@ -21,7 +21,6 @@ using WorkspaceServer;
 
 namespace MLS.Agent.Tests
 {
-    
     public class WorkspaceDiscoveryTests : ApiViaHttpTestsBase
     {
         public WorkspaceDiscoveryTests(ITestOutputHelper output) : base(output)

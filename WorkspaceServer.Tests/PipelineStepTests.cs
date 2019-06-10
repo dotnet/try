@@ -7,13 +7,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Pocket.For.Xunit;
 using WorkspaceServer.Packaging;
 using Xunit;
 
 namespace WorkspaceServer.Tests
 {
-    
     public class PipelineStepTests
     {
         [Fact]

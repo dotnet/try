@@ -18,11 +18,9 @@ using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 using Package = WorkspaceServer.Packaging.Package;
-using Pocket.For.Xunit;
 
 namespace WorkspaceServer.Tests
 {
-    
     public class AspNetWorkspaceTests : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
@@ -40,7 +38,8 @@ namespace WorkspaceServer.Tests
         {
             var registry = Default.PackageFinder;
             var server = new RoslynWorkspaceServer(registry);
-            var package = await registry.Get<IHaveADirectory>("aspnet.webapi");
+            var package = await registry.Get<Package>("aspnet.webapi");
+            await package.CreateRoslynWorkspaceAsync(new Budget()); // ensure the package exists on disk
 
             var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, "aspnet.webapi");
 

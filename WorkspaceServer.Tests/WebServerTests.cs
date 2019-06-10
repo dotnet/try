@@ -10,7 +10,6 @@ using Clockwise;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Pocket;
-using Pocket.For.Xunit;
 using Recipes;
 using WorkspaceServer.Features;
 using WorkspaceServer.Packaging;
@@ -20,7 +19,6 @@ using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests
 {
-    
     public class WebServerTests : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
