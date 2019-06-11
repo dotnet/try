@@ -16,7 +16,7 @@ namespace WorkspaceServer.WorkspaceFeatures
     {
         private Lazy<FileInfo> _path { get; }
 
-        public PackageTool(string name, IDirectoryAccessor directoryAccessor)
+        private PackageTool(string name, IDirectoryAccessor directoryAccessor)
         {
             Name = name;
             DirectoryAccessor = directoryAccessor;
@@ -27,6 +27,19 @@ namespace WorkspaceServer.WorkspaceFeatures
         public bool Exists => _path.Value != null && _path.Value.Exists;
 
         public string Name { get; }
+
+        public static PackageTool TryCreateFromDirectory(string name, IDirectoryAccessor directoryAccessor)
+        {
+            var tool = new PackageTool(name, directoryAccessor);
+            if (tool.Exists)
+            {
+                return tool;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         public async Task<ProjectAsset> LocateProjectAsset()
         {

@@ -26,8 +26,8 @@ namespace WorkspaceServer.Packaging
                 return null;
             }
 
-            var candidate = new PackageTool(descriptor.Name, _workingDirectory);
-            if (candidate.Exists)
+            var candidate = PackageTool.TryCreateFromDirectory(descriptor.Name, _workingDirectory);
+            if (candidate != null)
             {
                 var package = await CreatePackage(descriptor, candidate);
                 return package as TPackage;
@@ -52,8 +52,8 @@ namespace WorkspaceServer.Packaging
                 return null;
             }
 
-            var tool = new PackageTool(packageDesciptor.Name, _workingDirectory);
-            if (tool.Exists)
+            var tool = PackageTool.TryCreateFromDirectory(packageDesciptor.Name, _workingDirectory);
+            if (tool != null)
             {
                 return await CreatePackage(packageDesciptor, tool);
             }

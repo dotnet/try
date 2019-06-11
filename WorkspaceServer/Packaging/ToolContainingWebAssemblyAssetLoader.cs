@@ -28,15 +28,17 @@ namespace WorkspaceServer.Packaging
 
                 if (directory.FileExists(exeName))
                 {
-                    var tool = new PackageTool(package.Name, directory);
-                    var exePath = directory.GetFullyQualifiedFilePath(exeName);
+                    var tool = PackageTool.TryCreateFromDirectory(package.Name, directory);
 
-                    var toolDirectory = await _toolPackageLocator.PrepareToolAndLocateAssetDirectory(tool);
+                    if (tool != null)
+                    {
+                        var toolDirectory = await _toolPackageLocator.PrepareToolAndLocateAssetDirectory(tool);
 
-                    return new PackageAsset[]
-                           {
+                        return new PackageAsset[]
+                               {
                                new WebAssemblyAsset(directory.GetDirectoryAccessorFor(toolDirectory))
-                           };
+                               };
+                    }
                 }
             }
 

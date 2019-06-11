@@ -32,9 +32,12 @@ namespace WorkspaceServer
                 if (toolNames.Contains(name))
                 {
                     operation.Info($"Checking tool {name}");
-                    var tool = new PackageTool(name, new FileSystemDirectoryAccessor(_packagesDirectory));
-                    await tool.Prepare();
-                    return await tool.LocateWasmAsset();
+                    var tool = PackageTool.TryCreateFromDirectory(name, new FileSystemDirectoryAccessor(_packagesDirectory));
+                    if (tool != null)
+                    {
+                        await tool.Prepare();
+                        return await tool.LocateWasmAsset();
+                    }
                 }
             }
 
