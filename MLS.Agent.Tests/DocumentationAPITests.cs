@@ -253,5 +253,22 @@ namespace MLS.Agent.Tests
                     .Match("http://localhost:*/readme.md");
             }
         }
+
+        [Fact]
+        public async Task Is_able_to_serve_static_files()
+        {
+            var options = new StartupOptions(dir: TestAssets.SampleConsole);
+
+            using (var clock = VirtualClock.Start())
+            using (var agent = new AgentService(options: options))
+            {
+                var response = await agent.GetAsync(@"/a.html");
+
+                response.Should().BeSuccessful();
+
+                var html = await response.Content.ReadAsStringAsync();
+                html.Should().Be("<p>This file should be served</p>");
+            }
+        }
     }
 }

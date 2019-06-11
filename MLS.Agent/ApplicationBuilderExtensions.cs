@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,32 +30,29 @@ namespace MLS.Agent
             });
         }
 
-        public static IApplicationBuilder UseStaticFilesFromToolLocation(this IApplicationBuilder app)
+        public static IApplicationBuilder UseStaticFilesFromToolLocationAndRootDirectory(this IApplicationBuilder app, DirectoryInfo rootDirectory)
         {
-            var options = GetStaticFilesOptions();
+            var options = GetStaticFilesOptions(rootDirectory);
 
+            app.UseStaticFiles();
             if (options != null)
             {
-                app.UseSpaStaticFiles(options);
+                app.UseStaticFiles(options);
             }
-            else
-            {
-                app.UseStaticFiles();
-            }
+            
 
             return app;
         }
 
-        private static StaticFileOptions GetStaticFilesOptions()
+        private static StaticFileOptions GetStaticFilesOptions(DirectoryInfo rootDirectory)
         {
             var paths = new List<string>
             {
-                Path.Combine(Path.GetDirectoryName(typeof(Startup).Assembly.Location), "wwwroot")
+                Path.Combine(Path.GetDirectoryName(typeof(Startup).Assembly.Location), "wwwroot"),
+                rootDirectory.FullName
             };
 
-
             var providers = paths.Where(Directory.Exists).Select(p => new PhysicalFileProvider(p)).ToArray();
-
 
             StaticFileOptions options = null;
 

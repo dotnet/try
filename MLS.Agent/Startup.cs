@@ -94,7 +94,7 @@ namespace MLS.Agent
 
                         case StartupMode.Try:
                             return PackageRegistry.CreateForTryMode(
-                                StartupOptions.Dir, 
+                                StartupOptions.Dir,
                                 StartupOptions.AddPackageSource);
 
                         default:
@@ -175,9 +175,9 @@ namespace MLS.Agent
                 _disposables.Add(() => budget.Cancel());
                 BlazorPackageConfiguration.Configure(app, app.ApplicationServices, packageRegistry, budget, !StartupOptions.IsLanguageService);
 
-                app.UseDefaultFiles()
-                   .UseStaticFilesFromToolLocation()
-                   .UseMvc();
+                app.UseMvc()
+                   .UseDefaultFiles()
+                   .UseStaticFilesFromToolLocationAndRootDirectory(directoryAccessor.GetFullyQualifiedRoot());
 
                 operation.Succeed();
 
@@ -185,7 +185,7 @@ namespace MLS.Agent
                 {
                     var uri = new Uri(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses.First());
                     Clock.Current
-                         .Schedule(_ => LaunchBrowser(browserLauncher,directoryAccessor, uri), TimeSpan.FromSeconds(1));
+                         .Schedule(_ => LaunchBrowser(browserLauncher, directoryAccessor, uri), TimeSpan.FromSeconds(1));
                 }
             }
         }
