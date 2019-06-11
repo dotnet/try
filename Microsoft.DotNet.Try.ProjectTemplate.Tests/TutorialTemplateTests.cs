@@ -12,6 +12,7 @@ using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using System.Linq;
+using System;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
 {
@@ -59,8 +60,8 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                        .Match(
                            $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line *:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
 
+            Console.WriteLine(console.Out);
             resultCode.Should().Be(0);
-
         }
 
         [Fact]
