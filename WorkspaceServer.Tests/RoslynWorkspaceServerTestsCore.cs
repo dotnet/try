@@ -4,6 +4,7 @@
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Servers.Roslyn;
 using Xunit.Abstractions;
+using System.Threading.Tasks;
 
 namespace WorkspaceServer.Tests
 {
@@ -13,10 +14,10 @@ namespace WorkspaceServer.Tests
         {
         }
 
-        protected override ILanguageService GetLanguageService() => new RoslynWorkspaceServer(Default.PackageFinder);
+        protected override async Task<ILanguageService> GetLanguageServiceAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
 
-        protected override ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(Default.PackageFinder);
+        protected override async Task<ICodeCompiler> GetCodeCompilerAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
 
-        protected override ICodeRunner GetCodeRunner() => new RoslynWorkspaceServer(Default.PackageFinder);
+        protected override async Task<ICodeRunner> GetCodeRunnerAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
     }
 }

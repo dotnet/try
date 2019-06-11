@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 
 namespace MLS.Agent.Tools
 {
@@ -11,7 +12,7 @@ namespace MLS.Agent.Tools
         {
             if (result.ExitCode != 0)
             {
-                throw new CommandLineInvocationException(result, message ?? string.Join("\n", result.Error));
+                throw new CommandLineInvocationException(result, message ?? string.Join("\n", result.Error.Concat(result.Output)));
             }
         }
     }

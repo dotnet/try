@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading.Tasks;
 using Pocket;
 using Xunit.Abstractions;
 
@@ -18,10 +19,10 @@ namespace WorkspaceServer.Tests
 
         public void Dispose() => _disposables.Dispose();
 
-        protected abstract ILanguageService GetLanguageService();
+        protected abstract Task<ILanguageService> GetLanguageServiceAsync();
 
-        protected abstract ICodeCompiler GetCodeCompiler();
+        protected abstract Task<ICodeCompiler> GetCodeCompilerAsync();
 
-        protected abstract ICodeRunner GetCodeRunner();
+        protected abstract Task<ICodeRunner> GetCodeRunnerAsync();
     }
 }

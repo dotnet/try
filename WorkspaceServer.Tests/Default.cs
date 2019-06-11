@@ -4,20 +4,50 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Clockwise;
+using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Tests
 {
-    public static class Default
+    public class Default
     {
-        public static PackageRegistry PackageFinder { get; } = PackageRegistry.CreateForHostedMode();
+        public static AsyncLazy<PackageRegistry> PackageFinder { get; } = new AsyncLazy<PackageRegistry>(async () =>
+        {
+            var _ = await _lazyConsolePackage.ValueAsync();
+            return PackageRegistry.CreateForHostedMode();
+        });
 
-        public static async Task<Package> ConsoleWorkspace() =>  await PackageFinder.Get<Package>("console");
 
-        public static async Task<Package> WebApiWorkspace() =>  await PackageFinder.Get<Package>("aspnet.webapi");
+        public static AsyncLazy<Package> _lazyConsolePackage = new AsyncLazy<Package>(async () => 
+        {
+            var packageBuilder = new PackageBuilder("console");
+            packageBuilder.CreateUsingDotnet("console");
+            packageBuilder.TrySetLanguageVersion("8.0");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        });
 
-        public static async Task<Package> XunitWorkspace() =>  await PackageFinder.Get<Package>("xunit");
+        public static Task<Package> ConsoleWorkspace() =>  _lazyConsolePackage.ValueAsync();
 
-        public static async Task<Package> NetstandardWorkspace() =>  await PackageFinder.Get<Package>("blazor-console");
+        public static async Task<Package> WebApiWorkspace()
+        {
+            var finder = await PackageFinder.ValueAsync();
+            return await finder.Get<Package>("aspnet.webapi");
+        }
+
+        public static async Task<Package> XunitWorkspace()
+        {
+            var finder = await PackageFinder.ValueAsync();
+            return await finder.Get<Package>("xunit");
+        }
+
+        public static async Task<Package> NetstandardWorkspace()
+        {
+            var finder = await PackageFinder.ValueAsync();
+            return await finder.Get<Package>("blazor-console");
+        }
     }
 }

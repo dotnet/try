@@ -182,14 +182,6 @@ namespace WorkspaceServer
                 createRebuildablePackages: false,
                 packageFinders: finders);
 
-            registry.Add("console",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("console");
-                             packageBuilder.TrySetLanguageVersion("8.0");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                         });
-
             registry.Add("nodatime.api",
                          packageBuilder =>
                          {

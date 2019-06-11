@@ -52,7 +52,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: new BufferId("Program.cs", "code"));
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetDiagnostics(request);
 
             result.Diagnostics.Should().NotBeNullOrEmpty();
@@ -91,7 +91,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "Program.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetDiagnostics(request);
 
             result.Diagnostics.Should().NotBeNullOrEmpty();
@@ -151,7 +151,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetDiagnostics(request);
 
             result.Diagnostics.Should().NotBeNullOrEmpty();

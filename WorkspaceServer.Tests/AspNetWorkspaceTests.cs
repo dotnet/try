@@ -36,7 +36,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Run_starts_the_kestrel_server_and_provides_a_WebServer_feature_that_can_receive_requests()
         {
-            var registry = Default.PackageFinder;
+            var registry = await Default.PackageFinder.ValueAsync();
             var server = new RoslynWorkspaceServer(registry);
             var package = await registry.Get<Package>("aspnet.webapi");
             await package.CreateRoslynWorkspaceAsync(new Budget()); // ensure the package exists on disk

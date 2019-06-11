@@ -72,7 +72,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetCompletionList(request);
             result.Items.Should().NotBeNullOrEmpty();
             result.Items.Should().NotContain(signature => string.IsNullOrEmpty(signature.Kind));
@@ -133,7 +133,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetCompletionList(request);
 
             result.Items.Should().NotBeNullOrEmpty();
@@ -196,7 +196,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetCompletionList(request);
 
             result.Should().NotBeNull();
@@ -269,7 +269,7 @@ namespace FibonacciTest
                 });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs@codeRegion");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetCompletionList(request);
 
             result.Items.Should().NotBeNullOrEmpty();
@@ -339,7 +339,7 @@ namespace FibonacciTest
                 });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs@codeRegion");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetCompletionList(request);
             result.Items.Should().NotBeNullOrEmpty();
             result.Items.Should().NotContain(signature => string.IsNullOrEmpty(signature.Kind));
@@ -389,7 +389,7 @@ namespace FibonacciTest
                 });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs@codeRegion");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetCompletionList(request);
             result.Items.Should().BeEmpty();
         }
@@ -453,7 +453,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetSignatureHelp(request);
 
             result.Signatures.Should().NotBeNullOrEmpty();
@@ -512,7 +512,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetSignatureHelp(request);
             result.Should().NotBeNull();
             result.Signatures.Should().BeNullOrEmpty();
@@ -576,7 +576,7 @@ namespace FibonacciTest
                 });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs@codeRegion");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetSignatureHelp(request);
 
             result.Signatures.Should().NotBeNullOrEmpty();
@@ -643,7 +643,7 @@ namespace FibonacciTest
                 });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs@codeRegion");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetSignatureHelp(request);
 
             result.Signatures.Should().NotBeNullOrEmpty();
@@ -702,7 +702,7 @@ namespace FibonacciTest
             });
 
             var request = new WorkspaceRequest(workspace, activeBufferId: "generators/FibonacciGenerator.cs");
-            var server = GetLanguageService();
+            var server = await GetLanguageServiceAsync();
             var result = await server.GetSignatureHelp(request);
 
             result.Signatures.Should().NotBeNullOrEmpty();
