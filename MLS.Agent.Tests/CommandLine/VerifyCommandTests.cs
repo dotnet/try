@@ -805,6 +805,37 @@ public class EmptyClassTwo {{
                 resultCode.Should().NotBe(0);
             }
 
+            [Fact]
+            public async Task When_markdown_has_Program_with_a_region_and_markdown_has_destination_file_then_validation_succeeds()
+            {
+                var root = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
+
+                var directoryAccessor = new InMemoryDirectoryAccessor(root, root)
+            {
+                ("./subFolder/some.csproj", CsprojContents),
+                ("Program.cs", CompilingProgramWithRegionCs),
+                ("doc.md", $@"
+```cs --destination-file Program.cs --region targetRegion
+Console.WriteLine(""This code should be compiled with the targetRegion in Program.cs"");
+```
+")
+            }.CreateFiles();
+
+                var console = new TestConsole();
+                var project = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./subFolder/some.csproj"));
+
+                var resultCode = await VerifyCommand.Do(
+                    new VerifyOptions(root),
+                    console,
+                    () => directoryAccessor,
+                    PackageRegistry.CreateForTryMode(root),
+                    new StartupOptions(package: project.FullName)
+                    );
+
+                _output.WriteLine(console.Out.ToString());
+
+                resultCode.Should().Be(0);
+            }
         }
 
     }
