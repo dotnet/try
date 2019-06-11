@@ -9,6 +9,7 @@ using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using Recipes;
+using WorkspaceServer.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,9 +27,15 @@ namespace MLS.Agent.Tests.ApiContracts
             configuration = configuration.SetInteractive(true);
         }
 
+        private async Task EnsureConsoleWorkspaceCreated()
+        {
+            await Default.PackageFinder.ValueAsync();
+        }
+
         [Fact]
         public async Task The_Run_contract_for_compiling_code_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var viewport = ViewportCode();
 
             var requestJson = new WorkspaceRequest(
@@ -52,6 +59,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact]
         public async Task The_Run_contract_for_noncompiling_code_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var viewport = ViewportCode("doesn't compile");
 
             var request = new WorkspaceRequest(
@@ -77,6 +85,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact]
         public async Task The_Compile_contract_for_compiling_code_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var viewport = ViewportCode();
 
             var requestJson = new WorkspaceRequest(
@@ -111,6 +120,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact]
         public async Task The_Compile_contract_for_noncompiling_code_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var viewport = ViewportCode("doesn't compile");
 
             var request = new WorkspaceRequest(
@@ -136,6 +146,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact]
         public async Task The_Completions_contract_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var viewport = ViewportCode("Console.Ou$$");
 
             var requestJson = new WorkspaceRequest(
@@ -159,6 +170,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact]
         public async Task The_signature_help_contract_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var viewport = ViewportCode("Console.Write($$);");
 
             var requestJson = new WorkspaceRequest(
@@ -182,6 +194,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact(Skip = "Needs moved onto Package2")]
         public async Task The_instrumentation_contract_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var requestJson = new WorkspaceRequest(
                 new Workspace(
                     workspaceType: "console",
@@ -203,6 +216,7 @@ namespace MLS.Agent.Tests.ApiContracts
         [Fact]
         public async Task The_run_contract_with_no_instrumentation_has_not_been_broken()
         {
+            await EnsureConsoleWorkspaceCreated();
             var requestJson = new WorkspaceRequest(
                 new Workspace(
                     workspaceType: "console",
