@@ -10,6 +10,7 @@ namespace Microsoft.DotNet.Try.Protocol
     [JsonConverter(typeof(BufferIdConverter))]
     public class BufferId
     {
+        private const string ReplaceInjectionModifier = "[replace]";
         private const string BeforeInjectionModifier = "[before]";
         private const string AfterInjectionModifier = "[after]";
 
@@ -68,7 +69,10 @@ namespace Microsoft.DotNet.Try.Protocol
         {
             return string.IsNullOrWhiteSpace(regionName)
                 ? regionName
-                : regionName.Replace(BeforeInjectionModifier, string.Empty).Replace(AfterInjectionModifier, string.Empty);
+                : regionName
+                    .Replace(ReplaceInjectionModifier, string.Empty)
+                    .Replace(BeforeInjectionModifier, string.Empty)
+                    .Replace(AfterInjectionModifier, string.Empty);
         }
         public BufferId GetNormalized()
         {

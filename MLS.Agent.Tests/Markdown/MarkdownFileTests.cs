@@ -216,6 +216,48 @@ using System;
             }
 
             [Fact]
+            public async Task Should_emit_replace_injection_point_for_readonly_regions_from_source_file()
+            {
+                var expectedCode = @"Console.WriteLine(""Hello World!"");";
+
+                var codeContent = @"using System;
+
+namespace BasicConsoleApp
+{
+    class Program
+    {
+        static void MyProgram(string[] args)
+        {
+            #region code
+            Console.WriteLine(""Hello World!"");
+            #endregion
+        }
+    }
+}".EnforceLF();
+
+                var html = await RenderHtml(
+                    ("sample.csproj", ""),
+                    ("Program.cs", codeContent),
+                    ("Readme.md",
+                        @"```cs --source-file Program.cs --region code --editable false
+using System;
+```"));
+
+                var htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(html);
+                var code = htmlDocument.DocumentNode
+                    .SelectSingleNode("//pre/code");
+
+                var output = code.InnerHtml.EnforceLF();
+
+                code.Attributes["data-trydotnet-mode"].Value.Should().Be("include");
+                code.Attributes["data-trydotnet-injection-point"].Value.Should().Be("replace");
+                code.ParentNode.Attributes["style"].Should().BeNull();
+
+                output.Should().Contain($"{expectedCode.HtmlEncode()}");
+            }
+
+            [Fact]
             public async Task Should_emit_run_buttons_for_editable_blocks()
             {
                 var codeContent = @"using System;

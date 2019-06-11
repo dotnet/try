@@ -150,6 +150,16 @@ namespace MLS.Agent.Markdown
                     fileName);
             }
 
+            if (ReadOnlyRegionRoundtrip())
+            {
+                block.AddAttribute("data-trydotnet-injection-point", "replace");
+            }
+
+            bool ReadOnlyRegionRoundtrip()
+            {
+                return !Editable && !string.IsNullOrWhiteSpace(Region) && SourceFile != null && (DestinationFile == null || SourceFile.Equals(DestinationFile));
+            }
+
             await base.AddAttributes(block);
         }
 
