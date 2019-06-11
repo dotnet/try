@@ -12,7 +12,7 @@
       },
     "identity": "Microsoft.DotNet.Try.ProjectTemplate.Tutorial",
     "defaultName": "Microsoft.DotNet.Try.ProjectTemplate.Tutorial",
-    "name": ".NET Interactive documentation",
+    "name": "Interactive documentation",
     "shortName": "trydotnet-tutorial",
     "sourceName": "Microsoft.DotNet.Try.ProjectTemplate.Tutorial",
     "preferNameDirectory": true
