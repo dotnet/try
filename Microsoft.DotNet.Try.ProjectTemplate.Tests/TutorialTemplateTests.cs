@@ -60,7 +60,9 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                        .Match(
                            $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line *:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
 
-            Console.WriteLine(console.Out);
+            if(resultCode!=0){
+                throw new Exception($"installation didnt succeed {console.Out}, {console.Error.ToString()}");
+            }
             resultCode.Should().Be(0);
         }
 
