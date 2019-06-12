@@ -1040,11 +1040,11 @@ namespace FibonacciTest
         [Fact]
         public async Task Is_able_to_serve_static_files()
         {
-            var options = new StartupOptions(dir: TestAssets.SampleConsole);
+            var options = new StartupOptions(dir: new DirectoryInfo(Directory.GetCurrentDirectory()));
 
             using (var agent = new AgentService(options: options))
             {
-                var response = await agent.GetAsync(@"/a.js");
+                var response = await agent.GetAsync(@"/TestAssets/a.js");
 
                 response.Should().BeSuccessful();
                 var html = await response.Content.ReadAsStringAsync();
