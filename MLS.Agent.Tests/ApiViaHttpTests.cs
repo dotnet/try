@@ -1047,6 +1047,7 @@ namespace FibonacciTest
                 var response = await agent.GetAsync(@"/TestAssets/a.js");
 
                 response.Should().BeSuccessful();
+                response.Content.Headers.ContentType.MediaType.Should().Be("application/javascript");
                 var html = await response.Content.ReadAsStringAsync();
                 html.Should().Be("alert('This is an alert from javascript');");
             }
