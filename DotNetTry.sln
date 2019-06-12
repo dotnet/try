@@ -49,7 +49,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLS.PackageTool", "MLS.Pack
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageTool.Tests", "PackageTool.Tests\PackageTool.Tests.csproj", "{11FDD0E8-D07B-41C9-AF7E-E7F735D91ECF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.ProjectTemplate.IntegrationTests", "Microsoft.DotNet.Try.ProjectTemplate.Tests\Microsoft.DotNet.Try.ProjectTemplate.IntegrationTests.csproj", "{1F1A7554-1E88-4514-8602-EC00899E0C49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Try.ProjectTemplate.Tests", "Microsoft.DotNet.Try.ProjectTemplate.Tests\Microsoft.DotNet.Try.ProjectTemplate.Tests.csproj", "{1F1A7554-1E88-4514-8602-EC00899E0C49}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ProjectTemplate", "Microsoft.DotNet.Try.ProjectTemplate\Tutorial\Microsoft.DotNet.ProjectTemplate.csproj", "{E047D81A-7A18-4A1A-98E8-EDBB51EBB7DB}"
 EndProject
