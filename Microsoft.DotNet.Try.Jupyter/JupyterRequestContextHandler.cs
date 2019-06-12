@@ -61,10 +61,11 @@ namespace Microsoft.DotNet.Try.Jupyter
             var workspaceRequest = new WorkspaceRequest(workspace, activeBufferId: workspace.Buffers.First().Id);
 
             var result = await _server.GetCompletionList(workspaceRequest);
-
+            var pos = code.Substring(0,completeRequest.CursorPosition).LastIndexOf(".", StringComparison.InvariantCultureIgnoreCase) + 1;
             var reply = new CompleteReply
             {
                 Matches = result.Items.Select(e => e.InsertText).ToList(),
+                CursorStart = pos,
                 CursorEnd = completeRequest.CursorPosition
             };
 
