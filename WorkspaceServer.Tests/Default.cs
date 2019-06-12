@@ -14,12 +14,19 @@ namespace WorkspaceServer.Tests
     {
         public static AsyncLazy<PackageRegistry> PackageFinder { get; } = new AsyncLazy<PackageRegistry>(async () =>
         {
-            var _ = await _lazyConsolePackage.ValueAsync();
+            await _lazyConsole.ValueAsync();
+            await _lazyBlazorConsole.ValueAsync();
+            await _lazyAspnetWebapi.ValueAsync();
+            await _lazyBlazorNodatimeApi.ValueAsync();
+            await _lazyFSharpConsole.ValueAsync();
+            await _lazyXunit.ValueAsync();
+            await _lazyNodaTimeApi.ValueAsync();
+
             return PackageRegistry.CreateForHostedMode();
         });
 
 
-        public static AsyncLazy<Package> _lazyConsolePackage = new AsyncLazy<Package>(async () => 
+        private static AsyncLazy<Package> _lazyConsole = new AsyncLazy<Package>(async () => 
         {
             var packageBuilder = new PackageBuilder("console");
             packageBuilder.CreateUsingDotnet("console");
@@ -30,24 +37,79 @@ namespace WorkspaceServer.Tests
             return package;
         });
 
-        public static Task<Package> ConsoleWorkspace() =>  _lazyConsolePackage.ValueAsync();
-
-        public static async Task<Package> WebApiWorkspace()
+        private static AsyncLazy<Package> _lazyNodaTimeApi = new AsyncLazy<Package>(async () =>
         {
-            var finder = await PackageFinder.ValueAsync();
-            return await finder.Get<Package>("aspnet.webapi");
-        }
+            var packageBuilder = new PackageBuilder("nodatime.api");
+            packageBuilder.CreateUsingDotnet("console");
+            packageBuilder.TrySetLanguageVersion("8.0");
+            packageBuilder.AddPackageReference("NodaTime", "2.3.0");
+            packageBuilder.AddPackageReference("NodaTime.Testing", "2.3.0");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        });
 
-        public static async Task<Package> XunitWorkspace()
+        private static AsyncLazy<Package> _lazyAspnetWebapi = new AsyncLazy<Package>(async () =>
         {
-            var finder = await PackageFinder.ValueAsync();
-            return await finder.Get<Package>("xunit");
-        }
+            var packageBuilder = new PackageBuilder("aspnet.webapi");
+            packageBuilder.CreateUsingDotnet("webapi");
+            packageBuilder.TrySetLanguageVersion("8.0");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        });
 
-        public static async Task<Package> NetstandardWorkspace()
+        private static AsyncLazy<Package> _lazyXunit = new AsyncLazy<Package>(async () =>
         {
-            var finder = await PackageFinder.ValueAsync();
-            return await finder.Get<Package>("blazor-console");
-        }
+            var packageBuilder = new PackageBuilder("xunit");
+            packageBuilder.CreateUsingDotnet("xunit", "tests");
+            packageBuilder.TrySetLanguageVersion("8.0");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            packageBuilder.DeleteFile("UnitTest1.cs");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        });
+
+        public static AsyncLazy<Package> _lazyBlazorConsole = new AsyncLazy<Package>(async () =>
+        {
+            var packageBuilder = new PackageBuilder("blazor-console");
+            packageBuilder.CreateUsingDotnet("classlib");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        });
+
+        public static AsyncLazy<Package> _lazyBlazorNodatimeApi = new AsyncLazy<Package>(async () =>
+        {
+            var packageBuilder = new PackageBuilder("blazor-nodatime.api");
+            packageBuilder.CreateUsingDotnet("classlib");
+            packageBuilder.DeleteFile("Class1.cs");
+            packageBuilder.AddPackageReference("NodaTime", "2.4.4");
+            packageBuilder.AddPackageReference("NodaTime.Testing", "2.4.4");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        });
+
+        public static AsyncLazy<PackageBase> _lazyFSharpConsole = new AsyncLazy<PackageBase>(async () =>
+        {
+            var packageBuilder = new PackageBuilder("fsharp-console");
+            packageBuilder.CreateUsingDotnet("console", language: "F#");
+            var package = packageBuilder.GetPackage() as PackageBase;
+            await package.EnsureReady(new Budget());
+            return package;
+        });
+
+        public static Task<Package> ConsoleWorkspace() =>  _lazyConsole.ValueAsync();
+
+        public static Task<Package> WebApiWorkspace() => _lazyAspnetWebapi.ValueAsync();
+
+        public static Task<Package> XunitWorkspace() => _lazyXunit.ValueAsync();
+
+        public static Task<Package> NetstandardWorkspace() => _lazyBlazorConsole.ValueAsync();
     }
 }
