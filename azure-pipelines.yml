@@ -17,8 +17,10 @@ variables:
     value: .NETCore
   - name: BlazorTemplateVersion
     value: 0.7.0
-  - name: DotNetSdkVersion
+  - name: DotNetSdkVersion_2.0
     value: 2.1.503
+  - name: DotNetSdkVersion_3.0
+    value: 3.0.100-preview6-012264
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -73,10 +75,10 @@ jobs:
           versionSpec: '>=12'
 
       - task: UseDotNet@2
-        displayName: Add dotnet
+        displayName: Add dotnet version $(DotNetSdkVersion_2.0)
         inputs:
           packageType: sdk
-          version: $(DotNetSdkVersion)
+          version: $(DotNetSdkVersion_2.0)
           installationPath: $(Agent.ToolsDirectory)\dotnet
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
@@ -98,6 +100,13 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+      
+      - task: UseDotNet@3
+        displayName: Add dotnet version $(DotNetSdkVersion_3.0)
+        inputs:
+          packageType: sdk
+          version: $(DotNetSdkVersion_3.0)
+          installationPath: $(Agent.ToolsDirectory)\dotnet
 
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
