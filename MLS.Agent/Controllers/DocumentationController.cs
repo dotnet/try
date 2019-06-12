@@ -43,8 +43,6 @@ namespace MLS.Agent.Controllers
                 return NotFound();
             }
 
-
-
             var relativeFilePath = new RelativeFilePath(path);
 
             if (!_markdownProject.TryGetMarkdownFile(relativeFilePath, out var markdownFile))
