@@ -1044,11 +1044,11 @@ namespace FibonacciTest
 
             using (var agent = new AgentService(options: options))
             {
-                var response = await agent.GetAsync(@"/a.html");
+                var response = await agent.GetAsync(@"/a.js");
 
                 response.Should().BeSuccessful();
                 var html = await response.Content.ReadAsStringAsync();
-                html.Should().Be("<p>This file should be served</p>");
+                html.Should().Be("alert('This is an alert from javascript');");
             }
         }
 
