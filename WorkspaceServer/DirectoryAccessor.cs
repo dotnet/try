@@ -53,8 +53,10 @@ namespace WorkspaceServer
         public static DirectoryInfo GetFullyQualifiedRoot(this IDirectoryAccessor directoryAccessor) =>
             (DirectoryInfo) directoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath("."));
 
-        public static FileInfo GetFullyQualifiedFilePath(this IDirectoryAccessor directoryAccessor, string relativeFilePath) =>
-            (FileInfo) directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(relativeFilePath));
+        public static FileInfo GetFullyQualifiedFilePath(this IDirectoryAccessor directoryAccessor, string relativeFilePath) => 
+            GetFullyQualifiedFilePath(directoryAccessor, new RelativeFilePath(relativeFilePath));
 
+        public static FileInfo GetFullyQualifiedFilePath(this IDirectoryAccessor directoryAccessor, RelativeFilePath relativePath) => 
+            (FileInfo) directoryAccessor.GetFullyQualifiedPath(relativePath);
     }
 }

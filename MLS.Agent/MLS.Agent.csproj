@@ -86,7 +86,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="system.commandline.experimental" Version="0.2.0-alpha.19261.1" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19312.1" />
     <PackageReference Include="System.Reactive" Version="4.1.3" />
     <PackageReference Include="TaskExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
@@ -126,11 +126,7 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="BuildCss"
-          Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss"
-          Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css"
-          BeforeTargets="BeforeBuild"
-          Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildCss" Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
 
     <PropertyGroup>
       <_TryDotNetCssExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
@@ -164,12 +160,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildTryDotNetJs"
-          Inputs="@(TryDotNetJsInput)"
-          Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)"
-          DependsOnTargets="GatherInputs"
-          BeforeTargets="BeforeBuild"
-          Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildTryDotNetJs" Inputs="@(TryDotNetJsInput)" Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
     <PropertyGroup>
       <_TryDotNetMinJsExists Condition="Exists('$(TryDotNetJsFile)')">true</_TryDotNetMinJsExists>
     </PropertyGroup>
@@ -187,12 +178,7 @@
     </ItemGroup>
   </Target>
   
-  <Target Name="BuildClient"
-          Inputs="@(ClientInputFiles)"
-          Outputs="$(ClientOutputFile)"
-          DependsOnTargets="GatherInputs"
-          BeforeTargets="BeforeBuild"
-          Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildClient" Inputs="@(ClientInputFiles)" Outputs="$(ClientOutputFile)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
 
     <PropertyGroup>
       <_TryDotNetClientExists Condition="Exists('$(ClientOutputFile)')">true</_TryDotNetClientExists>

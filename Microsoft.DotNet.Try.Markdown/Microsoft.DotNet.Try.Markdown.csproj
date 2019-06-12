@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.17.0" />
-    <PackageReference Include="System.CommandLine.Experimental" Version="0.2.0-alpha.19261.1" />
+    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19312.1" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.1.1" />
   </ItemGroup>
 </Project>

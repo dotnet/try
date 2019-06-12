@@ -97,6 +97,13 @@ namespace MLS.Agent.CommandLine
             services = services ??
              new ServiceCollection();
 
+            var dirArgument = new Argument<DirectoryInfo>
+            {
+                Arity = ArgumentArity.ZeroOrOne,
+                Name = nameof(StartupOptions.Dir).ToLower(),
+                Description = "Specify the path to the root directory for your documentation"
+            }.ExistingOnly();
+
             var rootCommand = StartInTryMode();
 
             rootCommand.AddCommand(StartInHostedMode());
@@ -121,19 +128,16 @@ namespace MLS.Agent.CommandLine
                    })
                    .Build();
 
+
             RootCommand StartInTryMode()
             {
                 var command = new RootCommand
                 {
                     Name = "dotnet-try",
-                    Description = ".NET interactive documentation in your browser",
-                    Argument = new Argument<DirectoryInfo>
-                    {
-                        Arity = ArgumentArity.ZeroOrOne,
-                        Name = nameof(StartupOptions.Dir).ToLower(),
-                        Description = "Specify the path to the root directory for your documentation"
-                    }.ExistingOnly()
+                    Description = "Interactive documentation in your browser"
                 };
+                
+                command.AddArgument(dirArgument);
 
                 command.AddOption(new Option(
                                       "--add-package-source",
@@ -184,11 +188,11 @@ namespace MLS.Agent.CommandLine
 
                 var portArgument = new Argument<ushort>();
 
-                portArgument.AddValidator(symbolResult =>{
-                    
-                    if(symbolResult.Tokens
-                    .Select(t => t.Value)
-                    .Where(value => !ushort.TryParse(value, out ushort result)).Count() >0)
+                portArgument.AddValidator(symbolResult =>
+                {
+                    if (symbolResult.Tokens
+                                    .Select(t => t.Value)
+                                    .Count(value => !ushort.TryParse(value, out _)) > 0)
                     {
                         return "Invalid argument for --port option";
                     }
@@ -301,13 +305,15 @@ namespace MLS.Agent.CommandLine
 
             Command Jupyter()
             {
-                var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel");
-                jupyterCommand.IsHidden = true;
+                var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel")
+                {
+                    IsHidden = true
+                };
                 var connectionFileArgument = new Argument<FileInfo>
                 {
                     Name = "ConnectionFile"
                 }.ExistingOnly();
-                jupyterCommand.Argument = connectionFileArgument;
+                jupyterCommand.AddArgument(connectionFileArgument);
 
                 jupyterCommand.Handler = CommandHandler.Create<JupyterOptions, IConsole, InvocationContext>((options, console, context) =>
                 {
@@ -335,8 +341,10 @@ namespace MLS.Agent.CommandLine
             {
                 var packCommand = new Command("pack", "Create a Try .NET package");
                 packCommand.IsHidden = true;
-                packCommand.Argument = new Argument<DirectoryInfo>();
-                packCommand.Argument.Name = nameof(PackOptions.PackTarget);
+                packCommand.AddArgument(new Argument<DirectoryInfo>
+                {
+                    Name = nameof(PackOptions.PackTarget)
+                });
 
                 packCommand.AddOption(new Option("--version",
                                                  "The version of the Try .NET package",
@@ -356,8 +364,10 @@ namespace MLS.Agent.CommandLine
             Command Install()
             {
                 var installCommand = new Command("install", "Install a Try .NET package");
-                installCommand.Argument = new Argument<string>();
-                installCommand.Argument.Name = nameof(InstallOptions.PackageName);
+                installCommand.AddArgument(new Argument<string>
+                {
+                    Name = nameof(InstallOptions.PackageName)
+                });
                 installCommand.IsHidden = true;
 
                 var option = new Option("--add-source",
@@ -374,14 +384,11 @@ namespace MLS.Agent.CommandLine
             {
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                    Argument = new Argument<DirectoryInfo>(() => new DirectoryInfo(Directory.GetCurrentDirectory()))
-                    {
-                        Name = nameof(VerifyOptions.Dir).ToLower(),
-                        Description = "Specify the path to the root directory"
-                    }.ExistingOnly()
+                    dirArgument
                 };
 
-                verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>((options, console, startupOptions) =>
+                verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
+                    (options, console, startupOptions) =>
                 {
                     return verify(options, console, startupOptions);
                 });

@@ -30,8 +30,6 @@ namespace MLS.WasmCodeRunner
 
             builder.Command.ConfigureFromMethod(method);
 
-
-
             return builder;
         }
 
@@ -64,11 +62,11 @@ namespace MLS.WasmCodeRunner
             if (method.GetParameters()
                 .FirstOrDefault(p => _argumentParameterNames.Contains(p.Name)) is ParameterInfo argsParam)
             {
-                command.Argument = new Argument
+                command.AddArgument(new Argument
                 {
                     ArgumentType = argsParam.ParameterType,
                     Name = argsParam.Name
-                };
+                });
             }
 
             command.Handler = CommandHandler.Create(method);
@@ -89,7 +87,7 @@ namespace MLS.WasmCodeRunner
 
             foreach (var option in descriptor.ParameterDescriptors
                 .Where(d => !omittedTypes.Contains(d.Type))
-                .Where(d => !_argumentParameterNames.Contains(d.Name))
+                .Where(d => !_argumentParameterNames.Contains(d.ValueName))
                 .Select(p => p.BuildOption()))
             {
                 yield return option;
@@ -110,7 +108,7 @@ namespace MLS.WasmCodeRunner
 
             var option = new Option(
                 parameter.BuildAlias(),
-                parameter.Name,
+                parameter.ValueName,
                 argument);
 
             return option;
@@ -123,7 +121,7 @@ namespace MLS.WasmCodeRunner
                 throw new ArgumentNullException(nameof(descriptor));
             }
 
-            return BuildAlias(descriptor.Name);
+            return BuildAlias(descriptor.ValueName);
         }
 
         internal static string BuildAlias(string parameterName)

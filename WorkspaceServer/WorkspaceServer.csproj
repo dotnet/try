@@ -57,7 +57,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.1.0-beta3-final" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="NewtonSoft.Json" Version="11.0.2" />
-    <PackageReference Include="system.commandline.experimental" Version="0.2.0-alpha.19261.1" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19312.1" />
     <PackageReference Include="System.Reactive" Version="4.1.3" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>

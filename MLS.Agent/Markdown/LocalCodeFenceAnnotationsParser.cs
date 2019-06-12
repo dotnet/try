@@ -66,22 +66,25 @@ namespace MLS.Agent.Markdown
         private static void AddSourceFileOption(Command command)
         {
             var sourceFileArg = new Argument<RelativeFilePath>(
-                                    result =>
-                                    {
-                                        var filename = result.Tokens.Select(t => t.Value).SingleOrDefault();
+                (SymbolResult result, out RelativeFilePath relativeFilePath) =>
+                {
+                    var filename = result.Tokens.Select(t => t.Value).SingleOrDefault();
 
-                                        if (filename == null)
-                                        {
-                                            return ArgumentResult.Success(null);
-                                        }
+                    if (filename == null)
+                    {
+                        relativeFilePath = null;
+                        return true;
+                    }
 
-                                        if (RelativeFilePath.TryParse(filename, out var relativeFilePath))
-                                        {
-                                            return ArgumentResult.Success(relativeFilePath);
-                                        }
+                    if (RelativeFilePath.TryParse(filename, out relativeFilePath))
+                    {
+                        return true;
+                    }
 
-                                        return ArgumentResult.Failure($"Error parsing the filename: {filename}");
-                                    })
+                    result.ErrorMessage = $"Error parsing the filename: {filename}";
+
+                    return false;
+                })
             {
                 Name = "SourceFile",
                 Arity = ArgumentArity.ZeroOrOne
@@ -112,17 +115,22 @@ namespace MLS.Agent.Markdown
             IDirectoryAccessor directoryAccessor,
             string projectFileExtension)
         {
-            var projectOptionArgument = new Argument<FileInfo>(result =>
-            {
-                var projectPath = new RelativeFilePath(result.Tokens.Select(t => t.Value).Single());
-
-                if (directoryAccessor.FileExists(projectPath))
+            var projectOptionArgument = new Argument<FileInfo>(
+                (SymbolResult result, out FileInfo projectFile) =>
                 {
-                    return ArgumentResult.Success(directoryAccessor.GetFullyQualifiedPath(projectPath));
-                }
+                    var projectPath = new RelativeFilePath(result.Tokens.Select(t => t.Value).Single());
 
-                return ArgumentResult.Failure($"Project not found: {projectPath.Value}");
-            })
+                    if (directoryAccessor.FileExists(projectPath))
+                    {
+                        projectFile = directoryAccessor.GetFullyQualifiedFilePath(projectPath);
+
+                        return true;
+                    }
+
+                    result.ErrorMessage = $"Project not found: {projectPath.Value}";
+                    projectFile = null;
+                    return false;
+                })
             {
                 Name = "project",
                 Arity = ArgumentArity.ExactlyOne
