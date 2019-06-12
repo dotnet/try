@@ -182,47 +182,6 @@ namespace WorkspaceServer
                 createRebuildablePackages: false,
                 packageFinders: finders);
 
-            registry.Add("console",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("console");
-                             packageBuilder.TrySetLanguageVersion("8.0");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                         });
-
-            registry.Add("nodatime.api",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("console");
-                             packageBuilder.TrySetLanguageVersion("8.0");
-                             packageBuilder.AddPackageReference("NodaTime", "2.3.0");
-                             packageBuilder.AddPackageReference("NodaTime.Testing", "2.3.0");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                         });
-
-            registry.Add("aspnet.webapi",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("webapi");
-                             packageBuilder.TrySetLanguageVersion("8.0");
-                         });
-
-            registry.Add("xunit",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("xunit", "tests");
-                             packageBuilder.TrySetLanguageVersion("8.0");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                             packageBuilder.DeleteFile("UnitTest1.cs");
-                         });
-
-            registry.Add("blazor-console",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("classlib");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                         });
-
             // Todo: soemething about nodatime 2.3 makes blazor toolchain fail to build
             registry.Add("blazor-nodatime.api",
                          packageBuilder =>
@@ -232,15 +191,6 @@ namespace WorkspaceServer
                              packageBuilder.AddPackageReference("NodaTime", "2.4.4");
                              packageBuilder.AddPackageReference("NodaTime.Testing", "2.4.4");
                              packageBuilder.AddPackageReference("Newtonsoft.Json");
-                             packageBuilder.EnableBlazor(registry);
-                         });
-
-            registry.Add("blazor-ms.logging",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("classlib");
-                             packageBuilder.DeleteFile("Class1.cs");
-                             packageBuilder.AddPackageReference("Microsoft.Extensions.Logging", "2.2.0");
                              packageBuilder.EnableBlazor(registry);
                          });
 

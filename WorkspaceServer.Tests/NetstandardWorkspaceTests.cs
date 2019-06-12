@@ -32,7 +32,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task When_run_fails_to_compile_then_diagnostics_are_aligned_with_buffer_span()
         {
-            var server = GetCodeCompiler();
+            var server = await GetCodeCompilerAsync();
 
             var workspace = new Workspace(
                 workspaceType: "blazor-console",
@@ -54,7 +54,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Compile_with_active_buffer_id_includes_diagnostics_on_edge_of_region()
         {
-            var server = GetCodeCompiler();
+            var server = await GetCodeCompilerAsync();
 
             var workspace = new Workspace(
                 workspaceType: "blazor-console",
@@ -75,7 +75,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Compile_can_succeed_and_run()
         {
-            var server = GetCodeCompiler();
+            var server = await GetCodeCompilerAsync();
 
             var workspace = new Workspace(
                 workspaceType: "blazor-console",
@@ -96,6 +96,6 @@ namespace WorkspaceServer.Tests
             main.Invoke(null, new [] { new string[] { } });
         }
 
-        protected ICodeCompiler GetCodeCompiler() => new RoslynWorkspaceServer(Default.PackageFinder);
+        protected async Task<ICodeCompiler> GetCodeCompilerAsync() => new RoslynWorkspaceServer(await Default.PackageRegistry.ValueAsync());
     }
 }

@@ -28,12 +28,12 @@ namespace WorkspaceServer.Tests
             Workspace.FromSource(text, workspaceType: "script");
       
 
-        protected override ILanguageService GetLanguageService() =>
+        protected override Task<ILanguageService> GetLanguageServiceAsync() =>
             throw new NotImplementedException();
 
-        protected override ICodeCompiler GetCodeCompiler() => throw new NotImplementedException();
+        protected override Task<ICodeCompiler> GetCodeCompilerAsync() => throw new NotImplementedException();
 
-        protected override ICodeRunner GetCodeRunner() => new ScriptingWorkspaceServer();
+        protected override Task<ICodeRunner> GetCodeRunnerAsync() => Task.FromResult<ICodeRunner>(new ScriptingWorkspaceServer());
 
         [Fact]
         public async Task Response_shows_fragment_return_value()
@@ -43,7 +43,7 @@ namespace WorkspaceServer.Tests
 var person = new { Name = ""Jeff"", Age = 20 };
 $""{person.Name} is {person.Age} year(s) old""", "script");
 
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -63,7 +63,7 @@ $""{person.Name} is {person.Age} year(s) old""", "script");
         {
             var workspace = Workspace.FromSource(@"
 Console.WriteLine(banana);", "script");
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -93,7 +93,7 @@ public static class Hello
                 workspaceType: "script",
                 usings: new[] { "System.Threading" });
 
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -118,7 +118,7 @@ public static class Hello
         Console.WriteLine(""Hello there!"");
     }
 }", workspaceType: "script");
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -138,7 +138,7 @@ public static class Hello
         Console.WriteLine(""Hello there!"");
     }
 }", workspaceType: "script");
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -165,7 +165,7 @@ public static class Hello
                 workspaceType: "script",
                 files: new[] { new File("Main.cs", fileCode) },
                 buffers: new[] { new Buffer(@"Main.cs@toReplace", @"Console.WriteLine(""Hello there!"");", 0) });
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
 
             var result = await server.Run(new WorkspaceRequest(workspace));
 
@@ -191,7 +191,7 @@ public static class Hello
                 files: new[] { new File("Main.cs", fileCode) },
                 buffers: new[] { new Buffer(@"Main.cs@toReplace", @"Console.WriteLine(banana);", 0) });
 
-            var server = GetCodeRunner();
+            var server = await GetCodeRunnerAsync();
             var result = await server.Run(new WorkspaceRequest(workspace));
 
             result.Should().BeEquivalentTo(new

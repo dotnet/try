@@ -20,7 +20,6 @@ namespace WorkspaceServer.Tests
     public class WorkspaceServerRegistryTests : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        private readonly PackageRegistry _registry = Default.PackageFinder;
 
         public WorkspaceServerRegistryTests(ITestOutputHelper output)
         {
@@ -35,10 +34,11 @@ namespace WorkspaceServer.Tests
         {
             var packageName = PackageUtilities.CreateDirectory(nameof(Workspaces_can_be_registered_to_be_created_using_dotnet_new)).Name;
 
-            _registry.Add(packageName,
+            var registry = await Default.PackageRegistry.ValueAsync();
+            registry.Add(packageName,
                          options => options.CreateUsingDotnet("console"));
 
-            var package = await _registry.Get<ICreateWorkspaceForRun>(packageName);
+            var package = await registry.Get<ICreateWorkspaceForRun>(packageName);
 
             var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
@@ -51,7 +51,8 @@ namespace WorkspaceServer.Tests
         {
             var unregisteredWorkspace = await Default.ConsoleWorkspace();
 
-            var package = await _registry.Get<ICreateWorkspaceForRun>(unregisteredWorkspace.Name);
+            var registry = await Default.PackageRegistry.ValueAsync();
+            var package = await registry.Get<ICreateWorkspaceForRun>(unregisteredWorkspace.Name);
 
             var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
@@ -61,8 +62,9 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task When_workspace_was_not_registered_then_GetWorkspaceServer_will_return_a_working_server()
         {
+            var registry = await Default.PackageRegistry.ValueAsync();
             var unregisteredWorkspace = await Default.ConsoleWorkspace();
-            var server = new RoslynWorkspaceServer(_registry);
+            var server = new RoslynWorkspaceServer(registry);
 
             var workspaceRequest = WorkspaceRequestFactory.CreateRequestFromDirectory(unregisteredWorkspace.Directory, unregisteredWorkspace.Name);
 
@@ -80,14 +82,15 @@ namespace WorkspaceServer.Tests
 
             var childDirectory = parentDirectory.CreateSubdirectory(workspaceName);
 
-            _registry.Add(
+            var registry = await Default.PackageRegistry.ValueAsync();
+            registry.Add(
                 workspaceName,
                 builder =>
                 {
                     builder.Directory = childDirectory;
                 });
 
-            var workspace = await _registry.Get<IHaveADirectory>(workspaceName);
+            var workspace = await registry.Get<IHaveADirectory>(workspaceName);
 
             workspace.Directory.Should().Be(childDirectory);
         }

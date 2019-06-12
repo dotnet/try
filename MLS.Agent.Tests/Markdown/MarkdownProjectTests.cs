@@ -19,7 +19,7 @@ namespace MLS.Agent.Tests
         public class GetAllMarkdownFiles
         {
             [Fact]
-            public void Returns_list_of_all_relative_paths_to_all_markdown_files()
+            public async Task Returns_list_of_all_relative_paths_to_all_markdown_files()
             {
                 var workingDir = TestAssets.SampleConsole;
                 var dirAccessor = new InMemoryDirectoryAccessor(workingDir)
@@ -29,7 +29,7 @@ namespace MLS.Agent.Tests
                                       ("Program.cs", "")
                                   };
 
-                var project = new MarkdownProject(dirAccessor, Default.PackageFinder);
+                var project = new MarkdownProject(dirAccessor, await Default.PackageRegistry.ValueAsync());
 
                 var files = project.GetAllMarkdownFiles();
 
@@ -42,11 +42,11 @@ namespace MLS.Agent.Tests
         public class TryGetMarkdownFile
         {
             [Fact]
-            public void Returns_false_for_nonexistent_file()
+            public async Task Returns_false_for_nonexistent_file()
             {
                 var workingDir = TestAssets.SampleConsole;
                 var dirAccessor = new InMemoryDirectoryAccessor(workingDir);
-                var project = new MarkdownProject(dirAccessor, Default.PackageFinder);
+                var project = new MarkdownProject(dirAccessor, await Default.PackageRegistry.ValueAsync());
                 var path = new RelativeFilePath("DOESNOTEXIST");
 
                 project.TryGetMarkdownFile(path, out _).Should().BeFalse();
@@ -70,7 +70,7 @@ namespace MLS.Agent.Tests
                         ("../Project1/Console1.csproj", @""),
                         ("../Project2/Console2.csproj", @"")
                     },
-                    Default.PackageFinder);
+                    await Default.PackageRegistry.ValueAsync());
 
                 var markdownFiles = project.GetAllMarkdownFiles();
 
