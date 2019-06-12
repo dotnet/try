@@ -1036,6 +1036,22 @@ namespace FibonacciTest
                        .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
             }
         }
+
+        [Fact]
+        public async Task Is_able_to_serve_static_files()
+        {
+            var options = new StartupOptions(dir: TestAssets.SampleConsole);
+
+            using (var agent = new AgentService(options: options))
+            {
+                var response = await agent.GetAsync(@"/a.html");
+
+                response.Should().BeSuccessful();
+                var html = await response.Content.ReadAsStringAsync();
+                html.Should().Be("<p>This file should be served</p>");
+            }
+        }
+
         private class FailedRunResult : Exception
         {
             internal FailedRunResult(string message) : base(message)
