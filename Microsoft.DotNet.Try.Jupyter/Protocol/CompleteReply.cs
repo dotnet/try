@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
@@ -10,7 +11,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class CompleteReply : JupyterMessageContent
     {
         [JsonProperty("matches")]
-        public List<string> Matches { get; set; }
+        public List<string> Matches { get; set; } = new List<string>();
 
         [JsonProperty("cursor_start")]
         public int CursorStart { get; set; }
@@ -19,7 +20,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
         public int CursorEnd { get; set; }
 
         [JsonProperty("metadata", NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, object> MetaData { get; set; }
+        public object MetaData { get; set; } = new JObject();
 
         [JsonProperty("status")] public string Status { get; set; } = "ok";
     }

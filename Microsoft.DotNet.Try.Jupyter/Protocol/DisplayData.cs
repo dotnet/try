@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
         public object Data { get; set; }
 
         [JsonProperty("metadata", NullValueHandling = NullValueHandling.Ignore)]
-        public object MetaData { get; } = new JObject();
+        public object MetaData { get; set; } = new JObject();
 
         [JsonProperty("transient", NullValueHandling = NullValueHandling.Ignore)]
         public object Transient { get; set; }
