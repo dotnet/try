@@ -101,7 +101,7 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
-      - task: UseDotNet@3
+      - task: UseDotNet@2
         displayName: Add dotnet version
         inputs:
           packageType: sdk
@@ -190,7 +190,7 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
-      - task: UseDotNet@3
+      - task: UseDotNet@2
         displayName: Add dotnet version
         inputs:
           packageType: sdk
