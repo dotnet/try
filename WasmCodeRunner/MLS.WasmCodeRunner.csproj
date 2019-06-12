@@ -8,6 +8,6 @@
   
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19306.1" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19312.1" />
   </ItemGroup>
 </Project>

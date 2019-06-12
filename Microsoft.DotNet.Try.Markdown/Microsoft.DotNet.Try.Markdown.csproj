@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.17.0" />
-    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19306.1" />
+    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19312.1" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.1.1" />
   </ItemGroup>
 </Project>
