@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 
@@ -31,10 +32,25 @@ namespace Microsoft.DotNet.Try.Jupyter
             return CreateMessage(messageType, content, parentHeader);
         }
 
+        public Message CreateMessage(JupyterMessageContent content, Header parentHeader, List<byte[]> identifiers)
+        {
+            var message = CreateMessage(content, parentHeader);
+            message.Identifiers = identifiers;
+            return message;
+        }
+
+        public Message CreateResponseMessage(JupyterMessageContent content,Message request)
+        {
+            var message = CreateMessage(content, request.Header);
+            message.Identifiers = request.Identifiers;
+            return message;
+        }
+
+
         public Message CreateMessage(string messageType, JupyterMessageContent content, Header parentHeader)
         {
             var session = parentHeader.Session;
-            
+
             var message = new Message
             {
                 ParentHeader = parentHeader,
@@ -52,8 +68,8 @@ namespace Microsoft.DotNet.Try.Jupyter
                 throw new ArgumentNullException(nameof(source));
             }
 
-            var attribute = source.GetType().GetCustomAttribute<JupyterMessageTypeAttribute>() ?? throw new InvalidOperationException( "source is not annotated with JupyterMessageTypeAttribute");
-            
+            var attribute = source.GetType().GetCustomAttribute<JupyterMessageTypeAttribute>() ?? throw new InvalidOperationException("source is not annotated with JupyterMessageTypeAttribute");
+
             return attribute.Type;
         }
     }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
@@ -36,16 +37,50 @@ namespace Microsoft.DotNet.Try.Jupyter
                 case MessageTypeValues.ExecuteRequest:
                     await HandleExecuteRequest(delivery);
                     break;
+                case MessageTypeValues.CompleteRequest:
+                    await HandleCompleteRequest(delivery);
+                    break;
             }
 
             return delivery.Complete();
         }
 
+        private async Task HandleCompleteRequest(ICommandDelivery<JupyterRequestContext> delivery)
+        {
+            var messageBuilder = delivery.Command.Builder;
+            var serverChannel = delivery.Command.ServerChannel;
+
+            var jObject = (JObject)delivery.Command.Request.Content;
+            var completeRequest = jObject.ToObject<CompleteRequest>();
+
+
+            var code = completeRequest.Code;
+
+            var workspace = CreateScaffoldWorkspace(code, completeRequest.CursorPosition);
+
+            var workspaceRequest = new WorkspaceRequest(workspace, activeBufferId: workspace.Buffers.First().Id);
+
+            var result = await _server.GetCompletionList(workspaceRequest);
+
+            var reply = new CompleteReply
+            {
+                Matches = result.Items.Select(e => e.InsertText).ToList(),
+                CursorEnd = completeRequest.CursorPosition
+            };
+
+            var completeReply = messageBuilder.CreateResponseMessage(reply, delivery.Command.Request);
+            serverChannel.Send(completeReply);
+        }
+
         private async Task HandleExecuteRequest(ICommandDelivery<JupyterRequestContext> delivery)
         {
-            var transient = new Dictionary<string, object> {{"display_id", Guid.NewGuid().ToString()}};
+            var messageBuilder = delivery.Command.Builder;
+            var ioPubChannel = delivery.Command.IoPubChannel;
+            var serverChannel = delivery.Command.ServerChannel;
 
-            var jObject = (JObject) delivery.Command.Request.Content;
+            var transient = new Dictionary<string, object> { { "display_id", Guid.NewGuid().ToString() } };
+
+            var jObject = (JObject)delivery.Command.Request.Content;
             var executeRequest = jObject.ToObject<ExecuteRequest>();
 
             var code = executeRequest.Code;
@@ -55,10 +90,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             var workspaceRequest = new WorkspaceRequest(workspace);
 
             var result = await _server.Run(workspaceRequest);
-
-            var messageBuilder = delivery.Command.Builder;
-            var ioPubChannel = delivery.Command.IoPubChannel;
-            var serverChannel = delivery.Command.ServerChannel;
 
             if (!executeRequest.Silent)
             {
@@ -104,11 +135,9 @@ namespace Microsoft.DotNet.Try.Jupyter
                 };
 
                 // send to server
-                var executeReply = messageBuilder.CreateMessage(
+                var executeReply = messageBuilder.CreateResponseMessage(
                     executeReplyPayload,
-                    delivery.Command.Request.Header);
-
-                executeReply.Identifiers = delivery.Command.Request.Identifiers;
+                    delivery.Command.Request);
 
                 serverChannel.Send(executeReply);
             }
@@ -130,11 +159,9 @@ namespace Microsoft.DotNet.Try.Jupyter
                 };
 
                 // send to server
-                var executeReply = messageBuilder.CreateMessage(
+                var executeReply = messageBuilder.CreateResponseMessage(
                     executeReplyPayload,
-                    delivery.Command.Request.Header);
-
-                executeReply.Identifiers = delivery.Command.Request.Identifiers;
+                    delivery.Command.Request);
 
                 serverChannel.Send(executeReply);
 
@@ -168,13 +195,13 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
         }
 
-        private static Workspace CreateScaffoldWorkspace(string code)
+        private static Workspace CreateScaffoldWorkspace(string code, int cursorPosition = 0)
         {
-            var workspace = CreateCsharpScaffold(code);
+            var workspace = CreateCsharpScaffold(code, cursorPosition);
             return workspace;
         }
 
-        private static Workspace CreateCsharpScaffold(string code)
+        private static Workspace CreateCsharpScaffold(string code, int cursorPosition = 0)
         {
             var workspace = new Workspace(
                 files: new[]
@@ -183,7 +210,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 },
                 buffers: new[]
                 {
-                    new Buffer(new BufferId("Program.cs", "main"), code),
+                    new Buffer(new BufferId("Program.cs", "main"), code, position:cursorPosition)
                 },
                 workspaceType: "console",
                 language: "csharp");
