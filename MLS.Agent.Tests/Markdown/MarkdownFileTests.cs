@@ -135,7 +135,7 @@ namespace BasicConsoleApp
 ```")
                                   };
 
-                var project = new MarkdownProject(dirAccessor, await Default.PackageFinder.ValueAsync());
+                var project = new MarkdownProject(dirAccessor, await Default.PackageRegistry.ValueAsync());
                 project.TryGetMarkdownFile(new RelativeFilePath("docs/Readme.md"), out var markdownFile).Should().BeTrue();
                 var htmlDocument = new HtmlDocument();
                 htmlDocument.LoadHtml((await markdownFile.ToHtmlContentAsync()).ToString());
@@ -524,7 +524,7 @@ This is the end of the file"));
                         "),
                         ("Program.cs", "")
                     },
-                    await Default.PackageFinder.ValueAsync(),
+                    await Default.PackageRegistry.ValueAsync(),
                     defaultCodeBlockAnnotations
                 );
 
@@ -548,7 +548,7 @@ This is the end of the file"));
 
                 var markdownProject = new MarkdownProject(
                     directoryAccessor,
-                    await Default.PackageFinder.ValueAsync());
+                    await Default.PackageRegistry.ValueAsync());
 
                 var markdownFile = markdownProject.GetAllMarkdownFiles().Single();
                 var html = (await markdownFile.ToHtmlContentAsync()).ToString();

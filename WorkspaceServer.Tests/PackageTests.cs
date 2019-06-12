@@ -181,7 +181,7 @@ namespace WorkspaceServer.Tests
         //[InlineData("blazor-nodatime.api", true, Skip = "Requires package design changes")]
         public async Task CanSupportBlazor_indicates_whether_the_package_supports_Wasm_runner(string packageName, bool expected)
         {
-            var registry = await Default.PackageFinder.ValueAsync();
+            var registry = await Default.PackageRegistry.ValueAsync();
             var package = await registry.Get<ICanSupportWasm>(packageName);
             package.CanSupportWasm.Should().Be(expected);
         }

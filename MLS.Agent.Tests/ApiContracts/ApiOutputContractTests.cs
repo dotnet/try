@@ -29,7 +29,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
         private async Task EnsureConsoleWorkspaceCreated()
         {
-            await Default.PackageFinder.ValueAsync();
+            await Default.PackageRegistry.ValueAsync();
         }
 
         [Fact]

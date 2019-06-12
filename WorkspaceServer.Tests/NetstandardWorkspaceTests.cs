@@ -96,6 +96,6 @@ namespace WorkspaceServer.Tests
             main.Invoke(null, new [] { new string[] { } });
         }
 
-        protected async Task<ICodeCompiler> GetCodeCompilerAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
+        protected async Task<ICodeCompiler> GetCodeCompilerAsync() => new RoslynWorkspaceServer(await Default.PackageRegistry.ValueAsync());
     }
 }

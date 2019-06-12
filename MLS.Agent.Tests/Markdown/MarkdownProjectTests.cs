@@ -29,7 +29,7 @@ namespace MLS.Agent.Tests
                                       ("Program.cs", "")
                                   };
 
-                var project = new MarkdownProject(dirAccessor, await Default.PackageFinder.ValueAsync());
+                var project = new MarkdownProject(dirAccessor, await Default.PackageRegistry.ValueAsync());
 
                 var files = project.GetAllMarkdownFiles();
 
@@ -46,7 +46,7 @@ namespace MLS.Agent.Tests
             {
                 var workingDir = TestAssets.SampleConsole;
                 var dirAccessor = new InMemoryDirectoryAccessor(workingDir);
-                var project = new MarkdownProject(dirAccessor, await Default.PackageFinder.ValueAsync());
+                var project = new MarkdownProject(dirAccessor, await Default.PackageRegistry.ValueAsync());
                 var path = new RelativeFilePath("DOESNOTEXIST");
 
                 project.TryGetMarkdownFile(path, out _).Should().BeFalse();
@@ -70,7 +70,7 @@ namespace MLS.Agent.Tests
                         ("../Project1/Console1.csproj", @""),
                         ("../Project2/Console2.csproj", @"")
                     },
-                    await Default.PackageFinder.ValueAsync());
+                    await Default.PackageRegistry.ValueAsync());
 
                 var markdownFiles = project.GetAllMarkdownFiles();
 

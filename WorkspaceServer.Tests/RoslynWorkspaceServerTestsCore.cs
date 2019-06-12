@@ -14,10 +14,10 @@ namespace WorkspaceServer.Tests
         {
         }
 
-        protected override async Task<ILanguageService> GetLanguageServiceAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
+        protected override async Task<ILanguageService> GetLanguageServiceAsync() => new RoslynWorkspaceServer(await Default.PackageRegistry.ValueAsync());
 
-        protected override async Task<ICodeCompiler> GetCodeCompilerAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
+        protected override async Task<ICodeCompiler> GetCodeCompilerAsync() => new RoslynWorkspaceServer(await Default.PackageRegistry.ValueAsync());
 
-        protected override async Task<ICodeRunner> GetCodeRunnerAsync() => new RoslynWorkspaceServer(await Default.PackageFinder.ValueAsync());
+        protected override async Task<ICodeRunner> GetCodeRunnerAsync() => new RoslynWorkspaceServer(await Default.PackageRegistry.ValueAsync());
     }
 }

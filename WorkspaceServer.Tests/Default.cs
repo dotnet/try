@@ -12,7 +12,7 @@ namespace WorkspaceServer.Tests
 {
     public class Default
     {
-        public static AsyncLazy<PackageRegistry> PackageFinder { get; } = new AsyncLazy<PackageRegistry>(async () =>
+        public static AsyncLazy<PackageRegistry> PackageRegistry { get; } = new AsyncLazy<PackageRegistry>(async () =>
         {
             await _lazyConsole.ValueAsync();
             await _lazyBlazorConsole.ValueAsync();
@@ -22,7 +22,7 @@ namespace WorkspaceServer.Tests
             await _lazyXunit.ValueAsync();
             await _lazyNodaTimeApi.ValueAsync();
 
-            return PackageRegistry.CreateForHostedMode();
+            return WorkspaceServer.PackageRegistry.CreateForHostedMode();
         });
 
 

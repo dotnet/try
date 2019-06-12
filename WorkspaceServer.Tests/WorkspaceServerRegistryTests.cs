@@ -34,7 +34,7 @@ namespace WorkspaceServer.Tests
         {
             var packageName = PackageUtilities.CreateDirectory(nameof(Workspaces_can_be_registered_to_be_created_using_dotnet_new)).Name;
 
-            var registry = await Default.PackageFinder.ValueAsync();
+            var registry = await Default.PackageRegistry.ValueAsync();
             registry.Add(packageName,
                          options => options.CreateUsingDotnet("console"));
 
@@ -51,7 +51,7 @@ namespace WorkspaceServer.Tests
         {
             var unregisteredWorkspace = await Default.ConsoleWorkspace();
 
-            var registry = await Default.PackageFinder.ValueAsync();
+            var registry = await Default.PackageRegistry.ValueAsync();
             var package = await registry.Get<ICreateWorkspaceForRun>(unregisteredWorkspace.Name);
 
             var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
@@ -62,7 +62,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task When_workspace_was_not_registered_then_GetWorkspaceServer_will_return_a_working_server()
         {
-            var registry = await Default.PackageFinder.ValueAsync();
+            var registry = await Default.PackageRegistry.ValueAsync();
             var unregisteredWorkspace = await Default.ConsoleWorkspace();
             var server = new RoslynWorkspaceServer(registry);
 
@@ -82,7 +82,7 @@ namespace WorkspaceServer.Tests
 
             var childDirectory = parentDirectory.CreateSubdirectory(workspaceName);
 
-            var registry = await Default.PackageFinder.ValueAsync();
+            var registry = await Default.PackageRegistry.ValueAsync();
             registry.Add(
                 workspaceName,
                 builder =>
