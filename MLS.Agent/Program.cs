@@ -6,7 +6,6 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.Tools;
-using MLS.Repositories;
 using Pocket;
 using Pocket.For.ApplicationInsights;
 using Recipes;
@@ -27,11 +26,11 @@ namespace MLS.Agent
 {
     public class Program
     {
-        private static readonly ServiceCollection _serviceCollection = new ServiceCollection();
+        private static readonly ServiceCollection ServiceCollection = new ServiceCollection();
 
         public static async Task<int> Main(string[] args)
         {
-            return await CommandLineParser.Create().InvokeAsync(args);
+            return await CommandLineParser.Create( services:ServiceCollection ).InvokeAsync(args);
         }
 
         public static X509Certificate2 ParseKey(string base64EncodedKey)
@@ -40,7 +39,7 @@ namespace MLS.Agent
             return new X509Certificate2(bytes);
         }
 
-        private static readonly Assembly[] assembliesEmittingPocketLoggerLogs = {
+        private static readonly Assembly[] AssembliesEmittingPocketLoggerLogs = {
             typeof(Startup).Assembly,
             typeof(AsyncLazy<>).Assembly,
             typeof(IWorkspaceServer).Assembly,
@@ -73,7 +72,7 @@ namespace MLS.Agent
 
                 var subscription = LogEvents.Subscribe(
                     e => log.Information(e.ToLogString()),
-                    assembliesEmittingPocketLoggerLogs);
+                    AssembliesEmittingPocketLoggerLogs);
 
                 disposables.Add(subscription);
                 disposables.Add(log);
@@ -83,7 +82,7 @@ namespace MLS.Agent
             {
                 disposables.Add(
                     LogEvents.Subscribe(e => Console.WriteLine(e.ToLogString()),
-                                        assembliesEmittingPocketLoggerLogs));
+                                        AssembliesEmittingPocketLoggerLogs));
             }
 
             TaskScheduler.UnobservedTaskException += (sender, args) =>
@@ -98,7 +97,7 @@ namespace MLS.Agent
                 {
                     InstrumentationKey = options.ApplicationInsightsKey
                 };
-                disposables.Add(telemetryClient.SubscribeToPocketLogger(assembliesEmittingPocketLoggerLogs));
+                disposables.Add(telemetryClient.SubscribeToPocketLogger(AssembliesEmittingPocketLoggerLogs));
             }
 
             Log.Event("AgentStarting");
@@ -131,7 +130,7 @@ namespace MLS.Agent
 
                               c.AddSingleton(options);
 
-                              foreach (var serviceDescriptor in _serviceCollection)
+                              foreach (var serviceDescriptor in ServiceCollection)
                               {
                                   c.Add(serviceDescriptor);
                               }
