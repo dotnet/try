@@ -10,14 +10,11 @@ using Clockwise;
 using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Net.Http.Headers;
 using MLS.Agent.Blazor;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
@@ -31,7 +28,6 @@ using WorkspaceServer.Servers;
 using static Pocket.Logger<MLS.Agent.Startup>;
 using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
 using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
-using Process = System.Diagnostics.Process;
 
 namespace MLS.Agent
 {

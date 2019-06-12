@@ -21,7 +21,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
         [JsonProperty("metadata", NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string, object> MetaData { get; set; }
 
-        [JsonProperty("status")]
-        public string Status { get; set; }
+        [JsonProperty("status")] public string Status { get; set; } = "ok";
     }
 }
