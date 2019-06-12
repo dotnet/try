@@ -102,7 +102,7 @@ jobs:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
       - task: UseDotNet@3
-        displayName: Add dotnet version $(DotNetSdkVersion3)
+        displayName: Add dotnet version
         inputs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
@@ -189,6 +189,13 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+      
+      - task: UseDotNet@3
+        displayName: Add dotnet version
+        inputs:
+          packageType: sdk
+          version: $(DotNetSdkVersion3)
+          installationPath: $(Agent.ToolsDirectory)\dotnet
 
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
