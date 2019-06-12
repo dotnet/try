@@ -44,6 +44,8 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task The_workspace_snippet_endpoint_compiles_code_using_scripting_when_a_workspace_type_is_specified_as_script()
         {
+            await Default.ConsoleWorkspace();
+
             var output = Guid.NewGuid().ToString();
 
             var requestJson = new WorkspaceRequest(
@@ -67,6 +69,8 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task The_compile_endpoint_returns_bad_request_if_workspace_type_is_scripting()
         {
+            await Default.ConsoleWorkspace();
+
             var output = Guid.NewGuid().ToString();
 
             var requestJson = new WorkspaceRequest(
@@ -84,6 +88,8 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task The_workspace_endpoint_compiles_code_using_dotnet_when_a_non_script_workspace_type_is_specified()
         {
+            await Default.ConsoleWorkspace();
+
             var output = Guid.NewGuid().ToString();
             var requestJson = Create.SimpleWorkspaceRequestAsJson(output, "console");
 
@@ -114,7 +120,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task When_a_non_script_workspace_type_is_specified_then_code_fragments_cannot_be_compiled_successfully()
         {
-           
+            await Default.ConsoleWorkspace();
             var requestJson =
                 new WorkspaceRequest(
                     Workspace.FromSource(
@@ -137,6 +143,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task When_they_run_a_snippet_then_they_get_diagnostics_for_the_first_line()
         {
+            await Default.ConsoleWorkspace();
             var output = Guid.NewGuid().ToString();
 
             using (var agent = new AgentService())
@@ -203,6 +210,8 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task A_script_snippet_workspace_can_be_used_to_get_completions()
         {
+            await Default.ConsoleWorkspace();
+
             var (processed, position) = CodeManipulation.ProcessMarkup("Console.$$");
             using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
             {
@@ -239,6 +248,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task A_script_snippet_workspace_can_be_used_to_get_signature_help()
         {
+            await Default.ConsoleWorkspace();
             var log = new LogEntryList();
             var (processed, position) = CodeManipulation.ProcessMarkup("Console.WriteLine($$)");
             using (LogEvents.Subscribe(log.Add))
@@ -275,6 +285,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task A_script_snippet_workspace_can_be_used_to_get_diagnostics()
         {
+            await Default.ConsoleWorkspace();
             var log = new LogEntryList();
             var (processed, position) = CodeManipulation.ProcessMarkup("adddd");
             using (LogEvents.Subscribe(log.Add))
@@ -311,6 +322,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task A_console_workspace_can_be_used_to_get_signature_help()
         {
+            await Default.ConsoleWorkspace();
             #region bufferSources
 
             var program = @"using System;
@@ -386,6 +398,7 @@ namespace FibonacciTest
         [Fact]
         public async Task A_console_project_can_be_used_to_get_type_completion()
         {
+            await Default.ConsoleWorkspace();
             #region bufferSources
 
             var program = @"using System;
@@ -463,6 +476,7 @@ namespace FibonacciTest
         [Fact]
         public async Task A_console_project_can_be_used_to_get_type_completion_with_a_space_in_the_name()
         {
+            await Default.ConsoleWorkspace();
             #region bufferSources
 
             var program = @"using System;
@@ -541,6 +555,7 @@ namespace FibonacciTest
         [Fact]
         public async Task A_console_project_can_be_used_to_get_diagnostics()
         {
+            await Default.ConsoleWorkspace();
             #region bufferSources
 
             var program = @"using System;
@@ -694,6 +709,7 @@ namespace FibonacciTest
         [Fact]
         public async Task When_Run_times_out_in_console_workspace_server_code_then_the_response_code_is_504()
         {
+            await Default.ConsoleWorkspace();
             var code = @"public class Program { public static void Main()  {  Console.WriteLine();  }  }";
            
             var workspace = Workspace.FromSource(code.EnforceLF(), "console");
@@ -772,6 +788,7 @@ namespace FibonacciTest
             string workspaceType,
             string code)
         {
+            await Default.ConsoleWorkspace();
             Clock.Reset();
 
             Workspace workspace = null;
@@ -897,6 +914,7 @@ namespace FibonacciTest
         [Fact]
         public async Task Returns_200_if_the_package_exists()
         {
+            await Default.ConsoleWorkspace();
             var packageVersion = "1.0.0";
 
             using(var agent = new AgentService())
@@ -922,7 +940,7 @@ namespace FibonacciTest
         [Fact]
         public async Task Returns_IsWasmSupported_false_if_the_package_does_not_contain_wasm_runner()
         {
-         
+            await Default.ConsoleWorkspace();
             var packageVersion = "1.0.0";
 
             using (var agent = new AgentService())
