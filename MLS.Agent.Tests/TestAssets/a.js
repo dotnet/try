@@ -1,1 +1,0 @@
-alert('This is an alert from javascript');
