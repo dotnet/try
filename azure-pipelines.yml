@@ -102,7 +102,7 @@ jobs:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
       - task: UseDotNet@2
-        displayName: Add dotnet version
+        displayName: Add dotnet version $(DotNetSdkVersion3)
         inputs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
@@ -168,11 +168,11 @@ jobs:
           versionSpec: '>=12'
 
       - task: UseDotNet@2
-        displayName: Add dotnet
+        displayName: Add dotnet version $(DotNetSdkVersion2)
         inputs:
           packageType: sdk
-          version: $(DotNetSdkVersion)
-          installationPath: $(Agent.ToolsDirectory)/dotnet
+          version: $(DotNetSdkVersion2)
+          installationPath: $(Agent.ToolsDirectory)\dotnet
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
         displayName: Install Blazor templates
@@ -190,13 +190,13 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
-      - task: UseDotNet@2
-        displayName: Add dotnet version
+       - task: UseDotNet@2
+        displayName: Add dotnet version $(DotNetSdkVersion3)
         inputs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
           installationPath: $(Agent.ToolsDirectory)\dotnet
-
+          
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
         inputs:
