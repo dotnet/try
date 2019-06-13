@@ -139,6 +139,37 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
+        public void Complete_reply_contract_has_not_been_broken()
+        {
+            var socket = new TextSocket();
+            var sender = new MessageSender(socket, new SignatureValidator("key", "HMACSHA256"));
+          
+            var completeReply = new CompleteReply
+            {
+                Matches = new List<string> { "Write","WriteLine"}
+            };
+
+            var header = new Header
+            {
+                Username = Constants.USERNAME,
+                Session = "test session",
+                MessageId = Guid.Empty.ToString(),
+                MessageType = MessageTypeValues.UpdateDisplayData,
+                Date = DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                Version = "5.3"
+            };
+            var replyMessage = new Message
+            {
+                Header = header,
+                Content = completeReply
+            };
+            sender.Send(replyMessage);
+
+            var encoded = socket.GetEncodedMessage();
+            this.Assent(encoded, _configuration);
+        }
+
+        [Fact]
         public void Update_data_contract_has_not_been_broken()
         {
             var socket = new TextSocket();
