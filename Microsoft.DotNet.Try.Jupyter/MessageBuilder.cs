@@ -27,6 +27,11 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         public Message CreateMessage(JupyterMessageContent content, Header parentHeader, List<byte[]> identifiers = null)
         {
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
+
             var messageType = GetMessageType(content);
             var session = parentHeader.Session;
 
@@ -34,9 +39,12 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 ParentHeader = parentHeader,
                 Header = CreateHeader(messageType, session),
-                Content = content,
-                Identifiers = identifiers
+                Content = content
             };
+            if (identifiers != null)
+            {
+                message.Identifiers = identifiers;
+            }
 
             return message;
         }

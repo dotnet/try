@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             return Task.CompletedTask;
         }
 
-        private void HandleKernelInfoRequest(Message message)
+        private void HandleKernelInfoRequest(Message request)
         {
             var kernelInfoReply = new KernelInfoReply
                                   {
@@ -128,8 +128,8 @@ namespace Microsoft.DotNet.Try.Jupyter
                                       LanguageInfo = new CSharpLanguageInfo()
                                   };
 
-            var replyMessage = _messageBuilder.CreateResponseMessage(kernelInfoReply, message);
-    
+            var replyMessage = _messageBuilder.CreateResponseMessage(kernelInfoReply, request);
+           
 
             _shellSender.Send(replyMessage);
         }
