@@ -185,8 +185,8 @@ jobs:
           version: $(DotNetSdkVersion2)
           installationPath: $(Agent.ToolsDirectory)/dotnet
 
-      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-        displayName: Install Blazor templates
+      # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+      #   displayName: Install Blazor templates
 
       - script: |
           mkdir -p "$(Build.SourcesDirectory)/artifacts"
