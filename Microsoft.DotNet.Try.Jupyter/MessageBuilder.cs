@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 {
     public class MessageBuilder : IMessageBuilder
     {
-        public Header CreateHeader(string messageType, string session)
+        private Header CreateHeader(string messageType, string session)
         {
             var newHeader = new Header
             {
@@ -25,37 +25,17 @@ namespace Microsoft.DotNet.Try.Jupyter
             return newHeader;
         }
 
-        public Message CreateMessage(JupyterMessageContent content, Header parentHeader)
+        public Message CreateMessage(JupyterMessageContent content, Header parentHeader, List<byte[]> identifiers = null)
         {
             var messageType = GetMessageType(content);
-
-            return CreateMessage(messageType, content, parentHeader);
-        }
-
-        public Message CreateMessage(JupyterMessageContent content, Header parentHeader, List<byte[]> identifiers)
-        {
-            var message = CreateMessage(content, parentHeader);
-            message.Identifiers = identifiers;
-            return message;
-        }
-
-        public Message CreateResponseMessage(JupyterMessageContent content,Message request)
-        {
-            var message = CreateMessage(content, request.Header);
-            message.Identifiers = request.Identifiers;
-            return message;
-        }
-
-
-        public Message CreateMessage(string messageType, JupyterMessageContent content, Header parentHeader)
-        {
             var session = parentHeader.Session;
 
             var message = new Message
             {
                 ParentHeader = parentHeader,
                 Header = CreateHeader(messageType, session),
-                Content = content
+                Content = content,
+                Identifiers = identifiers
             };
 
             return message;

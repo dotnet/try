@@ -128,14 +128,8 @@ namespace Microsoft.DotNet.Try.Jupyter
                                       LanguageInfo = new CSharpLanguageInfo()
                                   };
 
-            var replyMessage = new Message
-                               {
-                                   Identifiers = message.Identifiers,
-                                   Signature = message.Signature,
-                                   ParentHeader = message.Header,
-                                   Header = _messageBuilder.CreateHeader(MessageTypeValues.KernelInfoReply, message.Header.Session),
-                                   Content = kernelInfoReply
-                               };
+            var replyMessage = _messageBuilder.CreateResponseMessage(kernelInfoReply, message);
+    
 
             _shellSender.Send(replyMessage);
         }
