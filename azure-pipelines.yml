@@ -91,15 +91,15 @@ jobs:
           exit /b 1
         displayName: Prevent test directory crawling
 
-      - script: eng\CIBuild.cmd
-          -configuration $(_BuildConfig)
-          -prepareMachine
-          -sign
-          -test
-          $(_BuildArgs)
-        displayName: Build / Test
-        env:
-          TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+      # - script: eng\CIBuild.cmd
+      #     -configuration $(_BuildConfig)
+      #     -prepareMachine
+      #     -sign
+      #     -test
+      #     $(_BuildArgs)
+      #   displayName: Build / Test
+      #   env:
+      #     TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
       - task: UseDotNet@2
         displayName: Add dotnet version $(DotNetSdkVersion3)
@@ -193,13 +193,13 @@ jobs:
           cp eng/resources/* "$(Build.SourcesDirectory)/artifacts"
         displayName: Prevent test directory crawling
 
-      - script: ./eng/cibuild.sh
-          --configuration $(_BuildConfig)
-          --prepareMachine
-          --test
-        displayName: Build / Test
-        env:
-          TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+      # - script: ./eng/cibuild.sh
+      #     --configuration $(_BuildConfig)
+      #     --prepareMachine
+      #     --test
+      #   displayName: Build / Test
+      #   env:
+      #     TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
       
       - task: UseDotNet@2
         displayName: Add dotnet version $(DotNetSdkVersion3)

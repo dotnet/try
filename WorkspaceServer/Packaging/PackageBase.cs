@@ -114,6 +114,7 @@ namespace WorkspaceServer.Packaging
                     File.WriteAllText(
                         LastBuildErrorLogFile.FullName,
                         string.Join(Environment.NewLine, result.Error));
+                    throw new Exception($"Build didn't pass->{result}");
                 }
                 else if (LastBuildErrorLogFile.Exists)
                 {
