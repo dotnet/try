@@ -30,7 +30,7 @@ namespace MLS.Agent
 
         public static async Task<int> Main(string[] args)
         {
-            return await CommandLineParser.Create( services:ServiceCollection ).InvokeAsync(args);
+            return await CommandLineParser.Create( ServiceCollection ).InvokeAsync(args);
         }
 
         public static X509Certificate2 ParseKey(string base64EncodedKey)

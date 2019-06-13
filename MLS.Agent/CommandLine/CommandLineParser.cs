@@ -56,15 +56,20 @@ namespace MLS.Agent.CommandLine
             InvocationContext context = null);
 
         public static Parser Create(
+            IServiceCollection services, 
             StartServer startServer = null,
             Demo demo = null,
             TryGitHub tryGithub = null,
             Pack pack = null,
             Install install = null,
             Verify verify = null,
-            Jupyter jupyter = null,
-            IServiceCollection services = null)
+            Jupyter jupyter = null)
         {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
             startServer = startServer ??
                           ((options, invocationContext) =>
                                   Program.ConstructWebHost(options).Run());
@@ -94,8 +99,7 @@ namespace MLS.Agent.CommandLine
 
             install = install ??
              InstallCommand.Do;
-            services = services ??
-             new ServiceCollection();
+        
 
             var dirArgument = new Argument<DirectoryInfo>
             {
