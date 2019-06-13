@@ -107,6 +107,16 @@ jobs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
           installationPath: $(Agent.ToolsDirectory)\dotnet
+      
+      - script: eng\CIBuild.cmd
+          -configuration $(_BuildConfig)
+          -prepareMachine
+          -sign
+          -integrationTest
+          $(_BuildArgs)
+        displayName: Run tests that need 3.0 sdk
+        env:
+          TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
@@ -196,6 +206,14 @@ jobs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
           installationPath: $(Agent.ToolsDirectory)/dotnet
+          
+      - script: ./eng/cibuild.sh
+          --configuration $(_BuildConfig)
+          --prepareMachine
+          --integrationTest
+        displayName: Run tests that need 3.0 sdk
+        env:
+          TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
           
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
