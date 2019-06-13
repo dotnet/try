@@ -369,8 +369,8 @@ namespace FibonacciTest
                     new WorkspaceRequest(activeBufferId: "generators/FibonacciGenerator.cs",
                                          requestId: "TestRun",
                                          workspace: Workspace.FromSources(
-                                             workspaceType:"console",
-                                             language:"csharp",
+                                             workspaceType: "console",
+                                             language: "csharp",
                                              ("Program.cs", program, 0),
                                              ("generators/FibonacciGenerator.cs", processed, position)
                                          )).ToJson();
@@ -634,7 +634,7 @@ namespace FibonacciTest
         [Fact(Skip = "WIP aspnet.webapi")]
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_output_shows_web_response()
         {
-            var workspace = new Workspace(workspaceType:"aspnet.webapi", buffers:new []{new Buffer("empty.cs", "")});
+            var workspace = new Workspace(workspaceType: "aspnet.webapi", buffers: new[] { new Buffer("empty.cs", "") });
             var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/api/values", "get"), requestId: "TestRun");
 
             var json = request.ToJson();
@@ -711,7 +711,7 @@ namespace FibonacciTest
         {
             await Default.ConsoleWorkspace();
             var code = @"public class Program { public static void Main()  {  Console.WriteLine();  }  }";
-           
+
             var workspace = Workspace.FromSource(code.EnforceLF(), "console");
 
             var requestJson = new WorkspaceRequest(workspace).ToJson();
@@ -802,8 +802,8 @@ namespace FibonacciTest
                 var build = await Create.NewPackage(package.Name, package.Directory, Create.ConsoleConfiguration);
                 workspace = Workspace.FromSource(code, build.Name);
             }
-                    
-                    
+
+
 
             var requestJson = new WorkspaceRequest(workspace).ToJson();
             var response = await CallRun(requestJson, 10000);
@@ -883,9 +883,9 @@ namespace FibonacciTest
             {
 
                 var json = new CreateRegionsFromFilesRequest(
-                    "testRun", 
+                    "testRun",
                     new[] { new SourceFile(
-                        "program.cs", 
+                        "program.cs",
                         "#region one\n#endregion\n#region two\nvar a = 1;\n#endregion")
                     }).ToJson();
 
@@ -917,7 +917,7 @@ namespace FibonacciTest
             await Default.ConsoleWorkspace();
             var packageVersion = "1.0.0";
 
-            using(var agent = new AgentService())
+            using (var agent = new AgentService())
             {
                 var response = await agent.GetAsync($@"/packages/console/{packageVersion}");
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1036,6 +1036,27 @@ namespace FibonacciTest
                        .Contain(s => s.Contains(@"trydotnet.autoEnable({ apiBaseAddress: new URL(""http://localhost""), useWasmRunner: true });"));
             }
         }
+
+        [Fact]
+        public async Task Is_able_to_serve_static_files()
+        {
+            using (var disposableDirectory = DisposableDirectory.Create())
+            {
+                System.IO.File.WriteAllText(Path.Combine(disposableDirectory.Directory.FullName, "a.js"), "alert('This is an alert from javascript');");
+                var options = new StartupOptions(dir: disposableDirectory.Directory);
+
+                using (var agent = new AgentService(options: options))
+                {
+                    var response = await agent.GetAsync(@"/a.js");
+
+                    response.Should().BeSuccessful();
+                    response.Content.Headers.ContentType.MediaType.Should().Be("application/javascript");
+                    var html = await response.Content.ReadAsStringAsync();
+                    html.Should().Be("alert('This is an alert from javascript');");
+                }
+            }
+        }
+
         private class FailedRunResult : Exception
         {
             internal FailedRunResult(string message) : base(message)

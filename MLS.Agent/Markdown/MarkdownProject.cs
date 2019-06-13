@@ -102,7 +102,7 @@ namespace MLS.Agent.Markdown
 
         public bool TryGetMarkdownFile(RelativeFilePath path, out MarkdownFile markdownFile)
         {
-            if (!DirectoryAccessor.FileExists(path))
+            if (!DirectoryAccessor.FileExists(path) || path.Extension != ".md")
             {
                 markdownFile = null;
                 return false;

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Clockwise;
 using FluentAssertions;
@@ -41,6 +42,7 @@ namespace MLS.Agent.Tests
                 response.Should().BeSuccessful();
 
                 var result = await response.Content.ReadAsStringAsync();
+                response.Content.Headers.ContentType.MediaType.Should().Be("text/html");
                 result.Should().Contain("<em>markdown file</em>");
             }
         }

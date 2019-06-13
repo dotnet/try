@@ -35,24 +35,12 @@ namespace MLS.Agent.Controllers
         }
 
         [HttpGet]
-        [Route("{*path}")]
+        [Route("{*path:regex(.*.md?$)}")]
         public async Task<IActionResult> ShowMarkdownFile(string path)
         {
             if (_startupOptions.Mode != StartupMode.Try)
             {
                 return NotFound();
-            }
-
-            if (string.IsNullOrEmpty(path))
-            {
-                const string documentSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z\" /></svg>";
-                var links = string.Join(
-                    "\n",
-                    _markdownProject.GetAllMarkdownFiles()
-                                    .Select(f =>
-                                     $@"<li><a href=""{f.Path.Value.HtmlAttributeEncode()}"">{documentSvg}<span>{f.Path.Value}</span></a></li>"));
-
-                return Content(Index(links).ToString(), "text/html");
             }
 
             var relativeFilePath = new RelativeFilePath(path);
@@ -95,6 +83,21 @@ namespace MLS.Agent.Controllers
 
             return Content(content.ToString(), "text/html");
         }
+
+        [HttpGet]
+        [Route("/")]
+        public async Task<IActionResult> ShowIndex()
+        {
+            const string documentSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z\" /></svg>";
+            var links = string.Join(
+                "\n",
+                _markdownProject.GetAllMarkdownFiles()
+                                .Select(f =>
+                                 $@"<li><a href=""{f.Path.Value.HtmlAttributeEncode()}"">{documentSvg}<span>{f.Path.Value}</span></a></li>"));
+
+            return Content(Index(links).ToString(), "text/html");
+        }
+
 
         public static async Task<IHtmlContent> SessionControlsHtml(MarkdownFile markdownFile, bool enablePreviewFeatures = false)
         {
@@ -200,7 +203,7 @@ namespace MLS.Agent.Controllers
 
         private async Task<IHtmlContent> OneColumnLayoutScaffold(string hostUrl, MarkdownFile markdownFile) =>
             Layout(
-                hostUrl, 
+                hostUrl,
                 markdownFile,
                 await DocumentationDiv(markdownFile),
                 await GetAutoEnableOptions(markdownFile));
