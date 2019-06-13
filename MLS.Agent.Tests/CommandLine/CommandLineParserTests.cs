@@ -7,6 +7,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using WorkspaceServer;
 using WorkspaceServer.Tests.TestUtility;
@@ -19,24 +20,23 @@ namespace MLS.Agent.Tests.CommandLine
     {
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console = new TestConsole();
-        private StartupOptions _start_options;
+        private StartupOptions _startOptions;
         private readonly Parser _parser;
         private TryGitHubOptions _tryGitHubOptions;
         private PackOptions _packOptions;
         private InstallOptions _installOptions;
-        private PackageSource _install_packageSource;
+        private PackageSource _installPackageSource;
         private VerifyOptions _verifyOptions;
         private DemoOptions _demoOptions;
-        private JupyterOptions _jupyter_Options;
+        private JupyterOptions _jupyterOptions;
 
         public CommandLineParserTests(ITestOutputHelper output)
         {
             _output = output;
 
-            _parser = CommandLineParser.Create(
-                startServer: (options, invocationContext) =>
+            _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
                 {
-                    _start_options = options;
+                    _startOptions = options;
                 },
                 demo: (options, console, context, startOptions) =>
                 {
@@ -56,7 +56,7 @@ namespace MLS.Agent.Tests.CommandLine
                 install: (options, console) =>
                 {
                     _installOptions = options;
-                    _install_packageSource = options.AddSource;
+                    _installPackageSource = options.AddSource;
                     return Task.CompletedTask;
                 },
                 verify: (options, console, startupOptions) =>
@@ -66,7 +66,7 @@ namespace MLS.Agent.Tests.CommandLine
                 },
                 jupyter: (options, console, startServer, context) =>
                 {
-                    _jupyter_Options = options;
+                    _jupyterOptions = options;
                     return Task.FromResult(1);
                 });
         }
@@ -81,7 +81,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             await _parser.InvokeAsync("hosted", _console);
 
-            _start_options.Production.Should().BeFalse();
+            _startOptions.Production.Should().BeFalse();
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             await _parser.InvokeAsync("hosted --production", _console);
 
-            _start_options.Production.Should().BeTrue();
+            _startOptions.Production.Should().BeTrue();
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var path = TestAssets.SampleConsole.FullName;
             await _parser.InvokeAsync(new[] { path }, _console);
-            _start_options.Dir.FullName.Should().Be(path);
+            _startOptions.Dir.FullName.Should().Be(path);
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             await _parser.InvokeAsync($"--log-path {logPath}", _console);
 
-            _start_options
+            _startOptions
                 .LogPath
                 .FullName
                 .Should()
@@ -119,7 +119,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             await _parser.InvokeAsync($"--verbose", _console);
 
-            _start_options
+            _startOptions
                 .Verbose
                 .Should()
                 .BeTrue();
@@ -130,7 +130,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             await _parser.InvokeAsync("--package console", _console);
 
-            _start_options
+            _startOptions
                 .Package
                 .Should()
                 .Be("console");
@@ -141,7 +141,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             await _parser.InvokeAsync("--package-version 1.2.3-beta", _console);
 
-            _start_options
+            _startOptions
                 .PackageVersion
                 .Should()
                 .Be("1.2.3-beta");
@@ -151,14 +151,14 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_empty_command_line_has_current_directory_as_root_directory()
         {
             await _parser.InvokeAsync("", _console);
-            _start_options.Dir.FullName.Should().Be(Directory.GetCurrentDirectory());
+            _startOptions.Dir.FullName.Should().Be(Directory.GetCurrentDirectory());
         }
 
         [Fact]
         public async Task Parse_root_directory_with_a_non_existing_path_fails()
         {
             await _parser.InvokeAsync("INVALIDPATH", _console);
-            _start_options.Should().BeNull();
+            _startOptions.Should().BeNull();
             _console.Error.ToString().Should().Match("*Directory does not exist: INVALIDPATH*");
         }
 
@@ -166,21 +166,21 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_uri_workspace()
         {
             await _parser.InvokeAsync("--uri https://google.com/foo.md", _console);
-            _start_options.Uri.Should().Be("https://google.com/foo.md");
+            _startOptions.Uri.Should().Be("https://google.com/foo.md");
         }
 
         [Fact]
         public async Task Parse_enable_preview_features_flag()
         {
             await _parser.InvokeAsync("--enable-preview-features", _console);
-            _start_options.EnablePreviewFeatures.Should().BeTrue();
+            _startOptions.EnablePreviewFeatures.Should().BeTrue();
         }
 
         [Fact]
         public async Task Parse_language_service_mode_flag_switches_option_to_language_service()
         {
             await _parser.InvokeAsync("hosted --language-service", _console);
-            _start_options.IsLanguageService.Should().BeTrue();
+            _startOptions.IsLanguageService.Should().BeTrue();
         }
 
         [Fact]
@@ -201,24 +201,24 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_key_with_parameter_succeeds()
         {
             await _parser.InvokeAsync("hosted -k abc123", _console);
-            _start_options.Key.Should().Be("abc123");
+            _startOptions.Key.Should().Be("abc123");
 
             await _parser.InvokeAsync("hosted --key abc123", _console);
-            _start_options.Key.Should().Be("abc123");
+            _startOptions.Key.Should().Be("abc123");
         }
 
         [Fact]
         public async Task AiKey_defaults_to_null()
         {
             await _parser.InvokeAsync("hosted", _console);
-            _start_options.ApplicationInsightsKey.Should().BeNull();
+            _startOptions.ApplicationInsightsKey.Should().BeNull();
         }
 
         [Fact]
         public async Task Parses_the_port()
         {
             await _parser.InvokeAsync("--port 6000", _console);
-            _start_options.Port.Should().Be(6000);
+            _startOptions.Port.Should().Be(6000);
         }
 
         [Fact]
@@ -242,21 +242,21 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_aiKey_with_parameter_succeeds()
         {
             await _parser.InvokeAsync("hosted --ai-key abc123", _console);
-            _start_options.ApplicationInsightsKey.Should().Be("abc123");
+            _startOptions.ApplicationInsightsKey.Should().Be("abc123");
         }
 
         [Fact]
         public async Task When_root_command_is_specified_then_agent_is_in_try_mode()
         {
             await _parser.InvokeAsync("", _console);
-            _start_options.Mode.Should().Be(StartupMode.Try);
+            _startOptions.Mode.Should().Be(StartupMode.Try);
         }
 
         [Fact]
         public async Task When_hosted_command_is_specified_then_agent_is_in_hosted_mode()
         {
             await _parser.InvokeAsync("hosted", _console);
-            _start_options.Mode.Should().Be(StartupMode.Hosted);
+            _startOptions.Mode.Should().Be(StartupMode.Hosted);
         }
 
         [Fact]
@@ -333,7 +333,7 @@ namespace MLS.Agent.Tests.CommandLine
             await _parser.InvokeAsync($"install --add-source {expectedPackageSource} the-package", console);
 
             _installOptions.PackageName.Should().Be("the-package");
-            _install_packageSource.ToString().Should().Be(expectedPackageSource);
+            _installPackageSource.ToString().Should().Be(expectedPackageSource);
         }
 
         [Fact]
@@ -365,7 +365,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             await _parser.InvokeAsync($"jupyter {expected}", _console);
 
-            _jupyter_Options
+            _jupyterOptions
                 .ConnectionFile
                 .FullName
                 .Should()

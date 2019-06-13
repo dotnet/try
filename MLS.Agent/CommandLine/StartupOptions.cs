@@ -3,7 +3,6 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
 using WorkspaceServer;
@@ -13,19 +12,6 @@ namespace MLS.Agent.CommandLine
     public class StartupOptions : IDefaultCodeBlockAnnotations
     {
         private readonly ParseResult _parseResult;
-
-        public static StartupOptions FromCommandLine(string commandLine)
-        {
-            StartupOptions startupOptions = null;
-
-            CommandLineParser.Create(startServer: (options, context) =>
-                                    {
-                                        startupOptions = options;
-                                    })
-                                    .InvokeAsync(commandLine);
-
-            return startupOptions;
-        }
 
         public StartupOptions(
             bool production = false,

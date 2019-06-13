@@ -23,7 +23,6 @@ using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.ClientApi;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
-using Microsoft.Net.Http.Headers;
 using HtmlAgilityPack;
 using System.Web;
 using MLS.Agent.Controllers;
@@ -31,7 +30,6 @@ using WorkspaceServer.Tests.Packaging;
 using WorkspaceServer.Tests.TestUtility;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
-using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {
@@ -213,7 +211,7 @@ namespace MLS.Agent.Tests
             await Default.ConsoleWorkspace();
 
             var (processed, position) = CodeManipulation.ProcessMarkup("Console.$$");
-            using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
+            using (var agent = new AgentService(StartupOptionsFactory.CreateFromCommandLine("hosted")))
             {
                 var json = new WorkspaceRequest(
                         requestId: "TestRun",
@@ -847,7 +845,7 @@ namespace FibonacciTest
             }
 
             // Now do the same thing in hosted mode using the already installed package
-            using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
+            using (var agent = new AgentService(StartupOptionsFactory.CreateFromCommandLine("hosted")))
             {
                 var response = await agent.GetAsync($@"/LocalCodeRunner/{name}");
 
@@ -866,7 +864,7 @@ namespace FibonacciTest
         [Fact]
         public async Task Can_serve_nodatime_code_runner()
         {
-            using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
+            using (var agent = new AgentService(StartupOptionsFactory.CreateFromCommandLine("hosted")))
             {
                 var response = await agent.GetAsync(@"/LocalCodeRunner/blazor-nodatime.api");
 
