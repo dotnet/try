@@ -42,6 +42,9 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             var baseDirectory = Create.EmptyWorkspace().Directory;
             var outputDirectory = baseDirectory.CreateSubdirectory("outputTemplate");
             await InstallTemplateAndCreateProject(baseDirectory, outputDirectory);
+            var dotnet = new Dotnet(outputDirectory);
+            //The template targets 3.0 hence verify should run against 3.0 and not 2.1.503 used in the solution directory
+            await dotnet.New("global.json", "--sdk-version 3.0.100-preview5-011568");
 
             var console = new TestConsole();
             var directoryAccessor = new FileSystemDirectoryAccessor(outputDirectory);
@@ -60,9 +63,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                        .Match(
                            $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line *:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
 
-            if(resultCode!=0){
-                throw new Exception($"installation didnt succeed {console.Out}, {console.Error.ToString()}");
-            }
+            
             resultCode.Should().Be(0);
         }
 
