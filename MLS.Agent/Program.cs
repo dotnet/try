@@ -26,11 +26,11 @@ namespace MLS.Agent
 {
     public class Program
     {
-        private static readonly ServiceCollection ServiceCollection = new ServiceCollection();
+        private static readonly ServiceCollection _serviceCollection = new ServiceCollection();
 
         public static async Task<int> Main(string[] args)
         {
-            return await CommandLineParser.Create( ServiceCollection ).InvokeAsync(args);
+            return await CommandLineParser.Create( _serviceCollection ).InvokeAsync(args);
         }
 
         public static X509Certificate2 ParseKey(string base64EncodedKey)
@@ -39,7 +39,7 @@ namespace MLS.Agent
             return new X509Certificate2(bytes);
         }
 
-        private static readonly Assembly[] AssembliesEmittingPocketLoggerLogs = {
+        private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs = {
             typeof(Startup).Assembly,
             typeof(AsyncLazy<>).Assembly,
             typeof(IWorkspaceServer).Assembly,
@@ -72,7 +72,7 @@ namespace MLS.Agent
 
                 var subscription = LogEvents.Subscribe(
                     e => log.Information(e.ToLogString()),
-                    AssembliesEmittingPocketLoggerLogs);
+                    _assembliesEmittingPocketLoggerLogs);
 
                 disposables.Add(subscription);
                 disposables.Add(log);
@@ -82,7 +82,7 @@ namespace MLS.Agent
             {
                 disposables.Add(
                     LogEvents.Subscribe(e => Console.WriteLine(e.ToLogString()),
-                                        AssembliesEmittingPocketLoggerLogs));
+                                        _assembliesEmittingPocketLoggerLogs));
             }
 
             TaskScheduler.UnobservedTaskException += (sender, args) =>
@@ -97,7 +97,7 @@ namespace MLS.Agent
                 {
                     InstrumentationKey = options.ApplicationInsightsKey
                 };
-                disposables.Add(telemetryClient.SubscribeToPocketLogger(AssembliesEmittingPocketLoggerLogs));
+                disposables.Add(telemetryClient.SubscribeToPocketLogger(_assembliesEmittingPocketLoggerLogs));
             }
 
             Log.Event("AgentStarting");
@@ -130,7 +130,7 @@ namespace MLS.Agent
 
                               c.AddSingleton(options);
 
-                              foreach (var serviceDescriptor in ServiceCollection)
+                              foreach (var serviceDescriptor in _serviceCollection)
                               {
                                   c.Add(serviceDescriptor);
                               }
