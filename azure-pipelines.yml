@@ -172,7 +172,7 @@ jobs:
         inputs:
           packageType: sdk
           version: $(DotNetSdkVersion2)
-          installationPath: $(Agent.ToolsDirectory)\dotnet
+          installationPath: $(Agent.ToolsDirectory)/dotnet
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
         displayName: Install Blazor templates
@@ -195,7 +195,7 @@ jobs:
         inputs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
-          installationPath: $(Agent.ToolsDirectory)\dotnet
+          installationPath: $(Agent.ToolsDirectory)/dotnet
           
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
