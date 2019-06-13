@@ -47,9 +47,11 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             await dotnet.New("global.json", "--sdk-version 3.0.100-preview3-010431");
 
             var projectFile = outputDirectory.GetFiles("*.csproj").Single();
+            
             var result = await dotnet.Build(projectFile.FullName);
-            Console.WriteLine(result.Output);
-            Console.WriteLine(result.Error);
+            Console.WriteLine(String.Join(";", result.Output));
+            Console.WriteLine(String.Join(";", result.Error));
+            
             var console = new TestConsole();
             var directoryAccessor = new FileSystemDirectoryAccessor(outputDirectory);
 
