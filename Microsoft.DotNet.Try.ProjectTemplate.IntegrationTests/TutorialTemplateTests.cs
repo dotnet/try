@@ -51,6 +51,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             var result = await dotnet.Build(projectFile.FullName);
             Console.WriteLine(String.Join(";", result.Output));
             Console.WriteLine(String.Join(";", result.Error));
+            Console.WriteLine(String.Join("\n", (await dotnet.Execute("--info")).Output));
             
             var console = new TestConsole();
             var directoryAccessor = new FileSystemDirectoryAccessor(outputDirectory);
