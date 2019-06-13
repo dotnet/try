@@ -20,7 +20,7 @@ variables:
   - name: DotNetSdkVersion2
     value: 2.1.503
   - name: DotNetSdkVersion3
-    value: "3.0.100-preview6-012264"
+    value: "3.0.100-preview3-010431"
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -107,6 +107,7 @@ jobs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
           installationPath: $(Agent.ToolsDirectory)\dotnet
+          includePreviewVersions: true
       
       - script: eng\CIBuild.cmd
           -configuration $(_BuildConfig)
@@ -206,6 +207,7 @@ jobs:
           packageType: sdk
           version: $(DotNetSdkVersion3)
           installationPath: $(Agent.ToolsDirectory)/dotnet
+          includePreviewVersions: true
           
       - script: ./eng/cibuild.sh
           --configuration $(_BuildConfig)
