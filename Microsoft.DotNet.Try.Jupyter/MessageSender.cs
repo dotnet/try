@@ -23,9 +23,12 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var hmac = _signatureValidator.CreateSignature(message);
 
-            foreach (var ident in message.Identifiers)
+            if (message.Identifiers != null)
             {
-                _socket.TrySendFrame(ident, true);
+                foreach (var ident in message.Identifiers)
+                {
+                    _socket.TrySendFrame(ident, true);
+                }
             }
 
             Send(Constants.DELIMITER, _socket);

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
@@ -17,6 +18,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 {
     public class JupyterRequestContextHandler : ICommandHandler<JupyterRequestContext>
     {
+        private static readonly Regex LastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
         private int _executionCount;
         private readonly WorkspaceServerMultiplexer _server;
 
@@ -53,7 +55,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             var jObject = (JObject)delivery.Command.Request.Content;
             var completeRequest = jObject.ToObject<CompleteRequest>();
 
-
             var code = completeRequest.Code;
 
             var workspace = CreateScaffoldWorkspace(code, completeRequest.CursorPosition);
@@ -61,7 +62,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             var workspaceRequest = new WorkspaceRequest(workspace, activeBufferId: workspace.Buffers.First().Id);
 
             var result = await _server.GetCompletionList(workspaceRequest);
-            var pos = code.Substring(0,completeRequest.CursorPosition).LastIndexOf(".", StringComparison.InvariantCultureIgnoreCase) + 1;
+            var pos = ComputeReplacementStartPosition(code, completeRequest.CursorPosition);
             var reply = new CompleteReply
             {
                 Matches = result.Items.Select(e => e.InsertText).ToList(),
@@ -71,6 +72,36 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             var completeReply = messageBuilder.CreateResponseMessage(reply, delivery.Command.Request);
             serverChannel.Send(completeReply);
+        }
+
+        private static int ComputeReplacementStartPosition(string code, int cursorPosition)
+        {
+            var pos = cursorPosition;
+
+            if (pos > 0)
+            {
+                var codeToCursor = code.Substring(0, pos);
+                var match = LastToken.Match(codeToCursor);
+                if (match.Success)
+                {
+                    var token = match.Groups["lastToken"];
+                    if (token.Success)
+                    {
+                        var lastDotPosition = token.Value.LastIndexOf(".", StringComparison.InvariantCultureIgnoreCase);
+                        if (lastDotPosition >= 0)
+                        {
+                            pos = token.Index + lastDotPosition + 1;
+                        }
+                        else
+                        {
+                            pos = token.Index;
+                        }
+                    }
+                }
+
+            }
+
+            return pos;
         }
 
         private async Task HandleExecuteRequest(ICommandDelivery<JupyterRequestContext> delivery)
