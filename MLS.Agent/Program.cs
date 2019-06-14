@@ -79,12 +79,12 @@ namespace MLS.Agent
                 disposables.Add(log);
             }
 
-            // if (options.Verbose)
-            // {
+            if (options.Verbose)
+            {
                 disposables.Add(
                     LogEvents.Subscribe(e => Console.WriteLine(e.ToLogString()),
                                         assembliesEmittingPocketLoggerLogs));
-            //}
+            }
 
             TaskScheduler.UnobservedTaskException += (sender, args) =>
             {

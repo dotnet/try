@@ -357,14 +357,9 @@ namespace WorkspaceServer.Packaging
         private Workspace CreateRoslynWorkspace()
         {
             var build = DesignTimeBuildResult;
-            using(var operation = Log.OnEnterAndConfirmOnExit())
-            {
-            }
             if (build == null)
             {
-                var message = new StringBuilder();
-                Directory.GetFiles().ToList().ForEach(file => message.Append($"{file.Name} and the contents\n{file.Read()}"));
-                throw new InvalidOperationException($"No design time or full build available : {message}");
+                throw new InvalidOperationException("No design time or full build available");
             }
 
             var ws = build.GetWorkspace();

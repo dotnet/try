@@ -17,10 +17,8 @@ variables:
     value: .NETCore
   - name: BlazorTemplateVersion
     value: 0.7.0
-  - name: DotNetSdkVersion2
+  - name: DotNetSdkVersion
     value: 2.1.503
-  - name: DotNetSdkVersion3
-    value: "3.0.100-preview3-010431"
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -75,10 +73,10 @@ jobs:
           versionSpec: '>=12'
 
       - task: UseDotNet@2
-        displayName: Add dotnet version $(DotNetSdkVersion2)
+        displayName: Add dotnet
         inputs:
           packageType: sdk
-          version: $(DotNetSdkVersion2)
+          version: $(DotNetSdkVersion)
           installationPath: $(Agent.ToolsDirectory)\dotnet
 
       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
@@ -91,31 +89,13 @@ jobs:
           exit /b 1
         displayName: Prevent test directory crawling
 
-      # - script: eng\CIBuild.cmd
-      #     -configuration $(_BuildConfig)
-      #     -prepareMachine
-      #     -sign
-      #     -test
-      #     $(_BuildArgs)
-      #   displayName: Build / Test
-      #   env:
-      #     TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
-      
-      - task: UseDotNet@2
-        displayName: Add dotnet version $(DotNetSdkVersion3)
-        inputs:
-          packageType: sdk
-          version: $(DotNetSdkVersion3)
-          installationPath: $(Agent.ToolsDirectory)\dotnet
-          includePreviewVersions: true
-      
       - script: eng\CIBuild.cmd
           -configuration $(_BuildConfig)
           -prepareMachine
           -sign
-          -integrationTest
+          -test
           $(_BuildArgs)
-        displayName: Run tests that need 3.0 sdk
+        displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
@@ -179,44 +159,28 @@ jobs:
           versionSpec: '>=12'
 
       - task: UseDotNet@2
-        displayName: Add dotnet version $(DotNetSdkVersion2)
+        displayName: Add dotnet
         inputs:
           packageType: sdk
-          version: $(DotNetSdkVersion2)
+          version: $(DotNetSdkVersion)
           installationPath: $(Agent.ToolsDirectory)/dotnet
 
-      # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-      #   displayName: Install Blazor templates
+      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        displayName: Install Blazor templates
 
       - script: |
           mkdir -p "$(Build.SourcesDirectory)/artifacts"
           cp eng/resources/* "$(Build.SourcesDirectory)/artifacts"
         displayName: Prevent test directory crawling
 
-      # - script: ./eng/cibuild.sh
-      #     --configuration $(_BuildConfig)
-      #     --prepareMachine
-      #     --test
-      #   displayName: Build / Test
-      #   env:
-      #     TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
-      
-      - task: UseDotNet@2
-        displayName: Add dotnet version $(DotNetSdkVersion3)
-        inputs:
-          packageType: sdk
-          version: $(DotNetSdkVersion3)
-          installationPath: $(Agent.ToolsDirectory)/dotnet
-          includePreviewVersions: true
-          
       - script: ./eng/cibuild.sh
           --configuration $(_BuildConfig)
           --prepareMachine
-          --integrationTest
-        displayName: Run tests that need 3.0 sdk
+          --test
+        displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
-          
+
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
         inputs:
