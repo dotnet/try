@@ -56,7 +56,7 @@ namespace WorkspaceServer.Packaging
                 await dotnet.AddPackage(packageId);
             }
 
-            await dotnet.AddPackage("System.CommandLine.Experimental", "0.3.0-alpha.19312.1");
+            await dotnet.AddPackage("System.CommandLine.Experimental", "0.3.0-alpha.19317.1");
 
             var result = await dotnet.Build("-o runtime /bl", budget: budget);
             var stuff = string.Concat(string.Join("\n", result.Output), (string.Join("\n", result.Error)));

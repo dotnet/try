@@ -90,8 +90,10 @@ namespace MLS.Agent.Markdown
                 Arity = ArgumentArity.ZeroOrOne
             };
 
-            var sourceFileOption = new Option("--source-file",
-                                              argument: sourceFileArg);
+            var sourceFileOption = new Option("--source-file")
+            {
+                Argument = sourceFileArg
+            };
 
             command.AddOption(sourceFileOption);
         }
@@ -151,8 +153,10 @@ namespace MLS.Agent.Markdown
                 return null;
             });
 
-            var projectOption = new Option("--project",
-                argument: projectOptionArgument);
+            var projectOption = new Option("--project")
+            {
+                Argument = projectOptionArgument
+            };
 
             command.Add(projectOption);
         }
