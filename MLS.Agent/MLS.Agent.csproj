@@ -86,7 +86,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19312.1" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19317.1" />
     <PackageReference Include="System.Reactive" Version="4.1.3" />
     <PackageReference Include="TaskExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>

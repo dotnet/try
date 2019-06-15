@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Binding;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Markdig;
 
 namespace Microsoft.DotNet.Try.Markdown
@@ -73,41 +72,72 @@ namespace Microsoft.DotNet.Try.Markdown
             Action<Command> configureCsharpCommand = null,
             Action<Command> configureFsharpCommand = null)
         {
-
             var languageCommands = new[]
             {
                 CreateCsharpCommand(configureCsharpCommand),
                 CreateFsharpCommand(configureFsharpCommand)
             };
             _supportedLanguages = new HashSet<string>(languageCommands.Select(c => c.Name));
-            return new Parser(new RootCommand(symbols: languageCommands));
+
+            var rootCommand = new RootCommand();
+
+            foreach (var command in languageCommands)
+            {
+                rootCommand.Add(command);
+            }
+
+            return new Parser(rootCommand);
         }
 
         private IEnumerable<Option> CreateCommandOptions()
         {
-            var packageOption = new Option(PackageOptionName,
-                argument: new Argument<string>());
+            yield return new Option("--destination-file")
+            {
+                Argument = new Argument<RelativeFilePath>()
+            };
+
+            yield return new Option("--editable")
+            {
+                Argument = new Argument<bool>(defaultValue: () => true)
+            };
+
+            yield return new Option("--hidden")
+            {
+                Argument = new Argument<bool>(defaultValue: () => false)
+            };
+
+            yield return new Option("--region")
+            {
+                Argument = new Argument<string>()
+            };
+            var packageOption = new Option(PackageOptionName)
+            {
+                Argument = new Argument<string>()
+            };
 
             if (_defaultAnnotations?.Package is string defaultPackage)
             {
                 packageOption.Argument.SetDefaultValue(defaultPackage);
             }
 
-            var packageVersionOption = new Option(PackageVersionOptionName,
-                argument: new Argument<string>());
+            yield return packageOption;
+
+            var packageVersionOption = new Option(PackageVersionOptionName)
+            {
+                Argument = new Argument<string>()
+            };
 
             if (_defaultAnnotations?.PackageVersion is string defaultPackageVersion)
             {
                 packageVersionOption.Argument.SetDefaultValue(defaultPackageVersion);
             }
 
-            yield return new Option("--destination-file", argument: new Argument<RelativeFilePath>());
-            yield return new Option("--editable", argument: new Argument<bool>(defaultValue: true));
-            yield return new Option("--hidden", argument: new Argument<bool>(defaultValue: false));
-            yield return new Option("--region", argument: new Argument<string>());
-            yield return packageOption;
             yield return packageVersionOption;
-            yield return new Option("--session", argument: new Argument<string>());
+
+            yield return new Option("--session")
+            {
+                Argument = new Argument<string>()
+            };
         }
 
         private Command CreateCsharpCommand(Action<Command> configureCsharpCommand)
