@@ -20,6 +20,12 @@ namespace MLS.Agent.Tests
         {
             _disposables.Add(output.SubscribeToPocketLogger());
             _disposables.Add(VirtualClock.Start());
+            EnsureConsoleWorkspaceCreated();
+        }
+
+        private void EnsureConsoleWorkspaceCreated()
+        {
+            Task.Run(() => WorkspaceServer.Tests.Default.PackageRegistry.ValueAsync()).Wait();
         }
 
         public void Dispose() => _disposables.Dispose();
