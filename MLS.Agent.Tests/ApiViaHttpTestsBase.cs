@@ -63,7 +63,7 @@ namespace MLS.Agent.Tests
             StartupOptions options = null)
         {
             HttpResponseMessage response;
-            using (var agent = new AgentService(options ?? StartupOptionsFactory.CreateFromCommandLine("hosted")))
+            using (var agent = new AgentService(options ?? StartupOptions.CreateFromCommandLine("hosted")))
             {
                 var request = new HttpRequestMessage(
                     HttpMethod.Post,

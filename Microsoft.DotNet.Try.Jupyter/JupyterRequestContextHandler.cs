@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Microsoft.DotNet.Try.Protocol;
-using Newtonsoft.Json.Linq;
 using WorkspaceServer;
 using WorkspaceServer.Servers;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
@@ -18,7 +17,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 {
     public class JupyterRequestContextHandler : ICommandHandler<JupyterRequestContext>
     {
-        private static readonly Regex LastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
+        private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
         private int _executionCount;
         private readonly WorkspaceServerMultiplexer _server;
 
@@ -74,7 +73,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             if (pos > 0)
             {
                 var codeToCursor = code.Substring(0, pos);
-                var match = LastToken.Match(codeToCursor);
+                var match = _lastToken.Match(codeToCursor);
                 if (match.Success)
                 {
                     var token = match.Groups["lastToken"];
