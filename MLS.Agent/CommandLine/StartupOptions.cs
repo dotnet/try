@@ -15,7 +15,7 @@ namespace MLS.Agent.CommandLine
     {
         private readonly ParseResult _parseResult;
 
-        public static StartupOptions CreateFromCommandLine(string commandLine)
+        public static StartupOptions FromCommandLine(string commandLine)
         {
             StartupOptions startupOptions = null;
 
