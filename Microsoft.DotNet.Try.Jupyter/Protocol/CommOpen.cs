@@ -17,5 +17,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
         public object Data { get; } = new JObject();
+
+
     }
 }

@@ -8,6 +8,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 {
     public interface IMessageBuilder
     {
-        Message CreateMessage(JupyterMessageContent content, Header parentHeader, List<byte[]> identifiers = null);
+        Message CreateMessage(JupyterMessageContent content, Header parentHeader, IReadOnlyList<IReadOnlyList <byte>> identifiers = null, string signature = null);
     }
 }

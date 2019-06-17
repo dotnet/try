@@ -12,20 +12,12 @@ namespace Microsoft.DotNet.Try.Jupyter
     {
         private Header CreateHeader(string messageType, string session)
         {
-            var newHeader = new Header
-            {
-                Username = Constants.USERNAME,
-                Session = session,
-                MessageId = Guid.NewGuid().ToString(),
-                MessageType = messageType,
-                Date = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                Version = "5.3"
-            };
+            var newHeader = new Header(messageType: messageType, messageId: Guid.NewGuid().ToString(), version:"5.3", username: Constants.USERNAME, session:session, date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
             return newHeader;
         }
 
-        public Message CreateMessage(JupyterMessageContent content, Header parentHeader, List<byte[]> identifiers = null)
+        public Message CreateMessage(JupyterMessageContent content, Header parentHeader, IReadOnlyList<IReadOnlyList<byte>> identifiers = null, string signature = null)
         {
             if (content == null)
             {
@@ -35,16 +27,8 @@ namespace Microsoft.DotNet.Try.Jupyter
             var messageType = GetMessageType(content);
             var session = parentHeader.Session;
 
-            var message = new Message
-            {
-                ParentHeader = parentHeader,
-                Header = CreateHeader(messageType, session),
-                Content = content
-            };
-            if (identifiers != null)
-            {
-                message.Identifiers = identifiers;
-            }
+            var message = new Message(CreateHeader(messageType, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature:signature);
+
 
             return message;
         }

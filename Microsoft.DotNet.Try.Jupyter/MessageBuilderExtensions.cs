@@ -26,11 +26,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var replyMessage = messageBuilder.CreateMessage(content, request.Header, request.Identifiers);
-            if (request.Signature != null)
-            {
-                replyMessage.Signature = request.Signature;
-            }
+            var replyMessage = messageBuilder.CreateMessage(content, request.Header, request.Identifiers, request.Signature);
 
             return replyMessage;
         }

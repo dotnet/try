@@ -3,11 +3,16 @@
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.Stream)]
-    public class StdErrStream : Stream
+    public abstract class HistoryElement
     {
-        public StdErrStream(string text) : base("stderr", text)
+        public int Session { get; }
+
+        public int LineNumber { get; }
+
+        protected HistoryElement(int session, int lineNumber)
         {
+            Session = session;
+            LineNumber = lineNumber;
         }
     }
 }

@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class ShutdownReply : JupyterMessageContent
     {
         [JsonProperty("restart")]
-        public bool Restart { get; set; }
+        public bool Restart { get;}
+
+        public ShutdownReply(bool restart = false)
+        {
+            Restart = restart;
+        }
     }
 }

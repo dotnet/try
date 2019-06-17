@@ -120,16 +120,10 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         private void HandleKernelInfoRequest(Message request)
         {
-            var kernelInfoReply = new KernelInfoReply
-                                  {
-                                      ProtocolVersion = "5.1.0",
-                                      Implementation = ".NET",
-                                      ImplementationVersion = "5.1.0",
-                                      LanguageInfo = new CSharpLanguageInfo()
-                                  };
+            var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
 
             var replyMessage = _messageBuilder.CreateResponseMessage(kernelInfoReply, request);
-           
+
 
             _shellSender.Send(replyMessage);
         }

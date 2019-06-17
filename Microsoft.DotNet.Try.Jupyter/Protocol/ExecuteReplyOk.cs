@@ -9,15 +9,16 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     [JupyterMessageType(MessageTypeValues.ExecuteReply)]
     public class ExecuteReplyOk : ExecuteReply
     {
-        public ExecuteReplyOk()
+        public ExecuteReplyOk(IReadOnlyList<IReadOnlyDictionary<string, string>> payload = null, IReadOnlyDictionary<string, string> userExpressions = null , int executionCount = 0): base(status: StatusValues.Ok, executionCount: executionCount)
         {
-            Status = StatusValues.Ok;
+            UserExpressions = userExpressions ?? new Dictionary<string, string>();
+            Payload = payload ?? new List<IReadOnlyDictionary<string, string>>();
         }
 
         [JsonProperty("payload")]
-        public List<Dictionary<string,string>> Payload { get; set; }
+        public IReadOnlyList<IReadOnlyDictionary<string,string>> Payload { get;  }
 
         [JsonProperty("user_expressions")]
-        public Dictionary<string,string> UserExpressions { get; set; }
+        public IReadOnlyDictionary<string,string> UserExpressions { get; }
     }
 }

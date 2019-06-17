@@ -5,15 +5,13 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.KernelShutdownRequest)]
-    public class ShutdownRequest : JupyterMessageContent
+    [JsonConverter(typeof(InputHistoryElementConverter))]
+    public class InputHistoryElement: HistoryElement
     {
-        [JsonProperty("restart")]
-        public bool Restart { get; }
-
-        public ShutdownRequest(bool restart = false)
+        public string Input { get; }
+        public InputHistoryElement(int session, int lineNumber, string input) : base(session, lineNumber)
         {
-            Restart = restart;
+            Input = input;
         }
     }
 }
