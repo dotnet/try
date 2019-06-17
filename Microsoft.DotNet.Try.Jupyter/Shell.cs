@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Try.Jupyter
         private readonly string _ioPubAddress;
         private readonly SignatureValidator _signatureValidator;
         private readonly CompositeDisposable _disposables;
-        private readonly MessageBuilder _messageBuilder;
         private readonly MessageSender _shellSender;
         private readonly MessageSender _ioPubSender;
         private readonly string _stdInAddress;
@@ -64,7 +63,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                                _stdIn,
                                _control
                            };
-            _messageBuilder = new MessageBuilder();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -96,7 +94,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 
                         default:
                             var context = new JupyterRequestContext(
-                                _messageBuilder,
                                 _shellSender,
                                 _ioPubSender,
                                 message,
@@ -122,7 +119,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
 
-            var replyMessage = _messageBuilder.CreateResponseMessage(kernelInfoReply, request);
+            var replyMessage = Message.CreateResponseMessage(kernelInfoReply, request);
 
 
             _shellSender.Send(replyMessage);
