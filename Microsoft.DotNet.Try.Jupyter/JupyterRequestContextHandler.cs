@@ -52,9 +52,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             var messageBuilder = delivery.Command.Builder;
             var serverChannel = delivery.Command.ServerChannel;
 
-            var jObject = (JObject)delivery.Command.Request.Content;
-            var completeRequest = jObject.ToObject<CompleteRequest>();
-
+            var completeRequest = delivery.Command.Request.Content as CompleteRequest;
             var code = completeRequest.Code;
 
             var workspace = CreateScaffoldWorkspace(code, completeRequest.CursorPosition);
@@ -63,12 +61,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             var result = await _server.GetCompletionList(workspaceRequest);
             var pos = ComputeReplacementStartPosition(code, completeRequest.CursorPosition);
-            var reply = new CompleteReply
-            {
-                Matches = result.Items.Select(e => e.InsertText).ToList(),
-                CursorStart = pos,
-                CursorEnd = completeRequest.CursorPosition
-            };
+            var reply = new CompleteReply(pos, completeRequest.CursorPosition, matches: result.Items.Select(e => e.InsertText).ToList());
 
             var completeReply = messageBuilder.CreateResponseMessage(reply, delivery.Command.Request);
             serverChannel.Send(completeReply);
@@ -112,8 +105,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             var transient = new Dictionary<string, object> { { "display_id", Guid.NewGuid().ToString() } };
 
-            var jObject = (JObject)delivery.Command.Request.Content;
-            var executeRequest = jObject.ToObject<ExecuteRequest>();
+            var executeRequest = delivery.Command.Request.Content as ExecuteRequest;
 
             var code = executeRequest.Code;
 
@@ -128,11 +120,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 _executionCount++;
 
                 var executeInput = messageBuilder.CreateMessage(
-                    new ExecuteInput
-                    {
-                        Code = code,
-                        ExecutionCount = _executionCount
-                    },
+                    new ExecuteInput(code: code, executionCount: _executionCount),
                     delivery.Command.Request.Header);
 
                 ioPubChannel.Send(executeInput);
@@ -143,16 +131,13 @@ namespace Microsoft.DotNet.Try.Jupyter
 
 
             // executeResult data
-            var executeResultData = new ExecuteResult
-            {
-                Data = new JObject
-                {
-                    {"text/html", output},
-                    {"text/plain", output}
-                },
-                Transient = transient,
-                ExecutionCount = _executionCount
-            };
+            var executeResultData = new ExecuteResult(
+                _executionCount,
+                transient: transient,
+                data: new Dictionary<string, object> {
+                    { "text/html", output},
+                    { "text/plain", output}
+                });
 
 
             var resultSucceeded = result.Succeeded &&
@@ -161,10 +146,8 @@ namespace Microsoft.DotNet.Try.Jupyter
             if (resultSucceeded)
             {
                 // reply ok
-                var executeReplyPayload = new ExecuteReplyOk
-                {
-                    ExecutionCount = _executionCount
-                };
+                var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
+                
 
                 // send to server
                 var executeReply = messageBuilder.CreateResponseMessage(
@@ -175,20 +158,13 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
             else
             {
-                var errorContent = new Error
-                {
-                    EName = string.IsNullOrWhiteSpace(result.Exception)
-                        ? "Compile Error"
-                        : "Unhandled Exception",
-                    EValue = output,
-                    Traceback = new List<string>()
-                };
+                var errorContent = new Error(
+                     eName: string.IsNullOrWhiteSpace(result.Exception) ? "Compile Error" : "Unhandled Exception",
+                     eValue: output
+                );
 
                 //  reply Error
-                var executeReplyPayload = new ExecuteReplyError(errorContent)
-                {
-                    ExecutionCount = _executionCount
-                };
+                var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
                 // send to server
                 var executeReply = messageBuilder.CreateResponseMessage(
@@ -206,10 +182,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                     ioPubChannel.Send(error);
 
                     // send on stderr
-                    var stdErr = new StdErrStream
-                    {
-                        Text = errorContent.EValue
-                    };
+                    var stdErr = new StdErrStream(errorContent.EValue);
                     var stream = messageBuilder.CreateMessage(
                         stdErr,
                         delivery.Command.Request.Header);

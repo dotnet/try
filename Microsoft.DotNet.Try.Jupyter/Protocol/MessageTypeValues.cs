@@ -39,9 +39,9 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         public const string UpdateDisplayData = "update_display_data";
 
-        public const string IntrospectionRequest = "inspect_request";
+        public const string InspectRequest = "inspect_request";
 
-        public const string IntrospectionReply = "inspect_reply";
+        public const string InspectReply = "inspect_reply";
 
         public const string HistoryRequest = "history_request";
 
@@ -58,5 +58,9 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
         public const string CommClose = "comm_close";
 
         public const string CommMsg = "comm_msg";
+
+        public const string CommInfoRequest = "comm_info_request";
+
+        public const string CommInfoReply = "comm_info_reply";
     }
 }

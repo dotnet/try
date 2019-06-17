@@ -10,12 +10,19 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class Error : JupyterMessageContent
     {
         [JsonProperty("ename")]
-        public string EName { get; set; }
+        public string EName { get;  }
 
         [JsonProperty("evalue")]
-        public string EValue { get; set; }
+        public string EValue { get;  }
 
         [JsonProperty("traceback")]
-        public List<string> Traceback { get; set; } = new List<string>();
+        public IReadOnlyList<string> Traceback { get; } 
+
+        public Error(string eName, string eValue, IReadOnlyList<string> traceback = null)
+        {
+            EName = eName;
+            EValue = eValue;
+            Traceback = traceback ?? new List<string>();
+        }
     }
 }

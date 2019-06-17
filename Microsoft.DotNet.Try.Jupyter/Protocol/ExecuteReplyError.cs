@@ -9,25 +9,26 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     [JupyterMessageType(MessageTypeValues.ExecuteReply)]
     public class ExecuteReplyError : ExecuteReply
     {
-        public ExecuteReplyError()
+        [JsonConstructor]
+        public ExecuteReplyError(string eName, string eValue, int executionCount = 0,IReadOnlyList<string> traceback = null) : base(StatusValues.Error, executionCount: executionCount)
         {
-            Status = StatusValues.Error;
+            Traceback = traceback ?? new List<string>();
+            EName = eName;
+            EValue = eValue;
         }
 
-        public ExecuteReplyError(Error error) : this()
+        public ExecuteReplyError(Error error,int executionCount = 0, IReadOnlyList<string> traceback = null) : this(error.EName, error.EValue, executionCount, traceback)
         {
-            EName = error.EName;
-            EValue = error.EValue;
-            Traceback = new List<string>(error.Traceback);
+           
         }
 
         [JsonProperty("ename")]
-        public string EName { get; set; }
+        public string EName { get; }
 
         [JsonProperty("evalue")]
-        public string EValue { get; set; }
+        public string EValue { get;  }
 
         [JsonProperty("traceback")]
-        public List<string> Traceback { get; set; } = new List<string>();
+        public IReadOnlyList<string> Traceback { get;} 
     }
 }

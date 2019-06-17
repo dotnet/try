@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-
+using System;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
@@ -11,6 +11,16 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class Status : JupyterMessageContent
     {
         [JsonProperty("execution_state")]
-        public string ExecutionState { get; set; }
+        public string ExecutionState { get; }
+
+        public Status(string executionState)
+        {
+            if (string.IsNullOrWhiteSpace(executionState))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(executionState));
+            }
+
+            ExecutionState = executionState;
+        }
     }
 }

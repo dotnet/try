@@ -5,15 +5,14 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.KernelShutdownRequest)]
-    public class ShutdownRequest : JupyterMessageContent
+    public class CommTarget
     {
-        [JsonProperty("restart")]
-        public bool Restart { get; }
+        [JsonProperty("target_name", NullValueHandling = NullValueHandling.Ignore)]
+        public string TargetName { get; set; }
 
-        public ShutdownRequest(bool restart = false)
+        public CommTarget(string targetName)
         {
-            Restart = restart;
+            TargetName = targetName;
         }
     }
 }

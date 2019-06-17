@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class InputReply : JupyterMessageContent
     {
         [JsonProperty("value")]
-        public string Value { get; set; }
+        public string Value { get; }
+
+        public InputReply(string value)
+        {
+            Value = value;
+        }
     }
 }

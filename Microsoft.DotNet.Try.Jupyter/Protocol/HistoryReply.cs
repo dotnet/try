@@ -3,14 +3,19 @@
 
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
 {
+    [JsonConverter(typeof(HistoryReplyConverter))]
     [JupyterMessageType(MessageTypeValues.HistoryReply)]
     public class HistoryReply : JupyterMessageContent
     {
         [JsonProperty("history")]
-        public List<JObject> History { get; set; } = new List<JObject>();
+        public IReadOnlyList<HistoryElement> History { get; } 
+
+        public HistoryReply(IReadOnlyList<HistoryElement> history= null)
+        {
+            History = history ?? new List<HistoryElement>();
+        }
     }
 }

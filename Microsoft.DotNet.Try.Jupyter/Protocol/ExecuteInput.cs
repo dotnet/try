@@ -9,9 +9,15 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class ExecuteInput : JupyterMessageContent
     {
         [JsonProperty("code")]
-        public string Code { get; set; }
+        public string Code { get; }
 
         [JsonProperty("execution_count")]
-        public int ExecutionCount { get; set; }
+        public int ExecutionCount { get; }
+
+        public ExecuteInput(string code = null, int executionCount = 0)
+        {
+            Code = code;
+            ExecutionCount = executionCount;
+        }
     }
 }

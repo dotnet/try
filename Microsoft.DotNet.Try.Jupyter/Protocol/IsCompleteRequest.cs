@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Try.Jupyter.Protocol
@@ -10,5 +11,10 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     {
         [JsonProperty("code")]
         public string Code { get; set; }
+
+        public IsCompleteRequest(string code)
+        {
+            Code = code ?? throw new ArgumentNullException(nameof(code));
+        }
     }
 }

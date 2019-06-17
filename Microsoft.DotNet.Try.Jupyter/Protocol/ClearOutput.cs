@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class ClearOutput : JupyterMessageContent
     {
         [JsonProperty("wait ")]
-        public bool Wait { get; set; }
+        public bool Wait { get; }
+
+        public ClearOutput(bool wait = false)
+        {
+            Wait = wait;
+        }
     }
 }

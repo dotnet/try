@@ -9,8 +9,14 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
     public class InputRequest : JupyterMessageContent
     {
         [JsonProperty("prompt")]
-        public string Prompt { get; set; }
+        public string Prompt { get; }
         [JsonProperty("password")]
         public bool Password { get; set; }
+
+        public InputRequest(string prompt = null, bool password = false)
+        {
+            Prompt = prompt;
+            Password = password;
+        }
     }
 }

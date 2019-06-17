@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 using NetMQ;
 using Recipes;
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 foreach (var ident in message.Identifiers)
                 {
-                    _socket.TrySendFrame(ident, true);
+                    _socket.TrySendFrame(ident.ToArray(), true);
                 }
             }
 
