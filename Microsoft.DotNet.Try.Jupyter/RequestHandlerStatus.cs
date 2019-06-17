@@ -10,13 +10,11 @@ namespace Microsoft.DotNet.Try.Jupyter
     {
         private readonly Header _requestHeader;
         private readonly MessageSender _messageSender;
-        private readonly MessageBuilder _messageBuilder;
 
         public RequestHandlerStatus(Header requestHeader, MessageSender messageSender)
         {
             _requestHeader = requestHeader;
             _messageSender = messageSender;
-            _messageBuilder = new MessageBuilder();
         }
         public void SetAsBusy()
         {
@@ -32,7 +30,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var content = new Status(status);
 
-            var statusMessage = _messageBuilder.CreateMessage(content, _requestHeader);
+            var statusMessage = Message.CreateMessage(content, _requestHeader);
 
             _messageSender.Send(statusMessage);
         }

@@ -48,7 +48,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         private async Task HandleCompleteRequest(ICommandDelivery<JupyterRequestContext> delivery)
         {
-            var messageBuilder = delivery.Command.Builder;
             var serverChannel = delivery.Command.ServerChannel;
 
             var completeRequest = delivery.Command.Request.Content as CompleteRequest;
@@ -62,7 +61,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             var pos = ComputeReplacementStartPosition(code, completeRequest.CursorPosition);
             var reply = new CompleteReply(pos, completeRequest.CursorPosition, matches: result.Items.Select(e => e.InsertText).ToList());
 
-            var completeReply = messageBuilder.CreateResponseMessage(reply, delivery.Command.Request);
+            var completeReply = Message.CreateResponseMessage(reply, delivery.Command.Request);
             serverChannel.Send(completeReply);
         }
 
@@ -98,7 +97,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         private async Task HandleExecuteRequest(ICommandDelivery<JupyterRequestContext> delivery)
         {
-            var messageBuilder = delivery.Command.Builder;
             var ioPubChannel = delivery.Command.IoPubChannel;
             var serverChannel = delivery.Command.ServerChannel;
 
@@ -118,7 +116,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 _executionCount++;
 
-                var executeInput = messageBuilder.CreateMessage(
+                var executeInput = Message.CreateMessage(
                     new ExecuteInput(code: code, executionCount: _executionCount),
                     delivery.Command.Request.Header);
 
@@ -149,7 +147,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 
 
                 // send to server
-                var executeReply = messageBuilder.CreateResponseMessage(
+                var executeReply = Message.CreateResponseMessage(
                     executeReplyPayload,
                     delivery.Command.Request);
 
@@ -166,7 +164,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
                 // send to server
-                var executeReply = messageBuilder.CreateResponseMessage(
+                var executeReply = Message.CreateResponseMessage(
                     executeReplyPayload,
                     delivery.Command.Request);
 
@@ -175,14 +173,14 @@ namespace Microsoft.DotNet.Try.Jupyter
                 if (!executeRequest.Silent)
                 {
                     // send on io
-                    var error = messageBuilder.CreateMessage(
+                    var error = Message.CreateMessage(
                         errorContent,
                         delivery.Command.Request.Header);
                     ioPubChannel.Send(error);
 
                     // send on stderr
                     var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = messageBuilder.CreateMessage(
+                    var stream = Message.CreateMessage(
                         stdErr,
                         delivery.Command.Request.Header);
                     ioPubChannel.Send(stream);
@@ -192,7 +190,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             if (!executeRequest.Silent && resultSucceeded)
             {
                 // send on io
-                var executeResultMessage = messageBuilder.CreateMessage(
+                var executeResultMessage = Message.CreateMessage(
                     executeResultData,
                     delivery.Command.Request.Header);
                 ioPubChannel.Send(executeResultMessage);
