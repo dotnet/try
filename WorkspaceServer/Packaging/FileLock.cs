@@ -33,7 +33,7 @@ namespace WorkspaceServer.Packaging
                 {
 
                 }
-            } while (attemptCount <= 10);
+            } while (attemptCount <= 100);
 
             throw new IOException($"Cannot acquire file lock {lockFile.FullName}");
         }
