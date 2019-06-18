@@ -10,21 +10,21 @@ namespace WorkspaceServer.Packaging
     internal static class PackageExtensions
     {
         public static async Task<bool> Create(
-            this IHaveADirectory packageBase, 
+            this IHaveADirectory packageBase,
             IPackageInitializer initializer)
         {
             using (var operation = Logger<PackageBase>.Log.OnEnterAndConfirmOnExit())
             {
+                if (!packageBase.Directory.Exists)
+                {
+
+                    operation.Info("Creating directory {directory}", packageBase.Directory);
+                    packageBase.Directory.Create();
+                    packageBase.Directory.Refresh();
+                }
+
                 using (await FileLock.TryCreateAsync(packageBase.Directory))
                 {
-                    if (!packageBase.Directory.Exists)
-                    {
-
-                        operation.Info("Creating directory {directory}", packageBase.Directory);
-                        packageBase.Directory.Create();
-                        packageBase.Directory.Refresh();
-                    }
-
                     if (packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Length == 0)
                     {
                         operation.Info("Initializing package using {_initializer} in {directory}", initializer,
