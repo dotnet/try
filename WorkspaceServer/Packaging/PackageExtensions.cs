@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Pocket;
 
@@ -25,7 +26,7 @@ namespace WorkspaceServer.Packaging
 
                 using (await FileLock.TryCreateAsync(packageBase.Directory))
                 {
-                    if (packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Length == 0)
+                    if (!packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Where(f => !FileLock.IsLockFile(f)).Any())
                     {
                         operation.Info("Initializing package using {_initializer} in {directory}", initializer,
                             packageBase.Directory);
