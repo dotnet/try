@@ -15,18 +15,22 @@ namespace WorkspaceServer.Packaging
         {
             using (var operation = Logger<PackageBase>.Log.OnEnterAndConfirmOnExit())
             {
-                if (!packageBase.Directory.Exists)
+                using (await FileLock.TryCreateAsync(packageBase.Directory))
                 {
+                    if (!packageBase.Directory.Exists)
+                    {
 
-                    operation.Info("Creating directory {directory}", packageBase.Directory);
-                    packageBase.Directory.Create();
-                    packageBase.Directory.Refresh();
-                }
+                        operation.Info("Creating directory {directory}", packageBase.Directory);
+                        packageBase.Directory.Create();
+                        packageBase.Directory.Refresh();
+                    }
 
-                if (packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Length == 0)
-                {
-                    operation.Info("Initializing package using {_initializer} in {directory}", initializer, packageBase.Directory);
-                    await initializer.Initialize(packageBase.Directory);
+                    if (packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Length == 0)
+                    {
+                        operation.Info("Initializing package using {_initializer} in {directory}", initializer,
+                            packageBase.Directory);
+                        await initializer.Initialize(packageBase.Directory);
+                    }
                 }
 
                 operation.Succeed();

@@ -44,5 +44,15 @@ namespace WorkspaceServer.Packaging
             }
             return TryCreateAsync(directoryAccessor.GetFullyQualifiedFilePath(".trydotnet-lock"));
         }
+
+        public static Task<IDisposable> TryCreateAsync(DirectoryInfo directory)
+        {
+            if (directory == null)
+            {
+                throw new ArgumentNullException(nameof(directory));
+            }
+            var lockFile = new FileInfo(Path.Combine(directory.FullName, ".trydotnet-lock"));
+            return TryCreateAsync(lockFile);
+        }
     }
 }

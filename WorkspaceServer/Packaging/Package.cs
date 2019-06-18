@@ -129,8 +129,7 @@ namespace WorkspaceServer.Packaging
                 binLog.LastWriteTimeUtc >= projectFile.LastWriteTimeUtc)
             {
                 AnalyzerResults results;
-                var lockFile = GetLockFile(package.Directory);
-                using (await FileLock.TryCreateAsync(lockFile))
+                using (await FileLock.TryCreateAsync(package.Directory))
                 {
                     var manager = new AnalyzerManager();
                     results = manager.Analyze(binLog.FullName);
@@ -159,10 +158,7 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-        private static FileInfo GetLockFile(DirectoryInfo directory)
-        {
-            return new FileInfo(Path.Combine(directory.FullName, ".trydotnet-lock"));
-        }
+      
 
         private DateTimeOffset? LastDesignTimeBuild { get; set; }
 
@@ -475,8 +471,8 @@ namespace WorkspaceServer.Packaging
                             operation.Info("Skipping build for package {name}", Name);
                             return;
                         }
-                        var lockFile = GetLockFile(Directory);
-                        using (await FileLock.TryCreateAsync(lockFile))
+
+                        using (await FileLock.TryCreateAsync(Directory))
                         {
                             await DotnetBuild();
                         }
@@ -580,8 +576,7 @@ namespace WorkspaceServer.Packaging
                 var csProj = this.GetProjectFile();
                 var logWriter = new StringWriter();
 
-                var lockFile = GetLockFile(Directory);
-                using (await FileLock.TryCreateAsync(lockFile))
+                using (await FileLock.TryCreateAsync(Directory))
                 {
                     var manager = new AnalyzerManager(new AnalyzerManagerOptions
                     {
