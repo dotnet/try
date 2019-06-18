@@ -29,13 +29,13 @@ using Disposable = System.Reactive.Disposables.Disposable;
 
 namespace WorkspaceServer.Packaging
 {
-    public abstract class Package : 
+    public abstract class Package :
         PackageBase,
         ICreateWorkspaceForLanguageServices,
         ICreateWorkspaceForRun
     {
         internal const string DesignTimeBuildBinlogFileName = "package_designTimeBuild.binlog";
-     
+
 
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _packageBuildSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _packagePublishSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
@@ -92,7 +92,7 @@ namespace WorkspaceServer.Packaging
             IScheduler buildThrottleScheduler = null) : base(name, initializer, directory)
         {
             Initializer = initializer ?? new PackageInitializer("console", Name);
-        
+
             _log = new Logger($"{nameof(Package)}:{Name}");
             _buildThrottleScheduler = buildThrottleScheduler ?? TaskPoolScheduler.Default;
 
@@ -105,20 +105,35 @@ namespace WorkspaceServer.Packaging
             SetupWorkspaceCreationFromBuildChannel();
             SetupWorkspaceCreationFromDesignTimeBuildChannel();
             TryLoadDesignTimeBuildFromBuildLog();
-            
+
             _buildSemaphore = _packageBuildSemaphores.GetOrAdd(Name, _ => new SemaphoreSlim(1, 1));
             _publishSemaphore = _packagePublishSemaphores.GetOrAdd(Name, _ => new SemaphoreSlim(1, 1));
             RoslynWorkspace = null;
         }
 
-        private static void LoadDesignTimeBuildFromBuildLogFile(Package package, FileSystemInfo binLog)
+        private void TryLoadDesignTimeBuildFromBuildLog()
+        {
+            if (Directory.Exists)
+            {
+                var binLog = this.FindLatestBinLog();
+                if (binLog != null)
+                {
+                    LoadDesignTimeBuildFromBuildLogFile(this, binLog).Wait();
+                }
+            }
+        }
+        private static async Task LoadDesignTimeBuildFromBuildLogFile(Package package, FileSystemInfo binLog)
         {
             var projectFile = package.GetProjectFile();
-            if (projectFile != null && 
+            if (projectFile != null &&
                 binLog.LastWriteTimeUtc >= projectFile.LastWriteTimeUtc)
             {
-                var manager = new AnalyzerManager();
-                var results = manager.Analyze(binLog.FullName);
+                AnalyzerResults results;
+                using (await FileLock.TryCreateAsync(package.Directory))
+                {
+                    var manager = new AnalyzerManager();
+                    results = manager.Analyze(binLog.FullName);
+                }
 
                 if (results.Count == 0)
                 {
@@ -143,17 +158,7 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-        private void TryLoadDesignTimeBuildFromBuildLog()
-        {
-            if (Directory.Exists)
-            {
-                var binLog = this.FindLatestBinLog();
-                if (binLog != null)
-                {
-                    LoadDesignTimeBuildFromBuildLogFile(this, binLog);
-                }
-            }
-        }
+      
 
         private DateTimeOffset? LastDesignTimeBuild { get; set; }
 
@@ -182,7 +187,7 @@ namespace WorkspaceServer.Packaging
                                ?.Attribute("Sdk")
                                ?.Value == "Microsoft.NET.Sdk.Web";
 
-                    _isWebProject = isAspNetCore2 || isAspNetCore3 ;
+                    _isWebProject = isAspNetCore2 || isAspNetCore3;
                 }
 
                 return _isWebProject ?? false;
@@ -194,7 +199,7 @@ namespace WorkspaceServer.Packaging
         public FileInfo EntryPointAssemblyPath => _entryPointAssemblyPath ?? (_entryPointAssemblyPath = this.GetEntryPointAssemblyPath(IsWebProject));
 
         public string TargetFramework => _targetFramework ?? (_targetFramework = this.GetTargetFramework());
-        
+
         public Task<Workspace> CreateRoslynWorkspaceForRunAsync(Budget budget)
         {
             var shouldBuild = ShouldDoFullBuild();
@@ -422,7 +427,7 @@ namespace WorkspaceServer.Packaging
             {
                 if (ShouldDoDesignTimeBuild())
                 {
-                    DesignTimeBuild();
+                    await DesignTimeBuild();
                 }
                 else
                 {
@@ -467,7 +472,10 @@ namespace WorkspaceServer.Packaging
                             return;
                         }
 
-                        await DotnetBuild();
+                        using (await FileLock.TryCreateAsync(Directory))
+                        {
+                            await DotnetBuild();
+                        }
                     }
 
                     operation.Info("Workspace built");
@@ -481,10 +489,10 @@ namespace WorkspaceServer.Packaging
 
                 var binLog = this.FindLatestBinLog();
                 await binLog.WaitForFileAvailable();
-                LoadDesignTimeBuildFromBuildLogFile(this, binLog);
+                await LoadDesignTimeBuildFromBuildLogFile(this, binLog);
             }
         }
-     
+
         protected async Task Publish()
         {
             using (var operation = _log.OnEnterAndConfirmOnExit())
@@ -515,7 +523,7 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-       
+
 
         public override string ToString()
         {
@@ -560,22 +568,27 @@ namespace WorkspaceServer.Packaging
                    || DesignTimeBuildResult.Succeeded == false;
         }
 
-        protected AnalyzerResult DesignTimeBuild()
+        protected async Task<AnalyzerResult> DesignTimeBuild()
         {
             using (var operation = _log.OnEnterAndConfirmOnExit())
             {
+                AnalyzerResult result;
                 var csProj = this.GetProjectFile();
                 var logWriter = new StringWriter();
-                var manager = new AnalyzerManager(new AnalyzerManagerOptions
-                {
-                    LogWriter = logWriter
-                });
 
-                var analyzer = manager.GetProject(csProj.FullName);
-                analyzer.AddBinaryLogger(Path.Combine(Directory.FullName, DesignTimeBuildBinlogFileName));
-                var languageVersion = csProj.SuggestedLanguageVersion();
-                analyzer.SetGlobalProperty("langVersion", languageVersion);
-                var result = analyzer.Build().Results.First();
+                using (await FileLock.TryCreateAsync(Directory))
+                {
+                    var manager = new AnalyzerManager(new AnalyzerManagerOptions
+                    {
+                        LogWriter = logWriter
+                    });
+                    var analyzer = manager.GetProject(csProj.FullName);
+                    analyzer.AddBinaryLogger(Path.Combine(Directory.FullName, DesignTimeBuildBinlogFileName));
+                    var languageVersion = csProj.SuggestedLanguageVersion();
+                    analyzer.SetGlobalProperty("langVersion", languageVersion);
+                    result = analyzer.Build().Results.First();
+                }
+
                 DesignTimeBuildResult = result;
                 LastDesignTimeBuild = Clock.Current.Now();
                 if (result.Succeeded == false)

@@ -8,13 +8,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
-using Recipes;
 
 namespace WorkspaceServer.Tests
 {
     public class InMemoryDirectoryAccessor : IDirectoryAccessor, IEnumerable
     {
-        private readonly AsyncLock _lock = new AsyncLock();
         private readonly DirectoryInfo _rootDirToAddFiles;
 
         private Dictionary<FileSystemInfo, string> _files = new Dictionary<FileSystemInfo, string>(
@@ -151,12 +149,6 @@ namespace WorkspaceServer.Tests
                 _files = _files
             };
         }
-
-        public Task<IDisposable> TryLockAsync()
-        {
-            return Task.FromResult<IDisposable>(_lock.LockAsync());
-        }
-
 
         public IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively()
         {

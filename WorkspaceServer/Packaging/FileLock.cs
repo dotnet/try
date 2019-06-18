@@ -9,6 +9,8 @@ namespace WorkspaceServer.Packaging
 {
     public class FileLock
     {
+        private const string LockFileName = ".trydotnet-lock";
+
         public static async Task<IDisposable> TryCreateAsync(FileInfo lockFile)
         {
             if (lockFile == null)
@@ -31,7 +33,7 @@ namespace WorkspaceServer.Packaging
                 {
 
                 }
-            } while (attemptCount <= 10);
+            } while (attemptCount <= 100);
 
             throw new IOException($"Cannot acquire file lock {lockFile.FullName}");
         }
@@ -42,7 +44,22 @@ namespace WorkspaceServer.Packaging
             {
                 throw new ArgumentNullException(nameof(directoryAccessor));
             }
-            return TryCreateAsync(directoryAccessor.GetFullyQualifiedFilePath(".trydotnet-lock"));
+            return TryCreateAsync(directoryAccessor.GetFullyQualifiedFilePath(LockFileName));
+        }
+
+        public static Task<IDisposable> TryCreateAsync(DirectoryInfo directory)
+        {
+            if (directory == null)
+            {
+                throw new ArgumentNullException(nameof(directory));
+            }
+            var lockFile = new FileInfo(Path.Combine(directory.FullName, LockFileName));
+            return TryCreateAsync(lockFile);
+        }
+
+        public static bool IsLockFile(FileInfo fileInfo)
+        {
+            return fileInfo.Name == LockFileName;
         }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Pocket;
 
@@ -10,7 +11,7 @@ namespace WorkspaceServer.Packaging
     internal static class PackageExtensions
     {
         public static async Task<bool> Create(
-            this IHaveADirectory packageBase, 
+            this IHaveADirectory packageBase,
             IPackageInitializer initializer)
         {
             using (var operation = Logger<PackageBase>.Log.OnEnterAndConfirmOnExit())
@@ -23,10 +24,14 @@ namespace WorkspaceServer.Packaging
                     packageBase.Directory.Refresh();
                 }
 
-                if (packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Length == 0)
+                using (await FileLock.TryCreateAsync(packageBase.Directory))
                 {
-                    operation.Info("Initializing package using {_initializer} in {directory}", initializer, packageBase.Directory);
-                    await initializer.Initialize(packageBase.Directory);
+                    if (!packageBase.Directory.GetFiles("*", SearchOption.AllDirectories).Where(f => !FileLock.IsLockFile(f)).Any())
+                    {
+                        operation.Info("Initializing package using {_initializer} in {directory}", initializer,
+                            packageBase.Directory);
+                        await initializer.Initialize(packageBase.Directory);
+                    }
                 }
 
                 operation.Succeed();
