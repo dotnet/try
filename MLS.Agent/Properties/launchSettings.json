@@ -18,7 +18,7 @@
     },
     "MLS.Agent": {
       "commandName": "Project",
-      "commandLineArgs": "../docs",
+      "commandLineArgs": "try C:/Users/dicolomb/source/repos/Public/TryDotNet.XamU.CSharp",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
