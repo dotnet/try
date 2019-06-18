@@ -27,8 +27,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>   
-    <PackageReference Include="Buildalyzer" Version="2.2.0" />
-    <PackageReference Include="Buildalyzer.Workspaces" Version="2.2.0" />
+    <PackageReference Include="Buildalyzer" Version="2.3.0" />
+    <PackageReference Include="Buildalyzer.Workspaces" Version="2.3.0" />
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
     <PackageReference Include="DictionaryExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
