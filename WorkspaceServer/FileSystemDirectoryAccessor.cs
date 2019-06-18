@@ -77,11 +77,6 @@ namespace WorkspaceServer
             return new FileSystemDirectoryAccessor(new DirectoryInfo(absolutePath));
         }
 
-        public Task<IDisposable> TryLockAsync()
-        {
-            return FileLock.TryCreateAsync(this);
-        }
-
 
         public IEnumerable<RelativeDirectoryPath> GetAllDirectoriesRecursively()
         {
