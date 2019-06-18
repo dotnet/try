@@ -30,7 +30,7 @@ done
 function TestUsingNPM() {
     test_path=$1
     pushd "$test_path"
-    npm ci
+    npm i
     npm run ciTest
     popd
 }
