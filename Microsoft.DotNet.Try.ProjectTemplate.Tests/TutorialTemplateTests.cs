@@ -46,15 +46,6 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             var dotnet = new Dotnet(outputDirectory);
             //The template targets 3.0 hence verify should run against 3.0 and not 2.1.503 used in the solution directory
             await dotnet.New("global.json", "--sdk-version 3.0.100-preview6-012264");
-
-            var projectFile = outputDirectory.GetFiles("*.csproj").Single();
-            
-            var result = await dotnet.Build(projectFile.FullName);
-            Console.WriteLine(String.Join(";", result.Output));
-            Console.WriteLine(String.Join(";", result.Error));
-            Console.WriteLine(String.Join(";", outputDirectory.GetFiles("*.json").Select(file => file.Read())));
-            Console.WriteLine(String.Join("\n", (await dotnet.Execute("--info")).Output));
-            
             var console = new TestConsole();
             var directoryAccessor = new FileSystemDirectoryAccessor(outputDirectory);
 
@@ -72,8 +63,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
                        .Match(
                            $"{outputDirectory}{Path.DirectorySeparatorChar}Readme.md*Line *:*{outputDirectory}{Path.DirectorySeparatorChar}Program.cs (in project {outputDirectory}{Path.DirectorySeparatorChar}{outputDirectory.Name}.csproj)*".EnforceLF());
 
-           System.Console.WriteLine(console.Out.ToString());
-            resultCode.Should().Be(0, $"Output: {console.Out.ToString()} \nError: {console.Error.ToString()}");
+            resultCode.Should().Be(0);
         }
 
         [Fact]
