@@ -52,7 +52,7 @@ namespace WorkspaceServer.Packaging
 
             var result = await dotnet
                              .New(Template,
-                                  args: $"--name \"{ProjectName}\" --language \"{Language}\" --output \"{directory.FullName}\"",
+                                  args: $"--name \"{ProjectName}\" --language \"{Language}\" --output \"{directory.FullName}\" --force",
                                   budget: budget);
             result.ThrowOnFailure($"Error initializing in {directory.FullName}");
 
