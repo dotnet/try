@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Authors>dotnet organization</Authors>
+    <Authors>Microsoft</Authors>
     <PackageTags>dotnet try</PackageTags>
     <Copyright>$(CopyrightMicrosoft)</Copyright>
   </PropertyGroup>
