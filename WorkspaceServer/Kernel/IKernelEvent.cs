@@ -49,15 +49,36 @@ namespace WorkspaceServer.Kernel
         }
     }
 
+    public class PackageAdded : IKernelEvent
+    {
+    }
+
+    public class DiagnosticsReceived : IKernelEvent
+    {
+    }
+
+    public class CompletionReceived : IKernelEvent
+    {
+    }
+
+    public class SignatureHelpReceived : IKernelEvent
+    {
+    }
+
+    public class DocumentationReceived : IKernelEvent
+    {
+    }
+
     public class SendStandardInput : IKernelCommand
     {
     }
+
 
     /// <summary>
     /// add a packages to the execution
     /// </summary>
     public class AddPackage : IKernelCommand
-    {       
+    {
     }
 
     public class SubmitCode : IKernelCommand
