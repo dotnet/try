@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using WorkspaceServer.Kernel;
+using WorkspaceServer.Tests.Kernel;
 using Xunit;
 
 namespace WorkspaceServer.Tests
@@ -35,13 +36,18 @@ namespace WorkspaceServer.Tests
             }
         }
 
-        public override async Task notifies_on_completion()
+        protected override Task<ProcessKernel> CreateKernelAsync(params IKernelCommand[] commands)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task notifies_on_completion()
         {
             var compute = CreateKernel();
 
-            var events = ConnectedEventStream(
+            var events = ConneteToKernelEvents(
                 compute
-                    .ComputeEvents
+                    .KernelEvents
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()))
                 .Materialize();
 
@@ -51,13 +57,13 @@ namespace WorkspaceServer.Tests
             completed.Should().NotBeNull();
         }
 
-        public override async Task notifies_on_failure()
+        public async Task notifies_on_failure()
         {
             var compute = CreateKernel();
 
-            var events = ConnectedEventStream(
+            var events = ConneteToKernelEvents(
                 compute
-                    .ComputeEvents
+                    .KernelEvents
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()))
                 .Materialize();
 
@@ -73,9 +79,9 @@ namespace WorkspaceServer.Tests
         {
             var compute = CreateKernel();
 
-            var events = ConnectedEventStream(
+            var events = ConneteToKernelEvents(
                 compute
-                    .ComputeEvents
+                    .KernelEvents
                     .OfType<StandardOutputReceived>()
                     .Timeout(10.Seconds()));
 

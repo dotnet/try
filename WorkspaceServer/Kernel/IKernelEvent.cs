@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace WorkspaceServer.Kernel
 {
     public interface IKernelEvent
@@ -9,6 +11,16 @@ namespace WorkspaceServer.Kernel
 
     public interface IKernelCommand
     {
+    }
+
+    public class ValueProduced: IKernelEvent
+    {
+        public object Value { get; }
+
+        public ValueProduced(object value)
+        {
+            Value = value;
+        }
     }
 
     public class Started : IKernelEvent
@@ -83,6 +95,12 @@ namespace WorkspaceServer.Kernel
 
     public class SubmitCode : IKernelCommand
     {
+        public string Value { get; }
+
+        public SubmitCode(string value)
+        {
+            Value = value ?? throw new ArgumentNullException(nameof(value));
+        }
     }
 
     public class RequestCompletion : IKernelCommand

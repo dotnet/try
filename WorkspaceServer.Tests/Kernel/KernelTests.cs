@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
@@ -12,13 +14,17 @@ using FluentAssertions.Extensions;
 using WorkspaceServer.Kernel;
 using Xunit;
 
-namespace WorkspaceServer.Tests
+namespace WorkspaceServer.Tests.Kernel
 {
-    public abstract class KernelTests<T> where T : IKernel
+    public abstract class KernelTests<T>: IDisposable where T : IKernel
     {
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        protected IList<IKernelEvent> KernelEvents { get; } = new List<IKernelEvent>();
         protected abstract T CreateKernel([CallerMemberName]string testName = null);
 
-        protected IObservable<TE> ConnectedEventStream<TE>(IObservable<TE> source) where TE : IKernelEvent
+        protected abstract Task<T> CreateKernelAsync(params IKernelCommand[] commands);
+
+        protected IObservable<TE> ConneteToKernelEvents<TE>(IObservable<TE> source) where TE : IKernelEvent
         {
             var events = new ReplaySubject<TE>();
             source.Subscribe(events);
@@ -30,9 +36,9 @@ namespace WorkspaceServer.Tests
         {
             var compute = CreateKernel();
 
-            var events = ConnectedEventStream(
+            var events = ConneteToKernelEvents(
                 compute
-                    .ComputeEvents
+                    .KernelEvents
                     .OfType<Started>()
                     .Timeout(10.Seconds()));
 
@@ -43,20 +49,16 @@ namespace WorkspaceServer.Tests
             startEvent.Should().NotBeNull();
         }
 
-        [Fact]
-        public abstract Task notifies_on_completion();
-
-        [Fact]
-        public abstract Task notifies_on_failure();
+       
 
         [Fact]
         public async Task notifies_on_stop()
         {
             var compute = CreateKernel();
 
-            var events = ConnectedEventStream(
+            var events = ConneteToKernelEvents(
                 compute
-                    .ComputeEvents
+                    .KernelEvents
                     .OfType<Stopped>()
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()));
 
@@ -74,9 +76,9 @@ namespace WorkspaceServer.Tests
         {
             var compute = CreateKernel();
 
-            var events = ConnectedEventStream(
+            var events = ConneteToKernelEvents(
                 compute
-                    .ComputeEvents
+                    .KernelEvents
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()));
 
             await compute.StartAsync();
@@ -87,6 +89,16 @@ namespace WorkspaceServer.Tests
                 .SingleAsync(n => n.Kind == NotificationKind.OnCompleted);
 
             completed.Should().NotBeNull();
+        }
+
+        protected void DisposeAfterTest(IDisposable disposable)
+        {
+            _disposables.Add(disposable);
+        }
+
+        public void Dispose()
+        {
+            _disposables?.Dispose();
         }
     }
 }

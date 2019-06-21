@@ -18,7 +18,7 @@ namespace WorkspaceServer
         private int _isRunning = 0;
         private readonly Subject<IKernelEvent> _channel;
         private readonly Process _process;
-        public IObservable<IKernelEvent> ComputeEvents { get; }
+        public IObservable<IKernelEvent> KernelEvents { get; }
 
         public ProcessKernel(
             string command,
@@ -58,7 +58,7 @@ namespace WorkspaceServer
             }
 
             _channel = new Subject<IKernelEvent>();
-            ComputeEvents = Observable
+            KernelEvents = Observable
                 .Create<IKernelEvent>(_channel.Subscribe)
                 .Publish()
                 .RefCount();

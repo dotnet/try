@@ -8,7 +8,7 @@ namespace WorkspaceServer.Kernel
 {
     public interface IKernel
     {
-        IObservable<IKernelEvent> ComputeEvents { get; }
+        IObservable<IKernelEvent> KernelEvents { get; }
         Task StartAsync();
         Task StopAsync();
     }
