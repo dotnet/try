@@ -4,13 +4,16 @@
 using System;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
 namespace WorkspaceServer.Kernel
 {
-    public class Repl : IKernel
+    public class CSharpRepl : IKernel
     {
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -18,7 +21,7 @@ namespace WorkspaceServer.Kernel
         private readonly Subject<IKernelEvent> _channel;
         private ScriptState _scriptState;
 
-        public Repl()
+        public CSharpRepl()
         {
             _channel = new Subject<IKernelEvent>();
         }
@@ -39,21 +42,49 @@ namespace WorkspaceServer.Kernel
         {
             _channel.OnNext(new CodeSubmissionReceived(submitCode.Value));
 
-            if (_scriptState == null)
+            var (shouldExecute,code) = ComputeFullSubmission(submitCode.Value);
+
+            if (shouldExecute)
             {
-                _scriptState = await CSharpScript.RunAsync(submitCode.Value);
+                _channel.OnNext(new CompleteCodeSubmissionReceived());
+                if (_scriptState == null)
+                {
+                    _scriptState = await CSharpScript.RunAsync(code);
+                }
+                else
+                {
+                    _scriptState = await _scriptState.ContinueWithAsync(code);
+                }
+
+                var hasReturnValue = (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
+
+                if (hasReturnValue)
+                {
+                    _channel.OnNext(new ValueProduced(_scriptState.ReturnValue));
+                }
             }
             else
             {
-                _scriptState = await _scriptState.ContinueWithAsync(submitCode.Value);
+                _channel.OnNext(new IncompleteCodeSubmissionReceived());
             }
+        }
 
-            var hasReturnValue = (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
+        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        protected StringBuilder _inputBuffer = new StringBuilder();
+        private (bool shouldExecute, string completeSubmission) ComputeFullSubmission(string input)
+        {
+            _inputBuffer.AppendLine(input);
 
-            if (hasReturnValue)
+            var code = _inputBuffer.ToString();
+            var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
+
+            if (!SyntaxFactory.IsCompleteSubmission(syntaxTree))
             {
-                _channel.OnNext(new ValueProduced(_scriptState.ReturnValue));
+                return (false, code);
             }
+
+            _inputBuffer = new StringBuilder();
+            return (true, code);
         }
 
         public Task SendAsync(IKernelCommand command)

@@ -10,11 +10,11 @@ using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class ReplTests : KernelTests<Repl>
+    public class CSharpReplTests : KernelTests<CSharpRepl>
     {
-        protected override async Task<Repl> CreateKernelAsync(params IKernelCommand[] commands)
+        protected override async Task<CSharpRepl> CreateKernelAsync(params IKernelCommand[] commands)
         {
-            var kernel = new Repl();
+            var kernel = new CSharpRepl();
 
             foreach (var command in commands ?? Enumerable.Empty<IKernelCommand>())
             {
@@ -40,6 +40,38 @@ namespace WorkspaceServer.Tests.Kernel
                         .Value
                         .Should()
                         .Be(123);
+        }
+
+        [Fact]
+        public async Task it_notifies_when_submission_is_complete()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("var a ="));
+
+            await repl.SendAsync(new SubmitCode("12;"));
+
+            KernelEvents.Should()
+                .NotContain(e => e is ValueProduced);
+
+            KernelEvents.Last()
+                .Should()
+                .BeOfType<CompleteCodeSubmissionReceived>();
+        }
+
+        [Fact]
+        public async Task it_notifies_when_submission_is_incomplete()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("var a ="));
+
+            KernelEvents.Should()
+                .NotContain(e => e is ValueProduced);
+
+            KernelEvents.Last()
+                .Should()
+                .BeOfType<IncompleteCodeSubmissionReceived>();
         }
 
         [Fact]
