@@ -7,7 +7,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -19,9 +18,9 @@ namespace WorkspaceServer.Tests.Kernel
     public abstract class KernelTests<T>: IDisposable where T : IKernel
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        protected IList<IKernelEvent> KernelEvents { get; } = new List<IKernelEvent>();
-        protected abstract T CreateKernel([CallerMemberName]string testName = null);
 
+        protected IList<IKernelEvent> KernelEvents { get; } = new List<IKernelEvent>();
+      
         protected abstract Task<T> CreateKernelAsync(params IKernelCommand[] commands);
 
         protected IObservable<TE> ConnectToKernelEvents<TE>(IObservable<TE> source) where TE : IKernelEvent
@@ -34,7 +33,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task notifies_on_start()
         {
-            var compute = CreateKernel();
+            var compute = await CreateKernelAsync();
 
             var events = ConnectToKernelEvents(
                 compute
@@ -52,7 +51,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task notifies_on_stop()
         {
-            var compute = CreateKernel();
+            var compute = await CreateKernelAsync();
 
             var events = ConnectToKernelEvents(
                 compute
@@ -72,7 +71,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task sequence_is_completed_on_stop()
         {
-            var compute = CreateKernel();
+            var compute = await CreateKernelAsync();
 
             var events = ConnectToKernelEvents(
                 compute

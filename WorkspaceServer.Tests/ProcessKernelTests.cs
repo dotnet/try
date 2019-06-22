@@ -16,7 +16,7 @@ namespace WorkspaceServer.Tests
 {
     public class ProcessKernelTests : KernelTests<ProcessKernel>
     {
-        protected override ProcessKernel CreateKernel([CallerMemberName]string testName = null)
+        protected ProcessKernel CreateKernel([CallerMemberName]string testName = null)
         {
             switch (testName)
             {

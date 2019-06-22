@@ -12,13 +12,6 @@ namespace WorkspaceServer.Tests.Kernel
 {
     public class ReplTests : KernelTests<Repl>
     {
-        protected override Repl CreateKernel(string testName = null)
-        {
-            var kernel = new Repl();
-            DisposeAfterTest(kernel.KernelEvents.Subscribe(KernelEvents.Add));
-            return kernel;
-        }
-
         protected override async Task<Repl> CreateKernelAsync(params IKernelCommand[] commands)
         {
             var kernel = new Repl();
