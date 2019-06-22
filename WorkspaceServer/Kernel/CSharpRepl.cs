@@ -27,17 +27,7 @@ namespace WorkspaceServer.Kernel
         }
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
-
-        public Task StartAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task StopAsync()
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public async Task SendAsync(SubmitCode submitCode)
         {
             _channel.OnNext(new CodeSubmissionReceived(submitCode.Value));

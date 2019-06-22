@@ -3,11 +3,14 @@
 
 using System;
 using System.Threading.Tasks;
+using WorkspaceServer.Kernel;
 
-namespace WorkspaceServer.Kernel
+namespace WorkspaceServer
 {
-    public interface IKernel
+    public interface IObservableRunner
     {
         IObservable<IKernelEvent> KernelEvents { get; }
+        Task StartAsync();
+        Task StopAsync();
     }
 }

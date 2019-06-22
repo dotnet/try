@@ -14,36 +14,34 @@ using Xunit;
 
 namespace WorkspaceServer.Tests
 {
-    public class ProcessKernelTests : KernelTests<ProcessKernel>
+    public class ObservableProcessTests : ObservableRunnerTests<ProcessRunner>
     {
-        protected ProcessKernel CreateKernel([CallerMemberName]string testName = null)
+        protected override async Task<ProcessRunner> CreateRunnerAsync([CallerMemberName]string testName = null)
         {
+            await Task.Yield();
+
             switch (testName)
             {
                 case nameof(notifies_on_start):
                 case nameof(notifies_on_stop):
                 case nameof(notifies_on_completion):
                 case nameof(sequence_is_completed_on_stop):
-                    return new ProcessKernel("dotnet.exe", "--version");
+                    return new ProcessRunner("dotnet.exe", "--version");
                 case nameof(streams_standard_output_events):
-                    return new ProcessKernel("dotnet.exe", "--info");
+                    return new ProcessRunner("dotnet.exe", "--info");
 
                 case nameof(notifies_on_failure):
-                    return new ProcessKernel("invalidCommand");
+                    return new ProcessRunner("invalidCommand");
 
                     default:
                         throw new InvalidOperationException($"Test case {testName} is not supported");
             }
         }
 
-        protected override Task<ProcessKernel> CreateKernelAsync(params IKernelCommand[] commands)
-        {
-            throw new NotImplementedException();
-        }
-
+        [Fact]
         public async Task notifies_on_completion()
         {
-            var compute = CreateKernel();
+            var compute = await CreateRunnerAsync();
 
             var events = ConnectToKernelEvents(
                 compute
@@ -57,9 +55,10 @@ namespace WorkspaceServer.Tests
             completed.Should().NotBeNull();
         }
 
+        [Fact]
         public async Task notifies_on_failure()
         {
-            var compute = CreateKernel();
+            var compute = await CreateRunnerAsync();
 
             var events = ConnectToKernelEvents(
                 compute
@@ -77,7 +76,7 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task streams_standard_output_events()
         {
-            var compute = CreateKernel();
+            var compute = await CreateRunnerAsync();
 
             var events = ConnectToKernelEvents(
                 compute
@@ -92,10 +91,6 @@ namespace WorkspaceServer.Tests
             outputEvent.Should().Contain(".NET Core SDK (reflecting any global.json):");
         }
 
-        [Fact]
-        public void handles_input_requests()
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

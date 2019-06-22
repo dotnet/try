@@ -13,14 +13,14 @@ using WorkspaceServer.Kernel;
 
 namespace WorkspaceServer
 {
-    public class ProcessKernel : IKernel
+    public class ProcessRunner : IObservableRunner
     {
         private int _isRunning = 0;
         private readonly Subject<IKernelEvent> _channel;
         private readonly Process _process;
         public IObservable<IKernelEvent> KernelEvents { get; }
 
-        public ProcessKernel(
+        public ProcessRunner(
             string command,
             string args = null,
             DirectoryInfo workingDir = null,
