@@ -15,6 +15,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Jupyter;
 using static Pocket.Logger<MLS.Agent.Program>;
@@ -30,6 +31,8 @@ namespace MLS.Agent
 
         public static async Task<int> Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             return await CommandLineParser.Create( _serviceCollection ).InvokeAsync(args);
         }
 
