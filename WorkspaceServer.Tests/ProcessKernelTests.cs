@@ -45,7 +45,7 @@ namespace WorkspaceServer.Tests
         {
             var compute = CreateKernel();
 
-            var events = ConneteToKernelEvents(
+            var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()))
@@ -61,7 +61,7 @@ namespace WorkspaceServer.Tests
         {
             var compute = CreateKernel();
 
-            var events = ConneteToKernelEvents(
+            var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()))
@@ -79,7 +79,7 @@ namespace WorkspaceServer.Tests
         {
             var compute = CreateKernel();
 
-            var events = ConneteToKernelEvents(
+            var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
                     .OfType<StandardOutputReceived>()

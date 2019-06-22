@@ -2,22 +2,29 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.Serialization;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace WorkspaceServer.Kernel
 {
     public class Repl : IKernel
     {
+        private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
+            .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
+
         private readonly Subject<IKernelEvent> _channel;
-        public IObservable<IKernelEvent> KernelEvents => _channel;
+        private ScriptState _scriptState;
 
         public Repl()
         {
             _channel = new Subject<IKernelEvent>();
         }
+
+        public IObservable<IKernelEvent> KernelEvents => _channel;
 
         public Task StartAsync()
         {
@@ -32,8 +39,22 @@ namespace WorkspaceServer.Kernel
         public async Task SendAsync(SubmitCode submitCode)
         {
             _channel.OnNext(new CodeSubmissionReceived(submitCode.Value));
-            var result = await CSharpScript.RunAsync(submitCode.Value);
-            _channel.OnNext(new ValueProduced(result.ReturnValue));
+
+            if (_scriptState == null)
+            {
+                _scriptState = await CSharpScript.RunAsync(submitCode.Value);
+            }
+            else
+            {
+                _scriptState = await _scriptState.ContinueWithAsync(submitCode.Value);
+            }
+
+            var hasReturnValue = (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
+
+            if (hasReturnValue)
+            {
+                _channel.OnNext(new ValueProduced(_scriptState.ReturnValue));
+            }
         }
 
         public Task SendAsync(IKernelCommand command)
@@ -42,42 +63,10 @@ namespace WorkspaceServer.Kernel
             {
                 case SubmitCode submitCode:
                     return SendAsync(submitCode);
-                    
+
                 default:
-                    throw new KernelCommandNotSupportedException(command);
+                    throw new KernelCommandNotSupportedException(command, this);
             }
-        }
-
-    }
-
-    public class CodeSubmissionReceived : IKernelEvent
-    {
-        public string Value { get; }
-
-        public CodeSubmissionReceived(string value)
-        {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-        }
-    }
-
-
-    public class KernelCommandNotSupportedException : Exception
-    {
-       
-
-        public KernelCommandNotSupportedException()
-        {
-        }
-
-        public KernelCommandNotSupportedException(string message) 
-            : base(message)
-        {
-        }
-
-        public KernelCommandNotSupportedException(IKernelCommand command) 
-            : this($"Command type {command.GetType()} not supported")
-        {
-            
         }
     }
 }
