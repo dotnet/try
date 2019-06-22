@@ -13,16 +13,6 @@ namespace WorkspaceServer.Kernel
     {
     }
 
-    public class ValueProduced: IKernelEvent
-    {
-        public object Value { get; }
-
-        public ValueProduced(object value)
-        {
-            Value = value;
-        }
-    }
-
     public class Started : IKernelEvent
     {
     }

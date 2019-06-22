@@ -24,7 +24,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         protected abstract Task<T> CreateKernelAsync(params IKernelCommand[] commands);
 
-        protected IObservable<TE> ConneteToKernelEvents<TE>(IObservable<TE> source) where TE : IKernelEvent
+        protected IObservable<TE> ConnectToKernelEvents<TE>(IObservable<TE> source) where TE : IKernelEvent
         {
             var events = new ReplaySubject<TE>();
             source.Subscribe(events);
@@ -36,7 +36,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var compute = CreateKernel();
 
-            var events = ConneteToKernelEvents(
+            var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
                     .OfType<Started>()
@@ -49,14 +49,12 @@ namespace WorkspaceServer.Tests.Kernel
             startEvent.Should().NotBeNull();
         }
 
-       
-
         [Fact]
         public async Task notifies_on_stop()
         {
             var compute = CreateKernel();
 
-            var events = ConneteToKernelEvents(
+            var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
                     .OfType<Stopped>()
@@ -76,7 +74,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var compute = CreateKernel();
 
-            var events = ConneteToKernelEvents(
+            var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
                     .Timeout(DateTimeOffset.UtcNow + 5.Seconds()));
