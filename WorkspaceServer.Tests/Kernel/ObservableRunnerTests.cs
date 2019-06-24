@@ -41,7 +41,7 @@ namespace WorkspaceServer.Tests.Kernel
                 compute
                     .KernelEvents
                     .OfType<Started>()
-                    .Timeout(10.Seconds()));
+                    .Timeout(1.Minutes()));
 
 
             await compute.StartAsync();
@@ -59,7 +59,7 @@ namespace WorkspaceServer.Tests.Kernel
                 compute
                     .KernelEvents
                     .OfType<Stopped>()
-                    .Timeout(DateTimeOffset.UtcNow + 5.Seconds()));
+                    .Timeout(DateTimeOffset.UtcNow + 1.Minutes()));
 
 
             await compute.StartAsync();
@@ -78,7 +78,7 @@ namespace WorkspaceServer.Tests.Kernel
             var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
-                    .Timeout(DateTimeOffset.UtcNow + 5.Seconds()));
+                    .Timeout(DateTimeOffset.UtcNow + 1.Minutes()));
 
             await compute.StartAsync();
             await compute.StopAsync();

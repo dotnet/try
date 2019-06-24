@@ -47,7 +47,7 @@ namespace WorkspaceServer.Tests
             var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
-                    .Timeout(DateTimeOffset.UtcNow + 5.Seconds()))
+                    .Timeout(DateTimeOffset.UtcNow + 1.Minutes()))
                 .Materialize();
 
 
@@ -64,7 +64,7 @@ namespace WorkspaceServer.Tests
             var events = ConnectToKernelEvents(
                 compute
                     .KernelEvents
-                    .Timeout(DateTimeOffset.UtcNow + 5.Seconds()))
+                    .Timeout(DateTimeOffset.UtcNow + 1.Minutes()))
                 .Materialize();
 
 
@@ -83,7 +83,7 @@ namespace WorkspaceServer.Tests
                 compute
                     .KernelEvents
                     .OfType<StandardOutputReceived>()
-                    .Timeout(10.Seconds()));
+                    .Timeout(1.Minutes()));
 
 
             await compute.StartAsync();
