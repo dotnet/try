@@ -78,8 +78,8 @@ namespace WorkspaceServer.Packaging
         private void AddEmbeddedResourceContentToProject(string root)
         {
             var wwwRootFiles = new[] { "index.html", "interop.js" };
-            var pagesFiles = new[] { "Index.cshtml", "Index.cshtml.cs" };
-            var rootFiles = new[] { "Program.cs", "Startup.cs", "Linker.xml", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs" };
+            var pagesFiles = new[] { "Index.razor", "_Imports.razor2" };
+            var rootFiles = new[] { "Program.cs", "Startup.cs", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs" };
 
             WriteResourcesToLocation(wwwRootFiles, Path.Combine(root, "wwwroot"));
             WriteResourcesToLocation(pagesFiles, Path.Combine(root, "Pages"));

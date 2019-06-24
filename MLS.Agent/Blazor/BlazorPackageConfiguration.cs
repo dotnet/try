@@ -53,7 +53,7 @@ namespace MLS.Agent.Blazor
             {
                 var blazorEntryPoint = package.BlazorEntryPointAssemblyPath;
                 appBuilder.UsePathBase(package.CodeRunnerPathBase);
-                appBuilder.UseBlazor(new BlazorOptions { ClientAssemblyPath = blazorEntryPoint.FullName });
+                appBuilder.UseClientSideBlazorFiles(blazorEntryPoint.FullName);
             });
         }
 

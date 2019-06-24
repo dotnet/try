@@ -9,6 +9,7 @@ using System.Net.Mime;
 using Clockwise;
 using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.DotNet.Try.Markdown;
@@ -65,10 +66,11 @@ namespace MLS.Agent
                 // Add framework services.
                 services.AddMvc(options =>
                         {
+                            options.EnableEndpointRouting = false;
                             options.Filters.Add(new ExceptionFilter());
                             options.Filters.Add(new BadRequestOnInvalidModelFilter());
                         })
-                        .AddJsonOptions(o =>
+                        .AddNewtonsoftJson(o =>
                         {
                             o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                             o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -164,7 +166,7 @@ namespace MLS.Agent
                 {
                     builder.UsePathBase("/LocalCodeRunner/blazor-console/");
                     builder.EnableCachingBlazorContent();
-                    builder.UseBlazor<MLS.Blazor.Program>();
+                    builder.UseClientSideBlazorFiles<MLS.Blazor.Program>();
                 });
 
                 var budget = new Budget();
