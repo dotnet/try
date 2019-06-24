@@ -20,15 +20,16 @@ namespace WorkspaceServer.Tests
         {
             await Task.Yield();
 
+            
             switch (testName)
             {
                 case nameof(notifies_on_start):
                 case nameof(notifies_on_stop):
                 case nameof(notifies_on_completion):
                 case nameof(sequence_is_completed_on_stop):
-                    return new ProcessRunner("dotnet.exe", "--version");
+                    return new ProcessRunner("dotnet", "--version");
                 case nameof(streams_standard_output_events):
-                    return new ProcessRunner("dotnet.exe", "--info");
+                    return new ProcessRunner("dotnet", "--info");
 
                 case nameof(notifies_on_failure):
                     return new ProcessRunner("invalidCommand");

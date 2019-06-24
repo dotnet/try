@@ -54,7 +54,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .Should()
                 .BeOfType<CodeSubmissionEvaluationFailed>()
                 .Which
-                .Exception
+                .Error
                 .Should()
                 .BeOfType<NotImplementedException>();
         }
