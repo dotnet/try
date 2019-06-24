@@ -3,7 +3,7 @@
 
 namespace WorkspaceServer.Kernel
 {
-    public class CompleteCodeSubmissionReceived : IKernelEvent
+    public class CodeSubmissionEvaluated : IKernelEvent
     {
 
     }

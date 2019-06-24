@@ -5,6 +5,7 @@ using System;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,7 +29,7 @@ namespace WorkspaceServer.Kernel
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
         
-        public async Task SendAsync(SubmitCode submitCode)
+        public async Task SendAsync(SubmitCode submitCode, CancellationToken cancellationToken)
         {
             _channel.OnNext(new CodeSubmissionReceived(submitCode.Value));
 
@@ -37,20 +38,34 @@ namespace WorkspaceServer.Kernel
             if (shouldExecute)
             {
                 _channel.OnNext(new CompleteCodeSubmissionReceived());
-                if (_scriptState == null)
+                Exception exception = null;
+                try
                 {
-                    _scriptState = await CSharpScript.RunAsync(code);
+                    if (_scriptState == null)
+                    {
+                        _scriptState = await CSharpScript.RunAsync(code, cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        _scriptState = await _scriptState.ContinueWithAsync(code, cancellationToken: cancellationToken);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    _scriptState = await _scriptState.ContinueWithAsync(code);
+                    exception=  e;
                 }
 
-                var hasReturnValue = (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
+                var hasReturnValue = _scriptState != null && (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
+                
+                _channel.OnNext(new CodeSubmissionEvaluated());
 
                 if (hasReturnValue)
                 {
                     _channel.OnNext(new ValueProduced(_scriptState.ReturnValue));
+                }
+                if (exception != null)
+                {
+                    _channel.OnNext(new CodeSubmissionEvaluationFailed(exception));
                 }
             }
             else
@@ -79,10 +94,15 @@ namespace WorkspaceServer.Kernel
 
         public Task SendAsync(IKernelCommand command)
         {
+            return SendAsync(command, CancellationToken.None);
+        }
+
+        public Task SendAsync(IKernelCommand command, CancellationToken cancellationToken)
+        {
             switch (command)
             {
                 case SubmitCode submitCode:
-                    return SendAsync(submitCode);
+                    return SendAsync(submitCode,  cancellationToken);
 
                 default:
                     throw new KernelCommandNotSupportedException(command, this);

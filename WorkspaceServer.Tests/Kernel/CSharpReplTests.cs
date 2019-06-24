@@ -5,6 +5,7 @@ using System;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using Octokit;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -43,6 +44,22 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task it_returns_exceptions_thrown_in_user_code()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("throw new System.NotImplementedException();"));
+
+            KernelEvents.Last()
+                .Should()
+                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .Which
+                .Exception
+                .Should()
+                .BeOfType<NotImplementedException>();
+        }
+
+        [Fact]
         public async Task it_notifies_when_submission_is_complete()
         {
             var repl = await CreateKernelAsync();
@@ -54,9 +71,9 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
 
-            KernelEvents.Last()
+            KernelEvents
                 .Should()
-                .BeOfType<CompleteCodeSubmissionReceived>();
+                .Contain(e => e is CodeSubmissionEvaluated);
         }
 
         [Fact]
