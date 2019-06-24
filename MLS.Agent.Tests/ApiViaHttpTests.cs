@@ -841,7 +841,7 @@ namespace FibonacciTest
 
                 response.EnsureSuccess();
                 result = await response.Content.ReadAsStringAsync();
-                result.Should().Contain("DotNet.invokeMethodAsync");
+                result.Should().Contain("invokeMethodAsync");
             }
 
             // Now do the same thing in hosted mode using the already installed package
@@ -857,13 +857,16 @@ namespace FibonacciTest
 
                 response.EnsureSuccess();
                 result = await response.Content.ReadAsStringAsync();
-                result.Should().Contain("DotNet.invokeMethodAsync");
+                result.Should().Contain("invokeMethodAsync");
             }
         }
 
         [Fact]
         public async Task Can_serve_nodatime_code_runner()
         {
+            var registry = await Default.PackageRegistry.ValueAsync();
+            var nodatime = await registry.Get<WorkspaceServer.Packaging.Package2>("blazor-nodatime.api");
+
             using (var agent = new AgentService(StartupOptions.FromCommandLine("hosted")))
             {
                 var response = await agent.GetAsync(@"/LocalCodeRunner/blazor-nodatime.api");

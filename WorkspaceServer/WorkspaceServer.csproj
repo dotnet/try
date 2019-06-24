@@ -107,12 +107,12 @@
   </ItemGroup>
   
   <ItemGroup>
-    <!-- <EmbeddedResource Include="..\MLS.Blazor\Linker.xml" /> -->
+     <EmbeddedResource Include="..\MLS.Blazor\Linker.xml" /> 
     <EmbeddedResource Include="..\MLS.Blazor\Program.cs" />
     <EmbeddedResource Include="..\MLS.Blazor\Startup.cs" />
     <EmbeddedResource Include="..\MLS.Blazor\wwwroot\index.html" />
     <EmbeddedResource Include="..\MLS.Blazor\wwwroot\interop.js" />
-    <EmbeddedResource Include="..\MLS.Blazor\Pages\_Imports.razor2" />
+    <!--<EmbeddedResource Include="..\MLS.Blazor\Pages\_Imports.razor" />-->
     <EmbeddedResource Include="..\MLS.Blazor\_Imports.razor" />
     <EmbeddedResource Include="..\MLS.Blazor\Pages\Index.razor" />
 

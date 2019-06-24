@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Pages\_Imports.razor2" />
+    <Content Remove="Shared\MainLayout.razor" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Pages\_Imports.razor2" />
+    <BlazorLinkerDescriptor Include="Linker.xml" />
   </ItemGroup>
 
   <ItemGroup>

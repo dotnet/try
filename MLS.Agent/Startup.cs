@@ -69,7 +69,7 @@ namespace MLS.Agent
                             options.EnableEndpointRouting = false;
                             options.Filters.Add(new ExceptionFilter());
                             options.Filters.Add(new BadRequestOnInvalidModelFilter());
-                        })
+                        }).SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1)
                         .AddNewtonsoftJson(o =>
                         {
                             o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
@@ -162,12 +162,33 @@ namespace MLS.Agent
 
                 ConfigureForOrchestratorProxy(app);
 
-                app.Map("/LocalCodeRunner/blazor-console", builder =>
+                //app.Map("/LocalCodeRunner/blazor-console", builder =>
+                //{
+                //    builder.UsePathBase("/LocalCodeRunner/blazor-console");
+                //    builder.EnableCachingBlazorContent();
+                //    builder.UseClientSideBlazorFiles<MLS.Blazor.Program>();
+                //    builder.UseRouting();
+
+                //    builder.UseEndpoints(e =>
+                //    {
+                //        e.MapDefaultControllerRoute();
+                //        e.MapFallbackToClientSideBlazor<MLS.Blazor.Program>("index.html");
+                //    });
+                //});
+
+                // Serve Blazor on the /LocalCodeRunner/blazor-console prefix
+                app.Map("/LocalCodeRunner/blazor-console", blazor =>
                 {
-                    builder.UsePathBase("/LocalCodeRunner/blazor-console/");
-                    builder.EnableCachingBlazorContent();
-                    builder.UseClientSideBlazorFiles<MLS.Blazor.Program>();
+                    blazor.UseClientSideBlazorFiles<MLS.Blazor.Startup>();
+
+                    blazor.UseRouting();
+
+                    blazor.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapFallbackToClientSideBlazor<MLS.Blazor.Startup>("index.html");
+                    });
                 });
+
 
                 var budget = new Budget();
                 _disposables.Add(() => budget.Cancel());

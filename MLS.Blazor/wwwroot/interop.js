@@ -8,6 +8,7 @@ window.BlazorInterop = {
     },
 
     install: function (obj) {
+        console.log("dotnet installed");
         dotnetInstance = obj;
     }
 };
