@@ -13,21 +13,11 @@ import InstrumentationPanel from "./InstrumentationPanel";
 import Running from "./Running";
 import GistPanel from "./GistPanel";
 import Frame from "./Frame";
-import { IFrameWindow } from "./IFrameWindow";
 import TryDotnetBanner from "./TryDotnetBanner";
+import { GetBlazorIFrameUrl } from "./GetBlazorIFrameUrl";
 
 const DotDotNetCodeRunner = (trydotnetWindow: Window) => {
-  let trydotnetIframe = new IFrameWindow(trydotnetWindow);
-  let trydotnetHostOrigin = new URL(trydotnetWindow.document.URL).origin;
-  let workspaceType = trydotnetIframe.getQuery().get("workspaceType") || "blazor-console";
-  let clientParams = trydotnetIframe.getClientParameters();
-  if (clientParams && clientParams.workspaceType) {
-    workspaceType = clientParams.workspaceType;
-  }
-  let localRunner = `/LocalCodeRunner/${workspaceType}/`;
-  let url = new URL(localRunner, trydotnetHostOrigin);
-  url.searchParams.append("embeddingHostOrigin", trydotnetIframe.getHostOrigin().origin);
-  url.searchParams.append("trydotnetHostOrigin", trydotnetHostOrigin);
+  let url = GetBlazorIFrameUrl(trydotnetWindow);
 
   // @ts-ignore Some connect type inference thing
   let hack = <Frame src={url}/>;  return (
