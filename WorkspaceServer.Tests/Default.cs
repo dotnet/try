@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
@@ -92,6 +93,18 @@ namespace WorkspaceServer.Tests
             packageBuilder.AddPackageReference("Newtonsoft.Json");
             var package = packageBuilder.GetPackage() as Package;
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            var name = $"runner-blazor-nodatime.api";
+            
+            var initializer = new BlazorPackageInitializer("blazor-nodatime.api", new List<string>()
+            {
+                "NodaTime::2.4.4",
+                "NodaTime.Testing::2.4.4",
+                "NewtonSoft.Json"
+            });
+
+            var dir = Directory.CreateDirectory(Path.Combine(package.Directory.FullName, "MLS.Blazor"));
+            await initializer.Initialize(dir);
+                
             return package;
         });
 

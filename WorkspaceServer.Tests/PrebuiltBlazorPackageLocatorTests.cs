@@ -6,10 +6,10 @@ using System.CommandLine;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
-using MLS.Agent.CommandLine;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
+using MLS.Agent.CommandLine;
 
 namespace WorkspaceServer.Tests
 {

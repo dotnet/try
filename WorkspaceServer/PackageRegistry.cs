@@ -111,7 +111,7 @@ namespace WorkspaceServer
 
                 return default;
             }));
-
+            _packages2.TryGetValue(descriptor, out var akshita);
             if (package != null)
             {
                 if (package is T pkg)
