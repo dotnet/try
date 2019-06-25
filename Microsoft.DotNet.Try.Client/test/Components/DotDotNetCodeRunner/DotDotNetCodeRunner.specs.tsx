@@ -27,7 +27,9 @@ describe("DotDotNetCodeRunner(dom)", () => {
         }
     }
         </pre>
+        <script id="bundlejs" data-client-parameters="{"useBlazor":true,"referrer":"https://try.dot.net/", "workspaceType":"some_workspace"}" src="/client/bundle.js?v=1.0.865.1"></script>
     </body>
+
     </html>`,
     {
         url: url.toString(),
