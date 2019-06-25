@@ -12,7 +12,10 @@ import { shallow } from "enzyme";
 import { JSDOM } from "jsdom";
 import TryDotnetBanner from "../../../src/components/TryDotnetBanner";
 
-describe("DotDotNetCodeRunner(dom)", () => {
+import * as enzyme from "enzyme";
+import * as Adapter from "enzyme-adapter-react-16";
+
+enzyme.configure({ adapter: new Adapter() });
     let url = new URL("http://try.dot.net");
     url.searchParams.append("hostOrigin", "http://foo.com");
     let dom = new JSDOM(`<!DOCTYPE html>
@@ -27,7 +30,7 @@ describe("DotDotNetCodeRunner(dom)", () => {
         }
     }
         </pre>
-        <script id="bundlejs" data-client-parameters="{"useBlazor":true,"referrer":"https://try.dot.net/", "workspaceType":"some_workspace"}" src="/client/bundle.js?v=1.0.865.1"></script>
+        <script id="bundlejs" data-client-parameters="{&quot;workspaceType&quot;:&quot;blazer-nodatime.api&quot;,&quot;useBlazor&quot;:true,&quot;referrer&quot;:&quot;http://localhost:58737/a.html&quot;}" src="/client/bundle.js?v=1.0.0.0"></script>
     </body>
 
     </html>`,
