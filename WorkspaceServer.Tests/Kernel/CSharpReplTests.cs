@@ -5,7 +5,6 @@ using System;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
-using Octokit;
 using WorkspaceServer.Kernel;
 using Xunit;
 

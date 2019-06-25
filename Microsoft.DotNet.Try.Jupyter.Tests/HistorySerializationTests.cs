@@ -4,7 +4,6 @@
 using FluentAssertions;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Try.Jupyter.Tests
