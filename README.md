@@ -79,5 +79,5 @@ This will create a console app with the files `myApp.csproj` and `Program.cs`.
 You have created your first C# interactive developer experience. You should now be able to run your console app and see the result in the browser. 
 
 **Option 3**: Explore our [samples Repo](https://github.com/dotnet/try-samples). 
-- Clone [this](https://github.com/dotnet/try-samples) repo.
+- Clone the [dotnet/try-samples](https://github.com/dotnet/try-samples) repo.
 - Follow the quick steps listed [here](https://github.com/dotnet/try-samples#basics) to get started.
