@@ -7,7 +7,5 @@ namespace WorkspaceServer.Kernel
     {
         string Mime { get; }
         object Content { get; }
-    }
-
-  
+    }  
 }

@@ -7,20 +7,11 @@ using System.Linq;
 
 namespace WorkspaceServer.Kernel
 {
-    public class InClassName
-    {
-        public InClassName(IRenderer renderer)
-        {
-            Renderer = renderer;
-        }
-
-        public IRenderer Renderer { get; private set; }
-    }
 
     public class RenderingEngine : IRenderingEngine
     {
         private readonly IRenderer _defaultRenderer;
-        private readonly Dictionary<Type,IRenderer> _renderers = new Dictionary<Type, IRenderer>();
+        private readonly Dictionary<Type,IRenderer> _rendererRegistry = new Dictionary<Type, IRenderer>();
 
         public RenderingEngine(IRenderer defaultRenderer)
         {
@@ -42,12 +33,12 @@ namespace WorkspaceServer.Kernel
             {
                 throw new ArgumentNullException(nameof(sourceType));
             }
-            return _renderers.TryGetValue(sourceType, out var renderer) ? renderer : FindMatchingRenderer(sourceType);
+            return _rendererRegistry.TryGetValue(sourceType, out var renderer) ? renderer : FindMatchingRenderer(sourceType);
         }
 
         private IRenderer FindMatchingRenderer(Type sourceType)
         {
-            return _renderers.FirstOrDefault(pair => pair.Key.IsAssignableFrom(sourceType)).Value ?? _defaultRenderer;
+            return _rendererRegistry.FirstOrDefault(pair => pair.Key.IsAssignableFrom(sourceType)).Value ?? _defaultRenderer;
         }
 
         public void RegisterRenderer(Type sourceType, IRenderer renderer)
@@ -57,7 +48,7 @@ namespace WorkspaceServer.Kernel
                 throw new ArgumentNullException(nameof(sourceType));
             }
 
-            _renderers[sourceType] = renderer ?? throw new ArgumentNullException(nameof(renderer));
+            _rendererRegistry[sourceType] = renderer ?? throw new ArgumentNullException(nameof(renderer));
         }
 
         public IRenderer FindRenderer<T>()
