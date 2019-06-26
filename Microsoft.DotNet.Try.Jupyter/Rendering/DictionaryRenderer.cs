@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             switch (source)
             {
                 case IDictionary dictionary:
-                    var sourceType = RendererUtilities.GetElementType(dictionary);
+                    var sourceType = RendererUtilities.GetSequenceElementTypeOrKeyValuePairValueType(dictionary);
                     var accessors = RendererUtilities.GetAccessors(sourceType).ToList();
                     var keyValueList = dictionary.Keys.OfType<object>()
                         .Select(k => new KeyValuePair<object, object>(k, dictionary[k]));

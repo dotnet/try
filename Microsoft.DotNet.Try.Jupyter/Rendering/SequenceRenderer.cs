@@ -20,9 +20,9 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             switch (source)
             {
                 case IEnumerable sequence:
-                    var sourceType = RendererUtilities.GetElementType(sequence);
+                    var sourceType = RendererUtilities.GetSequenceElementTypeOrKeyValuePairValueType(sequence);
                         var accessors = RendererUtilities.GetAccessors(sourceType).ToList();
-                    var headers = RendererUtilities.CreateTableHeaders(accessors);
+                    var headers = RendererUtilities.CreateTableHeaders(accessors, false);
                     var rows = RendererUtilities.CreateTableRowsFromValues(accessors, sequence, engine);
                     var table = $@"<table>
 {headers}

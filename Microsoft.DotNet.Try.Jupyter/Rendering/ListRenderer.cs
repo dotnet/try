@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             switch (source)
             {
                 case IList sequence:
-                    var sourceType = RendererUtilities.GetElementType(sequence);
+                    var sourceType = RendererUtilities.GetSequenceElementTypeOrKeyValuePairValueType(sequence);
                     var accessors = RendererUtilities.GetAccessors(sourceType).ToList();
                     var keyValueList = sequence.OfType<object>()
                         .Select((v, i) => new KeyValuePair<object, object>(i, v));

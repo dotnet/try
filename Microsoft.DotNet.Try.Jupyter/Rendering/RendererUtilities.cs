@@ -11,7 +11,7 @@ using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter.Rendering
 {
-    static class RendererUtilities
+    internal static class RendererUtilities
     {
         public static bool IsStructured(Type sourceType)
         {
@@ -21,11 +21,9 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             return isStructured;
         }
 
-        public static string CreateTableHeaders(IEnumerable<MemberInfo> memberInfos, bool emptyFirstHeader = false)
+        public static string CreateTableHeaders(IEnumerable<MemberInfo> memberInfos, bool emptyFirstHeader)
         {
             var headersBuffer = new StringBuilder();
-           
-
             if (memberInfos?.Any() != false)
             {
                 headersBuffer.AppendLine("\t<tr>");
@@ -142,11 +140,10 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 
             return rowsBuffer.ToString();
         }
-     
 
-        public static Type GetElementType(IEnumerable sequence)
+        public static Type GetSequenceElementTypeOrKeyValuePairValueType(IEnumerable sequence)
         {
-            var elementType = GetSequenceElementOrElementValueType(sequence.GetType());
+            var elementType = GetSequenceElementTypeOrKeyValuePairValueType(sequence.GetType());
             if (elementType == null)
             {
                 elementType = sequence.Cast<object>().FirstOrDefault()?.GetType() ?? typeof(object);
@@ -166,7 +163,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             return elementType;
         }
 
-        private static Type GetSequenceElementOrElementValueType(Type sequenceType)
+        private static Type GetSequenceElementTypeOrKeyValuePairValueType(Type sequenceType)
         {
             var dictionaryInterface = sequenceType.GetInterfaces().FirstOrDefault(i =>
                 i.IsGenericType && typeof(IDictionary<,>).IsAssignableFrom(i.GetGenericTypeDefinition()));
