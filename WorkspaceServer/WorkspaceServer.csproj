@@ -83,10 +83,10 @@
     <PackageReference Include="PocketLogger" Version="0.3.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="PocketLogger.For.MicrosoftExtensionsLogging" Version="0.1.2">
+    <!-- <PackageReference Include="PocketLogger.For.MicrosoftExtensionsLogging" Version="0.1.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    </PackageReference> -->
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="TaskExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
