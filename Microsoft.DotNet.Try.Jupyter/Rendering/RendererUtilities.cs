@@ -141,17 +141,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 
             return rowsBuffer.ToString();
         }
-
-        public static Type GetElementType<T>(IEnumerable<T> sequence)
-        {
-            var elementType = GetSequenceElementOrElementValueType(sequence.GetType());
-            if (elementType == null)
-            {
-                elementType = typeof(T);
-                elementType = GetElementOrValuePropertyType(elementType);
-            }
-            return elementType;
-        }
+     
 
         public static Type GetElementType(IEnumerable sequence)
         {
