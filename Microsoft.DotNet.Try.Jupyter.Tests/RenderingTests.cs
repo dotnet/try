@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Try.Jupyter.Tests
 {
-    public class PrinterTests
+    public class RenderingTests
     {
         private struct PriorityElement
         {
@@ -22,13 +21,14 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
         private readonly RenderingEngine _engine;
 
-        public PrinterTests()
+        public RenderingTests()
         {
             _engine = new RenderingEngine(new DefaultRenderer());
             _engine.RegisterRenderer<string>(new DefaultRenderer());
         }
+
         [Fact]
-        public void objects_are_printed_as_table()
+        public void objects_are_rendered_as_table()
         {
             var source = new
             {
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void structs_are_printed_as_table()
+        public void structs_are_rendered_as_table()
         {
             var source = new PriorityElement { Url = "Test struct", Priority = 112 };
 
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void collections_are_printed_as_lists()
+        public void collections_are_rendered_as_lists()
         {
             _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = Enumerable.Range(1, 3).Select(i => i + 2);
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void collections_of_objects_are_printed_as_table()
+        public void collections_of_objects_are_rendered_as_table()
         {
             _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = Enumerable.Range(1, 2).Select(i => new { Url = $"http://site{i}.microsoft.com", Priority = i });
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void lists_of_objects_are_printed_as_table()
+        public void lists_of_objects_are_rendered_as_table()
         {
             _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = new[]
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void dictionaries_of_objects_are_printed_as_table()
+        public void dictionaries_of_objects_are_rendered_as_table()
         {
 
             _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
