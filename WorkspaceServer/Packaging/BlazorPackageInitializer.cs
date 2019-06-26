@@ -34,7 +34,7 @@ namespace WorkspaceServer.Packaging
         {
             if (directory.Name != "MLS.Blazor")
             {
-                throw new ArgumentException(nameof(directory));
+                throw new ArgumentException(@"Directory must be called `MLS.Blazor` but is actually called {nameof(directory)}");
             }
 
             await base.Initialize(directory, budget);
