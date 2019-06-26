@@ -1,5 +1,5 @@
 # Try .NET <img src ="https://user-images.githubusercontent.com/2546640/56708992-deee8780-66ec-11e9-9991-eb85abb1d10a.png" width="80px" alt="dotnet bot in space" align ="right">
-|| [**Basics**](#basics) • [**Contribution Guidelines**](#contribution) • [**Experiences**](#experiences) || [**Setup**](#setup) • [**Getting Started**](#getting-started) || [**Samples**](https://github.com/dotnet/try/tree/samples/Samples) ||
+|| [**Basics**](#basics) • [**Contribution Guidelines**](#contribution) • [**Experiences**](#experiences) || [**Setup**](#setup) • [**Getting Started**](#getting-started) || [**Samples**](https://github.com/dotnet/try-samples) ||
 
 ![Try_.NET Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
@@ -78,6 +78,6 @@ This will create a console app with the files `myApp.csproj` and `Program.cs`.
 ```
 You have created your first C# interactive developer experience. You should now be able to run your console app and see the result in the browser. 
 
-**Option 3**: Explore our [samples Branch](https://github.com/dotnet/try/tree/samples). 
-- Clone [this](https://github.com/dotnet/try/tree/samples) repo(checkout the samples branch `git checkout samples`)
-- Read our quick [setup guide](Samples/Setup.md). 
+**Option 3**: Explore our [samples Repo](https://github.com/dotnet/try-samples). 
+- Clone [this](https://github.com/dotnet/try-samples) repo.
+- Follow the quick steps listed [here](https://github.com/dotnet/try-samples#basics) to get started.
