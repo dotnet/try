@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
         }
 
         private static void CreateTableRow(IEnumerable<MemberInfo> memberInfos, IRenderingEngine engine, object element,
-            PlainTextRendering nullRendering, StringBuilder rowsBuffer)
+            IRendering defaultRendering, StringBuilder rowsBuffer)
         {
             if (memberInfos?.Any() != false)
             {
@@ -95,14 +95,14 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
                         {
                             var childRenderer = engine.TryFindRenderer(propertyInfo.PropertyType);
                             var childValue = propertyInfo.GetValue(element);
-                            childRendering = childValue == null ? nullRendering : childRenderer.Render(childValue, engine);
+                            childRendering = childValue == null ? defaultRendering : childRenderer.Render(childValue, engine);
                         }
                             break;
                         case FieldInfo fieldInfo:
                         {
                             var childRenderer = engine.TryFindRenderer(fieldInfo.FieldType);
                             var childValue = fieldInfo.GetValue(element);
-                            childRendering = childValue == null ? nullRendering : childRenderer.Render(childValue, engine);
+                            childRendering = childValue == null ? defaultRendering : childRenderer.Render(childValue, engine);
                         }
                             break;
                     }
