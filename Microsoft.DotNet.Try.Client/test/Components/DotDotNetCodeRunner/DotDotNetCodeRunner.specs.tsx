@@ -16,6 +16,8 @@ import * as enzyme from "enzyme";
 import * as Adapter from "enzyme-adapter-react-16";
 
 enzyme.configure({ adapter: new Adapter() });
+
+describe("DotDotNetCodeRunner(dom)", () => {
     let url = new URL("http://try.dot.net");
     url.searchParams.append("hostOrigin", "http://foo.com");
     let dom = new JSDOM(`<!DOCTYPE html>
