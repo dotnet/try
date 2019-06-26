@@ -38,7 +38,7 @@ namespace WorkspaceServer.Kernel
 
         private IRenderer FindMatchingRenderer(Type sourceType)
         {
-            var typeLookup = new List<LinkedList<Type>>();
+            var keyCandidates = new List<Type>();
 
             var candidates = _rendererRegistry.Keys.Where(key => key.IsAssignableFrom(sourceType)).ToList();
 
@@ -50,39 +50,33 @@ namespace WorkspaceServer.Kernel
             foreach (var candidate in candidates)
             {
                 var found = false;
-                foreach (var list in typeLookup)
-                {
-                    var node = list.First;
-                    do
-                    {
-                        if (node.Value.IsAssignableFrom(candidate))
-                        {
-                            list.AddBefore(node, candidate);
-                            found = true;
-                        }
-                        else if (candidate.IsAssignableFrom(node.Value))
-                        {
-                            list.AddAfter(node, candidate);
-                            found = true;
 
-                        }
-                        else
-                        {
-                            node = node.Next;
-                        }
-                    } while (node != null && found == false);
+                for (var i = 0; i < keyCandidates.Count; i++)
+                {
+                    var current = keyCandidates[i];
+                    if (current.IsAssignableFrom(candidate))
+                    {
+                        keyCandidates[i] = candidate;
+                        found = true;
+                    }
+                    else if (candidate.IsAssignableFrom(current))
+                    {
+                        found = true;
+                    }
+
+                    if (found)
+                    {
+                        break;
+                    }
                 }
 
                 if (!found)
                 {
-                    var newList = new LinkedList<Type>();
-                    newList.AddFirst(candidate);
-                    typeLookup.Add(newList);
+                    keyCandidates.Add(candidate);
                 }
             }
 
-            return _rendererRegistry[typeLookup[0].First.Value];
-            return _rendererRegistry.FirstOrDefault(pair => pair.Key.IsAssignableFrom(sourceType)).Value ?? _defaultRenderer;
+            return _rendererRegistry[keyCandidates[0]];
         }
 
         public void RegisterRenderer(Type sourceType, IRenderer renderer)
