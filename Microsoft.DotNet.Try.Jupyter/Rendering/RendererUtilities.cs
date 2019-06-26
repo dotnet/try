@@ -144,19 +144,54 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 
         public static Type GetElementType<T>(IEnumerable<T> sequence)
         {
-            return typeof(T);
+            var elementType = GetSequenceElementOrElementValueType(sequence.GetType());
+            if (elementType == null)
+            {
+                elementType = typeof(T);
+                elementType = GetElementOrValuePropertyType(elementType);
+            }
+            return elementType;
         }
 
         public static Type GetElementType(IEnumerable sequence)
         {
-            var elementType = sequence.Cast<object>().FirstOrDefault()?.GetType() ?? typeof(object);
+            var elementType = GetSequenceElementOrElementValueType(sequence.GetType());
+            if (elementType == null)
+            {
+                elementType = sequence.Cast<object>().FirstOrDefault()?.GetType() ?? typeof(object);
+                elementType = GetElementOrValuePropertyType(elementType);
+            }
 
+            return elementType;
+        }
+
+        private static Type GetElementOrValuePropertyType(Type elementType)
+        {
             if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
             {
                 elementType = elementType.GetGenericArguments()[1];
             }
 
             return elementType;
+        }
+
+        private static Type GetSequenceElementOrElementValueType(Type sequenceType)
+        {
+            var dictionaryInterface = sequenceType.GetInterfaces().FirstOrDefault(i =>
+                i.IsGenericType && typeof(IDictionary<,>).IsAssignableFrom(i.GetGenericTypeDefinition()));
+            if (dictionaryInterface != null)
+            {
+                return dictionaryInterface.GetGenericArguments()[1];
+            }
+
+            var enumerableInterface =sequenceType.GetInterfaces().FirstOrDefault(i =>
+                i.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(i.GetGenericTypeDefinition()));
+            if (enumerableInterface != null)
+            {
+                return GetElementOrValuePropertyType(enumerableInterface.GetGenericArguments()[0]);
+            }
+
+            return null;
         }
     }
 }
