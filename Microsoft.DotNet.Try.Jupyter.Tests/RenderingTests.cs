@@ -25,6 +25,10 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         {
             _engine = new RenderingEngine(new DefaultRenderer());
             _engine.RegisterRenderer<string>(new DefaultRenderer());
+            // _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
+            _engine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
+            _engine.RegisterRenderer(typeof(IList), new ListRenderer());
+            _engine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
         }
 
         [Fact]
@@ -71,7 +75,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public void collections_are_rendered_as_lists()
         {
-            _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = Enumerable.Range(1, 3).Select(i => i + 2);
 
             var rendering = _engine.Render(source);
@@ -93,7 +96,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public void collections_of_objects_are_rendered_as_table()
         {
-            _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = Enumerable.Range(1, 2).Select(i => new { Url = $"http://site{i}.microsoft.com", Priority = i });
 
             var rendering = _engine.Render(source);
@@ -118,7 +120,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public void lists_of_objects_are_rendered_as_table()
         {
-            _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = new[]
             {
                 new { Url = "http://siteA.microsoft.com", Priority = 9},
@@ -147,8 +148,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public void dictionaries_of_objects_are_rendered_as_table()
         {
-
-            _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             var source = new Dictionary<string, PriorityElement>
             {
                 {"low", new PriorityElement{ Url = "http://siteA.microsoft.com", Priority = 9}},

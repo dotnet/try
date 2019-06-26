@@ -38,6 +38,50 @@ namespace WorkspaceServer.Kernel
 
         private IRenderer FindMatchingRenderer(Type sourceType)
         {
+            var typeLookup = new List<LinkedList<Type>>();
+
+            var candidates = _rendererRegistry.Keys.Where(key => key.IsAssignableFrom(sourceType)).ToList();
+
+            if (candidates.Count == 0)
+            {
+                return _defaultRenderer;
+            }
+
+            foreach (var candidate in candidates)
+            {
+                var found = false;
+                foreach (var list in typeLookup)
+                {
+                    var node = list.First;
+                    do
+                    {
+                        if (node.Value.IsAssignableFrom(candidate))
+                        {
+                            list.AddBefore(node, candidate);
+                            found = true;
+                        }
+                        else if (candidate.IsAssignableFrom(node.Value))
+                        {
+                            list.AddAfter(node, candidate);
+                            found = true;
+
+                        }
+                        else
+                        {
+                            node = node.Next;
+                        }
+                    } while (node != null && found == false);
+                }
+
+                if (!found)
+                {
+                    var newList = new LinkedList<Type>();
+                    newList.AddFirst(candidate);
+                    typeLookup.Add(newList);
+                }
+            }
+
+            return _rendererRegistry[typeLookup[0].First.Value];
             return _rendererRegistry.FirstOrDefault(pair => pair.Key.IsAssignableFrom(sourceType)).Value ?? _defaultRenderer;
         }
 
