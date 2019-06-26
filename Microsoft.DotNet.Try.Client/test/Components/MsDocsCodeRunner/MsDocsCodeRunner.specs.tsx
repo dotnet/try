@@ -74,7 +74,7 @@ describe("<MsDocsCodeRunner />", () => {
         wrapper.find(TryDotnetBanner).should.have.length(1);
     });
 
-    it.only("The frame component has the workspace set from the client parameters", () => {
+    it("The frame component has the workspace set from the client parameters", () => {
         var workspaceType = "my_workspace_type";
         let dom = new JSDOM(`<!DOCTYPE html>
     <html lang="en">
