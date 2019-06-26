@@ -35,10 +35,10 @@ describe("<MsDocsCodeRunner />", () => {
         </pre>
     </body>
     </html>`,
-    {
-        url: url.toString(),
-        runScripts: "dangerously"
-    });
+        {
+            url: url.toString(),
+            runScripts: "dangerously"
+        });
 
     it("contains an <Editor /> component", () => {
         const wrapper = shallow(MsDocsCodeRunner(dom.window));
@@ -72,5 +72,25 @@ describe("<MsDocsCodeRunner />", () => {
         const wrapper = shallow(MsDocsCodeRunner(dom.window));
 
         wrapper.find(TryDotnetBanner).should.have.length(1);
+    });
+
+    it.only("The frame component has the workspace set from the client parameters", () => {
+        var workspaceType = "my_workspace_type";
+        let dom = new JSDOM(`<!DOCTYPE html>
+    <html lang="en">
+    <body>
+        <script id="bundlejs" data-client-parameters="{&quot;workspaceType&quot;:&quot;${workspaceType}&quot;}"></script>
+    </body>
+    </html>`,
+            {
+                url: url.toString(),
+                runScripts: "dangerously"
+            });
+
+        const wrapper = shallow(MsDocsCodeRunner(dom.window));
+        let frames = wrapper.find(Frame);
+        let frame = frames.first();
+        let href = frame.getElement().props.src.href;
+        href.should.equal(`http://try.dot.net/LocalCodeRunner/${workspaceType}/?embeddingHostOrigin=http%3A%2F%2Ffoo.com&trydotnetHostOrigin=http%3A%2F%2Ftry.dot.net`);
     });
 });

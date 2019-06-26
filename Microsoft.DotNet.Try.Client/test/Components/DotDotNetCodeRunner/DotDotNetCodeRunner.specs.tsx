@@ -14,6 +14,7 @@ import TryDotnetBanner from "../../../src/components/TryDotnetBanner";
 
 import * as enzyme from "enzyme";
 import * as Adapter from "enzyme-adapter-react-16";
+import Frame from "../../../src/components/Frame";
 
 enzyme.configure({ adapter: new Adapter() });
 
@@ -32,7 +33,6 @@ describe("DotDotNetCodeRunner(dom)", () => {
         }
     }
         </pre>
-        <script id="bundlejs" data-client-parameters="{&quot;workspaceType&quot;:&quot;blazer-nodatime.api&quot;,&quot;useBlazor&quot;:true,&quot;referrer&quot;:&quot;http://localhost:58737/a.html&quot;}" src="/client/bundle.js?v=1.0.0.0"></script>
     </body>
 
     </html>`,
@@ -75,5 +75,25 @@ describe("DotDotNetCodeRunner(dom)", () => {
     it("contains a <Frame /> component", () => {
         const wrapper = shallow(DotDotNetCodeRunner(dom.window));
         wrapper.find("Connect(Frame)").should.have.length(1);
+    });
+
+    it("The frame component has the workspace set from the client parameters", () => {
+        var workspaceType = "my_workspace_type";
+        let dom = new JSDOM(`<!DOCTYPE html>
+    <html lang="en">
+    <body>
+        <script id="bundlejs" data-client-parameters="{&quot;workspaceType&quot;:&quot;${workspaceType}&quot;}"></script>
+    </body>
+    </html>`,
+            {
+                url: url.toString(),
+                runScripts: "dangerously"
+            });
+        
+        const wrapper = shallow(DotDotNetCodeRunner(dom.window));
+        let frames = wrapper.find(Frame);
+        frames.should.have.length(1);
+        let href =  frames.first().getElement().props.src.href;
+        href.should.equal(`http://try.dot.net/LocalCodeRunner/${workspaceType}/?embeddingHostOrigin=http%3A%2F%2Ffoo.com&trydotnetHostOrigin=http%3A%2F%2Ftry.dot.net`);
     });
 });
