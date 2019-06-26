@@ -11,7 +11,7 @@ using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter.Rendering
 {
-    internal static class RendererUtilities
+    static class RendererUtilities
     {
         public static bool IsStructured(Type sourceType)
         {
@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
                                    || sourceType.IsValueType && !sourceType.IsEnum);
             return isStructured;
         }
+
         public static string CreateTableHeaders(IEnumerable<MemberInfo> memberInfos, bool emptyFirstHeader = false)
         {
             var headersBuffer = new StringBuilder();
