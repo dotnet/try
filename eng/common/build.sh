@@ -63,7 +63,7 @@ sign=false
 public=false
 ci=false
 
-warn_as_error=true
+warn_as_error=false
 node_reuse=true
 binary_log=false
 

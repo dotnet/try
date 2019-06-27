@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Clockwise;
 using MLS.Agent.Tools;
-using WorkspaceServer.WorkspaceFeatures;
 
 namespace WorkspaceServer
 {
