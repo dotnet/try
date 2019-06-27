@@ -13,7 +13,6 @@ using Newtonsoft.Json;
 
 namespace MLS.WasmCodeRunner
 {
-
     public class CodeRunner
     {
         public static InteropMessage<WasmCodeRunnerResponse> ProcessRunRequest(string message)

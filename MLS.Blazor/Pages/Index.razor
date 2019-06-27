@@ -9,42 +9,43 @@ Welcome to your new app.
 
 @using Newtonsoft.Json;
 @using Newtonsoft.Json.Linq;
+@using MLS.WasmCodeRunner
 @code
-{ 
-protected override async Task OnAfterRenderAsync()
 {
-    await base.OnAfterRenderAsync();
-
-    await jsRuntime.InvokeAsync<object>(
-            "BlazorInterop.install",
-            DotNetObjectRef.Create(this));
-
-    await PostMessage(JObject.FromObject(new { ready = true }).ToString());
-}
-
-public Task<string> PostMessage(string message)
-{
-    // Implemented in interop.js
-    return jsRuntime.InvokeAsync<string>(
-        "BlazorInterop.postMessage",
-        message);
-}
-
-[JSInvokable("MLS.Blazor.PostMessageAsync")]
-public async Task<bool> PostMessageAsync(string message)
-{
-    try
+    protected override async Task OnAfterRenderAsync()
     {
-        var result = new object(); // CodeRunner.ProcessRunRequest(message);
-        if (result != null)
+        await base.OnAfterRenderAsync();
+
+        await jsRuntime.InvokeAsync<object>(
+                "BlazorInterop.install",
+                DotNetObjectRef.Create(this));
+
+        await PostMessage(JObject.FromObject(new { ready = true }).ToString());
+    }
+
+    public Task<string> PostMessage(string message)
+    {
+        // Implemented in interop.js
+        return jsRuntime.InvokeAsync<string>(
+            "BlazorInterop.postMessage",
+            message);
+    }
+
+    [JSInvokable("MLS.Blazor.PostMessageAsync")]
+    public async Task<bool> PostMessageAsync(string message)
+    {
+        try
         {
-            await PostMessage(JObject.FromObject(result).ToString());
+            var result = CodeRunner.ProcessRunRequest(message);
+            if (result != null)
+            {
+                await PostMessage(JObject.FromObject(result).ToString());
+            }
         }
-    }
-    catch
-    {
-    }
+        catch
+        {
+        }
 
-    return true;
-}
+        return true;
+    }
 }
