@@ -21,4 +21,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WasmCodeRunner\MLS.WasmCodeRunner.csproj" />
+  </ItemGroup>
+
 </Project>
