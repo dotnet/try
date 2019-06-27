@@ -7,6 +7,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
@@ -91,8 +92,8 @@ namespace MLS.Agent.CommandLine
 
         public string EnvironmentName =>
             Production || Mode != StartupMode.Hosted
-                ? Microsoft.AspNetCore.Hosting.EnvironmentName.Production
-                : Microsoft.AspNetCore.Hosting.EnvironmentName.Development;
+                ? Environments.Production
+                : Environments.Development;
 
         public DirectoryInfo LogPath { get;  }
 

@@ -16,6 +16,7 @@ using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using MLS.Agent.Blazor;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
@@ -40,7 +41,7 @@ namespace MLS.Agent
         };
 
         public Startup(
-            IHostingEnvironment env,
+            IHostEnvironment env,
             StartupOptions startupOptions)
         {
             Environment = env;
@@ -55,7 +56,7 @@ namespace MLS.Agent
 
         protected IConfigurationRoot Configuration { get; }
 
-        protected IHostingEnvironment Environment { get; }
+        protected IHostEnvironment Environment { get; }
 
         public StartupOptions StartupOptions { get; }
 
@@ -151,7 +152,7 @@ namespace MLS.Agent
 
         public void Configure(
             IApplicationBuilder app,
-            IApplicationLifetime lifetime,
+            IHostApplicationLifetime lifetime,
             IBrowserLauncher browserLauncher,
             IDirectoryAccessor directoryAccessor,
             PackageRegistry packageRegistry)
@@ -161,20 +162,6 @@ namespace MLS.Agent
                 lifetime.ApplicationStopping.Register(() => _disposables.Dispose());
 
                 ConfigureForOrchestratorProxy(app);
-
-                //app.Map("/LocalCodeRunner/blazor-console", builder =>
-                //{
-                //    builder.UsePathBase("/LocalCodeRunner/blazor-console");
-                //    builder.EnableCachingBlazorContent();
-                //    builder.UseClientSideBlazorFiles<MLS.Blazor.Program>();
-                //    builder.UseRouting();
-
-                //    builder.UseEndpoints(e =>
-                //    {
-                //        e.MapDefaultControllerRoute();
-                //        e.MapFallbackToClientSideBlazor<MLS.Blazor.Program>("index.html");
-                //    });
-                //});
 
                 // Serve Blazor on the /LocalCodeRunner/blazor-console prefix
                 app.Map("/LocalCodeRunner/blazor-console", blazor =>
