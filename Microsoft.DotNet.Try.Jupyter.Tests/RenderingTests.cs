@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         {
             _engine = new RenderingEngine(new DefaultRenderer());
             _engine.RegisterRenderer<string>(new DefaultRenderer());
-            // _engine.RegisterRenderer(typeof(IEnumerable), new CollectionRenderer());
             _engine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _engine.RegisterRenderer(typeof(IList), new ListRenderer());
             _engine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());

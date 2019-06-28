@@ -2,27 +2,99 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.Build.Execution;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
+using Microsoft.DotNet.Try.Jupyter.Rendering;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer;
+using WorkspaceServer.Kernel;
 using WorkspaceServer.Servers;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 
 namespace Microsoft.DotNet.Try.Jupyter
 {
+    public class ExecuteRequestHandler : IObserver<IKernelEvent>
+    {
+        private readonly IKernel _kernel;
+        private readonly RenderingEngine _renderingEngine;
+        private readonly ConcurrentDictionary<Guid, OpenRequest> _openRequests = new ConcurrentDictionary<Guid, OpenRequest>();
+
+        private class OpenRequest
+        {
+            private Guid Id { get; }
+            private Dictionary<string, object> Transient { get; }
+            private ExecuteRequest ExecuteRequest { get; }
+
+            public OpenRequest(ExecuteRequest executeRequest, Guid id, Dictionary<string, object> transient)
+            {
+                ExecuteRequest = executeRequest;
+                Id = id;
+                Transient = transient;
+            }
+
+          
+        }
+        public ExecuteRequestHandler(IKernel kernel)
+        {
+            _kernel = kernel;
+            _renderingEngine = new RenderingEngine(new DefaultRenderer());
+            _renderingEngine = new RenderingEngine(new DefaultRenderer());
+            _renderingEngine.RegisterRenderer<string>(new DefaultRenderer());
+            _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
+            _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
+            _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
+
+            _kernel.KernelEvents.Subscribe(this);
+        }
+
+        public async Task Handle(JupyterRequestContext context)
+        {
+            var ioPubChannel = context.IoPubChannel;
+            var serverChannel = context.ServerChannel;
+            var id = Guid.NewGuid();
+            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
+            var executeRequest = context.GetRequestContent<ExecuteRequest>();
+            _openRequests[id] = new OpenRequest(executeRequest, id, transient);
+        }
+
+        void IObserver<IKernelEvent>.OnCompleted()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IObserver<IKernelEvent>.OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IObserver<IKernelEvent>.OnNext(IKernelEvent value)
+        {
+            switch (value)
+            {
+                
+            }
+            throw new NotImplementedException();
+        }
+    }
+
     public class JupyterRequestContextHandler : ICommandHandler<JupyterRequestContext>
     {
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
         private int _executionCount;
         private readonly WorkspaceServerMultiplexer _server;
+        private readonly ExecuteRequestHandler _executeHandler;
 
         public JupyterRequestContextHandler(PackageRegistry packageRegistry)
         {
+            _executeHandler = new ExecuteRequestHandler(new CSharpRepl());
+
             if (packageRegistry == null)
             {
                 throw new ArgumentNullException(nameof(packageRegistry));
@@ -36,6 +108,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             switch (delivery.Command.Request.Header.MessageType)
             {
                 case MessageTypeValues.ExecuteRequest:
+                    await _executeHandler.Handle(delivery.Command);
                     await HandleExecuteRequest(delivery);
                     break;
                 case MessageTypeValues.CompleteRequest:
@@ -50,7 +123,8 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var serverChannel = delivery.Command.ServerChannel;
 
-            var completeRequest = delivery.Command.Request.Content as CompleteRequest;
+            var completeRequest = delivery.Command.GetRequestContent <CompleteRequest>();
+
             var code = completeRequest.Code;
 
             var workspace = CreateScaffoldWorkspace(code, completeRequest.CursorPosition);
@@ -102,7 +176,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             var transient = new Dictionary<string, object> { { "display_id", Guid.NewGuid().ToString() } };
 
-            var executeRequest = delivery.Command.Request.Content as ExecuteRequest;
+            var executeRequest = delivery.Command.GetRequestContent<ExecuteRequest>();
 
             var code = executeRequest.Code;
 

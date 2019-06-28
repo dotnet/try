@@ -11,6 +11,12 @@ namespace Microsoft.DotNet.Try.Jupyter
         public IMessageSender ServerChannel { get; }
         public IMessageSender IoPubChannel { get; }
         public Message Request { get; }
+
+        public T GetRequestContent<T>() where T : JupyterMessageContent
+        {
+            return Request?.Content as T;
+        }
+
         public IRequestHandlerStatus RequestHandlerStatus { get; }
 
         public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request,
