@@ -12,40 +12,44 @@ Welcome to your new app.
 @using MLS.WasmCodeRunner
 @code
 {
-    protected override async Task OnAfterRenderAsync()
+protected override async Task OnAfterRenderAsync()
+{
+    await base.OnAfterRenderAsync();
+
+    await jsRuntime.InvokeAsync<object>(
+            "BlazorInterop.install",
+            DotNetObjectRef.Create(this));
+
+    await PostMessage(JObject.FromObject(new { ready = true }).ToString());
+}
+
+public Task<string> PostMessage(string message)
+{
+    // Implemented in interop.js
+    return jsRuntime.InvokeAsync<string>(
+        "BlazorInterop.postMessage",
+        message);
+}
+
+[JSInvokable("MLS.Blazor.PostMessageAsync")]
+public async Task<string> PostMessageAsync(string message)
+{
+    try
     {
-        await base.OnAfterRenderAsync();
+        var result = CodeRunner.ProcessRunRequest(message);
+        var logMsg = $"Computed {JObject.FromObject(result).ToString()}";
+        await jsRuntime.InvokeAsync<string>("BlazorInterop.log", logMsg);
 
-        await jsRuntime.InvokeAsync<object>(
-                "BlazorInterop.install",
-                DotNetObjectRef.Create(this));
-
-        await PostMessage(JObject.FromObject(new { ready = true }).ToString());
-    }
-
-    public Task<string> PostMessage(string message)
-    {
-        // Implemented in interop.js
-        return jsRuntime.InvokeAsync<string>(
-            "BlazorInterop.postMessage",
-            message);
-    }
-
-    [JSInvokable("MLS.Blazor.PostMessageAsync")]
-    public async Task<bool> PostMessageAsync(string message)
-    {
-        try
+        if (result != null)
         {
-            var result = CodeRunner.ProcessRunRequest(message);
-            if (result != null)
-            {
-                await PostMessage(JObject.FromObject(result).ToString());
-            }
+            return JObject.FromObject(result).ToString();
+            // await PostMessage(JObject.FromObject(result).ToString());
         }
-        catch
-        {
-        }
-
-        return true;
     }
+    catch
+    {
+    }
+
+    return null;
+}
 }
