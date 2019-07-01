@@ -81,6 +81,33 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
+        public async Task sends_executeReply_with_error_message_on_codeSubmissionEvaluated()
+        {
+            var kernel = new KernelSimulator((command, channel) =>
+            {
+                switch (command)
+                {
+                    case SubmitCode codeSubmission:
+                        channel.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, new InvalidOperationException("failed")));
+                        return Task.CompletedTask;
+                    default:
+                        throw new NotImplementedException();
+                }
+            });
+
+            var handler = new ExecuteRequestHandler(kernel);
+            var request = Message.Create(new ExecuteRequest("var a =12;"), null);
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            _serverRecordingSocket.DecodedMessages
+                .Should()
+                .Contain(message => message.Contains(MessageTypeValues.ExecuteReply))
+                .And
+                .Contain(message => message.Contains($"\"status\":\"{StatusValues.Error}\""));
+
+        }
+
+        [Fact]
         public async Task sends_executeResult_message_on_valueProduced()
         {
             var kernel = new KernelSimulator((command, channel) =>
@@ -88,7 +115,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
                 switch (command)
                 {
                     case SubmitCode codeSubmission:
-                        channel.OnNext(new ValueProduced(codeSubmission.Id, new []{1,2,3}));
+                        channel.OnNext(new ValueProduced(codeSubmission.Id, new[] { 1, 2, 3 }));
                         channel.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
                         return Task.CompletedTask;
                     default:

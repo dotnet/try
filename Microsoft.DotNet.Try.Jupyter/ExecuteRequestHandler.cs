@@ -84,9 +84,36 @@ namespace Microsoft.DotNet.Try.Jupyter
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
                     OnCodeSubmissionEvaluated(codeSubmissionEvaluated, _openRequests);
                     break;
-                default:
+                case CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed:
+                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, _openRequests);
+                    break;
+                case IncompleteCodeSubmissionReceived _:
+                case CompleteCodeSubmissionReceived _:
+                    break;
+                default: 
                     throw new NotImplementedException();
             }
+        }
+
+        private void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<Guid, OpenRequest> openRequests)
+        {
+            var openRequest = openRequests[codeSubmissionEvaluationFailed.ParentId];
+ 
+            var errorContent = new Error(
+                eName: "Unhandled Exception",
+                eValue: $"{codeSubmissionEvaluationFailed.Error}"
+            );
+
+            //  reply Error
+            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
+
+            // send to server
+            var executeReply = Message.CreateResponse(
+                executeReplyPayload,
+                openRequest.Context.Request);
+
+            openRequest.Context.ServerChannel.Send(executeReply);
+            openRequest.Context.RequestHandlerStatus.SetAsIdle();
         }
 
         private static void OnValueProduced(ValueProduced valueProduced,
