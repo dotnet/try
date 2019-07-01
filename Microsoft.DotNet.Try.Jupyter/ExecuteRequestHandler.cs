@@ -87,6 +87,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 case CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed:
                     OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, _openRequests);
                     break;
+                case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
                 case CompleteCodeSubmissionReceived _:
                     break;
@@ -113,6 +114,23 @@ namespace Microsoft.DotNet.Try.Jupyter
                 openRequest.Context.Request);
 
             openRequest.Context.ServerChannel.Send(executeReply);
+
+            if (!openRequest.ExecuteRequest.Silent)
+            {
+                // send on io
+                var error = Message.Create(
+                    errorContent,
+                    openRequest.Context.Request.Header);
+                openRequest.Context.IoPubChannel.Send(error);
+
+                // send on stderr
+                var stdErr = new StdErrStream(errorContent.EValue);
+                var stream = Message.Create(
+                    stdErr,
+                    openRequest.Context.Request.Header);
+                openRequest.Context.IoPubChannel.Send(stream);
+            }
+
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
         }
 
