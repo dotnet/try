@@ -57,8 +57,6 @@ namespace WorkspaceServer.Kernel
 
                 var hasReturnValue = _scriptState != null && (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
 
-                _channel.OnNext(new CodeSubmissionEvaluated(submitCode.Id));
-
                 if (hasReturnValue)
                 {
                     _channel.OnNext(new ValueProduced(submitCode.Id, _scriptState.ReturnValue));
@@ -66,6 +64,10 @@ namespace WorkspaceServer.Kernel
                 if (exception != null)
                 {
                     _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
+                }
+                else
+                {
+                    _channel.OnNext(new CodeSubmissionEvaluated(submitCode.Id));
                 }
             }
             else

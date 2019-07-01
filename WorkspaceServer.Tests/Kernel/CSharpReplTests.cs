@@ -33,7 +33,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             await repl.SendAsync(new SubmitCode("123"));
 
-            KernelEvents.Last()
+            KernelEvents.OfType<ValueProduced>()
+                .Last()
                         .Should()
                         .BeOfType<ValueProduced>()
                         .Which
@@ -97,7 +98,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             await repl.SendAsync(new SubmitCode("null"));
 
-            KernelEvents.Last()
+            KernelEvents.OfType<ValueProduced>()
+                        .Last()
                         .Should()
                         .BeOfType<ValueProduced>()
                         .Which
@@ -126,7 +128,8 @@ namespace WorkspaceServer.Tests.Kernel
             await repl.SendAsync(new SubmitCode("var x = 123;"));
             await repl.SendAsync(new SubmitCode("x"));
 
-            KernelEvents.Last()
+            KernelEvents.OfType<ValueProduced>()
+                        .Last()
                         .Should()
                         .BeOfType<ValueProduced>()
                         .Which
