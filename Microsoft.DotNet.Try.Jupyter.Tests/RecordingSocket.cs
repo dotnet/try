@@ -10,10 +10,11 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
     internal class RecordingSocket : IOutgoingSocket
     {
         public List<Msg> Messages { get; } = new List<Msg>();
+        public List<string> DecodedMessages { get; } = new List<string>();
 
         public bool TrySend(ref Msg msg, TimeSpan timeout, bool more)
         {
-            Messages.Add(msg);
+            DecodedMessages.Add(SendReceiveConstants.DefaultEncoding.GetString(msg.Data));
             return true;
         }
      

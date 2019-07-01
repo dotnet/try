@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
-using NetMQ;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -77,8 +75,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
-            _serverRecordingSocket.Messages
-                .Select(message => SendReceiveConstants.DefaultEncoding.GetString(message.Data))
+            _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(MessageTypeValues.ExecuteReply));
         }
@@ -103,13 +100,11 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
-            _serverRecordingSocket.Messages
-                .Select(message => SendReceiveConstants.DefaultEncoding.GetString(message.Data))
+            _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(MessageTypeValues.ExecuteReply));
 
-            _ioRecordingSocket.Messages
-                .Select(message => SendReceiveConstants.DefaultEncoding.GetString(message.Data))
+            _ioRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(MessageTypeValues.ExecuteResult));
         }
