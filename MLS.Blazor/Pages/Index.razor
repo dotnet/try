@@ -12,6 +12,9 @@ Welcome to your new app.
 @using MLS.WasmCodeRunner
 @code
 {
+
+private CodeRunner runner = new CodeRunner();
+
 protected override async Task OnAfterRenderAsync()
 {
     await base.OnAfterRenderAsync();
@@ -36,7 +39,7 @@ public async Task<string> PostMessageAsync(string message)
 {
     try
     {
-        var result = CodeRunner.ProcessRunRequest(message);
+        var result = runner.ProcessRunRequest(message);
         var logMsg = $"Computed {JObject.FromObject(result).ToString()}";
         await jsRuntime.InvokeAsync<string>("BlazorInterop.log", logMsg);
 
