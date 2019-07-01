@@ -24,21 +24,18 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             public Guid Id { get; }
             public Dictionary<string, object> Transient { get; }
-            public IMessageSender ServerChannel { get; }
-            public IMessageSender IoPubChannel { get; }
-            public Message Request { get; }
+            public JupyterRequestContext Context { get; }
             public ExecuteRequest ExecuteRequest { get; }
             public int ExecutionCount { get; }
 
-            public OpenRequest(Message request, ExecuteRequest executeRequest, int executionCount, Guid id, Dictionary<string, object> transient, IMessageSender serverChannel, IMessageSender ioPubChannel)
+            public OpenRequest(JupyterRequestContext context, ExecuteRequest executeRequest, int executionCount, Guid id, Dictionary<string, object> transient)
             {
-                Request = request;
+               
+                Context = context;
                 ExecuteRequest = executeRequest;
                 ExecutionCount = executionCount;
                 Id = id;
                 Transient = transient;
-                ServerChannel = serverChannel;
-                IoPubChannel = ioPubChannel;
             }
         }
 
@@ -57,14 +54,13 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         public Task Handle(JupyterRequestContext context)
         {
-            var ioPubChannel = context.IoPubChannel;
-            var serverChannel = context.ServerChannel;
             var executeRequest = context.GetRequestContent<ExecuteRequest>() ?? throw new InvalidOperationException($"Request Content must be a not null {typeof(ExecuteRequest).Name}");
+            context.RequestHandlerStatus.SetAsBusy();
             var command = new SubmitCode(executeRequest.Code);
             var id = command.Id;
             var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
-            _openRequests[id] = new OpenRequest(context.Request, executeRequest, executionCount, id, transient, serverChannel, ioPubChannel);
+            _openRequests[id] = new OpenRequest(context, executeRequest, executionCount, id, transient);
             return _kernel.SendAsync(command);
         }
 
@@ -91,7 +87,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                 default:
                     throw new NotImplementedException();
             }
-            
         }
 
         private static void OnValueProduced(ValueProduced valueProduced,
@@ -115,8 +110,8 @@ namespace Microsoft.DotNet.Try.Jupyter
                 // send on io
                 var executeResultMessage = Message.Create(
                     executeResultData,
-                    openRequest.Request.Header);
-                openRequest.IoPubChannel.Send(executeResultMessage);
+                    openRequest.Context.Request.Header);
+                openRequest.Context.IoPubChannel.Send(executeResultMessage);
             }
         }
 
@@ -130,9 +125,10 @@ namespace Microsoft.DotNet.Try.Jupyter
             // send to server
             var executeReply = Message.CreateResponse(
                 executeReplyPayload,
-                openRequest.Request);
+                openRequest.Context.Request);
 
-            openRequest.ServerChannel.Send(executeReply);
+            openRequest.Context.ServerChannel.Send(executeReply);
+            openRequest.Context.RequestHandlerStatus.SetAsIdle();
         }
     }
 }

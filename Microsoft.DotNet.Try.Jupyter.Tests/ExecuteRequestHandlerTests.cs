@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         private readonly MessageSender _serverChannel;
         private readonly RecordingSocket _serverRecordingSocket;
         private readonly RecordingSocket _ioRecordingSocket;
+        private readonly KernelStatus _kernelStatus;
 
         public ExecuteRequestHandlerTests()
         {
@@ -26,6 +27,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             _serverChannel = new MessageSender(_serverRecordingSocket, signatureValidator);
             _ioRecordingSocket = new RecordingSocket();
             _ioPubChannel = new MessageSender(_ioRecordingSocket, signatureValidator);
+            _kernelStatus = new KernelStatus();
         }
 
         [Fact]
@@ -33,7 +35,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         {
             var handler = new ExecuteRequestHandler(new KernelSimulator());
             var request = Message.Create(new DisplayData(), null);
-            Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, null));
+            Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             messageHandling.Should().ThrowExactly<InvalidOperationException>();
         }
 
@@ -53,7 +55,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, null));
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
         }
 
         [Fact]
@@ -73,7 +75,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
 
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, null));
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.Messages
                 .Select(message => SendReceiveConstants.DefaultEncoding.GetString(message.Data))
@@ -99,7 +101,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
 
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, null));
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.Messages
                 .Select(message => SendReceiveConstants.DefaultEncoding.GetString(message.Data))

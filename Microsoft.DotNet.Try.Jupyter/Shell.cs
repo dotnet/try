@@ -81,15 +81,19 @@ namespace Microsoft.DotNet.Try.Jupyter
                     activity.Info("Received: {message}", message.ToJson());
 
                     var status = new RequestHandlerStatus(message.Header, new MessageSender(_ioPubSocket, _signatureValidator));
-                    status.SetAsBusy();
+                    
 
                     switch (message.Header.MessageType)
                     {
                         case MessageTypeValues.KernelInfoRequest:
+                            status.SetAsBusy();
                             HandleKernelInfoRequest(message);
+                            status.SetAsIdle();
                             break;
 
                         case MessageTypeValues.KernelShutdownRequest:
+                            status.SetAsBusy();
+                            status.SetAsIdle();
                             break;
 
                         default:
@@ -104,7 +108,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                             break;
                     }
 
-                    status.SetAsIdle();
+                  
                 }
             }
         }
