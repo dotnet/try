@@ -7,71 +7,38 @@ namespace WorkspaceServer.Kernel
 {
     public interface IKernelEvent
     {
+        Guid ParentId { get; }
+        Guid Id { get; }
     }
 
-    public interface IKernelCommand
+    public abstract class KernelEventBase : IKernelEvent
     {
-    }
+        public Guid ParentId { get; }
+        public Guid Id { get; }
 
-    public class Started : IKernelEvent
-    {
-    }
-
-    public class Stopped : IKernelEvent
-    {
-    }
-
-    public class StandardOutputReceived : IKernelEvent
-    {
-        public string Content { get; }
-
-        public StandardOutputReceived(string content)
+        protected KernelEventBase(Guid id, IKernelCommand command) : this(id, command.Id)
         {
-            Content = content;
+
+        }
+
+        protected KernelEventBase(IKernelCommand command) : this(Guid.NewGuid(), command)
+        {
+            
+        }
+
+        protected KernelEventBase(Guid parentId) : this(Guid.NewGuid(), parentId)
+        {
+        }
+
+        protected KernelEventBase(Guid id, Guid parentId)
+        {
+            ParentId = parentId;
+            Id = id;
         }
     }
 
-    public class StandardErrorReceived : IKernelEvent
-    {
-        public string Content { get; }
 
-        public StandardErrorReceived(string content)
-        {
-            Content = content;
-        }
-    }
-
-    public class StandardInputReceived : IKernelEvent
-    {
-        public string Content { get; }
-
-        public StandardInputReceived(string content)
-        {
-            Content = content;
-        }
-    }
-
-    public class PackageAdded : IKernelEvent
-    {
-    }
-
-    public class DiagnosticsReceived : IKernelEvent
-    {
-    }
-
-    public class CompletionReceived : IKernelEvent
-    {
-    }
-
-    public class SignatureHelpReceived : IKernelEvent
-    {
-    }
-
-    public class DocumentationReceived : IKernelEvent
-    {
-    }
-
-    public class SendStandardInput : IKernelCommand
+    public class SendStandardInput : KernelCommandBase
     {
     }
 
@@ -79,33 +46,33 @@ namespace WorkspaceServer.Kernel
     /// <summary>
     /// add a packages to the execution
     /// </summary>
-    public class AddPackage : IKernelCommand
+    public class AddPackage : KernelCommandBase
     {
     }
 
-    public class SubmitCode : IKernelCommand
+    public class SubmitCode : KernelCommandBase
     {
         public string Value { get; }
 
-        public SubmitCode(string value)
+        public SubmitCode(string value) : base()
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 
-    public class RequestCompletion : IKernelCommand
+    public class RequestCompletion : KernelCommandBase
     {
     }
 
-    public class RequestDiagnostics : IKernelCommand
+    public class RequestDiagnostics : KernelCommandBase
     {
     }
 
-    public class RequestSignatureHelp : IKernelCommand
+    public class RequestSignatureHelp : KernelCommandBase
     {
     }
 
-    public class RequestDocumentation : IKernelCommand
+    public class RequestDocumentation : KernelCommandBase
     {
     }
 

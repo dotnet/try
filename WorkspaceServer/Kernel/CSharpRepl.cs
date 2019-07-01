@@ -28,16 +28,16 @@ namespace WorkspaceServer.Kernel
         }
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
-        
+
         public async Task SendAsync(SubmitCode submitCode, CancellationToken cancellationToken)
         {
-            _channel.OnNext(new CodeSubmissionReceived(submitCode.Value));
+            _channel.OnNext(new CodeSubmissionReceived(submitCode.Id, submitCode.Value));
 
-            var (shouldExecute,code) = ComputeFullSubmission(submitCode.Value);
+            var (shouldExecute, code) = ComputeFullSubmission(submitCode.Value);
 
             if (shouldExecute)
             {
-                _channel.OnNext(new CompleteCodeSubmissionReceived());
+                _channel.OnNext(new CompleteCodeSubmissionReceived(submitCode.Id));
                 Exception exception = null;
                 try
                 {
@@ -52,25 +52,25 @@ namespace WorkspaceServer.Kernel
                 }
                 catch (Exception e)
                 {
-                    exception=  e;
+                    exception = e;
                 }
 
                 var hasReturnValue = _scriptState != null && (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
-                
-                _channel.OnNext(new CodeSubmissionEvaluated());
+
+                _channel.OnNext(new CodeSubmissionEvaluated(submitCode.Id));
 
                 if (hasReturnValue)
                 {
-                    _channel.OnNext(new ValueProduced(_scriptState.ReturnValue));
+                    _channel.OnNext(new ValueProduced(submitCode.Id, _scriptState.ReturnValue));
                 }
                 if (exception != null)
                 {
-                    _channel.OnNext(new CodeSubmissionEvaluationFailed(exception));
+                    _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
                 }
             }
             else
             {
-                _channel.OnNext(new IncompleteCodeSubmissionReceived());
+                _channel.OnNext(new IncompleteCodeSubmissionReceived(submitCode.Id));
             }
         }
 
@@ -102,7 +102,7 @@ namespace WorkspaceServer.Kernel
             switch (command)
             {
                 case SubmitCode submitCode:
-                    return SendAsync(submitCode,  cancellationToken);
+                    return SendAsync(submitCode, cancellationToken);
 
                 default:
                     throw new KernelCommandNotSupportedException(command, this);

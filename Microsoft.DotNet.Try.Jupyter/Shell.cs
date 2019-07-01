@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
 
-            var replyMessage = Message.CreateResponseMessage(kernelInfoReply, request);
+            var replyMessage = Message.CreateResponse(kernelInfoReply, request);
 
 
             _shellSender.Send(replyMessage);

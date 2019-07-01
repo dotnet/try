@@ -2,16 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Clockwise;
-using Microsoft.Build.Execution;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
-using Microsoft.DotNet.Try.Jupyter.Rendering;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer;
 using WorkspaceServer.Kernel;
@@ -20,70 +16,6 @@ using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 
 namespace Microsoft.DotNet.Try.Jupyter
 {
-    public class ExecuteRequestHandler : IObserver<IKernelEvent>
-    {
-        private readonly IKernel _kernel;
-        private readonly RenderingEngine _renderingEngine;
-        private readonly ConcurrentDictionary<Guid, OpenRequest> _openRequests = new ConcurrentDictionary<Guid, OpenRequest>();
-
-        private class OpenRequest
-        {
-            private Guid Id { get; }
-            private Dictionary<string, object> Transient { get; }
-            private ExecuteRequest ExecuteRequest { get; }
-
-            public OpenRequest(ExecuteRequest executeRequest, Guid id, Dictionary<string, object> transient)
-            {
-                ExecuteRequest = executeRequest;
-                Id = id;
-                Transient = transient;
-            }
-
-          
-        }
-        public ExecuteRequestHandler(IKernel kernel)
-        {
-            _kernel = kernel;
-            _renderingEngine = new RenderingEngine(new DefaultRenderer());
-            _renderingEngine = new RenderingEngine(new DefaultRenderer());
-            _renderingEngine.RegisterRenderer<string>(new DefaultRenderer());
-            _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
-            _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
-            _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
-
-            _kernel.KernelEvents.Subscribe(this);
-        }
-
-        public async Task Handle(JupyterRequestContext context)
-        {
-            var ioPubChannel = context.IoPubChannel;
-            var serverChannel = context.ServerChannel;
-            var id = Guid.NewGuid();
-            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
-            var executeRequest = context.GetRequestContent<ExecuteRequest>();
-            _openRequests[id] = new OpenRequest(executeRequest, id, transient);
-        }
-
-        void IObserver<IKernelEvent>.OnCompleted()
-        {
-            throw new NotImplementedException();
-        }
-
-        void IObserver<IKernelEvent>.OnError(Exception error)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IObserver<IKernelEvent>.OnNext(IKernelEvent value)
-        {
-            switch (value)
-            {
-                
-            }
-            throw new NotImplementedException();
-        }
-    }
-
     public class JupyterRequestContextHandler : ICommandHandler<JupyterRequestContext>
     {
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
@@ -109,7 +41,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 case MessageTypeValues.ExecuteRequest:
                     await _executeHandler.Handle(delivery.Command);
-                    await HandleExecuteRequest(delivery);
+                   // await HandleExecuteRequest(delivery);
                     break;
                 case MessageTypeValues.CompleteRequest:
                     await HandleCompleteRequest(delivery);
@@ -135,7 +67,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             var pos = ComputeReplacementStartPosition(code, completeRequest.CursorPosition);
             var reply = new CompleteReply(pos, completeRequest.CursorPosition, matches: result.Items.Select(e => e.InsertText).ToList());
 
-            var completeReply = Message.CreateResponseMessage(reply, delivery.Command.Request);
+            var completeReply = Message.CreateResponse(reply, delivery.Command.Request);
             serverChannel.Send(completeReply);
         }
 
@@ -190,7 +122,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 _executionCount++;
 
-                var executeInput = Message.CreateMessage(
+                var executeInput = Message.Create(
                     new ExecuteInput(code: code, executionCount: _executionCount),
                     delivery.Command.Request.Header);
 
@@ -221,7 +153,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 
 
                 // send to server
-                var executeReply = Message.CreateResponseMessage(
+                var executeReply = Message.CreateResponse(
                     executeReplyPayload,
                     delivery.Command.Request);
 
@@ -238,7 +170,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
                 // send to server
-                var executeReply = Message.CreateResponseMessage(
+                var executeReply = Message.CreateResponse(
                     executeReplyPayload,
                     delivery.Command.Request);
 
@@ -247,14 +179,14 @@ namespace Microsoft.DotNet.Try.Jupyter
                 if (!executeRequest.Silent)
                 {
                     // send on io
-                    var error = Message.CreateMessage(
+                    var error = Message.Create(
                         errorContent,
                         delivery.Command.Request.Header);
                     ioPubChannel.Send(error);
 
                     // send on stderr
                     var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = Message.CreateMessage(
+                    var stream = Message.Create(
                         stdErr,
                         delivery.Command.Request.Header);
                     ioPubChannel.Send(stream);
@@ -264,7 +196,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             if (!executeRequest.Silent && resultSucceeded)
             {
                 // send on io
-                var executeResultMessage = Message.CreateMessage(
+                var executeResultMessage = Message.Create(
                     executeResultData,
                     delivery.Command.Request.Header);
                 ioPubChannel.Send(executeResultMessage);
