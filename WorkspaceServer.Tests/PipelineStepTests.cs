@@ -97,15 +97,27 @@ namespace WorkspaceServer.Tests
         {
             var seed = 0;
             var barrier = new Barrier(3);
-            var producer = new PipelineStep<int>(() =>
+            var producer = new PipelineStep<int>(() => Task.FromResult(++seed));
+
+            var firstConsumer = Task.Run(() =>
             {
-                barrier.SignalAndWait(10.Seconds());
-                return Task.FromResult(++seed);
+                barrier.SignalAndWait();
+                return producer.GetLatestAsync();
             });
 
-            var values = await Task.WhenAll(Enumerable.Range(0, 3).Take(3)
-                .AsParallel()
-                .Select(_ => producer.GetLatestAsync()));
+            var secondConsumer = Task.Run(() =>
+            {
+                barrier.SignalAndWait();
+                return producer.GetLatestAsync();
+            });
+
+            var thirdConsumer = Task.Run(() =>
+            {
+                barrier.SignalAndWait();
+                return producer.GetLatestAsync();
+            });
+
+            var values = await Task.WhenAll(firstConsumer, secondConsumer, thirdConsumer);
 
             values.Should().HaveCount(3).And.OnlyContain(i => i == 1);
         }
