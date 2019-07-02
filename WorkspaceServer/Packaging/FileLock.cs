@@ -59,6 +59,10 @@ namespace WorkspaceServer.Packaging
 
         public static bool IsLockFile(FileInfo fileInfo)
         {
+            if (fileInfo == null)
+            {
+                throw new ArgumentNullException(nameof(fileInfo));
+            }
             return fileInfo.Name == LockFileName;
         }
     }

@@ -36,14 +36,16 @@ namespace WorkspaceServer.Tests.Packaging
                 CreateDirectory(folderNameStartsWith,
                     parentDirectory);
 
-            fromPackage.Directory.CopyTo(destination);
-
-            var binLogs = destination.GetFiles("*.binlog");
-
-            foreach (var fileInfo in binLogs)
+            fromPackage.Directory.CopyTo(destination, info =>
             {
-                fileInfo.Delete();
-            }
+                switch (info)
+                {
+                    case FileInfo fileInfo:
+                        return FileLock.IsLockFile(fileInfo) || fileInfo.Extension.EndsWith("binlog");
+                    default:
+                        return false;
+                }
+            });
 
             Package copy;
             if (isRebuildable)
