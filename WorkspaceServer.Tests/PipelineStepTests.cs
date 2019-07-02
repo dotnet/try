@@ -99,11 +99,11 @@ namespace WorkspaceServer.Tests
             var barrier = new Barrier(3);
             var producer = new PipelineStep<int>(() =>
             {
-                barrier.SignalAndWait();
+                barrier.SignalAndWait(10.Seconds());
                 return Task.FromResult(++seed);
             });
 
-            var values = await Task.WhenAll(Enumerable.Range(0, 3)
+            var values = await Task.WhenAll(Enumerable.Range(0, 3).Take(3)
                 .AsParallel()
                 .Select(_ => producer.GetLatestAsync()));
 
