@@ -63,6 +63,9 @@ namespace WorkspaceServer.Packaging
             Log.Info("Packages path is {DefaultWorkspacesDirectory}", DefaultPackagesDirectory);
         }
 
+        private int buildCount = 0;
+        private int publishCount = 0;
+
         private bool? _isWebProject;
         private bool? _isUnitTestProject;
         private FileInfo _entryPointAssemblyPath;
@@ -461,7 +464,11 @@ namespace WorkspaceServer.Packaging
                 {
                     operation.Info("Attempting building package {name}", Name);
 
-                    var buildInProgress = _buildSemaphore.CurrentCount == 0;
+                    // When a build finishes, buildCount is reset to 0. If, when we increment
+                    // the value, we get a value > 1, someone else has already started another
+                    // build
+                    var buildInProgress = Interlocked.Increment(ref buildCount) > 1;
+
                     await _buildSemaphore.WaitAsync();
 
                     using (Disposable.Create(() => _buildSemaphore.Release()))
@@ -490,6 +497,8 @@ namespace WorkspaceServer.Packaging
                 var binLog = this.FindLatestBinLog();
                 await binLog.WaitForFileAvailable();
                 await LoadDesignTimeBuildFromBuildLogFile(this, binLog);
+
+                Interlocked.Exchange(ref buildCount, 0);
             }
         }
 
@@ -498,7 +507,7 @@ namespace WorkspaceServer.Packaging
             using (var operation = _log.OnEnterAndConfirmOnExit())
             {
                 operation.Info("Attempting to publish package {name}", Name);
-                var publishInProgress = _publishSemaphore.CurrentCount == 0;
+                var publishInProgress = Interlocked.Increment(ref publishCount) > 1;
                 await _publishSemaphore.WaitAsync();
 
                 if (publishInProgress)
@@ -520,6 +529,7 @@ namespace WorkspaceServer.Packaging
                 operation.Info("Workspace published");
                 operation.Succeed();
                 PublicationTime = Clock.Current.Now();
+                Interlocked.Exchange(ref publishCount, 0);
             }
         }
 

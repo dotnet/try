@@ -9,12 +9,14 @@ using System.Net.Mime;
 using Clockwise;
 using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using MLS.Agent.Blazor;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
@@ -39,7 +41,7 @@ namespace MLS.Agent
         };
 
         public Startup(
-            IHostingEnvironment env,
+            IHostEnvironment env,
             StartupOptions startupOptions)
         {
             Environment = env;
@@ -54,7 +56,7 @@ namespace MLS.Agent
 
         protected IConfigurationRoot Configuration { get; }
 
-        protected IHostingEnvironment Environment { get; }
+        protected IHostEnvironment Environment { get; }
 
         public StartupOptions StartupOptions { get; }
 
@@ -65,10 +67,13 @@ namespace MLS.Agent
                 // Add framework services.
                 services.AddMvc(options =>
                         {
+                            options.EnableEndpointRouting = false;
                             options.Filters.Add(new ExceptionFilter());
                             options.Filters.Add(new BadRequestOnInvalidModelFilter());
-                        })
-                        .AddJsonOptions(o =>
+#pragma warning disable CS0618 // Type or member is obsolete
+                        }).SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1)
+#pragma warning restore CS0618 // Type or member is obsolete
+                        .AddNewtonsoftJson(o =>
                         {
                             o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                             o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -149,7 +154,7 @@ namespace MLS.Agent
 
         public void Configure(
             IApplicationBuilder app,
-            IApplicationLifetime lifetime,
+            IHostApplicationLifetime lifetime,
             IBrowserLauncher browserLauncher,
             IDirectoryAccessor directoryAccessor,
             PackageRegistry packageRegistry)
@@ -160,12 +165,19 @@ namespace MLS.Agent
 
                 ConfigureForOrchestratorProxy(app);
 
-                app.Map("/LocalCodeRunner/blazor-console", builder =>
+                // Serve Blazor on the /LocalCodeRunner/blazor-console prefix
+                app.Map("/LocalCodeRunner/blazor-console", blazor =>
                 {
-                    builder.UsePathBase("/LocalCodeRunner/blazor-console/");
-                    builder.EnableCachingBlazorContent();
-                    builder.UseBlazor<MLS.Blazor.Program>();
+                    blazor.UseClientSideBlazorFiles<MLS.Blazor.Startup>();
+
+                    blazor.UseRouting();
+
+                    blazor.UseEndpoints(endpoints =>
+                    {
+                        endpoints.MapFallbackToClientSideBlazor<MLS.Blazor.Startup>("index.html");
+                    });
                 });
+
 
                 var budget = new Budget();
                 _disposables.Add(() => budget.Cancel());

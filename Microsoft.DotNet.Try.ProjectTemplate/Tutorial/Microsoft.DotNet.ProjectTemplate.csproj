@@ -12,7 +12,7 @@
     <ContentTargetFolders>content</ContentTargetFolders>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoBuild>True</NoBuild>
+    <!-- <NoBuild>True</NoBuild> -->
   </PropertyGroup>
 
   <ItemGroup>

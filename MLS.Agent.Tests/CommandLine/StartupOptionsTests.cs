@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using MLS.Agent.CommandLine;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var options = new StartupOptions(production: true, dir: null);
 
-            options.EnvironmentName.Should().Be(EnvironmentName.Production);
+            options.EnvironmentName.Should().Be(Environments.Production);
         }
 
         [Fact]
@@ -25,7 +26,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var options = new StartupOptions(production: true, dir: new DirectoryInfo(Directory.GetCurrentDirectory()));
 
-            options.EnvironmentName.Should().Be(EnvironmentName.Production);
+            options.EnvironmentName.Should().Be(Environments.Production);
         }
 
         [Fact]
@@ -33,7 +34,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var options = new StartupOptions(dir: new DirectoryInfo(Directory.GetCurrentDirectory()));
 
-            options.EnvironmentName.Should().Be(EnvironmentName.Production);
+            options.EnvironmentName.Should().Be(Environments.Production);
         }
     }
 }

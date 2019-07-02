@@ -78,8 +78,8 @@ namespace WorkspaceServer.Packaging
         private void AddEmbeddedResourceContentToProject(string root)
         {
             var wwwRootFiles = new[] { "index.html", "interop.js" };
-            var pagesFiles = new[] { "Index.cshtml", "Index.cshtml.cs" };
-            var rootFiles = new[] { "Program.cs", "Startup.cs", "Linker.xml", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs" };
+            var pagesFiles = new[] { "Index.razor" };
+            var rootFiles = new[] { "Program.cs", "Startup.cs", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs", "_Imports.razor", "Linker.xml" };
 
             WriteResourcesToLocation(wwwRootFiles, Path.Combine(root, "wwwroot"));
             WriteResourcesToLocation(pagesFiles, Path.Combine(root, "Pages"));
@@ -88,7 +88,7 @@ namespace WorkspaceServer.Packaging
 
         private static void DeleteUnusedFilesFromTemplate(string root)
         {
-            var filesAndDirectoriestoDelete = new[] { "Pages", "Shared", "wwwroot", "_ViewImports.cshtml" };
+            var filesAndDirectoriestoDelete = new[] { "Pages", "Shared", "wwwroot", "_Imports.razor" };
             foreach (var fOrD in filesAndDirectoriestoDelete)
             {
                 Path.Combine(root, fOrD).DeleteFileSystemObject();

@@ -182,18 +182,6 @@ namespace WorkspaceServer
                 createRebuildablePackages: false,
                 packageFinders: finders);
 
-            // Todo: soemething about nodatime 2.3 makes blazor toolchain fail to build
-            registry.Add("blazor-nodatime.api",
-                         packageBuilder =>
-                         {
-                             packageBuilder.CreateUsingDotnet("classlib");
-                             packageBuilder.DeleteFile("Class1.cs");
-                             packageBuilder.AddPackageReference("NodaTime", "2.4.4");
-                             packageBuilder.AddPackageReference("NodaTime.Testing", "2.4.4");
-                             packageBuilder.AddPackageReference("Newtonsoft.Json");
-                             packageBuilder.EnableBlazor(registry);
-                         });
-
             registry.Add("fsharp-console",
                          packageBuilder =>
                          {

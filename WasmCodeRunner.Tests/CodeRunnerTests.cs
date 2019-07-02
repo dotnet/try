@@ -31,7 +31,7 @@ namespace MLS.WasmCodeRunner.Tests
 
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.CodeRunnerVersion.Should().NotBeNullOrEmpty();
@@ -60,7 +60,7 @@ namespace MLS.WasmCodeRunner.Tests
                 var theThing = new InteropMessage<WasmCodeRunnerRequest>(123, runRequest);
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.Output.Should().BeEquivalentTo("message");
@@ -100,7 +100,7 @@ namespace MLS.WasmCodeRunner.Tests
                 var theThing = new InteropMessage<WasmCodeRunnerRequest>(123, runRequest);
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.Output.Select(o => o.Trim()).Should().BeEquivalentTo("third argument, and then second, and then first", "");
@@ -139,7 +139,7 @@ namespace MLS.WasmCodeRunner.Tests
                 var theThing = new InteropMessage<WasmCodeRunnerRequest>(123, runRequest);
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.Output.Select(o => o.Trim()).Should().BeEquivalentTo("region region1 session sessionOne", "");
@@ -178,7 +178,7 @@ namespace MLS.WasmCodeRunner.Tests
                 var theThing = new InteropMessage<WasmCodeRunnerRequest>(123, runRequest);
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.Output.Select(o => o.Trim()).Should().BeEquivalentTo("region region1", "");
@@ -218,7 +218,7 @@ namespace MLS.WasmCodeRunner.Tests
                 var theThing = new InteropMessage<WasmCodeRunnerRequest>(123, runRequest);
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.Output.Select(o => o.Trim()).Should().BeEquivalentTo("sessionOne --session region1 --region", "");
@@ -254,7 +254,7 @@ namespace myApp
                 var theThing = new InteropMessage<WasmCodeRunnerRequest>(123, runRequest);
                 var message = JObject.FromObject(theThing).ToString();
 
-                var result = CodeRunner.ProcessRunRequest(message);
+                var result = new CodeRunner().ProcessRunRequest(message);
 
                 result.Sequence.Should().Be(123);
                 result.Data.Output.Select(o => o.Trim()).Should().BeEquivalentTo("Hello World!", "");
@@ -294,7 +294,7 @@ class D
                         Base64Assembly = encodedAssembly
                     };
 
-                    var response = CodeRunner.ExecuteRunRequest(runRequest, 1);
+                    var response = new CodeRunner().ExecuteRunRequest(runRequest, 1);
 
                     response.Data.RunnerException.Should().Match("*Missing type `C`*");
                     consoleState.OutputIsRedirected.Should().BeFalse();
@@ -310,7 +310,7 @@ class D
                 var runRequest = new WasmCodeRunnerRequest();
                 var interopMessage = new InteropMessage<WasmCodeRunnerRequest>(0, runRequest);
                 var text = JObject.FromObject(interopMessage).ToString();
-                CodeRunner.ProcessRunRequest(text).Should().Be(null);
+                new CodeRunner().ProcessRunRequest(text).Should().Be(null);
                 consoleState.OutputIsRedirected.Should().BeFalse();
             }
         }
@@ -334,7 +334,7 @@ class D
                         Base64Assembly = encodedAssembly
                     };
 
-                    var output = CodeRunner.ExecuteRunRequest(runRequest, 1).Data.Output;
+                    var output = new CodeRunner().ExecuteRunRequest(runRequest, 1).Data.Output;
                     output.Single().Should().Be("error CS5001: Program does not contain a static 'Main' method suitable for an entry point");
                     consoleState.OutputIsRedirected.Should().BeFalse();
                 }

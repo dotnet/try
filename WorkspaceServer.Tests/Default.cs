@@ -2,9 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using MLS.Agent;
+using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
 
@@ -82,17 +86,31 @@ namespace WorkspaceServer.Tests
             return package;
         });
 
-        public static AsyncLazy<Package> _lazyBlazorNodatimeApi = new AsyncLazy<Package>(async () =>
+        public static AsyncLazy<Package2> _lazyBlazorNodatimeApi = new AsyncLazy<Package2>(async () =>
         {
-            var packageBuilder = new PackageBuilder("blazor-nodatime.api");
-            packageBuilder.CreateUsingDotnet("classlib");
-            packageBuilder.DeleteFile("Class1.cs");
-            packageBuilder.AddPackageReference("NodaTime", "2.4.4");
-            packageBuilder.AddPackageReference("NodaTime.Testing", "2.4.4");
-            packageBuilder.AddPackageReference("Newtonsoft.Json");
-            var package = packageBuilder.GetPackage() as Package;
-            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
-            return package;
+            var workingDirectory = Package.DefaultPackagesDirectory;
+            var dotnet = new Dotnet(workingDirectory);
+            var tools = await dotnet.ToolList(workingDirectory);
+            if (tools.Contains("blazor-nodatime.api"))
+            {
+                return await new WebAssemblyAssetFinder(new FileSystemDirectoryAccessor(workingDirectory))
+                    .Find<Package2>("blazor-nodatime.api");
+            }
+
+            using (var dir = DisposableDirectory.Create())
+            {
+                var subDir = dir.Directory.CreateSubdirectory("blazor-nodatime.api");
+                dotnet = new Dotnet(subDir);
+                await dotnet.New("classlib");
+                await dotnet.AddPackage("NodaTime", "2.4.4");
+                await dotnet.AddPackage("NodaTime.Testing", "2.4.4");
+                await dotnet.AddPackage("Newtonsoft.Json");
+
+                var console = new TestConsole();
+                var name = await PackCommand.Do(new PackOptions(subDir, enableWasm: true, packageName: "blazor-nodatime.api"), console);
+                return await new PackageInstallingWebAssemblyAssetFinder(new FileSystemDirectoryAccessor(workingDirectory), new PackageSource(subDir.FullName))
+                    .Find<Package2>("blazor-nodatime.api");
+            }
         });
 
         public static AsyncLazy<PackageBase> _lazyFSharpConsole = new AsyncLazy<PackageBase>(async () =>

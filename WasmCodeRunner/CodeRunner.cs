@@ -13,12 +13,23 @@ using Newtonsoft.Json;
 
 namespace MLS.WasmCodeRunner
 {
-
     public class CodeRunner
     {
-        public static InteropMessage<WasmCodeRunnerResponse> ProcessRunRequest(string message)
+        int sequence = -1;
+
+        public InteropMessage<WasmCodeRunnerResponse> ProcessRunRequest(string message)
         {
             var messageObject = JsonConvert.DeserializeObject<InteropMessage<WasmCodeRunnerRequest>>(message);
+            if (messageObject.Sequence > this.sequence)
+            {
+                this.sequence = messageObject.Sequence;
+            }
+            else
+            {
+                return null;
+            }
+
+
             if (messageObject.Data.Base64Assembly == null && messageObject.Data.Diagnostics == null)
             {
                 // Something was posted that wasn't meant for us
@@ -38,7 +49,7 @@ namespace MLS.WasmCodeRunner
         }
 
 
-        public static InteropMessage<WasmCodeRunnerResponse> ExecuteRunRequest(WasmCodeRunnerRequest runRequest, int sequence)
+        public InteropMessage<WasmCodeRunnerResponse> ExecuteRunRequest(WasmCodeRunnerRequest runRequest, int sequence)
         {
             var output = new List<string>();
             string runnerException = null;
@@ -118,7 +129,7 @@ namespace MLS.WasmCodeRunner
             }
         }
 
-        private static IEnumerable<string> SplitOnNewlines(string str)
+        private IEnumerable<string> SplitOnNewlines(string str)
         {
             str = str.Replace("\r\n", "\n");
             return str.Split('\n');

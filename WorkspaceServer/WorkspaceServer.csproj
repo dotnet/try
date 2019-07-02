@@ -56,7 +56,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="3.1.0-beta3-final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.1.0-beta3-final" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
-    <PackageReference Include="NewtonSoft.Json" Version="11.0.2" />
+    <PackageReference Include="NewtonSoft.Json" Version="12.0.02" />
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19317.1" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
@@ -83,10 +83,10 @@
     <PackageReference Include="PocketLogger" Version="0.3.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="PocketLogger.For.MicrosoftExtensionsLogging" Version="0.1.2">
+    <!-- <PackageReference Include="PocketLogger.For.MicrosoftExtensionsLogging" Version="0.1.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    </PackageReference> -->
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="TaskExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
@@ -107,13 +107,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <EmbeddedResource Include="..\MLS.Blazor\Linker.xml" />
+     <EmbeddedResource Include="..\MLS.Blazor\Linker.xml" /> 
     <EmbeddedResource Include="..\MLS.Blazor\Program.cs" />
     <EmbeddedResource Include="..\MLS.Blazor\Startup.cs" />
     <EmbeddedResource Include="..\MLS.Blazor\wwwroot\index.html" />
     <EmbeddedResource Include="..\MLS.Blazor\wwwroot\interop.js" />
-    <EmbeddedResource Include="..\MLS.Blazor\Pages\Index.cshtml" />
-    <EmbeddedResource Include="..\MLS.Blazor\Pages\Index.cshtml.cs" />
+    <!--<EmbeddedResource Include="..\MLS.Blazor\Pages\_Imports.razor" />-->
+    <EmbeddedResource Include="..\MLS.Blazor\_Imports.razor" />
+    <EmbeddedResource Include="..\MLS.Blazor\Pages\Index.razor" />
 
     <EmbeddedResource Include="..\WasmCodeRunner\CodeRunner.cs" />
     <EmbeddedResource Include="..\WasmCodeRunner\InteropMessage.cs" />

@@ -48,12 +48,12 @@ namespace WorkspaceServer.Tests
             rootFiles.Should().Contain(f => f.Name == "Program.cs");
             rootFiles.Should().Contain(f => f.Name == "Startup.cs");
             rootFiles.Should().Contain(f => f.Name == "Linker.xml");
-            rootFiles.Should().Contain(f => f.Name == "App.cshtml");
+            rootFiles.Should().Contain(f => f.Name == "_Imports.razor");
             rootFiles.Should().Contain(f => f.Name == "MLS.Blazor.csproj");
 
             var pagesFiles = dir.GetFiles("Pages/*", SearchOption.AllDirectories);
             pagesFiles.Should().OnlyContain(
-                f => f.Name == "Index.cshtml" || f.Name == "Index.cshtml.cs");
+                f => f.Name == "Index.razor" || f.Name == "_Imports.razor2");
 
             var wwwrootFiles = dir.GetFiles("wwwroot/*", SearchOption.AllDirectories);
             wwwrootFiles.Should().OnlyContain(
@@ -75,7 +75,7 @@ namespace WorkspaceServer.Tests
                 name,
                 new List<string>()
                 {
-                    "Microsoft.Extensions.Logging"
+                    "Microsoft.Extensions.Logging::3.0.0-preview6.19304.6"
                 });
 
             await initializer.Initialize(dir);
