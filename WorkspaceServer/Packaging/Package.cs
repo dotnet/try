@@ -63,6 +63,9 @@ namespace WorkspaceServer.Packaging
             Log.Info("Packages path is {DefaultWorkspacesDirectory}", DefaultPackagesDirectory);
         }
 
+        private int buildCount = 0;
+        private int publishCount = 0;
+
         private bool? _isWebProject;
         private bool? _isUnitTestProject;
         private FileInfo _entryPointAssemblyPath;
@@ -461,7 +464,8 @@ namespace WorkspaceServer.Packaging
                 {
                     operation.Info("Attempting building package {name}", Name);
 
-                    var buildInProgress = _buildSemaphore.CurrentCount == 0;
+                    var buildInProgress = Interlocked.CompareExchange(ref buildCount, 1, 0) == 0;
+
                     await _buildSemaphore.WaitAsync();
 
                     using (Disposable.Create(() => _buildSemaphore.Release()))
@@ -490,6 +494,8 @@ namespace WorkspaceServer.Packaging
                 var binLog = this.FindLatestBinLog();
                 await binLog.WaitForFileAvailable();
                 await LoadDesignTimeBuildFromBuildLogFile(this, binLog);
+
+                Interlocked.Exchange(ref buildCount, 0);
             }
         }
 
@@ -498,7 +504,7 @@ namespace WorkspaceServer.Packaging
             using (var operation = _log.OnEnterAndConfirmOnExit())
             {
                 operation.Info("Attempting to publish package {name}", Name);
-                var publishInProgress = _publishSemaphore.CurrentCount == 0;
+                var publishInProgress = Interlocked.CompareExchange(ref publishCount, 1, 0) == 0;
                 await _publishSemaphore.WaitAsync();
 
                 if (publishInProgress)
@@ -520,6 +526,7 @@ namespace WorkspaceServer.Packaging
                 operation.Info("Workspace published");
                 operation.Succeed();
                 PublicationTime = Clock.Current.Now();
+                Interlocked.Exchange(ref publishCount, 0);
             }
         }
 
