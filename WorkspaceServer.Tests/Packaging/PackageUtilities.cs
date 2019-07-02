@@ -36,19 +36,16 @@ namespace WorkspaceServer.Tests.Packaging
                 CreateDirectory(folderNameStartsWith,
                     parentDirectory);
 
-            using (await FileLock.TryCreateAsync(fromPackage.Directory))
+            fromPackage.Directory.CopyTo(destination, info =>
             {
-                fromPackage.Directory.CopyTo(destination, info =>
+                switch (info)
                 {
-                    switch (info)
-                    {
-                        case FileInfo fileInfo:
-                            return FileLock.IsLockFile(fileInfo) || fileInfo.Extension.EndsWith("binlog");
-                        default:
-                            return false;
-                    }
-                });
-            }
+                    case FileInfo fileInfo:
+                        return FileLock.IsLockFile(fileInfo) || fileInfo.Extension.EndsWith("binlog");
+                    default:
+                        return false;
+                }
+            });
 
             Package copy;
             if (isRebuildable)
