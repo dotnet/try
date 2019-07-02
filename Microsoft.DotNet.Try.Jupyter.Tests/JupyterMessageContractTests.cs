@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Assent;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
-using NetMQ;
 using Xunit;
 
 namespace Microsoft.DotNet.Try.Jupyter.Tests
@@ -150,23 +148,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
 
             var encoded = socket.GetEncodedMessage();
             this.Assent(encoded, _configuration);
-        }
-
-        private class TextSocket : IOutgoingSocket
-        {
-            readonly StringBuilder _buffer = new StringBuilder();
-
-            public bool TrySend(ref Msg msg, TimeSpan timeout, bool more)
-            {
-                var decoded = SendReceiveConstants.DefaultEncoding.GetString(msg.Data);
-                _buffer.AppendLine($"data: {decoded} more: {more}");
-                return true;
-            }
-
-            public string GetEncodedMessage()
-            {
-                return _buffer.ToString();
-            }
         }
     }
 }

@@ -365,3 +365,5 @@ Microsoft\.DotNet\.Try\.js/\.rpt2_cache/
 Microsoft\.DotNet\.Try\.js/dist/
 
 docs/\.ionide/
+
+\.ionide/

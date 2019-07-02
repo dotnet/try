@@ -10,6 +10,7 @@ using Clockwise;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer;
+using WorkspaceServer.Kernel;
 using WorkspaceServer.Servers;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 
@@ -20,9 +21,12 @@ namespace Microsoft.DotNet.Try.Jupyter
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
         private int _executionCount;
         private readonly WorkspaceServerMultiplexer _server;
+        private readonly ExecuteRequestHandler _executeHandler;
 
         public JupyterRequestContextHandler(PackageRegistry packageRegistry)
         {
+            _executeHandler = new ExecuteRequestHandler(new CSharpRepl());
+
             if (packageRegistry == null)
             {
                 throw new ArgumentNullException(nameof(packageRegistry));
@@ -36,10 +40,13 @@ namespace Microsoft.DotNet.Try.Jupyter
             switch (delivery.Command.Request.Header.MessageType)
             {
                 case MessageTypeValues.ExecuteRequest:
-                    await HandleExecuteRequest(delivery);
+                    await _executeHandler.Handle(delivery.Command);
+                   // await HandleExecuteRequest(delivery);
                     break;
                 case MessageTypeValues.CompleteRequest:
+                    delivery.Command.RequestHandlerStatus.SetAsBusy();
                     await HandleCompleteRequest(delivery);
+                    delivery.Command.RequestHandlerStatus.SetAsIdle();
                     break;
             }
 
@@ -50,7 +57,8 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var serverChannel = delivery.Command.ServerChannel;
 
-            var completeRequest = delivery.Command.Request.Content as CompleteRequest;
+            var completeRequest = delivery.Command.GetRequestContent <CompleteRequest>();
+
             var code = completeRequest.Code;
 
             var workspace = CreateScaffoldWorkspace(code, completeRequest.CursorPosition);
@@ -61,7 +69,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             var pos = ComputeReplacementStartPosition(code, completeRequest.CursorPosition);
             var reply = new CompleteReply(pos, completeRequest.CursorPosition, matches: result.Items.Select(e => e.InsertText).ToList());
 
-            var completeReply = Message.CreateResponseMessage(reply, delivery.Command.Request);
+            var completeReply = Message.CreateResponse(reply, delivery.Command.Request);
             serverChannel.Send(completeReply);
         }
 
@@ -102,7 +110,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             var transient = new Dictionary<string, object> { { "display_id", Guid.NewGuid().ToString() } };
 
-            var executeRequest = delivery.Command.Request.Content as ExecuteRequest;
+            var executeRequest = delivery.Command.GetRequestContent<ExecuteRequest>();
 
             var code = executeRequest.Code;
 
@@ -116,7 +124,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 _executionCount++;
 
-                var executeInput = Message.CreateMessage(
+                var executeInput = Message.Create(
                     new ExecuteInput(code: code, executionCount: _executionCount),
                     delivery.Command.Request.Header);
 
@@ -147,7 +155,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 
 
                 // send to server
-                var executeReply = Message.CreateResponseMessage(
+                var executeReply = Message.CreateResponse(
                     executeReplyPayload,
                     delivery.Command.Request);
 
@@ -164,7 +172,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
                 // send to server
-                var executeReply = Message.CreateResponseMessage(
+                var executeReply = Message.CreateResponse(
                     executeReplyPayload,
                     delivery.Command.Request);
 
@@ -173,14 +181,14 @@ namespace Microsoft.DotNet.Try.Jupyter
                 if (!executeRequest.Silent)
                 {
                     // send on io
-                    var error = Message.CreateMessage(
+                    var error = Message.Create(
                         errorContent,
                         delivery.Command.Request.Header);
                     ioPubChannel.Send(error);
 
                     // send on stderr
                     var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = Message.CreateMessage(
+                    var stream = Message.Create(
                         stdErr,
                         delivery.Command.Request.Header);
                     ioPubChannel.Send(stream);
@@ -190,7 +198,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             if (!executeRequest.Silent && resultSucceeded)
             {
                 // send on io
-                var executeResultMessage = Message.CreateMessage(
+                var executeResultMessage = Message.Create(
                     executeResultData,
                     delivery.Command.Request.Header);
                 ioPubChannel.Send(executeResultMessage);

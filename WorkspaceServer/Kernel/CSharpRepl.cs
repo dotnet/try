@@ -22,22 +22,25 @@ namespace WorkspaceServer.Kernel
         private readonly Subject<IKernelEvent> _channel;
         private ScriptState _scriptState;
 
+        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        protected StringBuilder _inputBuffer = new StringBuilder();
+
+        public IObservable<IKernelEvent> KernelEvents => _channel;
+
         public CSharpRepl()
         {
             _channel = new Subject<IKernelEvent>();
         }
 
-        public IObservable<IKernelEvent> KernelEvents => _channel;
-        
         public async Task SendAsync(SubmitCode submitCode, CancellationToken cancellationToken)
         {
-            _channel.OnNext(new CodeSubmissionReceived(submitCode.Value));
+            _channel.OnNext(new CodeSubmissionReceived(submitCode.Id, submitCode.Value));
 
-            var (shouldExecute,code) = ComputeFullSubmission(submitCode.Value);
+            var (shouldExecute, code) = ComputeFullSubmission(submitCode.Value);
 
             if (shouldExecute)
             {
-                _channel.OnNext(new CompleteCodeSubmissionReceived());
+                _channel.OnNext(new CompleteCodeSubmissionReceived(submitCode.Id));
                 Exception exception = null;
                 try
                 {
@@ -52,30 +55,30 @@ namespace WorkspaceServer.Kernel
                 }
                 catch (Exception e)
                 {
-                    exception=  e;
+                    exception = e;
                 }
 
                 var hasReturnValue = _scriptState != null && (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
-                
-                _channel.OnNext(new CodeSubmissionEvaluated());
 
                 if (hasReturnValue)
                 {
-                    _channel.OnNext(new ValueProduced(_scriptState.ReturnValue));
+                    _channel.OnNext(new ValueProduced(submitCode.Id, _scriptState.ReturnValue));
                 }
                 if (exception != null)
                 {
-                    _channel.OnNext(new CodeSubmissionEvaluationFailed(exception));
+                    _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
+                }
+                else
+                {
+                    _channel.OnNext(new CodeSubmissionEvaluated(submitCode.Id));
                 }
             }
             else
             {
-                _channel.OnNext(new IncompleteCodeSubmissionReceived());
+                _channel.OnNext(new IncompleteCodeSubmissionReceived(submitCode.Id));
             }
         }
 
-        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
-        protected StringBuilder _inputBuffer = new StringBuilder();
         private (bool shouldExecute, string completeSubmission) ComputeFullSubmission(string input)
         {
             _inputBuffer.AppendLine(input);
@@ -102,7 +105,7 @@ namespace WorkspaceServer.Kernel
             switch (command)
             {
                 case SubmitCode submitCode:
-                    return SendAsync(submitCode,  cancellationToken);
+                    return SendAsync(submitCode, cancellationToken);
 
                 default:
                     throw new KernelCommandNotSupportedException(command, this);

@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var content = new Status(status);
 
-            var statusMessage = Message.CreateMessage(content, _requestHeader);
+            var statusMessage = Message.Create(content, _requestHeader);
 
             _messageSender.Send(statusMessage);
         }

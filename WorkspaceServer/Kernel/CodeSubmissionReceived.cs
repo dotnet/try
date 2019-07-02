@@ -5,11 +5,11 @@ using System;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CodeSubmissionReceived : IKernelEvent
+    public class CodeSubmissionReceived : KernelEventBase
     {
         public string Value { get; }
 
-        public CodeSubmissionReceived(string value)
+        public CodeSubmissionReceived(Guid parentId, string value) : base(parentId)
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }

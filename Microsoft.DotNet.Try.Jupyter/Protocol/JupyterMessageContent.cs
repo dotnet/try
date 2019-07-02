@@ -74,6 +74,27 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
 
         public static JupyterMessageContent Empty { get; } = new EmptyMessageContent();
 
+        public static string GetMessageType(JupyterMessageContent source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            return GetMessageType(source.GetType());
+        }
+
+        public static string GetMessageType(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+            var attribute = type.GetCustomAttribute<JupyterMessageTypeAttribute>() ?? throw new InvalidOperationException($"{type.Name} is not annotated with JupyterMessageTypeAttribute");
+
+            return attribute.Type;
+        }
+
         private class EmptyMessageContent : JupyterMessageContent
         {
 
