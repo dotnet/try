@@ -36,7 +36,10 @@ namespace WorkspaceServer.Tests.Packaging
                 CreateDirectory(folderNameStartsWith,
                     parentDirectory);
 
-            fromPackage.Directory.CopyTo(destination);
+            using (await FileLock.TryCreateAsync(fromPackage.Directory))
+            {
+                fromPackage.Directory.CopyTo(destination);
+            }
 
             var binLogs = destination.GetFiles("*.binlog");
 

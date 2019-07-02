@@ -38,11 +38,11 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task It_propagates_exception()
         {
-            var producer = new PipelineStep<int>( () => throw new InvalidOperationException());
+            var producer = new PipelineStep<int>(() => throw new InvalidOperationException());
             producer.Awaiting(p => p.GetLatestAsync())
                 .Should()
                 .Throw<InvalidOperationException>();
-           
+
         }
 
         [Fact]
@@ -99,13 +99,14 @@ namespace WorkspaceServer.Tests
             var barrier = new Barrier(3);
             var producer = new PipelineStep<int>(() =>
             {
-                barrier.SignalAndWait(2.Seconds());
+                barrier.SignalAndWait();
                 return Task.FromResult(++seed);
             });
 
-            var values = await  Task.WhenAll( Enumerable.Range(0, 3)
+            var values = await Task.WhenAll(Enumerable.Range(0, 3)
                 .AsParallel()
-                .Select((_) => producer.GetLatestAsync()));
+                .Select(_ => producer.GetLatestAsync()));
+
             values.Should().HaveCount(3).And.OnlyContain(i => i == 1);
         }
 
@@ -119,7 +120,7 @@ namespace WorkspaceServer.Tests
             var producer = new PipelineStep<int>(() =>
             {
                 // will require all consumer to reach this point to move on
-                producerBarrier.SignalAndWait(2.Seconds());
+                producerBarrier.SignalAndWait();
                 return Task.FromResult(Interlocked.Increment(ref seed));
             });
 
@@ -127,7 +128,7 @@ namespace WorkspaceServer.Tests
                 {
                     var task = producer.GetLatestAsync();
                     // block waiting for the other consumer
-                    consumerBarrier.SignalAndWait(2.Seconds());
+                    consumerBarrier.SignalAndWait();
                     return task;
                 }
             );
@@ -135,7 +136,7 @@ namespace WorkspaceServer.Tests
             var secondConsumer = Task.Run(() =>
                 {
                     // now both consumer reached the barrier
-                    consumerBarrier.SignalAndWait(2.Seconds());
+                    consumerBarrier.SignalAndWait();
                     producer.Invalidate();
                     // let the firs request fire
                     producerBarrier.RemoveParticipant();
@@ -147,13 +148,14 @@ namespace WorkspaceServer.Tests
 
             var values = await Task.WhenAll(firstConsumer, secondConsumer);
             values.Should().HaveCount(2).And.OnlyContain(i => i == 2);
-           
+
         }
 
-        [Fact]public async Task Sequence_of_steps_produce_a_value()
+        [Fact]
+        public async Task Sequence_of_steps_produce_a_value()
         {
-            var step1 = new PipelineStep<int>(()=>Task.FromResult(1));
-            var step2 = step1.Then( (number) => Task.FromResult($"{number} {number}") );
+            var step1 = new PipelineStep<int>(() => Task.FromResult(1));
+            var step2 = step1.Then((number) => Task.FromResult($"{number} {number}"));
             var value1 = await step2.GetLatestAsync();
             value1.Should().Be("1 1");
         }
@@ -166,7 +168,7 @@ namespace WorkspaceServer.Tests
             var seed2 = 0;
             var step2 = step1.Then((number) => Task.FromResult($"{number} {Interlocked.Increment(ref seed2)}"));
             await step2.GetLatestAsync();
-        
+
             step2.Invalidate();
             var value = await step2.GetLatestAsync();
             value.Should().Be("1 2");
@@ -182,7 +184,7 @@ namespace WorkspaceServer.Tests
             var step2 = step1.Then((number) => Task.FromResult($"{number} {Interlocked.Increment(ref seed2)}"));
             var step3 = step2.Then((text) => Task.FromResult($"{text} {Interlocked.Increment(ref seed3)}"));
             await step3.GetLatestAsync();
-       
+
             step2.Invalidate();
             var value = await step3.GetLatestAsync();
             value.Should().Be("1 2 2");
