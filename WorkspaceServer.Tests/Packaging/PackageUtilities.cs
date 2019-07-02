@@ -43,18 +43,11 @@ namespace WorkspaceServer.Tests.Packaging
                     switch (info)
                     {
                         case FileInfo fileInfo:
-                            return FileLock.IsLockFile(fileInfo);
+                            return FileLock.IsLockFile(fileInfo) || fileInfo.Extension.EndsWith("binlog");
                         default:
                             return false;
                     }
                 });
-            }
-
-            var binLogs = destination.GetFiles("*.binlog");
-
-            foreach (var fileInfo in binLogs)
-            {
-                fileInfo.Delete();
             }
 
             Package copy;
