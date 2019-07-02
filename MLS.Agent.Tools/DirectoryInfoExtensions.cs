@@ -10,7 +10,8 @@ namespace MLS.Agent.Tools
     {
         public static void CopyTo(
             this DirectoryInfo source,
-            DirectoryInfo destination)
+            DirectoryInfo destination,
+            Func<FileSystemInfo,bool> skipWhen = null)
         {
             if (source == null)
             {
@@ -29,6 +30,11 @@ namespace MLS.Agent.Tools
 
             foreach (var file in source.GetFiles())
             {
+                if (skipWhen?.Invoke(file) == true)
+                {
+                    continue;
+                }
+
                 file.CopyTo(
                     Path.Combine(
                         destination.FullName, file.Name), false);
@@ -36,6 +42,11 @@ namespace MLS.Agent.Tools
 
             foreach (var subdirectory in source.GetDirectories())
             {
+                if (skipWhen?.Invoke(subdirectory) == true)
+                {
+                    continue;
+                }
+
                 subdirectory.CopyTo(
                     new DirectoryInfo(
                         Path.Combine(

@@ -38,7 +38,16 @@ namespace WorkspaceServer.Tests.Packaging
 
             using (await FileLock.TryCreateAsync(fromPackage.Directory))
             {
-                fromPackage.Directory.CopyTo(destination);
+                fromPackage.Directory.CopyTo(destination, info =>
+                {
+                    switch (info)
+                    {
+                        case FileInfo fileInfo:
+                            return FileLock.IsLockFile(fileInfo);
+                        default:
+                            return false;
+                    }
+                });
             }
 
             var binLogs = destination.GetFiles("*.binlog");

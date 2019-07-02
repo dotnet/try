@@ -59,7 +59,7 @@ namespace WorkspaceServer.Packaging
 
         public static bool IsLockFile(FileInfo fileInfo)
         {
-            return fileInfo.Name == LockFileName;
+            return fileInfo != null && fileInfo.Name == LockFileName;
         }
     }
 }
