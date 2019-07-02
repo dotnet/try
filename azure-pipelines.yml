@@ -21,8 +21,6 @@ variables:
     value: 3.0.100-preview6-012264
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
-  - name: warnAsError
-    value: false
 
 jobs:
 - template: /eng/common/templates/jobs/jobs.yml

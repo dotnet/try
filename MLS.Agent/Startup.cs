@@ -70,7 +70,9 @@ namespace MLS.Agent
                             options.EnableEndpointRouting = false;
                             options.Filters.Add(new ExceptionFilter());
                             options.Filters.Add(new BadRequestOnInvalidModelFilter());
+#pragma warning disable CS0618 // Type or member is obsolete
                         }).SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1)
+#pragma warning restore CS0618 // Type or member is obsolete
                         .AddNewtonsoftJson(o =>
                         {
                             o.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
