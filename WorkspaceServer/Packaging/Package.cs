@@ -464,7 +464,10 @@ namespace WorkspaceServer.Packaging
                 {
                     operation.Info("Attempting building package {name}", Name);
 
-                    var buildInProgress = Interlocked.CompareExchange(ref buildCount, 1, 0) == 0;
+                    // When a build finishes, buildCount is reset to 0. If, when we increment
+                    // the value, we get a value > 1, someone else has already started another
+                    // build
+                    var buildInProgress = Interlocked.Increment(ref buildCount) > 1;
 
                     await _buildSemaphore.WaitAsync();
 
@@ -504,7 +507,7 @@ namespace WorkspaceServer.Packaging
             using (var operation = _log.OnEnterAndConfirmOnExit())
             {
                 operation.Info("Attempting to publish package {name}", Name);
-                var publishInProgress = Interlocked.CompareExchange(ref publishCount, 1, 0) == 0;
+                var publishInProgress = Interlocked.Increment(ref publishCount) > 1;
                 await _publishSemaphore.WaitAsync();
 
                 if (publishInProgress)
