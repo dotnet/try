@@ -48,23 +48,23 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
             Signature = signature ?? string.Empty;
         }
 
-        public static Message CreateMessage(JupyterMessageContent content, Header parentHeader, IReadOnlyList<IReadOnlyList<byte>> identifiers = null, string signature = null)
+        public static Message Create(JupyterMessageContent content, Header parentHeader, IReadOnlyList<IReadOnlyList<byte>> identifiers = null, string signature = null)
         {
             if (content == null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
 
-            var messageType = GetMessageType(content);
-            var session = parentHeader.Session;
+            var messageType = JupyterMessageContent.GetMessageType(content);
+            var session = parentHeader?.Session ?? Guid.NewGuid().ToString();
 
-            var message = new Message(CreateHeader(messageType, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
+            var message = new Message(Header.Create(messageType, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
 
 
             return message;
         }
 
-        public static Message CreateResponseMessage(JupyterMessageContent content,
+        public static Message CreateResponse(JupyterMessageContent content,
             Message request)
         {
             if (content == null)
@@ -77,27 +77,10 @@ namespace Microsoft.DotNet.Try.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var replyMessage = CreateMessage(content, request.Header, request.Identifiers, request.Signature);
+            var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
 
             return replyMessage;
         }
 
-        private static string GetMessageType(JupyterMessageContent source)
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            var attribute = source.GetType().GetCustomAttribute<JupyterMessageTypeAttribute>() ?? throw new InvalidOperationException("source is not annotated with JupyterMessageTypeAttribute");
-
-            return attribute.Type;
-        }
-        private static Header CreateHeader(string messageType, string session)
-        {
-            var newHeader = new Header(messageType: messageType, messageId: Guid.NewGuid().ToString(), version: "5.3", username: Constants.USERNAME, session: session, date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-
-            return newHeader;
-        }
     }
 }
