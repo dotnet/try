@@ -105,16 +105,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                 eValue: $"{codeSubmissionEvaluationFailed.Error}"
             );
 
-            //  reply Error
-            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
-
-            // send to server
-            var executeReply = Message.CreateResponse(
-                executeReplyPayload,
-                openRequest.Context.Request);
-
-            openRequest.Context.ServerChannel.Send(executeReply);
-
             if (!openRequest.ExecuteRequest.Silent)
             {
                 // send on io
@@ -130,6 +120,16 @@ namespace Microsoft.DotNet.Try.Jupyter
                     openRequest.Context.Request.Header);
                 openRequest.Context.IoPubChannel.Send(stream);
             }
+
+            //  reply Error
+            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
+
+            // send to server
+            var executeReply = Message.CreateResponse(
+                executeReplyPayload,
+                openRequest.Context.Request);
+
+            openRequest.Context.ServerChannel.Send(executeReply);
 
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
         }
