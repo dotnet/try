@@ -120,7 +120,7 @@ namespace MLS.Agent
 
             var webHost = new WebHostBuilder()
                           .UseKestrel()
-                          .UseContentRoot(Directory.GetCurrentDirectory())
+                          .UseContentRoot(Path.GetDirectoryName(typeof(Program).Assembly.Location))
                           .ConfigureServices(c =>
                           {
                               if (!string.IsNullOrEmpty(options.ApplicationInsightsKey))
