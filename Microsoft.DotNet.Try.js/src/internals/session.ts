@@ -340,6 +340,10 @@ export class Session implements ISession {
         await this.setWorkspaceIfRequired();
         return this.completionListService.getCompletionList(this.workspace, fileName, position, region);
     }
+
+    getOpenDocuments(): IDocument[]{
+        return this.workspace.getAllOpenDocuments();
+    }
 }
 
 

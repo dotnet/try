@@ -92,7 +92,17 @@ describe("A user", () => {
             editorState.content.should.equal("file content");
             editorState.documentId.should.equal("program.cs");
         });
-
+        
+        it("can return the open documents", async() => {
+            let session = await createReadySession(configuration, editorIFrame, dom.window);
+            let defaultEditor = session.getTextEditor();
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }]});
+            await session.openProject(project);
+            await session.openDocument({ fileName: "program.cs", editorId: defaultEditor.id(), content:"i am a document" });
+            let documents = session.getOpenDocuments();
+            documents.should.have.length(1);
+            documents[0].getContent().should.equal("i am a document");
+        });
 
         describe("and with a document", () => {
             it("can set the content and affect editor", async () => {

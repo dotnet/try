@@ -200,7 +200,7 @@ export class Workspace {
         }
     }
 
-    private getAllOpenDocuments() {
+    public getAllOpenDocuments() {
         return Object.getOwnPropertyNames(this.openDocuments).map(n => this.openDocuments[n]);
     }
 
