@@ -9,8 +9,7 @@ using WorkspaceServer.Kernel;
 using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
-{
-    
+{    
     public class CodeSubmissionPreProcessorTests
     {
         private readonly CodeSubmissionProcessors _processors;
@@ -47,7 +46,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .And.Match("*#region code\nthis should remain\n#endregion*");
         }
 
-        class ReplaceAllProcessor : ICodeSubmissionProcessor
+        private class ReplaceAllProcessor : ICodeSubmissionProcessor
         {
             public ReplaceAllProcessor()
             {
@@ -62,7 +61,7 @@ namespace WorkspaceServer.Tests.Kernel
             }
         }
 
-        class PassThroughAllProcessor : ICodeSubmissionProcessor
+        private class PassThroughAllProcessor : ICodeSubmissionProcessor
         {
             public PassThroughAllProcessor()
             {

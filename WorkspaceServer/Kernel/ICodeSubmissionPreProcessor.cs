@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
@@ -28,8 +27,6 @@ namespace WorkspaceServer.Kernel
         {
             _rootCommand = new RootCommand();
         }
-
-        
 
         public void Register(ICodeSubmissionProcessor processor)
         {
@@ -57,11 +54,7 @@ namespace WorkspaceServer.Kernel
                     unhandledLines.Enqueue(currentLine);
                 }
             }
-
             return new SubmitCode(string.Join("\n", unhandledLines), codeSubmission.Id, codeSubmission.ParentId);
-            
         }
     }
-
-    
 }
