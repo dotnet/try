@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Try.Jupyter
  
             var errorContent = new Error(
                 eName: "Unhandled Exception",
-                eValue: $"{codeSubmissionEvaluationFailed.Error}"
+                eValue: $"{codeSubmissionEvaluationFailed.Message}"
             );
 
             if (!openRequest.ExecuteRequest.Silent)

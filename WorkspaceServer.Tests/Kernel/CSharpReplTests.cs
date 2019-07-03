@@ -61,6 +61,23 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task it_returns_diagnostics()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("using System;"));
+            await repl.SendAsync(new SubmitCode("aaaadd"));
+
+            KernelEvents.Last()
+                .Should()
+                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .Which
+                .Message
+                .Should()
+                .Be("(1,1): error CS0103: The name 'aaaadd' does not exist in the current context");
+        }
+
+        [Fact]
         public async Task it_notifies_when_submission_is_complete()
         {
             var repl = await CreateKernelAsync();

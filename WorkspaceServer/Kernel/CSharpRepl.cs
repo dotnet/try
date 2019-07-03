@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 
 namespace WorkspaceServer.Kernel
 {
@@ -98,7 +99,17 @@ namespace WorkspaceServer.Kernel
                 }
                 if (exception != null)
                 {
-                    _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
+                    var diagnostics = _scriptState?.Script?.GetDiagnostics() ?? Enumerable.Empty<Diagnostic>();
+                    if (diagnostics.Any())
+                    {
+                        var message = string.Join("\n", diagnostics.Select(d => d.GetMessage()));
+
+                        _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception, message));
+                    }
+                    else
+                    {
+                        _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
+                    }
                 }
                 else
                 {
@@ -142,6 +153,35 @@ namespace WorkspaceServer.Kernel
                 default:
                     throw new KernelCommandNotSupportedException(command, this);
             }
+        }
+    }
+
+    internal static class EnumerableExtensions
+    {
+        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> source, Comparison<T> compare)
+        {
+            var comparer = Comparer<T>.Create(compare);
+            return source.OrderBy(t => t, comparer);
+        }
+    }
+
+    internal static class ScriptExtensions
+    {
+        public static IEnumerable<Diagnostic> GetDiagnostics(this Script script)
+        {
+            if(script == null)
+            {
+                return Enumerable.Empty<Diagnostic>();
+            }
+
+            var compilation = script.GetCompilation();
+            var orderedDiagnostics = compilation.GetDiagnostics().OrderBy((d1, d2) =>
+            {
+                var severityDiff = (int)d2.Severity - (int)d1.Severity;
+                return severityDiff != 0 ? severityDiff : d1.Location.SourceSpan.Start - d2.Location.SourceSpan.Start;
+            });
+
+            return orderedDiagnostics;
         }
     }
 }
