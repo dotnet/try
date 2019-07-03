@@ -28,19 +28,24 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 
         public IRendering RenderObject(object source, IRenderingEngine engine = null)
         {
-
-            var rows = CreateRows(source, engine);
-            var table = $@"<table>
+            try
+            {
+                var rows = CreateRows(source, engine);
+                var table = $@"<table>
     {rows}
 </table>";
 
-            return new HtmlRendering(table);
+                return new HtmlRendering(table);
+            }
+            catch (Exception)
+            {
+                return new PlainTextRendering(source?.ToString());
+            }
         }
 
         private string CreateRows(object source, IRenderingEngine engine)
         {
-
-            var props = source.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            var props = source.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var rows = new StringBuilder();
             foreach (var propertyInfo in props)
             {
@@ -51,7 +56,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
                 rows.AppendLine(row);
             }
 
-            var fields = source.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
+            var fields = source.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
           
             foreach (var fieldInfo in fields)
             {

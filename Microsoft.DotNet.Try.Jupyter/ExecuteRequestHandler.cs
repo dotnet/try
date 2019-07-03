@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
@@ -42,8 +43,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         public ExecuteRequestHandler(IKernel kernel)
         {
             _kernel = kernel;
-            _renderingEngine = new RenderingEngine(new DefaultRenderer());
-            _renderingEngine = new RenderingEngine(new DefaultRenderer());
+            _renderingEngine = new RenderingEngine(new DefaultRenderer(), new PlainTextRendering("<null>"));
             _renderingEngine.RegisterRenderer<string>(new DefaultRenderer());
             _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
         }
 
-        private void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<Guid, OpenRequest> openRequests)
+        private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<Guid, OpenRequest> openRequests)
         {
             var openRequest = openRequests[codeSubmissionEvaluationFailed.ParentId];
  
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
 
             //  reply Error
-            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
+            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: openRequest.ExecutionCount);
 
             // send to server
             var executeReply = Message.CreateResponse(

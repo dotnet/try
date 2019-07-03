@@ -23,11 +23,19 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
 
         public RenderingTests()
         {
-            _engine = new RenderingEngine(new DefaultRenderer());
+            _engine = new RenderingEngine(new DefaultRenderer(), new PlainTextRendering("<null>"));
             _engine.RegisterRenderer<string>(new DefaultRenderer());
             _engine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _engine.RegisterRenderer(typeof(IList), new ListRenderer());
             _engine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
+        }
+
+        [Fact]
+        public void renders_null()
+        {
+            var rendering = _engine.Render(null);
+            rendering.Mime.Should().Be("text/plain");
+            rendering.Content.Should().Be("<null>");
         }
 
         [Fact]
