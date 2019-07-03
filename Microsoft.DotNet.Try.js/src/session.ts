@@ -55,6 +55,7 @@ export type OpenDocumentParameters={
     content?:string
 }
 export interface ISession {
+    getOpenDocuments(): IDocument[];
     openProject(project: Project): Promise<void>;
     openDocument(parameters:OpenDocumentParameters): Promise<IDocument>;
 
