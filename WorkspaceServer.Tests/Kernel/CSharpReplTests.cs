@@ -126,8 +126,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var x = 123;"));
-            await repl.SendAsync(new SubmitCode("x"));
+            await repl.SendAsync(new SubmitCode("var x = new List<int>{1,2};"));
+            await repl.SendAsync(new SubmitCode("x.Add(3);"));
+            await repl.SendAsync(new SubmitCode("x.Max()"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
@@ -136,7 +137,7 @@ namespace WorkspaceServer.Tests.Kernel
                         .Which
                         .Value
                         .Should()
-                        .Be(123);
+                        .Be(3);
         }
     }
 }
