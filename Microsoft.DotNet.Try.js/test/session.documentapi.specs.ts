@@ -77,7 +77,7 @@ describe("A user", () => {
             let document = await session.openDocument({ fileName: "program.cs", region: "controller" });
             document.id().should.equal("program.cs@controller");
             document.getContent().should.equal("//content");
-        })
+        });
 
         it("can open a document and bind it immediately to an editor", async () => {
             let editorState = { content: "", documentId: "" };
