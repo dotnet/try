@@ -34,7 +34,7 @@
     },
     "Jupyter": {
       "commandName": "Project",
-      "commandLineArgs": "try jupyter ../MLS.Agent.Tests/kernel_connection_file.json"
+      "commandLineArgs": "jupyter ../MLS.Agent.Tests/kernel_connection_file.json"
     }
   }
 }
