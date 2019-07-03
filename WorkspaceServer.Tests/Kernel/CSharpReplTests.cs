@@ -48,7 +48,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("throw new System.NotImplementedException();"));
+            await repl.SendAsync(new SubmitCode("using System;"));
+            await repl.SendAsync(new SubmitCode("throw new NotImplementedException();"));
 
             KernelEvents.Last()
                 .Should()

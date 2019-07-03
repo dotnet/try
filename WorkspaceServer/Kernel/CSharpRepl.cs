@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text;
@@ -23,6 +25,8 @@ namespace WorkspaceServer.Kernel
         private ScriptState _scriptState;
 
         protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        protected ScriptOptions ScriptOptions;
+
         protected StringBuilder _inputBuffer = new StringBuilder();
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
@@ -30,6 +34,23 @@ namespace WorkspaceServer.Kernel
         public CSharpRepl()
         {
             _channel = new Subject<IKernelEvent>();
+            SetupScriptOptions();
+        }
+
+        private void SetupScriptOptions()
+        {
+            ScriptOptions = ScriptOptions.Default
+                .AddImports(
+                    "System",
+                    "System.Text",
+                    "System.Collections",
+                    "System.Collections.Generic",
+                    "System.Threading.Tasks",
+                    "System.Linq")
+                .AddReferences(
+                    typeof(Enumerable).GetTypeInfo().Assembly,
+                    typeof(IEnumerable<>).GetTypeInfo().Assembly,
+                    typeof(Task<>).GetTypeInfo().Assembly);
         }
 
         public async Task SendAsync(SubmitCode submitCode, CancellationToken cancellationToken)
@@ -46,11 +67,22 @@ namespace WorkspaceServer.Kernel
                 {
                     if (_scriptState == null)
                     {
-                        _scriptState = await CSharpScript.RunAsync(code, cancellationToken: cancellationToken);
+                        _scriptState = await CSharpScript.RunAsync(
+                            code, 
+                            ScriptOptions, 
+                            cancellationToken: cancellationToken);
                     }
                     else
                     {
-                        _scriptState = await _scriptState.ContinueWithAsync(code, cancellationToken: cancellationToken);
+                        _scriptState = await _scriptState.ContinueWithAsync(
+                            code, 
+                            ScriptOptions, 
+                            e =>
+                            {
+                                exception = e;
+                                return true;
+                            },
+                            cancellationToken);
                     }
                 }
                 catch (Exception e)
