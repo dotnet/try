@@ -48,7 +48,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("throw new System.NotImplementedException();"));
+            await repl.SendAsync(new SubmitCode("using System;"));
+            await repl.SendAsync(new SubmitCode("throw new NotImplementedException();"));
 
             KernelEvents.Last()
                 .Should()
@@ -57,6 +58,23 @@ namespace WorkspaceServer.Tests.Kernel
                 .Error
                 .Should()
                 .BeOfType<NotImplementedException>();
+        }
+
+        [Fact]
+        public async Task it_returns_diagnostics()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("using System;"));
+            await repl.SendAsync(new SubmitCode("aaaadd"));
+
+            KernelEvents.Last()
+                .Should()
+                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .Which
+                .Message
+                .Should()
+                .Be("(1,1): error CS0103: The name 'aaaadd' does not exist in the current context");
         }
 
         [Fact]
@@ -125,8 +143,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var x = 123;"));
-            await repl.SendAsync(new SubmitCode("x"));
+            await repl.SendAsync(new SubmitCode("var x = new List<int>{1,2};"));
+            await repl.SendAsync(new SubmitCode("x.Add(3);"));
+            await repl.SendAsync(new SubmitCode("x.Max()"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
@@ -135,7 +154,7 @@ namespace WorkspaceServer.Tests.Kernel
                         .Which
                         .Value
                         .Should()
-                        .Be(123);
+                        .Be(3);
         }
     }
 }

@@ -11,17 +11,19 @@ namespace WorkspaceServer.Kernel
     public class RenderingEngine : IRenderingEngine
     {
         private readonly IRenderer _defaultRenderer;
+        private readonly IRendering _nullRendering;
         private readonly Dictionary<Type,IRenderer> _rendererRegistry = new Dictionary<Type, IRenderer>();
 
-        public RenderingEngine(IRenderer defaultRenderer)
+        public RenderingEngine(IRenderer defaultRenderer, IRendering nullRendering)
         {
             _defaultRenderer = defaultRenderer;
+            _nullRendering = nullRendering;
         }
         public IRendering Render(object source)
         {
             if (source == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                return _nullRendering;
             }
             var renderer = FindRenderer(source.GetType());
             return renderer.Render(source, this);

@@ -31,6 +31,10 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "Jupyter": {
+      "commandName": "Project",
+      "commandLineArgs": "jupyter ../MLS.Agent.Tests/kernel_connection_file.json"
     }
   }
 }

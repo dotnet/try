@@ -46,8 +46,8 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
         {
             if (IsStructured(sourceType))
             {
-                var props = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).OfType<MemberInfo>();
-                var fields = sourceType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).OfType<MemberInfo>();
+                var props = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OfType<MemberInfo>();
+                var fields = sourceType.GetFields(BindingFlags.Public | BindingFlags.Instance).OfType<MemberInfo>();
 
                 return props.Concat(fields);
             }

@@ -50,16 +50,6 @@ namespace WorkspaceServer.Kernel
     {
     }
 
-    public class SubmitCode : KernelCommandBase
-    {
-        public string Value { get; }
-
-        public SubmitCode(string value) : base()
-        {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-        }
-    }
-
     public class RequestCompletion : KernelCommandBase
     {
     }
