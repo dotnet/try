@@ -3,6 +3,7 @@
 
 using System;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 using FluentAssertions;
 using WorkspaceServer.Kernel;
@@ -46,6 +47,17 @@ namespace WorkspaceServer.Tests.Kernel
                 .And.Match("*#region code\nthis should remain\n#endregion*");
         }
 
+
+        [Fact]
+        public async Task processing_code_submission_respect_directive_order()
+        {
+            _processors.Register(new AppendProcessor());
+            var submission = new SubmitCode("#append --value PART1\n#append --value PART2\n#region code\nthis should remain\n#endregion");
+            submission = await _processors.ProcessAsync(submission);
+            submission.Value.Should().NotContain("#pass")
+                .And.Match("*#region code\nthis should remain\n#endregion\nPART1\nPART2*");
+        }
+
         private class ReplaceAllProcessor : ICodeSubmissionProcessor
         {
             public ReplaceAllProcessor()
@@ -73,6 +85,42 @@ namespace WorkspaceServer.Tests.Kernel
             public Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission)
             {
                 return Task.FromResult(codeSubmission);
+            }
+        }
+        public class AppendProcessorOptions
+        {
+            public string Value { get; }
+
+            public AppendProcessorOptions(string value)
+            {
+                Value = value;
+            }
+        }
+
+        private class AppendProcessor : ICodeSubmissionProcessor
+        {
+            private string _valueToAppend;
+            
+            public AppendProcessor()
+            {
+                Command = new Command("#append");
+                var valueOption = new Option("--value")
+                {
+                    Argument = new Argument<string>()
+                };
+                Command.AddOption(valueOption);
+
+                Command.Handler = CommandHandler.Create<AppendProcessorOptions>((options) =>
+                    {
+                        _valueToAppend = options.Value;
+                    });
+            }
+
+            public Command Command { get; }
+
+            public Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission)
+            {
+                return Task.FromResult(new SubmitCode(codeSubmission.Value + $"\n{_valueToAppend}" , codeSubmission.Id, codeSubmission.ParentId));
             }
         }
     }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
+using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
@@ -40,6 +41,7 @@ namespace WorkspaceServer.Kernel
 
                 if (result.CommandResult != null && _processors.TryGetValue(result.CommandResult.Command, out var processor))
                 {
+                    await _parser.InvokeAsync(result);
                     var newSubmission =  await processor.ProcessAsync(new SubmitCode(string.Join("\n", lines), codeSubmission.Id, codeSubmission.ParentId));
                     lines = new Queue<string>(newSubmission.Value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
                 }
