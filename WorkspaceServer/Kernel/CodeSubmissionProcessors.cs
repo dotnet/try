@@ -21,6 +21,7 @@ namespace WorkspaceServer.Kernel
         public CodeSubmissionProcessors()
         {
             _rootCommand = new RootCommand();
+            _parser = new CommandLineBuilder(_rootCommand).Build();
         }
 
         public void Register(ICodeSubmissionProcessor processor)

@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         private readonly RenderingEngine _renderingEngine;
         private readonly ConcurrentDictionary<Guid, OpenRequest> _openRequests = new ConcurrentDictionary<Guid, OpenRequest>();
         private int _executionCount;
+        private readonly CodeSubmissionProcessors _processors;
 
         private class OpenRequest
         {
@@ -48,20 +49,23 @@ namespace Microsoft.DotNet.Try.Jupyter
             _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
             _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
+            _processors = new CodeSubmissionProcessors();
 
             _kernel.KernelEvents.Subscribe(this);
         }
 
-        public Task Handle(JupyterRequestContext context)
+        public async Task Handle(JupyterRequestContext context)
         {
             var executeRequest = context.GetRequestContent<ExecuteRequest>() ?? throw new InvalidOperationException($"Request Content must be a not null {typeof(ExecuteRequest).Name}");
             context.RequestHandlerStatus.SetAsBusy();
             var command = new SubmitCode(executeRequest.Code);
+            command = await _processors.ProcessAsync(command);
             var id = command.Id;
             var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
             _openRequests[id] = new OpenRequest(context, executeRequest, executionCount, id, transient);
-            return _kernel.SendAsync(command);
+          
+            await _kernel.SendAsync(command);
         }
 
         void IObserver<IKernelEvent>.OnCompleted()
