@@ -87,20 +87,22 @@ namespace WorkspaceServer.Tests.Kernel
                 return Task.FromResult(codeSubmission);
             }
         }
-        public class AppendProcessorOptions
-        {
-            public string Value { get; }
-
-            public AppendProcessorOptions(string value)
-            {
-                Value = value;
-            }
-        }
+        
 
         private class AppendProcessor : ICodeSubmissionProcessor
         {
             private string _valueToAppend;
-            
+
+            private class AppendProcessorOptions
+            {
+                public string Value { get; }
+
+                public AppendProcessorOptions(string value)
+                {
+                    Value = value;
+                }
+            }
+
             public AppendProcessor()
             {
                 Command = new Command("#append");
