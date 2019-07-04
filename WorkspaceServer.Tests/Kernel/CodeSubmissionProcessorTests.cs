@@ -10,11 +10,11 @@ using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
 {    
-    public class CodeSubmissionPreProcessorTests
+    public class CodeSubmissionProcessorTests
     {
         private readonly CodeSubmissionProcessors _processors;
 
-        public CodeSubmissionPreProcessorTests()
+        public CodeSubmissionProcessorTests()
         {
             _processors = new CodeSubmissionProcessors();
         }
