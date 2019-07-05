@@ -35,8 +35,13 @@ namespace WorkspaceServer.Kernel
         public CSharpRepl()
         {
             _channel = new Subject<IKernelEvent>();
-            _processors = new CodeSubmissionProcessors();
             SetupScriptOptions();
+            SetupProcessors();
+        }
+
+        private void SetupProcessors()
+        {
+            _processors = new CodeSubmissionProcessors();
         }
 
         private void SetupScriptOptions()

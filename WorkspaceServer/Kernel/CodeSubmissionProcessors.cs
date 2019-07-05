@@ -24,7 +24,7 @@ namespace WorkspaceServer.Kernel
             _parser = new CommandLineBuilder(_rootCommand).Build();
         }
 
-        public void Register(ICodeSubmissionProcessor processor)
+        public void Add(ICodeSubmissionProcessor processor)
         {
             _processors[processor.Command] = processor;
             _rootCommand.AddCommand(processor.Command);
