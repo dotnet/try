@@ -42,6 +42,7 @@ namespace WorkspaceServer.Kernel
         private void SetupProcessors()
         {
             _processors = new CodeSubmissionProcessors();
+            _processors.Add(new EmitProcessors(() => _scriptState));
         }
 
         private void SetupScriptOptions()
