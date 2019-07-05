@@ -28,12 +28,14 @@ namespace WorkspaceServer.Kernel
         protected ScriptOptions ScriptOptions;
 
         protected StringBuilder _inputBuffer = new StringBuilder();
+        private CodeSubmissionProcessors _processors;
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
 
         public CSharpRepl()
         {
             _channel = new Subject<IKernelEvent>();
+            _processors = new CodeSubmissionProcessors();
             SetupScriptOptions();
         }
 
@@ -53,15 +55,17 @@ namespace WorkspaceServer.Kernel
                     typeof(Task<>).GetTypeInfo().Assembly);
         }
 
-        public async Task SendAsync(SubmitCode submitCode, CancellationToken cancellationToken)
+        public async Task SendAsync(SubmitCode codeSubmission, CancellationToken cancellationToken)
         {
-            _channel.OnNext(new CodeSubmissionReceived(submitCode.Id, submitCode.Value));
+            _channel.OnNext(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Value));
 
-            var (shouldExecute, code) = ComputeFullSubmission(submitCode.Value);
+            codeSubmission = await _processors.ProcessAsync(codeSubmission);
+
+            var (shouldExecute, code) = ComputeFullSubmission(codeSubmission.Value);
 
             if (shouldExecute)
             {
-                _channel.OnNext(new CompleteCodeSubmissionReceived(submitCode.Id));
+                _channel.OnNext(new CompleteCodeSubmissionReceived(codeSubmission.Id));
                 Exception exception = null;
                 try
                 {
@@ -94,7 +98,7 @@ namespace WorkspaceServer.Kernel
 
                 if (hasReturnValue)
                 {
-                    _channel.OnNext(new ValueProduced(submitCode.Id, _scriptState.ReturnValue));
+                    _channel.OnNext(new ValueProduced(codeSubmission.Id, _scriptState.ReturnValue));
                 }
                 if (exception != null)
                 {
@@ -103,21 +107,21 @@ namespace WorkspaceServer.Kernel
                     {
                         var message = string.Join("\n", diagnostics.Select(d => d.GetMessage()));
 
-                        _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception, message));
+                        _channel.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception, message));
                     }
                     else
                     {
-                        _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
+                        _channel.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception));
                     }
                 }
                 else
                 {
-                    _channel.OnNext(new CodeSubmissionEvaluated(submitCode.Id));
+                    _channel.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
                 }
             }
             else
             {
-                _channel.OnNext(new IncompleteCodeSubmissionReceived(submitCode.Id));
+                _channel.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission.Id));
             }
         }
 
