@@ -28,19 +28,12 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 
         public IRendering RenderObject(object source, IRenderingEngine engine = null)
         {
-            try
-            {
                 var rows = CreateRows(source, engine);
                 var table = $@"<table>
     {rows}
 </table>";
 
                 return new HtmlRendering(table);
-            }
-            catch (Exception)
-            {
-                return new PlainTextRendering(source?.ToString());
-            }
         }
 
         private string CreateRows(object source, IRenderingEngine engine)

@@ -57,14 +57,53 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             var executeRequest = context.GetRequestContent<ExecuteRequest>() ?? throw new InvalidOperationException($"Request Content must be a not null {typeof(ExecuteRequest).Name}");
             context.RequestHandlerStatus.SetAsBusy();
-            var command = new SubmitCode(executeRequest.Code);
-            command = await _processors.ProcessAsync(command);
-            var id = command.Id;
-            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
-            _openRequests[id] = new OpenRequest(context, executeRequest, executionCount, id, transient);
-          
-            await _kernel.SendAsync(command);
+            try
+            {
+                var command = new SubmitCode(executeRequest.Code);
+                command = await _processors.ProcessAsync(command);
+                var id = command.Id;
+                var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
+              
+               var  openRequest = new OpenRequest(context, executeRequest, executionCount, id, transient);
+                _openRequests[id] = openRequest;
+
+                await _kernel.SendAsync(command);
+            }
+            catch (Exception e)
+            {
+                var errorContent = new Error(
+                    eName: "Unhandled Exception",
+                    eValue: $"{e.Message}"
+                );
+
+                if (!executeRequest.Silent)
+                {
+                    // send on io
+                    var error = Message.Create(
+                        errorContent,
+                        context.Request.Header);
+                    context.IoPubChannel.Send(error);
+
+                    // send on stderr
+                    var stdErr = new StdErrStream(errorContent.EValue);
+                    var stream = Message.Create(
+                        stdErr,
+                        context.Request.Header);
+                    context.IoPubChannel.Send(stream);
+                }
+
+                //  reply Error
+                var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: executionCount);
+
+                // send to server
+                var executeReply = Message.CreateResponse(
+                    executeReplyPayload,
+                    context.Request);
+
+                context.ServerChannel.Send(executeReply);
+                context.RequestHandlerStatus.SetAsIdle();
+            }
         }
 
         void IObserver<IKernelEvent>.OnCompleted()
@@ -102,7 +141,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<Guid, OpenRequest> openRequests)
         {
             var openRequest = openRequests[codeSubmissionEvaluationFailed.ParentId];
- 
+
             var errorContent = new Error(
                 eName: "Unhandled Exception",
                 eValue: $"{codeSubmissionEvaluationFailed.Message}"
@@ -141,25 +180,50 @@ namespace Microsoft.DotNet.Try.Jupyter
             ConcurrentDictionary<Guid, OpenRequest> openRequests, RenderingEngine renderingEngine)
         {
             var openRequest = openRequests[valueProduced.ParentId];
-           
-            var rendering = renderingEngine.Render(valueProduced.Value);
-
-
-            // executeResult data
-            var executeResultData = new ExecuteResult(
-                openRequest.ExecutionCount,
-                transient: openRequest.Transient,
-                data: new Dictionary<string, object> {
-                    { rendering.Mime, rendering.Content}
-                });
-
-            if (!openRequest.ExecuteRequest.Silent)
+            try
             {
-                // send on io
-                var executeResultMessage = Message.Create(
-                    executeResultData,
-                    openRequest.Context.Request.Header);
-                openRequest.Context.IoPubChannel.Send(executeResultMessage);
+                var rendering = renderingEngine.Render(valueProduced.Value);
+
+                // executeResult data
+                var executeResultData = new ExecuteResult(
+                    openRequest.ExecutionCount,
+                    transient: openRequest.Transient,
+                    data: new Dictionary<string, object>
+                    {
+                        {rendering.Mime, rendering.Content}
+                    });
+
+                if (!openRequest.ExecuteRequest.Silent)
+                {
+                    // send on io
+                    var executeResultMessage = Message.Create(
+                        executeResultData,
+                        openRequest.Context.Request.Header);
+                    openRequest.Context.IoPubChannel.Send(executeResultMessage);
+                }
+            }
+            catch (Exception e)
+            {
+                var errorContent = new Error(
+                    eName: "Unhandled Exception",
+                    eValue: $"{e.Message}"
+                );
+
+                if (!openRequest.ExecuteRequest.Silent)
+                {
+                    // send on io
+                    var error = Message.Create(
+                        errorContent,
+                        openRequest.Context.Request.Header);
+                    openRequest.Context.IoPubChannel.Send(error);
+
+                    // send on stderr
+                    var stdErr = new StdErrStream(errorContent.EValue);
+                    var stream = Message.Create(
+                        stdErr,
+                        openRequest.Context.Request.Header);
+                    openRequest.Context.IoPubChannel.Send(stream);
+                }
             }
         }
 

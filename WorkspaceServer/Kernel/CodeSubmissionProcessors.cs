@@ -33,25 +33,37 @@ namespace WorkspaceServer.Kernel
 
         public async Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission)
         {
-            var lines = new Queue<string>( codeSubmission.Value.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None));
-            var unhandledLines = new Queue<string>();
-            while (lines.Count > 0)
+            try
             {
-                var currentLine = lines.Dequeue();
-                var result = _parser.Parse(currentLine);
+                var lines = new Queue<string>(codeSubmission.Value.Split(new[] {"\r\n", "\n"},
+                    StringSplitOptions.None));
+                var unhandledLines = new Queue<string>();
+                while (lines.Count > 0)
+                {
+                    var currentLine = lines.Dequeue();
+                    var result = _parser.Parse(currentLine);
 
-                if (result.CommandResult != null && _processors.TryGetValue(result.CommandResult.Command, out var processor))
-                {
-                    await _parser.InvokeAsync(result);
-                    var newSubmission =  await processor.ProcessAsync(new SubmitCode(string.Join("\n", lines), codeSubmission.Id, codeSubmission.ParentId));
-                    lines = new Queue<string>(newSubmission.Value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
+                    if (result.CommandResult != null &&
+                        _processors.TryGetValue(result.CommandResult.Command, out var processor))
+                    {
+                        await _parser.InvokeAsync(result);
+                        var newSubmission = await processor.ProcessAsync(new SubmitCode(string.Join("\n", lines),
+                            codeSubmission.Id, codeSubmission.ParentId));
+                        lines = new Queue<string>(newSubmission.Value.Split(new[] {"\r\n", "\n"},
+                            StringSplitOptions.None));
+                    }
+                    else
+                    {
+                        unhandledLines.Enqueue(currentLine);
+                    }
                 }
-                else
-                {
-                    unhandledLines.Enqueue(currentLine);
-                }
+
+                return new SubmitCode(string.Join("\n", unhandledLines), codeSubmission.Id, codeSubmission.ParentId);
             }
-            return new SubmitCode(string.Join("\n", unhandledLines), codeSubmission.Id, codeSubmission.ParentId);
+            catch (Exception e)
+            {
+                throw new CodeSubmissionProcessorException(e, codeSubmission);
+            }
         }
     }
 }
