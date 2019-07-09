@@ -64,9 +64,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.3" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0-preview6.19304.6" />
-
     <PackageReference Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>
