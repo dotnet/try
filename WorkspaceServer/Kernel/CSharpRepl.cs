@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text;
@@ -13,9 +14,85 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using CancellationToken = System.Threading.CancellationToken;
 
 namespace WorkspaceServer.Kernel
 {
+    public delegate Task KernelCommandPipelineMiddleware(
+        InvocationContext context,
+        Func<InvocationContext, Task> next);
+    
+
+    public class InvocationContext
+    {
+        public IKernelCommand Command { get; }
+        public CancellationToken CancellationToken { get; }
+
+        public InvocationContext(IKernelCommand command, CancellationToken cancellationToken)
+        {
+            Command = command;
+            CancellationToken = cancellationToken;
+        }
+    }
+
+  
+    public class KernelCommandPipeline {
+        public Task InvokeAsync(InvocationContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddMiddleware(KernelCommandPipelineMiddleware middleware)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public abstract class KernelBase: IKernel
+    {
+        protected KernelCommandPipeline Pipeline { get; }
+
+        private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
+        public IObservable<IKernelEvent> KernelEvents => _channel;
+
+        protected KernelBase()
+        {
+            Pipeline = new KernelCommandPipeline();
+        }
+        public Task SendAsync(IKernelCommand command, CancellationToken cancellationToken)
+        {
+            return Pipeline.InvokeAsync(new InvocationContext(command, cancellationToken));
+        }
+
+        public Task SendAsync(IKernelCommand command)
+        {
+            return SendAsync(command, CancellationToken.None);
+        }
+
+        protected void PublishEvent(IKernelEvent kernelEvent)
+        {
+            _channel.OnNext(kernelEvent);
+        }
+    }
+    public class CompositeKernel : KernelBase
+    {
+        public CompositeKernel(IReadOnlyList<IKernel> kernels)
+        {
+            kernels = kernels ?? throw new ArgumentNullException(nameof(kernels));
+            kernels.Select(k => k.KernelEvents).Merge().Subscribe(PublishEvent);
+            Pipeline.AddMiddleware(async (context, next) => {
+                foreach (var kernel in kernels.OfType<KernelBase>())
+                {
+                    await kernel.Pipeline.InvokeAsync(context);
+                    if (context.Result != null)
+                    {
+                        return;
+                    }
+                }
+            });
+        }
+      
+    }
+
     public class CSharpRepl : IKernel
     {
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
@@ -63,11 +140,11 @@ namespace WorkspaceServer.Kernel
 
         public async Task SendAsync(SubmitCode codeSubmission, CancellationToken cancellationToken)
         {
-            _channel.OnNext(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Value));
+            _channel.OnNext(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Code));
 
             codeSubmission = await _processors.ProcessAsync(codeSubmission);
 
-            var (shouldExecute, code) = ComputeFullSubmission(codeSubmission.Value);
+            var (shouldExecute, code) = ComputeFullSubmission(codeSubmission.Code);
 
             if (shouldExecute)
             {
