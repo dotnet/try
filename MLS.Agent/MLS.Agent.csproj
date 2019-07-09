@@ -64,7 +64,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.3" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0-preview6.19304.6" />
+
     <PackageReference Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>
@@ -124,31 +126,31 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="BuildCss" Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildCss" Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss" Outputs="$(OutputPath)wwwroot\css\trydotnet.css" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
 
     <PropertyGroup>
-      <_TryDotNetCssExists Condition="Exists('$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
+      <_TryDotNetCssExists Condition="Exists('$(OutputPath)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
     </PropertyGroup>
 
     <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
     <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
-    <Exec Command="npm run release -- $(MSBuildThisFileDirectory)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
+    <Exec Command="npm run release -- $(OutputPath)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
 
     <ItemGroup>
-      <FileWrites Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" />
+      <FileWrites Include="$(OutputPath)wwwroot\css\trydotnet.css" />
 
       <!-- if the file already existed then it'll already be in the @(Content) item group -->
-      <Content Include="$(MSBuildThisFileDirectory)wwwroot\css\trydotnet.css" Condition="'$(_TryDotNetCssExists)' != 'true'" />
+      <Content Include="$(OutputPath)wwwroot\css\trydotnet.css" Condition="'$(_TryDotNetCssExists)' != 'true'" />
     </ItemGroup>
   </Target>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1'">
     <PropertyGroup>
       <ClientInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Client</ClientInputDir>
-      <ClientOutputDir>$(MSBuildThisFileDirectory)wwwroot/client</ClientOutputDir>
-      <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
+      <ClientOutputDir>$(OutputPath)wwwroot/client</ClientOutputDir>
+      <ClientOutputFile>$(OutputPath/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
       <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
-      <TryDotNetJsOutputDir>$(MSBuildThisFileDirectory)wwwroot/api</TryDotNetJsOutputDir>
+      <TryDotNetJsOutputDir>$(OutputPath)wwwroot/api</TryDotNetJsOutputDir>
       <TryDotNetJsFile>$(TryDotNetJsOutputDir)/trydotnet.min.js</TryDotNetJsFile>
       <TryDotNetJsMap>$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
     </PropertyGroup>
