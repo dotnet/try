@@ -18,12 +18,11 @@
     },
     "MLS.Agent": {
       "commandName": "Project",
-      "commandLineArgs": "try C:/Users/dicolomb/source/repos/Public/TryDotNet.XamU.CSharp",
+      "commandLineArgs": "try",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:4242"
+      }
     },
     "Hosted": {
       "commandName": "Project",
