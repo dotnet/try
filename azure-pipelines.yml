@@ -205,9 +205,19 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
+      - task: CopyFiles@2
+        inputs:
+          contents: '$(Build.SourcesDirectory)/artifacts/bin/**'
+          targetFolder: $(Build.ArtifactStagingDirectory)/bin/
+
+      - task: CopyFiles@2
+        inputs:
+          contents: '_buildOutput/artifacts/packages/**'
+          targetFolder: $(Build.ArtifactStagingDirectory)/packages
+
       - task: PublishBuildArtifacts@1
         inputs:
-          pathtoPublish: '$(Build.SourcesDirectory)/artifacts'
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
           artifactName: drop
 
       - task: PublishTestResults@2
