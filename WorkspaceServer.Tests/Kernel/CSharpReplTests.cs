@@ -31,7 +31,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("123"));
+            await repl.SendAsync(new SubmitCode("123", "csharp"));
 
             KernelEvents.OfType<ValueProduced>()
                 .Last()
@@ -48,8 +48,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("using System;"));
-            await repl.SendAsync(new SubmitCode("throw new NotImplementedException();"));
+            await repl.SendAsync(new SubmitCode("using System;", "csharp"));
+            await repl.SendAsync(new SubmitCode("throw new NotImplementedException();", "csharp"));
 
             KernelEvents.Last()
                 .Should()
@@ -65,8 +65,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("using System;"));
-            await repl.SendAsync(new SubmitCode("aaaadd"));
+            await repl.SendAsync(new SubmitCode("using System;", "csharp"));
+            await repl.SendAsync(new SubmitCode("aaaadd", "csharp"));
 
             KernelEvents.Last()
                 .Should()
@@ -82,9 +82,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var a ="));
+            await repl.SendAsync(new SubmitCode("var a =", "csharp"));
 
-            await repl.SendAsync(new SubmitCode("12;"));
+            await repl.SendAsync(new SubmitCode("12;", "csharp"));
 
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
@@ -99,7 +99,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var a ="));
+            await repl.SendAsync(new SubmitCode("var a =", "csharp"));
 
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
@@ -114,7 +114,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("null"));
+            await repl.SendAsync(new SubmitCode("null", "csharp"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
@@ -131,7 +131,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var x = 1;"));
+            await repl.SendAsync(new SubmitCode("var x = 1;", "csharp"));
 
             KernelEvents
                 .Should()
@@ -143,9 +143,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var x = new List<int>{1,2};"));
-            await repl.SendAsync(new SubmitCode("x.Add(3);"));
-            await repl.SendAsync(new SubmitCode("x.Max()"));
+            await repl.SendAsync(new SubmitCode("var x = new List<int>{1,2};", "csharp"));
+            await repl.SendAsync(new SubmitCode("x.Add(3);", "csharp"));
+            await repl.SendAsync(new SubmitCode("x.Max()", "csharp"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
