@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
@@ -13,16 +14,18 @@ using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter
 {
-    public class ExecuteRequestHandler : IObserver<IKernelEvent>
+    public class ExecuteRequestHandler : IDisposable
     {
         private readonly IKernel _kernel;
         private readonly RenderingEngine _renderingEngine;
         private readonly ConcurrentDictionary<Guid, OpenRequest> _openRequests = new ConcurrentDictionary<Guid, OpenRequest>();
         private int _executionCount;
         private readonly CodeSubmissionProcessors _processors;
+        private readonly  CompositeDisposable _disposables = new CompositeDisposable();
 
-        private class OpenRequest
+        private class OpenRequest : IDisposable
         {
+            private readonly CompositeDisposable _disposables = new CompositeDisposable();
             public Guid Id { get; }
             public Dictionary<string, object> Transient { get; }
             public JupyterRequestContext Context { get; }
@@ -38,6 +41,16 @@ namespace Microsoft.DotNet.Try.Jupyter
                 Id = id;
                 Transient = transient;
             }
+
+            public void AddDisposable(IDisposable disposable)
+            {
+               _disposables.Add(disposable);
+            }
+
+            public void Dispose()
+            {
+                _disposables.Dispose();
+            }
         }
 
         public ExecuteRequestHandler(IKernel kernel)
@@ -49,8 +62,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
             _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
             _processors = new CodeSubmissionProcessors();
-
-            _kernel.KernelEvents.Subscribe(this);
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -58,9 +69,10 @@ namespace Microsoft.DotNet.Try.Jupyter
             var executeRequest = context.GetRequestContent<ExecuteRequest>() ?? throw new InvalidOperationException($"Request Content must be a not null {typeof(ExecuteRequest).Name}");
             context.RequestHandlerStatus.SetAsBusy();
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
+        
             try
             {
-                var command = new SubmitCode(executeRequest.Code);
+                var command = new SubmitCode(executeRequest.Code, "csharp");
                 command = await _processors.ProcessAsync(command);
                 var id = command.Id;
                 var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
@@ -68,7 +80,8 @@ namespace Microsoft.DotNet.Try.Jupyter
                var  openRequest = new OpenRequest(context, executeRequest, executionCount, id, transient);
                 _openRequests[id] = openRequest;
 
-                await _kernel.SendAsync(command);
+                var kernelResult = await _kernel.SendAsync(command);
+                openRequest.AddDisposable(kernelResult.Events.Subscribe(OnKernelResultEvent));
             }
             catch (Exception e)
             {
@@ -105,18 +118,9 @@ namespace Microsoft.DotNet.Try.Jupyter
                 context.RequestHandlerStatus.SetAsIdle();
             }
         }
+     
 
-        void IObserver<IKernelEvent>.OnCompleted()
-        {
-            throw new NotImplementedException();
-        }
-
-        void IObserver<IKernelEvent>.OnError(Exception error)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IObserver<IKernelEvent>.OnNext(IKernelEvent value)
+        void OnKernelResultEvent(IKernelEvent value)
         {
             switch (value)
             {
@@ -241,6 +245,11 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             openRequest.Context.ServerChannel.Send(executeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
+        }
+
+        public void Dispose()
+        {
+            _disposables.Dispose();
         }
     }
 }

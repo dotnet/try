@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,117 +11,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using CancellationToken = System.Threading.CancellationToken;
 
 namespace WorkspaceServer.Kernel
 {
-    public delegate Task KernelCommandPipelineMiddleware(
-        InvocationContext context,
-        Func<InvocationContext, Task> next);
-    
-
-    public class InvocationContext
-    {
-        public object Result { get; set; }
-        public IKernelCommand Command { get; }
-        public CancellationToken CancellationToken { get; }
-
-        public InvocationContext(IKernelCommand command, CancellationToken cancellationToken)
-        {
-            Command = command;
-            CancellationToken = cancellationToken;
-        }
-    }
-
-  
-    public class KernelCommandPipeline {
-        private readonly KernelBase _kernel;
-
-        private readonly List<KernelCommandPipelineMiddleware> _invocations = new List<KernelCommandPipelineMiddleware>();
-
-        public KernelCommandPipeline(KernelBase kernel)
-        {
-            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-        }
-
-        public async Task InvokeAsync(InvocationContext context)
-        {
-            var invocationChain = BuildInvocationChain();
-
-            await invocationChain(context, invocationContext => Task.CompletedTask);
-        }
-
-        private KernelCommandPipelineMiddleware BuildInvocationChain()
-        {
-            var invocations = new List<KernelCommandPipelineMiddleware>(_invocations);
-
-            invocations.Add(async (invocationContext, _) =>
-            {
-                await _kernel.HandleAsync(invocationContext);
-            });
-
-            return invocations.Aggregate(
-                (function, continuation) =>
-                    (ctx, next) =>
-                        function(ctx, c => continuation(c, next)));
-        }
-
-        public void AddMiddleware(KernelCommandPipelineMiddleware middleware)
-        {
-            _invocations.Add(middleware);
-        }
-    }
-    public abstract class KernelBase: IKernel
-    {
-        public KernelCommandPipeline Pipeline { get; }
-
-        private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
-        public IObservable<IKernelEvent> KernelEvents => _channel;
-
-        protected KernelBase()
-        {
-            Pipeline = new KernelCommandPipeline(this);
-        }
-        public Task SendAsync(IKernelCommand command, CancellationToken cancellationToken)
-        {
-            return Pipeline.InvokeAsync(new InvocationContext(command, cancellationToken));
-        }
-
-        public Task SendAsync(IKernelCommand command)
-        {
-            return SendAsync(command, CancellationToken.None);
-        }
-
-        protected void PublishEvent(IKernelEvent kernelEvent)
-        {
-            _channel.OnNext(kernelEvent);
-        }
-
-        protected internal abstract Task HandleAsync(InvocationContext context);
-    }
-    public class CompositeKernel : KernelBase
-    {
-        private readonly IReadOnlyList<IKernel> _kernels;
-
-        public CompositeKernel(IReadOnlyList<IKernel> kernels)
-        {
-            _kernels = kernels ?? throw new ArgumentNullException(nameof(kernels));
-            kernels.Select(k => k.KernelEvents).Merge().Subscribe(PublishEvent);
-        }
-
-        protected internal override async Task HandleAsync(InvocationContext context)
-        {
-            foreach (var kernel in _kernels.OfType<KernelBase>())
-            {
-                await kernel.Pipeline.InvokeAsync(context);
-                if (context.Result != null)
-                {
-                    return;
-                }
-            }
-        }
-    }
-
     public class CSharpRepl : KernelBase
     {
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
@@ -165,15 +55,18 @@ namespace WorkspaceServer.Kernel
                     typeof(Task<>).GetTypeInfo().Assembly);
         }
 
-        private async Task HandleCodeSubmission(SubmitCode codeSubmission, CancellationToken cancellationToken)
+        private async Task HandleCodeSubmission(SubmitCode codeSubmission, KernelCommandContext context)
         {
-            PublishEvent(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Code));
+            var commandResult = new KernelCommandResult();
+            commandResult.RelayEventsOn(PublishEvent);
+            context.Result = commandResult;
+            commandResult.OnNext(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Code));
 
             var (shouldExecute, code) = ComputeFullSubmission(codeSubmission.Code);
 
             if (shouldExecute)
             {
-                PublishEvent(new CompleteCodeSubmissionReceived(codeSubmission.Id));
+                commandResult.OnNext(new CompleteCodeSubmissionReceived(codeSubmission.Id));
                 Exception exception = null;
                 try
                 {
@@ -182,7 +75,7 @@ namespace WorkspaceServer.Kernel
                         _scriptState = await CSharpScript.RunAsync(
                             code, 
                             ScriptOptions, 
-                            cancellationToken: cancellationToken);
+                            cancellationToken: context.CancellationToken);
                     }
                     else
                     {
@@ -194,7 +87,7 @@ namespace WorkspaceServer.Kernel
                                 exception = e;
                                 return true;
                             },
-                            cancellationToken);
+                            context.CancellationToken);
                     }
                 }
                 catch (Exception e)
@@ -206,7 +99,7 @@ namespace WorkspaceServer.Kernel
 
                 if (hasReturnValue)
                 {
-                    PublishEvent(new ValueProduced(codeSubmission.Id, _scriptState.ReturnValue));
+                    commandResult.OnNext(new ValueProduced(codeSubmission.Id, _scriptState.ReturnValue));
                 }
                 if (exception != null)
                 {
@@ -215,21 +108,25 @@ namespace WorkspaceServer.Kernel
                     {
                         var message = string.Join("\n", diagnostics.Select(d => d.GetMessage()));
 
-                        PublishEvent(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception, message));
+                        commandResult.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception, message));
                     }
                     else
                     {
-                        PublishEvent(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception));
+                        commandResult.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception));
+                        
                     }
+                    commandResult.OnError(exception);
                 }
                 else
                 {
-                    PublishEvent(new CodeSubmissionEvaluated(codeSubmission.Id));
+                    commandResult.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
+                    commandResult.OnCompleted();
                 }
             }
             else
             {
-                PublishEvent(new IncompleteCodeSubmissionReceived(codeSubmission.Id));
+                commandResult.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission.Id));
+                commandResult.OnCompleted();
             }
         }
 
@@ -249,15 +146,14 @@ namespace WorkspaceServer.Kernel
             return (true, code);
         }
 
-        protected internal override Task HandleAsync(InvocationContext context)
+        protected internal override Task HandleAsync(KernelCommandContext context)
         {
             switch (context.Command)
             {
                 case SubmitCode submitCode:
                     if (submitCode.Language == "csharp")
                     {
-                        context.Result = new object();
-                        return HandleCodeSubmission(submitCode, context.CancellationToken);
+                        return HandleCodeSubmission(submitCode, context);
                     }
                     else
                     {
