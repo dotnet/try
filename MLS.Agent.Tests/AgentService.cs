@@ -70,7 +70,7 @@ namespace MLS.Agent.Tests
                           })
                           .UseTestEnvironment()
                           .UseStartup<Startup>()
-                          .ConfigureUrlUsingPort(_options.Port);
+                          .ConfigureUrlUsingPort(_options.Mode, _options.Port);
 
             return builder;
         }
