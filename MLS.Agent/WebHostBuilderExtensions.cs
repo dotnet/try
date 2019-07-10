@@ -11,15 +11,15 @@ namespace MLS.Agent
 {
     public static class WebHostBuilderExtensions
     {
-        public static IWebHostBuilder ConfigureUrlUsingPort(this IWebHostBuilder builder, int? port)
+        public static IWebHostBuilder ConfigureUrlUsingPort(this IWebHostBuilder builder, StartupMode mode, int? port)
         {
-            var uri = GetBrowserLaunchUri(IsLaunchedForDevelopment(), port);
+            var uri = GetBrowserLaunchUri(mode, port);
             return builder.UseUrls(uri.ToString());
         }
 
-        public static Uri GetBrowserLaunchUri(bool isLaunchedForDevelopment, int? port)
+        public static Uri GetBrowserLaunchUri(StartupMode mode, int? port)
         {
-            if (isLaunchedForDevelopment)
+            if (mode != StartupMode.Try)
             {
                return new Uri("http://localhost:4242");
             }
@@ -31,12 +31,6 @@ namespace MLS.Agent
             {
                 return new Uri($"https://localhost:{GetFreePort()}");
             }
-        }
-
-        private static bool IsLaunchedForDevelopment()
-        {
-            var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            return processName == "dotnet" || processName == "dotnet.exe";
         }
 
         private static int GetFreePort()

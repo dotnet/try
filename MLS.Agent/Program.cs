@@ -137,7 +137,7 @@ namespace MLS.Agent
                           })
                           .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
-                          .ConfigureUrlUsingPort(options.Port)
+                          .ConfigureUrlUsingPort(options.Port, options.Mode)
                           .Build();
 
             return webHost;
