@@ -60,6 +60,14 @@ namespace WorkspaceServer
                 _workingDirectory,
                 budget);
 
+        public Process StartProcess(string args, Action<string> output = null, Action<string> error = null) =>
+            CommandLine.StartProcess(
+                Path.FullName,
+                args,
+                _workingDirectory, 
+                output,
+                error);
+
         public Task<CommandLineResult> Publish(string args, Budget budget = null) =>
             Execute("publish".AppendArgs(args), budget);
 
