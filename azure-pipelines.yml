@@ -126,6 +126,30 @@ jobs:
     enableTelemetry: true
     helixRepo: dotnet/try
     jobs:
+    - job: IntegrationTest
+      pool:
+        vmImage: ubuntu-16.04
+      steps:
+      - checkout: none #skip checking out the default repository resource
+      - task: UseDotNet@2
+        displayName: Add dotnet
+        inputs:
+          packageType: sdk
+          version: $(DotNetSdkVersion)
+          installationPath: $(Agent.ToolsDirectory)/dotnet
+
+      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        displayName: Install Blazor templates
+
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Download Build Artifacts'
+        inputs:
+          artifactName: drop
+          downloadPath: $(System.DefaultWorkingDirectory)
+
+      dependsOn: Linux
+      condition: succeeded()
+
     - job: Linux
       pool:
         vmImage: ubuntu-16.04
@@ -180,6 +204,11 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.SourcesDirectory)/artifacts'
+          artifactName: drop
 
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
