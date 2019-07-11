@@ -2,42 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reactive.Subjects;
 
 namespace WorkspaceServer.Kernel
 {
-    internal class KernelCommandResult : IKernelCommandResult, IObserver<IKernelEvent>
+    internal class KernelCommandResult : IKernelCommandResult
     {
-        private readonly ReplaySubject<IKernelEvent> _events;
-        private Action<IKernelEvent> _eventRelay;
-
-        public KernelCommandResult()
+        public KernelCommandResult(IObservable<IKernelEvent> events)
         {
-            _events = new ReplaySubject<IKernelEvent>();
+            KernelEvents = events ?? throw new ArgumentNullException(nameof(events));
         }
 
-        public IObservable<IKernelEvent> Events => _events;
-
-
-        public void OnCompleted()
-        {
-            _events.OnCompleted();
-        }
-
-        public void OnError(Exception error)
-        {
-            _events.OnError(error);
-        }
-
-        public void OnNext(IKernelEvent kernelEvent)
-        {
-            _events.OnNext(kernelEvent);
-            _eventRelay?.Invoke(kernelEvent);
-        }
-
-        public void RelayEventsOn(Action<IKernelEvent> eventRelay)
-        {
-            _eventRelay = eventRelay;
-        }
+        public IObservable<IKernelEvent> KernelEvents { get; }
     }
 }

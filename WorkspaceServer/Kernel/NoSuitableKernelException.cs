@@ -5,8 +5,7 @@ using System;
 
 namespace WorkspaceServer.Kernel
 {
-    public interface IKernelCommandResult
+    public class NoSuitableKernelException : Exception
     {
-        IObservable<IKernelEvent> KernelEvents { get; }
     }
 }

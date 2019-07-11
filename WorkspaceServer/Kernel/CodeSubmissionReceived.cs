@@ -7,11 +7,11 @@ namespace WorkspaceServer.Kernel
 {
     public class CodeSubmissionReceived : KernelEventBase
     {
-        public string Value { get; }
-
-        public CodeSubmissionReceived(Guid parentId, string value) : base(parentId)
+        public CodeSubmissionReceived(string value, SubmitCode submitCode) : base(submitCode)
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
+
+        public string Value { get; }
     }
 }

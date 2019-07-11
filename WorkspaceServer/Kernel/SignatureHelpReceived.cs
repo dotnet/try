@@ -7,12 +7,9 @@ namespace WorkspaceServer.Kernel
 {
     public class SignatureHelpReceived : KernelEventBase
     {
-        public SignatureHelpReceived(IKernelCommand command) : this(command.Id)
+        public SignatureHelpReceived(IKernelCommand command) : base(command)
         {
         }
 
-        public SignatureHelpReceived(Guid parentId) : base(parentId)
-        {
-        }
     }
 }

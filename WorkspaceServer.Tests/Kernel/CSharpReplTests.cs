@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -55,7 +58,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .Should()
                 .BeOfType<CodeSubmissionEvaluationFailed>()
                 .Which
-                .Error
+                .Exception
                 .Should()
                 .BeOfType<NotImplementedException>();
         }
@@ -118,9 +121,6 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
-                        .Should()
-                        .BeOfType<ValueProduced>()
-                        .Which
                         .Value
                         .Should()
                         .BeNull();
@@ -149,12 +149,36 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
-                        .Should()
-                        .BeOfType<ValueProduced>()
-                        .Which
                         .Value
                         .Should()
                         .Be(3);
+        }
+
+        [Fact]
+        public async Task it_can_load_assembly_references_using_r_directive()
+        {
+            var kernel = await CreateKernelAsync();
+
+            var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
+
+            await kernel.SendAsync(
+                new SubmitCode($"#r \"{dll}\""));
+            await kernel.SendAsync(
+                new SubmitCode(@"
+using Newtonsoft.Json;
+
+var json = JsonConvert.SerializeObject(new { value = ""hello"" });
+
+json
+"));
+
+            KernelEvents.Should()
+                        .ContainSingle(e => e is ValueProduced);
+            KernelEvents.OfType<ValueProduced>()
+                        .Single()
+                        .Value
+                        .Should()
+                        .Be(new { value = "hello" }.ToJson());
         }
     }
 }

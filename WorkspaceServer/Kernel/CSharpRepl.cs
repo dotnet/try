@@ -16,6 +16,8 @@ namespace WorkspaceServer.Kernel
 {
     public class CSharpRepl : KernelBase
     {
+        internal const string KernelName = "csharp";
+
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -26,18 +28,12 @@ namespace WorkspaceServer.Kernel
 
         private StringBuilder _inputBuffer = new StringBuilder();
 
-
         public CSharpRepl()
         {
             SetupScriptOptions();
-            SetupPipeline();
         }
 
-        private void SetupPipeline()
-        {
-           
-           
-        }
+        public override string Name => KernelName;
 
         private void SetupScriptOptions()
         {
@@ -55,82 +51,7 @@ namespace WorkspaceServer.Kernel
                     typeof(Task<>).GetTypeInfo().Assembly);
         }
 
-        private async Task HandleCodeSubmission(SubmitCode codeSubmission, KernelCommandContext context)
-        {
-            var commandResult = new KernelCommandResult();
-            commandResult.RelayEventsOn(PublishEvent);
-            context.Result = commandResult;
-            commandResult.OnNext(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Code));
-
-            var (shouldExecute, code) = ComputeFullSubmission(codeSubmission.Code);
-
-            if (shouldExecute)
-            {
-                commandResult.OnNext(new CompleteCodeSubmissionReceived(codeSubmission.Id));
-                Exception exception = null;
-                try
-                {
-                    if (_scriptState == null)
-                    {
-                        _scriptState = await CSharpScript.RunAsync(
-                            code, 
-                            ScriptOptions, 
-                            cancellationToken: context.CancellationToken);
-                    }
-                    else
-                    {
-                        _scriptState = await _scriptState.ContinueWithAsync(
-                            code, 
-                            ScriptOptions, 
-                            e =>
-                            {
-                                exception = e;
-                                return true;
-                            },
-                            context.CancellationToken);
-                    }
-                }
-                catch (Exception e)
-                {
-                    exception = e;
-                }
-
-                var hasReturnValue = _scriptState != null && (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
-
-                if (hasReturnValue)
-                {
-                    commandResult.OnNext(new ValueProduced(codeSubmission.Id, _scriptState.ReturnValue));
-                }
-                if (exception != null)
-                {
-                    var diagnostics = _scriptState?.Script?.GetDiagnostics() ?? Enumerable.Empty<Diagnostic>();
-                    if (diagnostics.Any())
-                    {
-                        var message = string.Join("\n", diagnostics.Select(d => d.GetMessage()));
-
-                        commandResult.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception, message));
-                    }
-                    else
-                    {
-                        commandResult.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception));
-                        
-                    }
-                    commandResult.OnError(exception);
-                }
-                else
-                {
-                    commandResult.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
-                    commandResult.OnCompleted();
-                }
-            }
-            else
-            {
-                commandResult.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission.Id));
-                commandResult.OnCompleted();
-            }
-        }
-
-        private (bool shouldExecute, string completeSubmission) ComputeFullSubmission(string input)
+        private (bool shouldExecute, string completeSubmission) IsBufferACompleteSubmission(string input)
         {
             _inputBuffer.AppendLine(input);
 
@@ -146,23 +67,90 @@ namespace WorkspaceServer.Kernel
             return (true, code);
         }
 
-        protected internal override Task HandleAsync(KernelCommandContext context)
+        protected internal override async Task HandleAsync(
+            IKernelCommand command,
+            KernelPipelineContext context)
         {
-            switch (context.Command)
+            switch (command)
             {
                 case SubmitCode submitCode:
-                    if (submitCode.Language == "csharp")
+                    context.OnExecute(async invocationContext =>
                     {
-                        return HandleCodeSubmission(submitCode, context);
+                        await HandleSubmitCode(submitCode, invocationContext);
+                    });
+
+                    break;
+            }
+        }
+
+        private async Task HandleSubmitCode(
+            SubmitCode codeSubmission, 
+            KernelInvocationContext context)
+        {
+            var codeSubmissionReceived = new CodeSubmissionReceived(
+                codeSubmission.Code,
+                codeSubmission);
+            context.OnNext(codeSubmissionReceived);
+
+            var (shouldExecute, code) = IsBufferACompleteSubmission(codeSubmission.Code);
+
+            if (shouldExecute)
+            {
+                context.OnNext(new CompleteCodeSubmissionReceived(codeSubmission));
+                Exception exception = null;
+                try
+                {
+                    if (_scriptState == null)
+                    {
+                        _scriptState = await CSharpScript.RunAsync(
+                                           code, 
+                                           ScriptOptions);
                     }
                     else
                     {
-                        return Task.CompletedTask;
+                        _scriptState = await _scriptState.ContinueWithAsync(
+                                           code, 
+                                           ScriptOptions, 
+                                           e =>
+                                           {
+                                               exception = e;
+                                               return true;
+                                           });
                     }
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
 
-                default:
-                   return Task.CompletedTask;
+                if (HasReturnValue)
+                {
+                    context.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
+                }
+
+                if (exception != null)
+                {
+                    var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
+                                                     Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
+
+                    context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, codeSubmission));
+                    context.OnError(exception);
+                }
+                else
+                {
+                    context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
+                    context.OnCompleted();
+                }
+            }
+            else
+            {
+                context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
+                context.OnCompleted();
             }
         }
+
+        private bool HasReturnValue =>
+            _scriptState != null && 
+            (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
     }
 }

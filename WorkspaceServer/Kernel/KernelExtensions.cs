@@ -8,7 +8,9 @@ namespace WorkspaceServer.Kernel
 {
     public static class KernelExtensions
     {
-        public static Task<IKernelCommandResult> SendAsync(this IKernel kernel, IKernelCommand command)
+        public static Task<IKernelCommandResult> SendAsync(
+            this IKernel kernel, 
+            IKernelCommand command)
         {
             return kernel.SendAsync(command, CancellationToken.None);
         }

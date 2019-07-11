@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_executeReply_message_on_codeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_message_on_codeSubmissionEvaluated()
         {
             var kernel = new CSharpRepl();
 
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_executeResult_message_on_valueProduced()
+        public async Task sends_ExecuteReply_message_on_ValueProduced()
         {
             var kernel = new CSharpRepl();
 
@@ -98,6 +98,23 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             _ioRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(MessageTypeValues.ExecuteResult));
+        }
+
+        [Fact]
+        public async Task sends_ExecuteReply_message_when_submission_contains_only_a_directive()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpRepl()
+            };
+
+            var handler = new ExecuteRequestHandler(kernel);
+            var request = Message.Create(new ExecuteRequest("#kernel csharp"), null);
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            _serverRecordingSocket.DecodedMessages
+                .Should().Contain(message =>
+                    message.Contains(MessageTypeValues.ExecuteReply));
         }
     }
 }

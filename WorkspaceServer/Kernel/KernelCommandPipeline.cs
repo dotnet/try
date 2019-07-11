@@ -8,41 +8,56 @@ using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
 {
-    public class KernelCommandPipeline {
+    public class KernelCommandPipeline
+    {
         private readonly KernelBase _kernel;
 
-        private readonly List<KernelCommandPipelineMiddleware> _invocations = new List<KernelCommandPipelineMiddleware>();
+        private readonly List<KernelCommandPipelineMiddleware> _middlewares = new List<KernelCommandPipelineMiddleware>();
+
+        private KernelCommandPipelineMiddleware _pipeline;
 
         public KernelCommandPipeline(KernelBase kernel)
         {
             _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
         }
 
-        public async Task InvokeAsync(KernelCommandContext context)
+        private void EnsureMiddlewarePipelineIsInitialized()
         {
-            var invocationChain = BuildInvocationChain();
-
-            await invocationChain(context, invocationContext => Task.CompletedTask);
+            if (_pipeline == null)
+            {
+                _pipeline = BuildPipeline();
+            }
         }
 
-        private KernelCommandPipelineMiddleware BuildInvocationChain()
+        public async Task InvokeAsync(
+            IKernelCommand command,
+            KernelPipelineContext context)
         {
-            var invocations = new List<KernelCommandPipelineMiddleware>(_invocations);
+            EnsureMiddlewarePipelineIsInitialized();
 
-            invocations.Add(async (invocationContext, _) =>
+            await _pipeline(command, context, (_, __) => Task.CompletedTask);
+        }
+
+        private KernelCommandPipelineMiddleware BuildPipeline()
+        {
+            var invocations = new List<KernelCommandPipelineMiddleware>(_middlewares);
+
+            invocations.Add(async (command, context, _) =>
             {
-                await _kernel.HandleAsync(invocationContext);
+                await _kernel.HandleAsync(command, context);
             });
 
             return invocations.Aggregate(
                 (function, continuation) =>
-                    (ctx, next) =>
-                        function(ctx, c => continuation(c, next)));
+                    (cmd1, ctx1, next) =>
+                        function(cmd1, ctx1, (cmd2, ctx2) =>
+                                     continuation(cmd2, ctx2, next)));
         }
 
         public void AddMiddleware(KernelCommandPipelineMiddleware middleware)
         {
-            _invocations.Add(middleware);
+            _middlewares.Add(middleware);
+            _pipeline = null;
         }
     }
 }
