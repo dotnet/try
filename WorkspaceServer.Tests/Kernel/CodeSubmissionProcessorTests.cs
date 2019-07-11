@@ -22,7 +22,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public void can_register_processorHandlers()
         {
-            var action = new Action(() => _processors.Register(new ReplaceAllProcessor()));
+            var action = new Action(() => _processors.Add(new ReplaceAllProcessor()));
             action.Should().NotThrow();
             _processors.ProcessorsCount.Should().BeGreaterThan(0);
         }
@@ -30,20 +30,20 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task processing_code_submission_removes_processors()
         {
-            _processors.Register(new PassThroughAllProcessor());
+            _processors.Add(new PassThroughProcessor());
             var submission = new SubmitCode("#pass\nthis should remain");
             submission = await _processors.ProcessAsync(submission);
-            submission.Value.Should().NotContain("#pass")
+            submission.Code.Should().NotContain("#pass")
                 .And.Contain("this should remain");
         }
 
         [Fact]
         public async Task processing_code_submission_leaves_unprocessed_directives()
         {
-            _processors.Register(new PassThroughAllProcessor());
+            _processors.Add(new PassThroughProcessor());
             var submission = new SubmitCode("#pass\n#region code\nthis should remain\n#endregion");
             submission = await _processors.ProcessAsync(submission);
-            submission.Value.Should().NotContain("#pass")
+            submission.Code.Should().NotContain("#pass")
                 .And.Match("*#region code\nthis should remain\n#endregion*");
         }
 
@@ -51,10 +51,10 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task processing_code_submission_respect_directive_order()
         {
-            _processors.Register(new AppendProcessor());
+            _processors.Add(new AppendProcessor());
             var submission = new SubmitCode("#append --value PART1\n#append --value PART2\n#region code\nthis should remain\n#endregion");
             submission = await _processors.ProcessAsync(submission);
-            submission.Value.Should().NotContain("#pass")
+            submission.Code.Should().NotContain("#pass")
                 .And.Match("*#region code\nthis should remain\n#endregion\nPART1\nPART2*");
         }
 
@@ -69,13 +69,14 @@ namespace WorkspaceServer.Tests.Kernel
 
             public Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission)
             {
-                return Task.FromResult(new SubmitCode(string.Empty, codeSubmission.Id, codeSubmission.ParentId));
+                codeSubmission.Code = string.Empty;
+                return Task.FromResult(codeSubmission);
             }
         }
 
-        private class PassThroughAllProcessor : ICodeSubmissionProcessor
+        private class PassThroughProcessor : ICodeSubmissionProcessor
         {
-            public PassThroughAllProcessor()
+            public PassThroughProcessor()
             {
                 Command = new Command("#pass", "pass all code");
             }
@@ -122,7 +123,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             public Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission)
             {
-                return Task.FromResult(new SubmitCode(codeSubmission.Value + $"\n{_valueToAppend}" , codeSubmission.Id, codeSubmission.ParentId));
+                codeSubmission.Code = codeSubmission.Code + $"\n{_valueToAppend}";
+                return Task.FromResult(codeSubmission);
             }
         }
     }

@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,25 +14,29 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CSharpRepl : IKernel
+    public class CSharpRepl : KernelBase
     {
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        private readonly Subject<IKernelEvent> _channel;
         private ScriptState _scriptState;
 
         protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
         protected ScriptOptions ScriptOptions;
 
-        protected StringBuilder _inputBuffer = new StringBuilder();
+        private StringBuilder _inputBuffer = new StringBuilder();
 
-        public IObservable<IKernelEvent> KernelEvents => _channel;
 
         public CSharpRepl()
         {
-            _channel = new Subject<IKernelEvent>();
             SetupScriptOptions();
+            SetupPipeline();
+        }
+
+        private void SetupPipeline()
+        {
+           
+           
         }
 
         private void SetupScriptOptions()
@@ -53,15 +55,18 @@ namespace WorkspaceServer.Kernel
                     typeof(Task<>).GetTypeInfo().Assembly);
         }
 
-        public async Task SendAsync(SubmitCode submitCode, CancellationToken cancellationToken)
+        private async Task HandleCodeSubmission(SubmitCode codeSubmission, KernelCommandContext context)
         {
-            _channel.OnNext(new CodeSubmissionReceived(submitCode.Id, submitCode.Value));
+            var commandResult = new KernelCommandResult();
+            commandResult.RelayEventsOn(PublishEvent);
+            context.Result = commandResult;
+            commandResult.OnNext(new CodeSubmissionReceived(codeSubmission.Id, codeSubmission.Code));
 
-            var (shouldExecute, code) = ComputeFullSubmission(submitCode.Value);
+            var (shouldExecute, code) = ComputeFullSubmission(codeSubmission.Code);
 
             if (shouldExecute)
             {
-                _channel.OnNext(new CompleteCodeSubmissionReceived(submitCode.Id));
+                commandResult.OnNext(new CompleteCodeSubmissionReceived(codeSubmission.Id));
                 Exception exception = null;
                 try
                 {
@@ -70,7 +75,7 @@ namespace WorkspaceServer.Kernel
                         _scriptState = await CSharpScript.RunAsync(
                             code, 
                             ScriptOptions, 
-                            cancellationToken: cancellationToken);
+                            cancellationToken: context.CancellationToken);
                     }
                     else
                     {
@@ -82,7 +87,7 @@ namespace WorkspaceServer.Kernel
                                 exception = e;
                                 return true;
                             },
-                            cancellationToken);
+                            context.CancellationToken);
                     }
                 }
                 catch (Exception e)
@@ -94,7 +99,7 @@ namespace WorkspaceServer.Kernel
 
                 if (hasReturnValue)
                 {
-                    _channel.OnNext(new ValueProduced(submitCode.Id, _scriptState.ReturnValue));
+                    commandResult.OnNext(new ValueProduced(codeSubmission.Id, _scriptState.ReturnValue));
                 }
                 if (exception != null)
                 {
@@ -103,21 +108,25 @@ namespace WorkspaceServer.Kernel
                     {
                         var message = string.Join("\n", diagnostics.Select(d => d.GetMessage()));
 
-                        _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception, message));
+                        commandResult.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception, message));
                     }
                     else
                     {
-                        _channel.OnNext(new CodeSubmissionEvaluationFailed(submitCode.Id, exception));
+                        commandResult.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, exception));
+                        
                     }
+                    commandResult.OnError(exception);
                 }
                 else
                 {
-                    _channel.OnNext(new CodeSubmissionEvaluated(submitCode.Id));
+                    commandResult.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
+                    commandResult.OnCompleted();
                 }
             }
             else
             {
-                _channel.OnNext(new IncompleteCodeSubmissionReceived(submitCode.Id));
+                commandResult.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission.Id));
+                commandResult.OnCompleted();
             }
         }
 
@@ -137,20 +146,22 @@ namespace WorkspaceServer.Kernel
             return (true, code);
         }
 
-        public Task SendAsync(IKernelCommand command)
+        protected internal override Task HandleAsync(KernelCommandContext context)
         {
-            return SendAsync(command, CancellationToken.None);
-        }
-
-        public Task SendAsync(IKernelCommand command, CancellationToken cancellationToken)
-        {
-            switch (command)
+            switch (context.Command)
             {
                 case SubmitCode submitCode:
-                    return SendAsync(submitCode, cancellationToken);
+                    if (submitCode.Language == "csharp")
+                    {
+                        return HandleCodeSubmission(submitCode, context);
+                    }
+                    else
+                    {
+                        return Task.CompletedTask;
+                    }
 
                 default:
-                    throw new KernelCommandNotSupportedException(command, this);
+                   return Task.CompletedTask;
             }
         }
     }

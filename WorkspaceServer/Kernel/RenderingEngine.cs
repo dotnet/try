@@ -12,21 +12,30 @@ namespace WorkspaceServer.Kernel
     {
         private readonly IRenderer _defaultRenderer;
         private readonly IRendering _nullRendering;
-        private readonly Dictionary<Type,IRenderer> _rendererRegistry = new Dictionary<Type, IRenderer>();
+        private readonly Dictionary<Type, IRenderer> _rendererRegistry = new Dictionary<Type, IRenderer>();
 
         public RenderingEngine(IRenderer defaultRenderer, IRendering nullRendering)
         {
             _defaultRenderer = defaultRenderer;
             _nullRendering = nullRendering;
         }
+
         public IRendering Render(object source)
         {
-            if (source == null)
+            try
             {
-                return _nullRendering;
+                if (source == null)
+                {
+                    return _nullRendering;
+                }
+
+                var renderer = FindRenderer(source.GetType());
+                return renderer.Render(source, this);
             }
-            var renderer = FindRenderer(source.GetType());
-            return renderer.Render(source, this);
+            catch (Exception e)
+            {
+                throw new RenderingEngineException(e, source);
+            }
         }
 
         public IRenderer FindRenderer(Type sourceType)
@@ -98,7 +107,7 @@ namespace WorkspaceServer.Kernel
 
         public void RegisterRenderer<T>(IRenderer<T> renderer)
         {
-           RegisterRenderer(typeof(T), renderer);
+            RegisterRenderer(typeof(T), renderer);
         }
 
         public void RegisterRenderer<T>(IRenderer renderer)

@@ -31,7 +31,8 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public void cannot_handle_requests_that_are_not_executeRequest()
         {
-            var handler = new ExecuteRequestHandler(new KernelSimulator());
+            var kernel = new CSharpRepl();
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new DisplayData(), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             messageHandling.Should().ThrowExactly<InvalidOperationException>();
@@ -40,17 +41,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public async Task handles_executeRequest()
         {
-            var kernel = new KernelSimulator((command, channel) =>
-            {
-                switch (command)
-                {
-                    case SubmitCode _:
-                        return Task.CompletedTask;
-                    default:
-                        throw new NotImplementedException();
-                }
-            });
-            
+            var kernel = new CSharpRepl();
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
@@ -59,17 +50,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public async Task sends_executeReply_message_on_codeSubmissionEvaluated()
         {
-            var kernel = new KernelSimulator((command, channel) =>
-            {
-                switch (command)
-                {
-                    case SubmitCode codeSubmission:
-                        channel.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
-                        return Task.CompletedTask;
-                    default:
-                        throw new NotImplementedException();
-                }
-            });
+            var kernel = new CSharpRepl();
 
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
@@ -83,20 +64,10 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public async Task sends_executeReply_with_error_message_on_codeSubmissionEvaluated()
         {
-            var kernel = new KernelSimulator((command, channel) =>
-            {
-                switch (command)
-                {
-                    case SubmitCode codeSubmission:
-                        channel.OnNext(new CodeSubmissionEvaluationFailed(codeSubmission.Id, new InvalidOperationException("failed")));
-                        return Task.CompletedTask;
-                    default:
-                        throw new NotImplementedException();
-                }
-            });
+            var kernel = new CSharpRepl();
 
             var handler = new ExecuteRequestHandler(kernel);
-            var request = Message.Create(new ExecuteRequest("var a =12;"), null);
+            var request = Message.Create(new ExecuteRequest("asdes"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.DecodedMessages
@@ -114,21 +85,10 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         [Fact]
         public async Task sends_executeResult_message_on_valueProduced()
         {
-            var kernel = new KernelSimulator((command, channel) =>
-            {
-                switch (command)
-                {
-                    case SubmitCode codeSubmission:
-                        channel.OnNext(new ValueProduced(codeSubmission.Id, new[] { 1, 2, 3 }));
-                        channel.OnNext(new CodeSubmissionEvaluated(codeSubmission.Id));
-                        return Task.CompletedTask;
-                    default:
-                        throw new NotImplementedException();
-                }
-            });
+            var kernel = new CSharpRepl();
 
             var handler = new ExecuteRequestHandler(kernel);
-            var request = Message.Create(new ExecuteRequest("var a =12;"), null);
+            var request = Message.Create(new ExecuteRequest("2+2"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.DecodedMessages

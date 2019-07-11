@@ -1,15 +1,16 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
 {
-    public interface IKernel: IDisposable
+    public static class KernelExtensions
     {
-        IObservable<IKernelEvent> KernelEvents { get; }
-        Task<IKernelCommandResult> SendAsync(IKernelCommand command, CancellationToken cancellationToken);
+        public static Task<IKernelCommandResult> SendAsync(this IKernel kernel, IKernelCommand command)
+        {
+            return kernel.SendAsync(command, CancellationToken.None);
+        }
     }
 }
