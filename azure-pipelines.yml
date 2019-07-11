@@ -126,6 +126,8 @@ jobs:
     helixRepo: dotnet/try
     jobs:
     - job: IntegrationTest
+      dependsOn: Windows_NT
+      condition: succeeded()
       pool:
         vmImage: ubuntu-16.04
       steps:
