@@ -3,38 +3,86 @@
 
 using FluentAssertions;
 using MLS.Agent.CommandLine;
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using Xunit;
 namespace MLS.Agent.Tests
 {
     public class WebHostBuilderExtensionTests
     {
         [Theory]
-        [Inline()]
-        public void If_launched_for_development_localhost_4242_is_used_irrespective_of_mode()
+        [InlineData(StartupMode.Hosted)]
+        [InlineData(StartupMode.Try)]
+        public void If_launched_for_development_localhost_4242_is_used_irrespective_of_mode(StartupMode mode)
         {
-            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(true, StartupMode,null);
-            uri.ToString().Should().Be("http://localhost:4242/");
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(true, mode, null);
+            uri.Should().Be("http://localhost:4242");
         }
 
-        [Fact]
-        public void If_not_launched_for_development_and_port_is_specified_it_is_used()
+        public class WhenNotLaunchedForDevelopment
         {
-            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, 6000);
-            uri.ToString().Should().Be("https://localhost:6000/");
+
+            [Theory]
+            [InlineData(StartupMode.Try)]
+            [InlineData(StartupMode.Hosted)]
+            public void If_port_is_not_specified_a_free_port_is_returned(StartupMode mode)
+            {
+                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, mode, null);
+                CheckIfPortIsAvailable(GetPort(uri)).Should().BeTrue();
+            }
+
+            [Theory]
+            [InlineData(StartupMode.Try)]
+            [InlineData(StartupMode.Hosted)]
+            public void If_a_port_it_specified_it_is_used(StartupMode mode)
+            {
+                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, mode, 6000);
+                GetPort(uri).Should().Be(6000);
+            }
+
+            [Fact]
+            public void In_try_mode_host_should_be_localhost()
+            {
+                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, StartupMode.Try, 6000);
+                GetHost(uri).Should().Be("localhost");
+            }
+
+            [Fact]
+            public void In_hosted_mode_host_should_be_star()
+            {
+                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, StartupMode.Hosted, 6000);
+                GetHost(uri).Should().Be("*");
+            }
         }
 
-        [Fact]
-        public void If_not_launched_for_development_and_port_is_not_specified_a_free_port_is_returned()
+        private static long GetPort(string uri)
         {
-            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, null);
-            uri.AbsoluteUri.Should().Match("https://localhost:*/");
-            CheckIfPortIsAvailable(uri.Port).Should().BeTrue();
+            if(Uri.TryCreate(uri, UriKind.Absolute, out var result))
+            {
+                return result.Port;
+            }
+
+            Regex r = new Regex(@"^(?<host>.+):(?<port>\d+)$");
+            Match m = r.Match(uri);
+            return Convert.ToInt64(m.Groups["port"].Value);
         }
 
-        private static bool CheckIfPortIsAvailable(int port)
+        private static string GetHost(string uri)
+        {
+            if (Uri.TryCreate(uri, UriKind.Absolute, out var result))
+            {
+                return result.Host;
+            }
+
+            Regex r = new Regex(@"^(?<proto>.+)://(?<host>.+):(?<port>\d+)$");
+            Match m = r.Match(uri);
+            return m.Groups["host"].Value;
+        }
+
+        private static bool CheckIfPortIsAvailable(long port)
         {
             // Evaluate current system tcp connections. This is the same information provided
             // by the netstat command line application, just in .Net strongly-typed object
@@ -43,7 +91,7 @@ namespace MLS.Agent.Tests
             IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
 
-            return tcpConnInfoArray.FirstOrDefault(tcpi => tcpi.LocalEndPoint.Port == port) == null;
+            return tcpConnInfoArray.FirstOrDefault(tcpi => tcpi.LocalEndPoint.Port == (int)port) == null;
         }
     }
 }

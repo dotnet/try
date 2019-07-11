@@ -11,23 +11,23 @@ namespace MLS.Agent
 {
     public static class WebHostBuilderExtensions
     {
-        public static IWebHostBuilder ConfigureUrlUsingPort(this IWebHostBuilder builder, StartupMode mode,  int? port)
+        public static IWebHostBuilder ConfigureUrl(this IWebHostBuilder builder, StartupMode mode, int? port)
         {
             var uri = GetBrowserLaunchUri(IsLaunchedForDevelopment(), mode, port);
             return builder.UseUrls(uri.ToString());
         }
 
-        public static Uri GetBrowserLaunchUri(bool isLaunchedForDevelopment, StartupMode mode, int? port)
+        public static string GetBrowserLaunchUri(bool isLaunchedForDevelopment, StartupMode mode, int? port)
         {
             if (isLaunchedForDevelopment)
             {
-               return new Uri("http://localhost:4242");
+                return "http://localhost:4242";
             }
 
-            var portToUse = port.HasValue?port: GetFreePort();
+            var portToUse = port.HasValue ? port : GetFreePort();
             var domain = mode == StartupMode.Hosted ? "*" : "localhost";
 
-            return new Uri($"https://{domain}:{portToUse}");
+            return $"https://{domain}:{portToUse}";
         }
 
         private static bool IsLaunchedForDevelopment()
