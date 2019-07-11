@@ -146,7 +146,7 @@ jobs:
           artifactName: drop
           downloadPath: $(System.DefaultWorkingDirectory)
 
-      dependsOn: Linux
+      dependsOn: Windows_NT
       condition: succeeded()
 
     - job: Linux
