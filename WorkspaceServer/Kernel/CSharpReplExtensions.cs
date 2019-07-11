@@ -41,7 +41,9 @@ namespace WorkspaceServer.Kernel
 
                             if (parseResult.Errors.Count == 0)
                             {
-                                var nugetReference = parseResult.FindResultFor(packageRefArg).GetValueOrDefault<NugetPackageReference>();
+                                var nugetReference =
+                                    parseResult.FindResultFor(packageRefArg)
+                                               .GetValueOrDefault<NugetPackageReference>();
 
                                 pipelineContext.OnExecute(async invocationContext =>
                                 {

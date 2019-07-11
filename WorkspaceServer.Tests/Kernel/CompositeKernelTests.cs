@@ -2,23 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Extensions;
+using System.Linq;
+using System.Threading.Tasks;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class KernelCommandPipelineTests
+    public class CompositeKernelTests
     {
         private ITestOutputHelper _output;
 
-        public KernelCommandPipelineTests(ITestOutputHelper output)
+        public CompositeKernelTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -38,7 +36,10 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
-            var kernel = new CompositeKernel(new[] { new CSharpRepl().UseNugetDirective() });
+            var kernel = new CompositeKernel
+            {
+                new CSharpRepl().UseNugetDirective()
+            };
 
             var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
             await kernel.SendAsync(command);
@@ -49,7 +50,10 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_PackageAdded_event_is_raised()
         {
-            var kernel = new CompositeKernel(new[] { new CSharpRepl().UseNugetDirective() });
+            var kernel = new CompositeKernel
+            {
+                new CSharpRepl().UseNugetDirective()
+            };
 
             var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
 

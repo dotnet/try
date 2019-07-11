@@ -2,32 +2,37 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CompositeKernel : KernelBase
+    public class CompositeKernel : KernelBase, IEnumerable<IKernel>
     {
-        private readonly IReadOnlyList<IKernel> _kernels;
+        private readonly List<IKernel> _kernels = new List<IKernel>();
 
-        public CompositeKernel(IReadOnlyList<IKernel> kernels)
+        public CompositeKernel()
         {
-            _kernels = kernels ?? throw new ArgumentNullException(nameof(kernels));
-
             Pipeline.AddMiddleware(ChooseKernel);
+        }
 
-            AddDisposable(
-                kernels.Select(k => k.KernelEvents)
-                       .Merge()
-                       .Subscribe(PublishEvent));
+        public void Add(IKernel kernel)
+        {
+            if (kernel == null)
+            {
+                throw new ArgumentNullException(nameof(kernel));
+            }
+
+            _kernels.Add(kernel);
+
+            AddDisposable(kernel.KernelEvents.Subscribe(PublishEvent));
         }
 
         private Task ChooseKernel(
-            IKernelCommand command, 
-            KernelPipelineContext context, 
+            IKernelCommand command,
+            KernelPipelineContext context,
             KernelPipelineContinuation next)
         {
             if (context.Kernel == null)
@@ -55,5 +60,9 @@ namespace WorkspaceServer.Kernel
 
             throw new NoSuitableKernelException();
         }
+
+        public IEnumerator<IKernel> GetEnumerator() => _kernels.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
