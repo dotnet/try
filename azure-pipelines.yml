@@ -143,7 +143,7 @@ jobs:
       - task: DownloadBuildArtifacts@0
         displayName: 'Download Build Artifacts'
         inputs:
-          artifactName: drop
+          artifactName: packages
           downloadPath: $(System.DefaultWorkingDirectory)
 
       dependsOn: Windows_NT
@@ -203,21 +203,6 @@ jobs:
         displayName: Build / Test
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
-
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: '$(Build.SourcesDirectory)/artifacts/bin/**'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)/bin/
-
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: '$(Build.SourcesDirectory)/artifacts/packages/**'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)/packages/
-
-      # - task: PublishBuildArtifacts@1
-      #   inputs:
-      #     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      #     artifactName: drop
 
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
