@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
 {
-    public abstract class KernelBase: IKernel
+    public abstract class KernelBase : IKernel
     {
         public KernelCommandPipeline Pipeline { get; }
 
@@ -23,15 +23,27 @@ namespace WorkspaceServer.Kernel
             _disposables = new CompositeDisposable();
         }
 
-        public async Task<IKernelCommandResult> SendAsync(IKernelCommand command, CancellationToken cancellationToken)
+        public async Task<IKernelCommandResult> SendAsync(
+            IKernelCommand command,
+            CancellationToken cancellationToken)
         {
-            if (command == null) {
+            if (command == null)
+            {
                 throw new ArgumentNullException(nameof(command));
-
             }
-            var invocationContext = new KernelCommandContext(command, cancellationToken);
-            await Pipeline.InvokeAsync(invocationContext);
+
+            var invocationContext = new KernelCommandContext(cancellationToken);
+
+            await SendOnContextAsync(command, invocationContext);
+
             return invocationContext.Result;
+        }
+
+        public async Task SendOnContextAsync(
+            IKernelCommand command, 
+            KernelCommandContext invocationContext)
+        {
+            await Pipeline.InvokeAsync(command, invocationContext);
         }
 
         protected void PublishEvent(IKernelEvent kernelEvent)
@@ -40,21 +52,24 @@ namespace WorkspaceServer.Kernel
             {
                 throw new ArgumentNullException(nameof(kernelEvent));
             }
+
             _channel.OnNext(kernelEvent);
         }
+
         protected void AddDisposable(IDisposable disposable)
         {
             if (disposable == null)
             {
                 throw new ArgumentNullException(nameof(disposable));
             }
+
             _disposables.Add(disposable);
         }
 
-        protected internal abstract Task HandleAsync(KernelCommandContext context);
-        public void Dispose()
-        {
-            _disposables.Dispose();
-        }
+        protected internal abstract Task HandleAsync(
+            IKernelCommand command, 
+            KernelCommandContext context);
+
+        public void Dispose() => _disposables.Dispose();
     }
 }

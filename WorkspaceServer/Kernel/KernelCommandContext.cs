@@ -7,14 +7,15 @@ namespace WorkspaceServer.Kernel
 {
     public class KernelCommandContext
     {
-        public IKernelCommandResult Result { get; set; }
-        public IKernelCommand Command { get; }
-        public CancellationToken CancellationToken { get; }
-
-        public KernelCommandContext(IKernelCommand command, CancellationToken cancellationToken)
+        public KernelCommandContext(CancellationToken cancellationToken)
         {
-            Command = command;
             CancellationToken = cancellationToken;
         }
+
+        public IKernelCommandResult Result { get; set; }
+
+        public CancellationToken CancellationToken { get; }
+
+        internal IKernel Kernel { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace WorkspaceServer.Kernel
 {
     public delegate Task KernelCommandPipelineMiddleware(
+        IKernelCommand command,
         KernelCommandContext context,
-        Func<KernelCommandContext, Task> next);
+        KernelCommandPipelineContinuation next);
 }

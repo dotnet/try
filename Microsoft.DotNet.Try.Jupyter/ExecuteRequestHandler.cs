@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Try.Jupyter
     {
         private readonly IKernel _kernel;
         private readonly RenderingEngine _renderingEngine;
-        private readonly ConcurrentDictionary<Guid, OpenRequest> _openRequests = new ConcurrentDictionary<Guid, OpenRequest>();
+        private readonly ConcurrentDictionary<IKernelCommand, OpenRequest> _openRequests = new ConcurrentDictionary<IKernelCommand, OpenRequest>();
         private int _executionCount;
         private readonly CodeSubmissionProcessors _processors;
         private readonly  CompositeDisposable _disposables = new CompositeDisposable();
@@ -74,14 +74,16 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 var command = new SubmitCode(executeRequest.Code, "csharp");
                 command = await _processors.ProcessAsync(command);
-                var id = command.Id;
+
+                var id = Guid.NewGuid();
+
                 var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
               
                var  openRequest = new OpenRequest(context, executeRequest, executionCount, id, transient);
-                _openRequests[id] = openRequest;
+                _openRequests[command] = openRequest;
 
                 var kernelResult = await _kernel.SendAsync(command);
-                openRequest.AddDisposable(kernelResult.Events.Subscribe(OnKernelResultEvent));
+                openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
             }
             catch (Exception e)
             {
@@ -118,7 +120,6 @@ namespace Microsoft.DotNet.Try.Jupyter
                 context.RequestHandlerStatus.SetAsIdle();
             }
         }
-     
 
         void OnKernelResultEvent(IKernelEvent value)
         {
@@ -142,9 +143,9 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
         }
 
-        private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<Guid, OpenRequest> openRequests)
+        private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
         {
-            var openRequest = openRequests[codeSubmissionEvaluationFailed.ParentId];
+            var openRequest = openRequests[codeSubmissionEvaluationFailed.Command];
 
             var errorContent = new Error(
                 eName: "Unhandled Exception",
@@ -181,9 +182,9 @@ namespace Microsoft.DotNet.Try.Jupyter
         }
 
         private static void OnValueProduced(ValueProduced valueProduced,
-            ConcurrentDictionary<Guid, OpenRequest> openRequests, RenderingEngine renderingEngine)
+            ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests, RenderingEngine renderingEngine)
         {
-            var openRequest = openRequests[valueProduced.ParentId];
+            var openRequest = openRequests[valueProduced.Command];
             try
             {
                 var rendering = renderingEngine.Render(valueProduced.Value);
@@ -232,9 +233,9 @@ namespace Microsoft.DotNet.Try.Jupyter
         }
 
         private static void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated,
-            ConcurrentDictionary<Guid, OpenRequest> openRequests)
+            ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
         {
-            var openRequest = openRequests[codeSubmissionEvaluated.ParentId];
+            var openRequest = openRequests[codeSubmissionEvaluated.Command];
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
 

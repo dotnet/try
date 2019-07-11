@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
@@ -12,24 +12,48 @@ namespace WorkspaceServer.Kernel
     public class CompositeKernel : KernelBase
     {
         private readonly IReadOnlyList<IKernel> _kernels;
-        
 
         public CompositeKernel(IReadOnlyList<IKernel> kernels)
         {
             _kernels = kernels ?? throw new ArgumentNullException(nameof(kernels));
-            AddDisposable( kernels.Select(k => k.KernelEvents).Merge().Subscribe(PublishEvent));
+
+            Pipeline.AddMiddleware(ChooseKernel);
+
+            AddDisposable(
+                kernels.Select(k => k.KernelEvents)
+                       .Merge()
+                       .Subscribe(PublishEvent));
         }
 
-        protected internal override async Task HandleAsync(KernelCommandContext context)
+        private Task ChooseKernel(
+            IKernelCommand command, 
+            KernelCommandContext context, 
+            KernelCommandPipelineContinuation next)
         {
-            foreach (var kernel in _kernels.OfType<KernelBase>())
+            if (context.Kernel == null)
             {
-                await kernel.Pipeline.InvokeAsync(context);
-                if (context.Result != null)
+                if (_kernels.Count == 1)
                 {
-                    return;
+                    context.Kernel = _kernels[0];
                 }
             }
+
+            return next(command, context);
+        }
+
+        protected internal override async Task HandleAsync(
+            IKernelCommand command,
+            KernelCommandContext context)
+        {
+            var kernel = context.Kernel;
+
+            if (kernel is KernelBase kernelBase)
+            {
+                await kernelBase.SendOnContextAsync(command, context);
+                return;
+            }
+
+            throw new NoSuitableKernelException();
         }
     }
 }

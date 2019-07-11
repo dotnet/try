@@ -5,14 +5,7 @@ using System;
 
 namespace WorkspaceServer.Kernel
 {
-    public class PackageAdded : KernelEventBase
+    public class NoSuitableKernelException : Exception
     {
-        public PackageAdded(IKernelCommand command) : this(command.Id)
-        {
-        }
-
-        public PackageAdded(Guid parentId) : base(parentId)
-        {
-        }
     }
 }

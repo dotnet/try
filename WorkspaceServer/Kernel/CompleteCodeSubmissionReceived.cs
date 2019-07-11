@@ -7,7 +7,7 @@ namespace WorkspaceServer.Kernel
 {
     public class CompleteCodeSubmissionReceived : KernelEventBase
     {
-        public CompleteCodeSubmissionReceived(Guid parentId) : base(parentId)
+        public CompleteCodeSubmissionReceived(SubmitCode submitCode) : base(submitCode)
         {
         }
     }

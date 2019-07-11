@@ -10,7 +10,7 @@ using WorkspaceServer.Kernel;
 using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
-{    
+{
     public class CodeSubmissionProcessorTests
     {
         private readonly CodeSubmissionProcessors _processors;

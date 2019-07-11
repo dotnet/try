@@ -31,40 +31,34 @@ namespace WorkspaceServer.Kernel
             _parser = new CommandLineBuilder(_rootCommand).Build();
         }
 
-        public async Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission)
+        public async Task<SubmitCode> ProcessAsync(SubmitCode submitCode)
         {
-            try
+            var lines = new Queue<string>(submitCode.Code.Split(new[] { "\r\n", "\n" },
+                                                                    StringSplitOptions.None));
+            var unhandledLines = new Queue<string>();
+            while (lines.Count > 0)
             {
-                var lines = new Queue<string>(codeSubmission.Code.Split(new[] {"\r\n", "\n"},
-                    StringSplitOptions.None));
-                var unhandledLines = new Queue<string>();
-                while (lines.Count > 0)
+                var currentLine = lines.Dequeue();
+                var result = _parser.Parse(currentLine);
+
+                if (result.CommandResult != null &&
+                    _processors.TryGetValue(result.CommandResult.Command, out var processor))
                 {
-                    var currentLine = lines.Dequeue();
-                    var result = _parser.Parse(currentLine);
-
-                    if (result.CommandResult != null &&
-                        _processors.TryGetValue(result.CommandResult.Command, out var processor))
-                    {
-                        await _parser.InvokeAsync(result);
-                        codeSubmission.Code = string.Join("\n", lines);
-                        var newSubmission = await processor.ProcessAsync(codeSubmission);
-                        lines = new Queue<string>(newSubmission.Code.Split(new[] {"\r\n", "\n"},
-                            StringSplitOptions.None));
-                    }
-                    else
-                    {
-                        unhandledLines.Enqueue(currentLine);
-                    }
+                    await _parser.InvokeAsync(result);
+                    submitCode.Code = string.Join("\n", lines);
+                    var newSubmission = await processor.ProcessAsync(submitCode);
+                    lines = new Queue<string>(newSubmission.Code.Split(new[] { "\r\n", "\n" },
+                                                                       StringSplitOptions.None));
                 }
+                else
+                {
+                    unhandledLines.Enqueue(currentLine);
+                }
+            }
 
-                codeSubmission.Code = string.Join("\n", unhandledLines);
-                return codeSubmission;
-            }
-            catch (Exception e)
-            {
-                throw new CodeSubmissionProcessorException(e, codeSubmission);
-            }
+            submitCode.Code = string.Join("\n", unhandledLines);
+
+            return submitCode;
         }
     }
 }

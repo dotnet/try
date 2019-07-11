@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
 {
-    public interface IKernel: IDisposable
+    public interface IKernel : IDisposable
     {
         IObservable<IKernelEvent> KernelEvents { get; }
+
         Task<IKernelCommandResult> SendAsync(IKernelCommand command, CancellationToken cancellationToken);
     }
 }

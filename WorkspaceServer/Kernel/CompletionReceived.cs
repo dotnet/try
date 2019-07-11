@@ -7,7 +7,7 @@ namespace WorkspaceServer.Kernel
 {
     public class CompletionReceived : KernelEventBase
     {
-        public CompletionReceived(Guid parentId) : base(parentId)
+        public CompletionReceived(IKernelCommand command) : base(command)
         {
         }
     }

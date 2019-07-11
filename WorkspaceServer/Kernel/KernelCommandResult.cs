@@ -9,15 +9,15 @@ namespace WorkspaceServer.Kernel
     internal class KernelCommandResult : IKernelCommandResult, IObserver<IKernelEvent>
     {
         private readonly ReplaySubject<IKernelEvent> _events;
-        private Action<IKernelEvent> _eventRelay;
+        private Action<IKernelEvent> _publishGlobally;
 
-        public KernelCommandResult()
+        public KernelCommandResult(Action<IKernelEvent> publishGlobally)
         {
             _events = new ReplaySubject<IKernelEvent>();
+            _publishGlobally = publishGlobally;
         }
 
-        public IObservable<IKernelEvent> Events => _events;
-
+        public IObservable<IKernelEvent> KernelEvents => _events;
 
         public void OnCompleted()
         {
@@ -32,12 +32,7 @@ namespace WorkspaceServer.Kernel
         public void OnNext(IKernelEvent kernelEvent)
         {
             _events.OnNext(kernelEvent);
-            _eventRelay?.Invoke(kernelEvent);
-        }
-
-        public void RelayEventsOn(Action<IKernelEvent> eventRelay)
-        {
-            _eventRelay = eventRelay;
+            _publishGlobally?.Invoke(kernelEvent);
         }
     }
 }

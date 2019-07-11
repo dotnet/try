@@ -7,7 +7,7 @@ namespace WorkspaceServer.Kernel
 {
     public class CodeSubmissionEvaluated : KernelEventBase
     {
-        public CodeSubmissionEvaluated(Guid parentId) : base(parentId)
+        public CodeSubmissionEvaluated(IKernelCommand command) : base(command)
         {
         }
     }

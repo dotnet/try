@@ -5,8 +5,10 @@ using System;
 
 namespace WorkspaceServer.Kernel
 {
-    public interface IKernelCommandResult
+    public class NuGetPackageAdded : KernelEventBase
     {
-        IObservable<IKernelEvent> KernelEvents { get; }
+        public NuGetPackageAdded(IKernelCommand command) : base(command)
+        {
+        }
     }
 }
