@@ -21,7 +21,7 @@ namespace MLS.Agent
         {
             if (isLaunchedForDevelopment)
             {
-                return "http://localhost:4242";
+                return "https://localhost:4242";
             }
 
             var portToUse = port.HasValue ? port : GetFreePort();

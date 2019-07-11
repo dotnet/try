@@ -19,7 +19,7 @@ namespace MLS.Agent.Tests
         public void If_launched_for_development_localhost_4242_is_used_irrespective_of_mode(StartupMode mode)
         {
             var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(true, mode, null);
-            uri.Should().Be("http://localhost:4242");
+            uri.Should().Be("https://localhost:4242");
         }
 
         public class WhenNotLaunchedForDevelopment
