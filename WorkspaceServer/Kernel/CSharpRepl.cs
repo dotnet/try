@@ -16,6 +16,8 @@ namespace WorkspaceServer.Kernel
 {
     public class CSharpRepl : KernelBase
     {
+        internal const string KernelName = "csharp";
+
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -30,6 +32,8 @@ namespace WorkspaceServer.Kernel
         {
             SetupScriptOptions();
         }
+
+        public override string Name => KernelName;
 
         private void SetupScriptOptions()
         {
@@ -70,13 +74,10 @@ namespace WorkspaceServer.Kernel
             switch (command)
             {
                 case SubmitCode submitCode:
-                    if (submitCode.Language == "csharp")
+                    context.OnExecute(async invocationContext =>
                     {
-                        context.OnExecute(async invocationContext =>
-                        {
-                            await HandleSubmitCode(submitCode, invocationContext);
-                        });
-                    }
+                        await HandleSubmitCode(submitCode, invocationContext);
+                    });
 
                     break;
             }
@@ -103,8 +104,7 @@ namespace WorkspaceServer.Kernel
                     {
                         _scriptState = await CSharpScript.RunAsync(
                                            code, 
-                                           ScriptOptions, 
-                                           cancellationToken: context.CancellationToken);
+                                           ScriptOptions);
                     }
                     else
                     {
@@ -115,8 +115,7 @@ namespace WorkspaceServer.Kernel
                                            {
                                                exception = e;
                                                return true;
-                                           },
-                                           context.CancellationToken);
+                                           });
                     }
                 }
                 catch (Exception e)
@@ -124,10 +123,7 @@ namespace WorkspaceServer.Kernel
                     exception = e;
                 }
 
-                var hasReturnValue = _scriptState != null && 
-                                     (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
-
-                if (hasReturnValue)
+                if (HasReturnValue)
                 {
                     context.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
                 }
@@ -152,5 +148,9 @@ namespace WorkspaceServer.Kernel
                 context.OnCompleted();
             }
         }
+
+        private bool HasReturnValue =>
+            _scriptState != null && 
+            (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
     }
 }

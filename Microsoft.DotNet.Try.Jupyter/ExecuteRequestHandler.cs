@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.Try.Jupyter
         private readonly RenderingEngine _renderingEngine;
         private readonly ConcurrentDictionary<IKernelCommand, OpenRequest> _openRequests = new ConcurrentDictionary<IKernelCommand, OpenRequest>();
         private int _executionCount;
-        private readonly CodeSubmissionProcessors _processors;
         private readonly  CompositeDisposable _disposables = new CompositeDisposable();
 
         private class OpenRequest : IDisposable
@@ -34,7 +33,6 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             public OpenRequest(JupyterRequestContext context, ExecuteRequest executeRequest, int executionCount, Guid id, Dictionary<string, object> transient)
             {
-               
                 Context = context;
                 ExecuteRequest = executeRequest;
                 ExecutionCount = executionCount;
@@ -61,7 +59,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
             _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
-            _processors = new CodeSubmissionProcessors();
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -73,7 +70,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             try
             {
                 var command = new SubmitCode(executeRequest.Code, "csharp");
-                command = await _processors.ProcessAsync(command);
 
                 var id = Guid.NewGuid();
 

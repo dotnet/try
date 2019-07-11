@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 
 namespace WorkspaceServer.Kernel
 {
@@ -17,55 +17,21 @@ namespace WorkspaceServer.Kernel
                 Name = "package"
             };
 
-            var parser = new Command("#r")
+            var r = new Command("#r")
             {
                 packageRefArg
             };
 
-            repl.Pipeline.AddMiddleware(async (command, pipelineContext, next) =>
+            r.Handler = CommandHandler.Create<NugetPackageReference, KernelPipelineContext>(async (package, pipelineContext) =>
             {
-                switch (command)
+                pipelineContext.OnExecute(async invocationContext =>
                 {
-                    case SubmitCode submitCode:
-
-                        var lines = new Queue<string>(
-                            submitCode.Code.Split(new[] { "\r\n", "\n" }, 
-                                                  StringSplitOptions.None));
-
-                        var unhandledLines = new List<string>();
-
-                        while (lines.Count > 0)
-                        {
-                            var currentLine = lines.Dequeue();
-                            var parseResult = parser.Parse(currentLine);
-
-                            if (parseResult.Errors.Count == 0)
-                            {
-                                var nugetReference =
-                                    parseResult.FindResultFor(packageRefArg)
-                                               .GetValueOrDefault<NugetPackageReference>();
-
-                                pipelineContext.OnExecute(async invocationContext =>
-                                {
-                                    var addNuGetPackage = new AddNuGetPackage(nugetReference);
-
-                                    invocationContext.OnNext(new NuGetPackageAdded(addNuGetPackage));
-                                    invocationContext.OnCompleted();
-                                });
-                            }
-                            else
-                            {
-                                unhandledLines.Add(currentLine);
-                            }
-                        }
-
-                        submitCode.Code = string.Join("\n", unhandledLines);
-
-                        break;
-                }
-
-                await next(command, pipelineContext);
+                    invocationContext.OnNext(new NuGetPackageAdded(package));
+                    invocationContext.OnCompleted();
+                });
             });
+
+            repl.AddDirective(r);
 
             return repl;
         }

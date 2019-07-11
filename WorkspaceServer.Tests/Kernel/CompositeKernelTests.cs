@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using FluentAssertions;
 using System.Linq;
@@ -69,11 +70,57 @@ namespace WorkspaceServer.Tests.Kernel
 
             events.OfType<NuGetPackageAdded>()
                   .Single()
-                  .Command
-                  .As<AddNuGetPackage>()
-                  .NugetReference
+                  .PackageReference
                   .Should()
                   .BeEquivalentTo(new NugetPackageReference("PocketLogger", "1.2.3"));
+        }
+
+        [Fact]
+        public async Task Kernel_can_be_chosen_by_specifying_kernel_name()
+        {
+            var receivedOnFakeRepl = new List<IKernelCommand>();
+
+            var kernel = new CompositeKernel
+            {
+                new CSharpRepl(),
+                new FakeRepl("fake")
+                {
+                    Handle = (command, context) =>
+                    {
+                        receivedOnFakeRepl.Add(command);
+                        return Task.CompletedTask;
+                    }
+                }
+            };
+
+            await kernel.SendAsync(new SubmitCode("#kernel csharp"));
+            await kernel.SendAsync(new SubmitCode("var x = 123;"));
+            await kernel.SendAsync(new SubmitCode("#kernel fake"));
+            await kernel.SendAsync(new SubmitCode("hello!"));
+            await kernel.SendAsync(new SubmitCode("#kernel csharp"));
+            await kernel.SendAsync(new SubmitCode("x"));
+
+            receivedOnFakeRepl.Should()
+                              .BeEquivalentTo(new SubmitCode("hello!"));
+        }
+    }
+
+    public class FakeRepl : KernelBase
+    {
+        private readonly string _name;
+
+        public FakeRepl(string name)
+        {
+            _name = name;
+        }
+
+        public override string Name => _name;
+
+        public Func<IKernelCommand, KernelPipelineContext, Task> Handle { get; set; }
+
+        protected override Task HandleAsync(IKernelCommand command, KernelPipelineContext context)
+        {
+            return Handle(command, context);
         }
     }
 }

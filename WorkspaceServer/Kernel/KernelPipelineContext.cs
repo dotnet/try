@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
@@ -15,15 +14,10 @@ namespace WorkspaceServer.Kernel
         private readonly Action<IKernelEvent> _publishEvent;
         private readonly List<KernelInvocationContext> _invocations = new List<KernelInvocationContext>();
 
-        public KernelPipelineContext(
-            Action<IKernelEvent> publishEvent,
-            CancellationToken cancellationToken)
+        public KernelPipelineContext(Action<IKernelEvent> publishEvent)
         {
             _publishEvent = publishEvent;
-            CancellationToken = cancellationToken;
         }
-
-        public CancellationToken CancellationToken { get; }
 
         internal IKernel Kernel { get; set; }
 
@@ -36,8 +30,7 @@ namespace WorkspaceServer.Kernel
 
             _invocations.Add(new KernelInvocationContext(
                                  invocation,
-                                 _publishEvent,
-                                 CancellationToken));
+                                 _publishEvent));
         }
 
         internal async Task<IKernelCommandResult> InvokeAsync()

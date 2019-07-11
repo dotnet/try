@@ -3,7 +3,6 @@
 
 using System;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
@@ -16,15 +15,11 @@ namespace WorkspaceServer.Kernel
 
         public KernelInvocationContext(
             KernelCommandInvocation invocation,
-            Action<IKernelEvent> publishEvent,
-            CancellationToken cancellationToken)
+            Action<IKernelEvent> publishEvent)
         {
             _invocation = invocation;
             _publishEvent = publishEvent;
-            CancellationToken = cancellationToken;
         }
-
-        public CancellationToken CancellationToken { get; }
 
         public void OnCompleted()
         {
