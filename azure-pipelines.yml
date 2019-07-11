@@ -212,8 +212,8 @@ jobs:
 
       - task: CopyFiles@2
         inputs:
-          contents: '_buildOutput/artifacts/packages/**'
-          targetFolder: $(Build.ArtifactStagingDirectory)/packages
+          contents: '$(Build.SourcesDirectory)/artifacts/packages/**'
+          targetFolder: $(Build.ArtifactStagingDirectory)/packages/
 
       - task: PublishBuildArtifacts@1
         inputs:
