@@ -148,9 +148,6 @@ jobs:
           artifactName: packages
           downloadPath: $(System.DefaultWorkingDirectory)
 
-      dependsOn: Windows_NT
-      condition: succeeded()
-
     - job: Linux
       pool:
         vmImage: ubuntu-16.04
