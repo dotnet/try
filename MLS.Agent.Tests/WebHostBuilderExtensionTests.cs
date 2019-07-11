@@ -58,16 +58,16 @@ namespace MLS.Agent.Tests
             }
         }
 
-        private static long GetPort(string uri)
+        private static ushort GetPort(string uri)
         {
             if(Uri.TryCreate(uri, UriKind.Absolute, out var result))
             {
-                return result.Port;
+                return Convert.ToUInt16(result.Port);
             }
 
             Regex r = new Regex(@"^(?<host>.+):(?<port>\d+)$");
             Match m = r.Match(uri);
-            return Convert.ToInt64(m.Groups["port"].Value);
+            return Convert.ToUInt16(m.Groups["port"].Value);
         }
 
         private static string GetHost(string uri)
@@ -82,7 +82,7 @@ namespace MLS.Agent.Tests
             return m.Groups["host"].Value;
         }
 
-        private static bool CheckIfPortIsAvailable(long port)
+        private static bool CheckIfPortIsAvailable(ushort port)
         {
             // Evaluate current system tcp connections. This is the same information provided
             // by the netstat command line application, just in .Net strongly-typed object
@@ -91,7 +91,7 @@ namespace MLS.Agent.Tests
             IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
 
-            return tcpConnInfoArray.FirstOrDefault(tcpi => tcpi.LocalEndPoint.Port == (int)port) == null;
+            return tcpConnInfoArray.FirstOrDefault(tcpi => tcpi.LocalEndPoint.Port == port) == null;
         }
     }
 }
