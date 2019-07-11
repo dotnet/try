@@ -108,13 +108,12 @@ jobs:
         continueOnError: true
         condition: always()
 
-      - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        - task: PublishBuildArtifacts@1
-          displayName: Publish packages to artifacts container
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
-            artifactName: packages
-            artifactType: container
+      - task: PublishBuildArtifacts@1
+        displayName: Publish packages to artifacts container
+        inputs:
+          pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
+          artifactName: packages
+          artifactType: container
 
 - template: /eng/common/templates/jobs/jobs.yml
   parameters:
@@ -205,20 +204,20 @@ jobs:
         env:
           TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
-      - task: CopyFiles@2
-        inputs:
-          contents: '$(Build.SourcesDirectory)/artifacts/bin/**'
-          targetFolder: $(Build.ArtifactStagingDirectory)/bin/
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: '$(Build.SourcesDirectory)/artifacts/bin/**'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)/bin/
 
-      - task: CopyFiles@2
-        inputs:
-          contents: '$(Build.SourcesDirectory)/artifacts/packages/**'
-          targetFolder: $(Build.ArtifactStagingDirectory)/packages/
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: '$(Build.SourcesDirectory)/artifacts/packages/**'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)/packages/
 
-      - task: PublishBuildArtifacts@1
-        inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-          artifactName: drop
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      #     artifactName: drop
 
       - task: PublishTestResults@2
         displayName: Publish NPM Test Results
