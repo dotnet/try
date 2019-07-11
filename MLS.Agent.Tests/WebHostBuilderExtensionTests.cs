@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using MLS.Agent.CommandLine;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -10,10 +11,11 @@ namespace MLS.Agent.Tests
 {
     public class WebHostBuilderExtensionTests
     {
-        [Fact]
-        public void If_launched_for_development_4242_is_used()
+        [Theory]
+        [Inline()]
+        public void If_launched_for_development_localhost_4242_is_used_irrespective_of_mode()
         {
-            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(true, null);
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(true, StartupMode,null);
             uri.ToString().Should().Be("http://localhost:4242/");
         }
 
