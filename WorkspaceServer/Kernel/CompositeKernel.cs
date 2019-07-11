@@ -27,8 +27,8 @@ namespace WorkspaceServer.Kernel
 
         private Task ChooseKernel(
             IKernelCommand command, 
-            KernelCommandContext context, 
-            KernelCommandPipelineContinuation next)
+            KernelPipelineContext context, 
+            KernelPipelineContinuation next)
         {
             if (context.Kernel == null)
             {
@@ -43,7 +43,7 @@ namespace WorkspaceServer.Kernel
 
         protected internal override async Task HandleAsync(
             IKernelCommand command,
-            KernelCommandContext context)
+            KernelPipelineContext context)
         {
             var kernel = context.Kernel;
 

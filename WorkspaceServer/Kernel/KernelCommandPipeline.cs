@@ -12,8 +12,9 @@ namespace WorkspaceServer.Kernel
     {
         private readonly KernelBase _kernel;
 
-        private readonly List<KernelCommandPipelineMiddleware> _invocations = new List<KernelCommandPipelineMiddleware>();
-        private KernelCommandPipelineMiddleware _invocationChain;
+        private readonly List<KernelCommandPipelineMiddleware> _middlewares = new List<KernelCommandPipelineMiddleware>();
+
+        private KernelCommandPipelineMiddleware _pipeline;
 
         public KernelCommandPipeline(KernelBase kernel)
         {
@@ -22,24 +23,24 @@ namespace WorkspaceServer.Kernel
 
         private void EnsureMiddlewarePipelineIsInitialized()
         {
-            if (_invocationChain == null)
+            if (_pipeline == null)
             {
-                _invocationChain = BuildInvocationChain();
+                _pipeline = BuildPipeline();
             }
         }
 
         public async Task InvokeAsync(
             IKernelCommand command,
-            KernelCommandContext context)
+            KernelPipelineContext context)
         {
             EnsureMiddlewarePipelineIsInitialized();
 
-            await _invocationChain(command, context, (_, __) => Task.CompletedTask);
+            await _pipeline(command, context, (_, __) => Task.CompletedTask);
         }
 
-        private KernelCommandPipelineMiddleware BuildInvocationChain()
+        private KernelCommandPipelineMiddleware BuildPipeline()
         {
-            var invocations = new List<KernelCommandPipelineMiddleware>(_invocations);
+            var invocations = new List<KernelCommandPipelineMiddleware>(_middlewares);
 
             invocations.Add(async (command, context, _) =>
             {
@@ -55,8 +56,8 @@ namespace WorkspaceServer.Kernel
 
         public void AddMiddleware(KernelCommandPipelineMiddleware middleware)
         {
-            _invocations.Add(middleware);
-            _invocationChain = null;
+            _middlewares.Add(middleware);
+            _pipeline = null;
         }
     }
 }

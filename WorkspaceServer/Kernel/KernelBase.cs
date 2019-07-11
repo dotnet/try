@@ -32,16 +32,18 @@ namespace WorkspaceServer.Kernel
                 throw new ArgumentNullException(nameof(command));
             }
 
-            var invocationContext = new KernelCommandContext(cancellationToken);
+            var pipelineContext = new KernelPipelineContext(
+                PublishEvent,
+                cancellationToken);
 
-            await SendOnContextAsync(command, invocationContext);
+            await SendOnContextAsync(command, pipelineContext);
 
-            return invocationContext.Result;
+            return await pipelineContext.InvokeAsync();
         }
 
         public async Task SendOnContextAsync(
             IKernelCommand command, 
-            KernelCommandContext invocationContext)
+            KernelPipelineContext invocationContext)
         {
             await Pipeline.InvokeAsync(command, invocationContext);
         }
@@ -68,7 +70,7 @@ namespace WorkspaceServer.Kernel
 
         protected internal abstract Task HandleAsync(
             IKernelCommand command, 
-            KernelCommandContext context);
+            KernelPipelineContext context);
 
         public void Dispose() => _disposables.Dispose();
     }

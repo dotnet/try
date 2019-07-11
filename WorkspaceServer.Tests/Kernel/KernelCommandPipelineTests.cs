@@ -4,15 +4,25 @@
 using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using WorkspaceServer.Kernel;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
     public class KernelCommandPipelineTests
     {
+        private ITestOutputHelper _output;
+
+        public KernelCommandPipelineTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact(Skip = "WIP")]
         public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_the_submission_is_passed_to_fsi()
         {

@@ -22,7 +22,7 @@ namespace WorkspaceServer.Kernel
                 packageRefArg
             };
 
-            repl.Pipeline.AddMiddleware(async (command, context, next) =>
+            repl.Pipeline.AddMiddleware(async (command, pipelineContext, next) =>
             {
                 switch (command)
                 {
@@ -43,11 +43,13 @@ namespace WorkspaceServer.Kernel
                             {
                                 var nugetReference = parseResult.FindResultFor(packageRefArg).GetValueOrDefault<NugetPackageReference>();
 
-                                var addNuGetPackage = new AddNuGetPackage(nugetReference);
+                                pipelineContext.OnExecute(async invocationContext =>
+                                {
+                                    var addNuGetPackage = new AddNuGetPackage(nugetReference);
 
-                                await repl.SendAsync(
-                                    addNuGetPackage, 
-                                    context.CancellationToken);
+                                    invocationContext.OnNext(new NuGetPackageAdded(addNuGetPackage));
+                                    invocationContext.OnCompleted();
+                                });
                             }
                             else
                             {
@@ -60,7 +62,7 @@ namespace WorkspaceServer.Kernel
                         break;
                 }
 
-                await next(command, context);
+                await next(command, pipelineContext);
             });
 
             return repl;

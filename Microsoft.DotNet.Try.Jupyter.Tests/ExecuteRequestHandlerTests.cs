@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_executeReply_message_on_codeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_message_on_codeSubmissionEvaluated()
         {
             var kernel = new CSharpRepl();
 
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_executeResult_message_on_valueProduced()
+        public async Task sends_ExecuteReply_message_on_ValueProduced()
         {
             var kernel = new CSharpRepl();
 

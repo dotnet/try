@@ -65,53 +65,37 @@ namespace WorkspaceServer.Kernel
 
         protected internal override async Task HandleAsync(
             IKernelCommand command,
-            KernelCommandContext context)
+            KernelPipelineContext context)
         {
             switch (command)
             {
                 case SubmitCode submitCode:
                     if (submitCode.Language == "csharp")
                     {
-                        await HandleSubmitCode(submitCode, context);
+                        context.OnExecute(async invocationContext =>
+                        {
+                            await HandleSubmitCode(submitCode, invocationContext);
+                        });
                     }
-
-                    break;
-
-                case AddNuGetPackage addPackage:
-
-                    await HandleAddNugetPackage(addPackage, context);
 
                     break;
             }
         }
 
-        private async Task HandleAddNugetPackage(
-            AddNuGetPackage addPackage,
-            KernelCommandContext context)
-        {
-            // FIX: (HandleAddNugetPackage) 
-
-
-
-
-
-        }
-
         private async Task HandleSubmitCode(
             SubmitCode codeSubmission, 
-            KernelCommandContext context)
+            KernelInvocationContext context)
         {
-            var commandResult = new KernelCommandResult(PublishEvent);
-            context.Result = commandResult;
-            commandResult.OnNext(new CodeSubmissionReceived(
-                                     codeSubmission.Code,
-                                     codeSubmission));
+            var codeSubmissionReceived = new CodeSubmissionReceived(
+                codeSubmission.Code,
+                codeSubmission);
+            context.OnNext(codeSubmissionReceived);
 
             var (shouldExecute, code) = IsBufferACompleteSubmission(codeSubmission.Code);
 
             if (shouldExecute)
             {
-                commandResult.OnNext(new CompleteCodeSubmissionReceived(codeSubmission));
+                context.OnNext(new CompleteCodeSubmissionReceived(codeSubmission));
                 Exception exception = null;
                 try
                 {
@@ -145,7 +129,7 @@ namespace WorkspaceServer.Kernel
 
                 if (hasReturnValue)
                 {
-                    commandResult.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
+                    context.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
                 }
 
                 if (exception != null)
@@ -153,21 +137,19 @@ namespace WorkspaceServer.Kernel
                     var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
                                                      Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
 
-                    commandResult.OnNext(new CodeSubmissionEvaluationFailed(exception, message, codeSubmission));
-
-
-                    commandResult.OnError(exception);
+                    context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, codeSubmission));
+                    context.OnError(exception);
                 }
                 else
                 {
-                    commandResult.OnNext(new CodeSubmissionEvaluated(codeSubmission));
-                    commandResult.OnCompleted();
+                    context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
+                    context.OnCompleted();
                 }
             }
             else
             {
-                commandResult.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
-                commandResult.OnCompleted();
+                context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
+                context.OnCompleted();
             }
         }
     }
