@@ -3,6 +3,7 @@
 
 using MLS.Agent.Tools;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using WorkspaceServer.Packaging;
 
@@ -14,10 +15,11 @@ namespace WorkspaceServer.WorkspaceFeatures
         {
             Name = name;
             DirectoryAccessor = directoryAccessor;
+            FilePath = DirectoryAccessor.GetFullyQualifiedFilePath(Name.ExecutableName()).FullName;
         }
 
         public IDirectoryAccessor DirectoryAccessor { get; }
-
+        public string FilePath { get; }
         public string Name { get; }
 
         public static PackageTool TryCreateFromDirectory(string name, IDirectoryAccessor directoryAccessor)
@@ -35,14 +37,40 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public async Task<ProjectAsset> LocateProjectAsset()
         {
-            var result = await CommandLine.Execute(GetFilePath(), MLS.PackageTool.PackageToolConstants.LocateProjectAsset, DirectoryAccessor.GetFullyQualifiedRoot());
-            var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
-            return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
+            var projectDirectory = await GetProjectDirectory(MLS.PackageTool.PackageToolConstants.LocateProjectAsset);
+            if (projectDirectory != null)
+            {
+                return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
+            }
+            
+            return null;
+        }
+
+        private async Task<DirectoryInfo> GetProjectDirectory(string command)
+        {
+            if (Exists())
+            {
+                var result = await CommandLine.Execute(FilePath, command, DirectoryAccessor.GetFullyQualifiedRoot());
+                if (result.ExitCode == 0)
+                {
+                    var path = string.Join("", result.Output);
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
+                        if (projectDirectory.Exists)
+                        {
+                            return projectDirectory;
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         public async Task<WebAssemblyAsset> LocateWasmAsset()
         {
-            var result = await CommandLine.Execute(GetFilePath(), MLS.PackageTool.PackageToolConstants.LocateWasmAsset, DirectoryAccessor.GetFullyQualifiedRoot());
+            var result = await CommandLine.Execute(FilePath, MLS.PackageTool.PackageToolConstants.LocateWasmAsset, DirectoryAccessor.GetFullyQualifiedRoot());
             var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
 
             if (!projectDirectory.Exists)
@@ -55,13 +83,7 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public Task Prepare()
         {
-            GetFilePath();
-            return CommandLine.Execute(GetFilePath(), MLS.PackageTool.PackageToolConstants.PreparePackage, DirectoryAccessor.GetFullyQualifiedRoot());
-        }
-
-        private string GetFilePath()
-        {
-            return DirectoryAccessor.GetFullyQualifiedFilePath(Name.ExecutableName()).FullName;
+            return CommandLine.Execute(FilePath, MLS.PackageTool.PackageToolConstants.PreparePackage, DirectoryAccessor.GetFullyQualifiedRoot());
         }
 
         public bool Exists()
