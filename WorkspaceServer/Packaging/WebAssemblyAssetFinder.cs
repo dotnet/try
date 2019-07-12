@@ -38,22 +38,27 @@ namespace WorkspaceServer.Packaging
         protected async Task<IPackage> CreatePackage(PackageDescriptor descriptor, PackageTool tool)
         {
             await tool.Prepare();
-            var projectAsset = await tool.LocateProjectAsset();
-            if (projectAsset != null)
+            try
             {
+                var projectAsset = await tool.LocateProjectAsset();
                 var package = new Package2(descriptor.Name, tool.DirectoryAccessor);
                 package.Add(projectAsset);
-
-                var wasmAsset = await tool.LocateWasmAsset();
-                if (wasmAsset != null)
+                try
                 {
+                    var wasmAsset = await tool.LocateWasmAsset();
                     package.Add(wasmAsset);
-                    return package;
                 }
+                catch (WasmAssetNotFoundException)
+                {
+
+                }
+               
+                return package;
             }
-
-            return null;
+            catch (ProjectAssetNotFoundException)
+            {
+                return null;
+            }
         }
-
     }
 }

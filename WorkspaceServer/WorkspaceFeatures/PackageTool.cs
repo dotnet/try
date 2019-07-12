@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using MLS.Agent.Tools;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.ComTypes;
@@ -44,7 +45,7 @@ namespace WorkspaceServer.WorkspaceFeatures
                 return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
             }
 
-            return null;
+            throw new ProjectAssetNotFoundException($"Could not locate project asset for tool: {Name}");
         }
 
         private async Task<DirectoryInfo> GetProjectDirectory(string command)
@@ -74,7 +75,7 @@ namespace WorkspaceServer.WorkspaceFeatures
                 return new WebAssemblyAsset(new FileSystemDirectoryAccessor(projectDirectory));
             }
 
-            return null;
+            throw new WasmAssetNotFoundException($"Could not locate wasm asset for tool: {Name}");
         }
 
         public Task Prepare()
@@ -85,6 +86,20 @@ namespace WorkspaceServer.WorkspaceFeatures
         public bool Exists()
         {
             return DirectoryAccessor.FileExists(Name.ExecutableName());
+        }
+    }
+
+    public class ProjectAssetNotFoundException : Exception
+    {
+        public ProjectAssetNotFoundException(string message): base(message)
+        {
+        }
+    }
+
+    public class WasmAssetNotFoundException : Exception
+    {
+        public WasmAssetNotFoundException(string message) : base(message)
+        {
         }
     }
 }
