@@ -4,6 +4,7 @@
 using MLS.Agent.Tools;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using WorkspaceServer.Packaging;
 
@@ -42,7 +43,7 @@ namespace WorkspaceServer.WorkspaceFeatures
             {
                 return new ProjectAsset(new FileSystemDirectoryAccessor(projectDirectory));
             }
-            
+
             return null;
         }
 
@@ -51,16 +52,13 @@ namespace WorkspaceServer.WorkspaceFeatures
             if (Exists())
             {
                 var result = await CommandLine.Execute(FilePath, command, DirectoryAccessor.GetFullyQualifiedRoot());
-                if (result.ExitCode == 0)
+                var path = string.Join("", result.Output);
+                if (result.ExitCode == 0 && !string.IsNullOrEmpty(path))
                 {
-                    var path = string.Join("", result.Output);
-                    if (!string.IsNullOrEmpty(path))
+                    var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
+                    if (projectDirectory.Exists)
                     {
-                        var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
-                        if (projectDirectory.Exists)
-                        {
-                            return projectDirectory;
-                        }
+                        return projectDirectory;
                     }
                 }
             }
@@ -70,15 +68,13 @@ namespace WorkspaceServer.WorkspaceFeatures
 
         public async Task<WebAssemblyAsset> LocateWasmAsset()
         {
-            var result = await CommandLine.Execute(FilePath, MLS.PackageTool.PackageToolConstants.LocateWasmAsset, DirectoryAccessor.GetFullyQualifiedRoot());
-            var projectDirectory = new DirectoryInfo(string.Join("", result.Output));
-
-            if (!projectDirectory.Exists)
+            var projectDirectory = await GetProjectDirectory(MLS.PackageTool.PackageToolConstants.LocateWasmAsset);
+            if (projectDirectory != null)
             {
-                return null;
+                return new WebAssemblyAsset(new FileSystemDirectoryAccessor(projectDirectory));
             }
 
-            return new WebAssemblyAsset(new FileSystemDirectoryAccessor(projectDirectory));
+            return null;
         }
 
         public Task Prepare()
