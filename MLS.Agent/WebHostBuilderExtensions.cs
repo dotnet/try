@@ -21,7 +21,7 @@ namespace MLS.Agent
             var scheme = "https";
             if (isLaunchedForDevelopment)
             {
-                return new BrowserLaunchUri(scheme, "localhost",4242);
+                return new BrowserLaunchUri(scheme, "localhost", 4242);
             }
 
             var portToUse = port.HasValue ? port : GetFreePort();
