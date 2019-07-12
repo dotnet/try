@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Hosting;
@@ -44,25 +43,6 @@ namespace MLS.Agent
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
             return (ushort)port;
-        }
-    }
-
-    public class BrowserLaunchUri
-    {
-        public BrowserLaunchUri(string protocol, string host, ushort port)
-        {
-            Scheme = protocol ?? throw new ArgumentNullException(nameof(protocol));
-            Host = host ?? throw new ArgumentNullException(nameof(host));
-            Port = port;
-        }
-
-        public string Scheme { get; }
-        public string Host { get; }
-        public ushort Port { get; }
-
-        public override string ToString()
-        {
-            return $"{Scheme}://{Host}:{Port}";
         }
     }
 }
