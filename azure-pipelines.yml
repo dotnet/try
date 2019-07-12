@@ -161,7 +161,7 @@ jobs:
           artifactName: integrationTests
           downloadPath: $(System.DefaultWorkingDirectory)
 
-      - script: dotnet vstest $(System.DefaultWorkingDirectory) --ResultDirectory $(SystemWorkingDirectory)/testResults
+      - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegrationTests.dll --ResultDirectory $(SystemWorkingDirectory)/testResults
         displayName: Run integration tests
 
       - task: PublishTestResults@2
