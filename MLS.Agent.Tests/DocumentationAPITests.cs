@@ -224,7 +224,7 @@ namespace MLS.Agent.Tests
                      .LaunchedUri
                      .ToString()
                      .Should()
-                     .Match("http://localhost:*/something.md");
+                     .Match("https://localhost:*/something.md");
             }
         }
 
@@ -252,7 +252,7 @@ namespace MLS.Agent.Tests
                     .LaunchedUri
                     .ToString()
                     .Should()
-                    .Match("http://localhost:*/readme.md");
+                    .Match("https://localhost:*/readme.md");
             }
         }
     }
