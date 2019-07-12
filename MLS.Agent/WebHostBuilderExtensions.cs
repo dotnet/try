@@ -11,23 +11,24 @@ namespace MLS.Agent
 {
     public static class WebHostBuilderExtensions
     {
-        public static IWebHostBuilder ConfigureUrl(this IWebHostBuilder builder, StartupMode mode, int? port)
+        public static IWebHostBuilder ConfigureUrl(this IWebHostBuilder builder, StartupMode mode, ushort? port)
         {
             var uri = GetBrowserLaunchUri(IsLaunchedForDevelopment(), mode, port);
             return builder.UseUrls(uri.ToString());
         }
 
-        public static string GetBrowserLaunchUri(bool isLaunchedForDevelopment, StartupMode mode, int? port)
+        public static BrowserLaunchUri GetBrowserLaunchUri(bool isLaunchedForDevelopment, StartupMode mode, ushort? port)
         {
+            var scheme = "https";
             if (isLaunchedForDevelopment)
             {
-                return "https://localhost:4242";
+                return new BrowserLaunchUri(scheme, "localhost",4242);
             }
 
             var portToUse = port.HasValue ? port : GetFreePort();
-            var domain = mode == StartupMode.Hosted ? "*" : "localhost";
+            var host = mode == StartupMode.Hosted ? "*" : "localhost";
 
-            return $"https://{domain}:{portToUse}";
+            return new BrowserLaunchUri(scheme, host, portToUse.Value);
         }
 
         private static bool IsLaunchedForDevelopment()
@@ -36,13 +37,32 @@ namespace MLS.Agent
             return processName == "dotnet" || processName == "dotnet.exe";
         }
 
-        private static int GetFreePort()
+        private static ushort GetFreePort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
-            return port;
+            return (ushort)port;
+        }
+    }
+
+    public class BrowserLaunchUri
+    {
+        public BrowserLaunchUri(string protocol, string host, ushort port)
+        {
+            Scheme = protocol ?? throw new ArgumentNullException(nameof(protocol));
+            Host = host ?? throw new ArgumentNullException(nameof(host));
+            Port = port;
+        }
+
+        public string Scheme { get; }
+        public string Host { get; }
+        public ushort Port { get; }
+
+        public override string ToString()
+        {
+            return $"{Scheme}://{Host}:{Port}";
         }
     }
 }
