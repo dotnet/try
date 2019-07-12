@@ -23,9 +23,11 @@ namespace Microsoft.DotNet.Try.Jupyter
         private readonly WorkspaceServerMultiplexer _server;
         private readonly ExecuteRequestHandler _executeHandler;
 
-        public JupyterRequestContextHandler(PackageRegistry packageRegistry)
+        public JupyterRequestContextHandler(
+            PackageRegistry packageRegistry,
+            IKernel kernel)
         {
-            _executeHandler = new ExecuteRequestHandler(new CSharpRepl());
+            _executeHandler = new ExecuteRequestHandler(kernel);
 
             if (packageRegistry == null)
             {

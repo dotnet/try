@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using MLS.Agent.Markdown;
 using MLS.Repositories;
 using WorkspaceServer;
+using WorkspaceServer.Kernel;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
 
 namespace MLS.Agent.CommandLine
@@ -374,7 +375,14 @@ namespace MLS.Agent.CommandLine
                                                                                 .Trace()
                                                                                 .Handle(delivery));
                             })
-                        .AddSingleton(c => new JupyterRequestContextHandler(c.GetRequiredService<PackageRegistry>()).Trace())
+                        .AddTransient<IKernel>(c => new CompositeKernel
+                        {
+                            new CSharpRepl().UseNugetDirective()
+                        })
+                        .AddSingleton(c => new JupyterRequestContextHandler(
+                                              c.GetRequiredService<PackageRegistry>(),
+                                              c.GetRequiredService<IKernel>())
+                                          .Trace())
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
 

@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             return Enumerable.Empty<MemberInfo>();
         }
 
-        public static string CreateTableRowsFromValues(IEnumerable<MemberInfo> memberInfos, IEnumerable<KeyValuePair<object,object>> source, IRenderingEngine engine,
+        public static string CreateTableRowsFromValues(IEnumerable<MemberInfo> memberInfos, IEnumerable<KeyValuePair<object,object>> source, RenderingEngine engine,
            bool emptyFirstCell = false)
         {
             var nullRendering = new PlainTextRendering("null");
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
                     rowsBuffer.AppendLine("\t\t<td></td>");
                 }
 
-                var keyRenderer = engine.TryFindRenderer(key.GetType());
+                var keyRenderer = engine.GetRendererForType(key.GetType());
                 var keyRendering = keyRenderer.Render(key, engine);
                 rowsBuffer.AppendLine($"\t\t<td>{keyRendering?.Content ?? string.Empty}</td>");
                 CreateTableRow(memberInfos, engine, element, nullRendering, rowsBuffer);
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             return rowsBuffer.ToString();
         }
 
-        private static void CreateTableRow(IEnumerable<MemberInfo> memberInfos, IRenderingEngine engine, object element,
+        private static void CreateTableRow(IEnumerable<MemberInfo> memberInfos, RenderingEngine engine, object element,
             IRendering defaultRendering, StringBuilder rowsBuffer)
         {
             if (memberInfos?.Any() != false)
@@ -93,14 +93,14 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
                     {
                         case PropertyInfo propertyInfo:
                         {
-                            var childRenderer = engine.TryFindRenderer(propertyInfo.PropertyType);
+                            var childRenderer = engine.GetRendererForType(propertyInfo.PropertyType);
                             var childValue = propertyInfo.GetValue(element);
                             childRendering = childValue == null ? defaultRendering : childRenderer.Render(childValue, engine);
                         }
                             break;
                         case FieldInfo fieldInfo:
                         {
-                            var childRenderer = engine.TryFindRenderer(fieldInfo.FieldType);
+                            var childRenderer = engine.GetRendererForType(fieldInfo.FieldType);
                             var childValue = fieldInfo.GetValue(element);
                             childRendering = childValue == null ? defaultRendering : childRenderer.Render(childValue, engine);
                         }
@@ -113,14 +113,13 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             }
             else
             {
-                var childRenderer = engine.TryFindRenderer(element.GetType());
+                var childRenderer = engine.GetRendererForType(element.GetType());
                 var childRendering = childRenderer.Render(element, engine);
                 rowsBuffer.AppendLine($"\t\t<td>{childRendering.Content}</td>");
             }
         }
 
-
-        public static string CreateTableRowsFromValues(IEnumerable<MemberInfo> memberInfos, IEnumerable source, IRenderingEngine engine,
+        public static string CreateTableRowsFromValues(IEnumerable<MemberInfo> memberInfos, IEnumerable source, RenderingEngine engine,
             bool emptyFirstCell = false)
         {
             var nullRendering = new PlainTextRendering("null");

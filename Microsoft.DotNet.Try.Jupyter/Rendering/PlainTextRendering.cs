@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
             Content = text;
         }
 
-        public string Mime { get; } = "text/plain";
+        public string MimeType { get; } = "text/plain";
         public object Content { get; }
     }
 }

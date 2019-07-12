@@ -1,18 +1,18 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter.Rendering
 {
-    public class HtmlRendering : IRendering
+    internal static class RenderingEngineExtensions
     {
-        public HtmlRendering(string html)
+        public static IRenderer GetRendererForType(
+            this RenderingEngine engine, 
+            Type sourceType)
         {
-            Content = html;
+            return engine?.FindRenderer(sourceType) ?? new DefaultRenderer();
         }
-
-        public string MimeType { get; } = "text/html";
-        public object Content { get; }
     }
 }
