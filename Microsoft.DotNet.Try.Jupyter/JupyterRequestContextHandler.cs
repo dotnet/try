@@ -19,15 +19,18 @@ namespace Microsoft.DotNet.Try.Jupyter
     public class JupyterRequestContextHandler : ICommandHandler<JupyterRequestContext>
     {
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
-        private int _executionCount;
+
         private readonly WorkspaceServerMultiplexer _server;
         private readonly ExecuteRequestHandler _executeHandler;
+        private readonly CompleteRequestHandler _completeHandler;
 
         public JupyterRequestContextHandler(
             PackageRegistry packageRegistry,
             IKernel kernel)
         {
+            var kernel = new CSharpRepl();
             _executeHandler = new ExecuteRequestHandler(kernel);
+            _completeHandler = new CompleteRequestHandler(kernel);
 
             if (packageRegistry == null)
             {
@@ -43,9 +46,9 @@ namespace Microsoft.DotNet.Try.Jupyter
             {
                 case MessageTypeValues.ExecuteRequest:
                     await _executeHandler.Handle(delivery.Command);
-                   // await HandleExecuteRequest(delivery);
                     break;
                 case MessageTypeValues.CompleteRequest:
+                    await _completeHandler.Handle(delivery.Command);
                     delivery.Command.RequestHandlerStatus.SetAsBusy();
                     await HandleCompleteRequest(delivery);
                     delivery.Command.RequestHandlerStatus.SetAsIdle();
@@ -103,108 +106,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
 
             return pos;
-        }
-
-        private async Task HandleExecuteRequest(ICommandDelivery<JupyterRequestContext> delivery)
-        {
-            var ioPubChannel = delivery.Command.IoPubChannel;
-            var serverChannel = delivery.Command.ServerChannel;
-
-            var transient = new Dictionary<string, object> { { "display_id", Guid.NewGuid().ToString() } };
-
-            var executeRequest = delivery.Command.GetRequestContent<ExecuteRequest>();
-
-            var code = executeRequest.Code;
-
-            var workspace = CreateScaffoldWorkspace(code);
-
-            var workspaceRequest = new WorkspaceRequest(workspace);
-
-            var result = await _server.Run(workspaceRequest);
-
-            if (!executeRequest.Silent)
-            {
-                _executionCount++;
-
-                var executeInput = Message.Create(
-                    new ExecuteInput(code: code, executionCount: _executionCount),
-                    delivery.Command.Request.Header);
-
-                ioPubChannel.Send(executeInput);
-            }
-
-            // execute result
-            var output = string.Join("\n", result.Output);
-
-
-            // executeResult data
-            var executeResultData = new ExecuteResult(
-                _executionCount,
-                transient: transient,
-                data: new Dictionary<string, object> {
-                    { "text/html", output},
-                    { "text/plain", output}
-                });
-
-
-            var resultSucceeded = result.Succeeded &&
-                                  result.Exception == null;
-
-            if (resultSucceeded)
-            {
-                // reply ok
-                var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
-                
-
-                // send to server
-                var executeReply = Message.CreateResponse(
-                    executeReplyPayload,
-                    delivery.Command.Request);
-
-                serverChannel.Send(executeReply);
-            }
-            else
-            {
-                var errorContent = new Error(
-                     eName: string.IsNullOrWhiteSpace(result.Exception) ? "Compile Error" : "Unhandled Exception",
-                     eValue: output
-                );
-
-                //  reply Error
-                var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
-
-                // send to server
-                var executeReply = Message.CreateResponse(
-                    executeReplyPayload,
-                    delivery.Command.Request);
-
-                serverChannel.Send(executeReply);
-
-                if (!executeRequest.Silent)
-                {
-                    // send on io
-                    var error = Message.Create(
-                        errorContent,
-                        delivery.Command.Request.Header);
-                    ioPubChannel.Send(error);
-
-                    // send on stderr
-                    var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = Message.Create(
-                        stdErr,
-                        delivery.Command.Request.Header);
-                    ioPubChannel.Send(stream);
-                }
-            }
-
-            if (!executeRequest.Silent && resultSucceeded)
-            {
-                // send on io
-                var executeResultMessage = Message.Create(
-                    executeResultData,
-                    delivery.Command.Request.Header);
-                ioPubChannel.Send(executeResultMessage);
-            }
         }
 
         private static Workspace CreateScaffoldWorkspace(string code, int cursorPosition = 0)
