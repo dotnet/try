@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -6,6 +6,8 @@ using System.IO;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
@@ -38,12 +40,40 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents.OfType<ValueProduced>()
                 .Last()
-                        .Should()
-                        .BeOfType<ValueProduced>()
-                        .Which
-                        .Value
-                        .Should()
-                        .Be(123);
+                .Value
+                .Should()
+                .Be(123);
+        }
+
+        [Fact]
+        public async Task when_it_throws_exception_after_a_value_was_produced_thne_only_the_error_is_returned()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("using System;", "csharp"));
+            await repl.SendAsync(new SubmitCode("2 + 2", "csharp"));
+            await repl.SendAsync(new SubmitCode("adddddddddd", "csharp"));
+
+            var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
+                .Select((error, pos) => (error, pos))
+                .Single(t => t.error is CodeSubmissionEvaluationFailed);
+
+            ((CodeSubmissionEvaluationFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
+
+            var lastCodeSubmissionPosition = KernelEvents
+                .Select((e, pos) => (e, pos))
+                .Last(t=> t.e is CodeSubmissionReceived).pos;
+
+            var lastValueProducedPosition = KernelEvents
+                .Select((e, pos) => (e, pos))
+                .Last(t => t.e is ValueProduced).pos;
+
+            lastValueProducedPosition
+                .Should()
+                .BeLessThan(lastCodeSubmissionPosition);
+            lastCodeSubmissionPosition
+                .Should()
+                .BeLessThan(lastCodeSubmissionEvaluationFailedPosition);
         }
 
         [Fact]

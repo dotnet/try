@@ -123,11 +123,6 @@ namespace WorkspaceServer.Kernel
                     exception = e;
                 }
 
-                if (HasReturnValue)
-                {
-                    context.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
-                }
-
                 if (exception != null)
                 {
                     var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
@@ -138,6 +133,11 @@ namespace WorkspaceServer.Kernel
                 }
                 else
                 {
+                    if (HasReturnValue)
+                    {
+                        context.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
+                    }
+
                     context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
                     context.OnCompleted();
                 }
