@@ -129,11 +129,11 @@
       <ClientOutputDir>$(MSBuildThisFileDirectory)$(OutputPath)wwwroot/client</ClientOutputDir>
       <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
       <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
-      <TryDotNetJsOutputDir>$(MSBuildThisFileDirectory)/$(OutputPath)wwwroot/api</TryDotNetJsOutputDir>
+      <TryDotNetJsOutputDir>$(OutputPath)wwwroot/api</TryDotNetJsOutputDir>
       <TryDotNetJsFile>$(TryDotNetJsOutputDir)/trydotnet.min.js</TryDotNetJsFile>
-      <TryDotNetJsMap>$(MSBuildThisFileDirectory)$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
+      <TryDotNetJsMap>$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
       <CssInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.Styles</CssInputDir>
-      <CssOutputDir>$(MSBuildThisFileDirectory)$(OutputPath)wwwroot/css</CssOutputDir>
+      <CssOutputDir>$(OutputPath)wwwroot/css</CssOutputDir>
       <CssOutputFile>$(CssOutputDir)/trydotnet.css</CssOutputFile>
     </PropertyGroup>
     <ItemGroup>
@@ -155,10 +155,10 @@
     <Exec Command="npm run release -- $(CssOutputFile)" WorkingDirectory="$(CssInputDir)" />
 
     <ItemGroup>
-      <FileWrites Include="$(OutputPath)wwwroot\css\trydotnet.css" />
+      <FileWrites Include="$(CssOutputFile)" />
 
       <!-- if the file already existed then it'll already be in the @(Content) item group -->
-      <Content Include="$(OutputPath)wwwroot\css\trydotnet.css" Condition="'$(_TryDotNetCssExists)' != 'true'" />
+      <Content Include="$(CssOutputFile)" Condition="'$(_TryDotNetCssExists)' != 'true'" />
     </ItemGroup>
   </Target>
 
