@@ -9,30 +9,24 @@ using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter
 {
-    public class CompleteRequestHandler : IDisposable
+    public class CompleteRequestHandler: RequestHandlerBase<CompleteRequest>
     {
-        private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        private readonly IKernel _kernel;
+   
 
-        public CompleteRequestHandler(IKernel kernel)
+        public CompleteRequestHandler(IKernel kernel) : base(kernel)
         {
-            _kernel = kernel;
+            
         }
 
         public Task Handle(JupyterRequestContext context)
         {
-            var completeRequest = context.GetRequestContent<CompleteRequest>() ??
-                                 throw new InvalidOperationException(
-                                     $"Request Content must be a not null {typeof(CompleteRequest).Name}");
+            var completeRequest = GetRequest(context);
 
             context.RequestHandlerStatus.SetAsBusy();
             context.RequestHandlerStatus.SetAsIdle();
             throw new NotImplementedException();
         }
 
-        public void Dispose()
-        {
-            _disposables.Dispose();
-        }
+      
     }
 }

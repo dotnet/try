@@ -32,7 +32,8 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         public async Task Handle(JupyterRequestContext context)
         {
-            var executeRequest = context.GetRequestContent<ExecuteRequest>() ?? throw new InvalidOperationException($"Request Content must be a not null {typeof(ExecuteRequest).Name}");
+            var executeRequest = GetRequest(context);
+
             context.RequestHandlerStatus.SetAsBusy();
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 

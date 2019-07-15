@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Try.Jupyter.Tests
 {
-    public class CompleteRequestHandlerTests
+    public class CompleteRequestHandlerTests 
     {
         private readonly MessageSender _ioPubChannel;
         private readonly MessageSender _serverChannel;
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         public void cannot_handle_requests_that_are_not_executeRequest()
         {
             var kernel = new CSharpRepl();
-            var handler = new ExecuteRequestHandler(kernel);
+            var handler = new CompleteRequestHandler(kernel);
             var request = Message.Create(new DisplayData(), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             messageHandling.Should().ThrowExactly<InvalidOperationException>();

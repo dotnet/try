@@ -20,6 +20,14 @@ namespace Microsoft.DotNet.Try.Jupyter
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
         }
 
+        protected static T GetRequest(JupyterRequestContext context)
+        {
+            var request = context.GetRequestContent<T>() ??
+                                  throw new InvalidOperationException(
+                                      $"Request Content must be a not null {typeof(T).Name}");
+            return request;
+        }
+
         protected IKernel Kernel { get;  }
 
         protected ConcurrentDictionary<IKernelCommand, OpenRequest> OpenRequests { get; } = new ConcurrentDictionary<IKernelCommand, OpenRequest>();
