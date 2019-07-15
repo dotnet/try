@@ -124,16 +124,21 @@
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1'">
+    <ConvertToAbsolutePath Paths="$(OutputPath)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="AbsoluteOutputPath"/>
+    </ConvertToAbsolutePath>
+
+     <Message Text="NUnitConsoleToolPath : %(AbsoluteOutputPath.FullPath)"/>
     <PropertyGroup>
       <ClientInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.Client</ClientInputDir>
-      <ClientOutputDir>$(MSBuildThisFileDirectory)$(OutputPath)wwwroot/client</ClientOutputDir>
+      <ClientOutputDir>$(AbsoluteOutputPath)wwwroot/client</ClientOutputDir>
       <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
       <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
-      <TryDotNetJsOutputDir>$(OutputPath)wwwroot/api</TryDotNetJsOutputDir>
+      <TryDotNetJsOutputDir>$(AbsoluteOutputPath)wwwroot/api</TryDotNetJsOutputDir>
       <TryDotNetJsFile>$(TryDotNetJsOutputDir)/trydotnet.min.js</TryDotNetJsFile>
       <TryDotNetJsMap>$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
       <CssInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.Styles</CssInputDir>
-      <CssOutputDir>$(OutputPath)wwwroot/css</CssOutputDir>
+      <CssOutputDir>$(AbsoluteOutputPath)wwwroot/css</CssOutputDir>
       <CssOutputFile>$(CssOutputDir)/trydotnet.css</CssOutputFile>
     </PropertyGroup>
     <ItemGroup>
