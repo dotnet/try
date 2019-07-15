@@ -90,6 +90,7 @@
     "jsdom-global": "3.0.2",
     "lodash": "4.17.11",
     "mini-css-extract-plugin": "0.4.2",
+    "mkdirp": "0.5.1",
     "mocha": "6.1.4",
     "mocha-multi-reporters": "1.1.7",
     "mocha-trx-reporter": "3.2.0",
@@ -134,6 +135,7 @@
     "devNoOrchestrator": "webpack --watch --config ./webpack.config/nonTest/dev/webpack.config.ts",
     "profile": "webpack -p --inline --progress --colors --profile --config ./webpack.config/nonTest/profile/webpack.config.ts",
     "tdd": "npm test -- --watch",
+    "ciCreateDir": "./node_modules/.bin/mkdirp ",
     "test": "mochapack --opts mocha.opts"
   }
 }
