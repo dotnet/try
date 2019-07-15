@@ -14,44 +14,15 @@ using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter
 {
-    public class ExecuteRequestHandler : IDisposable
+    public class ExecuteRequestHandler : RequestHandlerBase<ExecuteRequest>
     {
-        private readonly IKernel _kernel;
         private readonly RenderingEngine _renderingEngine;
-        private readonly ConcurrentDictionary<IKernelCommand, OpenRequest> _openRequests = new ConcurrentDictionary<IKernelCommand, OpenRequest>();
         private int _executionCount;
         private readonly  CompositeDisposable _disposables = new CompositeDisposable();
 
-        private class OpenRequest : IDisposable
+      
+        public ExecuteRequestHandler(IKernel kernel) :base(kernel)
         {
-            private readonly CompositeDisposable _disposables = new CompositeDisposable();
-            public Dictionary<string, object> Transient { get; }
-            public JupyterRequestContext Context { get; }
-            public ExecuteRequest ExecuteRequest { get; }
-            public int ExecutionCount { get; }
-
-            public OpenRequest(JupyterRequestContext context, ExecuteRequest executeRequest, int executionCount, Dictionary<string, object> transient)
-            {
-                Context = context;
-                ExecuteRequest = executeRequest;
-                ExecutionCount = executionCount;
-                Transient = transient;
-            }
-
-            public void AddDisposable(IDisposable disposable)
-            {
-               _disposables.Add(disposable);
-            }
-
-            public void Dispose()
-            {
-                _disposables.Dispose();
-            }
-        }
-
-        public ExecuteRequestHandler(IKernel kernel)
-        {
-            _kernel = kernel;
             _renderingEngine = new RenderingEngine(new DefaultRenderer(), new PlainTextRendering("<null>"));
             _renderingEngine.RegisterRenderer(typeof(string), new DefaultRenderer());
             _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
@@ -70,16 +41,16 @@ namespace Microsoft.DotNet.Try.Jupyter
             var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
             var openRequest = new OpenRequest(context, executeRequest, executionCount, transient);
 
-            _openRequests[command] = openRequest;
+            OpenRequests[command] = openRequest;
 
             try
             {
-                var kernelResult = await _kernel.SendAsync(command);
+                var kernelResult = await Kernel.SendAsync(command);
                 openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
             }
             catch (Exception e)
             {
-                _openRequests.TryRemove(command, out _);
+                OpenRequests.TryRemove(command, out _);
 
                 var errorContent = new Error(
                     eName: "Unhandled Exception",
@@ -120,13 +91,13 @@ namespace Microsoft.DotNet.Try.Jupyter
             switch (value)
             {
                 case ValueProduced valueProduced:
-                    OnValueProduced(valueProduced, _openRequests, _renderingEngine);
+                    OnValueProduced(valueProduced, OpenRequests, _renderingEngine);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
-                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated, _openRequests);
+                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated, OpenRequests);
                     break;
                 case CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed:
-                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, _openRequests);
+                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, OpenRequests);
                     break;
                 case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
@@ -146,7 +117,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 eValue: $"{codeSubmissionEvaluationFailed.Message}"
             );
 
-            if (!openRequest.ExecuteRequest.Silent)
+            if (!openRequest.Request.Silent)
             {
                 // send on io
                 var error = Message.Create(
@@ -198,7 +169,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                         { rendering.MimeType, rendering.Content }
                     });
 
-                if (!openRequest.ExecuteRequest.Silent)
+                if (!openRequest.Request.Silent)
                 {
                     // send on io
                     var executeResultMessage = Message.Create(
@@ -214,7 +185,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                     eValue: $"{e.Message}"
                 );
 
-                if (!openRequest.ExecuteRequest.Silent)
+                if (!openRequest.Request.Silent)
                 {
                     // send on io
                     var error = Message.Create(
