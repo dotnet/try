@@ -357,6 +357,8 @@ MLS\.Agent/wwwroot/api/
 
 MLS\.Agent/wwwroot/client/
 
+MLS\.Agent/wwwroot/css/
+
 *.trx
 
 
@@ -367,3 +369,5 @@ Microsoft\.DotNet\.Try\.js/dist/
 docs/\.ionide/
 
 \.ionide/
+
+

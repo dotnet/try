@@ -1,12 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading.Tasks;
+
 namespace WorkspaceServer.Kernel
 {
-    public class DocumentationReceived : KernelEventBase
-    {
-        public DocumentationReceived(IKernelCommand command) : base(command)
-        {
-        }
-    }
+    public delegate Task KernelPipelineContinuation(
+        IKernelCommand command, 
+        KernelPipelineContext context);
 }

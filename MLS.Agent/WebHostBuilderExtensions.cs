@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Hosting;
@@ -11,26 +10,24 @@ namespace MLS.Agent
 {
     public static class WebHostBuilderExtensions
     {
-        public static IWebHostBuilder ConfigureUrlUsingPort(this IWebHostBuilder builder, int? port)
+        public static IWebHostBuilder ConfigureUrl(this IWebHostBuilder builder, StartupMode mode, ushort? port)
         {
-            var uri = GetBrowserLaunchUri(IsLaunchedForDevelopment(), port);
+            var uri = GetBrowserLaunchUri(IsLaunchedForDevelopment(), mode, port);
             return builder.UseUrls(uri.ToString());
         }
 
-        public static Uri GetBrowserLaunchUri(bool isLaunchedForDevelopment, int? port)
+        public static BrowserLaunchUri GetBrowserLaunchUri(bool isLaunchedForDevelopment, StartupMode mode, ushort? port)
         {
+            var scheme = "https";
             if (isLaunchedForDevelopment)
             {
-               return new Uri("http://localhost:4242");
+                return new BrowserLaunchUri(scheme, "localhost", 4242);
             }
-            else if (port.HasValue)
-            {
-                return new Uri($"https://localhost:{port}");
-            }
-            else
-            {
-                return new Uri($"https://localhost:{GetFreePort()}");
-            }
+
+            var portToUse = port.HasValue ? port : GetFreePort();
+            var host = mode == StartupMode.Hosted ? "*" : "localhost";
+
+            return new BrowserLaunchUri(scheme, host, portToUse.Value);
         }
 
         private static bool IsLaunchedForDevelopment()
@@ -39,13 +36,13 @@ namespace MLS.Agent
             return processName == "dotnet" || processName == "dotnet.exe";
         }
 
-        private static int GetFreePort()
+        private static ushort GetFreePort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
-            return port;
+            return (ushort)port;
         }
     }
 }

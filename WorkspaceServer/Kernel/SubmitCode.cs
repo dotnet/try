@@ -7,16 +7,16 @@ namespace WorkspaceServer.Kernel
 {
     public class SubmitCode : KernelCommandBase
     {
-        public string Value { get; }
-
-        public SubmitCode(string value) 
+        public SubmitCode(
+            string code, 
+            string targetKernelName = null)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Code = code ?? throw new ArgumentNullException(nameof(code));
+            TargetKernelName = targetKernelName;
         }
 
-        public SubmitCode(string value, Guid id, Guid parentId) : base(id, parentId)
-        {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-        }
+        public string Code { get; set; }
+
+        public string TargetKernelName { get; set; }
     }
 }

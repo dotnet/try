@@ -3,10 +3,7 @@
 
 namespace WorkspaceServer.Kernel
 {
-    public class DocumentationReceived : KernelEventBase
+    public abstract class KernelCommandBase : IKernelCommand
     {
-        public DocumentationReceived(IKernelCommand command) : base(command)
-        {
-        }
     }
 }

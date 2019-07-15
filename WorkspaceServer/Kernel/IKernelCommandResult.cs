@@ -1,14 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.CommandLine;
-using System.Threading.Tasks;
+using System;
 
 namespace WorkspaceServer.Kernel
 {
-    public interface ICodeSubmissionProcessor
+    public interface IKernelCommandResult
     {
-      Task<SubmitCode> ProcessAsync(SubmitCode codeSubmission);
-      Command Command { get; }
+        IObservable<IKernelEvent> KernelEvents { get; }
     }
 }

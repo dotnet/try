@@ -1,10 +1,15 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Scripting;
+using Newtonsoft.Json;
+using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -31,16 +36,44 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("123"));
+            await repl.SendAsync(new SubmitCode("123", "csharp"));
 
             KernelEvents.OfType<ValueProduced>()
                 .Last()
-                        .Should()
-                        .BeOfType<ValueProduced>()
-                        .Which
-                        .Value
-                        .Should()
-                        .Be(123);
+                .Value
+                .Should()
+                .Be(123);
+        }
+
+        [Fact]
+        public async Task when_it_throws_exception_after_a_value_was_produced_thne_only_the_error_is_returned()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("using System;", "csharp"));
+            await repl.SendAsync(new SubmitCode("2 + 2", "csharp"));
+            await repl.SendAsync(new SubmitCode("adddddddddd", "csharp"));
+
+            var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
+                .Select((error, pos) => (error, pos))
+                .Single(t => t.error is CodeSubmissionEvaluationFailed);
+
+            ((CodeSubmissionEvaluationFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
+
+            var lastCodeSubmissionPosition = KernelEvents
+                .Select((e, pos) => (e, pos))
+                .Last(t=> t.e is CodeSubmissionReceived).pos;
+
+            var lastValueProducedPosition = KernelEvents
+                .Select((e, pos) => (e, pos))
+                .Last(t => t.e is ValueProduced).pos;
+
+            lastValueProducedPosition
+                .Should()
+                .BeLessThan(lastCodeSubmissionPosition);
+            lastCodeSubmissionPosition
+                .Should()
+                .BeLessThan(lastCodeSubmissionEvaluationFailedPosition);
         }
 
         [Fact]
@@ -48,14 +81,14 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("using System;"));
-            await repl.SendAsync(new SubmitCode("throw new NotImplementedException();"));
+            await repl.SendAsync(new SubmitCode("using System;", "csharp"));
+            await repl.SendAsync(new SubmitCode("throw new NotImplementedException();", "csharp"));
 
             KernelEvents.Last()
                 .Should()
                 .BeOfType<CodeSubmissionEvaluationFailed>()
                 .Which
-                .Error
+                .Exception
                 .Should()
                 .BeOfType<NotImplementedException>();
         }
@@ -65,8 +98,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("using System;"));
-            await repl.SendAsync(new SubmitCode("aaaadd"));
+            await repl.SendAsync(new SubmitCode("using System;", "csharp"));
+            await repl.SendAsync(new SubmitCode("aaaadd", "csharp"));
 
             KernelEvents.Last()
                 .Should()
@@ -82,9 +115,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var a ="));
+            await repl.SendAsync(new SubmitCode("var a =", "csharp"));
 
-            await repl.SendAsync(new SubmitCode("12;"));
+            await repl.SendAsync(new SubmitCode("12;", "csharp"));
 
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
@@ -99,7 +132,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var a ="));
+            await repl.SendAsync(new SubmitCode("var a =", "csharp"));
 
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
@@ -114,13 +147,10 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("null"));
+            await repl.SendAsync(new SubmitCode("null", "csharp"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
-                        .Should()
-                        .BeOfType<ValueProduced>()
-                        .Which
                         .Value
                         .Should()
                         .BeNull();
@@ -131,7 +161,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var x = 1;"));
+            await repl.SendAsync(new SubmitCode("var x = 1;", "csharp"));
 
             KernelEvents
                 .Should()
@@ -143,18 +173,42 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new SubmitCode("var x = new List<int>{1,2};"));
-            await repl.SendAsync(new SubmitCode("x.Add(3);"));
-            await repl.SendAsync(new SubmitCode("x.Max()"));
+            await repl.SendAsync(new SubmitCode("var x = new List<int>{1,2};", "csharp"));
+            await repl.SendAsync(new SubmitCode("x.Add(3);", "csharp"));
+            await repl.SendAsync(new SubmitCode("x.Max()", "csharp"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
-                        .Should()
-                        .BeOfType<ValueProduced>()
-                        .Which
                         .Value
                         .Should()
                         .Be(3);
+        }
+
+        [Fact]
+        public async Task it_can_load_assembly_references_using_r_directive()
+        {
+            var kernel = await CreateKernelAsync();
+
+            var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
+
+            await kernel.SendAsync(
+                new SubmitCode($"#r \"{dll}\""));
+            await kernel.SendAsync(
+                new SubmitCode(@"
+using Newtonsoft.Json;
+
+var json = JsonConvert.SerializeObject(new { value = ""hello"" });
+
+json
+"));
+
+            KernelEvents.Should()
+                        .ContainSingle(e => e is ValueProduced);
+            KernelEvents.OfType<ValueProduced>()
+                        .Single()
+                        .Value
+                        .Should()
+                        .Be(new { value = "hello" }.ToJson());
         }
     }
 }
