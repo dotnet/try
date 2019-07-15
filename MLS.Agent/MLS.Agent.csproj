@@ -123,37 +123,47 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="BuildCss" Inputs="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles\sass\trydotnet.scss" Outputs="$(OutputPath)wwwroot\css\trydotnet.css" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
-
-    <PropertyGroup>
-      <_TryDotNetCssExists Condition="Exists('$(OutputPath)wwwroot\css\trydotnet.css')">true</_TryDotNetCssExists>
-    </PropertyGroup>
-
-    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
-    <Exec Command="npm i" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
-    <Exec Command="npm run release -- $(OutputPath)wwwroot/css/trydotnet.css" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Styles" />
-
-    <ItemGroup>
-      <FileWrites Include="$(OutputPath)wwwroot\css\trydotnet.css" />
-
-      <!-- if the file already existed then it'll already be in the @(Content) item group -->
-      <Content Include="$(OutputPath)wwwroot\css\trydotnet.css" Condition="'$(_TryDotNetCssExists)' != 'true'" />
-    </ItemGroup>
-  </Target>
-
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1'">
+    <ConvertToAbsolutePath Paths="$(OutputPath)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="AbsoluteOutputPath"/>
+    </ConvertToAbsolutePath>
+
+     <Message Text="NUnitConsoleToolPath : %(AbsoluteOutputPath.FullPath)"/>
     <PropertyGroup>
-      <ClientInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.Client</ClientInputDir>
-      <ClientOutputDir>$(OutputPath)wwwroot/client</ClientOutputDir>
-      <ClientOutputFile>$(OutputPath/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
-      <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)..\Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
-      <TryDotNetJsOutputDir>$(OutputPath)wwwroot/api</TryDotNetJsOutputDir>
+      <ClientInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.Client</ClientInputDir>
+      <ClientOutputDir>$(AbsoluteOutputPath)wwwroot/client</ClientOutputDir>
+      <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
+      <TryDotNetJsInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.js</TryDotNetJsInputDir>
+      <TryDotNetJsOutputDir>$(AbsoluteOutputPath)wwwroot/api</TryDotNetJsOutputDir>
       <TryDotNetJsFile>$(TryDotNetJsOutputDir)/trydotnet.min.js</TryDotNetJsFile>
       <TryDotNetJsMap>$(TryDotNetJsOutputDir)/trydotnet.min.js.map</TryDotNetJsMap>
+      <CssInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.Styles</CssInputDir>
+      <CssOutputDir>$(AbsoluteOutputPath)wwwroot/css</CssOutputDir>
+      <CssOutputFile>$(CssOutputDir)/trydotnet.css</CssOutputFile>
     </PropertyGroup>
     <ItemGroup>
       <ClientInputFiles Include="$(ClientInputDir)\**" />
       <TryDotNetJsInput Include="$(TryDotNetJsInputDir)\**" />
+      <CssInputFiles Include="$(CssInputDir)\sass\**" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BuildCss" Inputs="@$(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
+
+    <PropertyGroup>
+      <_TryDotNetCssExists Condition="Exists('$(CssOutputFile)')">true</_TryDotNetCssExists>
+    </PropertyGroup>
+
+    <Exec Command="npm rebuild node-sass" WorkingDirectory="$(CssInputDir)" />
+    <Exec Command="npm i" WorkingDirectory="$(CssInputDir)" />
+    <Exec Command="npm run ciCreateDir -- $(CssOutputDir)" WorkingDirectory="$(CssInputDir)" />
+    <Exec Command="npm run release -- $(CssOutputFile)" WorkingDirectory="$(CssInputDir)" />
+
+    <ItemGroup>
+      <FileWrites Include="$(CssOutputFile)" />
+
+      <!-- if the file already existed then it'll already be in the @(Content) item group -->
+      <Content Include="$(CssOutputFile)" Condition="'$(_TryDotNetCssExists)' != 'true'" />
     </ItemGroup>
   </Target>
 
@@ -163,7 +173,7 @@
     </PropertyGroup>
 
     <Exec Command="npm i" WorkingDirectory="$(TryDotNetJsInputDir)" />
-    <MakeDir Directories="$(TryDotNetJsOutputDir)" />
+    <Exec Command="npm run ciCreateDir -- $(TryDotNetJsOutputDir)" WorkingDirectory="$(TryDotNetJsInputDir)" />
     <Exec Command="npm run build" WorkingDirectory="$(TryDotNetJsInputDir)" />
     <Exec Command="npm run ciMinify -- --output $(TryDotNetJsFile)" WorkingDirectory="$(TryDotNetJsInputDir)" />
 
@@ -181,7 +191,8 @@
       <_TryDotNetClientExists Condition="Exists('$(ClientOutputFile)')">true</_TryDotNetClientExists>
     </PropertyGroup>
 
-    <Exec Command="npm i" WorkingDirectory="$(ClientInputDir)" /> 
+    <Exec Command="npm i" WorkingDirectory="$(ClientInputDir)" />
+    <Exec Command="npm run ciCreateDir -- $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
     <Exec Command="npm run buildCi -- --output-path $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
 
     <ItemGroup>
