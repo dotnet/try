@@ -25,18 +25,16 @@ namespace Microsoft.DotNet.Try.Jupyter
         private class OpenRequest : IDisposable
         {
             private readonly CompositeDisposable _disposables = new CompositeDisposable();
-            public Guid Id { get; }
             public Dictionary<string, object> Transient { get; }
             public JupyterRequestContext Context { get; }
             public ExecuteRequest ExecuteRequest { get; }
             public int ExecutionCount { get; }
 
-            public OpenRequest(JupyterRequestContext context, ExecuteRequest executeRequest, int executionCount, Guid id, Dictionary<string, object> transient)
+            public OpenRequest(JupyterRequestContext context, ExecuteRequest executeRequest, int executionCount, Dictionary<string, object> transient)
             {
                 Context = context;
                 ExecuteRequest = executeRequest;
                 ExecutionCount = executionCount;
-                Id = id;
                 Transient = transient;
             }
 
@@ -66,23 +64,23 @@ namespace Microsoft.DotNet.Try.Jupyter
             var executeRequest = context.GetRequestContent<ExecuteRequest>() ?? throw new InvalidOperationException($"Request Content must be a not null {typeof(ExecuteRequest).Name}");
             context.RequestHandlerStatus.SetAsBusy();
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
-        
+
+            var command = new SubmitCode(executeRequest.Code, "csharp");
+            var id = Guid.NewGuid();
+            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
+            var openRequest = new OpenRequest(context, executeRequest, executionCount, transient);
+
+            _openRequests[command] = openRequest;
+
             try
             {
-                var command = new SubmitCode(executeRequest.Code, "csharp");
-
-                var id = Guid.NewGuid();
-
-                var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
-              
-               var  openRequest = new OpenRequest(context, executeRequest, executionCount, id, transient);
-                _openRequests[command] = openRequest;
-
                 var kernelResult = await _kernel.SendAsync(command);
                 openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
             }
             catch (Exception e)
             {
+                _openRequests.TryRemove(command, out _);
+
                 var errorContent = new Error(
                     eName: "Unhandled Exception",
                     eValue: $"{e.Message}"
@@ -141,7 +139,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
         {
-            var openRequest = openRequests[codeSubmissionEvaluationFailed.Command];
+            openRequests.TryRemove(codeSubmissionEvaluationFailed.Command, out var openRequest);
 
             var errorContent = new Error(
                 eName: "Unhandled Exception",
@@ -175,12 +173,18 @@ namespace Microsoft.DotNet.Try.Jupyter
             openRequest.Context.ServerChannel.Send(executeReply);
 
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
+            openRequest.Dispose();
         }
 
         private static void OnValueProduced(ValueProduced valueProduced,
             ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests, RenderingEngine renderingEngine)
         {
-            var openRequest = openRequests[valueProduced.Command];
+            openRequests.TryGetValue(valueProduced.Command, out var openRequest);
+            if (openRequest == null)
+            {
+                return;
+            }
+
             try
             {
                 var rendering = renderingEngine.Render(valueProduced.Value);
@@ -231,7 +235,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         private static void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated,
             ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
         {
-            var openRequest = openRequests[codeSubmissionEvaluated.Command];
+            openRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest);
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
 
@@ -242,6 +246,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             openRequest.Context.ServerChannel.Send(executeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
+            openRequest.Dispose();
         }
 
         public void Dispose()
