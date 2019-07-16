@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
@@ -18,8 +17,6 @@ namespace Microsoft.DotNet.Try.Jupyter
     {
         private readonly RenderingEngine _renderingEngine;
         private int _executionCount;
-        private readonly  CompositeDisposable _disposables = new CompositeDisposable();
-
       
         public ExecuteRequestHandler(IKernel kernel) :base(kernel)
         {
@@ -219,11 +216,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             openRequest.Context.ServerChannel.Send(executeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
             openRequest.Dispose();
-        }
-
-        public void Dispose()
-        {
-            _disposables.Dispose();
         }
     }
 }

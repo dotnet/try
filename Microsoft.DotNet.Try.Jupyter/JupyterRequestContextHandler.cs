@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Try.Jupyter
             PackageRegistry packageRegistry,
             IKernel kernel)
         {
-            var kernel = new CSharpRepl();
             _executeHandler = new ExecuteRequestHandler(kernel);
             _completeHandler = new CompleteRequestHandler(kernel);
 
