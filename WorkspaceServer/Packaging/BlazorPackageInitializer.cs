@@ -14,20 +14,21 @@ namespace WorkspaceServer.Packaging
     public class BlazorPackageInitializer : PackageInitializer
     {
         private readonly string _name;
-        private readonly List<string> _addPackages;
+        private readonly List<(string packageName, string packageVersion)> _addPackages;
 
-        public BlazorPackageInitializer(string name, List<string> addPackages) :
+        public BlazorPackageInitializer(string name, List<(string packageName, string packageVersion)> addPackages) :
             base("blazor", "MLS.Blazor")
         {
             _name = name;
-            _addPackages = addPackages ?? throw new ArgumentNullException(nameof(addPackages));
+            var packages = addPackages ?? throw new ArgumentNullException(nameof(addPackages));
 
-            var requiredPackages = new List<string>
+            var requiredPackages = new List<(string packageName, string packageVersion)>
             {
-                "Newtonsoft.Json"
+                ("Newtonsoft.Json", "12.0.02"),
+                ("system.commandline.experimental", "0.3.0-alpha.19317.1")               
             };
 
-            _addPackages = addPackages.Concat(requiredPackages).Distinct().ToList();
+            _addPackages = packages.Concat(requiredPackages).Distinct().ToList();
         }
 
         public override async Task Initialize(DirectoryInfo directory, Budget budget = null)
@@ -53,10 +54,14 @@ namespace WorkspaceServer.Packaging
             
             foreach (var packageId in _addPackages)
             {
-                await dotnet.AddPackage(packageId);
-            }
+                var addPackageResult = await dotnet.AddPackage(packageId.packageName, packageId.packageVersion);
+                var addPackageResultMessage = string.Concat(
+                    string.Join("\n", addPackageResult.Output), 
+                    string.Join("\n", addPackageResult.Error));
 
-            await dotnet.AddPackage("System.CommandLine.Experimental", "0.3.0-alpha.19317.1");
+                addPackageResult.ThrowOnFailure(addPackageResultMessage);
+            }
+           
 
             var result = await dotnet.Build("-o runtime /bl", budget: budget);
             var stuff = string.Concat(string.Join("\n", result.Output), (string.Join("\n", result.Error)));
@@ -113,8 +118,8 @@ namespace WorkspaceServer.Packaging
 
         private void WriteResource(string resourceName, string targetDirectory)
         {
-            var text = this.GetType().ReadManifestResource($"WorkspaceServer.{resourceName}");
-            System.IO.Directory.CreateDirectory(targetDirectory);
+            var text = GetType().ReadManifestResource($"WorkspaceServer.{resourceName}");
+            Directory.CreateDirectory(targetDirectory);
             var path = Path.Combine(targetDirectory, resourceName);
             File.WriteAllText(path, text);
         }

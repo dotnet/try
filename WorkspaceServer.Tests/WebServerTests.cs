@@ -2,17 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Clockwise;
 using FluentAssertions;
-using FluentAssertions.Extensions;
 using Pocket;
 using Recipes;
 using WorkspaceServer.Features;
-using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests.Packaging;
 using Xunit;
 using Xunit.Abstractions;
@@ -37,8 +33,8 @@ namespace WorkspaceServer.Tests
             using (var webServer1 = new WebServer(workspace))
             using (var webServer2 = new WebServer(workspace))
             {
-                var response1 = await webServer1.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/values"));
-                var response2 = await webServer2.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/values"));
+                var response1 = await webServer1.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/custom/values"));
+                var response2 = await webServer2.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/custom/values"));
 
                 response1.EnsureSuccess();
                 response2.EnsureSuccess();

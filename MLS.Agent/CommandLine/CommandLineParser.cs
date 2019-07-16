@@ -57,7 +57,7 @@ namespace MLS.Agent.CommandLine
             InvocationContext context = null);
 
         public static Parser Create(
-            IServiceCollection services, 
+            IServiceCollection services,
             StartServer startServer = null,
             Demo demo = null,
             TryGitHub tryGithub = null,
@@ -100,7 +100,7 @@ namespace MLS.Agent.CommandLine
 
             install = install ??
              InstallCommand.Do;
-        
+
 
             var dirArgument = new Argument<DirectoryInfo>
             {
@@ -146,63 +146,63 @@ namespace MLS.Agent.CommandLine
                 command.AddOption(new Option(
                                       "--add-package-source",
                                       "Specify an additional NuGet package source")
-                                  {
-                                      Argument = new Argument<PackageSource>(() => new PackageSource(Directory.GetCurrentDirectory()))
-                                      {
-                                          Name = "NuGet source"
-                                      }
-                                  });
+                {
+                    Argument = new Argument<PackageSource>(() => new PackageSource(Directory.GetCurrentDirectory()))
+                    {
+                        Name = "NuGet source"
+                    }
+                });
 
                 command.AddOption(new Option(
                                       "--package",
                                       "Specify a Try .NET package or path to a .csproj to run code samples with")
-                                  {
-                                      Argument = new Argument<string>
-                                      {
-                                          Name = "name or .csproj"
-                                      }
-                                  });
+                {
+                    Argument = new Argument<string>
+                    {
+                        Name = "name or .csproj"
+                    }
+                });
 
                 command.AddOption(new Option(
                                       "--package-version",
                                       "Specify a Try .NET package version to use with the --package option")
-                                  {
-                                      Argument = new Argument<string>
-                                      {
-                                          Name = "version"
-                                      }
-                                  });
+                {
+                    Argument = new Argument<string>
+                    {
+                        Name = "version"
+                    }
+                });
 
                 command.AddOption(new Option(
                                       "--uri",
                                       "Specify a URL or a relative path to a Markdown file")
-                                  {
-                                      Argument = new Argument<Uri>()
-                                  });
+                {
+                    Argument = new Argument<Uri>()
+                });
 
                 command.AddOption(new Option(
                                           "--enable-preview-features",
                                           "Enable preview features")
-                                  {
-                                      Argument = new Argument<bool>()
-                                  });
+                {
+                    Argument = new Argument<bool>()
+                });
 
                 command.AddOption(new Option(
                                       "--log-path",
                                       "Enable file logging to the specified directory")
-                                  {
-                                      Argument = new Argument<DirectoryInfo>
-                                      {
-                                          Name = "dir"
-                                      }
-                                  });
+                {
+                    Argument = new Argument<DirectoryInfo>
+                    {
+                        Name = "dir"
+                    }
+                });
 
                 command.AddOption(new Option(
                                           "--verbose",
                                           "Enable verbose logging to the console")
-                                  {
-                                      Argument = new Argument<bool>()
-                                  });
+                {
+                    Argument = new Argument<bool>()
+                });
 
                 var portArgument = new Argument<ushort>();
 
@@ -221,9 +221,9 @@ namespace MLS.Agent.CommandLine
                 command.AddOption(new Option(
                                         "--port",
                                         "Specify the port for dotnet try to listen on")
-                                  {
-                                      Argument = portArgument
-                                  });
+                {
+                    Argument = portArgument
+                });
 
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {

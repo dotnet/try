@@ -184,6 +184,22 @@ namespace WorkspaceServer.Tests.Kernel
                         .Be(3);
         }
 
+
+        [Fact(Skip = "requires support for cs8 in roslyn scripting")]
+        public async Task it_supports_csharp_8()
+        {
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(new SubmitCode("var text = \"meow? meow!\";", "csharp"));
+            await repl.SendAsync(new SubmitCode("text[^5..^0]", "csharp"));
+
+            KernelEvents.OfType<ValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be("meow!");
+        }
+
         [Fact]
         public async Task it_can_load_assembly_references_using_r_directive()
         {
