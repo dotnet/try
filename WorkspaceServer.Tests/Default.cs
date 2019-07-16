@@ -56,18 +56,16 @@ namespace WorkspaceServer.Tests
         {
             var packageBuilder = new PackageBuilder("aspnet.webapi");
             packageBuilder.CreateUsingDotnet("webapi");
-            packageBuilder.DeleteFile("WeatherForecast.cs");
-            packageBuilder.DeleteFile("Controllers/WeatherForecastController.cs");
-            packageBuilder.WriteFile("Controllers/ApiController.cs", @"using System.Collections.Generic;
+            packageBuilder.WriteFile("Controllers/CustomController.cs", @"using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace aspnet.webapi.Controllers
 {
     [ApiController]
     [Route(""[controller]"")]
-    public class ApiController : ControllerBase
+    public class CustomController : ControllerBase
     {
-        public ApiController() { }
+        public CustomController() { }
 
         [HttpGet(""values"")]
         public IEnumerable<string> Values()
