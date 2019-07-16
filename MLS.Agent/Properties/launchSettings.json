@@ -10,31 +10,30 @@
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
-      "commandLineArgs": "hosted",
+      "commandLineArgs": "--port 4242 hosted",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "MLS.Agent": {
+    "Try": {
       "commandName": "Project",
-      "commandLineArgs": "../Samples",
+      "commandLineArgs": "--port 4242 ../Samples ",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "http://localhost:4242"
+      }
     },
     "Hosted": {
       "commandName": "Project",
-      "commandLineArgs": "hosted",
+      "commandLineArgs": "--port 4242 hosted ",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "Jupyter": {
       "commandName": "Project",
-      "commandLineArgs": "jupyter ../MLS.Agent.Tests/kernel_connection_file.json"
+      "commandLineArgs": "--port 4242 jupyter ../MLS.Agent.Tests/kernel_connection_file.json"
     }
   }
 }

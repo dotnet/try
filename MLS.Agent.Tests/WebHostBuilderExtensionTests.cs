@@ -38,7 +38,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public void In_try_mode_scheme_should_be_https()
         {
-            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(StartupMode.Hosted, 6000);
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(StartupMode.Try, 6000);
             uri.Scheme.Should().Be("https");
         }
 
