@@ -32,7 +32,7 @@
     },
     "Jupyter": {
       "commandName": "Project",
-      "commandLineArgs": "--port 4242 jupyter ../MLS.Agent.Tests/kernel_connection_file.json"
+      "commandLineArgs": "../MLS.Agent.Tests/kernel_connection_file.json"
     }
   }
 }
