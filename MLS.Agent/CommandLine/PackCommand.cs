@@ -31,7 +31,7 @@ namespace MLS.Agent.CommandLine
 
                 if (options.EnableWasm)
                 {
-                    string runnerDirectoryName = $"wasm";
+                    string runnerDirectoryName = "wasm";
                     var temp_projects_wasm = temp_projects.CreateSubdirectory(runnerDirectoryName);
                     var temp_mlsblazor = temp.CreateSubdirectory("MLS.Blazor");
                     await AddBlazorProject(temp_mlsblazor, GetProjectFile(temp_projects_build), name, temp_projects_wasm);
@@ -73,7 +73,7 @@ namespace MLS.Agent.CommandLine
 
         private static async Task AddBlazorProject(DirectoryInfo blazorTargetDirectory, FileInfo projectToReference, string name, DirectoryInfo wasmLocation)
         {
-            var initializer = new BlazorPackageInitializer(name, new System.Collections.Generic.List<string>());
+            var initializer = new BlazorPackageInitializer(name, new System.Collections.Generic.List<(string,string)>());
             await initializer.Initialize(blazorTargetDirectory);
 
             await AddReference(blazorTargetDirectory, projectToReference);
