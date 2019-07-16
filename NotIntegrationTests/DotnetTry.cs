@@ -57,7 +57,8 @@ namespace NotIntegrationTests
                 {
                     if (!string.IsNullOrWhiteSpace(error))
                     {
-                        tcs.SetException(new Exception(error));
+                        tcs.TrySetException(new Exception(error));
+                        Console.Write(error);
                     }
                 });
 

@@ -140,6 +140,8 @@ jobs:
       variables:
         - name: PACKAGESOURCE
           value: $(System.DefaultWorkingDirectory)/packages/Shipping
+        - name: TryDotNetPackagesPath
+          value: $(Build.SourcesDirectory)/.trydotnet/packages
       steps:
       - checkout: none #skip checking out the default repository resource
       - task: UseDotNet@2
