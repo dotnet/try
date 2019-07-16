@@ -33,8 +33,8 @@ namespace WorkspaceServer.Tests
             using (var webServer1 = new WebServer(workspace))
             using (var webServer2 = new WebServer(workspace))
             {
-                var response1 = await webServer1.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/WeatherForecast"));
-                var response2 = await webServer2.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/WeatherForecast"));
+                var response1 = await webServer1.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/values"));
+                var response2 = await webServer2.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/values"));
 
                 response1.EnsureSuccess();
                 response2.EnsureSuccess();

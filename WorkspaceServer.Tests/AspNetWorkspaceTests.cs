@@ -47,7 +47,7 @@ namespace WorkspaceServer.Tests
             {
                 var webServer = runResult.GetFeature<WebServer>();
 
-                var response = await webServer.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/WeatherForecast")).CancelIfExceeds(new TimeBudget(35.Seconds()));
+                var response = await webServer.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/values")).CancelIfExceeds(new TimeBudget(35.Seconds()));
 
                 var result = await response.EnsureSuccess()
                                            .DeserializeAs<string[]>();

@@ -56,6 +56,26 @@ namespace WorkspaceServer.Tests
         {
             var packageBuilder = new PackageBuilder("aspnet.webapi");
             packageBuilder.CreateUsingDotnet("webapi");
+            packageBuilder.DeleteFile("WeatherForecast.cs");
+            packageBuilder.DeleteFile("Controllers/WeatherForecastController.cs");
+            packageBuilder.WriteFile("Controllers/ApiController.cs", @"using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+
+namespace aspnet.webapi.Controllers
+{
+    [ApiController]
+    [Route(""[controller]"")]
+    public class ApiController : ControllerBase
+    {
+        public ApiController() { }
+
+        [HttpGet(""values"")]
+        public IEnumerable<string> Values()
+        {
+            return new[] { ""value1"", ""value2"" };
+        }
+    }
+}");
             packageBuilder.TrySetLanguageVersion("8.0");
             var package = packageBuilder.GetPackage() as Package;
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());

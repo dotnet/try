@@ -131,6 +131,16 @@ namespace WorkspaceServer.Packaging
             });
         }
 
+        public void WriteFile(string relativePath, string content)
+        {
+            _afterCreateActions.Add(async (workspace, budget) =>
+            {
+                await Task.Yield();
+                var filePath = Path.Combine(workspace.Directory.FullName, relativePath);
+                File.WriteAllText(filePath,content);
+            });
+        }
+
         public PackageBase GetPackage(Budget budget = null)
         {
             budget = budget ?? new Budget();
