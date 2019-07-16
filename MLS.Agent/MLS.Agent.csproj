@@ -155,7 +155,7 @@
     </PropertyGroup>
 
     <Exec Command="npm rebuild node-sass" WorkingDirectory="$(CssInputDir)" />
-    <Exec Command="npm i" WorkingDirectory="$(CssInputDir)" />
+    <Exec Command="npm ci" WorkingDirectory="$(CssInputDir)" />
     <Exec Command="npm run ciCreateDir -- $(CssOutputDir)" WorkingDirectory="$(CssInputDir)" />
     <Exec Command="npm run release -- $(CssOutputFile)" WorkingDirectory="$(CssInputDir)" />
 
@@ -172,7 +172,7 @@
       <_TryDotNetMinJsExists Condition="Exists('$(TryDotNetJsFile)')">true</_TryDotNetMinJsExists>
     </PropertyGroup>
 
-    <Exec Command="npm i" WorkingDirectory="$(TryDotNetJsInputDir)" />
+    <Exec Command="npm ci" WorkingDirectory="$(TryDotNetJsInputDir)" />
     <Exec Command="npm run ciCreateDir -- $(TryDotNetJsOutputDir)" WorkingDirectory="$(TryDotNetJsInputDir)" />
     <Exec Command="npm run build" WorkingDirectory="$(TryDotNetJsInputDir)" />
     <Exec Command="npm run ciMinify -- --output $(TryDotNetJsFile)" WorkingDirectory="$(TryDotNetJsInputDir)" />
@@ -191,7 +191,7 @@
       <_TryDotNetClientExists Condition="Exists('$(ClientOutputFile)')">true</_TryDotNetClientExists>
     </PropertyGroup>
 
-    <Exec Command="npm i" WorkingDirectory="$(ClientInputDir)" />
+    <Exec Command="npm ci" WorkingDirectory="$(ClientInputDir)" />
     <Exec Command="npm run ciCreateDir -- $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
     <Exec Command="npm run buildCi -- --output-path $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
 
