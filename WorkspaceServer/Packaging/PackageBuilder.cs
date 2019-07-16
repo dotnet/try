@@ -127,7 +127,10 @@ namespace WorkspaceServer.Packaging
             {
                 await Task.Yield();
                 var filePath = Path.Combine(workspace.Directory.FullName, relativePath);
-                File.Delete(filePath);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
             });
         }
 
