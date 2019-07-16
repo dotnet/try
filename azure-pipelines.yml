@@ -138,7 +138,8 @@ jobs:
       pool:
         vmImage: ubuntu-16.04
       variables:
-        dotnetTryPackageSource: $(System.DefaultWorkingDirectory)/packages/Shipping
+        - name: dotnetTryPackageSource
+          value: $(System.DefaultWorkingDirectory)/packages/Shipping
       steps:
       - checkout: none #skip checking out the default repository resource
       - task: UseDotNet@2
@@ -174,6 +175,7 @@ jobs:
           searchFolder: '$(SystemWorkingDirectory)/testResults'
         continueOnError: true
         condition: always()
+
     - job: Linux
       pool:
         vmImage: ubuntu-16.04
