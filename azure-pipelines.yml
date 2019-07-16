@@ -164,6 +164,8 @@ jobs:
           artifactName: integrationTests
           downloadPath: $(System.DefaultWorkingDirectory)
 
+      - script: echo $(dotnetTryPackageSources)
+        displayName: print value
       - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegrationTests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults
         displayName: Run integration tests
 
