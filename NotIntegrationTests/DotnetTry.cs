@@ -68,7 +68,7 @@ namespace NotIntegrationTests
 
         private PackageSource GetPackageSource([CallerFilePath] string callerFile = "")
         {
-            var dotnetTryPackageSource = Environment.GetEnvironmentVariable("dotnetTryPackageSource");
+            var dotnetTryPackageSource = Environment.GetEnvironmentVariable("PACKAGESOURCE");
 
             var directory = !string.IsNullOrWhiteSpace(dotnetTryPackageSource)
                 ? new DirectoryInfo(dotnetTryPackageSource)

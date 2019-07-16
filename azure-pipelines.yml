@@ -138,7 +138,7 @@ jobs:
       pool:
         vmImage: ubuntu-16.04
       variables:
-        - name: dotnetTryPackageSource
+        - name: PACKAGESOURCE
           value: $(System.DefaultWorkingDirectory)/packages/Shipping
       steps:
       - checkout: none #skip checking out the default repository resource
@@ -164,7 +164,7 @@ jobs:
           artifactName: integrationTests
           downloadPath: $(System.DefaultWorkingDirectory)
 
-      - script: echo $(dotnetTryPackageSources)
+      - script: echo $(PACKAGESOURCE)
         displayName: print value
       - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegrationTests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults
         displayName: Run integration tests
