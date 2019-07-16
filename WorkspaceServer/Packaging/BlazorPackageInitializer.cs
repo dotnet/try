@@ -25,10 +25,7 @@ namespace WorkspaceServer.Packaging
             var requiredPackages = new List<(string packageName, string packageVersion)>
             {
                 ("Newtonsoft.Json", "12.0.02"),
-                ("system.commandline.experimental", "0.3.0-alpha.19317.1"),
-                ("Microsoft.AspNetCore.Blazor", "3.0.0-preview6.19307.2"),
-                ("Microsoft.AspNetCore.Blazor.Build", "3.0.0-preview6.19307.2"),
-                ("Microsoft.AspNetCore.Blazor.DevServer", "3.0.0-preview6.19307.2")
+                ("system.commandline.experimental", "0.3.0-alpha.19317.1")               
             };
 
             _addPackages = packages.Concat(requiredPackages).Distinct().ToList();
