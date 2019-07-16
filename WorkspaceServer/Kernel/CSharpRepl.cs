@@ -23,7 +23,7 @@ namespace WorkspaceServer.Kernel
 
         private ScriptState _scriptState;
 
-        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
         protected ScriptOptions ScriptOptions;
 
         private StringBuilder _inputBuffer = new StringBuilder();

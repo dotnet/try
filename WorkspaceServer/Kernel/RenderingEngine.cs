@@ -7,8 +7,7 @@ using System.Linq;
 
 namespace WorkspaceServer.Kernel
 {
-
-    public class RenderingEngine : IRenderingEngine
+    public class RenderingEngine 
     {
         private readonly IRenderer _defaultRenderer;
         private readonly IRendering _nullRendering;
@@ -22,20 +21,13 @@ namespace WorkspaceServer.Kernel
 
         public IRendering Render(object source)
         {
-            try
+            if (source == null)
             {
-                if (source == null)
-                {
-                    return _nullRendering;
-                }
+                return _nullRendering;
+            }
 
-                var renderer = FindRenderer(source.GetType());
-                return renderer.Render(source, this);
-            }
-            catch (Exception e)
-            {
-                throw new RenderingEngineException(e, source);
-            }
+            var renderer = FindRenderer(source.GetType());
+            return renderer.Render(source, this);
         }
 
         public IRenderer FindRenderer(Type sourceType)
@@ -98,21 +90,6 @@ namespace WorkspaceServer.Kernel
             }
 
             _rendererRegistry[sourceType] = renderer ?? throw new ArgumentNullException(nameof(renderer));
-        }
-
-        public IRenderer FindRenderer<T>()
-        {
-            return FindRenderer(typeof(T));
-        }
-
-        public void RegisterRenderer<T>(IRenderer<T> renderer)
-        {
-            RegisterRenderer(typeof(T), renderer);
-        }
-
-        public void RegisterRenderer<T>(IRenderer renderer)
-        {
-            RegisterRenderer(typeof(T), renderer);
         }
     }
 }

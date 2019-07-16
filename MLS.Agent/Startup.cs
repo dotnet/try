@@ -234,7 +234,10 @@ namespace MLS.Agent
 
             RelativeFilePath FindReadmeFileAtRoot()
             {
-                var files = directoryAccessor.GetAllFilesRecursively().Where(f => (StringComparer.InvariantCultureIgnoreCase.Compare(f.FileName, "readme.md") == 0) && IsRoot(f.Directory)).ToList();
+                var files = directoryAccessor
+                    .GetAllFilesRecursively()
+                    .Where(f => (StringComparer.InvariantCultureIgnoreCase.Compare(f.FileName, "readme.md") == 0) && IsRoot(f.Directory))
+                    .ToList();
 
                 return files.FirstOrDefault();
             }

@@ -12,28 +12,16 @@ namespace MLS.Agent
     {
         public static IWebHostBuilder ConfigureUrl(this IWebHostBuilder builder, StartupMode mode, ushort? port)
         {
-            var uri = GetBrowserLaunchUri(IsLaunchedForDevelopment(), mode, port);
+            var uri = GetBrowserLaunchUri(mode, port);
             return builder.UseUrls(uri.ToString());
         }
 
-        public static BrowserLaunchUri GetBrowserLaunchUri(bool isLaunchedForDevelopment, StartupMode mode, ushort? port)
+        public static BrowserLaunchUri GetBrowserLaunchUri(StartupMode mode, ushort? port)
         {
-            var scheme = "https";
-            if (isLaunchedForDevelopment)
-            {
-                return new BrowserLaunchUri(scheme, "localhost", 4242);
-            }
-
+            var scheme = mode == StartupMode.Hosted ? "http" : "https";
             var portToUse = port.HasValue ? port : GetFreePort();
             var host = mode == StartupMode.Hosted ? "*" : "localhost";
-
             return new BrowserLaunchUri(scheme, host, portToUse.Value);
-        }
-
-        private static bool IsLaunchedForDevelopment()
-        {
-            var processName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-            return processName == "dotnet" || processName == "dotnet.exe";
         }
 
         private static ushort GetFreePort()

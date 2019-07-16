@@ -13,7 +13,7 @@ namespace WorkspaceServer.Packaging
     {
         private PackageBase _packageBase;
         private readonly List<Func<PackageBase, Budget, Task>> _afterCreateActions = new List<Func<PackageBase, Budget, Task>>();
-        private readonly List<string> _addPackages = new List<string>();
+        private readonly List<(string packageName, string packageVersion)> _addPackages = new List<(string packageName, string packageVersion)>();
         private string _languageVersion = "8.0";
 
         public PackageBuilder(string packageName, IPackageInitializer packageInitializer = null)
@@ -48,7 +48,7 @@ namespace WorkspaceServer.Packaging
 
         public void AddPackageReference(string packageId, string version = null)
         {
-            _addPackages.Add(packageId);
+            _addPackages.Add((packageId, version));
             _afterCreateActions.Add(async (package, budget) =>
             {
                 Func<Task> action = async () =>
@@ -127,7 +127,20 @@ namespace WorkspaceServer.Packaging
             {
                 await Task.Yield();
                 var filePath = Path.Combine(workspace.Directory.FullName, relativePath);
-                File.Delete(filePath);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            });
+        }
+
+        public void WriteFile(string relativePath, string content)
+        {
+            _afterCreateActions.Add(async (workspace, budget) =>
+            {
+                await Task.Yield();
+                var filePath = Path.Combine(workspace.Directory.FullName, relativePath);
+                File.WriteAllText(filePath,content);
             });
         }
 

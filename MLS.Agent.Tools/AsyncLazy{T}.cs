@@ -8,7 +8,7 @@ namespace MLS.Agent.Tools
 {
     public class AsyncLazy<T>
     {
-        private readonly Lazy<Task<T>> lazy;
+        private readonly Lazy<Task<T>> _lazy;
 
         public AsyncLazy(Func<Task<T>> initialize)
         {
@@ -17,9 +17,9 @@ namespace MLS.Agent.Tools
                 throw new ArgumentNullException(nameof(initialize));
             }
 
-            lazy = new Lazy<Task<T>>(initialize);
+            _lazy = new Lazy<Task<T>>(initialize);
         }
 
-        public Task<T> ValueAsync() => lazy.Value;
+        public Task<T> ValueAsync() => _lazy.Value;
     }
 }

@@ -5,11 +5,6 @@ namespace WorkspaceServer.Kernel
 {
     public interface IRenderer
     {
-        IRendering Render(object source, IRenderingEngine engine = null);
-    }
-
-    public interface IRenderer<in T> : IRenderer
-    {
-        IRendering Render(T source, IRenderingEngine engine = null);
+        IRendering Render(object source, RenderingEngine engine = null);
     }
 }
