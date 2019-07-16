@@ -137,6 +137,8 @@ jobs:
       condition: succeeded()
       pool:
         vmImage: ubuntu-16.04
+      variables:
+        dotnetTryPackageSource: $(System.DefaultWorkingDirectory)/packages/Shipping
       steps:
       - checkout: none #skip checking out the default repository resource
       - task: UseDotNet@2
