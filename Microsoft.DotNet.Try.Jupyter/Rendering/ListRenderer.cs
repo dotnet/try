@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 {
     public class ListRenderer : IRenderer
     {
-        public IRendering Render(object source, IRenderingEngine engine = null)
+        public IRendering Render(object source, RenderingEngine engine = null)
         {
             switch (source)
             {

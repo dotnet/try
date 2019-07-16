@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             _kernel = kernel;
             _renderingEngine = new RenderingEngine(new DefaultRenderer(), new PlainTextRendering("<null>"));
-            _renderingEngine.RegisterRenderer<string>(new DefaultRenderer());
+            _renderingEngine.RegisterRenderer(typeof(string), new DefaultRenderer());
             _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
             _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                     transient: openRequest.Transient,
                     data: new Dictionary<string, object>
                     {
-                        {rendering.Mime, rendering.Content}
+                        { rendering.MimeType, rendering.Content }
                     });
 
                 if (!openRequest.ExecuteRequest.Silent)

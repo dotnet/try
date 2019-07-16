@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         public RenderingTests()
         {
             _engine = new RenderingEngine(new DefaultRenderer(), new PlainTextRendering("<null>"));
-            _engine.RegisterRenderer<string>(new DefaultRenderer());
+            _engine.RegisterRenderer(typeof(string), new DefaultRenderer());
             _engine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
             _engine.RegisterRenderer(typeof(IList), new ListRenderer());
             _engine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         public void renders_null()
         {
             var rendering = _engine.Render(null);
-            rendering.Mime.Should().Be("text/plain");
+            rendering.MimeType.Should().Be("text/plain");
             rendering.Content.Should().Be("<null>");
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             };
 
             var rendering = _engine.Render(source);
-            rendering.Mime.Should().Be("text/html");
+            rendering.MimeType.Should().Be("text/html");
 
             var html = new HtmlDocument();
             html.LoadHtml(rendering.Content.ToString());
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             var source = new PriorityElement { Url = "Test struct", Priority = 112 };
 
             var rendering = _engine.Render(source);
-            rendering.Mime.Should().Be("text/html");
+            rendering.MimeType.Should().Be("text/html");
 
             var html = new HtmlDocument();
             html.LoadHtml(rendering.Content.ToString());

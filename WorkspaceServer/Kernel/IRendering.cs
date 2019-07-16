@@ -5,7 +5,8 @@ namespace WorkspaceServer.Kernel
 {
     public interface IRendering
     {
-        string Mime { get; }
+        string MimeType { get; }
+
         object Content { get; }
     }  
 }
