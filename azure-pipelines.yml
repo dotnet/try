@@ -18,7 +18,7 @@ variables:
   - name: BlazorTemplateVersion
     value: 3.0.0-preview6.19307.2
   - name: DotNetSdkVersion
-    value: 3.0.100-preview6-012264
+    value: 3.0.100-preview7-012802
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
