@@ -35,7 +35,8 @@ namespace NotIntegrationTests
         {
             var disposable = DisposableDirectory.Create();
             var dotnet = new Dotnet();
-            await dotnet.ToolInstall("dotnet try", disposable.Directory, addSource: GetPackageSource());
+            var installResult = await dotnet.ToolInstall("dotnet try", disposable.Directory, addSource: GetPackageSource());
+            Console.WriteLine(string.Join("\n", installResult.Output));
 
             await Start();
             return true;
