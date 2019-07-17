@@ -46,7 +46,7 @@ namespace NotIntegrationTests
         {
             var tcs = new TaskCompletionSource<bool>();
             var dotnetTry = _disposableDirectory.Directory.GetFiles("dotnet-try*").First().FullName;
-            _process = CommandLine.StartProcess(dotnetTry, "hosted --port 7891", _disposableDirectory.Directory,
+            _process = CommandLine.StartProcess(dotnetTry, "--port 7891 hosted", _disposableDirectory.Directory,
                 output =>
                 {
                     if (output.Contains("Now listening on"))
