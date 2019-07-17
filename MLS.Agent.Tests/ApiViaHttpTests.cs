@@ -633,7 +633,7 @@ namespace FibonacciTest
         public async Task When_aspnet_webapi_workspace_request_succeeds_then_output_shows_web_response()
         {
             var workspace = new Workspace(workspaceType: "aspnet.webapi", buffers: new[] { new Buffer("empty.cs", "") });
-            var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/api/values", "get"), requestId: "TestRun");
+            var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/custom/values", "get"), requestId: "TestRun");
 
             var json = request.ToJson();
 
@@ -667,7 +667,7 @@ namespace FibonacciTest
             await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(10.Minutes()));
             var workspace = WorkspaceFactory.CreateWorkspaceFromDirectory(package.Directory, package.Directory.Name);
 
-            var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/api/values", "get"), requestId: "TestRun");
+            var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/custom/values", "get"), requestId: "TestRun");
 
             var response = await CallRun(request.ToJson(), 30000);
 
@@ -693,7 +693,7 @@ namespace FibonacciTest
                 files: workspace.Files.ToArray(),
                 workspaceType: workspace.WorkspaceType);
 
-            var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/api/values", "get"), requestId: "TestRun");
+            var request = new WorkspaceRequest(workspace, httpRequest: new HttpRequest("/custom/values", "get"), requestId: "TestRun");
 
             var response = await CallRun(request.ToJson(), null);
 

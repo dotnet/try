@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Rendering
 {
     public class SequenceRenderer : IRenderer
     {
-        public IRendering Render(object source, IRenderingEngine engine = null)
+        public IRendering Render(object source, RenderingEngine engine = null)
         {
             if (source == null)
             {

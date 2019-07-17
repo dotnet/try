@@ -11,48 +11,49 @@ namespace MLS.Agent.Tests
     public class WebHostBuilderExtensionTests
     {
         [Theory]
-        [InlineData(StartupMode.Hosted)]
         [InlineData(StartupMode.Try)]
-        public void If_launched_for_development_localhost_4242_is_used_irrespective_of_mode(StartupMode mode)
+        [InlineData(StartupMode.Hosted)]
+        public void If_port_is_not_specified_a_free_port_is_returned(StartupMode mode)
         {
-            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(true, mode, null);
-            uri.ToString().Should().Be("https://localhost:4242");
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(mode, null);
+            CheckIfPortIsAvailable(uri.Port).Should().BeTrue();
         }
 
-        public class WhenNotLaunchedForDevelopment
+        [Theory]
+        [InlineData(StartupMode.Try)]
+        [InlineData(StartupMode.Hosted)]
+        public void If_a_port_it_specified_it_is_used(StartupMode mode)
         {
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(mode, 6000);
+            uri.Port.Should().Be(6000);
+        }
 
-            [Theory]
-            [InlineData(StartupMode.Try)]
-            [InlineData(StartupMode.Hosted)]
-            public void If_port_is_not_specified_a_free_port_is_returned(StartupMode mode)
-            {
-                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, mode, null);
-                CheckIfPortIsAvailable(uri.Port).Should().BeTrue();
-            }
+        [Fact]
+        public void In_try_mode_host_should_be_localhost()
+        {
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(StartupMode.Try, 6000);
+            uri.Host.Should().Be("localhost");
+        }
 
-            [Theory]
-            [InlineData(StartupMode.Try)]
-            [InlineData(StartupMode.Hosted)]
-            public void If_a_port_it_specified_it_is_used(StartupMode mode)
-            {
-                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, mode, 6000);
-                uri.Port.Should().Be(6000);
-            }
+        [Fact]
+        public void In_try_mode_scheme_should_be_https()
+        {
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(StartupMode.Try, 6000);
+            uri.Scheme.Should().Be("https");
+        }
 
-            [Fact]
-            public void In_try_mode_host_should_be_localhost()
-            {
-                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, StartupMode.Try, 6000);
-                uri.Host.Should().Be("localhost");
-            }
+        [Fact]
+        public void In_hosted_mode_host_should_be_star()
+        {
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(StartupMode.Hosted, 6000);
+            uri.Host.Should().Be("*");
+        }
 
-            [Fact]
-            public void In_hosted_mode_host_should_be_star()
-            {
-                var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(false, StartupMode.Hosted, 6000);
-                uri.Host.Should().Be("*");
-            }
+        [Fact]
+        public void In_hosted_mode_scheme_should_be_http()
+        {
+            var uri = WebHostBuilderExtensions.GetBrowserLaunchUri(StartupMode.Hosted, 6000);
+            uri.Scheme.Should().Be("http");
         }
 
         private static bool CheckIfPortIsAvailable(ushort port)

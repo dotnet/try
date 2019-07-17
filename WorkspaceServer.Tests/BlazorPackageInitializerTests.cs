@@ -22,7 +22,7 @@ namespace WorkspaceServer.Tests
 
             var initializer = new BlazorPackageInitializer(
                 "blazor-test",
-                new List<string>());
+                new List<(string,string)>());
 
             Func<Task> initialize = async () =>
                 await initializer.Initialize(empty.Directory);
@@ -40,7 +40,7 @@ namespace WorkspaceServer.Tests
             var name = "blazor-test";
             var initializer = new BlazorPackageInitializer(
                 name,
-                new List<string>());
+                new List<(string, string)>());
 
             await initializer.Initialize(dir);
 
@@ -73,9 +73,9 @@ namespace WorkspaceServer.Tests
             var name = "blazor-test";
             var initializer = new BlazorPackageInitializer(
                 name,
-                new List<string>()
+                new List<(string, string)>
                 {
-                    "Microsoft.Extensions.Logging::3.0.0-preview6.19304.6"
+                    ("Microsoft.Extensions.Logging", "3.0.0-preview6.19304.6")
                 });
 
             await initializer.Initialize(dir);

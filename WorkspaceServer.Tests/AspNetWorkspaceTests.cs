@@ -3,7 +3,6 @@
 
 using System;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Clockwise;
 using FluentAssertions;
@@ -14,7 +13,6 @@ using Recipes;
 using WorkspaceServer.Models.Execution;
 using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Features;
-using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 using Package = WorkspaceServer.Packaging.Package;
@@ -47,7 +45,7 @@ namespace WorkspaceServer.Tests
             {
                 var webServer = runResult.GetFeature<WebServer>();
 
-                var response = await webServer.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/api/values")).CancelIfExceeds(new TimeBudget(35.Seconds()));
+                var response = await webServer.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/custom/values")).CancelIfExceeds(new TimeBudget(35.Seconds()));
 
                 var result = await response.EnsureSuccess()
                                            .DeserializeAs<string[]>();
