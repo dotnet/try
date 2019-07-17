@@ -29,13 +29,26 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void cannot_handle_requests_that_are_not_executeRequest()
+        public void cannot_handle_requests_that_are_not_completeRequest()
         {
             var kernel = new CSharpRepl();
             var handler = new CompleteRequestHandler(kernel);
             var request = Message.Create(new DisplayData(), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             messageHandling.Should().ThrowExactly<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void send_completeReply_on_completeRequest()
+        {
+            var kernel = new CSharpRepl();
+            var handler = new CompleteRequestHandler(kernel);
+            var request = Message.Create(new CompleteRequest("Conso",4 ), null);
+            Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            _serverRecordingSocket.DecodedMessages
+                .Should().Contain(message =>
+                    message.Contains(MessageTypeValues.CompleteReply));
         }
     }
 }
