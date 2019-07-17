@@ -115,7 +115,8 @@ namespace WorkspaceServer
             Budget budget = null,
             string version = null)
         {
-            var args = $@"{packageName} --tool-path ""{RemoveTrailingSlash(toolPath.FullName)}"" --version {version}";
+            var versionArg = version != null ? $"--version {version}" : "");
+            var args = $@"{packageName} --tool-path ""{RemoveTrailingSlash(toolPath.FullName)}"" {versionArg}";
             if (addSource != null)
             {
                 args += $@" --add-source ""{addSource}""";
