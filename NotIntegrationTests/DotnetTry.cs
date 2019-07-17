@@ -46,7 +46,7 @@ namespace NotIntegrationTests
         {
             var tcs = new TaskCompletionSource<bool>();
             var dotnetTry = _disposableDirectory.Directory.GetFiles("dotnet-try*").First().FullName;
-            _process = CommandLine.StartProcess(dotnetTry, "--port 7891", _disposableDirectory.Directory,
+            _process = CommandLine.StartProcess(dotnetTry, "hosted --port 7891", _disposableDirectory.Directory,
                 output =>
                 {
                     if (output.Contains("Now listening on"))
@@ -64,7 +64,7 @@ namespace NotIntegrationTests
                 });
 
             _client = new HttpClient();
-            _client.BaseAddress = new Uri("https://localhost:7891");
+            _client.BaseAddress = new Uri("http://localhost:7891");
             await tcs.Task;
         }
 
