@@ -234,7 +234,7 @@ json
 
             var repl = await CreateKernelAsync();
 
-            await repl.SendAsync(new RequestCompletion("System.Console.", 15, "csharp"));
+            await repl.SendAsync(new RequestCompletion("System.Console.", 15));
 
             KernelEvents.Should()
                 .ContainSingle(e => e is CompletionRequestReceived);
@@ -254,7 +254,7 @@ json
 
             await repl.SendAsync(
                 new SubmitCode($"var alpha = new Random();"));
-            await repl.SendAsync(new RequestCompletion("al", 2, "csharp"));
+            await repl.SendAsync(new RequestCompletion("al", 2));
 
             KernelEvents.Should()
                 .ContainSingle(e => e is CompletionRequestReceived);
