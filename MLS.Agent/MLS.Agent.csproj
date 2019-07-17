@@ -123,7 +123,7 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1'">
+  <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
     <ConvertToAbsolutePath Paths="$(MSBuildThisFileDirectory)">
       <Output TaskParameter="AbsolutePaths" PropertyName="AbsoluteOutputPath"/>
     </ConvertToAbsolutePath>
@@ -148,7 +148,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildCss" Inputs="@$(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildCss" Inputs="@$(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
 
     <PropertyGroup>
       <_TryDotNetCssExists Condition="Exists('$(CssOutputFile)')">true</_TryDotNetCssExists>
@@ -167,7 +167,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildTryDotNetJs" Inputs="@(TryDotNetJsInput)" Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildTryDotNetJs" Inputs="@(TryDotNetJsInput)" Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
     <PropertyGroup>
       <_TryDotNetMinJsExists Condition="Exists('$(TryDotNetJsFile)')">true</_TryDotNetMinJsExists>
     </PropertyGroup>
@@ -185,7 +185,7 @@
     </ItemGroup>
   </Target>
   
-  <Target Name="BuildClient" Inputs="@(ClientInputFiles)" Outputs="$(ClientOutputFile)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
+  <Target Name="BuildClient" Inputs="@(ClientInputFiles)" Outputs="$(ClientOutputFile)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
 
     <PropertyGroup>
       <_TryDotNetClientExists Condition="Exists('$(ClientOutputFile)')">true</_TryDotNetClientExists>
