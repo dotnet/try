@@ -3,14 +3,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Host.Mef;
+using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Try.Protocol;
+using WorkspaceServer.LanguageServices;
 
 namespace WorkspaceServer.Kernel
 {
@@ -78,7 +86,13 @@ namespace WorkspaceServer.Kernel
                     {
                         await HandleSubmitCode(submitCode, invocationContext);
                     });
+                    break;
 
+                case RequestCompletion requestCompletion:
+                    context.OnExecute(async invocationContext =>
+                    {
+                        await HandleRequestCompletion(requestCompletion, invocationContext, _scriptState);
+                    });
                     break;
             }
         }
@@ -147,6 +161,88 @@ namespace WorkspaceServer.Kernel
                 context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
                 context.OnCompleted();
             }
+        }
+
+        private async Task HandleRequestCompletion(
+            RequestCompletion requestCompletion,
+            KernelInvocationContext context, 
+            ScriptState scriptState)
+        {
+            var completionRequestReceived = new CompletionRequestReceived(requestCompletion);
+          
+            context.OnNext(completionRequestReceived);
+
+            var completionList =
+                await GetCompletionList(requestCompletion.Code, requestCompletion.CursorPosition, scriptState);
+
+            context.OnNext(new CompletionRequestCompleted(completionList, requestCompletion));
+        }
+
+        private async Task<CompletionResult> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
+        {
+            var projectId = ProjectId.CreateNewId("ScriptProject");
+            var workspace = new AdhocWorkspace(MefHostServices.DefaultHost);
+
+            var metadataReferences = ImmutableArray<MetadataReference>.Empty;
+            
+            var forcedState = false;
+            if (scriptState == null)
+            {
+                scriptState = await CSharpScript.RunAsync("", ScriptOptions);
+                forcedState = true;
+            }
+
+            var compilation = scriptState.Script.GetCompilation();
+            metadataReferences = metadataReferences.AddRange(compilation.References);
+
+            var buffer = new StringBuilder(forcedState ? string.Empty : (scriptState.Script.Code ?? string.Empty));
+            buffer.AppendLine(code);
+            var fullScriptCode = buffer.ToString();
+            var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
+            var absolutePosition = Math.Max(offset,0) + cursorPosition;
+
+            var compilationOptions = compilation.Options;
+            
+
+            var projectInfo = ProjectInfo.Create(
+                projectId,
+                version: VersionStamp.Create(),
+                name: "ScriptProject",
+                assemblyName: "ScriptProject",
+                language: LanguageNames.CSharp,
+                compilationOptions: compilationOptions,
+                metadataReferences: metadataReferences);
+
+            workspace.AddProject(projectInfo);
+
+            var documentId = DocumentId.CreateNewId(projectId, "ScriptDocument");
+
+            var documentInfo = DocumentInfo.Create(documentId,
+                name: "ScriptDocument",
+                sourceCodeKind: SourceCodeKind.Script);
+
+            workspace.AddDocument(documentInfo);
+
+            var document = workspace.CurrentSolution.GetDocument(documentId);
+            document = document.WithText(SourceText.From(fullScriptCode));
+            var service = CompletionService.GetService(document);
+
+            var completionList = await service.GetCompletionsAsync(document, absolutePosition);
+            var semanticModel = await document.GetSemanticModelAsync();
+            var symbols = await Recommender.GetRecommendedSymbolsAtPositionAsync(semanticModel, absolutePosition, document.Project.Solution.Workspace);
+
+            var symbolToSymbolKey = new Dictionary<(string, int), ISymbol>();
+            foreach (var symbol in symbols)
+            {
+                var key = (symbol.Name, (int)symbol.Kind);
+                if (!symbolToSymbolKey.ContainsKey(key))
+                {
+                    symbolToSymbolKey[key] = symbol;
+                }
+            }
+            var items = completionList.Items.Select(item => item.ToModel(symbolToSymbolKey, document)).ToArray();
+
+            return new  CompletionResult(items);
         }
 
         private bool HasReturnValue =>
