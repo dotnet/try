@@ -203,7 +203,6 @@ namespace WorkspaceServer.Kernel
             var absolutePosition = Math.Max(offset,0) + cursorPosition;
 
             var compilationOptions = compilation.Options;
-            
 
             var projectInfo = ProjectInfo.Create(
                 projectId,

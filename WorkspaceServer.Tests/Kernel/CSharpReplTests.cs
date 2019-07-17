@@ -229,12 +229,12 @@ json
         }
 
         [Fact]
-        public async Task it_return_completion_list_for_types()
+        public async Task it_returns_completion_list_for_types()
         {
 
-            var repl = await CreateKernelAsync();
+            var kernel = await CreateKernelAsync();
 
-            await repl.SendAsync(new RequestCompletion("System.Console.", 15));
+            await kernel.SendAsync(new RequestCompletion("System.Console.", 15));
 
             KernelEvents.Should()
                 .ContainSingle(e => e is CompletionRequestReceived);
@@ -247,14 +247,14 @@ json
         }
 
         [Fact]
-        public async Task it_return_completion_list_for_previously_declared_variables()
+        public async Task it_returns_completion_list_for_previously_declared_variables()
         {
 
-            var repl = await CreateKernelAsync();
+            var kernel = await CreateKernelAsync();
 
-            await repl.SendAsync(
-                new SubmitCode($"var alpha = new Random();"));
-            await repl.SendAsync(new RequestCompletion("al", 2));
+            await kernel.SendAsync(
+                new SubmitCode("var alpha = new Random();"));
+            await kernel.SendAsync(new RequestCompletion("al", 2));
 
             KernelEvents.Should()
                 .ContainSingle(e => e is CompletionRequestReceived);
@@ -264,6 +264,30 @@ json
                 .CompletionList
                 .Should()
                 .Contain(i => i.DisplayText == "alpha");
+        }
+
+        [Fact]
+        public async Task it_returns_completion_list_for_types_imported_at_runtime()
+        {
+
+            var kernel = await CreateKernelAsync();
+
+            var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
+
+            await kernel.SendAsync(
+                new SubmitCode($"#r \"{dll}\""));
+
+            await kernel.SendAsync(new RequestCompletion("Newtonsoft.Json.JsonConvert.", 28));
+
+
+            KernelEvents.Should()
+                .ContainSingle(e => e is CompletionRequestReceived);
+
+            KernelEvents.Single(e => e is CompletionRequestCompleted)
+                .As<CompletionRequestCompleted>()
+                .CompletionList
+                .Should()
+                .Contain(i => i.DisplayText == "SerializeObject");
         }
     }
 }

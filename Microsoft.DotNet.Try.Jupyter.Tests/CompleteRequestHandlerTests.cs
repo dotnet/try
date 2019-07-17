@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         {
             var kernel = new CSharpRepl();
             var handler = new CompleteRequestHandler(kernel);
-            var request = Message.Create(new CompleteRequest("Conso",4 ), null);
+            var request = Message.Create(new CompleteRequest("System.Console.", 15 ), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.DecodedMessages
