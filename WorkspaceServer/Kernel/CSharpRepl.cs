@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.LanguageServices;
+using CompletionItem = Microsoft.DotNet.Try.Protocol.CompletionItem;
 
 namespace WorkspaceServer.Kernel
 {
@@ -178,7 +179,7 @@ namespace WorkspaceServer.Kernel
             context.OnNext(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
-        private async Task<CompletionResult> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
+        private async Task<IEnumerable<CompletionItem>> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
         {
             var projectId = ProjectId.CreateNewId("ScriptProject");
             var workspace = new AdhocWorkspace(MefHostServices.DefaultHost);
@@ -242,7 +243,7 @@ namespace WorkspaceServer.Kernel
             }
             var items = completionList.Items.Select(item => item.ToModel(symbolToSymbolKey, document)).ToArray();
 
-            return new  CompletionResult(items);
+            return items;
         }
 
         private bool HasReturnValue =>

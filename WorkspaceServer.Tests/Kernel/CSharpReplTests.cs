@@ -245,5 +245,25 @@ json
                 .Should()
                 .Contain(i => i.DisplayText == "ReadLine");
         }
+
+        [Fact]
+        public async Task it_return_completion_list_for_previously_declared_variables()
+        {
+
+            var repl = await CreateKernelAsync();
+
+            await repl.SendAsync(
+                new SubmitCode($"var alpha = new Random();"));
+            await repl.SendAsync(new RequestCompletion("al", 2, "csharp"));
+
+            KernelEvents.Should()
+                .ContainSingle(e => e is CompletionRequestReceived);
+
+            KernelEvents.Single(e => e is CompletionRequestCompleted)
+                .As<CompletionRequestCompleted>()
+                .CompletionList
+                .Should()
+                .Contain(i => i.DisplayText == "alpha");
+        }
     }
 }
