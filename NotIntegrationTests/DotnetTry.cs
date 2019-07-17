@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -33,9 +34,8 @@ namespace NotIntegrationTests
 
         private async Task<bool> ReadyAsync()
         {
-            var disposable = DisposableDirectory.Create();
             var dotnet = new Dotnet();
-            var installResult = await dotnet.ToolInstall("dotnet try", disposable.Directory, addSource: GetPackageSource());
+            var installResult = await dotnet.ToolInstall("dotnet-try", _disposableDirectory.Directory, version: "1.0.44142.42", addSource: GetPackageSource());
             Console.WriteLine(string.Join("\n", installResult.Output));
 
             await Start();
@@ -45,8 +45,8 @@ namespace NotIntegrationTests
         private async Task Start()
         {
             var tcs = new TaskCompletionSource<bool>();
-            var dotnet = new Dotnet(_disposableDirectory.Directory);
-            _process = dotnet.StartProcess("try --port 7891", 
+            var dotnetTry = _disposableDirectory.Directory.GetFiles("dotnet-try*").First().FullName;
+            _process = CommandLine.StartProcess(dotnetTry, "--port 7891", _disposableDirectory.Directory,
                 output =>
                 {
                     if (output.Contains("Now listening on"))
