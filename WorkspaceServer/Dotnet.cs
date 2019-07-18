@@ -60,6 +60,14 @@ namespace WorkspaceServer
                 _workingDirectory,
                 budget);
 
+        public Process StartProcess(string args, Action<string> output = null, Action<string> error = null) =>
+            CommandLine.StartProcess(
+                Path.FullName,
+                args,
+                _workingDirectory, 
+                output,
+                error);
+
         public Task<CommandLineResult> Publish(string args, Budget budget = null) =>
             Execute("publish".AppendArgs(args), budget);
 
@@ -104,9 +112,11 @@ namespace WorkspaceServer
             string packageName, 
             DirectoryInfo toolPath,
             PackageSource addSource = null, 
-            Budget budget = null)
+            Budget budget = null,
+            string version = null)
         {
-            var args = $@"{packageName} --tool-path ""{RemoveTrailingSlash(toolPath.FullName)}"" --version 1.0.0";
+            var versionArg = version != null ? $"--version {version}" : "";
+            var args = $@"{packageName} --tool-path ""{RemoveTrailingSlash(toolPath.FullName)}"" {versionArg}";
             if (addSource != null)
             {
                 args += $@" --add-source ""{addSource}""";
