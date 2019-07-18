@@ -23,15 +23,15 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         public async Task Handle(JupyterRequestContext context)
         {
-            var completeRequest = GetRequest(context);
+            var completeRequest = GetJupyterRequest(context);
 
             context.RequestHandlerStatus.SetAsBusy();
 
             var command = new RequestCompletion(completeRequest.Code, completeRequest.CursorPosition);
 
-            var openRequest = new OpenRequest(context, completeRequest, 0, null);
+            var openRequest = new InflightRequest(context, completeRequest, 0, null);
 
-            OpenRequests[command] = openRequest;
+            InFlightRequests[command] = openRequest;
 
             var kernelResult = await Kernel.SendAsync(command);
             openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             switch (value)
             {
                 case CompletionRequestCompleted completionRequestCompleted:
-                    OnCompletionRequestCompleted(completionRequestCompleted, OpenRequests);
+                    OnCompletionRequestCompleted(completionRequestCompleted, InFlightRequests);
                     break;
                 case CompletionRequestReceived _:
                     break;
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
         {
             openRequests.TryGetValue(completionRequestCompleted.Command, out var openRequest);
             if (openRequest == null)

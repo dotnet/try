@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
         }
 
-        protected static T GetRequest(JupyterRequestContext context)
+        protected static T GetJupyterRequest(JupyterRequestContext context)
         {
             var request = context.GetRequestContent<T>() ??
                                   throw new InvalidOperationException(
@@ -30,14 +30,14 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         protected IKernel Kernel { get;  }
 
-        protected ConcurrentDictionary<IKernelCommand, OpenRequest> OpenRequests { get; } = new ConcurrentDictionary<IKernelCommand, OpenRequest>();
+        protected ConcurrentDictionary<IKernelCommand, InflightRequest> InFlightRequests { get; } = new ConcurrentDictionary<IKernelCommand, InflightRequest>();
 
         public void Dispose()
         {
             _disposables.Dispose();
         }
 
-        protected class OpenRequest : IDisposable
+        protected class InflightRequest : IDisposable
         {
             private readonly CompositeDisposable _disposables = new CompositeDisposable();
             public Dictionary<string, object> Transient { get; }
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             public T Request { get; }
             public int ExecutionCount { get; }
 
-            public OpenRequest(JupyterRequestContext context, T request, int executionCount,
+            public InflightRequest(JupyterRequestContext context, T request, int executionCount,
                 Dictionary<string, object> transient)
             {
                 Context = context;

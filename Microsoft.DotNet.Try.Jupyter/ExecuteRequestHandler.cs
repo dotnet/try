@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         public async Task Handle(JupyterRequestContext context)
         {
-            var executeRequest = GetRequest(context);
+            var executeRequest = GetJupyterRequest(context);
 
             context.RequestHandlerStatus.SetAsBusy();
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
@@ -30,9 +30,9 @@ namespace Microsoft.DotNet.Try.Jupyter
             var command = new SubmitCode(executeRequest.Code, "csharp");
             var id = Guid.NewGuid();
             var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
-            var openRequest = new OpenRequest(context, executeRequest, executionCount, transient);
+            var openRequest = new InflightRequest(context, executeRequest, executionCount, transient);
 
-            OpenRequests[command] = openRequest;
+            InFlightRequests[command] = openRequest;
 
             try
             {
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
             catch (Exception e)
             {
-                OpenRequests.TryRemove(command, out _);
+                InFlightRequests.TryRemove(command, out _);
 
                 var errorContent = new Error(
                     eName: "Unhandled Exception",
@@ -82,13 +82,13 @@ namespace Microsoft.DotNet.Try.Jupyter
             switch (value)
             {
                 case ValueProduced valueProduced:
-                    OnValueProduced(valueProduced, OpenRequests);
+                    OnValueProduced(valueProduced, InFlightRequests);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
-                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated, OpenRequests);
+                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated, InFlightRequests);
                     break;
                 case CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed:
-                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, OpenRequests);
+                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, InFlightRequests);
                     break;
                 case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             }
         }
 
-        private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
+        private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
         {
             openRequests.TryRemove(codeSubmissionEvaluationFailed.Command, out var openRequest);
 
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Try.Jupyter
 
         private static void OnValueProduced(
             ValueProduced valueProduced,
-            ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
+            ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
         {
             openRequests.TryGetValue(valueProduced.Command, out var openRequest);
             if (openRequest == null)
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Try.Jupyter
         }
 
         private static void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated,
-            ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
+            ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
         {
             openRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest);
             // reply ok
