@@ -47,102 +47,10 @@ namespace Microsoft.DotNet.Try.Jupyter
                     break;
                 case MessageTypeValues.CompleteRequest:
                     await _completeHandler.Handle(delivery.Command);
-                    //delivery.Command.RequestHandlerStatus.SetAsBusy();
-                    //await HandleCompleteRequest(delivery);
-                    //delivery.Command.RequestHandlerStatus.SetAsIdle();
                     break;
             }
 
             return delivery.Complete();
         }
-
-        private async Task HandleCompleteRequest(ICommandDelivery<JupyterRequestContext> delivery)
-        {
-            var serverChannel = delivery.Command.ServerChannel;
-
-            var completeRequest = delivery.Command.GetRequestContent <CompleteRequest>();
-
-            var code = completeRequest.Code;
-
-            var workspace = CreateScaffoldWorkspace(code, completeRequest.CursorPosition);
-
-            var workspaceRequest = new WorkspaceRequest(workspace, activeBufferId: workspace.Buffers.First().Id);
-
-            var result = await _server.GetCompletionList(workspaceRequest);
-            var pos = ComputeReplacementStartPosition(code, completeRequest.CursorPosition);
-            var reply = new CompleteReply(pos, completeRequest.CursorPosition, matches: result.Items.Select(e => e.InsertText).ToList());
-
-            var completeReply = Message.CreateResponse(reply, delivery.Command.Request);
-            serverChannel.Send(completeReply);
-        }
-
-        private static int ComputeReplacementStartPosition(string code, int cursorPosition)
-        {
-            var pos = cursorPosition;
-
-            if (pos > 0)
-            {
-                var codeToCursor = code.Substring(0, pos);
-                var match = _lastToken.Match(codeToCursor);
-                if (match.Success)
-                {
-                    var token = match.Groups["lastToken"];
-                    if (token.Success)
-                    {
-                        var lastDotPosition = token.Value.LastIndexOf(".", StringComparison.InvariantCultureIgnoreCase);
-                        if (lastDotPosition >= 0)
-                        {
-                            pos = token.Index + lastDotPosition + 1;
-                        }
-                        else
-                        {
-                            pos = token.Index;
-                        }
-                    }
-                }
-
-            }
-
-            return pos;
-        }
-
-        private static Workspace CreateScaffoldWorkspace(string code, int cursorPosition = 0)
-        {
-            var workspace = CreateCsharpScaffold(code, cursorPosition);
-            return workspace;
-        }
-
-        private static Workspace CreateCsharpScaffold(string code, int cursorPosition = 0)
-        {
-            var workspace = new Workspace(
-                files: new[]
-                {
-                    new File("Program.cs", CsharpScaffold())
-                },
-                buffers: new[]
-                {
-                    new Buffer(new BufferId("Program.cs", "main"), code, position:cursorPosition)
-                },
-                workspaceType: "console",
-                language: "csharp");
-            return workspace;
-        }
-
-        private static string CsharpScaffold() =>
-            @"
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-public class Program
-{
-    public static void Main()
-    {
-#region main
-#endregion
-    }
-}
-";
     }
 }
