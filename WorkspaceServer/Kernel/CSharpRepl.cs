@@ -36,9 +36,12 @@ namespace WorkspaceServer.Kernel
         protected ScriptOptions ScriptOptions;
 
         private StringBuilder _inputBuffer = new StringBuilder();
+        private ImmutableArray<MetadataReference> _metadataReferences;
+        private WorkspaceFixture _fixture;
 
         public CSharpRepl()
         {
+            _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
         }
 
@@ -205,7 +208,6 @@ namespace WorkspaceServer.Kernel
                 forcedState = true;
             }
 
-
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
 
@@ -215,8 +217,13 @@ namespace WorkspaceServer.Kernel
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
             var absolutePosition = Math.Max(offset,0) + cursorPosition;
 
-            var fixture = new WorkspaceFixture(compilation.Options, metadataReferences);
-            var document = fixture.ForkDocument(fullScriptCode);
+            if (_fixture == null || _metadataReferences != metadataReferences)
+            {
+                _fixture = new WorkspaceFixture(compilation.Options, metadataReferences);
+                _metadataReferences = metadataReferences;
+            }
+         
+            var document = _fixture.ForkDocument(fullScriptCode);
             var service = CompletionService.GetService(document);
 
             var completionList = await service.GetCompletionsAsync(document, absolutePosition);
