@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 htmlContent.WriteTo(writer, HtmlEncoder.Default);
             });
 
-            Formatter.TypesWithHtmlViewsRegistered.Add(typeof(T));
+            Formatter.SetMimeType(typeof(T), "text/html");
         }
 
         /// <summary>

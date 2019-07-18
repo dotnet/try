@@ -1,9 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Text.Json;
 using System.Web;
 using Microsoft.AspNetCore.Html;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
@@ -23,9 +23,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
             new HtmlString(value);
 
         public static JsonString SerializeToJson<T>(this T source) =>
-            new JsonString(JsonSerializer.Serialize(source));
+            new JsonString(JsonConvert.SerializeObject(source));
 
         public static IHtmlContent JsonEncode(this string source) =>
-            new JsonString(JsonEncodedText.Encode(source).ToString());
+            new JsonString(JsonConvert.ToString(source));
     }
 }

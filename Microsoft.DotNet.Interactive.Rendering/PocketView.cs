@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                             break;
 
                                         default:
-                                            if (Formatter.TypesWithHtmlViewsRegistered.Contains(item.GetType()))
+                                            if (Formatter.MimeTypeFor(item.GetType()) != null)
                                             {
                                                 item.FormatTo(writer);
                                             }

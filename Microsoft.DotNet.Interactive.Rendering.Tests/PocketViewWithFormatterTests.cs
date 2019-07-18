@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using FluentAssertions;
 using Xunit;
-
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
@@ -80,6 +78,16 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             string output = div(widget).ToString();
 
             output.Should().Be("<div><div>&lt;ONE&gt;&lt;TWO&gt;</div></div>");
+        }
+
+        [Fact]
+        public void When_a_view_is_registered_then_ToDisplayString_returns_the_HTML()
+        {
+            Formatter<DateTime>.RegisterView(w => div("hello"));
+
+            DateTime.Now.ToDisplayString()
+                    .Should()
+                    .Be("<div>hello</div>");
         }
     }
 }

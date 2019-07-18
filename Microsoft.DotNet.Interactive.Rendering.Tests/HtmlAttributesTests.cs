@@ -294,7 +294,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         [Fact]
         public void Attributes_containing_JSON_values_are_not_reencoded()
         {
-            const string expected = @"<option data-url='\u002fwidgets\u002fX-1'>X-1 Widget</option>";
+            const string expected = @"<option data-url='""/widgets/X-1""'>X-1 Widget</option>";
 
             var part =
                 new

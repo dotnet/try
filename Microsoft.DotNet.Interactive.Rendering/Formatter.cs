@@ -23,7 +23,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
         private static int _recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
-        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter>> genericFormatters = new ConcurrentDictionary<Type, Action<object, TextWriter>>();
+        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter>> _genericFormatters = new ConcurrentDictionary<Type, Action<object, TextWriter>>();
+        private static readonly ConcurrentDictionary<Type, string> _mimeTypesByType = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
         /// Initializes the <see cref="Formatter"/> class.
@@ -103,7 +104,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             NullString = "<null>";
 
             RegisterDefaults();
-            TypesWithHtmlViewsRegistered.Clear();
+            _mimeTypesByType.Clear();
         }
 
         /// <summary>
@@ -118,7 +119,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             get => _autoGenerateForType;
             set => _autoGenerateForType = value ?? throw new ArgumentNullException(nameof(value));
         }
-     
+
         public static string ToDisplayString(this object obj)
         {
             var writer = CreateWriter();
@@ -142,7 +143,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 {
                     // in some cases the generic parameter is Object but the object is of a more specific type, in which case get or add a cached accessor to the more specific Formatter<T>.Format method
                     var genericFormatter =
-                        genericFormatters.GetOrAdd(actualType,
+                        _genericFormatters.GetOrAdd(actualType,
                                                    GetGenericFormatterMethod);
                     genericFormatter(obj, writer);
                     return;
@@ -344,8 +345,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             TryRegisterDefault("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
         }
 
-        internal static HashSet<Type> TypesWithHtmlViewsRegistered { get; } = new HashSet<Type>();
-
         private static void TryRegisterDefault(string typeName, Action<object, TextWriter> write)
         {
             var type = Type.GetType(typeName);
@@ -353,6 +352,17 @@ namespace Microsoft.DotNet.Interactive.Rendering
             {
                 Register(type, write);
             }
+        }
+
+        public static string MimeTypeFor(Type type)
+        {
+            _mimeTypesByType.TryGetValue(type, out var mimeType);
+            return mimeType;
+        }
+
+        public static void SetMimeType(Type type, string mimeType)
+        {
+            _mimeTypesByType[type] = mimeType;
         }
     }
 }
