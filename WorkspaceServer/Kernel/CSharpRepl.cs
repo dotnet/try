@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,6 +12,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Interactive.Rendering;
+using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
 {
@@ -44,11 +47,13 @@ namespace WorkspaceServer.Kernel
                     "System.Collections",
                     "System.Collections.Generic",
                     "System.Threading.Tasks",
-                    "System.Linq")
+                    "System.Linq",
+                    "Microsoft.DotNet.Interactive.Rendering")
                 .AddReferences(
-                    typeof(Enumerable).GetTypeInfo().Assembly,
-                    typeof(IEnumerable<>).GetTypeInfo().Assembly,
-                    typeof(Task<>).GetTypeInfo().Assembly);
+                    typeof(Enumerable).Assembly,
+                    typeof(IEnumerable<>).Assembly,
+                    typeof(Task<>).Assembly,
+                    typeof(PocketView).Assembly);
         }
 
         private (bool shouldExecute, string completeSubmission) IsBufferACompleteSubmission(string input)
@@ -135,7 +140,20 @@ namespace WorkspaceServer.Kernel
                 {
                     if (HasReturnValue)
                     {
-                        context.OnNext(new ValueProduced(_scriptState.ReturnValue, codeSubmission));
+                        var writer = new StringWriter();
+                        _scriptState.ReturnValue.FormatTo(writer);
+
+                        var formattedValues = new List<FormattedValue>
+                        {
+                            new FormattedValue(
+                                Formatter.MimeTypeFor(_scriptState.ReturnValue?.GetType() ?? typeof(object)), writer.ToString())
+                        };
+
+                        context.OnNext(
+                            new ValueProduced(
+                                _scriptState.ReturnValue,
+                                codeSubmission,
+                                formattedValues));
                     }
 
                     context.OnNext(new CodeSubmissionEvaluated(codeSubmission));

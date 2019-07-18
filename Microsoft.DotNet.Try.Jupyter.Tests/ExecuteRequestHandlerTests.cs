@@ -79,7 +79,6 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
             _ioRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(MessageTypeValues.Stream));
-
         }
 
         [Fact]
