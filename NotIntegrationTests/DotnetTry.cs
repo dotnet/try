@@ -36,7 +36,7 @@ namespace NotIntegrationTests
         {
             var dotnet = new Dotnet();
             var installResult = await dotnet.ToolInstall("dotnet-try", _disposableDirectory.Directory, version: "1.0.44142.42", addSource: GetPackageSource());
-            Console.WriteLine(string.Join("\n", installResult.Output));
+            installResult.ThrowOnFailure();
 
             await Start();
             return true;
@@ -70,11 +70,6 @@ namespace NotIntegrationTests
 
         private PackageSource GetPackageSource([CallerFilePath] string callerFile = "")
         {
-            var env = Environment.GetEnvironmentVariables();
-            foreach (var key in env.Keys)
-            {
-                Console.WriteLine($"{key}:{env[key]}");
-            }
             var dotnetTryPackageSource = Environment.GetEnvironmentVariable("PACKAGESOURCE");
 
             var directory = !string.IsNullOrWhiteSpace(dotnetTryPackageSource)
