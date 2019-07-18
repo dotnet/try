@@ -626,7 +626,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             Formatter.AutoGenerateForType = t => true;
 
             new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Contain(@"DirectoryName: c:\temp");
+                                            .Should().Contain(@"DirectoryName: ");
             new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
                                             .Should().Contain("Parent: ");
             new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
@@ -636,7 +636,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void FormatAllTypes_does_not_reregister_formatters_for_types_having_special_default_formatters()
+        public void FormatAllTypes_does_not_register_formatters_for_types_having_special_default_formatters()
         {
             Formatter.AutoGenerateForType = t => true;
 
