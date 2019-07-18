@@ -2,29 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
-using Microsoft.DotNet.Try.Jupyter.Rendering;
 using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Try.Jupyter
 {
     public class ExecuteRequestHandler : RequestHandlerBase<ExecuteRequest>
     {
-        private readonly RenderingEngine _renderingEngine;
         private int _executionCount;
       
         public ExecuteRequestHandler(IKernel kernel) :base(kernel)
         {
-            _renderingEngine = new RenderingEngine(new DefaultRenderer(), new PlainTextRendering("<null>"));
-            _renderingEngine.RegisterRenderer(typeof(string), new DefaultRenderer());
-            _renderingEngine.RegisterRenderer(typeof(IDictionary), new DictionaryRenderer());
-            _renderingEngine.RegisterRenderer(typeof(IList), new ListRenderer());
-            _renderingEngine.RegisterRenderer(typeof(IEnumerable), new SequenceRenderer());
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -89,7 +82,7 @@ namespace Microsoft.DotNet.Try.Jupyter
             switch (value)
             {
                 case ValueProduced valueProduced:
-                    OnValueProduced(valueProduced, OpenRequests, _renderingEngine);
+                    OnValueProduced(valueProduced, OpenRequests);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
                     OnCodeSubmissionEvaluated(codeSubmissionEvaluated, OpenRequests);
@@ -145,8 +138,9 @@ namespace Microsoft.DotNet.Try.Jupyter
             openRequest.Dispose();
         }
 
-        private static void OnValueProduced(ValueProduced valueProduced,
-            ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests, RenderingEngine renderingEngine)
+        private static void OnValueProduced(
+            ValueProduced valueProduced,
+            ConcurrentDictionary<IKernelCommand, OpenRequest> openRequests)
         {
             openRequests.TryGetValue(valueProduced.Command, out var openRequest);
             if (openRequest == null)
@@ -156,16 +150,12 @@ namespace Microsoft.DotNet.Try.Jupyter
 
             try
             {
-                var rendering = renderingEngine.Render(valueProduced.Value);
-
                 // executeResult data
                 var executeResultData = new ExecuteResult(
                     openRequest.ExecutionCount,
                     transient: openRequest.Transient,
-                    data: new Dictionary<string, object>
-                    {
-                        { rendering.MimeType, rendering.Content }
-                    });
+                    data: valueProduced?.FormattedValues
+                                       ?.ToDictionary(k => k.MimeType ?? "text/plain", v => v.Value));
 
                 if (!openRequest.Request.Silent)
                 {
