@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void cannot_handle_requests_that_are_not_completeRequest()
+        public void cannot_handle_requests_that_are_not_CompleteRequest()
         {
             var kernel = new CSharpRepl();
             var handler = new CompleteRequestHandler(kernel);
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task send_completeReply_on_completeRequest()
+        public async Task send_completeReply_on_CompleteRequest()
         {
             var kernel = new CSharpRepl();
             var handler = new CompleteRequestHandler(kernel);

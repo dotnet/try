@@ -636,7 +636,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void FormatAllTypes_does_not_register_formatters_for_types_having_special_default_formatters()
+        public void FormatAllTypes_does_not_reregister_formatters_for_types_having_special_default_formatters()
         {
             Formatter.AutoGenerateForType = t => true;
 

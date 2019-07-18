@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void cannot_handle_requests_that_are_not_executeRequest()
+        public void cannot_handle_requests_that_are_not_ExecuteRequest()
         {
             var kernel = new CSharpRepl();
             var handler = new ExecuteRequestHandler(kernel);
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_ExecuteReply_message_on_codeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_message_on_CodeSubmissionEvaluated()
         {
             var kernel = new CSharpRepl();
 
@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_executeReply_with_error_message_on_codeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_with_error_message_on_CodeSubmissionEvaluated()
         {
             var kernel = new CSharpRepl();
 

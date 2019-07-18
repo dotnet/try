@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 case CompleteCodeSubmissionReceived _:
                     break;
                 default: 
-                    throw new NotImplementedException();
+                    throw new NotSupportedException();
             }
         }
 

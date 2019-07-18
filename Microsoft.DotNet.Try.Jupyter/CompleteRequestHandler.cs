@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Try.Jupyter
                 case CompletionRequestReceived _:
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new NotSupportedException();
             }
         }
 
