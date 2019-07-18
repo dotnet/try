@@ -15,6 +15,7 @@ namespace WorkspaceServer.Servers.Scripting
     {
         private readonly AdhocWorkspace _workspace = new AdhocWorkspace(MefHostServices.DefaultHost);
         private readonly DocumentId _documentId;
+        private Project _project;
 
         public WorkspaceFixture(
             CompilationOptions compilationOptions,
@@ -39,7 +40,7 @@ namespace WorkspaceServer.Servers.Scripting
                 compilationOptions: compilationOptions,
                 metadataReferences: metadataReferences);
 
-            _workspace.AddProject(projectInfo);
+            _project =  _workspace.AddProject(projectInfo);
 
             _documentId = DocumentId.CreateNewId(projectId, "ScriptDocument");
 

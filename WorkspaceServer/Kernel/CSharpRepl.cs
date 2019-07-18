@@ -209,7 +209,7 @@ namespace WorkspaceServer.Kernel
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
 
-            var buffer = new StringBuilder(forcedState ? string.Empty : (scriptState.Script.Code ?? string.Empty));
+            var buffer = new StringBuilder(forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty);
             buffer.AppendLine(code);
             var fullScriptCode = buffer.ToString();
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
