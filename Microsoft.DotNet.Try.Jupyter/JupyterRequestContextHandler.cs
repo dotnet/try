@@ -47,9 +47,9 @@ namespace Microsoft.DotNet.Try.Jupyter
                     break;
                 case MessageTypeValues.CompleteRequest:
                     await _completeHandler.Handle(delivery.Command);
-                    delivery.Command.RequestHandlerStatus.SetAsBusy();
-                    await HandleCompleteRequest(delivery);
-                    delivery.Command.RequestHandlerStatus.SetAsIdle();
+                    //delivery.Command.RequestHandlerStatus.SetAsBusy();
+                    //await HandleCompleteRequest(delivery);
+                    //delivery.Command.RequestHandlerStatus.SetAsIdle();
                     break;
             }
 

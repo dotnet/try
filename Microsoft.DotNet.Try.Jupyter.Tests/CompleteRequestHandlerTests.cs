@@ -39,12 +39,12 @@ namespace Microsoft.DotNet.Try.Jupyter.Tests
         }
 
         [Fact]
-        public void send_completeReply_on_completeRequest()
+        public async Task send_completeReply_on_completeRequest()
         {
             var kernel = new CSharpRepl();
             var handler = new CompleteRequestHandler(kernel);
             var request = Message.Create(new CompleteRequest("System.Console.", 15 ), null);
-            Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
