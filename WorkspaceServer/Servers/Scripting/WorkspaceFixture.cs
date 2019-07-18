@@ -17,24 +17,18 @@ namespace WorkspaceServer.Servers.Scripting
         private readonly DocumentId _documentId;
 
         public WorkspaceFixture(
-            IEnumerable<string> defaultUsings,
+            CompilationOptions compilationOptions,
             ImmutableArray<MetadataReference> metadataReferences)
         {
-            if (defaultUsings == null)
+            if (compilationOptions == null)
             {
-                throw new ArgumentNullException(nameof(defaultUsings));
+                throw new ArgumentNullException(nameof(compilationOptions));
             }
-
             if (metadataReferences == null)
             {
                 throw new ArgumentNullException(nameof(metadataReferences));
             }
-
             var projectId = ProjectId.CreateNewId("ScriptProject");
-
-            var compilationOptions = new CSharpCompilationOptions(
-                OutputKind.DynamicallyLinkedLibrary,
-                usings: defaultUsings);
 
             var projectInfo = ProjectInfo.Create(
                 projectId,
@@ -50,10 +44,20 @@ namespace WorkspaceServer.Servers.Scripting
             _documentId = DocumentId.CreateNewId(projectId, "ScriptDocument");
 
             var documentInfo = DocumentInfo.Create(_documentId,
-                                                   name: "ScriptDocument",
-                                                   sourceCodeKind: SourceCodeKind.Script);
+                name: "ScriptDocument",
+                sourceCodeKind: SourceCodeKind.Script);
 
             _workspace.AddDocument(documentInfo);
+        }
+
+
+        public WorkspaceFixture(
+            IEnumerable<string> defaultUsings,
+            ImmutableArray<MetadataReference> metadataReferences) : this(new CSharpCompilationOptions(
+            OutputKind.DynamicallyLinkedLibrary,
+            usings: defaultUsings), metadataReferences)
+        {
+            
         }
 
         public Document ForkDocument(string text)

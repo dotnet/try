@@ -13,15 +13,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.LanguageServices;
 using CompletionItem = Microsoft.DotNet.Try.Protocol.CompletionItem;
 using Microsoft.DotNet.Interactive.Rendering;
+using WorkspaceServer.Servers.Scripting;
 using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
@@ -199,9 +196,6 @@ namespace WorkspaceServer.Kernel
 
         private async Task<IEnumerable<CompletionItem>> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
         {
-            var projectId = ProjectId.CreateNewId("ScriptProject");
-            var workspace = new AdhocWorkspace(MefHostServices.DefaultHost);
-
             var metadataReferences = ImmutableArray<MetadataReference>.Empty;
             
             var forcedState = false;
@@ -210,6 +204,7 @@ namespace WorkspaceServer.Kernel
                 scriptState = await CSharpScript.RunAsync("", ScriptOptions);
                 forcedState = true;
             }
+
 
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
@@ -220,29 +215,8 @@ namespace WorkspaceServer.Kernel
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
             var absolutePosition = Math.Max(offset,0) + cursorPosition;
 
-            var compilationOptions = compilation.Options;
-
-            var projectInfo = ProjectInfo.Create(
-                projectId,
-                version: VersionStamp.Create(),
-                name: "ScriptProject",
-                assemblyName: "ScriptProject",
-                language: LanguageNames.CSharp,
-                compilationOptions: compilationOptions,
-                metadataReferences: metadataReferences);
-
-            workspace.AddProject(projectInfo);
-
-            var documentId = DocumentId.CreateNewId(projectId, "ScriptDocument");
-
-            var documentInfo = DocumentInfo.Create(documentId,
-                name: "ScriptDocument",
-                sourceCodeKind: SourceCodeKind.Script);
-
-            workspace.AddDocument(documentInfo);
-
-            var document = workspace.CurrentSolution.GetDocument(documentId);
-            document = document.WithText(SourceText.From(fullScriptCode));
+            var fixture = new WorkspaceFixture(compilation.Options, metadataReferences);
+            var document = fixture.ForkDocument(fullScriptCode);
             var service = CompletionService.GetService(document);
 
             var completionList = await service.GetCompletionsAsync(document, absolutePosition);

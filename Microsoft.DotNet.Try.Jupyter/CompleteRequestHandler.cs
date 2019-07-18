@@ -42,7 +42,6 @@ namespace Microsoft.DotNet.Try.Jupyter
         {
             switch (value)
             {
-
                 case CompletionRequestCompleted completionRequestCompleted:
                     OnCompletionRequestCompleted(completionRequestCompleted, OpenRequests);
                     break;
