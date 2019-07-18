@@ -6,9 +6,9 @@ using System.CommandLine.Invocation;
 
 namespace WorkspaceServer.Kernel
 {
-    public static class CSharpReplExtensions
+    public static class CSharpKernelExtensions
     {
-        public static CSharpRepl UseNugetDirective(this CSharpRepl repl)
+        public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
                                                                         NugetPackageReference.TryParse(result.Token.Value, out reference))
@@ -30,9 +30,9 @@ namespace WorkspaceServer.Kernel
                 });
             });
 
-            repl.AddDirective(r);
+            kernel.AddDirective(r);
 
-            return repl;
+            return kernel;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = new CompositeKernel
             {
-                new CSharpRepl().UseNugetDirective()
+                new CSharpKernel().UseNugetDirective()
             };
 
             var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
@@ -53,7 +53,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = new CompositeKernel
             {
-                new CSharpRepl().UseNugetDirective()
+                new CSharpKernel().UseNugetDirective()
             };
 
             var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
@@ -82,8 +82,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             var kernel = new CompositeKernel
             {
-                new CSharpRepl(),
-                new FakeRepl("fake")
+                new CSharpKernel(),
+                new FakeKernel("fake")
                 {
                     Handle = (command, context) =>
                     {
@@ -105,16 +105,14 @@ namespace WorkspaceServer.Tests.Kernel
         }
     }
 
-    public class FakeRepl : KernelBase
+    public class FakeKernel : KernelBase
     {
-        private readonly string _name;
-
-        public FakeRepl(string name)
+        public FakeKernel(string name)
         {
-            _name = name;
+            Name = name;
         }
 
-        public override string Name => _name;
+        public override string Name { get; }
 
         public Func<IKernelCommand, KernelPipelineContext, Task> Handle { get; set; }
 

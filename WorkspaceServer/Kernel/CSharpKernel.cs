@@ -22,7 +22,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CSharpRepl : KernelBase
+    public class CSharpKernel : KernelBase
     {
         internal const string KernelName = "csharp";
 
@@ -38,7 +38,7 @@ namespace WorkspaceServer.Kernel
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
 
-        public CSharpRepl()
+        public CSharpKernel()
         {
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
