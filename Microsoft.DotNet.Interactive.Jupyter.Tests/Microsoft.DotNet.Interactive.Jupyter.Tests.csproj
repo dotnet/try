@@ -34,7 +34,7 @@
     <PackageReference Include="System.Reactive" Version="4.1.5" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Try.Jupyter\Microsoft.DotNet.Try.Jupyter.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Jupyter\Microsoft.DotNet.Interactive.Jupyter.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
 </Project>

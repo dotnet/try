@@ -4,8 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.DotNet.Try.Jupyter;
-using Microsoft.DotNet.Try.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using WorkspaceServer.Kernel;
 using Xunit;
 

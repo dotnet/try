@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Try.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Newtonsoft.Json;
 using Xunit;
 

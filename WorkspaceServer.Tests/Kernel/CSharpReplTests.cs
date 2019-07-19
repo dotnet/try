@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
