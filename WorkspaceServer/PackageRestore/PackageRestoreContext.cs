@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+using Clockwise;
 using Microsoft.CodeAnalysis;
 using MLS.Agent;
+using MLS.Agent.Tools;
 using Pocket;
+using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.PackageRestore
 {
@@ -12,6 +16,7 @@ namespace WorkspaceServer.PackageRestore
     {
         private readonly DirectoryInfo _workingDirectory;
         private readonly CompositeDisposable disposable = new CompositeDisposable();
+        private readonly AsyncLazy<Package> _lazyPackage;
 
         public PackageRestoreContext(DirectoryInfo workingDirectory = null)
         {
@@ -25,9 +30,22 @@ namespace WorkspaceServer.PackageRestore
                 workingDirectory = disposableDirectory.Directory;
                 disposable.Add(disposableDirectory);
             }
+
+            _lazyPackage = new AsyncLazy<Package>(CreatePackage);
         }
 
-        public IEnumerable<MetadataReference> AddPackage(string package, string version)
+        private async Task<Package> CreatePackage()
+        {
+            var packageBuilder = new PackageBuilder(Guid.NewGuid().ToString("N8"));
+            packageBuilder.CreateUsingDotnet("console");
+            packageBuilder.TrySetLanguageVersion("8.0");
+            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            var package = packageBuilder.GetPackage() as Package;
+            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return package;
+        }
+
+        public async Task<IEnumerable<MetadataReference>> AddPackage(string package, string version)
         {
 
         }
