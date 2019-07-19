@@ -4,10 +4,11 @@
 using System;
 using System.Collections.Generic;
 using Assent;
+using Microsoft.DotNet.Try.Jupyter;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Xunit;
 
-namespace Microsoft.DotNet.Try.Jupyter.Tests
+namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class JupyterMessageContractTests
     {

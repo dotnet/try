@@ -4,11 +4,12 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Try.Jupyter;
 using Microsoft.DotNet.Try.Jupyter.Protocol;
 using WorkspaceServer.Kernel;
 using Xunit;
 
-namespace Microsoft.DotNet.Try.Jupyter.Tests
+namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class CompleteRequestHandlerTests 
     {

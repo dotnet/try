@@ -1,7 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.DotNet.Try.Jupyter.Tests
+using Microsoft.DotNet.Try.Jupyter;
+
+namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     class KernelStatus : IRequestHandlerStatus
     {

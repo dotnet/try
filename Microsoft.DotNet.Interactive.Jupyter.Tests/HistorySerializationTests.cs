@@ -6,7 +6,7 @@ using Microsoft.DotNet.Try.Jupyter.Protocol;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Microsoft.DotNet.Try.Jupyter.Tests
+namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class HistorySerializationTests
     {

@@ -5,7 +5,7 @@ using System;
 using System.Text;
 using NetMQ;
 
-namespace Microsoft.DotNet.Try.Jupyter.Tests
+namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     internal class TextSocket : IOutgoingSocket
     {
