@@ -23,10 +23,5 @@ namespace MLS.Agent
         {
             return new HtmlString(value);
         }
-
-        public static string TrimLineEndings(this string value)
-        {
-            return value.Trim('\r', '\n');
-        }
     }
 }
