@@ -4,15 +4,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
+using WorkspaceServer.LanguageServices;
 using Microsoft.DotNet.Interactive.Rendering;
+using WorkspaceServer.Servers.Scripting;
 using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
@@ -30,9 +35,12 @@ namespace WorkspaceServer.Kernel
         protected ScriptOptions ScriptOptions;
 
         private StringBuilder _inputBuffer = new StringBuilder();
+        private ImmutableArray<MetadataReference> _metadataReferences;
+        private WorkspaceFixture _fixture;
 
         public CSharpRepl()
         {
+            _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
         }
 
@@ -83,7 +91,13 @@ namespace WorkspaceServer.Kernel
                     {
                         await HandleSubmitCode(submitCode, invocationContext);
                     });
+                    break;
 
+                case RequestCompletion requestCompletion:
+                    context.OnExecute(async invocationContext =>
+                    {
+                        await HandleRequestCompletion(requestCompletion, invocationContext, _scriptState);
+                    });
                     break;
             }
         }
@@ -165,6 +179,68 @@ namespace WorkspaceServer.Kernel
                 context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
                 context.OnCompleted();
             }
+        }
+
+        private async Task HandleRequestCompletion(
+            RequestCompletion requestCompletion,
+            KernelInvocationContext context, 
+            ScriptState scriptState)
+        {
+            var completionRequestReceived = new CompletionRequestReceived(requestCompletion);
+          
+            context.OnNext(completionRequestReceived);
+
+            var completionList =
+                await GetCompletionList(requestCompletion.Code, requestCompletion.CursorPosition, scriptState);
+
+            context.OnNext(new CompletionRequestCompleted(completionList, requestCompletion));
+        }
+
+        private async Task<IEnumerable<CompletionItem>> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
+        {
+            var metadataReferences = ImmutableArray<MetadataReference>.Empty;
+            
+            var forcedState = false;
+            if (scriptState == null)
+            {
+                scriptState = await CSharpScript.RunAsync("", ScriptOptions);
+                forcedState = true;
+            }
+
+            var compilation = scriptState.Script.GetCompilation();
+            metadataReferences = metadataReferences.AddRange(compilation.References);
+
+            var buffer = new StringBuilder(forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty);
+            buffer.AppendLine(code);
+            var fullScriptCode = buffer.ToString();
+            var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
+            var absolutePosition = Math.Max(offset,0) + cursorPosition;
+
+            if (_fixture == null || _metadataReferences != metadataReferences)
+            {
+                _fixture = new WorkspaceFixture(compilation.Options, metadataReferences);
+                _metadataReferences = metadataReferences;
+            }
+         
+            var document = _fixture.ForkDocument(fullScriptCode);
+            var service = CompletionService.GetService(document);
+
+            var completionList = await service.GetCompletionsAsync(document, absolutePosition);
+            var semanticModel = await document.GetSemanticModelAsync();
+            var symbols = await Recommender.GetRecommendedSymbolsAtPositionAsync(semanticModel, absolutePosition, document.Project.Solution.Workspace);
+
+            var symbolToSymbolKey = new Dictionary<(string, int), ISymbol>();
+            foreach (var symbol in symbols)
+            {
+                var key = (symbol.Name, (int)symbol.Kind);
+                if (!symbolToSymbolKey.ContainsKey(key))
+                {
+                    symbolToSymbolKey[key] = symbol;
+                }
+            }
+            var items = completionList.Items.Select(item => item.ToModel(symbolToSymbolKey, document).ToDomainObject()).ToArray();
+
+            return items;
         }
 
         private bool HasReturnValue =>

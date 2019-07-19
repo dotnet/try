@@ -62,7 +62,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var lastCodeSubmissionPosition = KernelEvents
                 .Select((e, pos) => (e, pos))
-                .Last(t=> t.e is CodeSubmissionReceived).pos;
+                .Last(t => t.e is CodeSubmissionReceived).pos;
 
             var lastValueProducedPosition = KernelEvents
                 .Select((e, pos) => (e, pos))
@@ -225,6 +225,68 @@ json
                         .Value
                         .Should()
                         .Be(new { value = "hello" }.ToJson());
+        }
+
+        [Fact]
+        public async Task it_returns_completion_list_for_types()
+        {
+
+            var kernel = await CreateKernelAsync();
+
+            await kernel.SendAsync(new RequestCompletion("System.Console.", 15));
+
+            KernelEvents.Should()
+                .ContainSingle(e => e is CompletionRequestReceived);
+
+            KernelEvents.Single(e => e is CompletionRequestCompleted)
+                .As<CompletionRequestCompleted>()
+                .CompletionList
+                .Should()
+                .Contain(i => i.DisplayText == "ReadLine");
+        }
+
+        [Fact]
+        public async Task it_returns_completion_list_for_previously_declared_variables()
+        {
+
+            var kernel = await CreateKernelAsync();
+
+            await kernel.SendAsync(
+                new SubmitCode("var alpha = new Random();"));
+            await kernel.SendAsync(new RequestCompletion("al", 2));
+
+            KernelEvents.Should()
+                .ContainSingle(e => e is CompletionRequestReceived);
+
+            KernelEvents.Single(e => e is CompletionRequestCompleted)
+                .As<CompletionRequestCompleted>()
+                .CompletionList
+                .Should()
+                .Contain(i => i.DisplayText == "alpha");
+        }
+
+        [Fact]
+        public async Task it_returns_completion_list_for_types_imported_at_runtime()
+        {
+
+            var kernel = await CreateKernelAsync();
+
+            var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
+
+            await kernel.SendAsync(
+                new SubmitCode($"#r \"{dll}\""));
+
+            await kernel.SendAsync(new RequestCompletion("Newtonsoft.Json.JsonConvert.", 28));
+
+
+            KernelEvents.Should()
+                .ContainSingle(e => e is CompletionRequestReceived);
+
+            KernelEvents.Single(e => e is CompletionRequestCompleted)
+                .As<CompletionRequestCompleted>()
+                .CompletionList
+                .Should()
+                .Contain(i => i.DisplayText == "SerializeObject");
         }
     }
 }
