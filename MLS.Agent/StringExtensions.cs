@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Globalization;
 using System.Web;
 using Microsoft.AspNetCore.Html;
 
@@ -21,6 +22,11 @@ namespace MLS.Agent
         public static IHtmlContent ToHtmlContent(this string value)
         {
             return new HtmlString(value);
+        }
+
+        public static string TrimLineEndings(this string value)
+        {
+            return value.Trim('\r', '\n');
         }
     }
 }
