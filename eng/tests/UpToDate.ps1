@@ -21,11 +21,7 @@ try {
     }
 
     # list of sentinel files to check
-    $FileList = @(
-        "$RepoRoot\MLS.Agent\wwwroot\api\trydotnet.min.js",
-        "$RepoRoot\MLS.Agent\wwwroot\client\bundle.js",
-        "$RepoRoot\MLS.Agent\wwwroot\css\trydotnet.css"
-    )
+    $FileList = Get-ChildItem -Path "$RepoRoot\MLS.Agent\wwwroot" -Recurse -File | %{ $_.FullName }
 
     # gather file timestamps
     $InitialFilesAndTimes = @{}
