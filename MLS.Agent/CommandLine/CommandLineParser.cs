@@ -14,6 +14,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MLS.Agent.Jupyter;
 using MLS.Agent.Markdown;
 using MLS.Repositories;
 using WorkspaceServer;
