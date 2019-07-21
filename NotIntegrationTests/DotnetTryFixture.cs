@@ -17,10 +17,10 @@ namespace NotIntegrationTests
 {
     public class DotnetTryFixture : IDisposable
     {
-        private DisposableDirectory _disposableDirectory;
+        private readonly DisposableDirectory _disposableDirectory;
         private Process _process;
         private HttpClient _client;
-        private AsyncLazy<bool> _lazyReady;
+        private readonly AsyncLazy<bool> _lazyReady;
 
         public DotnetTryFixture()
         {

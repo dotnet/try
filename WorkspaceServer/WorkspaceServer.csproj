@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net45+win8</AssetTargetFallback>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise and Buildalyzer* aren't strongly signed -->
   </PropertyGroup>

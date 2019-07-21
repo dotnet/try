@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace WorkspaceServer.Kernel
 {
-    public delegate Task KernelCommandPipelineMiddleware(
-        IKernelCommand command,
-        KernelPipelineContext context,
-        KernelPipelineContinuation next);
+    public interface IKernelExtension
+    {
+        Task OnLoadAsync(IKernel kernel);
+    }
 }

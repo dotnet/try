@@ -2,15 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CodeSubmissionEvaluated : KernelEventBase
+    public class ExtensionLoading : KernelEventBase
     {
-        public CodeSubmissionEvaluated(SubmitCode command) : base(command)
+        public ExtensionLoading(FileInfo assembly)
         {
+            Assembly = assembly ?? throw new ArgumentNullException(nameof(assembly));
         }
 
-        public string Code => ((SubmitCode) Command).Code;
+        public FileInfo Assembly { get; }
     }
 }

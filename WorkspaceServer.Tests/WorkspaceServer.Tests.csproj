@@ -76,8 +76,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestProjects\SampleConsole\BasicConsoleApp.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestProjects\SampleConsole\Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestProjects\SampleConsole\Readme.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestProjects\SampleConsole\Subdirectory\Tutorial.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

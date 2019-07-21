@@ -29,7 +29,7 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public async Task InvokeAsync(
+        public async Task SendAsync(
             IKernelCommand command,
             KernelPipelineContext context)
         {

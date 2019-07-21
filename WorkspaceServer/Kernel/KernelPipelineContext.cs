@@ -14,12 +14,15 @@ namespace WorkspaceServer.Kernel
         private readonly Action<IKernelEvent> _publishEvent;
         private readonly List<KernelInvocationContext> _invocations = new List<KernelInvocationContext>();
 
-        public KernelPipelineContext(Action<IKernelEvent> publishEvent)
+        public KernelPipelineContext(
+            Action<IKernelEvent> publishEvent,
+            IKernel kernel = null)
         {
+            Kernel = kernel;
             _publishEvent = publishEvent;
         }
 
-        internal IKernel Kernel { get; set; }
+        public IKernel Kernel { get; internal set; }
 
         public void OnExecute(KernelCommandInvocation invocation)
         {

@@ -7,15 +7,23 @@ using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Scripting;
+using MLS.Agent.Tools;
 using Newtonsoft.Json;
+using Pocket;
 using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
     public class CSharpKernelTests : KernelTests<CSharpKernel>
     {
+        public CSharpKernelTests(ITestOutputHelper output)
+        {
+            DisposeAfterTest(output.SubscribeToPocketLogger());
+        }
+
         protected override async Task<CSharpKernel> CreateKernelAsync(params IKernelCommand[] commands)
         {
             var kernel = new CSharpKernel();
@@ -276,7 +284,6 @@ json
 
             await kernel.SendAsync(new RequestCompletion("Newtonsoft.Json.JsonConvert.", 28));
 
-
             KernelEvents.Should()
                 .ContainSingle(e => e is CompletionRequestReceived);
 
@@ -285,6 +292,71 @@ json
                 .CompletionList
                 .Should()
                 .Contain(i => i.DisplayText == "SerializeObject");
+        }
+        
+        [Fact]
+        public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
+        {
+            var extensionDir = Create.EmptyWorkspace()
+                                     .Directory;
+
+            var workspaceServerDllPath = typeof(IKernelExtension).Assembly.Location;
+
+            var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
+                {
+                    ( "Extension.cs", $@"
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
+using WorkspaceServer.Kernel;
+
+public class TestKernelExtension : IKernelExtension
+{{
+    public async Task OnLoadAsync(IKernel kernel)
+    {{
+        await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));
+    }}
+}}
+" ),
+                    ("TestExtension.csproj", $@"
+<Project Sdk=""Microsoft.NET.Sdk"">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+
+    <Reference Include=""WorkspaceServer"">
+      <HintPath>{workspaceServerDllPath}</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
+")
+                }
+                .CreateFiles();
+
+            var buildResult = await new Dotnet(extensionDir).Build();
+            buildResult.ThrowOnFailure();
+
+            var extensionDllPath = extensionDir
+                                   .GetDirectories("bin", SearchOption.AllDirectories)
+                                   .Single()
+                                   .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
+                                   .Single()
+                                   .FullName;
+
+            var kernel = (await CreateKernelAsync())
+                         .UseNugetDirective()
+                         .UseExtendDirective()
+                         .LogEventsToPocketLogger();
+
+            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
+
+            KernelEvents.Should()
+                        .ContainSingle(e => e is CodeSubmissionEvaluated &&
+                                            e.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
     }
 }

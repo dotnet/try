@@ -8,7 +8,7 @@ namespace WorkspaceServer.Kernel
     public class SubmitCode : KernelCommandBase
     {
         public SubmitCode(
-            string code, 
+            string code,
             string targetKernelName = null)
         {
             Code = code ?? throw new ArgumentNullException(nameof(code));

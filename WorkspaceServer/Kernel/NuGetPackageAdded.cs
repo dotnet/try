@@ -12,4 +12,5 @@ namespace WorkspaceServer.Kernel
 
         public NugetPackageReference PackageReference { get; }
     }
+
 }
