@@ -10,11 +10,7 @@ namespace NotIntegrationTests
         public ConditionalFact()
         {
             var variable = Environment.GetEnvironmentVariable(RUN_DOTNET_TRY_INTEGRATION_TESTS);
-            if (bool.TryParse(variable, out var value) && value)
-            {
-                base.Skip = null;
-            }
-            else
+            if (!bool.TryParse(variable, out var value) || !value)
             {
                 base.Skip = base.Skip ?? $"Integration tests disabled. Set {RUN_DOTNET_TRY_INTEGRATION_TESTS}=true to run them";
             }
