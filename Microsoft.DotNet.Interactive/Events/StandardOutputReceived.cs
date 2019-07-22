@@ -1,11 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.DotNet.Interactive
+namespace Microsoft.DotNet.Interactive.Events
 {
-    public class StandardInputReceived : KernelEventBase
+    public class StandardOutputReceived : KernelEventBase
     {
-        public StandardInputReceived(string content)
+        public StandardOutputReceived(string content)
         {
             Content = content ?? string.Empty;
         }

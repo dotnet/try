@@ -3,6 +3,7 @@
 
 
 using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace WorkspaceServer.Kernel
 {

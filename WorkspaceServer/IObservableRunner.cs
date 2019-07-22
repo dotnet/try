@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.Kernel;
 
 namespace WorkspaceServer

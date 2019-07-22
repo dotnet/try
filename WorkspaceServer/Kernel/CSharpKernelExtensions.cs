@@ -4,6 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace WorkspaceServer.Kernel
 {
