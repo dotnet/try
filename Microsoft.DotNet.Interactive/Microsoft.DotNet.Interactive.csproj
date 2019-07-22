@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NoWarn>$(NoWarn);8002</NoWarn>
+    <LangVersion>preview</LangVersion>
+    <!-- Clockwise isn't strongly signed -->
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19317.1" />
+        <PackageReference Include="PocketLogger" Version="0.3.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+ 
+</Project>

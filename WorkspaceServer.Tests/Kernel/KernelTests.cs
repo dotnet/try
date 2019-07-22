@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.Kernel;
 
 namespace WorkspaceServer.Tests.Kernel

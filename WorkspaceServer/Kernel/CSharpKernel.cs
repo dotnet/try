@@ -15,9 +15,13 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.LanguageServices;
 using Microsoft.DotNet.Interactive.Rendering;
 using WorkspaceServer.Servers.Scripting;
+using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
@@ -80,7 +84,7 @@ namespace WorkspaceServer.Kernel
             return (true, code);
         }
 
-        protected internal override async Task HandleAsync(
+        protected override async Task HandleAsync(
             IKernelCommand command,
             KernelPipelineContext context)
         {

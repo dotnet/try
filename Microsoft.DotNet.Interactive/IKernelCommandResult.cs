@@ -2,17 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Events;
-using WorkspaceServer.Kernel;
 
-namespace WorkspaceServer
+namespace Microsoft.DotNet.Interactive
 {
-    public interface IObservableRunner
+    public interface IKernelCommandResult
     {
         IObservable<IKernelEvent> KernelEvents { get; }
-        Task StartAsync();
-        Task StopAsync();
     }
 }

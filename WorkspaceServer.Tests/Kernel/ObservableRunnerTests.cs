@@ -11,6 +11,8 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.Kernel;
 using Xunit;
 

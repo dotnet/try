@@ -7,6 +7,9 @@ using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools;
 using Newtonsoft.Json;
 using Pocket;
@@ -53,7 +56,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task when_it_throws_exception_after_a_value_was_produced_thne_only_the_error_is_returned()
+        public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned()
         {
             var kernel = await CreateKernelAsync();
 
@@ -300,7 +303,7 @@ json
             var extensionDir = Create.EmptyWorkspace()
                                      .Directory;
 
-            var workspaceServerDllPath = typeof(IKernelExtension).Assembly.Location;
+            var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
             var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
                 {
@@ -308,7 +311,8 @@ json
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using WorkspaceServer.Kernel;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
 
 public class TestKernelExtension : IKernelExtension
 {{
@@ -327,8 +331,8 @@ public class TestKernelExtension : IKernelExtension
 
     <ItemGroup>
 
-    <Reference Include=""WorkspaceServer"">
-      <HintPath>{workspaceServerDllPath}</HintPath>
+    <Reference Include=""Microsoft.DotNet.Interactive"">
+      <HintPath>{microsoftDotNetInteractiveDllPath}</HintPath>
     </Reference>
   </ItemGroup>
 

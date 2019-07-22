@@ -3,6 +3,7 @@
 
 using System;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive;
 using WorkspaceServer.Kernel;
 using Xunit;
 

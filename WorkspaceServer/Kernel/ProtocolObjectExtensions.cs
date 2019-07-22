@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Events;
+
 namespace WorkspaceServer.Kernel
 {
     internal static class ProtocolObjectExtensions{
