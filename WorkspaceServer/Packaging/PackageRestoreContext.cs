@@ -67,9 +67,11 @@ namespace WorkspaceServer.PackageRestore
 
         }
 
-        public IEnumerable<MetadataReference> AccumulatedReferences()
+        public async Task<IEnumerable<MetadataReference>> AccumulatedReferences()
         {
-            return null;
+            var package = await _lazyPackage.ValueAsync();
+            var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return currentWorkspace.CurrentSolution.Projects.First().MetadataReferences;
         }
 
         public void Dispose()
