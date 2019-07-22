@@ -95,6 +95,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="PackageRestore\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 

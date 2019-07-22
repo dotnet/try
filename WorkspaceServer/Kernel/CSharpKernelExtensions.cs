@@ -5,11 +5,14 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Events;
+using WorkspaceServer.PackageRestore;
 
 namespace WorkspaceServer.Kernel
 {
     public static class CSharpKernelExtensions
     {
+        private static PackageRestoreContext _restoreContext = new PackageRestoreContext();
+
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
@@ -27,6 +30,12 @@ namespace WorkspaceServer.Kernel
             {
                 pipelineContext.OnExecute(async invocationContext =>
                 {
+                    var refs = await _restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    if (refs != null)
+                    {
+                        kernel.AddMetatadaReferences(refs);
+                    }
+
                     invocationContext.OnNext(new NuGetPackageAdded(package));
                     invocationContext.OnCompleted();
                 });

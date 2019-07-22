@@ -59,7 +59,7 @@ namespace WorkspaceServer.Tests.Kernel
                 new CSharpKernel().UseNugetDirective()
             };
 
-            var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 3.0.0-preview6.19304.6\" \nMicrosoft.Extensions.Logging.ILogger logger = null;", "csharp");
 
             var result = await kernel.SendAsync(command);
 
@@ -75,7 +75,11 @@ namespace WorkspaceServer.Tests.Kernel
                   .Single()
                   .PackageReference
                   .Should()
-                  .BeEquivalentTo(new NugetPackageReference("PocketLogger", "1.2.3"));
+                  .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "3.0.0-preview6.19304.6"));
+
+            events
+                .Should()
+                .ContainSingle(e => e is CodeSubmissionEvaluated);
         }
 
         [Fact]
