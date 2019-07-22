@@ -142,6 +142,8 @@ jobs:
       variables:
         - name: PACKAGESOURCE
           value: $(System.DefaultWorkingDirectory)/packages/Shipping
+        - name: RUN_DOTNET_TRY_INTEGRATION_TESTS
+          value: true
         - name: TryDotNetPackagesPath
           value: $(Build.SourcesDirectory)/.trydotnet/packages
       steps:
