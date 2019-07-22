@@ -303,7 +303,7 @@ json
             var extensionDir = Create.EmptyWorkspace()
                                      .Directory;
 
-            var workspaceServerDllPath = typeof(IKernelExtension).Assembly.Location;
+            var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
             var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
                 {
@@ -311,7 +311,8 @@ json
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using WorkspaceServer.Kernel;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
 
 public class TestKernelExtension : IKernelExtension
 {{
@@ -330,8 +331,8 @@ public class TestKernelExtension : IKernelExtension
 
     <ItemGroup>
 
-    <Reference Include=""WorkspaceServer"">
-      <HintPath>{workspaceServerDllPath}</HintPath>
+    <Reference Include=""Microsoft.DotNet.Interactive"">
+      <HintPath>{microsoftDotNetInteractiveDllPath}</HintPath>
     </Reference>
   </ItemGroup>
 
