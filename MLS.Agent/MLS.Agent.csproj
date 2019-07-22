@@ -148,7 +148,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildCss" Inputs="@$(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
+  <Target Name="BuildCss" Inputs="@(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
 
     <PropertyGroup>
       <_TryDotNetCssExists Condition="Exists('$(CssOutputFile)')">true</_TryDotNetCssExists>

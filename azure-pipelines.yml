@@ -19,6 +19,8 @@ variables:
     value: 3.0.0-preview6.19307.2
   - name: DotNetSdkVersion
     value: 3.0.100-preview6-012264
+  - name: NodeJSVersion
+    value: '>=12'
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -70,7 +72,7 @@ jobs:
       - task: NodeTool@0
         displayName: Add NodeJS/npm
         inputs:
-          versionSpec: '>=12'
+          versionSpec: $(NodeJSVersion)
 
       - task: UseDotNet@2
         displayName: Add dotnet
@@ -208,7 +210,7 @@ jobs:
       - task: NodeTool@0
         displayName: Add NodeJS/npm
         inputs:
-          versionSpec: '>=12'
+          versionSpec: $(NodeJSVersion)
 
       - task: UseDotNet@2
         displayName: Add dotnet
@@ -241,3 +243,28 @@ jobs:
           searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
         continueOnError: true
         condition: always()
+
+    # Up-to-date
+    - job: UpToDate_Windows
+      pool:
+        vmImage: windows-2019
+      steps:
+      - checkout: self
+        clean: true
+      - task: NodeTool@0
+        displayName: Add NodeJS/npm
+        inputs:
+          versionSpec: $(NodeJSVersion)
+      - task: UseDotNet@2
+        displayName: Add dotnet
+        inputs:
+          packageType: sdk
+          version: $(DotNetSdkVersion)
+          installationPath: $(Agent.ToolsDirectory)/dotnet
+      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        displayName: Install Blazor templates
+      - task: PowerShell@2
+        displayName: Run up-to-date build check
+        inputs:
+          filePath: eng\tests\UpToDate.ps1
+          arguments: -configuration $(_BuildConfig) -restore -ci
