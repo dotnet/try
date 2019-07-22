@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class KernelPipelineContext
     {

@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pocket;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public static class KernelExtensions
     {

@@ -7,6 +7,7 @@ using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Interactive;
 using MLS.Agent.Tools;
 using Newtonsoft.Json;
 using Pocket;

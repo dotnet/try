@@ -3,7 +3,7 @@
 
 using System;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class CodeSubmissionReceived : KernelEventBase
     {

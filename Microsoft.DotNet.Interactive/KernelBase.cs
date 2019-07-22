@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public abstract class KernelBase : IKernel
     {

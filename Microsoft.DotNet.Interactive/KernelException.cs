@@ -3,14 +3,10 @@
 
 using System;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class KernelException : Exception
     {
-        public KernelException()
-        {
-
-        }
         public KernelException(string message) : base(message)
         {
 

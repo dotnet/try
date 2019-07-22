@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class LoadExtension : KernelCommandBase
     {

@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public delegate Task KernelPipelineContinuation(
         IKernelCommand command, 

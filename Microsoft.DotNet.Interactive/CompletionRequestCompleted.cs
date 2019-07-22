@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class CompletionRequestCompleted : KernelEventBase
     {

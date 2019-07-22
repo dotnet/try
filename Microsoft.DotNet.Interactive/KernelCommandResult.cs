@@ -3,7 +3,7 @@
 
 using System;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     internal class KernelCommandResult : IKernelCommandResult
     {

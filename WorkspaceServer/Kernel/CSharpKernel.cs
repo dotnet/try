@@ -15,9 +15,11 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Interactive;
 using WorkspaceServer.LanguageServices;
 using Microsoft.DotNet.Interactive.Rendering;
 using WorkspaceServer.Servers.Scripting;
+using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel

@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;

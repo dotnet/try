@@ -10,7 +10,7 @@ using System.CommandLine.Invocation;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class CompositeKernel : KernelBase, IEnumerable<IKernel>
     {

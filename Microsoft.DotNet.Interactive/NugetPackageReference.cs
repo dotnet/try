@@ -4,7 +4,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class NugetPackageReference
     {

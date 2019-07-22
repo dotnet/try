@@ -5,7 +5,7 @@ using System;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public class KernelInvocationContext : IObserver<IKernelEvent>
     {
