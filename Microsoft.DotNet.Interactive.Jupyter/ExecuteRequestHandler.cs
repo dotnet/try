@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private int _executionCount;
       
-        public ExecuteRequestHandler(IKernel kernel) :base(kernel)
+        public ExecuteRequestHandler(IKernel kernel) : base(kernel)
         {
         }
 

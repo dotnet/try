@@ -19,8 +19,6 @@ namespace WorkspaceServer.Kernel
 
         public CompositeKernel()
         {
-            Pipeline.AddMiddleware(ChooseKernel);
-
             _kernelNameArgument = new Argument<string>("kernelName");
 
             var chooseKernelCommand = new Command("#kernel")
@@ -55,10 +53,9 @@ namespace WorkspaceServer.Kernel
             AddDisposable(kernel.KernelEvents.Subscribe(PublishEvent));
         }
 
-        private Task ChooseKernel(
+        protected override void SetKernel(
             IKernelCommand command,
-            KernelPipelineContext context,
-            KernelPipelineContinuation next)
+            KernelPipelineContext context)
         {
             if (context.Kernel == null)
             {
@@ -71,8 +68,6 @@ namespace WorkspaceServer.Kernel
                     context.Kernel = _kernels[0];
                 }
             }
-
-            return next(command, context);
         }
 
         protected internal override async Task HandleAsync(
@@ -83,7 +78,7 @@ namespace WorkspaceServer.Kernel
 
             if (kernel is KernelBase kernelBase)
             {
-                await kernelBase.SendOnContextAsync(command, context);
+                await kernelBase.Pipeline.SendAsync(command, context);
                 return;
             }
 

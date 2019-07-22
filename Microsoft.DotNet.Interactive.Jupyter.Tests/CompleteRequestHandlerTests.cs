@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public void cannot_handle_requests_that_are_not_CompleteRequest()
         {
-            var kernel = new CSharpRepl();
+            var kernel = new CSharpKernel();
             var handler = new CompleteRequestHandler(kernel);
             var request = Message.Create(new DisplayData(), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task send_completeReply_on_CompleteRequest()
         {
-            var kernel = new CSharpRepl();
+            var kernel = new CSharpKernel();
             var handler = new CompleteRequestHandler(kernel);
             var request = Message.Create(new CompleteRequest("System.Console.", 15 ), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));

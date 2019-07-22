@@ -377,7 +377,7 @@ namespace MLS.Agent.CommandLine
                             })
                         .AddTransient<IKernel>(c => new CompositeKernel
                         {
-                            new CSharpRepl().UseNugetDirective()
+                            new CSharpKernel().UseNugetDirective()
                         })
                         .AddSingleton(c => new JupyterRequestContextHandler(
                                               c.GetRequiredService<PackageRegistry>(),
