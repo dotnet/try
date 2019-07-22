@@ -626,7 +626,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             Formatter.AutoGenerateForType = t => true;
 
             new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Contain(@"DirectoryName: c:\temp");
+                                            .Should().Contain(@"DirectoryName: ");
             new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
                                             .Should().Contain("Parent: ");
             new FileInfo(@"c:\temp\foo.txt").ToDisplayString()

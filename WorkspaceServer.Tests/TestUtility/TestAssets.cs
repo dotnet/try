@@ -10,6 +10,9 @@ namespace WorkspaceServer.Tests.TestUtility
         public static DirectoryInfo SampleConsole => 
             new DirectoryInfo(Path.Combine(GetTestProjectsFolder(), "SampleConsole"));
 
+        public static DirectoryInfo KernelExtension => 
+            new DirectoryInfo(Path.Combine(GetTestProjectsFolder(), "KernelExtension"));
+
         private static string GetTestProjectsFolder()
         {
             var current = Directory.GetCurrentDirectory();

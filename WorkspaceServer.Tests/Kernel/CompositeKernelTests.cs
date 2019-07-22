@@ -7,6 +7,9 @@ using System.Reactive.Linq;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,7 +42,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = new CompositeKernel
             {
-                new CSharpRepl().UseNugetDirective()
+                new CSharpKernel().UseNugetDirective()
             };
 
             var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
@@ -53,7 +56,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = new CompositeKernel
             {
-                new CSharpRepl().UseNugetDirective()
+                new CSharpKernel().UseNugetDirective()
             };
 
             var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
@@ -82,8 +85,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             var kernel = new CompositeKernel
             {
-                new CSharpRepl(),
-                new FakeRepl("fake")
+                new CSharpKernel(),
+                new FakeKernel("fake")
                 {
                     Handle = (command, context) =>
                     {
@@ -105,16 +108,14 @@ namespace WorkspaceServer.Tests.Kernel
         }
     }
 
-    public class FakeRepl : KernelBase
+    public class FakeKernel : KernelBase
     {
-        private readonly string _name;
-
-        public FakeRepl(string name)
+        public FakeKernel(string name)
         {
-            _name = name;
+            Name = name;
         }
 
-        public override string Name => _name;
+        public override string Name { get; }
 
         public Func<IKernelCommand, KernelPipelineContext, Task> Handle { get; set; }
 

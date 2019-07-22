@@ -10,7 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.DotNet.Try.Jupyter;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.Markdown;
@@ -377,7 +378,7 @@ namespace MLS.Agent.CommandLine
                             })
                         .AddTransient<IKernel>(c => new CompositeKernel
                         {
-                            new CSharpRepl().UseNugetDirective()
+                            new CSharpKernel().UseNugetDirective()
                         })
                         .AddSingleton(c => new JupyterRequestContextHandler(
                                               c.GetRequiredService<PackageRegistry>(),

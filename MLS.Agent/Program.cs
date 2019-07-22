@@ -17,7 +17,7 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Try.Jupyter;
+using Microsoft.DotNet.Interactive.Jupyter;
 using static Pocket.Logger<MLS.Agent.Program>;
 using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 using MLS.Agent.CommandLine;
