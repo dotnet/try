@@ -17,7 +17,7 @@ namespace NotIntegrationTests
             _fixture = fixture;
         }
 
-        [ConditionalFact(Skip = "This doesn't work yet")]
+        [ConditionalIntegrationTestFact(Skip = "This doesn't work yet")]
         public async Task Can_serve_blazor_console_code_runner()
         {
             var response = await _fixture.GetAsync(@"/LocalCodeRunner/blazor-console");
@@ -27,7 +27,7 @@ namespace NotIntegrationTests
             result.Should().Contain("Loading...");
         }
 
-        [ConditionalFact]
+        [ConditionalIntegrationTestFact]
         public async Task Can_serve_bundleCss()
         {
             var response = await _fixture.GetAsync(@"/client/bundle.css");
@@ -36,7 +36,7 @@ namespace NotIntegrationTests
             content.Should().NotBeNullOrEmpty();
         }
 
-        [ConditionalFact]
+        [ConditionalIntegrationTestFact]
         public async Task Can_serve_bundlejs()
         {
             var response = await _fixture.GetAsync(@"/client/2.bundle.js");
@@ -45,7 +45,7 @@ namespace NotIntegrationTests
             content.Should().NotBeNullOrEmpty();
         }
 
-        [ConditionalFact]
+        [ConditionalIntegrationTestFact]
         public async Task Can_serve_clientapi()
         {
             var response = await _fixture.GetAsync(@"/api/trydotnet.min.js");
