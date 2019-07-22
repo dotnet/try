@@ -56,7 +56,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task when_it_throws_exception_after_a_value_was_produced_thne_only_the_error_is_returned()
+        public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned()
         {
             var kernel = await CreateKernelAsync();
 
