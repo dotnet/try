@@ -18,10 +18,10 @@ namespace WorkspaceServer.Servers.Roslyn
         }
 
         readonly List<Region> _regions = new List<Region>();
-         private bool _trackingWriteOperation;
 
+        private bool _trackingWriteOperation;
 
-         public bool WriteOccurred { get; set; }
+        public bool WriteOccurred { get; set; }
 
         public override void Write(char value)
         {
@@ -52,6 +52,7 @@ namespace WorkspaceServer.Servers.Roslyn
             region.Length = sb.Length - region.Start;
             _trackingWriteOperation = false;
         }
+
         private async Task TrackWriteOperationAsync(Func<Task> action)
         {
             WriteOccurred = true;
