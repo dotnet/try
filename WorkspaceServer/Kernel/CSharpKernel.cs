@@ -199,6 +199,12 @@ namespace WorkspaceServer.Kernel
             context.OnNext(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
+        public void AddMetatadaReferences(IEnumerable<MetadataReference> references)
+        {
+            _metadataReferences.AddRange(references);
+            ScriptOptions = ScriptOptions.AddReferences(references);
+        }
+
         private async Task<IEnumerable<CompletionItem>> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
         {
             var metadataReferences = ImmutableArray<MetadataReference>.Empty;

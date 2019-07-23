@@ -5,26 +5,47 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Clockwise;
 
 namespace WorkspaceServer.Packaging
 {
     public class RebuildablePackage : Package
     {
-        private readonly FileSystemWatcher _fileSystemWatcher;
+        private FileSystemWatcher _fileSystemWatcher;
 
         public RebuildablePackage(string name = null, IPackageInitializer initializer = null, DirectoryInfo directory = null, IScheduler buildThrottleScheduler = null) 
             : base(name, initializer, directory, buildThrottleScheduler)
         {
+        }
 
-            _fileSystemWatcher = new FileSystemWatcher(Directory.FullName)
+        void SetupFileWatching()
+        {
+            if (_fileSystemWatcher == null)
             {
-                EnableRaisingEvents = true
-            };
+                _fileSystemWatcher = new FileSystemWatcher(Directory.FullName)
+                {
+                    EnableRaisingEvents = true
+                };
 
-            _fileSystemWatcher.Changed += FileSystemWatcherOnChangedOrDeleted;
-            _fileSystemWatcher.Deleted += FileSystemWatcherOnDeleted;
-            _fileSystemWatcher.Renamed += FileSystemWatcherOnRenamed;
-            _fileSystemWatcher.Created += FileSystemWatcherOnCreated;
+                _fileSystemWatcher.Changed += FileSystemWatcherOnChangedOrDeleted;
+                _fileSystemWatcher.Deleted += FileSystemWatcherOnDeleted;
+                _fileSystemWatcher.Renamed += FileSystemWatcherOnRenamed;
+                _fileSystemWatcher.Created += FileSystemWatcherOnCreated;
+            }
+        }
+
+        protected override async Task EnsureBuilt([CallerMemberName] string caller = null)
+        {
+            await base.EnsureBuilt(caller);
+            SetupFileWatching();
+        }
+
+        public override async Task EnsureReady(Budget budget)
+        {
+            await base.EnsureReady(budget);
+            SetupFileWatching();
         }
 
         private static bool IsProjectFile(string fileName)
