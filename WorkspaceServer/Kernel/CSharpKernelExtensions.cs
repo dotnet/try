@@ -3,11 +3,12 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Events;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
+using WorkspaceServer.PackageRestore;
 
 namespace WorkspaceServer.Kernel
 {
@@ -38,10 +39,18 @@ using {typeof(PocketView).Namespace};
                 packageRefArg
             };
 
+            var restoreContext = new PackageRestoreContext();
+
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelPipelineContext>(async (package, pipelineContext) =>
             {
                 pipelineContext.OnExecute(async invocationContext =>
                 {
+                    var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    if (refs != null)
+                    {
+                        kernel.AddMetatadaReferences(refs);
+                    }
+
                     invocationContext.OnNext(new NuGetPackageAdded(package));
                     invocationContext.OnCompleted();
                 });
