@@ -11,8 +11,6 @@ namespace WorkspaceServer.Kernel
 {
     public static class CSharpKernelExtensions
     {
-        private static PackageRestoreContext _restoreContext = new PackageRestoreContext();
-
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
@@ -26,11 +24,13 @@ namespace WorkspaceServer.Kernel
                 packageRefArg
             };
 
+            var restoreContext = new PackageRestoreContext();
+
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelPipelineContext>(async (package, pipelineContext) =>
             {
                 pipelineContext.OnExecute(async invocationContext =>
                 {
-                    var refs = await _restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
                     if (refs != null)
                     {
                         kernel.AddMetatadaReferences(refs);

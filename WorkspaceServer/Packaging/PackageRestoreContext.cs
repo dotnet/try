@@ -14,25 +14,12 @@ using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.PackageRestore
 {
-    public class PackageRestoreContext : IDisposable
+    public class PackageRestoreContext
     {
-        private readonly DirectoryInfo _workingDirectory;
-        private readonly CompositeDisposable disposable = new CompositeDisposable();
         private readonly AsyncLazy<Package> _lazyPackage;
 
-        public PackageRestoreContext(DirectoryInfo workingDirectory = null)
+        public PackageRestoreContext()
         {
-            if (workingDirectory != null)
-            {
-                _workingDirectory = workingDirectory;
-            }
-            else
-            {
-                var disposableDirectory = DisposableDirectory.Create();
-                workingDirectory = disposableDirectory.Directory;
-                disposable.Add(disposableDirectory);
-            }
-
             _lazyPackage = new AsyncLazy<Package>(CreatePackage);
         }
 
@@ -59,12 +46,16 @@ namespace WorkspaceServer.PackageRestore
             var dotnet = new Dotnet(package.Directory);
             var result = await dotnet.AddPackage(packageName, packageVersion);
 
+            if (result.ExitCode != 0)
+            {
+                return null;
+            }
+
             var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             var newRefs = new HashSet<MetadataReference>(newWorkspace.CurrentSolution.Projects.First().MetadataReferences);
 
             var resultRefs = newRefs.Where(n => !currentRefs.Contains(n.Display));
             return resultRefs;
-
         }
 
         public async Task<IEnumerable<MetadataReference>> GetAllReferences()
@@ -72,11 +63,6 @@ namespace WorkspaceServer.PackageRestore
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             return currentWorkspace.CurrentSolution.Projects.First().MetadataReferences;
-        }
-
-        public void Dispose()
-        {
-            disposable.Dispose();
         }
     }
 }

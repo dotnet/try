@@ -59,7 +59,7 @@ namespace WorkspaceServer.Tests.Kernel
                 new CSharpKernel().UseNugetDirective()
             };
 
-            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 3.0.0-preview6.19304.6\" \nMicrosoft.Extensions.Logging.ILogger logger = null;", "csharp");
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 3.0.0-preview6.19304.6\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
 
             var result = await kernel.SendAsync(command);
 
