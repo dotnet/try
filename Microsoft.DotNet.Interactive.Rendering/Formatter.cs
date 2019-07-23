@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
     /// </summary>
     public static class Formatter
     {
+        private const string DefaultMimeType = "text/plain";
         private static Func<Type, bool> _autoGenerateForType = t => false;
         private static int _defaultListExpansionLimit;
         private static int _recursionLimit;
@@ -358,7 +359,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public static string MimeTypeFor(Type type)
         {
-           return  _mimeTypesByType.TryGetValue(type, out var mimeType) ? mimeType : "text/plain";
+           return  _mimeTypesByType.TryGetValue(type, out var mimeType) ? mimeType : DefaultMimeType;
         }
 
         public static void SetMimeType(Type type, string mimeType)
