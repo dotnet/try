@@ -48,7 +48,7 @@ namespace WorkspaceServer.PackageRestore
 
             if (result.ExitCode != 0)
             {
-                return null;
+                return Array.Empty<MetadataReference>();
             }
 
             var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
