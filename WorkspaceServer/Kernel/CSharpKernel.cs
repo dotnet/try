@@ -20,6 +20,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.LanguageServices;
 using Microsoft.DotNet.Interactive.Rendering;
+using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
@@ -106,7 +107,7 @@ namespace WorkspaceServer.Kernel
         }
 
         private async Task HandleSubmitCode(
-            SubmitCode codeSubmission, 
+            SubmitCode codeSubmission,
             KernelInvocationContext context)
         {
             var codeSubmissionReceived = new CodeSubmissionReceived(
@@ -120,29 +121,38 @@ namespace WorkspaceServer.Kernel
             {
                 context.OnNext(new CompleteCodeSubmissionReceived(codeSubmission));
                 Exception exception = null;
-                try
+                var output = Array.Empty<string>();
+                using (var console = await ConsoleOutput.Capture())
                 {
-                    if (_scriptState == null)
+
+                    try
                     {
-                        _scriptState = await CSharpScript.RunAsync(
-                                           code, 
-                                           ScriptOptions);
+                        if (_scriptState == null)
+                        {
+                            _scriptState = await CSharpScript.RunAsync(
+                                code,
+                                ScriptOptions);
+                        }
+                        else
+                        {
+                            _scriptState = await _scriptState.ContinueWithAsync(
+                                code,
+                                ScriptOptions,
+                                e =>
+                                {
+                                    exception = e;
+                                    return true;
+                                });
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        _scriptState = await _scriptState.ContinueWithAsync(
-                                           code, 
-                                           ScriptOptions, 
-                                           e =>
-                                           {
-                                               exception = e;
-                                               return true;
-                                           });
+                        exception = e;
                     }
-                }
-                catch (Exception e)
-                {
-                    exception = e;
+                    output =
+                        console.WriteOccurredOnStandardOutput
+                            ? console.GetStandardOutputWrites().ToArray()
+                            : Array.Empty<string>();
                 }
 
                 if (exception != null)
@@ -155,6 +165,20 @@ namespace WorkspaceServer.Kernel
                 }
                 else
                 {
+                    foreach (var std in output)
+                    {
+                        var formattedValues = new List<FormattedValue>
+                        {
+                            new FormattedValue(
+                                Formatter.MimeTypeFor(std?.GetType() ?? typeof(object)), std)
+                        };
+
+                        context.OnNext(
+                            new ValueProduced(
+                                std,
+                                codeSubmission,
+                                formattedValues));
+                    }
                     if (HasReturnValue)
                     {
                         var writer = new StringWriter();
@@ -186,11 +210,11 @@ namespace WorkspaceServer.Kernel
 
         private async Task HandleRequestCompletion(
             RequestCompletion requestCompletion,
-            KernelInvocationContext context, 
+            KernelInvocationContext context,
             ScriptState scriptState)
         {
             var completionRequestReceived = new CompletionRequestReceived(requestCompletion);
-          
+
             context.OnNext(completionRequestReceived);
 
             var completionList =
@@ -202,7 +226,7 @@ namespace WorkspaceServer.Kernel
         private async Task<IEnumerable<CompletionItem>> GetCompletionList(string code, int cursorPosition, ScriptState scriptState)
         {
             var metadataReferences = ImmutableArray<MetadataReference>.Empty;
-            
+
             var forcedState = false;
             if (scriptState == null)
             {
@@ -217,14 +241,14 @@ namespace WorkspaceServer.Kernel
             buffer.AppendLine(code);
             var fullScriptCode = buffer.ToString();
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
-            var absolutePosition = Math.Max(offset,0) + cursorPosition;
+            var absolutePosition = Math.Max(offset, 0) + cursorPosition;
 
             if (_fixture == null || _metadataReferences != metadataReferences)
             {
                 _fixture = new WorkspaceFixture(compilation.Options, metadataReferences);
                 _metadataReferences = metadataReferences;
             }
-         
+
             var document = _fixture.ForkDocument(fullScriptCode);
             var service = CompletionService.GetService(document);
 
@@ -247,7 +271,7 @@ namespace WorkspaceServer.Kernel
         }
 
         private bool HasReturnValue =>
-            _scriptState != null && 
-            (bool) _hasReturnValueMethod.Invoke(_scriptState.Script, null);
+            _scriptState != null &&
+            (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
     }
 }

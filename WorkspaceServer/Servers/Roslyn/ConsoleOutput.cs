@@ -2,19 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Clockwise;
 
 namespace WorkspaceServer.Servers.Roslyn
 {
     public class ConsoleOutput : IDisposable
     {
+       
         private TextWriter originalOutputWriter;
         private TextWriter originalErrorWriter;
-        private readonly StringWriter outputWriter = new StringWriter();
-        private readonly StringWriter errorWriter = new StringWriter();
+        private readonly TrackingStringWriter outputWriter = new TrackingStringWriter();
+        private readonly TrackingStringWriter errorWriter = new TrackingStringWriter();
 
         private const int NOT_DISPOSED = 0;
         private const int DISPOSED = 1;
@@ -66,9 +67,15 @@ namespace WorkspaceServer.Servers.Roslyn
             }
         }
 
+
+       
         public string StandardOutput => outputWriter.ToString();
 
         public string StandardError => errorWriter.ToString();
+        public bool WriteOccurredOnStandardOutput => outputWriter.WriteOccurred;
+
+        public bool WriteOccurredOnStandardError => errorWriter.WriteOccurred;
+
 
         public void Clear()
         {
@@ -77,5 +84,10 @@ namespace WorkspaceServer.Servers.Roslyn
         }
 
         public bool IsEmpty() => outputWriter.ToString().Length == 0 && errorWriter.ToString().Length == 0;
+
+        public IEnumerable<string> GetStandardOutputWrites()
+        {
+            return outputWriter.Writes();
+        }
     }
 }

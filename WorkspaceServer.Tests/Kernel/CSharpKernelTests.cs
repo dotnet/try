@@ -178,6 +178,25 @@ namespace WorkspaceServer.Tests.Kernel
                         .Be(3);
         }
 
+        [Fact]
+        public async Task it_produces_values_when_executing_Console_output()
+        {
+            var kernel = CreateKernel();
+
+            var kernelCommand = new SubmitCode(@"
+Console.Write(""value one"");
+Console.Write(""value two"");
+Console.Write(""value three"");", "csharp");
+            await kernel.SendAsync(kernelCommand);
+
+            KernelEvents.OfType<ValueProduced>()
+                .Should()
+                .BeEquivalentTo(
+                    new ValueProduced("value one", kernelCommand, new[] { new FormattedValue(null, "value one"), }),
+                    new ValueProduced("value two", kernelCommand, new[] { new FormattedValue(null, "value two"), }),
+                    new ValueProduced("value three", kernelCommand, new[] { new FormattedValue(null, "value three"), }));
+        }
+
         [Fact(Skip = "requires support for cs8 in roslyn scripting")]
         public async Task it_supports_csharp_8()
         {
@@ -280,7 +299,7 @@ json
                 .Should()
                 .Contain(i => i.DisplayText == "SerializeObject");
         }
-        
+
         [Fact]
         public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
         {

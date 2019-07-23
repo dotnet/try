@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Reactive.Disposables;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
