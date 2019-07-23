@@ -134,54 +134,6 @@ jobs:
     enableTelemetry: true
     helixRepo: dotnet/try
     jobs:
-    - job: IntegrationTest
-      dependsOn: Windows_NT
-      condition: succeeded()
-      pool:
-        vmImage: ubuntu-16.04
-      variables:
-        - name: PACKAGESOURCE
-          value: $(System.DefaultWorkingDirectory)/packages/Shipping
-        - name: RUN_DOTNET_TRY_INTEGRATION_TESTS
-          value: true
-        - name: TryDotNetPackagesPath
-          value: $(Build.SourcesDirectory)/.trydotnet/packages
-      steps:
-      - checkout: none #skip checking out the default repository resource
-      - task: UseDotNet@2
-        displayName: Add dotnet
-        inputs:
-          packageType: sdk
-          version: $(DotNetSdkVersion)
-          installationPath: $(Agent.ToolsDirectory)/dotnet
-
-      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-        displayName: Install Blazor templates
-
-      - task: DownloadBuildArtifacts@0
-        displayName: 'Download built packages'
-        inputs:
-          artifactName: packages
-          downloadPath: $(System.DefaultWorkingDirectory)
-
-      - task: DownloadBuildArtifacts@0
-        displayName: 'Download built integrationtests'
-        inputs:
-          artifactName: integrationTests
-          downloadPath: $(System.DefaultWorkingDirectory)
-
-      - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegrationTests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
-        displayName: Run integration tests
-
-      - task: PublishTestResults@2
-        displayName: Publish NPM Test Results
-        inputs:
-          testResultsFormat: 'VSTest'
-          testResultsFiles: '*.trx'
-          searchFolder: '$(SystemWorkingDirectory)/testResults'
-        continueOnError: true
-        condition: always()
-
     - job: Linux
       pool:
         vmImage: ubuntu-16.04
@@ -270,3 +222,57 @@ jobs:
         inputs:
           filePath: eng\tests\UpToDate.ps1
           arguments: -configuration $(_BuildConfig) -restore -ci
+
+- template: /eng/common/templates/jobs/jobs.yml
+  parameters:
+    enableMicrobuild: true
+    enableTelemetry: true
+    helixRepo: dotnet/try
+    jobs:
+    - job: IntegrationTest
+      dependsOn: Windows_NT
+      condition: succeeded()
+      pool:
+        vmImage: ubuntu-16.04
+      variables:
+        - name: PACKAGESOURCE
+          value: $(System.DefaultWorkingDirectory)/packages/Shipping
+        - name: RUN_DOTNET_TRY_INTEGRATION_TESTS
+          value: true
+        - name: TryDotNetPackagesPath
+          value: $(Build.SourcesDirectory)/.trydotnet/packages
+      steps:
+      - checkout: none #skip checking out the default repository resource
+      - task: UseDotNet@2
+        displayName: Add dotnet
+        inputs:
+          packageType: sdk
+          version: $(DotNetSdkVersion)
+          installationPath: $(Agent.ToolsDirectory)/dotnet
+
+      - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        displayName: Install Blazor templates
+
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Download built packages'
+        inputs:
+          artifactName: packages
+          downloadPath: $(System.DefaultWorkingDirectory)
+
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Download built integrationtests'
+        inputs:
+          artifactName: integrationTests
+          downloadPath: $(System.DefaultWorkingDirectory)
+
+      - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegrationTests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
+        displayName: Run integration tests
+
+      - task: PublishTestResults@2
+        displayName: Publish NPM Test Results
+        inputs:
+          testResultsFormat: 'VSTest'
+          testResultsFiles: '*.trx'
+          searchFolder: '$(SystemWorkingDirectory)/testResults'
+        continueOnError: true
+        condition: always()
