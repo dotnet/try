@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using Clockwise;
-using Microsoft.AspNetCore.Blazor.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -28,8 +27,6 @@ using Recipes;
 using WorkspaceServer;
 using WorkspaceServer.Servers;
 using static Pocket.Logger<MLS.Agent.Startup>;
-using IApplicationLifetime = Microsoft.Extensions.Hosting.IApplicationLifetime;
-using IHostingEnvironment = Microsoft.Extensions.Hosting.IHostingEnvironment;
 
 namespace MLS.Agent
 {
