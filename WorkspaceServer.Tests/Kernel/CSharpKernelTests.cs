@@ -12,7 +12,6 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools;
 using Newtonsoft.Json;
-using Pocket;
 using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
@@ -20,31 +19,16 @@ using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class CSharpKernelTests : KernelTests<CSharpKernel>
+    public class CSharpKernelTests : CSharpKernelTestBase
     {
-        public CSharpKernelTests(ITestOutputHelper output)
+        public CSharpKernelTests(ITestOutputHelper output) : base(output)
         {
-            DisposeAfterTest(output.SubscribeToPocketLogger());
-        }
-
-        protected override async Task<CSharpKernel> CreateKernelAsync(params IKernelCommand[] commands)
-        {
-            var kernel = new CSharpKernel();
-
-            foreach (var command in commands ?? Enumerable.Empty<IKernelCommand>())
-            {
-                await kernel.SendAsync(command);
-            }
-
-            DisposeAfterTest(kernel.KernelEvents.Subscribe(KernelEvents.Add));
-
-            return kernel;
         }
 
         [Fact]
         public async Task it_returns_the_result_of_a_non_null_expression()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("123", "csharp"));
 
@@ -58,7 +42,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("using System;", "csharp"));
             await kernel.SendAsync(new SubmitCode("2 + 2", "csharp"));
@@ -89,7 +73,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_returns_exceptions_thrown_in_user_code()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("using System;", "csharp"));
             await kernel.SendAsync(new SubmitCode("throw new NotImplementedException();", "csharp"));
@@ -106,7 +90,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_returns_diagnostics()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("using System;", "csharp"));
             await kernel.SendAsync(new SubmitCode("aaaadd", "csharp"));
@@ -123,7 +107,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_notifies_when_submission_is_complete()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("var a =", "csharp"));
 
@@ -140,7 +124,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_notifies_when_submission_is_incomplete()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("var a =", "csharp"));
 
@@ -155,7 +139,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_returns_the_result_of_a_null_expression()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("null", "csharp"));
 
@@ -169,7 +153,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_does_not_return_a_result_for_a_statement()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("var x = 1;", "csharp"));
 
@@ -181,7 +165,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_aggregates_multiple_submissions()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("var x = new List<int>{1,2};", "csharp"));
             await kernel.SendAsync(new SubmitCode("x.Add(3);", "csharp"));
@@ -197,7 +181,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact(Skip = "requires support for cs8 in roslyn scripting")]
         public async Task it_supports_csharp_8()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode("var text = \"meow? meow!\";", "csharp"));
             await kernel.SendAsync(new SubmitCode("text[^5..^0]", "csharp"));
@@ -212,7 +196,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task it_can_load_assembly_references_using_r_directive()
         {
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
 
@@ -240,7 +224,7 @@ json
         public async Task it_returns_completion_list_for_types()
         {
 
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new RequestCompletion("System.Console.", 15));
 
@@ -258,7 +242,7 @@ json
         public async Task it_returns_completion_list_for_previously_declared_variables()
         {
 
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(
                 new SubmitCode("var alpha = new Random();"));
@@ -278,7 +262,7 @@ json
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
 
-            var kernel = await CreateKernelAsync();
+            var kernel = CreateKernel();
 
             var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
 
@@ -351,10 +335,9 @@ public class TestKernelExtension : IKernelExtension
                                    .Single()
                                    .FullName;
 
-            var kernel = (await CreateKernelAsync())
+            var kernel = CreateKernel()
                          .UseNugetDirective()
-                         .UseExtendDirective()
-                         .LogEventsToPocketLogger();
+                         .UseExtendDirective();
 
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 

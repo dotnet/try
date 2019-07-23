@@ -59,8 +59,7 @@ namespace WorkspaceServer.Kernel
                     "System.Collections",
                     "System.Collections.Generic",
                     "System.Threading.Tasks",
-                    "System.Linq",
-                    "Microsoft.DotNet.Interactive.Rendering")
+                    "System.Linq")
                 .AddReferences(
                     typeof(Enumerable).Assembly,
                     typeof(IEnumerable<>).Assembly,
