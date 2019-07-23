@@ -16,27 +16,28 @@ namespace WorkspaceServer.Servers.Roslyn
             public int Start { get; set; }
             public int Length { get; set; }
         }
-         List<Region> _regions = new List<Region>();
-         private bool _trakingSize;
+
+        readonly List<Region> _regions = new List<Region>();
+         private bool _trackingWriteOperation;
 
 
          public bool WriteOccurred { get; set; }
 
         public override void Write(char value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
-        private void TrackSize(Action action)
+        private void TrackWriteOperation(Action action)
         {
             WriteOccurred = true;
-            if (_trakingSize)
+            if (_trackingWriteOperation)
             {
                 action();
                 return;
             }
 
-            _trakingSize = true;
+            _trackingWriteOperation = true;
             var sb = base.GetStringBuilder();
 
             var region = new Region
@@ -45,19 +46,21 @@ namespace WorkspaceServer.Servers.Roslyn
             };
 
             _regions.Add(region);
+
             action();
+
             region.Length = sb.Length - region.Start;
-            _trakingSize = false;
+            _trackingWriteOperation = false;
         }
-        private async Task TrackSizeAsync(Func<Task> action)
+        private async Task TrackWriteOperationAsync(Func<Task> action)
         {
             WriteOccurred = true;
-            if (_trakingSize)
+            if (_trackingWriteOperation)
             {
                 await action();
                 return;
             }
-            _trakingSize = true;
+            _trackingWriteOperation = true;
             var sb = base.GetStringBuilder();
 
             var region = new Region
@@ -68,213 +71,214 @@ namespace WorkspaceServer.Servers.Roslyn
             _regions.Add(region);
 
             await action();
+
             region.Length = sb.Length - region.Start;
-            _trakingSize = false;
+            _trackingWriteOperation = false;
         }
 
         public override void Write(char[] buffer, int index, int count)
         {
-            TrackSize(() => base.Write(buffer, index, count));
+            TrackWriteOperation(() => base.Write(buffer, index, count));
         }
 
         public override void Write(string value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override Task WriteAsync(char value)
         {
-            return TrackSizeAsync(() => base.WriteAsync(value));
+            return TrackWriteOperationAsync(() => base.WriteAsync(value));
         }
 
         public override Task WriteAsync(char[] buffer, int index, int count)
         {
-            return TrackSizeAsync(() => base.WriteAsync(buffer, index, count));
+            return TrackWriteOperationAsync(() => base.WriteAsync(buffer, index, count));
         }
 
         public override Task WriteAsync(string value)
         {
-            return TrackSizeAsync(() => base.WriteAsync(value));
+            return TrackWriteOperationAsync(() => base.WriteAsync(value));
         }
 
         public override Task WriteLineAsync(char value)
         {
-            return TrackSizeAsync(() => base.WriteLineAsync(value));
+            return TrackWriteOperationAsync(() => base.WriteLineAsync(value));
         }
 
         public override Task WriteLineAsync(char[] buffer, int index, int count)
         {
-            return TrackSizeAsync(() => base.WriteLineAsync(buffer, index, count));
+            return TrackWriteOperationAsync(() => base.WriteLineAsync(buffer, index, count));
         }
 
         public override Task WriteLineAsync(string value)
         {
-            return TrackSizeAsync(() => base.WriteLineAsync(value));
+            return TrackWriteOperationAsync(() => base.WriteLineAsync(value));
         }
 
         public override void Write(bool value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(char[] buffer)
         {
-            TrackSize(() => base.Write(buffer));
+            TrackWriteOperation(() => base.Write(buffer));
         }
 
         public override void Write(decimal value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(double value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(int value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(long value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(object value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(float value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(string format, object arg0)
         {
-            TrackSize(() => base.Write(format, arg0));
+            TrackWriteOperation(() => base.Write(format, arg0));
         }
 
         public override void Write(string format, object arg0, object arg1)
         {
-            TrackSize(() => base.Write(format, arg0, arg1));
+            TrackWriteOperation(() => base.Write(format, arg0, arg1));
         }
 
         public override void Write(string format, object arg0, object arg1, object arg2)
         {
-            TrackSize(() => base.Write(format, arg0, arg1, arg2));
+            TrackWriteOperation(() => base.Write(format, arg0, arg1, arg2));
         }
 
         public override void Write(string format, params object[] arg)
         {
-            TrackSize(() => base.Write(format, arg));
+            TrackWriteOperation(() => base.Write(format, arg));
         }
 
         public override void Write(uint value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void Write(ulong value)
         {
-            TrackSize(() => base.Write(value));
+            TrackWriteOperation(() => base.Write(value));
         }
 
         public override void WriteLine()
         {
-            TrackSize(() => base.WriteLine());
+            TrackWriteOperation(() => base.WriteLine());
         }
 
         public override void WriteLine(bool value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(char value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(char[] buffer)
         {
-            TrackSize(() => base.WriteLine(buffer));
+            TrackWriteOperation(() => base.WriteLine(buffer));
         }
 
         public override void WriteLine(char[] buffer, int index, int count)
         {
-            TrackSize(() => base.WriteLine(buffer, index, count));
+            TrackWriteOperation(() => base.WriteLine(buffer, index, count));
         }
 
         public override void WriteLine(decimal value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(double value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(int value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(long value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(object value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(float value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(string value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(string format, object arg0)
         {
-            TrackSize(() => base.WriteLine(format, arg0));
+            TrackWriteOperation(() => base.WriteLine(format, arg0));
         }
 
         public override void WriteLine(string format, object arg0, object arg1)
         {
-            TrackSize(() => base.WriteLine(format, arg0, arg1));
+            TrackWriteOperation(() => base.WriteLine(format, arg0, arg1));
         }
 
         public override void WriteLine(string format, object arg0, object arg1, object arg2)
         {
-            TrackSize(() => base.WriteLine(format, arg0, arg1, arg2));
+            TrackWriteOperation(() => base.WriteLine(format, arg0, arg1, arg2));
         }
 
         public override void WriteLine(string format, params object[] arg)
         {
-            TrackSize(() => base.WriteLine(format, arg));
+            TrackWriteOperation(() => base.WriteLine(format, arg));
         }
 
         public override void WriteLine(uint value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override void WriteLine(ulong value)
         {
-            TrackSize(() => base.WriteLine(value));
+            TrackWriteOperation(() => base.WriteLine(value));
         }
 
         public override Task WriteLineAsync()
         {
-            return TrackSizeAsync(() => base.WriteLineAsync());
+            return TrackWriteOperationAsync(() => base.WriteLineAsync());
         }
 
         public IEnumerable<string> Writes()
