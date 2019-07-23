@@ -5,11 +5,26 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Events;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Rendering;
 
 namespace WorkspaceServer.Kernel
 {
     public static class CSharpKernelExtensions
     {
+        public static CSharpKernel UseDefaultRendering(
+            this CSharpKernel kernel)
+        {
+            Task.Run(() => 
+                         kernel.SendAsync(
+                         new SubmitCode($@"
+using static {typeof(PocketViewTags).FullName};
+using {typeof(PocketView).Namespace};
+"))).Wait();
+            return kernel;
+        }
+
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using FluentAssertions;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -110,7 +111,7 @@ namespace WorkspaceServer.Tests.Kernel
 
     public class FakeKernel : KernelBase
     {
-        public FakeKernel(string name)
+        public FakeKernel([CallerMemberName] string name = null)
         {
             Name = name;
         }

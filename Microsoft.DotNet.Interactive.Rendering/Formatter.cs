@@ -103,8 +103,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
             RecursionLimit = 6;
             NullString = "<null>";
 
-            RegisterDefaults();
             _mimeTypesByType.Clear();
+            RegisterDefaults();
         }
 
         /// <summary>
@@ -343,6 +343,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
             // Newtonsoft.Json types -- these implement IEnumerable and their default output is not useful, so use their default ToString
             TryRegisterDefault("Newtonsoft.Json.Linq.JArray, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
             TryRegisterDefault("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
+
+            Formatter<PocketView>.RegisterView(view => view);
         }
 
         private static void TryRegisterDefault(string typeName, Action<object, TextWriter> write)
