@@ -30,7 +30,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("123", "csharp"));
+            await kernel.SendAsync(new SubmitCode("123"));
 
             KernelEvents.OfType<ValueProduced>()
                 .Last()
@@ -44,9 +44,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("using System;", "csharp"));
-            await kernel.SendAsync(new SubmitCode("2 + 2", "csharp"));
-            await kernel.SendAsync(new SubmitCode("adddddddddd", "csharp"));
+            await kernel.SendAsync(new SubmitCode("using System;"));
+            await kernel.SendAsync(new SubmitCode("2 + 2"));
+            await kernel.SendAsync(new SubmitCode("adddddddddd"));
 
             var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
                 .Select((error, pos) => (error, pos))
@@ -75,8 +75,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("using System;", "csharp"));
-            await kernel.SendAsync(new SubmitCode("throw new NotImplementedException();", "csharp"));
+            await kernel.SendAsync(new SubmitCode("using System;"));
+            await kernel.SendAsync(new SubmitCode("throw new NotImplementedException();"));
 
             KernelEvents.Last()
                 .Should()
@@ -92,8 +92,8 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("using System;", "csharp"));
-            await kernel.SendAsync(new SubmitCode("aaaadd", "csharp"));
+            await kernel.SendAsync(new SubmitCode("using System;"));
+            await kernel.SendAsync(new SubmitCode("aaaadd"));
 
             KernelEvents.Last()
                 .Should()
@@ -109,9 +109,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var a =", "csharp"));
+            await kernel.SendAsync(new SubmitCode("var a ="));
 
-            await kernel.SendAsync(new SubmitCode("12;", "csharp"));
+            await kernel.SendAsync(new SubmitCode("12;"));
 
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
@@ -126,7 +126,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var a =", "csharp"));
+            await kernel.SendAsync(new SubmitCode("var a ="));
 
             KernelEvents.Should()
                 .NotContain(e => e is ValueProduced);
@@ -141,7 +141,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("null", "csharp"));
+            await kernel.SendAsync(new SubmitCode("null"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
@@ -155,7 +155,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var x = 1;", "csharp"));
+            await kernel.SendAsync(new SubmitCode("var x = 1;"));
 
             KernelEvents
                 .Should()
@@ -167,9 +167,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var x = new List<int>{1,2};", "csharp"));
-            await kernel.SendAsync(new SubmitCode("x.Add(3);", "csharp"));
-            await kernel.SendAsync(new SubmitCode("x.Max()", "csharp"));
+            await kernel.SendAsync(new SubmitCode("var x = new List<int>{1,2};"));
+            await kernel.SendAsync(new SubmitCode("x.Add(3);"));
+            await kernel.SendAsync(new SubmitCode("x.Max()"));
 
             KernelEvents.OfType<ValueProduced>()
                         .Last()
@@ -186,7 +186,7 @@ namespace WorkspaceServer.Tests.Kernel
             var kernelCommand = new SubmitCode(@"
 Console.Write(""value one"");
 Console.Write(""value two"");
-Console.Write(""value three"");", "csharp");
+Console.Write(""value three"");");
             await kernel.SendAsync(kernelCommand);
 
             KernelEvents.OfType<ValueProduced>()
@@ -222,8 +222,8 @@ Console.Write(""value three"");
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var text = \"meow? meow!\";", "csharp"));
-            await kernel.SendAsync(new SubmitCode("text[^5..^0]", "csharp"));
+            await kernel.SendAsync(new SubmitCode("var text = \"meow? meow!\";"));
+            await kernel.SendAsync(new SubmitCode("text[^5..^0]"));
 
             KernelEvents.OfType<ValueProduced>()
                 .Last()
