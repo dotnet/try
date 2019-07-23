@@ -192,9 +192,9 @@ Console.Write(""value three"");");
             KernelEvents.OfType<ValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new ValueProduced("value one", kernelCommand, false, new[] { new FormattedValue(null, "value one"), }),
-                    new ValueProduced("value two", kernelCommand, false, new[] { new FormattedValue(null, "value two"), }),
-                    new ValueProduced("value three", kernelCommand, false, new[] { new FormattedValue(null, "value three"), }));
+                    new ValueProduced("value one", kernelCommand, false, new[] { new FormattedValue("text/plain", "value one"), }),
+                    new ValueProduced("value two", kernelCommand, false, new[] { new FormattedValue("text/plain", "value two"), }),
+                    new ValueProduced("value three", kernelCommand, false, new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
         [Fact]

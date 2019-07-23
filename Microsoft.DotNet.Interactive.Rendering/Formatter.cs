@@ -358,8 +358,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public static string MimeTypeFor(Type type)
         {
-            _mimeTypesByType.TryGetValue(type, out var mimeType);
-            return mimeType;
+           return  _mimeTypesByType.TryGetValue(type, out var mimeType) ? mimeType : "text/plain";
         }
 
         public static void SetMimeType(Type type, string mimeType)
