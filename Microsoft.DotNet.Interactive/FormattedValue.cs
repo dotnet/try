@@ -9,7 +9,12 @@ namespace Microsoft.DotNet.Interactive
     {
         public FormattedValue(string mimeType, object value)
         {
-            MimeType = mimeType ?? throw new ArgumentNullException(nameof(mimeType));
+            if (string.IsNullOrWhiteSpace(mimeType))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(mimeType));
+            }
+
+            MimeType = mimeType;
             Value = value;
         }
 
