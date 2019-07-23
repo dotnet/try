@@ -207,7 +207,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                             break;
 
                                         default:
-                                            if (Formatter.MimeTypeFor(item.GetType()) != null)
+                                            var mimeType = Formatter.MimeTypeFor(item.GetType());
+                                            if (mimeType != null && mimeType != "text/plain")
                                             {
                                                 item.FormatTo(writer);
                                             }

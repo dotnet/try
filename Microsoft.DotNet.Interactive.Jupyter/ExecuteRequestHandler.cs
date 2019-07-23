@@ -10,14 +10,13 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class ExecuteRequestHandler : RequestHandlerBase<ExecuteRequest>
     {
         private int _executionCount;
-      
+
         public ExecuteRequestHandler(IKernel kernel) : base(kernel)
         {
         }
@@ -30,9 +29,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var command = new SubmitCode(executeRequest.Code, "csharp");
-            var id = Guid.NewGuid();
-            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
-            var openRequest = new InflightRequest(context, executeRequest, executionCount, transient);
+
+            var openRequest = new InflightRequest(context, executeRequest, executionCount);
 
             InFlightRequests[command] = openRequest;
 
@@ -79,6 +77,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
+        private static Dictionary<string, object> CreateTransient()
+        {
+            var id = Guid.NewGuid();
+            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
+            return transient;
+        }
+
         void OnKernelResultEvent(IKernelEvent value)
         {
             switch (value)
@@ -96,7 +101,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case IncompleteCodeSubmissionReceived _:
                 case CompleteCodeSubmissionReceived _:
                     break;
-                default: 
+                default:
                     throw new NotSupportedException();
             }
         }
@@ -152,12 +157,18 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             try
             {
+                var transient = CreateTransient();
                 // executeResult data
-                var executeResultData = new ExecuteResult(
+                var executeResultData = valueProduced.IsLastValue
+                ? new ExecuteResult(
                     openRequest.ExecutionCount,
-                    transient: openRequest.Transient,
+                    transient: transient,
                     data: valueProduced?.FormattedValues
-                                       ?.ToDictionary(k => k.MimeType ?? "text/plain", v => v.Value));
+                        ?.ToDictionary(k => k.MimeType, v => v.Value))
+                : new DisplayData(
+                    transient: transient,
+                    data: valueProduced?.FormattedValues
+                                       ?.ToDictionary(k => k.MimeType, v => v.Value));
 
                 if (!openRequest.Request.Silent)
                 {
