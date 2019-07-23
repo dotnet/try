@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using WorkspaceServer.Kernel;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -31,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             var command = new RequestCompletion(completeRequest.Code, completeRequest.CursorPosition);
 
-            var openRequest = new InflightRequest(context, completeRequest, 0, null);
+            var openRequest = new InflightRequest(context, completeRequest, 0);
 
             InFlightRequests[command] = openRequest;
 

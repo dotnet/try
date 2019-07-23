@@ -40,18 +40,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         protected class InflightRequest : IDisposable
         {
             private readonly CompositeDisposable _disposables = new CompositeDisposable();
-            public Dictionary<string, object> Transient { get; }
             public JupyterRequestContext Context { get; }
             public T Request { get; }
             public int ExecutionCount { get; }
 
-            public InflightRequest(JupyterRequestContext context, T request, int executionCount,
-                Dictionary<string, object> transient)
+            public InflightRequest(JupyterRequestContext context, T request, int executionCount)
             {
                 Context = context;
                 Request = request;
                 ExecutionCount = executionCount;
-                Transient = transient;
             }
 
             public void AddDisposable(IDisposable disposable)
