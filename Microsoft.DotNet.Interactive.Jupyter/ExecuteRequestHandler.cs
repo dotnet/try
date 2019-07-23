@@ -159,8 +159,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 var transient = CreateTransient();
                 // executeResult data
-                var executeResultData = new ExecuteResult(
+                var executeResultData = valueProduced.IsLastValue
+                ?new ExecuteResult(
                     openRequest.ExecutionCount,
+                    transient: transient,
+                    data: valueProduced?.FormattedValues
+                        ?.ToDictionary(k => k.MimeType ?? "text/plain", v => v.Value))
+                : new DisplayData(
                     transient: transient,
                     data: valueProduced?.FormattedValues
                                        ?.ToDictionary(k => k.MimeType ?? "text/plain", v => v.Value));

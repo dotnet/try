@@ -8,16 +8,18 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public class ValueProduced : KernelEventBase
     {
-        public ValueProduced(
-            object value,
+        public ValueProduced(object value,
             SubmitCode submitCode,
+            bool isLastValue = false,
             IReadOnlyCollection<FormattedValue> formattedValues = null) : base(submitCode)
         {
             Value = value;
+            IsLastValue = isLastValue;
             FormattedValues = formattedValues;
         }
 
         public object Value { get; }
+        public bool IsLastValue { get; }
 
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
     }

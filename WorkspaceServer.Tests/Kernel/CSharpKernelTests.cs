@@ -192,9 +192,29 @@ Console.Write(""value three"");", "csharp");
             KernelEvents.OfType<ValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new ValueProduced("value one", kernelCommand, new[] { new FormattedValue(null, "value one"), }),
-                    new ValueProduced("value two", kernelCommand, new[] { new FormattedValue(null, "value two"), }),
-                    new ValueProduced("value three", kernelCommand, new[] { new FormattedValue(null, "value three"), }));
+                    new ValueProduced("value one", kernelCommand, false, new[] { new FormattedValue(null, "value one"), }),
+                    new ValueProduced("value two", kernelCommand, false, new[] { new FormattedValue(null, "value two"), }),
+                    new ValueProduced("value three", kernelCommand, false, new[] { new FormattedValue(null, "value three"), }));
+        }
+
+        [Fact]
+        public async Task it_produces_a_final_value_if_the_code_expression_evaluates()
+        {
+            var kernel = CreateKernel();
+
+            var kernelCommand = new SubmitCode(@"
+Console.Write(""value one"");
+Console.Write(""value two"");
+Console.Write(""value three"");
+5", "csharp");
+            await kernel.SendAsync(kernelCommand);
+
+            KernelEvents.OfType<ValueProduced>()
+                .Should()
+                .HaveCount(4)
+                .And
+                .ContainSingle(e => e.IsLastValue);
+              
         }
 
         [Fact(Skip = "requires support for cs8 in roslyn scripting")]
