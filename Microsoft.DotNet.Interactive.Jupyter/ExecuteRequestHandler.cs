@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private int _executionCount;
 
-        public ExecuteRequestHandler(IKernel kernel, IScheduler messagePump) : base(kernel, messagePump)
+        public ExecuteRequestHandler(IKernel kernel, IScheduler scheduler = null)
+            : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
         }
 

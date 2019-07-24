@@ -3,14 +3,12 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
-using System.Threading;
-using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using System.Reactive.Linq;
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -21,11 +19,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
         protected IObservable<IKernelEvent> _kernelEventSource { get; }
 
-        protected RequestHandlerBase(IKernel kernel, IScheduler messagePump)
+        protected RequestHandlerBase(IKernel kernel, IScheduler scheduler)
         {
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
 
-            _kernelEventSource = Kernel.KernelEvents.ObserveOn(messagePump);
+            _kernelEventSource = Kernel.KernelEvents.ObserveOn(scheduler ?? throw new ArgumentNullException(nameof(scheduler)));
             _disposables.Add(_kernelEventSource.Subscribe(OnKernelEvent));
         }
 

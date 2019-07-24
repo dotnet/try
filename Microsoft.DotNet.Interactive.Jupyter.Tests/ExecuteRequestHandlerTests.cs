@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public void cannot_handle_requests_that_are_not_ExecuteRequest()
         {
             var kernel = new CSharpKernel();
-            var handler = new ExecuteRequestHandler(kernel, CurrentThreadScheduler.Instance);
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new DisplayData(), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             messageHandling.Should().ThrowExactly<InvalidOperationException>();
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task handles_executeRequest()
         {
             var kernel = new CSharpKernel();
-            var handler = new ExecuteRequestHandler(kernel, CurrentThreadScheduler.Instance);
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
         }
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var kernel = new CSharpKernel();
 
-            var handler = new ExecuteRequestHandler(kernel, CurrentThreadScheduler.Instance);
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var kernel = new CSharpKernel();
 
-            var handler = new ExecuteRequestHandler(kernel, CurrentThreadScheduler.Instance);
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("asdes"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var kernel = new CSharpKernel();
 
-            var handler = new ExecuteRequestHandler(kernel, CurrentThreadScheduler.Instance);
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("2+2"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 new CSharpKernel()
             };
 
-            var handler = new ExecuteRequestHandler(kernel, CurrentThreadScheduler.Instance);
+            var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("#kernel csharp"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 

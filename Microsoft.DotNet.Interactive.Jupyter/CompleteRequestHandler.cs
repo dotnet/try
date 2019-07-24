@@ -13,14 +13,15 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class CompleteRequestHandler: RequestHandlerBase<CompleteRequest>
+    public class CompleteRequestHandler : RequestHandlerBase<CompleteRequest>
     {
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 
-        public CompleteRequestHandler(IKernel kernel, IScheduler messagePump) : base(kernel, messagePump)
+        public CompleteRequestHandler(IKernel kernel, IScheduler scheduler = null)
+            : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
-            
+
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Context.ServerChannel.Send(completeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
             openRequest.Dispose();
-            
+
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)
