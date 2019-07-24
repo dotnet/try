@@ -123,7 +123,7 @@ namespace WorkspaceServer.Kernel
                 Exception exception = null;
                 using (var console = await ConsoleOutput.Capture())
                 {
-                    console.SubscribeToStdOutput((std) => PublishOutput(std, context, codeSubmission));
+                    console.SubscribeToStandardOutput((std) => PublishOutput(std, context, codeSubmission));
 
                     try
                     {
@@ -191,17 +191,17 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        private void PublishOutput(string std, KernelInvocationContext context, IKernelCommand command)
+        private void PublishOutput(string output, KernelInvocationContext context, IKernelCommand command)
         {
             var formattedValues = new List<FormattedValue>
                         {
                             new FormattedValue(
-                                Formatter.MimeTypeFor(std?.GetType() ?? typeof(object)), std)
+                                Formatter.MimeTypeFor(output?.GetType() ?? typeof(object)), output)
                         };
 
             context.OnNext(
                 new ValueProduced(
-                    std,
+                    output,
                     command,
                     false,
                     formattedValues));

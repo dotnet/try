@@ -16,16 +16,14 @@ namespace WorkspaceServer.Servers.Roslyn
 {
     internal class TrackingStringWriter : StringWriter, IObservable<string>
     {
-        Subject<string> WriteEvents = new Subject<string>();
-
         private class Region
         {
             public int Start { get; set; }
             public int Length { get; set; }
         }
 
-        readonly List<Region> _regions = new List<Region>();
-
+        private Subject<string> WriteEvents = new Subject<string>();
+        private readonly List<Region> _regions = new List<Region>();
         private bool _trackingWriteOperation;
         private int _observerCount;
 

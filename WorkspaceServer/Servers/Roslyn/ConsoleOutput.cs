@@ -50,7 +50,7 @@ namespace WorkspaceServer.Servers.Roslyn
             return redirector;
         }
 
-        public IDisposable SubscribeToStdOutput(Action<string> action)
+        public IDisposable SubscribeToStandardOutput(Action<string> action)
         {
             return outputWriter.Subscribe(action);
         }
