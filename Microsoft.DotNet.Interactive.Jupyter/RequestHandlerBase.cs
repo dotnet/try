@@ -4,9 +4,13 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Threading;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using System.Reactive.Linq;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -14,11 +18,24 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         where T : JupyterMessageContent
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        protected IObservable<IKernelEvent> _kernelEventSource { get; }
 
         protected RequestHandlerBase(IKernel kernel)
         {
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+            var scheduler = new EventLoopScheduler(t =>
+            {
+                var thread = new Thread(t);
+                thread.Name = $"KernelEventHandler<{GetType().Name}>";
+                return thread;
+            });
+
+            _kernelEventSource = Kernel.KernelEvents.ObserveOn(scheduler);
+            _disposables.Add(scheduler);
+            _disposables.Add(_kernelEventSource.Subscribe(OnKernelEvent));
         }
+
+        protected abstract void OnKernelEvent(IKernelEvent @event);
 
         protected static T GetJupyterRequest(JupyterRequestContext context)
         {

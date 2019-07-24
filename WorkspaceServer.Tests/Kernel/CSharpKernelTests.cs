@@ -16,6 +16,8 @@ using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
+using System.Reactive.Linq;
+using FluentAssertions.Extensions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -49,18 +51,18 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("adddddddddd"));
 
             var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
-                .Select((error, pos) => (error, pos))
-                .Single(t => t.error is CodeSubmissionEvaluationFailed);
+                .Select((t, pos) => (t.Value, pos))
+                .Single(t => t.Value is CodeSubmissionEvaluationFailed);
 
             ((CodeSubmissionEvaluationFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
 
             var lastCodeSubmissionPosition = KernelEvents
-                .Select((e, pos) => (e, pos))
-                .Last(t => t.e is CodeSubmissionReceived).pos;
+                .Select((e, pos) => (e.Value, pos))
+                .Last(t => t.Value is CodeSubmissionReceived).pos;
 
             var lastValueProducedPosition = KernelEvents
-                .Select((e, pos) => (e, pos))
-                .Last(t => t.e is ValueProduced).pos;
+                .Select((e, pos) => (e.Value, pos))
+                .Last(t => t.Value is ValueProduced).pos;
 
             lastValueProducedPosition
                 .Should()
@@ -215,6 +217,24 @@ Console.Write(""value three"");
                 .And
                 .ContainSingle(e => e.IsLastValue);
               
+        }
+
+        [Fact]
+        public async Task the_output_is_asynchronous()
+        {
+            var kernel = CreateKernel();
+
+            var kernelCommand = new SubmitCode(@"
+Console.Write(DateTime.Now);
+System.Threading.Thread.Sleep(1000);
+Console.Write(DateTime.Now);
+5", "csharp");
+            await kernel.SendAsync(kernelCommand);
+            var events = KernelEvents
+                .Where(e => e.Value is ValueProduced).ToArray();
+            var diff = events[1].Timestamp - events[0].Timestamp;
+            diff.Should().BeCloseTo(1.Seconds(), precision: 200);
+
         }
 
         [Fact(Skip = "requires support for cs8 in roslyn scripting")]

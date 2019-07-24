@@ -50,6 +50,11 @@ namespace WorkspaceServer.Servers.Roslyn
             return redirector;
         }
 
+        public IDisposable SubscribeToStdOutput(Action<string> action)
+        {
+            return outputWriter.Subscribe(action);
+        }
+
         public void Dispose()
         {
             if (Interlocked.CompareExchange(ref alreadyDisposed, DISPOSED, NOT_DISPOSED) == NOT_DISPOSED)

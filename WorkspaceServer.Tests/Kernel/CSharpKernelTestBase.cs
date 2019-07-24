@@ -8,6 +8,8 @@ using Microsoft.DotNet.Interactive.Events;
 using Pocket;
 using WorkspaceServer.Kernel;
 using Xunit.Abstractions;
+using System.Reactive.Linq;
+using System.Reactive;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -24,14 +26,14 @@ namespace WorkspaceServer.Tests.Kernel
                 .LogEventsToPocketLogger();
 
             DisposeAfterTest(
-                kernel.KernelEvents.Subscribe(KernelEvents.Add));
+                kernel.KernelEvents.Timestamp().Subscribe(KernelEvents.Add));
 
             return kernel;
         }
 
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
-        protected IList<IKernelEvent> KernelEvents { get; } = new List<IKernelEvent>();
+        protected IList<Timestamped<IKernelEvent>> KernelEvents { get; } = new List<Timestamped<IKernelEvent>>();
 
         protected void DisposeAfterTest(IDisposable disposable)
         {

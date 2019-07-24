@@ -34,22 +34,18 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             InFlightRequests[command] = openRequest;
 
-            var kernelResult = await Kernel.SendAsync(command);
-            openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
-
+            await Kernel.SendAsync(command);
         }
 
-        void OnKernelResultEvent(IKernelEvent value)
+        protected override void OnKernelEvent(IKernelEvent @event)
         {
-            switch (value)
+            switch (@event)
             {
                 case CompletionRequestCompleted completionRequestCompleted:
                     OnCompletionRequestCompleted(completionRequestCompleted, InFlightRequests);
                     break;
                 case CompletionRequestReceived _:
                     break;
-                default:
-                    throw new NotSupportedException();
             }
         }
 
