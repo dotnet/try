@@ -18,6 +18,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System.Reactive.Linq;
 using FluentAssertions.Extensions;
+using System.Reactive;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -34,7 +35,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             await kernel.SendAsync(new SubmitCode("123"));
 
-            KernelEvents.OfType<ValueProduced>()
+            KernelEvents.Select(k => k.Value)
+                .OfType<ValueProduced>()
                 .Last()
                 .Value
                 .Should()
@@ -81,6 +83,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("throw new NotImplementedException();"));
 
             KernelEvents.Last()
+                .Value
                 .Should()
                 .BeOfType<CodeSubmissionEvaluationFailed>()
                 .Which
@@ -98,6 +101,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("aaaadd"));
 
             KernelEvents.Last()
+                .Value
                 .Should()
                 .BeOfType<CodeSubmissionEvaluationFailed>()
                 .Which
@@ -116,11 +120,11 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("12;"));
 
             KernelEvents.Should()
-                .NotContain(e => e is ValueProduced);
+                .NotContain(e => e.Value is ValueProduced);
 
             KernelEvents
                 .Should()
-                .Contain(e => e is CodeSubmissionEvaluated);
+                .Contain(e => e.Value is CodeSubmissionEvaluated);
         }
 
         [Fact]
@@ -131,9 +135,10 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("var a ="));
 
             KernelEvents.Should()
-                .NotContain(e => e is ValueProduced);
+                .NotContain(e => e.Value is ValueProduced);
 
             KernelEvents.Last()
+                .Value
                 .Should()
                 .BeOfType<IncompleteCodeSubmissionReceived>();
         }
@@ -145,8 +150,10 @@ namespace WorkspaceServer.Tests.Kernel
 
             await kernel.SendAsync(new SubmitCode("null"));
 
-            KernelEvents.OfType<ValueProduced>()
+            KernelEvents.Where(k => k.Value is ValueProduced)
                         .Last()
+                        .Value
+                        .As<ValueProduced>()
                         .Value
                         .Should()
                         .BeNull();
@@ -161,7 +168,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e is ValueProduced);
+                .NotContain(e => e.Value is ValueProduced);
         }
 
         [Fact]
@@ -173,7 +180,8 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("x.Add(3);"));
             await kernel.SendAsync(new SubmitCode("x.Max()"));
 
-            KernelEvents.OfType<ValueProduced>()
+            KernelEvents.Select(k => k.Value)
+                        .OfType<ValueProduced>()
                         .Last()
                         .Value
                         .Should()
@@ -191,7 +199,9 @@ Console.Write(""value two"");
 Console.Write(""value three"");");
             await kernel.SendAsync(kernelCommand);
 
-            KernelEvents.OfType<ValueProduced>()
+            KernelEvents
+                .Where(k => k.Value is ValueProduced)
+                .Select(k => k.Value)
                 .Should()
                 .BeEquivalentTo(
                     new ValueProduced("value one", kernelCommand, false, new[] { new FormattedValue("text/plain", "value one"), }),
@@ -211,12 +221,14 @@ Console.Write(""value three"");
 5", "csharp");
             await kernel.SendAsync(kernelCommand);
 
-            KernelEvents.OfType<ValueProduced>()
+            KernelEvents
+                .Where(k => k.Value is ValueProduced)
+                .Select(k => k.Value as ValueProduced)
                 .Should()
                 .HaveCount(4)
                 .And
                 .ContainSingle(e => e.IsLastValue);
-              
+
         }
 
         [Fact]
@@ -271,8 +283,9 @@ json
 "));
 
             KernelEvents.Should()
-                        .ContainSingle(e => e is ValueProduced);
-            KernelEvents.OfType<ValueProduced>()
+                        .ContainSingle(e => e.Value is ValueProduced);
+            KernelEvents.Select(k => k.Value)
+                        .OfType<ValueProduced>()
                         .Single()
                         .Value
                         .Should()
@@ -288,9 +301,10 @@ json
             await kernel.SendAsync(new RequestCompletion("System.Console.", 15));
 
             KernelEvents.Should()
-                .ContainSingle(e => e is CompletionRequestReceived);
+                .ContainSingle(e => e.Value is CompletionRequestReceived);
 
-            KernelEvents.Single(e => e is CompletionRequestCompleted)
+            KernelEvents.Single(e => e.Value is CompletionRequestCompleted)
+                .Value
                 .As<CompletionRequestCompleted>()
                 .CompletionList
                 .Should()
@@ -308,9 +322,10 @@ json
             await kernel.SendAsync(new RequestCompletion("al", 2));
 
             KernelEvents.Should()
-                .ContainSingle(e => e is CompletionRequestReceived);
+                .ContainSingle(e => e.Value is CompletionRequestReceived);
 
-            KernelEvents.Single(e => e is CompletionRequestCompleted)
+            KernelEvents.Single(e => e.Value is CompletionRequestCompleted)
+                .Value
                 .As<CompletionRequestCompleted>()
                 .CompletionList
                 .Should()
@@ -331,9 +346,10 @@ json
             await kernel.SendAsync(new RequestCompletion("Newtonsoft.Json.JsonConvert.", 28));
 
             KernelEvents.Should()
-                .ContainSingle(e => e is CompletionRequestReceived);
+                .ContainSingle(e => e.Value is CompletionRequestReceived);
 
-            KernelEvents.Single(e => e is CompletionRequestCompleted)
+            KernelEvents.Single(e => e.Value is CompletionRequestCompleted)
+                .Value
                 .As<CompletionRequestCompleted>()
                 .CompletionList
                 .Should()
@@ -401,8 +417,8 @@ public class TestKernelExtension : IKernelExtension
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
             KernelEvents.Should()
-                        .ContainSingle(e => e is CodeSubmissionEvaluated &&
-                                            e.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
+                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
     }
 }
