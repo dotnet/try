@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -17,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 
-        public CompleteRequestHandler(IKernel kernel) : base(kernel)
+        public CompleteRequestHandler(IKernel kernel, IScheduler messagePump) : base(kernel, messagePump)
         {
             
         }

@@ -17,21 +17,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     public abstract class RequestHandlerBase<T> : IDisposable
         where T : JupyterMessageContent
     {
+       
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
         protected IObservable<IKernelEvent> _kernelEventSource { get; }
 
-        protected RequestHandlerBase(IKernel kernel)
+        protected RequestHandlerBase(IKernel kernel, IScheduler messagePump)
         {
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-            var scheduler = new EventLoopScheduler(t =>
-            {
-                var thread = new Thread(t);
-                thread.Name = $"KernelEventHandler<{GetType().Name}>";
-                return thread;
-            });
 
-            _kernelEventSource = Kernel.KernelEvents.ObserveOn(scheduler);
-            _disposables.Add(scheduler);
+            _kernelEventSource = Kernel.KernelEvents.ObserveOn(messagePump);
             _disposables.Add(_kernelEventSource.Subscribe(OnKernelEvent));
         }
 

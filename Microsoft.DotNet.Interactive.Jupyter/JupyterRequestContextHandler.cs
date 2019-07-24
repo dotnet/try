@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reactive.Concurrency;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
@@ -24,8 +26,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             PackageRegistry packageRegistry,
             IKernel kernel)
         {
-            _executeHandler = new ExecuteRequestHandler(kernel);
-            _completeHandler = new CompleteRequestHandler(kernel);
+            var scheduler = new EventLoopScheduler(t =>
+            {
+                var thread = new Thread(t);
+                thread.IsBackground = true;
+                thread.Name = "MessagePump";
+                return thread;
+            });
+
+            _executeHandler = new ExecuteRequestHandler(kernel, scheduler);
+            _completeHandler = new CompleteRequestHandler(kernel, scheduler);
 
             if (packageRegistry == null)
             {

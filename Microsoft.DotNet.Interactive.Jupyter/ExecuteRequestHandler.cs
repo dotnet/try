@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -17,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private int _executionCount;
 
-        public ExecuteRequestHandler(IKernel kernel) : base(kernel)
+        public ExecuteRequestHandler(IKernel kernel, IScheduler messagePump) : base(kernel, messagePump)
         {
         }
 

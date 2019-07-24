@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reactive.Concurrency;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
@@ -32,7 +33,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public void cannot_handle_requests_that_are_not_CompleteRequest()
         {
             var kernel = new CSharpKernel();
-            var handler = new CompleteRequestHandler(kernel);
+            var handler = new CompleteRequestHandler(kernel, CurrentThreadScheduler.Instance);
             var request = Message.Create(new DisplayData(), null);
             Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             messageHandling.Should().ThrowExactly<InvalidOperationException>();
@@ -42,7 +43,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task send_completeReply_on_CompleteRequest()
         {
             var kernel = new CSharpKernel();
-            var handler = new CompleteRequestHandler(kernel);
+            var handler = new CompleteRequestHandler(kernel, CurrentThreadScheduler.Instance);
             var request = Message.Create(new CompleteRequest("System.Console.", 15 ), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
