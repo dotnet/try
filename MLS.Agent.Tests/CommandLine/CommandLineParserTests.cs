@@ -3,6 +3,7 @@
 
 using System;
 using System.CommandLine;
+using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
@@ -28,7 +29,6 @@ namespace MLS.Agent.Tests.CommandLine
         private PackageSource _installPackageSource;
         private VerifyOptions _verifyOptions;
         private DemoOptions _demoOptions;
-        private JupyterOptions _jupyterOptions;
 
         public CommandLineParserTests(ITestOutputHelper output)
         {
@@ -64,9 +64,8 @@ namespace MLS.Agent.Tests.CommandLine
                     _verifyOptions = options;
                     return Task.FromResult(1);
                 },
-                jupyter: (options, console, startServer, context) =>
+                jupyter: (console, startServer, context) =>
                 {
-                    _jupyterOptions = options;
                     return Task.FromResult(1);
                 });
         }
@@ -363,9 +362,13 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var expected = Path.GetTempFileName();
 
-            await _parser.InvokeAsync($"jupyter {expected}", _console);
+            var result = _parser.Parse($"jupyter {expected}");
 
-            _jupyterOptions
+            var binder = new ModelBinder<JupyterOptions>();
+
+            var options = (JupyterOptions) binder.CreateInstance(new BindingContext(result));
+
+            options
                 .ConnectionFile
                 .FullName
                 .Should()
