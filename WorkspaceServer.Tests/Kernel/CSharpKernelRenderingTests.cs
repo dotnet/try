@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -30,18 +30,39 @@ namespace WorkspaceServer.Tests.Kernel
 
             var result = await kernel.SendAsync(new SubmitCode("b(123)"));
 
-            await Task.Delay(500);
-
             var valueProduced = await result
                                       .KernelEvents
                                       .OfType<ValueProduced>()
-                                      .Timeout(10.Seconds())
+                                      .Timeout(5.Seconds())
                                       .FirstAsync();
 
             valueProduced
                 .FormattedValues
                 .Should()
                 .BeEquivalentTo(new FormattedValue("text/html", "<b>123</b>"));
+        }
+
+        [Fact]
+        public async Task HTML_formatting_is_the_default_for_sequences_of_anonymous_objects()
+        {
+            var kernel = new CSharpKernel()
+                .UseDefaultRendering();
+
+            var result = await kernel.SendAsync(new SubmitCode(@"
+ new[] { new { a = 123 }, new { a = 456 } }"));
+
+            var valueProduced = await result
+                                      .KernelEvents
+                                      .OfType<ValueProduced>()
+                                      .Timeout(5.Seconds())
+                                      .FirstAsync();
+
+            valueProduced
+                .FormattedValues
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().StartsWith("<table>"));
         }
     }
 }

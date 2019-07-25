@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     });
         }
 
-        public static MemberAccessor<T>[] GetMemberAccessors<T>(this MemberInfo[] forMembers) =>
+        public static MemberAccessor<T>[] GetMemberAccessors<T>(this IEnumerable<MemberInfo> forMembers) =>
             forMembers
                 .Select(m => new MemberAccessor<T>(m))
                 .ToArray();
@@ -87,6 +87,16 @@ namespace Microsoft.DotNet.Interactive.Rendering
                    type.IsGenericType && type.Name.Contains("AnonymousType") &&
                    (type.Name.StartsWith("<>") || type.Name.StartsWith("VB$")) &&
                    (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
+        }
+
+        public static bool IsValueTuple(this Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            return type.ToString().StartsWith("System.ValueTuple`");
         }
     }
 }

@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    internal interface IDisplayTextFormatter
+    internal interface IPlainTextFormatter
     {
         void WriteStartProperty(TextWriter writer);
         void WriteEndProperty(TextWriter writer);
@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
         void WriteEndObject(TextWriter writer);
         void WriteStartSequence(TextWriter writer);
         void WriteEndSequence(TextWriter writer);
+        void WriteStartTuple(TextWriter writer);
+        void WriteEndTuple(TextWriter writer);
         void WriteNameValueDelimiter(TextWriter writer);
         void WritePropertyDelimiter(TextWriter writer);
         void WriteSequenceDelimiter(TextWriter writer);

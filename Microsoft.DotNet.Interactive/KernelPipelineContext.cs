@@ -3,9 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
@@ -43,9 +44,20 @@ namespace Microsoft.DotNet.Interactive
 
             var observable = invocationContexts.Select(i => i.KernelEvents).Merge();
 
-            foreach (var invocation in invocationContexts)
+            try
             {
-                await invocation.InvokeAsync();
+                foreach (var invocation in invocationContexts)
+                {
+                    await invocation.InvokeAsync();
+                }
+            }
+            catch (Exception exception)
+            {
+                // FIX: (InvokeAsync) 
+                _publishEvent(
+                    new ValueProduced(
+                        exception,
+                        new SubmitCode("")));
             }
 
             return new KernelCommandResult(observable);

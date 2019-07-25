@@ -41,9 +41,9 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 }
             };
 
-            Formatter<Part>.RegisterView(part => span(part.PartNumber));
+            Formatter<Part>.RegisterHtml(part => span(part.PartNumber));
 
-            Formatter<Widget>.RegisterView(w =>
+            Formatter<Widget>.RegisterHtml(w =>
                                                table(
                                                    tr(
                                                        th(nameof(Widget.Name))),
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void Nested_registered_string_formatters_are_HTML_encoded()
+        public void Nested_registered_text_formatters_are_HTML_encoded()
         {
             var widget = new Widget
             {
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
             Formatter<Part>.Register(part => $"<{part.PartNumber}>");
 
-            Formatter<Widget>.RegisterView(w => div(w.Parts));
+            Formatter<Widget>.RegisterHtml(w => div(w.Parts));
 
             string output = div(widget).ToString();
 
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         [Fact]
         public void When_a_view_is_registered_then_ToDisplayString_returns_the_HTML()
         {
-            Formatter<DateTime>.RegisterView(w => div("hello"));
+            Formatter<DateTime>.RegisterHtml(w => div("hello"));
 
             DateTime.Now.ToDisplayString()
                     .Should()

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
 {
@@ -621,7 +622,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void FormatAllTypes_allows_formatters_to_be_registered_on_fly_for_all_types()
+        public void FormatAllTypes_allows_text_formatters_to_be_registered_on_fly_for_all_types()
         {
             Formatter.AutoGenerateForType = t => true;
 
@@ -636,7 +637,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void FormatAllTypes_does_not_reregister_formatters_for_types_having_special_default_formatters()
+        public void AutoGenerateForType_does_not_reregister_formatters_for_types_having_special_default_formatters()
         {
             Formatter.AutoGenerateForType = t => true;
 
@@ -644,6 +645,49 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
             log.Should().Contain("hello");
             log.Should().NotContain("Length");
+        }
+
+        [Fact]
+        public void Formatters_for_specific_mime_types_can_be_registered_on_the_fly_when_new_types_are_encountered_by_the_formatter()
+        {
+            Formatter.OnRenderingUnregisteredType += (Type type, string mimeType, out ITypeFormatter formatter) =>
+            {
+                var htmlFormatter = new HtmlFormatter<Widget>((widget, writer) =>
+                {
+                    writer.Write(b(widget.Name));
+                });
+
+                formatter = htmlFormatter;
+            };
+
+            var value = new Widget
+            {
+                Name = "The Widget"
+            }.ToDisplayString();
+
+            value.Should().Be("<b>The Widget</b>");
+        }
+
+        [Fact]
+        public void ValueTuple_values_are_formatted()
+        {
+            var tuple = (123, "Hello", Enumerable.Range(1, 3));
+
+            var formatted = tuple.ToDisplayString();
+
+            formatted.Should().Be("( 123, Hello, [ 1, 2, 3 ] )");
+        }
+
+        [Fact(Skip = "WIP")]
+        public void Formatting_can_be_chosen_based_on_mime_type()
+        {
+            Formatter.Register(new PlainTextFormatter<DateTime>((time, writer) => writer.Write("plain")));
+            Formatter.Register(new HtmlFormatter<DateTime>((time, writer) => writer.Write("html")));
+
+            var now = DateTime.Now;
+
+            now.ToDisplayString(PlainTextFormatter.MimeType).Should().Be("plain");
+            now.ToDisplayString(HtmlFormatter.MimeType).Should().Be("html");
         }
     }
 }
