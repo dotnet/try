@@ -9,9 +9,9 @@ namespace Microsoft.DotNet.Interactive.Events
     public class ValueProduced : KernelEventBase
     {
         public ValueProduced(object value,
-            SubmitCode submitCode,
+            IKernelCommand command,
             bool isLastValue = false,
-            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(submitCode)
+            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(command)
         {
             Value = value;
             IsLastValue = isLastValue;

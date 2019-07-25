@@ -5,11 +5,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WorkspaceServer.Servers.Roslyn
 {
-    internal class TrackingStringWriter : StringWriter
+    internal class TrackingStringWriter : StringWriter, IObservable<string>
     {
         private class Region
         {
@@ -17,9 +22,42 @@ namespace WorkspaceServer.Servers.Roslyn
             public int Length { get; set; }
         }
 
-        readonly List<Region> _regions = new List<Region>();
-
+        private Subject<string> WriteEvents = new Subject<string>();
+        private readonly List<Region> _regions = new List<Region>();
         private bool _trackingWriteOperation;
+        private int _observerCount;
+
+        private readonly CompositeDisposable _disposable;
+        private readonly IObservable<string> _scheduleEvents;
+        public TrackingStringWriter()
+        {
+            var scheduler = new EventLoopScheduler(t =>
+           {
+               var thread = new Thread(t);
+               thread.Name = "Diego";
+               thread.IsBackground = true;
+               return thread;
+           });
+
+            _scheduleEvents = WriteEvents.ObserveOn(scheduler);
+
+
+            _disposable = new CompositeDisposable()
+            {
+                scheduler,
+                WriteEvents
+            };
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _disposable.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
 
         public bool WriteOccurred { get; set; }
 
@@ -51,6 +89,15 @@ namespace WorkspaceServer.Servers.Roslyn
 
             region.Length = sb.Length - region.Start;
             _trackingWriteOperation = false;
+            PumpStringIfObserved(sb, region);
+        }
+
+        private void PumpStringIfObserved(System.Text.StringBuilder sb, Region region)
+        {
+            if (_observerCount > 0)
+            {
+                WriteEvents.OnNext(sb.ToString(region.Start, region.Length));
+            }
         }
 
         private async Task TrackWriteOperationAsync(Func<Task> action)
@@ -74,7 +121,10 @@ namespace WorkspaceServer.Servers.Roslyn
             await action();
 
             region.Length = sb.Length - region.Start;
+
             _trackingWriteOperation = false;
+
+            PumpStringIfObserved(sb, region);
         }
 
         public override void Write(char[] buffer, int index, int count)
@@ -289,6 +339,17 @@ namespace WorkspaceServer.Servers.Roslyn
             {
                 yield return src.Substring(region.Start, region.Length);
             }
+        }
+
+        public IDisposable Subscribe(IObserver<string> observer)
+        {
+            Interlocked.Increment(ref _observerCount);
+            return new CompositeDisposable()
+            {
+                Disposable.Create(
+                () => Interlocked.Decrement(ref _observerCount)),
+                _scheduleEvents.Subscribe(observer)
+            };
         }
     }
 }

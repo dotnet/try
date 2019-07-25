@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -12,14 +13,15 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class CompleteRequestHandler: RequestHandlerBase<CompleteRequest>
+    public class CompleteRequestHandler : RequestHandlerBase<CompleteRequest>
     {
         private static readonly Regex _lastToken = new Regex(@"(?<lastToken>\S+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
 
-        public CompleteRequestHandler(IKernel kernel) : base(kernel)
+        public CompleteRequestHandler(IKernel kernel, IScheduler scheduler = null)
+            : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
-            
+
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -34,22 +36,18 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             InFlightRequests[command] = openRequest;
 
-            var kernelResult = await Kernel.SendAsync(command);
-            openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
-
+            await Kernel.SendAsync(command);
         }
 
-        void OnKernelResultEvent(IKernelEvent value)
+        protected override void OnKernelEvent(IKernelEvent @event)
         {
-            switch (value)
+            switch (@event)
             {
                 case CompletionRequestCompleted completionRequestCompleted:
                     OnCompletionRequestCompleted(completionRequestCompleted, InFlightRequests);
                     break;
                 case CompletionRequestReceived _:
                     break;
-                default:
-                    throw new NotSupportedException();
             }
         }
 
@@ -68,7 +66,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Context.ServerChannel.Send(completeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
             openRequest.Dispose();
-            
+
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

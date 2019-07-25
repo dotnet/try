@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     activity.Info("Received: {message}", message.ToJson());
 
                     var status = new RequestHandlerStatus(message.Header, new MessageSender(_ioPubSocket, _signatureValidator));
-                    
+
 
                     switch (message.Header.MessageType)
                     {
@@ -107,8 +107,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                             break;
                     }
-
-                  
                 }
             }
         }

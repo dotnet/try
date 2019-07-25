@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -17,7 +18,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private int _executionCount;
 
-        public ExecuteRequestHandler(IKernel kernel) : base(kernel)
+        public ExecuteRequestHandler(IKernel kernel, IScheduler scheduler = null)
+            : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
         }
 
@@ -36,8 +38,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             try
             {
-                var kernelResult = await Kernel.SendAsync(command);
-                openRequest.AddDisposable(kernelResult.KernelEvents.Subscribe(OnKernelResultEvent));
+                await Kernel.SendAsync(command);
             }
             catch (Exception e)
             {
@@ -84,9 +85,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return transient;
         }
 
-        void OnKernelResultEvent(IKernelEvent value)
+        protected override void OnKernelEvent(IKernelEvent @event)
         {
-            switch (value)
+            switch (@event)
             {
                 case ValueProduced valueProduced:
                     OnValueProduced(valueProduced, InFlightRequests);
@@ -101,8 +102,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case IncompleteCodeSubmissionReceived _:
                 case CompleteCodeSubmissionReceived _:
                     break;
-                default:
-                    throw new NotSupportedException();
             }
         }
 
