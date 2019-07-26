@@ -103,5 +103,14 @@ namespace WorkspaceServer
         }
 
         public override string ToString() => _rootDirectory.FullName;
+
+        public void CopyFileFromDirectory(IDirectoryAccessor directoryAccessor, string filename)
+        {
+            var file= directoryAccessor.GetAllFiles().FirstOrDefault(file => file.FileName == filename);
+            if(file!=null)
+            {
+                File.Copy(directoryAccessor.GetFullyQualifiedFilePath(file.FileName).FullName, GetFullyQualifiedPath( new RelativeFilePath(filename)).FullName);
+            }
+        }
     }
 }

@@ -58,5 +58,11 @@ namespace WorkspaceServer
 
         public static FileInfo GetFullyQualifiedFilePath(this IDirectoryAccessor directoryAccessor, RelativeFilePath relativePath) => 
             (FileInfo) directoryAccessor.GetFullyQualifiedPath(relativePath);
+
+        public static bool RootDirectoryExists(this IDirectoryAccessor directoryAccessor) =>
+            directoryAccessor.DirectoryExists(".");
+
+        public static void EnsureRootDirectoryExists(this IDirectoryAccessor directoryAccessor) =>
+            directoryAccessor.EnsureDirectoryExists(".");
     }
 }

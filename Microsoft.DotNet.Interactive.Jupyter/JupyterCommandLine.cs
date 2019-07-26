@@ -8,17 +8,20 @@ using System.CommandLine;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkspaceServer;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class JupyterCommandLine
     {
         private IConsole _console;
+        private readonly IDirectoryAccessor _kernelContentDirAccessor;
         private readonly (string key, string value)[] _environmentVariables;
 
         public JupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)
         {
             _console = console;
+            _kernelContentDirAccessor = new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\try.dot.net\github-try\try\Microsoft.DotNet.Interactive.Jupyter\ContentFiles")); ;
             _environmentVariables = environmentVariables;
         }
 
@@ -28,7 +31,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var dataPathsResult = JupyterPathInfo.GetDataPaths(jupyterPathsResult);
             if (string.IsNullOrEmpty(dataPathsResult.Error))
             {
-                Installkernel(dataPathsResult.Paths, _console);
+                //to do: find out what this path is
+
+                Installkernel(dataPathsResult.Paths.Select(path => new FileSystemDirectoryAccessor(path)), _console);
                 _console.Out.WriteLine(".NET kernel installation succeded");
                 return 0;
             }
@@ -39,34 +44,30 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void Installkernel(IEnumerable<DirectoryInfo> dataDirectories, IConsole console)
+        private void Installkernel(IEnumerable<IDirectoryAccessor> directoryAccessors, IConsole console)
         {
-            foreach (var directory in dataDirectories)
+            foreach (var directoryAccessor in directoryAccessors)
             {
-                if (directory.Exists)
+                var kernelsDirAccessor = directoryAccessor.GetDirectoryAccessorForRelativePath("kernels");
+                if (kernelsDirAccessor.RootDirectoryExists())
                 {
-                    var kernelDirectory = directory.Subdirectory("kernels");
-                    if (kernelDirectory.Exists)
-                    {
-                        var dotnetkernelDir = kernelDirectory.Subdirectory(".NET");
-                        if (!dotnetkernelDir.Exists)
-                        {
-                            dotnetkernelDir.Create();
-                        }
+                    var dotnetkernelDir = kernelsDirAccessor.GetDirectoryAccessorForRelativePath(".NET");
+                    dotnetkernelDir.EnsureRootDirectoryExists();
 
-                        console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.FullName}");
+                    console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
 
-                        //to do: find out what this path is
-                        var jupyterInstallContent = new DirectoryInfo(@"C:\Users\akagarw\try.dot.net\github-try\try\Microsoft.DotNet.Interactive.Jupyter\ContentFiles");
-
-                        // Copy the files into the kernels directory
-                        File.Copy(jupyterInstallContent.GetFileSystemInfos("kernel.json").First().FullName, Path.Combine(dotnetkernelDir.FullName, "kernel.json"), overwrite: true);
-                        File.Copy(jupyterInstallContent.GetFileSystemInfos("logo-32x32.png").First().FullName, Path.Combine(dotnetkernelDir.FullName, "logo-32x32.png"), overwrite: true);
-                        File.Copy(jupyterInstallContent.GetFileSystemInfos("logo-64x64.png").First().FullName, Path.Combine(dotnetkernelDir.FullName, "logo-64x64.png"), overwrite: true);
-                        console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.FullName}");
-                    }
+                    // Copy the files into the kernels directory
+                    File.Copy(GetFileWithName(_kernelContentDirAccessor, "kernel.json").FullName, dotnetkernelDir.GetFullyQualifiedFilePath("kernel.json").FullName, overwrite: true);
+                    File.Copy(GetFileWithName(_kernelContentDirAccessor, "logo-32x32.png").FullName, dotnetkernelDir.GetFullyQualifiedFilePath("logo-32x32.png").FullName, overwrite: true);
+                    File.Copy(GetFileWithName(_kernelContentDirAccessor, "logo-64x64.png").FullName, dotnetkernelDir.GetFullyQualifiedFilePath("logo-64x64.png").FullName, overwrite: true);
+                    console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
                 }
             }
+        }
+
+        private FileInfo GetFileWithName(IDirectoryAccessor directoryAccessor, string filename)
+        {
+            return new FileInfo(directoryAccessor.GetFullyQualifiedFilePath(filename).FullName);
         }
     }
 }
