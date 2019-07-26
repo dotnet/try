@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive.Jupyter\Microsoft.DotNet.Interactive.Jupyter.csproj" />
+    <ProjectReference Include="..\WorkspaceServer.Tests\WorkspaceServer.Tests.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
 </Project>

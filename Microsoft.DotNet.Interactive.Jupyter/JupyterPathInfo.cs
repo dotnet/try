@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using MLS.Agent.Tools;
 
-namespace MLS.Agent.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class JupyterPathInfo
     {
@@ -22,7 +22,7 @@ namespace MLS.Agent.Jupyter
                 else
                 {
                     return new JupyterDataPathResult($"Could not find the jupyter kernel installation directory." +
-                            $" Output of \"jupyter --paths\" is {string.Join('\n', jupyterPathResult.Output.ToArray())}");
+                            $" Output of \"jupyter --paths\" is {string.Join("\n", jupyterPathResult.Output.ToArray())}");
                 }
             }
             else

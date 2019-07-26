@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace MLS.Agent.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class JupyterDataPathResult
     {

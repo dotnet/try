@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Xunit;
-using System;
 using FluentAssertions;
 using MLS.Agent.Tools;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using MLS.Agent.Jupyter;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class JupyterPathInfoTests
     {
