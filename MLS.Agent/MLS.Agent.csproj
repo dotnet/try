@@ -61,8 +61,8 @@
     </PackageReference>
     <PackageReference Include="Markdig" Version="0.17.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview6.19307.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview6.19307.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview7.19365.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview7.19365.7" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.6.3" PrivateAssets="all" />
     <PackageReference Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">

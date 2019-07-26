@@ -16,9 +16,9 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: BlazorTemplateVersion
-    value: 3.0.0-preview6.19307.2
+    value: 3.0.0-preview7.19365.7
   - name: DotNetSdkVersion
-    value: 3.0.100-preview6-012264
+    value: 3.0.100-preview7-012821
   - name: NodeJSVersion
     value: '>=12'
   - name: TryDotNetPackagesPath
