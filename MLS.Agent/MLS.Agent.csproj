@@ -124,12 +124,8 @@
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
-    <ConvertToAbsolutePath Paths="$(MSBuildThisFileDirectory)">
-      <Output TaskParameter="AbsolutePaths" PropertyName="AbsoluteOutputPath" />
-    </ConvertToAbsolutePath>
-
     <PropertyGroup>
-      <webRootDir>$(AbsoluteOutputPath)wwwroot</webRootDir>
+      <webRootDir>$(MSBuildThisFileDirectory)wwwroot</webRootDir>
       <ClientInputDir>$(MSBuildThisFileDirectory)../Microsoft.DotNet.Try.Client</ClientInputDir>
       <ClientOutputDir>$(webRootDir)/client</ClientOutputDir>
       <ClientOutputFile>$(ClientOutputDir)/bundle.js</ClientOutputFile><!-- TODO: fix this? -->
@@ -148,7 +144,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildCss" Inputs="@(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
+  <Target Name="BuildCss" Inputs="@(CssInputFiles)" DependsOnTargets="GatherInputs" Outputs="$(CssOutputFile)" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
 
     <PropertyGroup>
       <_TryDotNetCssExists Condition="Exists('$(CssOutputFile)')">true</_TryDotNetCssExists>
@@ -161,13 +157,10 @@
 
     <ItemGroup>
       <FileWrites Include="$(CssOutputFile)" />
-
-      <!-- if the file already existed then it'll already be in the @(Content) item group -->
-      <Content Include="$(CssOutputFile)" Condition="'$(_TryDotNetCssExists)' != 'true'" />
     </ItemGroup>
   </Target>
 
-  <Target Name="BuildTryDotNetJs" Inputs="@(TryDotNetJsInput)" Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
+  <Target Name="BuildTryDotNetJs" Inputs="@(TryDotNetJsInput)" Outputs="$(TryDotNetJsFile);$(TryDotNetJsMap)" DependsOnTargets="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
     <PropertyGroup>
       <_TryDotNetMinJsExists Condition="Exists('$(TryDotNetJsFile)')">true</_TryDotNetMinJsExists>
     </PropertyGroup>
@@ -179,13 +172,10 @@
 
     <ItemGroup>
       <FileWrites Include="$(TryDotNetJsFile);$(TryDotNetJsMap)" />
-
-      <!-- if the file already existed then it'll already be in the @(Content) item group -->
-      <Content Include="$(TryDotNetJsFile);$(TryDotNetJsMap)" Condition="'$(_TryDotNetMinJsExists)' != 'true'" />
     </ItemGroup>
   </Target>
   
-  <Target Name="BuildClient" Inputs="@(ClientInputFiles)" Outputs="$(ClientOutputFile)" DependsOnTargets="GatherInputs" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
+  <Target Name="BuildClient" Inputs="@(ClientInputFiles)" Outputs="$(ClientOutputFile)" DependsOnTargets="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
 
     <PropertyGroup>
       <_TryDotNetClientExists Condition="Exists('$(ClientOutputFile)')">true</_TryDotNetClientExists>
@@ -197,9 +187,14 @@
 
     <ItemGroup>
       <FileWrites Include="$(ClientOutputDir)\**" />
+    </ItemGroup>
+  </Target>
 
-      <!-- if the file already existed then it'll already be in the @(Content) item group -->
-      <Content Include="$(ClientOutputDir)\**" Condition="'$(_TryDotNetClientExists)' != 'true'" />
+  <Target Name="AddBuiltContent" DependsOnTargets="BuildCss;BuildTryDotNetJs;BuildClient" BeforeTargets="BeforeBuild">
+    <ItemGroup>
+      <Content Include="$(MSBuildThisFileDirectory)wwwroot\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
   </Target>
 
