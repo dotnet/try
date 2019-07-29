@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await GetJupyterCommandLine(console, ("path", @"C:\Users\akagarw\AppData\Local\Continuum\anaconda3")).InvokeAsync();
 
             var dotnetDirectoryAccessor = GetExpectedKernelsDirectory().GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath(".NET"));
-            dotnetDirectoryAccessor.DirectoryExists(".").Should().BeTrue();
+            dotnetDirectoryAccessor.RootDirectoryExists().Should().BeTrue();
             dotnetDirectoryAccessor.GetAllFiles().Select(file => file.FileName).Should().BeEquivalentTo("kernel.json", "logo-32x32.png", "logo-64x64.png");
         }
     }
@@ -60,7 +60,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
         public override JupyterCommandLine GetJupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)
         {
-            
             return new JupyterCommandLine(console, environmentVariables);
         }
     }
@@ -69,7 +68,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
     {
         public override IDirectoryAccessor GetExpectedKernelsDirectory()
         {
-            throw new NotImplementedException();
+            return new InMemoryDirectoryAccessor()
+            {
+                ("kernels.json", ""),
+                ("logo-32x32.png", ""),
+                ("logo-64x64.png", "")
+            };
         }
 
         public override JupyterCommandLine GetJupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)

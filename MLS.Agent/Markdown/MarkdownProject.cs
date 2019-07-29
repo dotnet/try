@@ -71,6 +71,10 @@ namespace MLS.Agent.Markdown
             public void WriteAllText(RelativeFilePath path, string text)
             {
             }
+
+            public void CopyFileFromDirectory(IDirectoryAccessor directoryAccessor, string filename, bool overwrite)
+            {
+            }
         }
 
         internal IDirectoryAccessor DirectoryAccessor { get; }

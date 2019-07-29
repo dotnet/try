@@ -15,13 +15,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     public class JupyterCommandLine
     {
         private IConsole _console;
-        private readonly IDirectoryAccessor _kernelContentDirAccessor;
+        private readonly IDirectoryAccessor _kernelContentDir;
         private readonly (string key, string value)[] _environmentVariables;
 
         public JupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)
         {
             _console = console;
-            _kernelContentDirAccessor = new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\try.dot.net\github-try\try\Microsoft.DotNet.Interactive.Jupyter\ContentFiles")); ;
+            _kernelContentDir = new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\try.dot.net\github-try\try\Microsoft.DotNet.Interactive.Jupyter\ContentFiles")); ;
             _environmentVariables = environmentVariables;
         }
 
@@ -57,9 +57,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
 
                     // Copy the files into the kernels directory
-                    File.Copy(GetFileWithName(_kernelContentDirAccessor, "kernel.json").FullName, dotnetkernelDir.GetFullyQualifiedFilePath("kernel.json").FullName, overwrite: true);
-                    File.Copy(GetFileWithName(_kernelContentDirAccessor, "logo-32x32.png").FullName, dotnetkernelDir.GetFullyQualifiedFilePath("logo-32x32.png").FullName, overwrite: true);
-                    File.Copy(GetFileWithName(_kernelContentDirAccessor, "logo-64x64.png").FullName, dotnetkernelDir.GetFullyQualifiedFilePath("logo-64x64.png").FullName, overwrite: true);
+                    dotnetkernelDir.CopyFileFromDirectory(_kernelContentDir, "kernel.json", overwrite: true);
+                    dotnetkernelDir.CopyFileFromDirectory(_kernelContentDir, "logo-32x32.png", overwrite: true);
+                    dotnetkernelDir.CopyFileFromDirectory(_kernelContentDir, "logo-64x64.png", overwrite: true);
                     console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
                 }
             }

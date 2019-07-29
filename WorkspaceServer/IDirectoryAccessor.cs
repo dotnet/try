@@ -29,6 +29,6 @@ namespace WorkspaceServer
 
         IDirectoryAccessor GetDirectoryAccessorForRelativePath(RelativeDirectoryPath path);
 
-        void CopyFileFromDirectory(IDirectoryAccessor directoryAccessor, string filename);
+        void CopyFileFromDirectory(IDirectoryAccessor directoryAccessor, string filename, bool overwrite);
     }
 }

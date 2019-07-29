@@ -121,6 +121,9 @@
     <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
       <LogicalName>demo.zip</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\logo-32x32.png" />
+    <EmbeddedResource Include="..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\logo-64x64.png" />
+    <EmbeddedResource Include="..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\kernel.json" />
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">

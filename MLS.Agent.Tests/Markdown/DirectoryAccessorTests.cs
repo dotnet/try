@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -257,6 +258,18 @@ namespace MLS.Agent.Tests.Markdown
             var subdirectory = directory.GetDirectoryAccessorFor(fullyQualifiedSubdirectory);
 
             subdirectory.FileExists("Tutorial.md").Should().BeTrue();
+        }
+
+
+        [Fact]
+        public void It_can_copy_files()
+        {
+            var targetDirectory = CreateDirectory();
+            var sourceDirectory = GetDirectory(TestAssets.SampleConsole);
+
+            targetDirectory.CopyFileFromDirectory(sourceDirectory, "Program.cs", true);
+            targetDirectory.FileExists("Program.cs").Should().BeTrue();
+            targetDirectory.ReadAllText("Program.cs").Should().Contain("using System");
         }
     }
 

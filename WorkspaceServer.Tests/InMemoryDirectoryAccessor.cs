@@ -177,6 +177,16 @@ namespace WorkspaceServer.Tests
 
         public override string ToString() => this.GetFullyQualifiedRoot().FullName;
 
+        public void CopyFileFromDirectory(IDirectoryAccessor directoryAccessor, string filename, bool overwrite)
+        {
+            var file = directoryAccessor.GetAllFiles().FirstOrDefault(file => file.FileName == filename);
+            if (file != null)
+            {
+                var content = directoryAccessor.ReadAllText(file);
+                WriteAllText(file, content);
+            }
+        }
+
         private class FileSystemInfoComparer : IEqualityComparer<FileSystemInfo>
         {
             public static FileSystemInfoComparer Instance { get; } = new FileSystemInfoComparer();
