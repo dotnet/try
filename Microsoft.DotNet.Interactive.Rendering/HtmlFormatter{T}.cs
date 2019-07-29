@@ -14,9 +14,19 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     public class HtmlFormatter<T> : TypeFormatter<T>
     {
-        public HtmlFormatter(Action<T, TextWriter> format) : base("text/html", format)
+        private readonly Action<T, TextWriter> _format;
+
+        public HtmlFormatter(Action<T, TextWriter> format)
         {
+            _format = format;
         }
+
+        public override void Format(T instance, TextWriter writer)
+        {
+            _format(instance, writer);
+        }
+
+        public override string MimeType => "text/html";
 
         public static HtmlFormatter<T> Create(bool includeInternals = false)
         {

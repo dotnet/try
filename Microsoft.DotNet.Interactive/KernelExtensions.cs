@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Rendering;
 using Pocket;
 
 namespace Microsoft.DotNet.Interactive

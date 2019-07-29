@@ -6,29 +6,13 @@ using System.IO;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    public class TypeFormatter<T> : ITypeFormatter<T>
+    public abstract class TypeFormatter<T> : ITypeFormatter<T>
     {
-        public TypeFormatter(string mimeType, Action<T, TextWriter> format)
-        {
-            if (string.IsNullOrWhiteSpace(mimeType))
-            {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(mimeType));
-            }
-
-            MimeType = mimeType;
-            Format = format ?? throw new ArgumentNullException(nameof(format));
-        }
+        public abstract void Format(T instance, TextWriter writer);
 
         public Type Type => typeof(T);
 
-        void ITypeFormatter<T>.Format(T instance, TextWriter writer)
-        {
-            Format(instance, writer);
-        }
-
-        public string MimeType { get; }
-
-        public Action<T, TextWriter> Format { get; }
+        public abstract string MimeType { get; }
 
         void ITypeFormatter.Format(object instance, TextWriter writer)
         {

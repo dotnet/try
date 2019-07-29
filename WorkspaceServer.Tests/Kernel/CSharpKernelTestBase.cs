@@ -23,7 +23,8 @@ namespace WorkspaceServer.Tests.Kernel
         protected CSharpKernel CreateKernel()
         {
             var kernel = new CSharpKernel()
-                .LogEventsToPocketLogger();
+                         .UseDefaultRendering()
+                         .LogEventsToPocketLogger();
 
             DisposeAfterTest(
                 kernel.KernelEvents.Timestamp().Subscribe(KernelEvents.Add));

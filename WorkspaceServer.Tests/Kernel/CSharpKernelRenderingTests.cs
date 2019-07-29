@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,34 +21,17 @@ namespace WorkspaceServer.Tests.Kernel
         {
         }
 
-        [Fact]
-        public async Task HTML_rendered_using_PocketView_has_the_mime_type_set_correctly()
+        [Theory]
+        [InlineData("b(123) // PocketView", "")]
+        [InlineData("new[] { 1, 2, 3, 4 } // sequence", "<table>")]
+        [InlineData("new[] { new { a = 123 }, new { a = 456 } } // sequence of anonymous objects", "<table>")]
+        public async Task HTML_rendered_using_PocketView_has_the_mime_type_set_correctly(
+            string submission,
+            string expectedContent)
         {
-            var kernel = new CSharpKernel()
-                .UseDefaultRendering();
+            var kernel = CreateKernel();
 
-            var result = await kernel.SendAsync(new SubmitCode("b(123)"));
-
-            var valueProduced = await result
-                                      .KernelEvents
-                                      .OfType<ValueProduced>()
-                                      .Timeout(5.Seconds())
-                                      .FirstAsync();
-
-            valueProduced
-                .FormattedValues
-                .Should()
-                .BeEquivalentTo(new FormattedValue("text/html", "<b>123</b>"));
-        }
-
-        [Fact]
-        public async Task HTML_formatting_is_the_default_for_sequences_of_anonymous_objects()
-        {
-            var kernel = new CSharpKernel()
-                .UseDefaultRendering();
-
-            var result = await kernel.SendAsync(new SubmitCode(@"
- new[] { new { a = 123 }, new { a = 456 } }"));
+            var result = await kernel.SendAsync(new SubmitCode(submission));
 
             var valueProduced = await result
                                       .KernelEvents
@@ -62,7 +44,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .Should()
                 .ContainSingle(v =>
                                    v.MimeType == "text/html" &&
-                                   v.Value.ToString().StartsWith("<table>"));
+                                   v.Value.ToString().Contains(expectedContent));
         }
     }
 }

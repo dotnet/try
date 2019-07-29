@@ -10,25 +10,24 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Html;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
     public delegate void OnRenderingUnregisteredType(
-        Type type, 
-        string mimeType, 
-        out ITypeFormatter formatter );
+        Type type,
+        string mimeType,
+        out ITypeFormatter formatter);
 
-    /// <summary>
-    /// Provides methods for formatting objects into log strings.
-    /// </summary>
     public static class Formatter
     {
-        private static Func<Type, bool> _autoGenerateForType = t => false;
         private static int _defaultListExpansionLimit;
         private static int _recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
-        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters = new ConcurrentDictionary<Type, Action<object, TextWriter, string>>();
+        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters =
+            new ConcurrentDictionary<Type, Action<object, TextWriter, string>>();
+
         private static readonly ConcurrentDictionary<Type, string> _mimeTypesByType = new ConcurrentDictionary<Type, string>();
 
         public static event OnRenderingUnregisteredType OnRenderingUnregisteredType;
@@ -105,32 +104,19 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             Clearing?.Invoke(null, EventArgs.Empty);
 
-            AutoGenerateForType = t => false;
             ListExpansionLimit = 10;
             RecursionLimit = 6;
             NullString = "<null>";
 
             _mimeTypesByType.Clear();
-            RegisterDefaults();
-        }
-
-        /// <summary>
-        /// Gets or sets a delegate that is checked when a type is being formatted that not previously been formatted and has no custom formatting rules set. If this delegate returns true, then <see cref="Formatter{T}.RegisterForAllMembers" /> is called for that type.
-        /// </summary>
-        /// <value>
-        /// The type being formatted.
-        /// </value>
-        /// <exception cref="System.ArgumentNullException">value</exception>
-        public static Func<Type, bool> AutoGenerateForType
-        {
-            get => _autoGenerateForType;
-            set => _autoGenerateForType = value ?? throw new ArgumentNullException(nameof(value));
+            ConfigureDefaultFormattersForSpecialTypes();
         }
 
         public static string ToDisplayString(
             this object obj, 
             string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
+            // TODO: (ToDisplayString) rename
             if (mimeType == null)
             {
                 throw new ArgumentNullException(nameof(mimeType));
@@ -141,12 +127,21 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return writer.ToString();
         }
 
-        /// <summary>
-        /// Writes a formatted representation of the object to the specified writer.
-        /// </summary>
-        /// <typeparam name="T">The type of the object being written.</typeparam>
-        /// <param name="obj">The object to write.</param>
-        /// <param name="writer">The writer.</param>
+        public static string ToDisplayString(
+            this object obj,
+            ITypeFormatter formatter)
+        {
+            // TODO: (ToDisplayString) rename
+            if (formatter == null)
+            {
+                throw new ArgumentNullException(nameof(formatter));
+            }
+
+            var writer = CreateWriter();
+            formatter.Format(obj, writer);
+            return writer.ToString();
+        }
+
         public static void FormatTo<T>(
             this T obj, 
             TextWriter writer,
@@ -169,6 +164,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             Formatter<T>.FormatTo(obj, writer);
         }
+
 
         internal static Action<object, TextWriter, string> GetGenericFormatterMethod(this Type type)
         {
@@ -260,9 +256,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             PlainTextFormatter.WriteEndSequence(writer);
         }
 
-        /// <summary>
-        ///   Registers a formatter to be used when formatting instances of a specified type.
-        /// </summary>
         public static void Register(
             Type type,
             Action<object, TextWriter> formatter,
@@ -283,7 +276,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public static void Register(ITypeFormatter formatter)
         {
-            var formatterType = typeof(TypeFormatter<>).MakeGenericType(formatter.Type);
+            var formatterType = typeof(ITypeFormatter<>).MakeGenericType(formatter.Type);
 
             var genericRegisterMethod = typeof(Formatter<>)
                                         .MakeGenericType(formatter.Type)
@@ -297,19 +290,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             genericRegisterMethod.Invoke(null, new object[] { formatter });
         }
 
-        /// <summary>
-        ///   Registers a formatter to be used when formatting instances of a specified type.
-        /// </summary>
-        public static void RegisterForAllMembers(Type type, bool includeInternals = false)
-        {
-            var genericRegisterMethod = typeof(Formatter<>)
-                                        .MakeGenericType(type)
-                                        .GetMethod(nameof(RegisterForAllMembers));
-
-            genericRegisterMethod.Invoke(null, new object[] { includeInternals });
-        }
-
-        private static void RegisterDefaults()
+        private static void ConfigureDefaultFormattersForSpecialTypes()
         {
             // common primitive types
             Formatter<bool>.Default = (value, writer) => writer.Write(value);
@@ -399,6 +380,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
             TryRegisterDefault("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
 
             Formatter<PocketView>.RegisterHtml(view => view);
+            Formatter<HtmlString>.RegisterHtml(view => view);
+            Formatter<JsonString>.RegisterHtml(view => view);
         }
 
         private static void TryRegisterDefault(string typeName, Action<object, TextWriter> write)

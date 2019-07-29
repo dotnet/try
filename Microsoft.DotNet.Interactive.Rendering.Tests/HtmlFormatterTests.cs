@@ -12,12 +12,19 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 {
     public class HtmlFormatterTests
     {
+        [Fact]
+        public void Non_generic_Create_creates_generic_formatter()
+        {
+            HtmlFormatter.Create(typeof(Widget))
+                         .Should()
+                         .BeOfType<HtmlFormatter<Widget>>();
+        }
+
         public class Objects
         {
             public Objects()
             {
                 Formatter.ResetToDefault();
-                Formatter.AutoGenerateForType = type => true;
             }
 
             [Fact]

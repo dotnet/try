@@ -36,14 +36,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         internal readonly IDictionary<string, Func<T, object>> _instanceGetters;
 
-        /// <summary>
-        ///   Gets the default Mapper instance for type <typeparamref name = "T" />, which maps based on case-insensitive matching of KeyValuePair keys to type <typeparamref name = "T" />'s property names.
-        /// </summary>
-        public static Destructurer<T> Default { get; } = new Destructurer<T>();
-
-        /// <summary>
-        ///   Initializes a new instance of the <see cref = "MapTo{T}.Mappings{TFrom}.MapFromProperty{TMemberValue}" /> class.
-        /// </summary>
         public Destructurer()
         {
             EnsureInitialized();

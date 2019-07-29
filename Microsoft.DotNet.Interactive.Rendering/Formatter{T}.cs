@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
@@ -19,15 +17,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
     /// <typeparam name="T">The type for which formatting is provided.</typeparam>
     public static class Formatter<T>
     {
-        private static readonly bool _typeIsAnonymous = typeof(T).IsAnonymous();
-        private static readonly bool _typeIsException = typeof(Exception).IsAssignableFrom(typeof(T));
-        private static readonly bool _typeIsValueTuple = typeof(T).IsValueTuple();
-        private static readonly bool _shouldWriteHeader = !_typeIsAnonymous;
+        internal static readonly bool TypeIsAnonymous = typeof(T).IsAnonymous();
+        internal static readonly bool TypeIsException = typeof(Exception).IsAssignableFrom(typeof(T));
+        internal static readonly bool TypeIsValueTuple = typeof(T).IsValueTuple();
 
         private static int? _listExpansionLimit;
-        private static readonly ConcurrentDictionary<string, ITypeFormatter<T>> _formattersByMimeType = new ConcurrentDictionary<string, ITypeFormatter<T>>();
 
-        // FIX: (Formatter) get rid of Custom
+        // FIX: (Formatter.Custom) get rid of this
         private static Action<T, TextWriter> Custom;
 
         /// <summary>
@@ -35,33 +31,35 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// </summary>
         static Formatter()
         {
-            Formatter.Clearing += (o, e) =>
+            void Initialize()
             {
+                Default = PlainTextFormatter<T>.Default.Format;
                 Custom = null;
-                Default = WriteDefault;
-                _formattersByMimeType.Clear();
-            };
+            }
+
+            Initialize();
+
+            Formatter.Clearing += (o, e) => Initialize();
         }
 
         /// <summary>
         /// Gets or sets the default formatter for type <typeparamref name="T" />.
         /// </summary>
-        public static Action<T, TextWriter> Default { get; set; } = WriteDefault;
+        // FIX: (Formatter.Default) get rid of this
+        public static Action<T, TextWriter> Default { get; set; }
 
         /// <summary>
         /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T" />.
         /// </summary>
         /// <param name="includeInternals">if set to <c>true</c> include internal and private members.</param>
-        public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false) =>
-            CreateFormatDelegate(typeof(T).GetAllMembers(includeInternals).ToArray());
+        public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false) => PlainTextFormatter.CreateFormatDelegate<T>(typeof(T).GetAllMembers(includeInternals).ToArray());
 
         /// <summary>
         /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T"/>.
         /// </summary>
         /// <param name="members">Expressions specifying the members to include in formatting.</param>
         /// <returns></returns>
-        public static Action<T, TextWriter> GenerateForMembers(params Expression<Func<T, object>>[] members) =>
-            CreateFormatDelegate(typeof(T).GetMembers(members).ToArray());
+        public static Action<T, TextWriter> GenerateForMembers(params Expression<Func<T, object>>[] members) => PlainTextFormatter.CreateFormatDelegate<T>(typeof(T).GetMembers(members).ToArray());
 
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
@@ -80,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 // special treatment is needed since typeof(Type) == System.RuntimeType, which is not public
                 // ReSharper disable once PossibleMistakenCallToGetType.2
                 Formatter.Register(
-                    typeof(Type).GetType(), 
+                    typeof(Type).GetType(),
                     (o, writer) => formatter((T) o, writer),
                     mimeType);
             }
@@ -100,10 +98,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             if (formatter.MimeType == PlainTextFormatter.MimeType)
             {
                 Custom = formatter.Format;
-            }
-            else
-            {
-                _formattersByMimeType[formatter.MimeType] = formatter;
             }
         }
 
@@ -130,15 +124,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
         /// </summary>
-        public static void RegisterForAllMembers(bool includeInternals = false) =>
-            Register(GenerateForAllMembers(includeInternals));
-
-        /// <summary>
-        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
-        /// </summary>
         public static void RegisterForMembers(params Expression<Func<T, object>>[] members)
         {
-            if (members == null || !members.Any())
+            if (members == null)
+            {
+                throw new ArgumentNullException(nameof(members));
+            }
+
+            if (!members.Any())
             {
                 Register(GenerateForAllMembers());
             }
@@ -171,15 +164,15 @@ namespace Microsoft.DotNet.Interactive.Rendering
             {
                 if (Custom == null)
                 {
-                    if (_typeIsAnonymous || _typeIsException)
+                    if (TypeIsAnonymous || TypeIsException)
                     {
                         Custom = GenerateForAllMembers();
                     }
-                    else if (_typeIsValueTuple)
+                    else if (TypeIsValueTuple)
                     {
                         Custom = GenerateForAllMembers();
                     }
-                    else if (Default == WriteDefault)
+                    else if (IsDefault)
                     {
                         Formatter.RaiseOnRenderingUnregisteredType(typeof(T), mimeType, out var formatter);
 
@@ -187,7 +180,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                         {
                             Custom = formatterT.Format;
                         }
-                        else if (Formatter.AutoGenerateForType(typeof(T)))
+                        else 
                         {
                             if (!typeof(IEnumerable).IsAssignableFrom(typeof(T)))
                             {
@@ -205,117 +198,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
         }
 
-        private static Action<T, TextWriter> CreateFormatDelegate(MemberInfo[] forMembers)
-        {
-            var accessors = forMembers.GetMemberAccessors<T>();
-
-            if (_typeIsValueTuple)
-            {
-                return FormatValueTuple;
-            }
-
-            if (_typeIsException)
-            {
-                // filter out internal values from the Data dictionary, since they're intended to be surfaced in other ways
-                var dataAccessor = accessors.SingleOrDefault(a => a.Member.Name == "Data");
-                if (dataAccessor != null)
-                {
-                    var originalGetData = dataAccessor.GetValue;
-                    dataAccessor.GetValue = e => ((IDictionary) originalGetData(e))
-                                                 .Cast<DictionaryEntry>()
-                                                 .ToDictionary(de => de.Key, de => de.Value);
-                }
-
-                // replace the default stack trace with the full stack trace when present
-                var stackTraceAccessor = accessors.SingleOrDefault(a => a.Member.Name == "StackTrace");
-                if (stackTraceAccessor != null)
-                {
-                    stackTraceAccessor.GetValue = e =>
-                    {
-                        var ex = e as Exception;
-
-                        return ex.StackTrace;
-                    };
-                }
-            }
-
-            return FormatObject;
-
-            void FormatObject(T target, TextWriter writer)
-            {
-                Formatter.PlainTextFormatter.WriteStartObject(writer);
-
-                if (_shouldWriteHeader)
-                {
-                    Formatter<Type>.FormatTo(typeof(T), writer);
-                    Formatter.PlainTextFormatter.WriteEndHeader(writer);
-                }
-
-                for (var i = 0; i < accessors.Length; i++)
-                {
-                    try
-                    {
-                        var accessor = accessors[i];
-
-                        if (accessor.Ignore)
-                        {
-                            continue;
-                        }
-
-                        var value = accessor.GetValue(target);
-
-                        Formatter.PlainTextFormatter.WriteStartProperty(writer);
-                        writer.Write(accessor.Member.Name);
-                        Formatter.PlainTextFormatter.WriteNameValueDelimiter(writer);
-                        value.FormatTo(writer);
-                        Formatter.PlainTextFormatter.WriteEndProperty(writer);
-
-                        if (i < accessors.Length - 1)
-                        {
-                            Formatter.PlainTextFormatter.WritePropertyDelimiter(writer);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-
-                Formatter.PlainTextFormatter.WriteEndObject(writer);
-            }
-
-            void FormatValueTuple(T target, TextWriter writer)
-            {
-                Formatter.PlainTextFormatter.WriteStartTuple(writer);
-
-                for (var i = 0; i < accessors.Length; i++)
-                {
-                    try
-                    {
-                        var accessor = accessors[i];
-
-                        if (accessor.Ignore)
-                        {
-                            continue;
-                        }
-
-                        var value = accessor.GetValue(target);
-
-                        value.FormatTo(writer);
-                        Formatter.PlainTextFormatter.WriteEndProperty(writer);
-
-                        if (i < accessors.Length - 1)
-                        {
-                            Formatter.PlainTextFormatter.WritePropertyDelimiter(writer);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-
-                Formatter.PlainTextFormatter.WriteEndTuple(writer);
-            }
-        }
+        internal static bool IsDefault => Default == PlainTextFormatter<T>.Default.Format;
 
         /// <summary>
         ///   Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence of <typeparamref name="T" />.
@@ -325,24 +208,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             get => _listExpansionLimit ?? Formatter.ListExpansionLimit;
             set => _listExpansionLimit = value;
-        }
-
-        private static void WriteDefault(T obj, TextWriter writer)
-        {
-            if (obj is string)
-            {
-                writer.Write(obj);
-                return;
-            }
-
-            if (obj is IEnumerable enumerable)
-            {
-                Formatter.Join(enumerable, writer, _listExpansionLimit);
-            }
-            else
-            {
-                writer.Write(obj.ToString());
-            }
         }
     }
 }
