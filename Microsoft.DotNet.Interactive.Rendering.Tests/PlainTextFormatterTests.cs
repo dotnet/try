@@ -36,12 +36,8 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void RegisterForMembers_creates_a_function_that_emits_the_specified_property_names_and_values_for_a_specific_type()
+            public void CreateForMembers_creates_a_formatter_that_emits_the_specified_property_names_and_values_for_a_specific_type()
             {
-                Formatter<SomethingWithLotsOfProperties>.RegisterForMembers(
-                    o => o.DateProperty,
-                    o => o.StringProperty);
-
                 var formatter = PlainTextFormatter<SomethingWithLotsOfProperties>.CreateForMembers(
                     o => o.DateProperty,
                     o => o.StringProperty);

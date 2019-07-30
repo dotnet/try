@@ -326,11 +326,13 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             value.Should().Be("<b>The Widget</b>");
         }
 
-        [Fact(Skip = "wip")]
+        [Fact]
         public void Formatting_can_be_chosen_based_on_mime_type()
         {
-            Formatter.Register(new PlainTextFormatter<DateTime>((time, writer) => writer.Write("plain")));
-            Formatter.Register(new HtmlFormatter<DateTime>((time, writer) => writer.Write("html")));
+            Formatter.Register(
+                new PlainTextFormatter<DateTime>((time, writer) => writer.Write("plain")));
+            Formatter.Register(
+                new HtmlFormatter<DateTime>((time, writer) => writer.Write("html")));
 
             var now = DateTime.Now;
 

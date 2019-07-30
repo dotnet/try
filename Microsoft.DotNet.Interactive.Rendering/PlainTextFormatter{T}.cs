@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
             else
             {
-                return new PlainTextFormatter<T>(Formatter<T>.Default);
+                return new PlainTextFormatter<T>(Formatter<T>.FormatPlainTextDefault);
             }
         }
 

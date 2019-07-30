@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -163,13 +162,19 @@ namespace WorkspaceServer.Kernel
                 {
                     if (HasReturnValue)
                     {
-                        var writer = new StringWriter();
-                        _scriptState.ReturnValue.FormatTo(writer);
+                        var formatted = _scriptState.ReturnValue.ToDisplayString();
+
+                        var mimeType = Formatter.MimeTypeFor(_scriptState.ReturnValue?.GetType() ?? typeof(object));
+
+                        if (formatted.TrimStart().StartsWith("<"))
+                        {
+                            // FIX: (HandleSubmitCode) 
+                            mimeType = "text/html";
+                        }
 
                         var formattedValues = new List<FormattedValue>
                         {
-                            new FormattedValue(
-                                Formatter.MimeTypeFor(_scriptState.ReturnValue?.GetType() ?? typeof(object)), writer.ToString())
+                            new FormattedValue(mimeType, formatted)
                         };
 
                         context.OnNext(

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Reactive.Linq;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -22,10 +21,10 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
-        [InlineData("b(123) // PocketView", "")]
+        [InlineData("b(123) // PocketView", "<b>123</b>")]
         [InlineData("new[] { 1, 2, 3, 4 } // sequence", "<table>")]
         [InlineData("new[] { new { a = 123 }, new { a = 456 } } // sequence of anonymous objects", "<table>")]
-        public async Task HTML_rendered_using_PocketView_has_the_mime_type_set_correctly(
+        public async Task Default_rendering_is_HTML(
             string submission,
             string expectedContent)
         {
@@ -43,7 +42,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .FormattedValues
                 .Should()
                 .ContainSingle(v =>
-                                   v.MimeType == "text/html" &&
+                                   v.MimeType == "text/html" && 
                                    v.Value.ToString().Contains(expectedContent));
         }
     }

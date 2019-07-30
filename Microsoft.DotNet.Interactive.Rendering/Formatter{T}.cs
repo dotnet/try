@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
@@ -33,7 +32,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             void Initialize()
             {
-                Default = PlainTextFormatter<T>.Default.Format;
+                FormatPlainTextDefault = PlainTextFormatter<T>.Default.Format;
                 Custom = null;
             }
 
@@ -46,20 +45,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// Gets or sets the default formatter for type <typeparamref name="T" />.
         /// </summary>
         // FIX: (Formatter.Default) get rid of this
-        public static Action<T, TextWriter> Default { get; set; }
+        internal static Action<T, TextWriter> FormatPlainTextDefault { get; set; }
 
         /// <summary>
         /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T" />.
         /// </summary>
         /// <param name="includeInternals">if set to <c>true</c> include internal and private members.</param>
         public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false) => PlainTextFormatter.CreateFormatDelegate<T>(typeof(T).GetAllMembers(includeInternals).ToArray());
-
-        /// <summary>
-        /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T"/>.
-        /// </summary>
-        /// <param name="members">Expressions specifying the members to include in formatting.</param>
-        /// <returns></returns>
-        public static Action<T, TextWriter> GenerateForMembers(params Expression<Func<T, object>>[] members) => PlainTextFormatter.CreateFormatDelegate<T>(typeof(T).GetMembers(members).ToArray());
 
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
@@ -122,26 +114,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
         }
 
         /// <summary>
-        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
-        /// </summary>
-        public static void RegisterForMembers(params Expression<Func<T, object>>[] members)
-        {
-            if (members == null)
-            {
-                throw new ArgumentNullException(nameof(members));
-            }
-
-            if (!members.Any())
-            {
-                Register(GenerateForAllMembers());
-            }
-            else
-            {
-                Register(GenerateForMembers(members));
-            }
-        }
-
-        /// <summary>
         /// Formats an object and writes it to a writer.
         /// </summary>
         /// <param name="obj">The obj.</param>
@@ -190,15 +162,15 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     }
                 }
 
-                (Custom ?? Default)(obj, writer);
+                (Custom ?? FormatPlainTextDefault)(obj, writer);
             }
             else
             {
-                Default(obj, writer);
+                FormatPlainTextDefault(obj, writer);
             }
         }
 
-        internal static bool IsDefault => Default == PlainTextFormatter<T>.Default.Format;
+        internal static bool IsDefault => FormatPlainTextDefault == PlainTextFormatter<T>.Default.Format;
 
         /// <summary>
         ///   Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence of <typeparamref name="T" />.

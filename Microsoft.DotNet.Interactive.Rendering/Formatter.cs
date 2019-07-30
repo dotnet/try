@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             NullString = "<null>";
 
             _mimeTypesByType.Clear();
-            ConfigureDefaultFormattersForSpecialTypes();
+            ConfigureDefaultPlainTextFormattersForSpecialTypes();
         }
 
         public static string ToDisplayString(
@@ -290,38 +290,38 @@ namespace Microsoft.DotNet.Interactive.Rendering
             genericRegisterMethod.Invoke(null, new object[] { formatter });
         }
 
-        private static void ConfigureDefaultFormattersForSpecialTypes()
+        private static void ConfigureDefaultPlainTextFormattersForSpecialTypes()
         {
             // common primitive types
-            Formatter<bool>.Default = (value, writer) => writer.Write(value);
-            Formatter<byte>.Default = (value, writer) => writer.Write(value);
-            Formatter<short>.Default = (value, writer) => writer.Write(value);
-            Formatter<int>.Default = (value, writer) => writer.Write(value);
-            Formatter<long>.Default = (value, writer) => writer.Write(value);
-            Formatter<Guid>.Default = (value, writer) => writer.Write(value);
-            Formatter<decimal>.Default = (value, writer) => writer.Write(value);
-            Formatter<float>.Default = (value, writer) => writer.Write(value);
-            Formatter<double>.Default = (value, writer) => writer.Write(value);
+            Formatter<bool>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<byte>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<short>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<int>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<long>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<Guid>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<decimal>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<float>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
+            Formatter<double>.FormatPlainTextDefault = (value, writer) => writer.Write(value);
 
-            Formatter<DateTime>.Default = (value, writer) => writer.Write(value.ToString("u"));
-            Formatter<DateTimeOffset>.Default = (value, writer) => writer.Write(value.ToString("u"));
+            Formatter<DateTime>.FormatPlainTextDefault = (value, writer) => writer.Write(value.ToString("u"));
+            Formatter<DateTimeOffset>.FormatPlainTextDefault = (value, writer) => writer.Write(value.ToString("u"));
 
             // common complex types
-            Formatter<KeyValuePair<string, object>>.Default = (pair, writer) =>
+            Formatter<KeyValuePair<string, object>>.FormatPlainTextDefault = (pair, writer) =>
             {
                 writer.Write(pair.Key);
                 PlainTextFormatter.WriteNameValueDelimiter(writer);
                 pair.Value.FormatTo(writer);
             };
 
-            Formatter<DictionaryEntry>.Default = (pair, writer) =>
+            Formatter<DictionaryEntry>.FormatPlainTextDefault = (pair, writer) =>
             {
                 writer.Write(pair.Key);
                 PlainTextFormatter.WriteNameValueDelimiter(writer);
                 pair.Value.FormatTo(writer);
             };
 
-            Formatter<ExpandoObject>.Default = (expando, writer) =>
+            Formatter<ExpandoObject>.FormatPlainTextDefault = (expando, writer) =>
             {
                 PlainTextFormatter.WriteStartObject(writer);
                 var pairs = expando.ToArray();
@@ -341,7 +341,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 PlainTextFormatter.WriteEndObject(writer);
             };
 
-            Formatter<Type>.Default = (type, writer) =>
+            Formatter<Type>.FormatPlainTextDefault = (type, writer) =>
             {
                 var typeName = type.Name;
                 if (typeName.Contains("`") && !type.IsAnonymous())
@@ -352,7 +352,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
                     for (var i = 0; i < genericArguments.Length; i++)
                     {
-                        Formatter<Type>.Default(genericArguments[i], writer);
+                        Formatter<Type>.FormatPlainTextDefault(genericArguments[i], writer);
                         if (i < genericArguments.Length - 1)
                         {
                             writer.Write(",");
@@ -370,10 +370,10 @@ namespace Microsoft.DotNet.Interactive.Rendering
             // an additional formatter is needed since typeof(Type) == System.RuntimeType, which is not public
             // ReSharper disable once PossibleMistakenCallToGetType.2
             Register(typeof(Type).GetType(),
-                     (obj, writer) => Formatter<Type>.Default((Type) obj, writer));
+                     (obj, writer) => Formatter<Type>.FormatPlainTextDefault((Type) obj, writer));
 
             // supply a formatter for String so that it will not be iterated
-            Formatter<string>.Default = (s, writer) => writer.Write(s);
+            Formatter<string>.FormatPlainTextDefault = (s, writer) => writer.Write(s);
 
             // Newtonsoft.Json types -- these implement IEnumerable and their default output is not useful, so use their default ToString
             TryRegisterDefault("Newtonsoft.Json.Linq.JArray, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
