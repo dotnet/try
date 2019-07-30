@@ -4,12 +4,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using WorkspaceServer;
 
 namespace MLS.Agent
 {
     public class JupyterDataPathResult
     {
-        public JupyterDataPathResult(IEnumerable<DirectoryInfo> paths)
+        public JupyterDataPathResult(IEnumerable<IDirectoryAccessor> paths)
         {
             Paths = paths;
             Error = "";
@@ -17,11 +18,10 @@ namespace MLS.Agent
 
         public JupyterDataPathResult(string error)
         {
-            Paths = Enumerable.Empty<DirectoryInfo>();
             Error = error;
         }
 
-        public IEnumerable<DirectoryInfo> Paths { get; }
+        public IEnumerable<IDirectoryAccessor> Paths { get; }
         public string Error { get; }
     }
 }

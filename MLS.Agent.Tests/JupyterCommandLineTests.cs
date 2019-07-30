@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Tools;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace MLS.Agent.Tests
         {
             var console = new TestConsole();
             var commandLineResult = new CommandLineResult(1);
-            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterPathStuff(commandLineResult));
+            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterPathsHelper(commandLineResult));
             await jupyterCommandLine.InvokeAsync();
             console.Error.ToString().Should().Contain(".NET kernel installation failed");
         }
@@ -31,19 +32,10 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Prints_to_console_when_kernel_installation_succeded()
         {
-            const string expectedPath = @"C:\myDataPath";
-
-            var pathsOutput =
-$@"config:
-    C:\Users\.jupyter
-data:
-   {expectedPath}
-runtime:
-    C:\Users\AppData\Roaming\jupyter\runtime".Split("\n");
-
+            const string dataDirectory = @"C:\myDataPath";
             var console = new TestConsole();
-            var commandLineResult = new CommandLineResult(0, pathsOutput);
-            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterPathStuff(commandLineResult));
+            var jupyterPathsHelper = new InMemoryJupyterPathsHelper(dataDirectory);
+            var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
             await jupyterCommandLine.InvokeAsync();
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");
         }
@@ -51,57 +43,50 @@ runtime:
         [Fact] 
         public async Task Adds_the_kernels_json_file_and_logos_in_data_directory()
         {
+            const string dataDirectory = @"C:\myDataPath";
+
             var console = new TestConsole();
-            var commandLineResult = new CommandLineResult(1);
-            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterPathStuff(commandLineResult));
+            var jupyterPathsHelper = new InMemoryJupyterPathsHelper(dataDirectory);
+            var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
             await jupyterCommandLine.InvokeAsync();
 
-            throw new NotImplementedException();
-
-            //var dotnetDirectoryAccessor = GetExpectedKernelsDirectory().GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath(".NET"));
-            //dotnetDirectoryAccessor.RootDirectoryExists().Should().BeTrue();
-            //dotnetDirectoryAccessor.GetAllFiles().Select(file => file.FileName).Should().BeEquivalentTo("kernel.json", "logo-32x32.png", "logo-64x64.png");
+            var dotnetDirAccessor = jupyterPathsHelper.GetDirectoryAccessorForPath(dataDirectory).GetDirectoryAccessorForRelativePath("kernels/.NET");
+            dotnetDirAccessor.RootDirectoryExists().Should().BeTrue();
+            dotnetDirAccessor.GetAllFiles().Select(file => file.FileName).Should().BeEquivalentTo("kernel.json", "logo-32x32.png", "logo-64x64.png");
         }
     }
 
-    //public class JupyterCommandLineIntegrationTests : JupyterCommandLineTests
-    //{
-    //    public override IDirectoryAccessor GetExpectedKernelsDirectory()
-    //    {
-    //        return new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\AppData\Local\Continuum\anaconda3\share\jupyter\kernels"));
-    //    }
-
-    //    public override JupyterCommandLine GetJupyterCommandLine(IConsole console)
-    //    {
-    //        return new JupyterCommandLine(console, new JupyterPathStuff());
-    //    }
-    //}
-
-    //public class InMemoryJupyterCommandLineTests : JupyterCommandLineTests
-    //{
-    //    public override IDirectoryAccessor GetExpectedKernelsDirectory()
-    //    {
-    //        return new InMemoryDirectoryAccessor()
-    //        {
-    //            ("kernels.json", ""),
-    //            ("logo-32x32.png", ""),
-    //            ("logo-64x64.png", "")
-    //        };
-    //    }
-
-    //    public override JupyterCommandLine GetJupyterCommandLine(IConsole console, CommandLineResult commandLineResult)
-    //    {
-    //        return new JupyterCommandLine(console, new InMemoryJupyterPathStuff(commandLineResult));
-    //    }
-    //}
-
-    public class InMemoryJupyterPathStuff : IJupyterPathStuff
+    public class InMemoryJupyterPathsHelper : IJupyterPathsHelper
     {
         private CommandLineResult _commandLineResult;
+        private Dictionary<string, InMemoryDirectoryAccessor> _dataDirectories;
 
-        public InMemoryJupyterPathStuff(CommandLineResult commandLineResult)
+        public InMemoryJupyterPathsHelper(CommandLineResult commandLineResult)
         {
             _commandLineResult = commandLineResult;
+        }
+
+        public InMemoryJupyterPathsHelper(string dataDirectory)
+        {
+            var pathsOutput =
+$@"config:
+    C:\Users\.jupyter
+data:
+   {dataDirectory}
+runtime:
+    C:\Users\AppData\Roaming\jupyter\runtime".Split("\n");
+
+            _commandLineResult = new CommandLineResult(0, pathsOutput);
+            _dataDirectories = new Dictionary<string, InMemoryDirectoryAccessor>
+            {
+                { dataDirectory, new InMemoryDirectoryAccessor(new DirectoryInfo(dataDirectory)) }
+            };
+        }
+
+        public IDirectoryAccessor GetDirectoryAccessorForPath(string path)
+        {
+            _dataDirectories.TryGetValue(path, out var value);
+            return value;
         }
 
         public async Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args)

@@ -15,28 +15,23 @@ namespace MLS.Agent
 {
     public class JupyterCommandLine
     {
-        private FileInfo _pythonExeLocation;
-        private IConsole _console;
-        private IJupyterPathStuff _jupyterPathStuff;
+        private readonly FileInfo _pythonExeLocation;
+        private readonly IConsole _console;
+        private readonly IJupyterPathsHelper _jupyterPathsHelper;
 
-        public delegate Task<CommandLineResult> GetJupyterPaths(FileInfo pythonExeLocation, string args);
-
-        public JupyterCommandLine(IConsole console, IJupyterPathStuff jupyterPathStuff)
+        public JupyterCommandLine(IConsole console, IJupyterPathsHelper jupyterPathsHelper)
         {
             _pythonExeLocation = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\python.exe"));
             _console = console;
-            _jupyterPathStuff = jupyterPathStuff;
+            _jupyterPathsHelper = jupyterPathsHelper;
         }
 
         public async Task<int> InvokeAsync()
         {
-            var jupyterPathsResult = await _jupyterPathStuff.GetJupyterPaths(_pythonExeLocation, "-m jupyter --paths");
-            var dataPathsResult = JupyterPathInfo.GetDataPaths(jupyterPathsResult);
+            var dataPathsResult = await GetDataPathsAsync();
             if (string.IsNullOrEmpty(dataPathsResult.Error))
             {
-                //to do: find out what this path is
-
-                Installkernel(dataPathsResult.Paths.Select(path => new FileSystemDirectoryAccessor(path)));
+                Installkernel(dataPathsResult.Paths);
                 _console.Out.WriteLine(".NET kernel installation succeded");
                 return 0;
             }
@@ -67,15 +62,59 @@ namespace MLS.Agent
                 }
             }
         }
+
+        public async Task<JupyterDataPathResult> GetDataPathsAsync()
+        {
+            var jupyterPathResult = await _jupyterPathsHelper.GetJupyterPaths(_pythonExeLocation, "-m jupyter --paths");
+            if (jupyterPathResult.ExitCode == 0)
+            {
+                if (TryGetDataPaths(jupyterPathResult.Output.ToArray(), out var dataPaths))
+                {
+                    return new JupyterDataPathResult(dataPaths);
+                }
+                else
+                {
+                    return new JupyterDataPathResult($"Could not find the jupyter kernel installation directory." +
+                            $" Output of \"jupyter --paths\" is {string.Join("\n", jupyterPathResult.Output.ToArray())}");
+                }
+            }
+            else
+            {
+                return new JupyterDataPathResult($"Tried to invoke \"jupyter --paths\" but failed with error: {string.Join("\n", jupyterPathResult.Error)}");
+            }
+        }
+
+        private bool TryGetDataPaths(string[] pathInfo, out IEnumerable<IDirectoryAccessor> dataPathsAccessor)
+        {
+            var dataHeaderIndex = Array.FindIndex(pathInfo, element => element.Trim().CompareTo("data:") == 0);
+            if (dataHeaderIndex != -1)
+            {
+                var nextHeaderIndex = Array.FindIndex(pathInfo, dataHeaderIndex + 1, element => element.Trim().EndsWith(":"));
+                if (nextHeaderIndex == -1)
+                    nextHeaderIndex = pathInfo.Count();
+
+                dataPathsAccessor = pathInfo.Skip(dataHeaderIndex + 1).Take(nextHeaderIndex - dataHeaderIndex - 1).Select(dir => _jupyterPathsHelper.GetDirectoryAccessorForPath(dir.Trim()));
+                return true;
+            }
+
+            dataPathsAccessor = null;
+            return false;
+        }
     }
 
-    public interface IJupyterPathStuff
+    public interface IJupyterPathsHelper
     {
+        IDirectoryAccessor GetDirectoryAccessorForPath(string v);
         Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args);
     }
 
-    public class JupyterPathStuff : IJupyterPathStuff
+    public class JupyterPathsHelper : IJupyterPathsHelper
     {
+        public IDirectoryAccessor GetDirectoryAccessorForPath(string path)
+        {
+            return new FileSystemDirectoryAccessor(new DirectoryInfo(path));
+        }
+
         public Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args)
         {
             return Tools.CommandLine.Execute(fileInfo, args);
