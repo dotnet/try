@@ -33,6 +33,9 @@
     <None Remove="TestResults\**" />
   </ItemGroup>
 
+  <Target Name="AddBuiltContent" DependsOnTargets="BuildCss;BuildTryDotNetJs;BuildClient" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
