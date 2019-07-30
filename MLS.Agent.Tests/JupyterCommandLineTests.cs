@@ -13,11 +13,11 @@ using WorkspaceServer;
 using WorkspaceServer.Tests;
 using Xunit;
 
-namespace Microsoft.DotNet.Interactive.Jupyter.Tests
+namespace MLS.Agent.Tests
 {
     public abstract class JupyterCommandLineTests
     {
-        public abstract JupyterCommandLine GetJupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables);
+        public abstract JupyterCommandLine GetJupyterCommandLine(IConsole console);
 
         public abstract IDirectoryAccessor GetExpectedKernelsDirectory();
         [Fact]
@@ -34,16 +34,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             //to do: using environment variable this way will cause test flakiness
             Environment.SetEnvironmentVariable("path", @"C:\Users\akagarw\AppData\Local\Continuum\anaconda3");
             var console = new TestConsole();
-            await GetJupyterCommandLine(console, ("path", @"C:\Users\akagarw\AppData\Local\Continuum\anaconda3")).InvokeAsync();
+            await GetJupyterCommandLine(console).InvokeAsync();
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");
         }
 
         [Fact] 
         public async Task Adds_the_kernels_json_file_and_logos_in_data_directory()
         {
-            Environment.SetEnvironmentVariable("path", @"C:\Users\akagarw\AppData\Local\Continuum\anaconda3");
             var console = new TestConsole();
-            await GetJupyterCommandLine(console, ("path", @"C:\Users\akagarw\AppData\Local\Continuum\anaconda3")).InvokeAsync();
+            await GetJupyterCommandLine(console).InvokeAsync();
 
             var dotnetDirectoryAccessor = GetExpectedKernelsDirectory().GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath(".NET"));
             dotnetDirectoryAccessor.RootDirectoryExists().Should().BeTrue();
@@ -58,9 +57,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             return new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\AppData\Local\Continuum\anaconda3\share\jupyter\kernels"));
         }
 
-        public override JupyterCommandLine GetJupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)
+        public override JupyterCommandLine GetJupyterCommandLine(IConsole console)
         {
-            return new JupyterCommandLine(console, environmentVariables);
+            return new JupyterCommandLine(console);
         }
     }
 
@@ -76,7 +75,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             };
         }
 
-        public override JupyterCommandLine GetJupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)
+        public override JupyterCommandLine GetJupyterCommandLine(IConsole console)
         {
             throw new NotImplementedException();
         }

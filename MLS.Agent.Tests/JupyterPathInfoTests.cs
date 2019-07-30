@@ -7,7 +7,7 @@ using MLS.Agent.Tools;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.DotNet.Interactive.Jupyter.Tests
+namespace MLS.Agent.Tests
 {
     public class JupyterPathInfoTests
     {

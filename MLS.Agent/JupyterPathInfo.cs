@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using MLS.Agent.Tools;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace MLS.Agent
 {
     public class JupyterPathInfo
     {

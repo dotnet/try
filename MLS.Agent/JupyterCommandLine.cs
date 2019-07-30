@@ -10,24 +10,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using WorkspaceServer;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace MLS.Agent
 {
     public class JupyterCommandLine
     {
         private IConsole _console;
         private readonly IDirectoryAccessor _kernelContentDir;
-        private readonly (string key, string value)[] _environmentVariables;
 
-        public JupyterCommandLine(IConsole console, params (string key, string value)[] environmentVariables)
+        public JupyterCommandLine(IConsole console)
         {
             _console = console;
             _kernelContentDir = new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\try.dot.net\github-try\try\Microsoft.DotNet.Interactive.Jupyter\ContentFiles")); ;
-            _environmentVariables = environmentVariables;
         }
 
         public async Task<int> InvokeAsync()
         {
-            var jupyterPathsResult = await CommandLine.Execute("python.exe", "-m jupyter --paths", environmentVariables: _environmentVariables);
+            var jupyterPathsResult = await Tools.CommandLine.Execute(@"C:\Users\akagarw\AppData\Local\Continuum\anaconda3\python.exe", "-m jupyter --paths");
             var dataPathsResult = JupyterPathInfo.GetDataPaths(jupyterPathsResult);
             if (string.IsNullOrEmpty(dataPathsResult.Error))
             {
@@ -56,18 +54,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
 
-                    // Copy the files into the kernels directory
-                    dotnetkernelDir.CopyFileFromDirectory(_kernelContentDir, "kernel.json", overwrite: true);
-                    dotnetkernelDir.CopyFileFromDirectory(_kernelContentDir, "logo-32x32.png", overwrite: true);
-                    dotnetkernelDir.CopyFileFromDirectory(_kernelContentDir, "logo-64x64.png", overwrite: true);
+                    dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("kernel.json"), typeof(Program).ReadManifestResource("MLS.Agent.kernel.json"));
+                    dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("logo-32x32.png"), typeof(Program).ReadManifestResource("MLS.Agent.logo-32x32.png"));
+                    dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("logo-64x64.png"), typeof(Program).ReadManifestResource("MLS.Agent.logo-64x64.png"));
+                    
                     console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
                 }
             }
-        }
-
-        private FileInfo GetFileWithName(IDirectoryAccessor directoryAccessor, string filename)
-        {
-            return new FileInfo(directoryAccessor.GetFullyQualifiedFilePath(filename).FullName);
         }
     }
 }

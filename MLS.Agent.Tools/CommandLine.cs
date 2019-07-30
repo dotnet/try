@@ -20,8 +20,7 @@ namespace MLS.Agent.Tools
             FileInfo exePath,
             string args,
             DirectoryInfo workingDir = null,
-            Budget budget = null,
-            (string key, string value)[] environmentVariables = null) =>
+            Budget budget = null) => 
             Execute(exePath.FullName,
                     args,
                     workingDir,
@@ -31,8 +30,7 @@ namespace MLS.Agent.Tools
             string command,
             string args,
             DirectoryInfo workingDir = null,
-            Budget budget = null,
-            (string key, string value)[] environmentVariables =null)
+            Budget budget = null)
         {
             args = args ?? "";
             budget = budget ?? new Budget();
@@ -52,8 +50,7 @@ namespace MLS.Agent.Tools
                 error: data =>
                 {
                     stdErr.AppendLine(data);
-                },
-                environmentVariables))
+                }))
             {
                 var exitCode = await process.Complete(budget);
 
