@@ -259,18 +259,6 @@ namespace MLS.Agent.Tests.Markdown
 
             subdirectory.FileExists("Tutorial.md").Should().BeTrue();
         }
-
-
-        [Fact]
-        public void It_can_copy_files()
-        {
-            var targetDirectory = CreateDirectory();
-            var sourceDirectory = GetDirectory(TestAssets.SampleConsole);
-
-            targetDirectory.CopyFileFromDirectory(sourceDirectory, "Program.cs", true);
-            targetDirectory.FileExists("Program.cs").Should().BeTrue();
-            targetDirectory.ReadAllText("Program.cs").Should().Contain("using System");
-        }
     }
 
     public class FileSystemDirectoryAccessorTests : DirectoryAccessorTests

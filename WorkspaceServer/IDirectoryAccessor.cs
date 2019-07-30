@@ -28,7 +28,5 @@ namespace WorkspaceServer
         FileSystemInfo GetFullyQualifiedPath(RelativePath path);
 
         IDirectoryAccessor GetDirectoryAccessorForRelativePath(RelativeDirectoryPath path);
-
-        void CopyFileFromDirectory(IDirectoryAccessor directoryAccessor, string filename, bool overwrite);
     }
 }
