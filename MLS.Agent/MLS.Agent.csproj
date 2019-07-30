@@ -190,7 +190,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="AddBuiltContent" DependsOnTargets="BuildCss;BuildTryDotNetJs;BuildClient" BeforeTargets="BeforeBuild">
+  <Target Name="AddBuiltContent" DependsOnTargets="BuildCss;BuildTryDotNetJs;BuildClient" BeforeTargets="BeforeBuild" Condition="'$(NCrunch)' != '1'">
     <ItemGroup>
       <Content Include="$(MSBuildThisFileDirectory)wwwroot\**">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

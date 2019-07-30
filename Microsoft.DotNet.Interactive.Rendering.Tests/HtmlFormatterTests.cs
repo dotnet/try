@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
@@ -25,6 +26,48 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             public Objects()
             {
                 Formatter.ResetToDefault();
+            }
+
+            [Fact]
+            public void Formatters_are_generated_on_the_fly_when_HTML_mime_type_is_requested()
+            {
+                var output = new { a = 123 }.ToDisplayString(HtmlFormatter.MimeType);
+
+                output.Should().StartWith("<table>");
+            }
+
+            [Fact]
+            public void Formatter_does_not_expand_string()
+            {
+                var formatter = HtmlFormatter<string>.Create();
+
+                var s = "hello".ToDisplayString(formatter);
+
+                s.Should().Be("hello");
+            }
+
+            [Fact]
+            public void Formatter_does_not_expand_Type()
+            {
+                var formatter = HtmlFormatter<Type>.Create();
+
+                var s = typeof(int).ToDisplayString(formatter);
+
+                s.Should().Be("System.Int32");
+            }
+
+            [Fact]
+            public void Formatter_expands_properties_of_ExpandoObjects()
+            {
+                dynamic expando = new ExpandoObject();
+                expando.Name = "socks";
+                expando.Count = 2;
+
+                var formatter = HtmlFormatter<ExpandoObject>.Create();
+
+                var output = ((object)expando).ToDisplayString(formatter);
+
+                output.Should().Be("<table><thead><tr><th>Count</th><th>Name</th></tr></thead><tbody><tr><td>2</td><td>socks</td></tr></tbody></table>");
             }
 
             [Fact]
@@ -61,6 +104,62 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 writer.ToString()
                       .Should()
                       .Be("<table><thead><tr><th>PropertyA</th><th>PropertyB</th></tr></thead><tbody><tr><td>123</td><td>hello</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void It_formats_tuples_as_tables_having_properties_on_the_y_axis()
+            {
+                var writer = new StringWriter();
+
+                var instance = (123, "hello");
+
+                var formatter = HtmlFormatter.Create(instance.GetType());
+
+                formatter.Format(instance, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Be("<table><thead><tr><th>Item1</th><th>Item2</th></tr></thead><tbody><tr><td>123</td><td>hello</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void Object_properties_are_formatted_using_plain_text_formatter()
+            {
+                var writer = new StringWriter();
+
+                var instance = new
+                {
+                    A = 123,
+                    B = new { BA = 456 }
+                };
+
+                var formatter = HtmlFormatter.Create(instance.GetType());
+
+                formatter.Format(instance, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Contain("<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody><tr><td>123</td><td>{ BA: 456 }</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void Sequence_properties_are_formatted_using_plain_text_formatter()
+            {
+                var writer = new StringWriter();
+
+                var instance = new
+                {
+                    PropertyA = 123,
+                    PropertyB = Enumerable.Range(1, 3)
+                };
+
+                var formatter = HtmlFormatter.Create(instance.GetType());
+
+                formatter.Format(instance, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Contain("<table><thead><tr><th>PropertyA</th><th>PropertyB</th></tr></thead><tbody><tr><td>123</td><td>[ 1, 2, 3 ]</td></tr></tbody></table>");
             }
 
             [Fact]
@@ -119,7 +218,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 writer.ToString()
                       .Should()
                       .Be(
-                          "<table><thead><tr><th></th><th>TypeName</th><th>Id</th></tr></thead><tbody><tr><td>0</td><td>entity one</td><td>123</td></tr><tr><td>1</td><td>entity two</td><td>456</td></tr></tbody></table>");
+                          "<table><thead><tr><th><i>index</i></th><th>TypeName</th><th>Id</th></tr></thead><tbody><tr><td>0</td><td>entity one</td><td>123</td></tr><tr><td>1</td><td>entity two</td><td>456</td></tr></tbody></table>");
             }
 
             [Fact]
@@ -140,7 +239,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 writer.ToString()
                       .Should()
                       .Be(
-                          "<table><thead><tr><th></th><th>TypeName</th><th>Id</th></tr></thead><tbody><tr><td>first</td><td>entity one</td><td>123</td></tr><tr><td>second</td><td>entity two</td><td>456</td></tr></tbody></table>");
+                          "<table><thead><tr><th><i>key</i></th><th>TypeName</th><th>Id</th></tr></thead><tbody><tr><td>first</td><td>entity one</td><td>123</td></tr><tr><td>second</td><td>entity two</td><td>456</td></tr></tbody></table>");
             }
         }
     }

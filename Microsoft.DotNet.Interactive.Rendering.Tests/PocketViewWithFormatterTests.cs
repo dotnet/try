@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
@@ -16,68 +15,26 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             Formatter.ResetToDefault();
         }
 
+        [Theory]
+        [InlineData("text/html")]
+        [InlineData("text/plain")]
+        public void Formatter_does_not_expand_properties_of_PocketView(string mimeType)
+        {
+            PocketView view = b(123);
+
+            view.ToDisplayString(mimeType).Should().Be("<b>123</b>");
+        }
+
         [Fact]
-        public void Embedded_objects_are_formatted_using_custom_formatter()
+        public void Embedded_objects_are_formatted_using_custom_formatter_and_encoded()
         {
             var date = DateTime.Parse("1/1/2019 12:30pm");
 
-            Formatter<DateTime>.Register(_ => "hello");
+            Formatter<DateTime>.Register(_ => "<hello>");
 
             string output = div(date).ToString();
 
-            output.Should().Be("<div>hello</div>");
-        }
-
-        [Fact]
-        public void Nested_registered_views_are_not_reencoded()
-        {
-            var widget = new Widget
-            {
-                Name = "Thingy",
-                Parts = new List<Part>
-                {
-                    new Part { PartNumber = "ONE" },
-                    new Part { PartNumber = "TWO" }
-                }
-            };
-
-            Formatter<Part>.RegisterHtml(part => span(part.PartNumber));
-
-            Formatter<Widget>.RegisterHtml(w =>
-                                               table(
-                                                   tr(
-                                                       th(nameof(Widget.Name))),
-                                                   tr(
-                                                       td(w.Name),
-                                                       td(w.Parts)
-                                                   )));
-
-            string output = div(widget).ToString();
-
-            output.Should()
-                  .Be("<div><table><tr><th>Name</th></tr><tr><td>Thingy</td><td><span>ONE</span><span>TWO</span></td></tr></table></div>");
-        }
-
-        [Fact]
-        public void Nested_registered_text_formatters_are_HTML_encoded()
-        {
-            var widget = new Widget
-            {
-                Name = "Thingy",
-                Parts = new List<Part>
-                {
-                    new Part { PartNumber = "ONE" },
-                    new Part { PartNumber = "TWO" }
-                }
-            };
-
-            Formatter<Part>.Register(part => $"<{part.PartNumber}>");
-
-            Formatter<Widget>.RegisterHtml(w => div(w.Parts));
-
-            string output = div(widget).ToString();
-
-            output.Should().Be("<div><div>&lt;ONE&gt;&lt;TWO&gt;</div></div>");
+            output.Should().Be("<div>&lt;hello&gt;</div>");
         }
 
         [Fact]
@@ -85,7 +42,8 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         {
             Formatter<DateTime>.RegisterHtml(w => div("hello"));
 
-            DateTime.Now.ToDisplayString()
+            DateTime.Now
+                    .ToDisplayString("text/html")
                     .Should()
                     .Be("<div>hello</div>");
         }

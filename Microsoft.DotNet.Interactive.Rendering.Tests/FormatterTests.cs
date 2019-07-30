@@ -287,43 +287,14 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void AutoGenerateForType_allows_text_formatters_to_be_registered_on_fly_for_all_types()
+        public void It_does_not_expand_properties_for_strings()
         {
-            new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Contain(@"DirectoryName: ");
-            new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Contain("Parent: ");
-            new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Contain("Root: ");
-            new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Contain("Exists: ");
-        }
+            var formatter = PlainTextFormatter.Create(typeof(string));
 
-        [Fact]
-        public void AutoGenerateForType_does_not_reregister_formatters_for_types_having_special_default_formatters()
-        {
-            var log = "hello".ToDisplayString();
+            var log = "hello".ToDisplayString(formatter);
 
             log.Should().Contain("hello");
             log.Should().NotContain("Length");
-        }
-
-        [Fact]
-        public void Formatters_for_specific_mime_types_can_be_registered_on_the_fly_when_new_types_are_encountered_by_the_formatter()
-        {
-            Formatter.OnRenderingUnregisteredType += (Type type, string mimeType, out ITypeFormatter formatter) =>
-            {
-                var htmlFormatter = new HtmlFormatter<Widget>((widget, writer) => { writer.Write(b(widget.Name)); });
-
-                formatter = htmlFormatter;
-            };
-
-            var value = new Widget
-            {
-                Name = "The Widget"
-            }.ToDisplayString();
-
-            value.Should().Be("<b>The Widget</b>");
         }
 
         [Fact]

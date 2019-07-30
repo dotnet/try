@@ -25,7 +25,21 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public static PlainTextFormatter<T> Create(bool includeInternals = false)
         {
-            return new PlainTextFormatter<T>();
+            if (PlainTextFormatter.SpecialDefaults.TryGetValue(typeof(T), out var formatter) &&
+                formatter is PlainTextFormatter<T> ft)
+            {
+                return ft;
+            }
+
+            if (Formatter<T>.TypeIsAnonymous ||
+                Formatter<T>.TypeIsException ||
+                Formatter<T>.TypeIsValueTuple|| 
+                !typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+            {
+                return CreateForAllMembers(includeInternals);
+            }
+
+            return Default;
         }
 
         public override string MimeType => "text/plain";
@@ -35,18 +49,11 @@ namespace Microsoft.DotNet.Interactive.Rendering
             _format(instance, writer);
         }
 
-        public static PlainTextFormatter<T> CreateForAllMembers(bool includeInternals = false)
+        private static PlainTextFormatter<T> CreateForAllMembers(bool includeInternals = false)
         {
-            if (Formatter<T>.IsDefault)
-            {
-                  return new PlainTextFormatter<T>(
+            return new PlainTextFormatter<T>(
                 PlainTextFormatter.CreateFormatDelegate<T>(
                     typeof(T).GetAllMembers(includeInternals).ToArray()));
-            }
-            else
-            {
-                return new PlainTextFormatter<T>(Formatter<T>.FormatPlainTextDefault);
-            }
         }
 
         public static PlainTextFormatter<T> CreateForMembers(params Expression<Func<T, object>>[] members)
@@ -57,7 +64,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return new PlainTextFormatter<T>(format);
         }
 
-        public static PlainTextFormatter<T> Default { get; } = Create();
+        public static PlainTextFormatter<T> Default { get; } = new PlainTextFormatter<T>();
 
         internal virtual void WriteDefault(
             T obj,

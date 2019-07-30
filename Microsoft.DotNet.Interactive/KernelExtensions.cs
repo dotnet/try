@@ -9,7 +9,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Rendering;
 using Pocket;
 
 namespace Microsoft.DotNet.Interactive
@@ -40,8 +39,7 @@ namespace Microsoft.DotNet.Interactive
             };
 
             extend.Handler = CommandHandler.Create<FileInfo, KernelPipelineContext>((dll, pipelineContext) =>
-                                                                                        kernel.SendAsync(new LoadExtension(dll))
-            );
+                                                                                         kernel.SendAsync(new LoadExtension(dll)));
 
             kernel.AddDirective(extend);
 

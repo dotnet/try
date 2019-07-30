@@ -30,6 +30,12 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public static HtmlFormatter<T> Create(bool includeInternals = false)
         {
+            if (HtmlFormatter.SpecialDefaults.TryGetValue(typeof(T), out var formatter) &&
+                formatter is HtmlFormatter<T> ft)
+            {
+                return ft;
+            }
+
             if (typeof(IEnumerable).IsAssignableFrom(typeof(T)))
             {
                 return CreateForSequence(includeInternals);
@@ -42,6 +48,11 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             var members = typeof(T).GetAllMembers(includeInternals)
                                    .GetMemberAccessors<T>();
+
+            if (members.Length ==0)
+            {
+                return new HtmlFormatter<T>((value, writer) => writer.Write(value));
+            }
 
             return new HtmlFormatter<T>((instance, writer) =>
             {
@@ -95,7 +106,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             return new HtmlFormatter<T>((instance, writer) =>
             {
-                var i = 0;
+                var index = 0;
 
                 IEnumerable sequence = instance switch {
                                            IDictionary d => d.Values,
@@ -103,17 +114,23 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                            _ => throw new ArgumentException($"{instance.GetType()} is not IEnumerable")
                                            };
 
+                IHtmlContent indexHeader = null;
+
                 Func<string> getIndex;
 
-                if (instance is IDictionary dict)
+                switch (instance)
                 {
-                    var keys = new string[dict.Keys.Count];
-                    dict.Keys.CopyTo(keys, 0);
-                    getIndex = () => keys[i];
-                }
-                else
-                {
-                    getIndex = () => i.ToString();
+                    case IDictionary dict:
+                        var keys = new string[dict.Keys.Count];
+                        dict.Keys.CopyTo(keys, 0);
+                        getIndex = () => keys[index];
+                        indexHeader = th(i("key"));
+                        break;
+
+                    default:
+                        getIndex = () => index.ToString();
+                        indexHeader = th(i("index"));
+                        break;
                 }
 
                 var rows = new List<IHtmlContent>();
@@ -126,10 +143,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     if (headers == null)
                     {
                         headers = new List<IHtmlContent>();
-                        headers.Add(th);
+                        headers.Add(indexHeader);
                         headers.AddRange(dictionary.Keys
-                                                   .Select(k => (IHtmlContent) th(k))
-                        );
+                                                   .Select(k => (IHtmlContent) th(k)));
                     }
 
                     var cells =
@@ -141,29 +157,16 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                 dictionary
                                     .Values
                                     .Select(v => (IHtmlContent) td(v)));
-                    rows.Add(
-                        tr(
-                            cells));
 
-                    i++;
+                    rows.Add(tr(cells));
+
+                    index++;
                 }
 
-                var view = Table(headers, rows);
+                var view = HtmlFormatter.Table(headers, rows);
 
                 view.WriteTo(writer, HtmlEncoder.Default);
             });
-        }
-
-        private static PocketView Table(List<IHtmlContent> headers, List<IHtmlContent> rows)
-        {
-            var t = table(
-                thead(
-                    tr(
-                        headers)),
-                tbody(
-                    rows));
-
-            return t;
         }
 
         private static string Value(MemberAccessor<T> m, T instance)

@@ -24,9 +24,9 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         public class Objects
         {
             [Fact]
-            public void Generate_creates_a_function_that_emits_the_property_names_and_values_for_a_specific_type()
+            public void Create_creates_a_formatter_that_emits_the_property_names_and_values_for_a_specific_type()
             {
-                var formatter = PlainTextFormatter<Widget>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<Widget>.Create();
 
                 var writer = new StringWriter();
                 formatter.Format(new Widget { Name = "Bob" }, writer);
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void GenerateForMembers_throws_when_an_expression_is_not_a_MemberExpression()
+            public void CreateForMembers_throws_when_an_expression_is_not_a_MemberExpression()
             {
                 var ex = Assert.Throws<ArgumentException>(() => PlainTextFormatter<SomethingWithLotsOfProperties>.CreateForMembers(
                                                               o => o.DateProperty.ToShortDateString(),
@@ -66,11 +66,11 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void GenerateForAllMembers_expands_properties_of_structs()
+            public void It_expands_properties_of_structs()
             {
                 var id = new EntityId("the typename", "the id");
 
-                var formatter = PlainTextFormatter.CreateForAllMembers(id.GetType());
+                var formatter = PlainTextFormatter.Create(id.GetType());
 
                 var formatted = id.ToDisplayString(formatter);
 
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
                 var obj = new { ints, count = ints.Length };
 
-                var formatter = PlainTextFormatter.CreateForAllMembers(obj.GetType());
+                var formatter = PlainTextFormatter.Create(obj.GetType());
 
                 var output = obj.ToDisplayString(formatter);
 
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 expando.Name = "socks";
                 expando.Parts = null;
 
-                var formatter = PlainTextFormatter<ExpandoObject>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<ExpandoObject>.Create();
 
                 var expandoString = ((object) expando).ToDisplayString(formatter);
 
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 };
                 widget.Parts = new List<Part> { new Part { Widget = widget } };
 
-                var formatter = PlainTextFormatter<Widget>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<Widget>.Create();
 
                 // this should not throw
                 var s = widget.ToDisplayString(formatter);
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             [Fact]
             public void Static_fields_are_not_written()
             {
-                var formatter = PlainTextFormatter<Widget>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<Widget>.Create();
                 new Widget().ToDisplayString(formatter)
                             .Should().NotContain(nameof(SomethingAWithStaticProperty.StaticField));
             }
@@ -168,15 +168,15 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             [Fact]
             public void Static_properties_are_not_written()
             {
-                var formatter = PlainTextFormatter<Widget>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<Widget>.Create();
                 new Widget().ToDisplayString(formatter)
                             .Should().NotContain(nameof(SomethingAWithStaticProperty.StaticProperty));
             }
 
             [Fact]
-            public void GenerateForAllMembers_expands_fields_of_objects()
+            public void It_expands_fields_of_objects()
             {
-                var formatter = PlainTextFormatter<SomeStruct>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<SomeStruct>.Create();
                 var today = DateTime.Today;
                 var tomorrow = DateTime.Today.AddDays(1);
                 var id = new SomeStruct
@@ -185,28 +185,28 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                     DateProperty = tomorrow
                 };
 
-                var value = id.ToDisplayString(formatter);
+                var output = id.ToDisplayString(formatter);
 
-                value.Should().Contain("DateField: ");
-                value.Should().Contain("DateProperty: ");
+                output.Should().Contain("DateField: ");
+                output.Should().Contain("DateProperty: ");
             }
 
             [Fact]
-            public void GenerateForAllMembers_can_include_internal_fields()
+            public void Output_can_include_internal_fields()
             {
-                var formatter = PlainTextFormatter<Node>.CreateForAllMembers(true);
+                var formatter = PlainTextFormatter<Node>.Create(true);
 
                 var node = new Node { Id = "5" };
 
-                var value = node.ToDisplayString(formatter);
+                var output = node.ToDisplayString(formatter);
 
-                value.Should().Contain("_id: 5");
+                output.Should().Contain("_id: 5");
             }
 
             [Fact]
-            public void GenerateForAllMembers_does_not_include_autoproperty_backing_fields()
+            public void Output_does_not_include_autoproperty_backing_fields()
             {
-                var formatter = PlainTextFormatter<Node>.CreateForAllMembers(true);
+                var formatter = PlainTextFormatter<Node>.Create(true);
 
                 var output = new Node().ToDisplayString(formatter);
 
@@ -215,9 +215,9 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void GenerateForAllMembers_can_include_internal_properties()
+            public void Output_can_include_internal_properties()
             {
-                var formatter = PlainTextFormatter<Node>.CreateForAllMembers(true);
+                var formatter = PlainTextFormatter<Node>.Create(true);
 
                 var output = new Node { Id = "6" }.ToDisplayString(formatter);
 
@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             {
                 var tuple = (123, "Hello", Enumerable.Range(1, 3));
 
-                var formatter = PlainTextFormatter.CreateForAllMembers(tuple.GetType());
+                var formatter = PlainTextFormatter.Create(tuple.GetType());
 
                 var formatted = tuple.ToDisplayString(formatter);
 
@@ -288,7 +288,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                         }
                 };
 
-                var formatter = PlainTextFormatter<Node>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<Node>.Create();
 
                 var output = node.ToDisplayString(formatter);
 
@@ -312,7 +312,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                         }
                 };
 
-                var formatter = PlainTextFormatter<Node>.CreateForAllMembers();
+                var formatter = PlainTextFormatter<Node>.Create();
 
                 var output = node.ToDisplayString(formatter);
 

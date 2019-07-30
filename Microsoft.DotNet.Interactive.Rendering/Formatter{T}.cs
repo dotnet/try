@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -22,9 +21,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         private static int? _listExpansionLimit;
 
-        // FIX: (Formatter.Custom) get rid of this
-        private static Action<T, TextWriter> Custom;
-
         /// <summary>
         /// Initializes the <see cref="Formatter&lt;T&gt;"/> class.
         /// </summary>
@@ -32,8 +28,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             void Initialize()
             {
-                FormatPlainTextDefault = PlainTextFormatter<T>.Default.Format;
-                Custom = null;
+                _listExpansionLimit = null;
+                // Formatter.Register(CreatePlainTextFormatterOnDemand(PlainTextFormatter.MimeType));
             }
 
             Initialize();
@@ -41,21 +37,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             Formatter.Clearing += (o, e) => Initialize();
         }
 
-        /// <summary>
-        /// Gets or sets the default formatter for type <typeparamref name="T" />.
-        /// </summary>
-        // FIX: (Formatter.Default) get rid of this
-        internal static Action<T, TextWriter> FormatPlainTextDefault { get; set; }
-
-        /// <summary>
-        /// Generates a formatter action that will write out all properties and fields from instances of type <typeparamref name="T" />.
-        /// </summary>
-        /// <param name="includeInternals">if set to <c>true</c> include internal and private members.</param>
-        public static Action<T, TextWriter> GenerateForAllMembers(bool includeInternals = false) => PlainTextFormatter.CreateFormatDelegate<T>(typeof(T).GetAllMembers(includeInternals).ToArray());
-
-        /// <summary>
-        /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
-        /// </summary>
         public static void Register(
             Action<T, TextWriter> formatter,
             string mimeType = PlainTextFormatter.MimeType)
@@ -75,22 +56,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     mimeType);
             }
 
-            Custom = formatter;
-
-            Formatter.SetMimeType(typeof(T), mimeType);
-        }
-
-        public static void Register(ITypeFormatter<T> formatter)
-        {
-            if (formatter == null)
-            {
-                throw new ArgumentNullException(nameof(formatter));
-            }
-
-            if (formatter.MimeType == PlainTextFormatter.MimeType)
-            {
-                Custom = formatter.Format;
-            }
+            Formatter.TypeFormatters[(typeof(T), mimeType)] = new AnonymousTypeFormatter<T>(formatter, mimeType);
         }
 
         /// <summary>
@@ -134,48 +100,33 @@ namespace Microsoft.DotNet.Interactive.Rendering
             // find a formatter for the object type, and possibly register one on the fly
             if (Formatter.RecursionCounter.Depth <= Formatter.RecursionLimit)
             {
-                if (Custom == null)
-                {
-                    if (TypeIsAnonymous || TypeIsException)
-                    {
-                        Custom = GenerateForAllMembers();
-                    }
-                    else if (TypeIsValueTuple)
-                    {
-                        Custom = GenerateForAllMembers();
-                    }
-                    else if (IsDefault)
-                    {
-                        Formatter.RaiseOnRenderingUnregisteredType(typeof(T), mimeType, out var formatter);
+                var formatter = Formatter.TypeFormatters
+                                         .GetOrAdd(
+                                             (typeof(T), mimeType),
+                                             tuple => CreateFormatterOnDemand(tuple.mimeType));
 
-                        if (formatter is ITypeFormatter<T> formatterT)
-                        {
-                            Custom = formatterT.Format;
-                        }
-                        else 
-                        {
-                            if (!typeof(IEnumerable).IsAssignableFrom(typeof(T)))
-                            {
-                                Custom = GenerateForAllMembers();
-                            }
-                        }
-                    }
-                }
-
-                (Custom ?? FormatPlainTextDefault)(obj, writer);
+                formatter.Format(obj, writer);
             }
             else
             {
-                FormatPlainTextDefault(obj, writer);
+                PlainTextFormatter<T>.Default.Format(obj, writer);
             }
         }
 
-        internal static bool IsDefault => FormatPlainTextDefault == PlainTextFormatter<T>.Default.Format;
+        private static ITypeFormatter CreateFormatterOnDemand(string mimeType)
+        {
+            switch (mimeType)
+            {
+                case "text/html":
 
-        /// <summary>
-        ///   Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence of <typeparamref name="T" />.
-        /// </summary>
-        /// <value> The list expansion limit.</value>
+                    return HtmlFormatter<T>.Create();
+
+                default:
+
+                    return PlainTextFormatter<T>.Create();
+            }
+        }
+
         public static int ListExpansionLimit
         {
             get => _listExpansionLimit ?? Formatter.ListExpansionLimit;

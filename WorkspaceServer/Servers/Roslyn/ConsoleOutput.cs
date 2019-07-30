@@ -11,7 +11,6 @@ namespace WorkspaceServer.Servers.Roslyn
 {
     public class ConsoleOutput : IDisposable
     {
-       
         private TextWriter originalOutputWriter;
         private TextWriter originalErrorWriter;
         private readonly TrackingStringWriter outputWriter = new TrackingStringWriter();
@@ -71,16 +70,10 @@ namespace WorkspaceServer.Servers.Roslyn
                 consoleLock.Release();
             }
         }
-
-
        
         public string StandardOutput => outputWriter.ToString();
 
         public string StandardError => errorWriter.ToString();
-        public bool WriteOccurredOnStandardOutput => outputWriter.WriteOccurred;
-
-        public bool WriteOccurredOnStandardError => errorWriter.WriteOccurred;
-
 
         public void Clear()
         {

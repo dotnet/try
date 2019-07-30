@@ -22,30 +22,29 @@ namespace WorkspaceServer.Servers.Roslyn
             public int Length { get; set; }
         }
 
-        private Subject<string> WriteEvents = new Subject<string>();
+        private readonly Subject<string> _writeEvents = new Subject<string>();
         private readonly List<Region> _regions = new List<Region>();
         private bool _trackingWriteOperation;
         private int _observerCount;
 
         private readonly CompositeDisposable _disposable;
         private readonly IObservable<string> _scheduleEvents;
+
         public TrackingStringWriter()
         {
             var scheduler = new EventLoopScheduler(t =>
            {
                var thread = new Thread(t);
-               thread.Name = "Diego";
                thread.IsBackground = true;
                return thread;
            });
 
-            _scheduleEvents = WriteEvents.ObserveOn(scheduler);
+            _scheduleEvents = _writeEvents.ObserveOn(scheduler);
 
-
-            _disposable = new CompositeDisposable()
+            _disposable = new CompositeDisposable
             {
                 scheduler,
-                WriteEvents
+                _writeEvents
             };
         }
 
@@ -96,7 +95,7 @@ namespace WorkspaceServer.Servers.Roslyn
         {
             if (_observerCount > 0)
             {
-                WriteEvents.OnNext(sb.ToString(region.Start, region.Length));
+                _writeEvents.OnNext(sb.ToString(region.Start, region.Length));
             }
         }
 

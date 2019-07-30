@@ -122,7 +122,7 @@ namespace WorkspaceServer.Kernel
                 Exception exception = null;
                 using (var console = await ConsoleOutput.Capture())
                 {
-                    console.SubscribeToStandardOutput((std) => PublishOutput(std, context, codeSubmission));
+                    console.SubscribeToStandardOutput(std => PublishOutput(std, context, codeSubmission));
 
                     try
                     {
@@ -162,15 +162,11 @@ namespace WorkspaceServer.Kernel
                 {
                     if (HasReturnValue)
                     {
-                        var formatted = _scriptState.ReturnValue.ToDisplayString();
+                        var returnValueType = _scriptState.ReturnValue?.GetType();
 
-                        var mimeType = Formatter.MimeTypeFor(_scriptState.ReturnValue?.GetType() ?? typeof(object));
+                        var mimeType = MimeTypeFor(returnValueType);
 
-                        if (formatted.TrimStart().StartsWith("<"))
-                        {
-                            // FIX: (HandleSubmitCode) 
-                            mimeType = "text/html";
-                        }
+                        var formatted = _scriptState.ReturnValue.ToDisplayString(mimeType);
 
                         var formattedValues = new List<FormattedValue>
                         {
@@ -192,16 +188,29 @@ namespace WorkspaceServer.Kernel
             else
             {
                 context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
+                context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
                 context.OnCompleted();
             }
         }
 
-        private void PublishOutput(string output, KernelInvocationContext context, IKernelCommand command)
+        private static string MimeTypeFor(Type returnValueType)
+        {
+            return returnValueType?.IsPrimitive == true ||
+                   returnValueType == typeof(string)
+                       ? "text/plain"
+                       : "text/html";
+        }
+
+        private void PublishOutput(
+            string output, 
+            KernelInvocationContext context, 
+            IKernelCommand command)
         {
             var formattedValues = new List<FormattedValue>
                         {
+
                             new FormattedValue(
-                                Formatter.MimeTypeFor(output?.GetType() ?? typeof(object)), output)
+                                PlainTextFormatter.MimeType, output)
                         };
 
             context.OnNext(

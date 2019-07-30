@@ -22,15 +22,8 @@ namespace WorkspaceServer.Kernel
                          new SubmitCode($@"
 using static {typeof(PocketViewTags).FullName};
 using {typeof(PocketView).Namespace};
-
-Formatter.OnRenderingUnregisteredType += (Type type, string mimeType, out ITypeFormatter formatter) =>
-{{
-    var htmlFormatter =  HtmlFormatter.Create(type);
-
-    formatter = htmlFormatter;
-}};
-
 "))).Wait();
+
             return kernel;
         }
 
