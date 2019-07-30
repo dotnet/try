@@ -14,24 +14,24 @@ namespace MLS.Agent
 {
     public class JupyterCommandLine
     {
+        private FileInfo _pythonExeLocation;
         private IConsole _console;
-        private readonly IDirectoryAccessor _kernelContentDir;
 
         public JupyterCommandLine(IConsole console)
         {
+            _pythonExeLocation = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\python.exe"));
             _console = console;
-            _kernelContentDir = new FileSystemDirectoryAccessor(new DirectoryInfo(@"C:\Users\akagarw\try.dot.net\github-try\try\Microsoft.DotNet.Interactive.Jupyter\ContentFiles")); ;
         }
 
         public async Task<int> InvokeAsync()
         {
-            var jupyterPathsResult = await Tools.CommandLine.Execute(@"C:\Users\akagarw\AppData\Local\Continuum\anaconda3\python.exe", "-m jupyter --paths");
+            var jupyterPathsResult = await Tools.CommandLine.Execute(_pythonExeLocation, "-m jupyter --paths");
             var dataPathsResult = JupyterPathInfo.GetDataPaths(jupyterPathsResult);
             if (string.IsNullOrEmpty(dataPathsResult.Error))
             {
                 //to do: find out what this path is
 
-                Installkernel(dataPathsResult.Paths.Select(path => new FileSystemDirectoryAccessor(path)), _console);
+                Installkernel(dataPathsResult.Paths.Select(path => new FileSystemDirectoryAccessor(path)));
                 _console.Out.WriteLine(".NET kernel installation succeded");
                 return 0;
             }
@@ -42,7 +42,7 @@ namespace MLS.Agent
             }
         }
 
-        private void Installkernel(IEnumerable<IDirectoryAccessor> directoryAccessors, IConsole console)
+        private void Installkernel(IEnumerable<IDirectoryAccessor> directoryAccessors)
         {
             foreach (var directoryAccessor in directoryAccessors)
             {
@@ -52,13 +52,13 @@ namespace MLS.Agent
                     var dotnetkernelDir = kernelsDirAccessor.GetDirectoryAccessorForRelativePath(".NET");
                     dotnetkernelDir.EnsureRootDirectoryExists();
 
-                    console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
+                    _console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
 
                     dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("kernel.json"), typeof(Program).ReadManifestResource("MLS.Agent.kernel.json"));
                     dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("logo-32x32.png"), typeof(Program).ReadManifestResource("MLS.Agent.logo-32x32.png"));
                     dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("logo-64x64.png"), typeof(Program).ReadManifestResource("MLS.Agent.logo-64x64.png"));
                     
-                    console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
+                    _console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
                 }
             }
         }

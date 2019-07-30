@@ -31,8 +31,6 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Prints_to_console_when_kernel_installation_succeded()
         {
-            //to do: using environment variable this way will cause test flakiness
-            Environment.SetEnvironmentVariable("path", @"C:\Users\akagarw\AppData\Local\Continuum\anaconda3");
             var console = new TestConsole();
             await GetJupyterCommandLine(console).InvokeAsync();
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");

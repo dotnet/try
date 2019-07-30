@@ -27,7 +27,7 @@ namespace MLS.Agent
             }
             else
             {
-                return new JupyterDataPathResult($"Tried to invoke \"jupyter --paths\" but failed with exception: {string.Join("\n", jupyterPathResult.Error)}");
+                return new JupyterDataPathResult($"Tried to invoke \"jupyter --paths\" but failed with error: {string.Join("\n", jupyterPathResult.Error)}");
             }
         }
 
