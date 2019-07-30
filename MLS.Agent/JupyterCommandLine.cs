@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using System;
 using System.Collections.Generic;
@@ -16,16 +17,20 @@ namespace MLS.Agent
     {
         private FileInfo _pythonExeLocation;
         private IConsole _console;
+        private IJupyterPathStuff _jupyterPathStuff;
 
-        public JupyterCommandLine(IConsole console)
+        public delegate Task<CommandLineResult> GetJupyterPaths(FileInfo pythonExeLocation, string args);
+
+        public JupyterCommandLine(IConsole console, IJupyterPathStuff jupyterPathStuff)
         {
             _pythonExeLocation = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\python.exe"));
             _console = console;
+            _jupyterPathStuff = jupyterPathStuff;
         }
 
         public async Task<int> InvokeAsync()
         {
-            var jupyterPathsResult = await Tools.CommandLine.Execute(_pythonExeLocation, "-m jupyter --paths");
+            var jupyterPathsResult = await _jupyterPathStuff.GetJupyterPaths(_pythonExeLocation, "-m jupyter --paths");
             var dataPathsResult = JupyterPathInfo.GetDataPaths(jupyterPathsResult);
             if (string.IsNullOrEmpty(dataPathsResult.Error))
             {
@@ -61,6 +66,19 @@ namespace MLS.Agent
                     _console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
                 }
             }
+        }
+    }
+
+    public interface IJupyterPathStuff
+    {
+        Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args);
+    }
+
+    public class JupyterPathStuff : IJupyterPathStuff
+    {
+        public Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args)
+        {
+            return Tools.CommandLine.Execute(fileInfo, args);
         }
     }
 }
