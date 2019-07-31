@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         public object Value { get; }
+
         public bool IsLastValue { get; }
 
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }

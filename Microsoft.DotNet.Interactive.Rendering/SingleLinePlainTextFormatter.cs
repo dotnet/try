@@ -5,15 +5,17 @@ using System.IO;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    internal class SingleLineTextFormatter : IDisplayTextFormatter
+    internal class SingleLinePlainTextFormatter : IPlainTextFormatter
     {
         private const string EndObject = " }";
         private const string EndSequence = " ]";
+        private const string EndTuple = " )";
         private const string ItemSeparator = ", ";
         private const string NameValueDelimiter = ": ";
         private const string PropertySeparator = ", ";
         private const string StartObject = "{ ";
         private const string StartSequence = "[ ";
+        private const string StartTuple = "( ";
 
         public void WriteStartProperty(TextWriter writer)
         {
@@ -30,6 +32,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public void WriteStartSequence(TextWriter writer) => writer.Write(StartSequence);
 
         public void WriteEndSequence(TextWriter writer) => writer.Write(EndSequence);
+        public void WriteStartTuple(TextWriter writer) => writer.Write(StartTuple);
+
+        public void WriteEndTuple(TextWriter writer) => writer.Write(EndTuple);
 
         public void WriteNameValueDelimiter(TextWriter writer) => writer.Write(NameValueDelimiter);
 

@@ -12,21 +12,21 @@ namespace Microsoft.DotNet.Interactive.Rendering
     {
         public MemberAccessor(MemberInfo member)
         {
-            var targetParam = Expression.Parameter(typeof(T), "target");
+            Member = member;
 
-            MemberName = member.Name;
+            var targetParam = Expression.Parameter(typeof(T), "target");
 
             GetValue = (Func<T, object>)Expression.Lambda(
                 typeof(Func<T, object>),
                 Expression.TypeAs(
-                    Expression.PropertyOrField(targetParam, MemberName),
+                    Expression.PropertyOrField(targetParam, Member.Name),
                     typeof(object)),
                 targetParam).Compile();
         }
 
-        public bool Ignore { get; set; }
+        public MemberInfo Member { get; }
 
-        public string MemberName { get; }
+        public bool Ignore { get; set; }
 
         public Func<T, object> GetValue { get; set; }
     }

@@ -5,27 +5,31 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Html;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    /// <summary>
-    /// Provides methods for formatting objects into log strings.
-    /// </summary>
+    public delegate void OnRenderingUnregisteredType(
+        Type type,
+        string mimeType,
+        out ITypeFormatter formatter);
+
     public static class Formatter
     {
-        private const string DefaultMimeType = "text/plain";
-        private static Func<Type, bool> _autoGenerateForType = t => false;
         private static int _defaultListExpansionLimit;
         private static int _recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
-        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter>> _genericFormatters = new ConcurrentDictionary<Type, Action<object, TextWriter>>();
+        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters =
+            new ConcurrentDictionary<Type, Action<object, TextWriter, string>>();
+
         private static readonly ConcurrentDictionary<Type, string> _mimeTypesByType = new ConcurrentDictionary<Type, string>();
+
+        internal static readonly ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter> TypeFormatters = new ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter>();
 
         /// <summary>
         /// Initializes the <see cref="Formatter"/> class.
@@ -40,7 +44,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// </summary>
         public static Func<TextWriter> CreateWriter = () => new StringWriter(CultureInfo.InvariantCulture);
 
-        internal static IDisplayTextFormatter TextFormatter = new SingleLineTextFormatter();
+        internal static IPlainTextFormatter PlainTextFormatter = new SingleLinePlainTextFormatter();
 
         /// <summary>
         /// Gets or sets the limit to the number of items that will be written out in detail from an IEnumerable sequence.
@@ -97,44 +101,51 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// </summary>
         public static void ResetToDefault()
         {
+            TypeFormatters.Clear();
             Clearing?.Invoke(null, EventArgs.Empty);
 
-            AutoGenerateForType = t => false;
             ListExpansionLimit = 10;
             RecursionLimit = 6;
             NullString = "<null>";
 
             _mimeTypesByType.Clear();
-            RegisterDefaults();
+            ConfigureDefaultPlainTextFormattersForSpecialTypes();
         }
 
-        /// <summary>
-        /// Gets or sets a delegate that is checked when a type is being formatted that not previously been formatted and has no custom formatting rules set. If this delegate returns true, then <see cref="Formatter{T}.RegisterForAllMembers" /> is called for that type.
-        /// </summary>
-        /// <value>
-        /// The type being formatted.
-        /// </value>
-        /// <exception cref="System.ArgumentNullException">value</exception>
-        public static Func<Type, bool> AutoGenerateForType
+        public static string ToDisplayString(
+            this object obj, 
+            string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
-            get => _autoGenerateForType;
-            set => _autoGenerateForType = value ?? throw new ArgumentNullException(nameof(value));
-        }
+            // TODO: (ToDisplayString) rename
+            if (mimeType == null)
+            {
+                throw new ArgumentNullException(nameof(mimeType));
+            }
 
-        public static string ToDisplayString(this object obj)
-        {
             var writer = CreateWriter();
-            FormatTo(obj, writer);
+            FormatTo(obj, writer, mimeType);
             return writer.ToString();
         }
 
-        /// <summary>
-        /// Writes a formatted representation of the object to the specified writer.
-        /// </summary>
-        /// <typeparam name="T">The type of the object being written.</typeparam>
-        /// <param name="obj">The object to write.</param>
-        /// <param name="writer">The writer.</param>
-        public static void FormatTo<T>(this T obj, TextWriter writer)
+        public static string ToDisplayString(
+            this object obj,
+            ITypeFormatter formatter)
+        {
+            // TODO: (ToDisplayString) rename
+            if (formatter == null)
+            {
+                throw new ArgumentNullException(nameof(formatter));
+            }
+
+            var writer = CreateWriter();
+            formatter.Format(obj, writer);
+            return writer.ToString();
+        }
+
+        public static void FormatTo<T>(
+            this T obj, 
+            TextWriter writer,
+            string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
             if (obj != null)
             {
@@ -145,29 +156,42 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     // in some cases the generic parameter is Object but the object is of a more specific type, in which case get or add a cached accessor to the more specific Formatter<T>.Format method
                     var genericFormatter =
                         _genericFormatters.GetOrAdd(actualType,
-                                                   GetGenericFormatterMethod);
-                    genericFormatter(obj, writer);
+                                                    GetGenericFormatterMethod);
+                    genericFormatter(obj, writer, mimeType);
                     return;
                 }
             }
 
-            Formatter<T>.FormatTo(obj, writer);
+            Formatter<T>.FormatTo(obj, writer, mimeType);
         }
 
-        internal static Action<object, TextWriter> GetGenericFormatterMethod(this Type type)
+
+        internal static Action<object, TextWriter, string> GetGenericFormatterMethod(this Type type)
         {
             var methodInfo = typeof(Formatter<>)
                              .MakeGenericType(type)
-                             .GetMethod(nameof(Formatter<object>.FormatTo), new[] { type, typeof(TextWriter) });
+                             .GetMethod(nameof(Formatter<object>.FormatTo), new[]
+                             {
+                                 type,
+                                 typeof(TextWriter),
+                                 typeof(string)
+                             });
 
             var targetParam = Expression.Parameter(typeof(object), "target");
             var writerParam = Expression.Parameter(typeof(TextWriter), "target");
+            var mimeTypeParam = Expression.Parameter(typeof(string), "target");
 
-            var methodCallExpr = Expression.Call(null, methodInfo,
+            var methodCallExpr = Expression.Call(null, 
+                                                 methodInfo,
                                                  Expression.Convert(targetParam, type),
-                                                 writerParam);
+                                                 writerParam,
+                                                 mimeTypeParam);
 
-            return Expression.Lambda<Action<object, TextWriter>>(methodCallExpr, targetParam, writerParam).Compile();
+            return Expression.Lambda<Action<object, TextWriter, string>>(
+                methodCallExpr,
+                targetParam,
+                writerParam,
+                mimeTypeParam).Compile();
         }
 
         // TODO: (Formatter) make Join methods public and expose an override for iteration limit
@@ -191,7 +215,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             var i = 0;
 
-            TextFormatter.WriteStartSequence(writer);
+            PlainTextFormatter.WriteStartSequence(writer);
 
             listExpansionLimit ??= Formatter<T>.ListExpansionLimit;
 
@@ -204,12 +228,12 @@ namespace Microsoft.DotNet.Interactive.Rendering
                         // write out another item in the list
                         if (i > 0)
                         {
-                            TextFormatter.WriteSequenceDelimiter(writer);
+                            PlainTextFormatter.WriteSequenceDelimiter(writer);
                         }
 
                         i++;
 
-                        TextFormatter.WriteStartSequenceItem(writer);
+                        PlainTextFormatter.WriteStartSequenceItem(writer);
 
                         enumerator.Current.FormatTo(writer);
                     }
@@ -229,123 +253,57 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 }
             }
 
-            TextFormatter.WriteEndSequence(writer);
+            PlainTextFormatter.WriteEndSequence(writer);
         }
 
-        /// <summary>
-        ///   Registers a formatter to be used when formatting instances of a specified type.
-        /// </summary>
-        public static void Register(Type type, Action<object, TextWriter> formatter)
+        public static void Register(
+            Type type,
+            Action<object, TextWriter> formatter,
+            string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
+
+
+
+            var delegateType = typeof(Action<,>).MakeGenericType(type, typeof(TextWriter));
+
             var genericRegisterMethod = typeof(Formatter<>)
                                         .MakeGenericType(type)
-                                        .GetMethod("Register", new[] { typeof(Action<,>).MakeGenericType(type, typeof(TextWriter)) });
+                                        .GetMethod(nameof(Formatter<object>.Register), new[]
+                                        {
+                                            delegateType,
+                                            typeof(string)
+                                        });
 
-            genericRegisterMethod.Invoke(null, new object[] { formatter });
+            genericRegisterMethod.Invoke(null, new object[] { formatter, mimeType });
         }
 
-        /// <summary>
-        ///   Registers a formatter to be used when formatting instances of a specified type.
-        /// </summary>
-        public static void RegisterForAllMembers(Type type, bool includeInternals = false)
+        public static void Register(ITypeFormatter formatter)
         {
-            var genericRegisterMethod = typeof(Formatter<>)
-                                        .MakeGenericType(type)
-                                        .GetMethod(nameof(RegisterForAllMembers));
+            if (formatter == null)
+            {
+                throw new ArgumentNullException(nameof(formatter));
+            }
 
-            genericRegisterMethod.Invoke(null, new object[] { includeInternals });
+            TypeFormatters[(formatter.Type, formatter.MimeType)] = formatter;
         }
 
-        private static void RegisterDefaults()
+        private static void ConfigureDefaultPlainTextFormattersForSpecialTypes()
         {
-            // common primitive types
-            Formatter<bool>.Default = (value, writer) => writer.Write(value);
-            Formatter<byte>.Default = (value, writer) => writer.Write(value);
-            Formatter<short>.Default = (value, writer) => writer.Write(value);
-            Formatter<int>.Default = (value, writer) => writer.Write(value);
-            Formatter<long>.Default = (value, writer) => writer.Write(value);
-            Formatter<Guid>.Default = (value, writer) => writer.Write(value);
-            Formatter<decimal>.Default = (value, writer) => writer.Write(value);
-            Formatter<float>.Default = (value, writer) => writer.Write(value);
-            Formatter<double>.Default = (value, writer) => writer.Write(value);
-
-            Formatter<DateTime>.Default = (value, writer) => writer.Write(value.ToString("u"));
-            Formatter<DateTimeOffset>.Default = (value, writer) => writer.Write(value.ToString("u"));
-
-            // common complex types
-            Formatter<KeyValuePair<string, object>>.Default = (pair, writer) =>
-            {
-                writer.Write(pair.Key);
-                TextFormatter.WriteNameValueDelimiter(writer);
-                pair.Value.FormatTo(writer);
-            };
-
-            Formatter<DictionaryEntry>.Default = (pair, writer) =>
-            {
-                writer.Write(pair.Key);
-                TextFormatter.WriteNameValueDelimiter(writer);
-                pair.Value.FormatTo(writer);
-            };
-
-            Formatter<ExpandoObject>.Default = (expando, writer) =>
-            {
-                TextFormatter.WriteStartObject(writer);
-                var pairs = expando.ToArray();
-                var length = pairs.Length;
-                for (var i = 0; i < length; i++)
-                {
-                    var pair = pairs[i];
-                    writer.Write(pair.Key);
-                    TextFormatter.WriteNameValueDelimiter(writer);
-                    pair.Value.FormatTo(writer);
-                    if (i < length - 1)
-                    {
-                        TextFormatter.WritePropertyDelimiter(writer);
-                    }
-                }
-
-                TextFormatter.WriteEndObject(writer);
-            };
-
-            Formatter<Type>.Default = (type, writer) =>
-            {
-                var typeName = type.Name;
-                if (typeName.Contains("`") && !type.IsAnonymous())
-                {
-                    writer.Write(typeName.Remove(typeName.IndexOf('`')));
-                    writer.Write("<");
-                    var genericArguments = type.GetGenericArguments();
-
-                    for (var i = 0; i < genericArguments.Length; i++)
-                    {
-                        Formatter<Type>.Default(genericArguments[i], writer);
-                        if (i < genericArguments.Length - 1)
-                        {
-                            writer.Write(",");
-                        }
-                    }
-
-                    writer.Write(">");
-                }
-                else
-                {
-                    writer.Write(typeName);
-                }
-            };
-
             // an additional formatter is needed since typeof(Type) == System.RuntimeType, which is not public
             // ReSharper disable once PossibleMistakenCallToGetType.2
             Register(typeof(Type).GetType(),
-                     (obj, writer) => Formatter<Type>.Default((Type) obj, writer));
+                     (obj, writer) => Formatter<Type>.FormatTo((Type) obj, writer, Rendering.PlainTextFormatter.MimeType));
 
             // supply a formatter for String so that it will not be iterated
-            Formatter<string>.Default = (s, writer) => writer.Write(s);
+            // Formatter<string>.FormatPlainTextDefault = (s, writer) => writer.Write(s);
 
             // Newtonsoft.Json types -- these implement IEnumerable and their default output is not useful, so use their default ToString
             TryRegisterDefault("Newtonsoft.Json.Linq.JArray, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
             TryRegisterDefault("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
 
-            Formatter<PocketView>.RegisterView(view => view);
+            Formatter<PocketView>.RegisterHtml(view => view);
+            Formatter<HtmlString>.RegisterHtml(view => view);
+            Formatter<JsonString>.RegisterHtml(view => view);
         }
 
         private static void TryRegisterDefault(string typeName, Action<object, TextWriter> write)
@@ -355,16 +313,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             {
                 Register(type, write);
             }
-        }
-
-        public static string MimeTypeFor(Type type)
-        {
-           return  _mimeTypesByType.TryGetValue(type, out var mimeType) ? mimeType : DefaultMimeType;
-        }
-
-        public static void SetMimeType(Type type, string mimeType)
-        {
-            _mimeTypesByType[type] = mimeType;
         }
     }
 }

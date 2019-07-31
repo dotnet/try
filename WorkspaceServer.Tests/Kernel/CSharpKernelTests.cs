@@ -134,13 +134,16 @@ namespace WorkspaceServer.Tests.Kernel
 
             await kernel.SendAsync(new SubmitCode("var a ="));
 
-            KernelEvents.Should()
+            KernelEvents
+                .Should()
                 .NotContain(e => e.Value is ValueProduced);
 
-            KernelEvents.ValuesOnly()
-                .Last()
+            KernelEvents
+                .ValuesOnly()
                 .Should()
-                .BeOfType<IncompleteCodeSubmissionReceived>();
+                .Contain(e => e is CodeSubmissionEvaluated)
+                .And
+                .Contain(e => e is IncompleteCodeSubmissionReceived);
         }
 
         [Fact]
@@ -198,7 +201,8 @@ Console.Write(""value two"");
 Console.Write(""value three"");");
             await kernel.SendAsync(kernelCommand);
 
-            KernelEvents.ValuesOnly()
+            KernelEvents
+                .ValuesOnly()
                 .OfType<ValueProduced>()
                 .Should()
                 .BeEquivalentTo(

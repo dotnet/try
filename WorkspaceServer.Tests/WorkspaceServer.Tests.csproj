@@ -65,7 +65,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />-->
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.Tests\Microsoft.DotNet.Try.Protocol.Tests.csproj" />
     <ProjectReference Include="..\MLS.Agent\MLS.Agent.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
@@ -86,7 +85,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="TestProjects\SampleConsole\Subdirectory\Tutorial.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

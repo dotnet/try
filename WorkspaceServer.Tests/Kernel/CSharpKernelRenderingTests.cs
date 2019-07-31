@@ -2,15 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using WorkspaceServer.Kernel;
+using Microsoft.DotNet.Interactive.Rendering;
+using Pocket;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,26 +23,59 @@ namespace WorkspaceServer.Tests.Kernel
         {
         }
 
-        [Fact]
-        public async Task HTML_rendered_using_PocketView_has_the_mime_type_set_correctly()
+        [Theory]
+        [InlineData("b(123) // PocketView", "<b>123</b>")]
+        [InlineData("new[] { 1, 2, 3, 4 } // sequence", "<table>")]
+        [InlineData("new[] { new { a = 123 }, new { a = 456 } } // sequence of anonymous objects", "<table>")]
+        public async Task Default_rendering_is_HTML(
+            string submission,
+            string expectedContent)
         {
-            var kernel = new CSharpKernel()
-                .UseDefaultRendering();
+            var kernel = CreateKernel();
 
-            var result = await kernel.SendAsync(new SubmitCode("b(123)"));
-
-            await Task.Delay(500);
+            var result = await kernel.SendAsync(new SubmitCode(submission));
 
             var valueProduced = await result
                                       .KernelEvents
                                       .OfType<ValueProduced>()
-                                      .Timeout(10.Seconds())
+                                      .Timeout(5.Seconds())
                                       .FirstAsync();
+
+            Logger.Log.Info(valueProduced.ToDisplayString());
 
             valueProduced
                 .FormattedValues
                 .Should()
-                .BeEquivalentTo(new FormattedValue("text/html", "<b>123</b>"));
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Contains(expectedContent));
+        }
+
+        [Theory]
+        [InlineData("div(123).ToString()", "<div>123</div>" )]
+        [InlineData("\"hi\"", "hi" )]
+        public async Task String_is_rendered_as_plain_text(
+            string submission,
+            string expectedContent)
+        {
+             var kernel = CreateKernel();
+
+            var result = await kernel.SendAsync(new SubmitCode(submission));
+
+            var valueProduced = await result
+                                      .KernelEvents
+                                      .OfType<ValueProduced>()
+                                      .Timeout(5.Seconds())
+                                      .FirstAsync();
+
+            Logger.Log.Info(valueProduced.ToDisplayString());
+
+            valueProduced
+                .FormattedValues
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/plain" &&
+                                   v.Value.ToString().Contains(expectedContent));
         }
     }
 }

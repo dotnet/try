@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -123,7 +122,7 @@ namespace WorkspaceServer.Kernel
                 Exception exception = null;
                 using (var console = await ConsoleOutput.Capture())
                 {
-                    console.SubscribeToStandardOutput((std) => PublishOutput(std, context, codeSubmission));
+                    console.SubscribeToStandardOutput(std => PublishOutput(std, context, codeSubmission));
 
                     try
                     {
@@ -163,13 +162,15 @@ namespace WorkspaceServer.Kernel
                 {
                     if (HasReturnValue)
                     {
-                        var writer = new StringWriter();
-                        _scriptState.ReturnValue.FormatTo(writer);
+                        var returnValueType = _scriptState.ReturnValue?.GetType();
+
+                        var mimeType = MimeTypeFor(returnValueType);
+
+                        var formatted = _scriptState.ReturnValue.ToDisplayString(mimeType);
 
                         var formattedValues = new List<FormattedValue>
                         {
-                            new FormattedValue(
-                                Formatter.MimeTypeFor(_scriptState.ReturnValue?.GetType() ?? typeof(object)), writer.ToString())
+                            new FormattedValue(mimeType, formatted)
                         };
 
                         context.OnNext(
@@ -187,16 +188,29 @@ namespace WorkspaceServer.Kernel
             else
             {
                 context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
+                context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
                 context.OnCompleted();
             }
         }
 
-        private void PublishOutput(string output, KernelInvocationContext context, IKernelCommand command)
+        private static string MimeTypeFor(Type returnValueType)
+        {
+            return returnValueType?.IsPrimitive == true ||
+                   returnValueType == typeof(string)
+                       ? "text/plain"
+                       : "text/html";
+        }
+
+        private void PublishOutput(
+            string output, 
+            KernelInvocationContext context, 
+            IKernelCommand command)
         {
             var formattedValues = new List<FormattedValue>
                         {
+
                             new FormattedValue(
-                                Formatter.MimeTypeFor(output?.GetType() ?? typeof(object)), output)
+                                PlainTextFormatter.MimeType, output)
                         };
 
             context.OnNext(

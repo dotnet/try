@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools;
 using WorkspaceServer;
 using Xunit.Abstractions;
@@ -18,6 +19,7 @@ namespace Pocket
                     typeof(LogEvents).Assembly,
                     typeof(CommandLine).Assembly,
                     typeof(ICodeRunner).Assembly,
+                    typeof(IKernelEvent).Assembly
                 });
     }
 }

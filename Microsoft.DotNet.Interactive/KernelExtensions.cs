@@ -39,8 +39,7 @@ namespace Microsoft.DotNet.Interactive
             };
 
             extend.Handler = CommandHandler.Create<FileInfo, KernelPipelineContext>((dll, pipelineContext) =>
-                                                                                        kernel.SendAsync(new LoadExtension(dll))
-            );
+                                                                                         kernel.SendAsync(new LoadExtension(dll)));
 
             kernel.AddDirective(extend);
 

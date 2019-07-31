@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.AspNetCore.Html;
+
 namespace Microsoft.DotNet.Interactive.Rendering
 {
     public static class PocketViewTags
@@ -37,6 +39,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public static dynamic hgroup => _.hgroup;
         public static dynamic hr => _.hr;
         public static dynamic html => _.html;
+        public static IHtmlContent HTML(string content) => content.ToHtmlContent();
         public static dynamic i => _.i;
         public static dynamic iframe => _.iframe;
         public static dynamic img => _.img;
@@ -64,6 +67,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public static dynamic source => _.source;
         public static dynamic span => _.span;
         public static dynamic strike => _.strike;
+        public static dynamic style => _.style;
         public static dynamic strong => _.strong;
         public static dynamic sub => _.sub;
         public static dynamic sup => _.sup;

@@ -193,6 +193,10 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                 writer.Write(s.HtmlEncode());
                                 break;
 
+                            case IHtmlContent html:
+                                html.WriteTo(writer, HtmlEncoder.Default);
+                                break;
+
                             case IEnumerable seq:
                                 foreach (var item in seq)
                                 {
@@ -207,18 +211,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                             break;
 
                                         default:
-                                            var mimeType = Formatter.MimeTypeFor(item.GetType());
-                                            if (mimeType != null && mimeType != "text/plain")
-                                            {
-                                                item.FormatTo(writer);
-                                            }
-                                            else
-                                            {
-                                                var formatted = item.ToDisplayString()
-                                                                    .HtmlEncode();
+                                            var formatted = item
+                                                            .ToDisplayString()
+                                                            .HtmlEncode();
 
-                                                formatted.FormatTo(writer);
-                                            }
+                                            formatted.FormatTo(
+                                                writer,
+                                                HtmlFormatter.MimeType);
 
                                             break;
                                     }
@@ -227,7 +226,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                 break;
 
                             default:
-                                arg.FormatTo(writer);
+
+                                var encoded = arg
+                                              .ToDisplayString()
+                                              .HtmlEncode();
+
+                                encoded.WriteTo(writer, HtmlEncoder.Default);
+
                                 break;
                         }
                     }

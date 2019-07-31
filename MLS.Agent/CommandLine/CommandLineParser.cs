@@ -52,7 +52,6 @@ namespace MLS.Agent.CommandLine
             StartupOptions startupOptions);
 
         public delegate Task<int> Jupyter(
-            JupyterOptions options,
             IConsole console,
             StartServer startServer = null,
             InvocationContext context = null);
@@ -100,8 +99,7 @@ namespace MLS.Agent.CommandLine
                    PackCommand.Do;
 
             install = install ??
-             InstallCommand.Do;
-
+                      InstallCommand.Do;
 
             var dirArgument = new Argument<DirectoryInfo>
             {
@@ -389,7 +387,7 @@ namespace MLS.Agent.CommandLine
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
 
-                    return jupyter(options, console, startServer, context);
+                    return jupyter(console, startServer, context);
                 });
 
                 return jupyterCommand;

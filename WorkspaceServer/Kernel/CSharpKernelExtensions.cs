@@ -23,6 +23,7 @@ namespace WorkspaceServer.Kernel
 using static {typeof(PocketViewTags).FullName};
 using {typeof(PocketView).Namespace};
 "))).Wait();
+
             return kernel;
         }
 
