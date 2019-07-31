@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.PlatformAbstractions;

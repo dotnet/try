@@ -20,7 +20,7 @@ namespace MLS.Agent.Tools
             FileInfo exePath,
             string args,
             DirectoryInfo workingDir = null,
-            Budget budget = null) => 
+            Budget budget = null) =>
             Execute(exePath.FullName,
                     args,
                     workingDir,

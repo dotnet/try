@@ -144,7 +144,6 @@ namespace WorkspaceServer.Tests
         public IDirectoryAccessor GetDirectoryAccessorForRelativePath(RelativeDirectoryPath relativePath)
         {
             var newPath = WorkingDirectory.Combine(relativePath);
-            
             return new InMemoryDirectoryAccessor(newPath)
             {
                 _files = _files

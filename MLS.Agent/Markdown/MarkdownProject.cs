@@ -72,6 +72,7 @@ namespace MLS.Agent.Markdown
             {
             }
         }
+
         internal IDirectoryAccessor DirectoryAccessor { get; }
 
         private readonly PackageRegistry _packageRegistry;
