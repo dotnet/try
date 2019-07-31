@@ -379,6 +379,7 @@ namespace MLS.Agent.CommandLine
                             new CSharpKernel()
                                 .UseDefaultRendering()
                                 .UseNugetDirective()
+                                .UseExtendDirective()
                         })
                         .AddSingleton(c => new JupyterRequestContextHandler(
                                               c.GetRequiredService<PackageRegistry>(),
