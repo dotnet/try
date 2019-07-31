@@ -64,6 +64,12 @@ namespace Microsoft.DotNet.Interactive
                             pipelineContext, 
                             next),
 
+                        DisplayValue displayValue =>
+                        HandleDisplayValue(
+                            displayValue,
+                            pipelineContext,
+                            next),
+
                         _ => next(command, pipelineContext)
                         });
         }
@@ -144,6 +150,25 @@ namespace Microsoft.DotNet.Interactive
             }
 
             await next(submitCode, pipelineContext);
+        }
+
+        private async Task HandleDisplayValue(
+            DisplayValue displayValue,
+            KernelPipelineContext pipelineContext,
+            KernelPipelineContinuation next)
+        {
+            pipelineContext.OnExecute(invocationContext =>
+            {
+                invocationContext.OnNext(
+                    new ValueProduced(
+                        displayValue.FormattedValue,
+                        displayValue,
+                        formattedValues: new[] { displayValue.FormattedValue }));
+                invocationContext.OnCompleted();
+                return Task.CompletedTask;
+            });
+
+            await next(displayValue, pipelineContext);
         }
 
         protected Parser BuildDirectiveParser(
