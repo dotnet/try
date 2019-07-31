@@ -4,10 +4,13 @@
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WorkspaceServer;
 
@@ -28,77 +31,35 @@ namespace MLS.Agent
 
         public async Task<int> InvokeAsync()
         {
-            var dataPathsResult = await GetDataPathsAsync();
-            if (string.IsNullOrEmpty(dataPathsResult.Error))
+            using (var disposableDirectory = DisposableDirectory.Create())
             {
-                Installkernel(dataPathsResult.Paths);
-                _console.Out.WriteLine(".NET kernel installation succeded");
-                return 0;
-            }
-            else
-            {
-                _console.Error.WriteLine($".NET kernel installation failed with error: {dataPathsResult.Error}");
-                return -1;
-            }
-        }
+                var assembly = typeof(Program).Assembly;
 
-        private void Installkernel(IEnumerable<IDirectoryAccessor> directoryAccessors)
-        {
-            foreach (var directoryAccessor in directoryAccessors)
-            {
-                var kernelsDirAccessor = directoryAccessor.GetDirectoryAccessorForRelativePath("kernels");
-                if (kernelsDirAccessor.RootDirectoryExists())
+                using (var resourceStream = assembly.GetManifestResourceStream("dotnetKernel.zip"))
                 {
-                    var dotnetkernelDir = kernelsDirAccessor.GetDirectoryAccessorForRelativePath(".NET");
-                    dotnetkernelDir.EnsureRootDirectoryExists();
+                    var zipPath = Path.Combine(disposableDirectory.Directory.FullName, "dotnetKernel.zip");
 
-                    _console.Out.WriteLine($"Installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
+                    using (var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
 
-                    dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("kernel.json"), typeof(Program).ReadManifestResource("MLS.Agent.kernel.json"));
-                    dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("logo-32x32.png"), typeof(Program).ReadManifestResource("MLS.Agent.logo-32x32.png"));
-                    dotnetkernelDir.WriteAllText(new Microsoft.DotNet.Try.Markdown.RelativeFilePath("logo-64x64.png"), typeof(Program).ReadManifestResource("MLS.Agent.logo-64x64.png"));
-                    
-                    _console.Out.WriteLine($"Finished installing the .NET kernel in directory: {dotnetkernelDir.GetFullyQualifiedRoot()}");
+                    ZipFile.ExtractToDirectory(zipPath, disposableDirectory.Directory.FullName);
+
+                    var result = await _jupyterPathsHelper.GetJupyterPaths(_pythonExeLocation, $"-m jupyter kernelspec install {disposableDirectory.Directory.Subdirectory("dotnetKernel").FullName}");
+
+                    if(result.ExitCode ==0)
+                    {
+                        _console.Out.WriteLine(".NET kernel installation succeded");
+                        return 0;
+                    }
+                    else
+                    {
+                        _console.Error.WriteLine($".NET kernel installation failed with error: {string.Join('\n', result.Error)}");
+                        return -1;
+                    }
                 }
             }
-        }
-
-        public async Task<JupyterDataPathResult> GetDataPathsAsync()
-        {
-            var jupyterPathResult = await _jupyterPathsHelper.GetJupyterPaths(_pythonExeLocation, "-m jupyter --paths");
-            if (jupyterPathResult.ExitCode == 0)
-            {
-                if (TryGetDataPaths(jupyterPathResult.Output.ToArray(), out var dataPaths))
-                {
-                    return new JupyterDataPathResult(dataPaths);
-                }
-                else
-                {
-                    return new JupyterDataPathResult($"Could not find the jupyter kernel installation directory." +
-                            $" Output of \"jupyter --paths\" is {string.Join("\n", jupyterPathResult.Output.ToArray())}");
-                }
-            }
-            else
-            {
-                return new JupyterDataPathResult($"Tried to invoke \"jupyter --paths\" but failed with error: {string.Join("\n", jupyterPathResult.Error)}");
-            }
-        }
-
-        private bool TryGetDataPaths(string[] pathInfo, out IEnumerable<IDirectoryAccessor> dataPathsAccessor)
-        {
-            var dataHeaderIndex = Array.FindIndex(pathInfo, element => element.Trim().CompareTo("data:") == 0);
-            if (dataHeaderIndex != -1)
-            {
-                var nextHeaderIndex = Array.FindIndex(pathInfo, dataHeaderIndex + 1, element => element.Trim().EndsWith(":"));
-                if (nextHeaderIndex == -1)
-                    nextHeaderIndex = pathInfo.Count();
-
-                dataPathsAccessor = pathInfo.Skip(dataHeaderIndex + 1).Take(nextHeaderIndex - dataHeaderIndex - 1).Select(dir => _jupyterPathsHelper.GetDirectoryAccessorForPath(dir.Trim()));
-                return true;
-            }
-
-            dataPathsAccessor = null;
-            return false;
         }
     }
 

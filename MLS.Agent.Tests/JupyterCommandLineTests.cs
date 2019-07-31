@@ -17,14 +17,14 @@ namespace MLS.Agent.Tests
 {
     public abstract class JupyterCommandLineTests
     {
-        public abstract IJupyterPathsHelper GetJupyterPathsHelper();
+        public abstract IJupyterPathsHelper GetJupyterPathsHelper(CommandLineResult commandLineResult);
 
         [Fact]
         public async Task Returns_error_when_jupyter_paths_could_not_be_obtained()
         {
             var console = new TestConsole();
             var commandLineResult = new CommandLineResult(1);
-            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterPathsHelper());
+            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterPathsHelper(commandLineResult));
             await jupyterCommandLine.InvokeAsync();
             console.Error.ToString().Should().Contain(".NET kernel installation failed");
         }
@@ -33,7 +33,8 @@ namespace MLS.Agent.Tests
         public async Task Prints_to_console_when_kernel_installation_succeded()
         {
             var console = new TestConsole();
-            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterPathsHelper());
+            var commandLineResult = new CommandLineResult(0);
+            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterPathsHelper(commandLineResult));
             await jupyterCommandLine.InvokeAsync();
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");
         }
@@ -44,7 +45,8 @@ namespace MLS.Agent.Tests
            var dataDirectory = Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\share\jupyter");
 
             var console = new TestConsole();
-            var jupyterPathsHelper = GetJupyterPathsHelper();
+            var commandLineResult = new CommandLineResult(0);
+            var jupyterPathsHelper = GetJupyterPathsHelper(commandLineResult);
             var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
             await jupyterCommandLine.InvokeAsync();
 
@@ -56,9 +58,9 @@ namespace MLS.Agent.Tests
         }
     }
 
-    public class JupyterCommandLineIntegrationTests : JupyterCommandLineTests
+    public class JupyterCommandLineIntegrationTests: JupyterCommandLineTests
     {
-        public override IJupyterPathsHelper GetJupyterPathsHelper()
+        public override IJupyterPathsHelper GetJupyterPathsHelper(CommandLineResult commandLineResult)
         {
             return new JupyterPathsHelper();
         }
@@ -66,9 +68,9 @@ namespace MLS.Agent.Tests
 
     public class InMemoryJupyterCommandLineTests : JupyterCommandLineTests
     {
-        public override IJupyterPathsHelper GetJupyterPathsHelper()
+        public override IJupyterPathsHelper GetJupyterPathsHelper(CommandLineResult commandLineResult)
         {
-            return new InMemoryJupyterPathsHelper(new CommandLineResult(0));
+            return new InMemoryJupyterPathsHelper(commandLineResult);
         }
     }
 }
