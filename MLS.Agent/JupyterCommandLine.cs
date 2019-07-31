@@ -45,7 +45,7 @@ namespace MLS.Agent
                     var dotnetDirectory = disposableDirectory.Directory.CreateSubdirectory(".NET");
                     ZipFile.ExtractToDirectory(zipPath, dotnetDirectory.FullName);
 
-                    var result = await _jupyterPathsHelper.ExecuteCommand($"install {dotnetDirectory.FullName} --user");
+                    var result = await _jupyterPathsHelper.ExecuteCommand("install", $"{dotnetDirectory.FullName} --user");
                     if (result.ExitCode == 0)
                     {
                         _console.Out.WriteLine(string.Join('\n', result.Output));

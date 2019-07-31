@@ -17,9 +17,9 @@ namespace MLS.Agent
             _jupyterKernelSpec = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\Scripts\jupyter-kernelspec.exe"));
         }
 
-        public Task<CommandLineResult> ExecuteCommand(string args)
+        public Task<CommandLineResult> ExecuteCommand(string command, string args="")
         {
-            return Tools.CommandLine.Execute(_jupyterKernelSpec, args);
+            return Tools.CommandLine.Execute(_jupyterKernelSpec, $"{command} {args}");
         }
     }
 }

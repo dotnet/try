@@ -9,6 +9,6 @@ namespace MLS.Agent
 {
     public interface IJupyterKernelSpec
     {
-        Task<CommandLineResult> ExecuteCommand(string command);
+        Task<CommandLineResult> ExecuteCommand(string command, string args="");
     }
 }
