@@ -39,13 +39,7 @@ runtime:
             };
         }
 
-        public IDirectoryAccessor GetDirectoryAccessorForPath(string path)
-        {
-            _dataDirectories.TryGetValue(path, out var value);
-            return value;
-        }
-
-        public async Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args)
+        public async Task<CommandLineResult> ExecuteCommand(string args)
         {
             return _commandLineResult;
         }

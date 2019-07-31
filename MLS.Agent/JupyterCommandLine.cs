@@ -24,7 +24,7 @@ namespace MLS.Agent
 
         public JupyterCommandLine(IConsole console, IJupyterPathsHelper jupyterPathsHelper)
         {
-            _pythonExeLocation = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\python.exe"));
+           
             _console = console;
             _jupyterPathsHelper = jupyterPathsHelper;
         }
@@ -46,7 +46,7 @@ namespace MLS.Agent
 
                     ZipFile.ExtractToDirectory(zipPath, disposableDirectory.Directory.FullName);
 
-                    var result = await _jupyterPathsHelper.GetJupyterPaths(_pythonExeLocation, $"-m jupyter kernelspec install {disposableDirectory.Directory.Subdirectory("dotnetKernel").FullName}");
+                    var result = await _jupyterPathsHelper.ExecuteCommand($"-m jupyter kernelspec install {disposableDirectory.Directory.Subdirectory("dotnetKernel").FullName}");
 
                     if(result.ExitCode ==0)
                     {
@@ -60,25 +60,6 @@ namespace MLS.Agent
                     }
                 }
             }
-        }
-    }
-
-    public interface IJupyterPathsHelper
-    {
-        IDirectoryAccessor GetDirectoryAccessorForPath(string v);
-        Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args);
-    }
-
-    public class JupyterPathsHelper : IJupyterPathsHelper
-    {
-        public IDirectoryAccessor GetDirectoryAccessorForPath(string path)
-        {
-            return new FileSystemDirectoryAccessor(new DirectoryInfo(path));
-        }
-
-        public Task<CommandLineResult> GetJupyterPaths(FileInfo fileInfo, string args)
-        {
-            return Tools.CommandLine.Execute(fileInfo, args);
         }
     }
 }

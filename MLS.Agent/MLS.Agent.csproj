@@ -121,9 +121,9 @@
     <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
       <LogicalName>demo.zip</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\logo-32x32.png" />
-    <EmbeddedResource Include="..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\logo-64x64.png" />
-    <EmbeddedResource Include="..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\kernel.json" />
+    <EmbeddedResource Include="$(IntermediateOutputPath)/dotnetKernel.zip">
+      <LogicalName>dotnetKernel.zip</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
@@ -221,7 +221,7 @@
     <Copy SourceFiles="@(KernelFiles)" DestinationFolder="$(IntermediateOutputPath)dotnetKernel\%(RecursiveDir)" />
   </Target>
 
-  <Target Name="ZipDotnetKernel" DependsOnTargets="CopyKernelFiles">
+  <Target Name="ZipDotnetKernel" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyKernelFiles">
     <ZipDirectory SourceDirectory="$(IntermediateOutputPath)dotnetKernel" DestinationFile="$(IntermediateOutputPath)\dotnetKernel.zip" Overwrite="true" />
   </Target>
 </Project>

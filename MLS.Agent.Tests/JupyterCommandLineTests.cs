@@ -40,7 +40,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact] 
-        public async Task Adds_the_kernels_json_file_and_logos_in_data_directory()
+        public async Task After_installation_kernelspec_list_gives_dotnet()
         {
            var dataDirectory = Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\share\jupyter");
 
@@ -50,11 +50,8 @@ namespace MLS.Agent.Tests
             var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
             await jupyterCommandLine.InvokeAsync();
 
-            var dotnetDirAccessor = jupyterPathsHelper.GetDirectoryAccessorForPath(dataDirectory).GetDirectoryAccessorForRelativePath("kernels/.NET");
-            dotnetDirAccessor.RootDirectoryExists().Should().BeTrue();
-            dotnetDirAccessor.FileExists("kernel.json").Should().BeTrue();
-            dotnetDirAccessor.FileExists("logo-32x32.png").Should().BeTrue();
-            dotnetDirAccessor.FileExists("logo-64x64.png").Should().BeTrue();
+            var installedKernels = await jupyterPathsHelper.ExecuteCommand("-m jupyter kernelspec list");
+            installedKernels.Output.Should().Contain(line => line.Contains(".net"));
         }
     }
 
