@@ -24,6 +24,8 @@ namespace WorkspaceServer
             NugetCache = String.IsNullOrWhiteSpace(nugetPackagesEnvironmentVariable)
                              ? Path.Combine(UserProfile, ".nuget", "packages")
                              : nugetPackagesEnvironmentVariable;
+
+            JupyterKernelSpecPath = Path.Combine(UserProfile, @"AppData\Local\Continuum\anaconda3\Scripts\jupyter-kernelspec.exe");
         }
 
         public static string DotnetToolsPath { get; }
@@ -31,6 +33,7 @@ namespace WorkspaceServer
         public static string UserProfile { get; }
 
         public static string NugetCache { get; }
+        public static string JupyterKernelSpecPath { get; }
 
         public static string ExecutableName(this string withoutExtension) =>
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)

@@ -2,10 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using System.Threading.Tasks;
+using WorkspaceServer;
 using Xunit;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace MLS.Agent.Tests
 {
@@ -13,7 +17,7 @@ namespace MLS.Agent.Tests
     {
         public abstract IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo installationDirectory);
 
-        [Fact]
+        [FactSkippedForIntegration]
         public async Task Returns_error_when_jupyter_paths_could_not_be_obtained()
         {
             var console = new TestConsole();
