@@ -8,18 +8,18 @@ using WorkspaceServer;
 
 namespace MLS.Agent
 {
-    public class JupyterPathsHelper : IJupyterPathsHelper
+    public class JupyterKernelSpec : IJupyterKernelSpec
     {
-        private FileInfo _pythonExeLocation;
+        private readonly FileInfo _jupyterKernelSpec;
 
-        public JupyterPathsHelper()
+        public JupyterKernelSpec()
         {
-            _pythonExeLocation = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\python.exe"));
+            _jupyterKernelSpec = new FileInfo(Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\Scripts\jupyter-kernelspec.exe"));
         }
 
         public Task<CommandLineResult> ExecuteCommand(string args)
         {
-            return Tools.CommandLine.Execute(_pythonExeLocation, args);
+            return Tools.CommandLine.Execute(_jupyterKernelSpec, args);
         }
     }
 }

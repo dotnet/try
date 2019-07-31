@@ -395,7 +395,7 @@ namespace MLS.Agent.CommandLine
                 var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
                 installCommand.Handler = CommandHandler.Create<IConsole>(async (console) =>
                 {
-                    return await new JupyterCommandLine(console, new JupyterPathsHelper()).InvokeAsync();
+                    return await new JupyterCommandLine(console, new JupyterKernelSpec()).InvokeAsync();
                 });
 
                 jupyterCommand.AddCommand(installCommand);

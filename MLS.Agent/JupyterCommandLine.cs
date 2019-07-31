@@ -18,13 +18,11 @@ namespace MLS.Agent
 {
     public class JupyterCommandLine
     {
-        private readonly FileInfo _pythonExeLocation;
         private readonly IConsole _console;
-        private readonly IJupyterPathsHelper _jupyterPathsHelper;
+        private readonly IJupyterKernelSpec _jupyterPathsHelper;
 
-        public JupyterCommandLine(IConsole console, IJupyterPathsHelper jupyterPathsHelper)
+        public JupyterCommandLine(IConsole console, IJupyterKernelSpec jupyterPathsHelper)
         {
-           
             _console = console;
             _jupyterPathsHelper = jupyterPathsHelper;
         }
@@ -44,12 +42,13 @@ namespace MLS.Agent
                         resourceStream.CopyTo(fileStream);
                     }
 
-                    ZipFile.ExtractToDirectory(zipPath, disposableDirectory.Directory.FullName);
+                    var dotnetDirectory = disposableDirectory.Directory.CreateSubdirectory(".NET");
+                    ZipFile.ExtractToDirectory(zipPath, dotnetDirectory.FullName);
 
-                    var result = await _jupyterPathsHelper.ExecuteCommand($"-m jupyter kernelspec install {disposableDirectory.Directory.Subdirectory("dotnetKernel").FullName}");
-
-                    if(result.ExitCode ==0)
+                    var result = await _jupyterPathsHelper.ExecuteCommand($"install {dotnetDirectory.FullName} --user");
+                    if (result.ExitCode == 0)
                     {
+                        _console.Out.WriteLine(string.Join('\n', result.Output));
                         _console.Out.WriteLine(".NET kernel installation succeded");
                         return 0;
                     }

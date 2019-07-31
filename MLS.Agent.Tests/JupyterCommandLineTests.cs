@@ -17,14 +17,14 @@ namespace MLS.Agent.Tests
 {
     public abstract class JupyterCommandLineTests
     {
-        public abstract IJupyterPathsHelper GetJupyterPathsHelper(CommandLineResult commandLineResult);
+        public abstract IJupyterKernelSpec GetJupyterKernelSpec(CommandLineResult commandLineResult);
 
         [Fact]
         public async Task Returns_error_when_jupyter_paths_could_not_be_obtained()
         {
             var console = new TestConsole();
             var commandLineResult = new CommandLineResult(1);
-            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterPathsHelper(commandLineResult));
+            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterKernelSpec(commandLineResult));
             await jupyterCommandLine.InvokeAsync();
             console.Error.ToString().Should().Contain(".NET kernel installation failed");
         }
@@ -34,7 +34,7 @@ namespace MLS.Agent.Tests
         {
             var console = new TestConsole();
             var commandLineResult = new CommandLineResult(0);
-            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterPathsHelper(commandLineResult));
+            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterKernelSpec(commandLineResult));
             await jupyterCommandLine.InvokeAsync();
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");
         }
@@ -46,28 +46,28 @@ namespace MLS.Agent.Tests
 
             var console = new TestConsole();
             var commandLineResult = new CommandLineResult(0);
-            var jupyterPathsHelper = GetJupyterPathsHelper(commandLineResult);
+            var jupyterPathsHelper = GetJupyterKernelSpec(commandLineResult);
             var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
             await jupyterCommandLine.InvokeAsync();
 
-            var installedKernels = await jupyterPathsHelper.ExecuteCommand("-m jupyter kernelspec list");
+            var installedKernels = await jupyterPathsHelper.ExecuteCommand("list");
             installedKernels.Output.Should().Contain(line => line.Contains(".net"));
         }
     }
 
     public class JupyterCommandLineIntegrationTests: JupyterCommandLineTests
     {
-        public override IJupyterPathsHelper GetJupyterPathsHelper(CommandLineResult commandLineResult)
+        public override IJupyterKernelSpec GetJupyterKernelSpec(CommandLineResult commandLineResult)
         {
-            return new JupyterPathsHelper();
+            return new JupyterKernelSpec();
         }
     }
 
     public class InMemoryJupyterCommandLineTests : JupyterCommandLineTests
     {
-        public override IJupyterPathsHelper GetJupyterPathsHelper(CommandLineResult commandLineResult)
+        public override IJupyterKernelSpec GetJupyterKernelSpec(CommandLineResult commandLineResult)
         {
-            return new InMemoryJupyterPathsHelper(commandLineResult);
+            throw new NotImplementedException();
         }
     }
 }

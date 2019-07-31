@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MLS.Agent
 {
-    public interface IJupyterPathsHelper
+    public interface IJupyterKernelSpec
     {
         Task<CommandLineResult> ExecuteCommand(string command);
     }
