@@ -26,6 +26,8 @@ namespace MLS.Agent.Tests
         [FactRunWhenJupyterIsInstalled]
         public async Task Returns_sucess_output_when_kernel_installation_succeded()
         {
+            //For real implementation run this test inside anaconda prompt or if jupyter is on path
+
             var kernelSpec = GetJupyterKernelSpec(true);
             var kernelDir = Create.EmptyWorkspace().Directory;
 
