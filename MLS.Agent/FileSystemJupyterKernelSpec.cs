@@ -17,7 +17,7 @@ namespace MLS.Agent
                 return new CommandLineResult(1, new List<string>() { "Could not find jupyter kernelspec module" });
             }
 
-            return await Tools.CommandLine.Execute("jupyter kernelspec", $"{command} {args}");
+            return await Tools.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
         }
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
