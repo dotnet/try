@@ -310,7 +310,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             switch (binder.Name)
             {
-                case "MergeWith":
+                case nameof(MergeWith):
                     var dictionary =
                         binder
                             .CallInfo

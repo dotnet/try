@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         ///   Gets HTML tag type.
         /// </summary>
         /// <value>The type of the tag.</value>
-        string TagName { get; }
+        string Name { get; }
 
         /// <summary>
         ///   Gets the HTML attributes to be rendered into the tag.

@@ -1,4 +1,6 @@
-using System;
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using FluentAssertions;
 using System.Linq;
 using Xunit;
@@ -131,7 +133,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             _.foolink = PocketView.Transform(
                 (tag, model) =>
                 {
-                    tag.TagName = "a";
+                    tag.Name = "a";
                     tag.HtmlAttributes.Add("href", "http://foo.biz");
                 });
 
@@ -148,7 +150,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             _.textbox = PocketView.Transform(
                 (tag, model) =>
                 {
-                    tag.TagName = "div";
+                    tag.Name = "div";
                     tag.Content = w =>
                     {
                         w.Write(label[@for: model.name](model.name));
@@ -234,7 +236,6 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         [Fact]
         public void HtmlAttributes_mixed_with_indexer_args_can_be_used_for_attributes()
         {
-            // TODO-JOSEQU: (HtmlAttributes_mixed_with_indexer_args_can_be_used_for_attributes) 
             var attr = new HtmlAttributes();
 
             string output = section[attr.Class("info"), style: "color:red"]("some content").ToString();

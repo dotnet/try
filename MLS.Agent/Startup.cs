@@ -186,7 +186,7 @@ namespace MLS.Agent
 
                 operation.Succeed();
 
-                if (StartupOptions.Mode == StartupMode.Try)
+                if (StartupOptions.Mode == StartupMode.Try && !StartupOptions.IsJupyter)
                 {
                     var uri = new Uri(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses.First());
                     Clock.Current
@@ -233,7 +233,7 @@ namespace MLS.Agent
             {
                 var files = directoryAccessor
                     .GetAllFilesRecursively()
-                    .Where(f => (StringComparer.InvariantCultureIgnoreCase.Compare(f.FileName, "readme.md") == 0) && IsRoot(f.Directory))
+                    .Where(f => StringComparer.InvariantCultureIgnoreCase.Compare(f.FileName, "readme.md") == 0 && IsRoot(f.Directory))
                     .ToList();
 
                 return files.FirstOrDefault();

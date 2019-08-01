@@ -89,6 +89,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
                    (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
+        public static bool IsScalar(this Type type)
+        {
+            return type.IsPrimitive ||
+                   type == typeof(string) ||
+                   (type.IsConstructedGenericType &&
+                    type.GetGenericTypeDefinition() == typeof(Nullable<>));
+        }
+
         public static bool IsValueTuple(this Type type)
         {
             if (type == null)

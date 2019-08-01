@@ -13,8 +13,28 @@ namespace Microsoft.DotNet.Interactive.Rendering
     {
         public static IDestructurer<T> Create<T>() => new Destructurer<T>();
 
-        public static IDestructurer Create(Type type) =>
-            (IDestructurer) Activator.CreateInstance(typeof(Destructurer<>).MakeGenericType(type));
+        public static IDestructurer Create(Type type)
+        {
+            if (type.IsScalar())
+            {
+                return NonDestructurer.Instance;
+            }
+
+            return (IDestructurer) Activator.CreateInstance(typeof(Destructurer<>).MakeGenericType(type));
+        }
+    }
+
+    internal class NonDestructurer : IDestructurer
+    {
+        public static IDestructurer Instance { get; } = new NonDestructurer();
+
+        public IDictionary<string, object> Destructure(object instance)
+        {
+            return new Dictionary<string, object>
+            {
+                ["value"] = instance
+            };
+        }
     }
 
     internal interface IDestructurer

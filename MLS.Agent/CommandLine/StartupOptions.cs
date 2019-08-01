@@ -45,7 +45,8 @@ namespace MLS.Agent.CommandLine
             string package = null,
             string packageVersion = null,
             ParseResult parseResult = null,
-            ushort? port = null)
+            ushort? port = null,
+            bool isJupyter = false)
         {
             _parseResult = parseResult;
             LogPath = logPath;
@@ -63,7 +64,9 @@ namespace MLS.Agent.CommandLine
             Package = package;
             PackageVersion = packageVersion;
             Port = port;
+            IsJupyter = isJupyter;
         }
+
 
         public bool EnablePreviewFeatures { get; }
         public string Id { get; }
@@ -72,6 +75,7 @@ namespace MLS.Agent.CommandLine
         public PackageSource AddPackageSource { get; }
         public Uri Uri { get; set; }
         public bool Production { get; }
+        public bool IsJupyter { get; }
         public bool IsLanguageService { get; set; }
         public string Key { get; }
         public string ApplicationInsightsKey { get; }

@@ -11,7 +11,6 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
 {

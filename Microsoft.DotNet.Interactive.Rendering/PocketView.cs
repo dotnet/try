@@ -262,7 +262,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         ///   Gets HTML tag type.
         /// </summary>
         /// <value>The type of the tag.</value>
-        public string TagName
+        public string Name
         {
             get
             {
@@ -271,7 +271,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     return "";
                 }
 
-                return _tag.TagName;
+                return _tag.Name;
             }
         }
 

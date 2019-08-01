@@ -208,7 +208,6 @@ namespace WorkspaceServer.Kernel
         {
             var formattedValues = new List<FormattedValue>
                         {
-
                             new FormattedValue(
                                 PlainTextFormatter.MimeType, output)
                         };

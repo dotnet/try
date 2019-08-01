@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
                 var formatter = HtmlFormatter<ExpandoObject>.Create();
 
-                var output = ((object)expando).ToDisplayString(formatter);
+                var output = ((object) expando).ToDisplayString(formatter);
 
                 output.Should().Be("<table><thead><tr><th>Count</th><th>Name</th></tr></thead><tbody><tr><td>2</td><td>socks</td></tr></tbody></table>");
             }
@@ -240,6 +240,32 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                       .Should()
                       .Be(
                           "<table><thead><tr><th><i>key</i></th><th>TypeName</th><th>Id</th></tr></thead><tbody><tr><td>first</td><td>entity one</td><td>123</td></tr><tr><td>second</td><td>entity two</td><td>456</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void It_formats_string_sequences_correctly()
+            {
+                var strings = new[] { "apple", "banana", "cherry" };
+
+                strings.ToDisplayString("text/html")
+                       .Should()
+                       .Be(
+                           "<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>apple</td></tr><tr><td>1</td><td>banana</td></tr><tr><td>2</td><td>cherry</td></tr></tbody></table>");
+            }
+
+            [Fact(Skip = "wip")]
+            public void It_formats_arrays_of_disparate_types_correctly()
+            {
+                var objects = new object[] { 1, (2, "two"), Enumerable.Range(1, 3) };
+
+                var obj0 = objects[0].ToDisplayString();
+                var obj1 = objects[1].ToDisplayString();
+                var obj2 = objects[2].ToDisplayString();
+
+                objects.ToDisplayString("text/html")
+                       .Should()
+                       .Be(
+                           $"<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>{obj0}</td></tr><tr><td>1</td><td>{obj1}</td></tr><tr><td>2</td><td>{obj2}</td></tr></tbody></table>");
             }
         }
     }
