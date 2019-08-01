@@ -14,21 +14,16 @@ namespace MLS.Agent
 {
     public class FileSystemJupyterKernelSpec : IJupyterKernelSpec
     {
-        private readonly FileInfo _executableFile;
-
-        public FileSystemJupyterKernelSpec()
-        {
-            _executableFile = new FileInfo(Paths.JupyterKernelSpecPath);
-        }
+        public static string JupyterKernelSpecPath = Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\Scripts\jupyter-kernelspec.exe");
 
         public async Task<CommandLineResult> ExecuteCommand(string command, string args = "")
         {
-            if(!_executableFile.Exists)
+            if(File.Exists(JupyterKernelSpecPath))
             {
-                return new CommandLineResult(1, error: new List<string> { $"Could not find the file: {_executableFile.FullName}" });
+                return new CommandLineResult(1, error: new List<string> { $"Could not find the file: {JupyterKernelSpecPath}" });
             }
 
-            return await Tools.CommandLine.Execute(_executableFile, $"{command} {args}");
+            return await Tools.CommandLine.Execute(JupyterKernelSpecPath, $"{command} {args}");
         }
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args="")
