@@ -33,30 +33,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return tag;
         }
 
-        /// <summary>
-        /// Merges the specified attributes into the tag's existing attributes.
-        /// </summary>
-        public static TTag WithAttributes<TTag>(this TTag tag, Action<HtmlAttributes> attributes) where TTag : ITag
+        public static TTag WithAttributes<TTag>(
+            this TTag tag,
+            string name,
+            object value)
+            where TTag : ITag
         {
-            attributes(tag.HtmlAttributes);
-            return tag;
-        }
+            tag.HtmlAttributes.Add(name, value);
 
-        /// <summary>
-        /// Adds the specified class or classes to the tag.
-        /// </summary>
-        /// <typeparam name="TTag">The type of the tag.</typeparam>
-        /// <param name="tag">The tag to which classes are to be added.</param>
-        /// <param name="classes">The class or classes to be added.</param>
-        /// <returns>
-        /// The modified <see cref="HtmlAttributes"/> instance.
-        /// </returns>
-        /// <remarks>
-        /// The classes are merged with the existing classes on the <see cref="HtmlAttributes"/> instance.
-        /// </remarks>
-        public static TTag Class<TTag>(this TTag tag, string classes) where TTag : ITag
-        {
-            tag.HtmlAttributes.Class(classes);
             return tag;
         }
 
@@ -121,7 +105,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return appendTag;
         }
 
-
         /// <summary>
         /// Specifies the contents of a tag.
         /// </summary>
@@ -169,7 +152,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             tag.Content = content;
             return tag;
         }
-
 
         /// <summary>
         ///   Prepends the specified tags to the source tag.

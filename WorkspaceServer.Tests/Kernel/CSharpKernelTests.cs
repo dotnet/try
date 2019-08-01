@@ -16,9 +16,7 @@ using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
-using System.Reactive.Linq;
 using FluentAssertions.Extensions;
-using System.Reactive;
 
 namespace WorkspaceServer.Tests.Kernel
 {

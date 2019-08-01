@@ -18,18 +18,18 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// <summary>
         /// Initializes a new instance of the <see cref="Tag"/> class.
         /// </summary>
-        /// <param name="tagName">The name of the tag.</param>
-        public Tag(string tagName)
+        /// <param name="name">The name of the tag.</param>
+        public Tag(string name)
         {
-            TagName = tagName;
+            Name = name;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Tag"/> class.
         /// </summary>
-        /// <param name="tagName">The name of the tag.</param>
+        /// <param name="name">The name of the tag.</param>
         /// <param name="text">The text contained by the tag.</param>
-        public Tag(string tagName, string text) : this(tagName)
+        public Tag(string name, string text) : this(name)
         {
             Content = writer => writer.Write(text);
         }
@@ -37,9 +37,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// <summary>
         /// Initializes a new instance of the <see cref="Tag"/> class.
         /// </summary>
-        /// <param name="tagName">Name of the tag.</param>
+        /// <param name="name">Name of the tag.</param>
         /// <param name="content">The content.</param>
-        public Tag(string tagName, Action<TextWriter> content) : this(tagName)
+        public Tag(string name, Action<TextWriter> content) : this(name)
         {
             Content = content;
         }
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// <value>
         ///   The type of the tag.
         /// </value>
-        public string TagName { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         ///   Gets the HTML attributes to be rendered into the tag.
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         protected void WriteSelfClosingTag(TextWriter writer)
         {
             writer.Write('<');
-            writer.Write(TagName);
+            writer.Write(Name);
             HtmlAttributes.WriteTo(writer, HtmlEncoder.Default);
             writer.Write(" />");
         }
@@ -102,14 +102,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
         protected void WriteEndTag(TextWriter writer)
         {
             writer.Write("</");
-            writer.Write(TagName);
+            writer.Write(Name);
             writer.Write('>');
         }
 
         protected void WriteStartTag(TextWriter writer)
         {
             writer.Write('<');
-            writer.Write(TagName);
+            writer.Write(Name);
             HtmlAttributes.WriteTo(writer, HtmlEncoder.Default);
             writer.Write('>');
         }
