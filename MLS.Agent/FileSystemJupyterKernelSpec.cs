@@ -2,28 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using MLS.Agent.Tools;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using WorkspaceServer;
 
 namespace MLS.Agent
 {
     public class FileSystemJupyterKernelSpec : IJupyterKernelSpec
     {
-        public static string JupyterKernelSpecPath = Path.Combine(Paths.UserProfile, @"AppData\Local\Continuum\anaconda3\Scripts\jupyter-kernelspec.exe");
-
         public async Task<CommandLineResult> ExecuteCommand(string command, string args = "")
         {
-            if(File.Exists(JupyterKernelSpecPath))
+            if (!await CheckIfJupyterKernelSpecExists())
             {
-                return new CommandLineResult(1, error: new List<string> { $"Could not find the file: {JupyterKernelSpecPath}" });
+                return new CommandLineResult(1, new List<string>() { "Could not find jupyter kernelspec module" });
             }
 
-            return await Tools.CommandLine.Execute(JupyterKernelSpecPath, $"{command} {args}");
+            return await Tools.CommandLine.Execute("jupyter kernelspec", $"{command} {args}");
         }
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args="")
@@ -31,20 +25,10 @@ namespace MLS.Agent
             return ExecuteCommand($"install {sourceDirectory.FullName} {args}");
         }
 
-        public async Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels()
+        public static async Task<bool> CheckIfJupyterKernelSpecExists()
         {
-            var result = await ExecuteCommand("list");
-            var installedKernels = new Dictionary<string, DirectoryInfo>();
-            if (result.ExitCode == 0)
-            {
-                foreach (var line in result.Output.Skip(1).Where(s => !string.IsNullOrWhiteSpace(s)))
-                {
-                    var bits = line.Split(new char[] { '\t', ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                    installedKernels.Add(bits[0], new DirectoryInfo(bits[1]));
-                }
-            }
-
-            return installedKernels;
+            var checkJupyterInstall = await Tools.CommandLine.Execute("where", "jupyter-kernelspec");
+            return checkJupyterInstall.ExitCode == 0;
         }
     }
 }
