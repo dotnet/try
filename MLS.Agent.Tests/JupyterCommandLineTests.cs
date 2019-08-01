@@ -29,40 +29,10 @@ namespace MLS.Agent.Tests
         public async Task Prints_to_console_when_kernel_installation_succeded()
         {
             var console = new TestConsole();
-            var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
             var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(true));
             await jupyterCommandLine.InvokeAsync();
+            console.Out.ToString().Should().MatchEquivalentOf($"*[InstallKernelSpec] Installed kernelspec .net in *.net *");
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");
         }
-
-        [Fact] 
-        public async Task After_installation_kernelspec_list_gives_dotnet()
-        {
-            var console = new TestConsole();
-            var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-            var jupyterKernelSpec = new InMemoryJupyterKernelSpec(true);
-            var jupyterCommandLine = new JupyterCommandLine(console, jupyterKernelSpec);
-            await jupyterCommandLine.InvokeAsync();
-
-            var installedKernels = await jupyterKernelSpec.ListInstalledKernels();
-            installedKernels.Keys.Should().Contain(".net");
-        }
     }
-
-    //public class JupyterCommandLineIntegrationTests: JupyterCommandLineTests
-    //{
-    //    public override IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo dir)
-    //    {
-    //        return new JupyterKernelSpec();
-    //    }
-    //}
-
-    //public class InMemoryJupyterCommandLineTests : JupyterCommandLineTests
-    //{
-    //    public override IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo dir)
-    //    {
-    //        return new InMemoryJupyterKernelSpec(dir);
-    //    }
-    //}
 }

@@ -49,6 +49,7 @@ namespace MLS.Agent
                     if (result.ExitCode == 0)
                     {
                         _console.Out.WriteLine(string.Join('\n', result.Output));
+                        _console.Out.WriteLine(string.Join('\n', result.Error));
                         _console.Out.WriteLine(".NET kernel installation succeded");
                         return 0;
                     }

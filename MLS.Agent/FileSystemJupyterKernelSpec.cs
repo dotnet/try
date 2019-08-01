@@ -12,23 +12,23 @@ using WorkspaceServer;
 
 namespace MLS.Agent
 {
-    public class JupyterKernelSpec : IJupyterKernelSpec
+    public class FileSystemJupyterKernelSpec : IJupyterKernelSpec
     {
         private readonly FileInfo _executableFile;
 
-        public JupyterKernelSpec()
+        public FileSystemJupyterKernelSpec()
         {
             _executableFile = new FileInfo(Paths.JupyterKernelSpecPath);
         }
 
-        private Task<CommandLineResult> ExecuteCommand(string command, string args = "")
+        public Task<CommandLineResult> ExecuteCommand(string command, string args = "")
         {
             return Tools.CommandLine.Execute(_executableFile, $"{command} {args}");
         }
 
-        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
+        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args="")
         {
-            return ExecuteCommand($"install {sourceDirectory.FullName} --user");
+            return ExecuteCommand($"install {sourceDirectory.FullName} {args}");
         }
 
         public async Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels()

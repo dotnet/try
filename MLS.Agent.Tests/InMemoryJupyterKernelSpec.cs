@@ -3,8 +3,10 @@
 
 using MLS.Agent.Tools;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MLS.Agent.Tests
@@ -20,20 +22,20 @@ namespace MLS.Agent.Tests
             _installedKernels = new Dictionary<string, DirectoryInfo>();
         }
 
-        public async Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
+        public Task<CommandLineResult> ExecuteCommand(string command, string args = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args ="")
         {
             if(_successfulInstall)
             {
-                _installedKernels.Add(".net", new DirectoryInfo(Directory.GetCurrentDirectory()));
-                return new CommandLineResult(0);
+                var installPath = Path.Combine(Directory.GetCurrentDirectory(), sourceDirectory.Name.ToLower());
+                return new CommandLineResult(0, "".Split("\n"), $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}".Split("\n"));
             }
 
             return new CommandLineResult(1);
-        }
-
-        public async Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels()
-        {
-            return _installedKernels;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace MLS.Agent
 {
     public interface IJupyterKernelSpec
     {
-        Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory);
-        Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels();
+        Task<CommandLineResult> ExecuteCommand(string command, string args="");
+        Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args="");
     }
 }
