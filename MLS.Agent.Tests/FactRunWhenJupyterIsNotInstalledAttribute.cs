@@ -10,16 +10,16 @@ using Xunit.Sdk;
 
 namespace MLS.Agent.Tests
 {
-    [XunitTestCaseDiscoverer("MLS.Agent.Tests.TestCaseDiscoverer", "MLS.Agent.Tests")]
-    public class FactSkippedForIntegrationAttribute : FactAttribute
+    [XunitTestCaseDiscoverer("MLS.Agent.Tests.JupyterNotInstalledTestCaseDiscover", "MLS.Agent.Tests")]
+    public class FactRunWhenJupyterIsNotInstalledAttribute : FactAttribute
     {
     }
 
-    public class TestCaseDiscoverer : IXunitTestCaseDiscoverer
+    public class JupyterNotInstalledTestCaseDiscover : IXunitTestCaseDiscoverer
     {
         private readonly IMessageSink messageSink;
 
-        public TestCaseDiscoverer(IMessageSink messageSink)
+        public JupyterNotInstalledTestCaseDiscover(IMessageSink messageSink)
         {
             this.messageSink = messageSink;
         }
@@ -29,7 +29,7 @@ namespace MLS.Agent.Tests
             ITestMethod testMethod,
             IAttributeInfo factAttribute)
         {
-            if (!File.Exists(Paths.JupyterKernelSpecPath))
+            if (testMethod.TestClass.Class.Name.Contains("Integration") && File.Exists(Paths.JupyterKernelSpecPath))
             {
                 yield break;
             }
