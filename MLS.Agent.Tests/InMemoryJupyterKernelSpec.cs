@@ -3,6 +3,7 @@
 
 using MLS.Agent.Tools;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,41 +11,17 @@ namespace MLS.Agent.Tests
 {
     public class InMemoryJupyterKernelSpec : IJupyterKernelSpec
     {
-        private CommandLineResult installResult;
-        private CommandLineResult listResult;
-
-        public InMemoryJupyterKernelSpec(DirectoryInfo installationDirectory)
+        public InMemoryJupyterKernelSpec(bool successfulInstall)
         {
-            if(installationDirectory!=null)
-            {
-                var installOutput =
-$@"[InstallKernelSpec] Installed kernelspec .net in {installationDirectory.FullName}".Split("\n");
-                installResult = new CommandLineResult(0, installOutput);
-
-                var listOutput =
-$@"Available kernels:
-.net      {installationDirectory.FullName}".Split("\n");
-                listResult = new CommandLineResult(0, listOutput);
-            }
-            else
-            {
-                installResult = new CommandLineResult(1);
-                listResult = new CommandLineResult(1);
-            }
         }
 
-        public async Task<CommandLineResult> ExecuteCommand(string command, string args)
+        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
-            if(command == "install")
-            {
-                return installResult;
-            }
+            throw new NotImplementedException();
+        }
 
-            else if(command =="list")
-            {
-                return listResult;
-            }
-
+        public Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels()
+        {
             throw new NotImplementedException();
         }
     }

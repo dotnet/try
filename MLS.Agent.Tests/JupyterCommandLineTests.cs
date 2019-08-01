@@ -46,8 +46,8 @@ namespace MLS.Agent.Tests
             var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
             await jupyterCommandLine.InvokeAsync();
 
-            var installedKernels = await jupyterPathsHelper.ExecuteCommand("list");
-            installedKernels.Output.Should().Contain(line => line.Contains(".net"));
+            var installedKernels = await jupyterPathsHelper.ListInstalledKernels();
+            installedKernels.Keys.Should().Contain(".net");
         }
     }
 

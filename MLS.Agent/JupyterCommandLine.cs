@@ -19,12 +19,12 @@ namespace MLS.Agent
     public class JupyterCommandLine
     {
         private readonly IConsole _console;
-        private readonly IJupyterKernelSpec _jupyterPathsHelper;
+        private readonly IJupyterKernelSpec _jupyterKernelSpec;
 
-        public JupyterCommandLine(IConsole console, IJupyterKernelSpec jupyterPathsHelper)
+        public JupyterCommandLine(IConsole console, IJupyterKernelSpec jupyterKernelSpec)
         {
             _console = console;
-            _jupyterPathsHelper = jupyterPathsHelper;
+            _jupyterKernelSpec = jupyterKernelSpec;
         }
 
         public async Task<int> InvokeAsync()
@@ -45,7 +45,7 @@ namespace MLS.Agent
                     var dotnetDirectory = disposableDirectory.Directory.CreateSubdirectory(".NET");
                     ZipFile.ExtractToDirectory(zipPath, dotnetDirectory.FullName);
 
-                    var result = await _jupyterPathsHelper.ExecuteCommand("install", $"{dotnetDirectory.FullName} --user");
+                    var result = await _jupyterKernelSpec.InstallKernel(dotnetDirectory);
                     if (result.ExitCode == 0)
                     {
                         _console.Out.WriteLine(string.Join('\n', result.Output));

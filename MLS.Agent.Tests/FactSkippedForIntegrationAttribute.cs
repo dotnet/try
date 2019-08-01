@@ -41,10 +41,5 @@ namespace MLS.Agent.Tests
                 testMethod
             );
         }
-
-        public IEnumerable<IXunitTestCase> Discover(ITestFrameworkDiscoveryOptions discoveryOptions, ITestMethod testMethod, IAttributeInfo factAttribute)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }
