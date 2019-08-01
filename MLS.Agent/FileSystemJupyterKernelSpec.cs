@@ -21,9 +21,14 @@ namespace MLS.Agent
             _executableFile = new FileInfo(Paths.JupyterKernelSpecPath);
         }
 
-        public Task<CommandLineResult> ExecuteCommand(string command, string args = "")
+        public async Task<CommandLineResult> ExecuteCommand(string command, string args = "")
         {
-            return Tools.CommandLine.Execute(_executableFile, $"{command} {args}");
+            if(!_executableFile.Exists)
+            {
+                return new CommandLineResult(1, error: new List<string> { $"Could not find the file: {_executableFile.FullName}" });
+            }
+
+            return await Tools.CommandLine.Execute(_executableFile, $"{command} {args}");
         }
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args="")

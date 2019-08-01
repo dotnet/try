@@ -17,7 +17,7 @@ namespace MLS.Agent.Tests
         protected List<string> _installedKernels;
 
         public JupyterKernelSpecTests()
-        {
+        { 
             _installedKernels = new List<string>();
         }
 
