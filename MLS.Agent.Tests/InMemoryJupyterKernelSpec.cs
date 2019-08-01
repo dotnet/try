@@ -14,12 +14,10 @@ namespace MLS.Agent.Tests
     public class InMemoryJupyterKernelSpec : IJupyterKernelSpec
     {
         private bool _successfulInstall;
-        private Dictionary<string, DirectoryInfo> _installedKernels;
 
         public InMemoryJupyterKernelSpec(bool successfulInstall)
         {
             _successfulInstall = successfulInstall;
-            _installedKernels = new Dictionary<string, DirectoryInfo>();
         }
 
         public Task<CommandLineResult> ExecuteCommand(string command, string args = "")

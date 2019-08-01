@@ -360,7 +360,8 @@ namespace MLS.Agent.CommandLine
                 };
                 var connectionFileArgument = new Argument<FileInfo>
                 {
-                    Name = "ConnectionFile"
+                    Name = "ConnectionFile",
+                    Arity = ArgumentArity.ZeroOrOne //should be removed once the commandlineapi allows subcommands to not have arguments from the main command
                 }.ExistingOnly();
                 jupyterCommand.AddArgument(connectionFileArgument);
 
