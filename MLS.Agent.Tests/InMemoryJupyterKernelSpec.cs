@@ -11,18 +11,29 @@ namespace MLS.Agent.Tests
 {
     public class InMemoryJupyterKernelSpec : IJupyterKernelSpec
     {
+        private bool _successfulInstall;
+        private Dictionary<string, DirectoryInfo> _installedKernels;
+
         public InMemoryJupyterKernelSpec(bool successfulInstall)
         {
+            _successfulInstall = successfulInstall;
+            _installedKernels = new Dictionary<string, DirectoryInfo>();
         }
 
-        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
+        public async Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
-            throw new NotImplementedException();
+            if(_successfulInstall)
+            {
+                _installedKernels.Add(".net", new DirectoryInfo(Directory.GetCurrentDirectory()));
+                return new CommandLineResult(0);
+            }
+
+            return new CommandLineResult(1);
         }
 
-        public Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels()
+        public async Task<Dictionary<string, DirectoryInfo>> ListInstalledKernels()
         {
-            throw new NotImplementedException();
+            return _installedKernels;
         }
     }
 }

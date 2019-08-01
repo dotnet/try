@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using Markdig.Syntax.Inlines;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
@@ -13,15 +14,13 @@ using Xunit.Sdk;
 
 namespace MLS.Agent.Tests
 {
-    public abstract class JupyterCommandLineTests
+    public class JupyterCommandLineTests
     {
-        public abstract IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo installationDirectory);
-
-        [FactSkippedForIntegration]
+        [Fact]
         public async Task Returns_error_when_jupyter_paths_could_not_be_obtained()
         {
             var console = new TestConsole();
-            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterKernelSpec(null));
+            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(false));
             await jupyterCommandLine.InvokeAsync();
             console.Error.ToString().Should().Contain(".NET kernel installation failed");
         }
@@ -31,7 +30,7 @@ namespace MLS.Agent.Tests
         {
             var console = new TestConsole();
             var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            var jupyterCommandLine = new JupyterCommandLine(console, GetJupyterKernelSpec(directory));
+            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(true));
             await jupyterCommandLine.InvokeAsync();
             console.Out.ToString().Should().Contain(".NET kernel installation succeded");
         }
@@ -42,28 +41,28 @@ namespace MLS.Agent.Tests
             var console = new TestConsole();
             var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
 
-            var jupyterPathsHelper = GetJupyterKernelSpec(directory);
-            var jupyterCommandLine = new JupyterCommandLine(console, jupyterPathsHelper);
+            var jupyterKernelSpec = new InMemoryJupyterKernelSpec(true);
+            var jupyterCommandLine = new JupyterCommandLine(console, jupyterKernelSpec);
             await jupyterCommandLine.InvokeAsync();
 
-            var installedKernels = await jupyterPathsHelper.ListInstalledKernels();
+            var installedKernels = await jupyterKernelSpec.ListInstalledKernels();
             installedKernels.Keys.Should().Contain(".net");
         }
     }
 
-    public class JupyterCommandLineIntegrationTests: JupyterCommandLineTests
-    {
-        public override IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo dir)
-        {
-            return new JupyterKernelSpec();
-        }
-    }
+    //public class JupyterCommandLineIntegrationTests: JupyterCommandLineTests
+    //{
+    //    public override IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo dir)
+    //    {
+    //        return new JupyterKernelSpec();
+    //    }
+    //}
 
-    public class InMemoryJupyterCommandLineTests : JupyterCommandLineTests
-    {
-        public override IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo dir)
-        {
-            return new InMemoryJupyterKernelSpec(dir);
-        }
-    }
+    //public class InMemoryJupyterCommandLineTests : JupyterCommandLineTests
+    //{
+    //    public override IJupyterKernelSpec GetJupyterKernelSpec(DirectoryInfo dir)
+    //    {
+    //        return new InMemoryJupyterKernelSpec(dir);
+    //    }
+    //}
 }
