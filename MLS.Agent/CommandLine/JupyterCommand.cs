@@ -15,7 +15,7 @@ namespace MLS.Agent.CommandLine
             CommandLineParser.StartServer startServer = null,
             InvocationContext context = null)
         {
-            startServer?.Invoke(new StartupOptions(), context);
+            startServer?.Invoke(new StartupOptions(isJupyter: true), context);
 
             return Task.FromResult(0);
         }
