@@ -20,9 +20,9 @@ namespace MLS.Agent
             return await Tools.CommandLine.Execute("jupyter kernelspec", $"{command} {args}");
         }
 
-        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory, string args="")
+        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
-            return ExecuteCommand($"install {sourceDirectory.FullName} {args}");
+            return ExecuteCommand($"install {sourceDirectory.FullName}");
         }
 
         public static async Task<bool> CheckIfJupyterKernelSpecExists()
