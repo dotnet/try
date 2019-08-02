@@ -29,7 +29,7 @@ namespace MLS.Agent.Tests
             ITestMethod testMethod,
             IAttributeInfo factAttribute)
         {
-            if (testMethod.TestClass.Class.Name.Contains("Integration") && FileSystemJupyterKernelSpec.CheckIfJupyterKernelSpecExists().Result)
+            if (testMethod.TestClass.Class.Name.Contains("Integration") && FileSystemJupyterKernelSpec.CheckIfJupyterKernelSpecExists())
             {
                 yield break;
             }
