@@ -10,7 +10,7 @@ using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -64,6 +64,12 @@ namespace Microsoft.DotNet.Interactive
                             pipelineContext, 
                             next),
 
+                        DisplayValue displayValue =>
+                        HandleDisplayValue(
+                            displayValue,
+                            pipelineContext,
+                            next),
+
                         _ => next(command, pipelineContext)
                         });
         }
@@ -73,7 +79,7 @@ namespace Microsoft.DotNet.Interactive
             KernelPipelineContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            var assembly = Assembly.LoadFile(loadExtension.AssemblyFile.FullName);
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(loadExtension.AssemblyFile.FullName);
 
             var extensionTypes = assembly
                                  .ExportedTypes
@@ -144,6 +150,25 @@ namespace Microsoft.DotNet.Interactive
             }
 
             await next(submitCode, pipelineContext);
+        }
+
+        private async Task HandleDisplayValue(
+            DisplayValue displayValue,
+            KernelPipelineContext pipelineContext,
+            KernelPipelineContinuation next)
+        {
+            pipelineContext.OnExecute(invocationContext =>
+            {
+                invocationContext.OnNext(
+                    new ValueProduced(
+                        displayValue.FormattedValue,
+                        displayValue,
+                        formattedValues: new[] { displayValue.FormattedValue }));
+                invocationContext.OnCompleted();
+                return Task.CompletedTask;
+            });
+
+            await next(displayValue, pipelineContext);
         }
 
         protected Parser BuildDirectiveParser(
