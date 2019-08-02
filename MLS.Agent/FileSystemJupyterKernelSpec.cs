@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using MLS.Agent.Tools;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace MLS.Agent
@@ -27,7 +29,8 @@ namespace MLS.Agent
 
         public static async Task<bool> CheckIfJupyterKernelSpecExists()
         {
-            var checkJupyterInstall = await Tools.CommandLine.Execute("where", "jupyter-kernelspec");
+            var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which";
+            var checkJupyterInstall = await Tools.CommandLine.Execute(command, "jupyter-kernelspec");
             return checkJupyterInstall.ExitCode == 0;
         }
     }
