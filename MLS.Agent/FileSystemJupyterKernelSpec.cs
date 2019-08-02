@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Clockwise;
 
 namespace MLS.Agent
 {
@@ -35,7 +36,7 @@ namespace MLS.Agent
             Task.Run(async ()=> {
                 var result = await Tools.CommandLine.Execute(command, "jupyter-kernelspec");
                 jupyterKernelSpecExists = result.ExitCode == 0;
-            }).Wait();
+            }).Wait(2000);
 
             return jupyterKernelSpecExists;
         }
