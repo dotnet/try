@@ -24,7 +24,7 @@ namespace MLS.Agent
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
-            return ExecuteCommand($"install {sourceDirectory.FullName}");
+            return ExecuteCommand($"install {sourceDirectory.FullName}", "--user");
         }
 
         public static bool CheckIfJupyterKernelSpecExists()
