@@ -23,10 +23,12 @@ namespace MLS.Agent.Tests
 
         public abstract IJupyterKernelSpec GetJupyterKernelSpec(bool success);
 
-        [FactRunWhenJupyterIsInstalled]
+        [FactDependsOnJupyterOnPath]
         public async Task Returns_sucess_output_when_kernel_installation_succeded()
         {
-            //For real implementation run this test inside anaconda prompt or if jupyter is on path
+            //For the FileSystemJupyterKernelSpec, this fact needs jupyter to be on the path
+            //To run this test for FileSystemJupyterKernelSpec open Visual Studio inside anaconda prompt or in a terminal with
+            //path containing the environment variables for jupyter
 
             var kernelSpec = GetJupyterKernelSpec(true);
             var kernelDir = Create.EmptyWorkspace().Directory;
@@ -39,7 +41,7 @@ namespace MLS.Agent.Tests
             result.Error.First().Should().MatchEquivalentOf($"[InstallKernelSpec] Installed kernelspec {kernelDir.Name} in *{kernelDir.Name}");
         }
 
-        [FactRunWhenJupyterIsNotInstalled]
+        [FactDependsOnJupyterNotOnPath]
         public async Task Returns_failure_when_kernel_installation_did_not_succeed()
         {
             var kernelSpec = GetJupyterKernelSpec(false);

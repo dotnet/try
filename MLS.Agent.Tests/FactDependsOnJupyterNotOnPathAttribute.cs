@@ -11,7 +11,7 @@ using Xunit.Sdk;
 namespace MLS.Agent.Tests
 {
     [XunitTestCaseDiscoverer("MLS.Agent.Tests.JupyterNotInstalledTestCaseDiscover", "MLS.Agent.Tests")]
-    public class FactRunWhenJupyterIsNotInstalledAttribute : FactAttribute
+    public class FactDependsOnJupyterNotOnPathAttribute : FactAttribute
     {
     }
 

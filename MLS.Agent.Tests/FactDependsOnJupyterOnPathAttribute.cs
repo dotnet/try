@@ -11,7 +11,7 @@ using Xunit.Sdk;
 namespace MLS.Agent.Tests
 {
     [XunitTestCaseDiscoverer("MLS.Agent.Tests.JupyterInstalledTestCaseDiscoverer", "MLS.Agent.Tests")]
-    public class FactRunWhenJupyterIsInstalledAttribute : FactAttribute
+    public class FactDependsOnJupyterOnPathAttribute : FactAttribute
     {
     }
 
