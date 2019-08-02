@@ -358,7 +358,8 @@ namespace MLS.Agent.CommandLine
                 };
                 var connectionFileArgument = new Argument<FileInfo>
                 {
-                    Name = "ConnectionFile"
+                    Name = "ConnectionFile",
+                    Arity = ArgumentArity.ZeroOrOne //should be removed once the commandlineapi allows subcommands to not have arguments from the main command
                 }.ExistingOnly();
                 jupyterCommand.AddArgument(connectionFileArgument);
 
@@ -390,6 +391,14 @@ namespace MLS.Agent.CommandLine
 
                     return jupyter(console, startServer, context);
                 });
+
+                var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
+                installCommand.Handler = CommandHandler.Create<IConsole>((console) =>
+                {
+                    return new JupyterCommandLine(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
+                });
+
+                jupyterCommand.AddCommand(installCommand);
 
                 return jupyterCommand;
             }

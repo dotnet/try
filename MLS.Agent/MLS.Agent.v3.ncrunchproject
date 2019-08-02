@@ -3,6 +3,7 @@
     <AdditionalFilesToIncludeForProject>
       <Value>..\docs\**.*</Value>
       <Value>wwwroot\**.*</Value>
+      <Value>..\Microsoft.DotNet.Interactive.Jupyter\ContentFiles\**.*</Value>
     </AdditionalFilesToIncludeForProject>
   </Settings>
 </ProjectConfiguration>

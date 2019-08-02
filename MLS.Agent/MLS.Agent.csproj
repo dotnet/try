@@ -32,7 +32,7 @@
     <None Remove="node_modules\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
@@ -121,6 +121,9 @@
     <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
       <LogicalName>demo.zip</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="$(IntermediateOutputPath)/dotnetKernel.zip">
+      <LogicalName>dotnetKernel.zip</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
@@ -208,5 +211,17 @@
 
   <Target Name="ZipDemo" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyDemoFiles">
     <ZipDirectory SourceDirectory="$(IntermediateOutputPath)demo" DestinationFile="$(IntermediateOutputPath)\demo.zip" Overwrite="true" />
+  </Target>
+
+  <Target Name="CopyKernelFiles">
+    <ItemGroup>
+      <KernelFiles Include="$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/*.png;$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/*.json;" SkipUnchangedFiles="true" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(KernelFiles)" DestinationFolder="$(IntermediateOutputPath)dotnetKernel\%(RecursiveDir)" />
+  </Target>
+
+  <Target Name="ZipDotnetKernel" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyKernelFiles">
+    <ZipDirectory SourceDirectory="$(IntermediateOutputPath)dotnetKernel" DestinationFile="$(IntermediateOutputPath)\dotnetKernel.zip" Overwrite="true" />
   </Target>
 </Project>
