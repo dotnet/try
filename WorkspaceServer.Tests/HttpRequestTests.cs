@@ -31,7 +31,7 @@ namespace WorkspaceServer.Tests
                   .Which
                   .Message
                   .Should()
-                  .Be($"Value must be a valid relative uri{Environment.NewLine}Parameter name: uri");
+                  .Be($"Value must be a valid relative uri (Parameter 'uri')");
         }
 
         [Fact]
