@@ -9,9 +9,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Clockwise;
-using MLS.Agent.Tools;
 
-namespace WorkspaceServer
+namespace MLS.Agent.Tools
 {
     public class Dotnet
     {
@@ -95,34 +94,6 @@ namespace WorkspaceServer
                 .Skip(2)
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Select(s => s.Split(separator, StringSplitOptions.RemoveEmptyEntries)[2]);
-        }
-
-        private string RemoveTrailingSlash(string path)
-        {
-            // dotnet tool install  doesn't like it if directory arguments end with "/"
-            if (path.EndsWith("\\"))
-            {
-                return path.Substring(0, path.Length - 1);
-            }
-
-            return path;
-        }
-
-        public Task<CommandLineResult> ToolInstall(
-            string packageName, 
-            DirectoryInfo toolPath,
-            PackageSource addSource = null, 
-            Budget budget = null,
-            string version = null)
-        {
-            var versionArg = version != null ? $"--version {version}" : "";
-            var args = $@"{packageName} --tool-path ""{RemoveTrailingSlash(toolPath.FullName)}"" {versionArg}";
-            if (addSource != null)
-            {
-                args += $@" --add-source ""{addSource}""";
-            }
-
-            return Execute("tool install".AppendArgs(args), budget);
         }
 
         public Task<CommandLineResult> Pack(string args = null, Budget budget = null) =>

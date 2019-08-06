@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 using WorkspaceServer.Tests;
-using WorkspaceServer.WorkspaceFeatures;
 using Xunit;
 
 namespace MLS.Agent.Tests.CommandLine

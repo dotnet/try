@@ -2,17 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using FluentAssertions;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using FluentAssertions;
+using FluentAssertions.Extensions;
+using Microsoft.Reactive.Testing;
+using MLS.Agent.Tools;
 using Pocket;
+using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
-using WorkspaceServer.Packaging;
-using System.IO;
-using FluentAssertions.Extensions;
-using System.Linq;
-using Microsoft.Reactive.Testing;
 
 namespace WorkspaceServer.Tests
 {

@@ -11,6 +11,7 @@ open System.Threading.Tasks
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
+open MLS.Agent.Tools
 
 type FSharpKernel() =
     inherit KernelBase()
@@ -27,31 +28,12 @@ type FSharpKernel() =
     let startProcess () =
         async {
             if isNull proc then
-                let command = "dotnet"
-                let startInfo = ProcessStartInfo(command)
-                startInfo.Arguments <- "fsi --nologo"
-                startInfo.UseShellExecute <- false
-                startInfo.CreateNoWindow <- true
-                startInfo.RedirectStandardInput <- true
-                startInfo.RedirectStandardOutput <- true
-                startInfo.RedirectStandardError <- true
-                proc <- new Process()
-                proc.Exited.Add(fun args ->
-                    ())
-                proc.ErrorDataReceived.Add(fun args ->
-                    let line = args.Data
-                    ())
-                proc.OutputDataReceived.Add(fun args ->
-                    let line = args.Data
-                    if not <| isNull line then
-                        if line = sentinelValue then
-                            sentinelFound.Trigger()
-                        else
-                            stdout.AppendLine(line) |> ignore)
-                proc.StartInfo <- startInfo
-                proc.Start() |> ignore
-                proc.BeginOutputReadLine()
-                proc.BeginErrorReadLine()
+                let outputReceived line =
+                    if line = sentinelValue then
+                        sentinelFound.Trigger()
+                    else
+                        stdout.AppendLine(line) |> ignore
+                proc <- Dotnet().StartProcess("fsi --nologo", output = Action<string>(outputReceived))
                 do! waitForReady()
         }
     let eval (code: string) =
