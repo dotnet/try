@@ -93,9 +93,9 @@ namespace WorkspaceServer.Tests.Kernel
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = (command, context) =>
+                    Handle = context =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeRepl.Add(context.Command);
                         return Task.CompletedTask;
                     }
                 }
@@ -108,25 +108,30 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("#kernel csharp"));
             await kernel.SendAsync(new SubmitCode("x"));
 
-            receivedOnFakeRepl.Should()
-                              .BeEquivalentTo(new SubmitCode("hello!"));
-        }
-    }
-
-    public class FakeKernel : KernelBase
-    {
-        public FakeKernel([CallerMemberName] string name = null)
-        {
-            Name = name;
+            receivedOnFakeRepl
+                .Should()
+                .ContainSingle(c => c is SubmitCode && 
+                                    c.As<SubmitCode>().Code == "hello!");
         }
 
-        public override string Name { get; }
-
-        public Func<IKernelCommand, KernelPipelineContext, Task> Handle { get; set; }
-
-        protected override Task HandleAsync(IKernelCommand command, KernelPipelineContext context)
+        public class FakeKernel : KernelBase
         {
-            return Handle(command, context);
+            public FakeKernel([CallerMemberName] string name = null)
+            {
+                Name = name;
+            }
+
+            public override string Name { get; }
+
+            public KernelCommandInvocation Handle { get; set; }
+
+            protected override Task HandleAsync(
+                IKernelCommand command, 
+                KernelInvocationContext context)
+            {
+                command.As<KernelCommandBase>().Handler = Handle;
+                return Task.CompletedTask;
+            }
         }
     }
 }

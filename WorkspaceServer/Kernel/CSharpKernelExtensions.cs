@@ -42,19 +42,24 @@ using {typeof(PocketView).Namespace};
 
             var restoreContext = new PackageRestoreContext();
 
-            r.Handler = CommandHandler.Create<NugetPackageReference, KernelPipelineContext>(async (package, pipelineContext) =>
+            r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
-                pipelineContext.OnExecute(async invocationContext =>
+                var addPackage = new AddNugetPackage(package)
                 {
-                    var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
-                    if (refs != null)
+                    Handler = async context =>
                     {
-                        kernel.AddMetatadaReferences(refs);
-                    }
+                        var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                        if (refs != null)
+                        {
+                            kernel.AddMetatadaReferences(refs);
+                        }
 
-                    invocationContext.OnNext(new NuGetPackageAdded(package));
-                    invocationContext.OnCompleted();
-                });
+                        context.OnNext(new NuGetPackageAdded(package));
+                        context.OnCompleted();
+                    }
+                };
+
+                await pipelineContext.Kernel.SendAsync(addPackage);
             });
 
             kernel.AddDirective(r);
