@@ -78,5 +78,25 @@ namespace WorkspaceServer.Tests.Kernel
                                    v.MimeType == "text/plain" &&
                                    v.Value.ToString().Contains(expectedContent));
         }
+
+        [Fact]
+        public async Task Display_helper_can_be_called_without_specifying_class_name()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("Display(b(\"hi!\"));"));
+
+            var formatted =
+                KernelEvents
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues);
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Contains("<b>hi!</b>"));
+        }
     }
 }

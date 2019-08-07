@@ -27,6 +27,18 @@ using {typeof(PocketView).Namespace};
             return kernel;
         }
 
+        public static CSharpKernel UseKernelHelpers(
+            this CSharpKernel kernel)
+        {
+            Task.Run(() =>
+                         kernel.SendAsync(
+                             new SubmitCode($@"
+using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
+"))).Wait();
+
+            return kernel;
+        }
+
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>

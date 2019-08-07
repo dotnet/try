@@ -29,18 +29,22 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact(Skip = "WIP")]
         public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_the_submission_is_passed_to_fsi()
         {
+            // FIX: move to FSharpKernelTests
             throw new NotImplementedException();
         }
 
         [Fact(Skip = "WIP")]
         public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_PackageAdded_event_is_raised()
         {
+            // FIX: move to FSharpKernelTests
             throw new NotImplementedException();
         }
 
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
+            // FIX: move to CSharpKernelTests
+
             var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective()
@@ -55,6 +59,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_PackageAdded_event_is_raised()
         {
+            // FIX: move to CSharpKernelTests
             var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective()
