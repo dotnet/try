@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class KernelStreamServer
+    public class KernelStreamClient
     {
 
 
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Interactive
         private readonly StreamWriter _outputWriter;
         private readonly IKernel _kernel;
 
-        public KernelStreamServer(IKernel kernel)
+        public KernelStreamClient(IKernel kernel)
         {
             Output = new MemoryStream();
             Input = new MemoryStream();

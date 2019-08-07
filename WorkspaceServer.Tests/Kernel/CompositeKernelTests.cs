@@ -133,7 +133,7 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            var streamKernel = new KernelStreamServer(kernel);
+            var streamKernel = new KernelStreamClient(kernel);
             var writer = new StreamWriter(streamKernel.Input, Encoding.UTF8);
             writer.WriteMessage(new SubmitCode("#kernel csharp"));
             writer.WriteMessage(new SubmitCode("var x = 123;"));
