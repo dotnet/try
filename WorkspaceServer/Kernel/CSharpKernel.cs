@@ -87,6 +87,16 @@ namespace WorkspaceServer.Kernel
             }
         }
 
+        public override void SetDefaultRendering()
+        {
+            Task.Run(() =>
+                         this.SendAsync(
+                         new SubmitCode($@"
+using static {typeof(PocketViewTags).FullName};
+using {typeof(PocketView).Namespace};
+"))).Wait();
+        }
+
         private async Task HandleSubmitCode(
             SubmitCode submitCode,
             KernelInvocationContext context)
