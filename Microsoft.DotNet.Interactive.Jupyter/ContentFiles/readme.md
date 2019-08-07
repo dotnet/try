@@ -1,9 +1,9 @@
 Dotnet try as jupyter kernel
-
-
-
-Create a folder called `.NET` in the kernels forlder of you jupyter installation, if using Anaconda3 on windows it is `%localAppData%\Continuum\anaconda3\share\jupyter\kernels`.
-
-Copy the `kernel.json` file and the two incons there.
-
-Now jupyter will list dotnet as an available kernel, to test open a terminal in an Anaconda environment and type `jupyter kernelspec list` it should show dotnet in the list.
+1. If you have installed jupyter via anaconda, open an anaconda command prompt 
+2. Execute the following in the command prompt:
+		`dotnet try jupyter install`
+3. You should see output similar to:
+[InstallKernelSpec] Installed kernelspec .net in C:\Users\AppData\Roaming\jupyter\kernels\.net
+.NET kernel installation succeeded
+4. Now executing `jupyter kernelspec list` will show the dotnet kernel
+	.net       C:\Users\AppData\Roaming\jupyter\kernels\.net
