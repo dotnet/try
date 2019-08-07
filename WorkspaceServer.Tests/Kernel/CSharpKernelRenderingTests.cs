@@ -14,6 +14,7 @@ using Microsoft.DotNet.Interactive.Rendering;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
+using static Pocket.Logger;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -41,7 +42,7 @@ namespace WorkspaceServer.Tests.Kernel
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
-            Logger.Log.Info(valueProduced.ToDisplayString());
+            Log.Info(valueProduced.ToDisplayString());
 
             valueProduced
                 .FormattedValues
@@ -52,13 +53,13 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
-        [InlineData("div(123).ToString()", "<div>123</div>" )]
-        [InlineData("\"hi\"", "hi" )]
+        [InlineData("div(123).ToString()", "<div>123</div>")]
+        [InlineData("\"hi\"", "hi")]
         public async Task String_is_rendered_as_plain_text(
             string submission,
             string expectedContent)
         {
-             var kernel = CreateKernel();
+            var kernel = CreateKernel();
 
             var result = await kernel.SendAsync(new SubmitCode(submission));
 
@@ -68,7 +69,7 @@ namespace WorkspaceServer.Tests.Kernel
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
-            Logger.Log.Info(valueProduced.ToDisplayString());
+            Log.Info(valueProduced.ToDisplayString());
 
             valueProduced
                 .FormattedValues
