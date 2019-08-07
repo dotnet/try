@@ -19,8 +19,12 @@ namespace Microsoft.DotNet.Interactive.Events
                           : message;
         }
 
+        public string Code => ((SubmitCode)Command).Code;
+
         public Exception Exception { get; }
 
         public string Message { get; }
+
+        public override string ToString() => $"{base.ToString()}: {Code}";
     }
 }

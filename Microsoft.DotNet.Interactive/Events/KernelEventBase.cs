@@ -14,7 +14,9 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         protected KernelEventBase()
+        public override string ToString()
         {
+            return $"{GetType().Name}";
         }
 
         public IKernelCommand Command { get; }
