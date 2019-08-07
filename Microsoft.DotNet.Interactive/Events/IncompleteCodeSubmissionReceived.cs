@@ -10,5 +10,7 @@ namespace Microsoft.DotNet.Interactive.Events
         public IncompleteCodeSubmissionReceived(SubmitCode submitCode) : base(submitCode)
         {
         }
+
+        public override string Type => nameof(IncompleteCodeSubmissionReceived);
     }
 }

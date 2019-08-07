@@ -5,5 +5,6 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public class Stopped : KernelEventBase
     {
+        public override string Type => nameof(Stopped);
     }
 }

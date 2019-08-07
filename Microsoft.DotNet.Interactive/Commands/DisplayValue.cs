@@ -11,5 +11,7 @@ namespace Microsoft.DotNet.Interactive.Commands
         }
 
         public FormattedValue FormattedValue { get; }
+
+        public override string Name => nameof(DisplayValue);
     }
 }

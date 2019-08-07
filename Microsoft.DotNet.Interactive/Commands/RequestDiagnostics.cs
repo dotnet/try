@@ -5,5 +5,6 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public class RequestDiagnostics : KernelCommandBase
     {
+        public override string Name => nameof(RequestDiagnostics);
     }
 }

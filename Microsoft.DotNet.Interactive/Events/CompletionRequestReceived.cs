@@ -10,5 +10,7 @@ namespace Microsoft.DotNet.Interactive.Events
         public CompletionRequestReceived(IKernelCommand command) : base(command)
         {
         }
+
+        public override string Type => nameof(CompletionRequestReceived);
     }
 }

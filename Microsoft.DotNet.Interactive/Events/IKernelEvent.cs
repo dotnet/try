@@ -7,6 +7,7 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public interface IKernelEvent
     {
+        string Type { get; }
         IKernelCommand Command { get; }
     }
 }

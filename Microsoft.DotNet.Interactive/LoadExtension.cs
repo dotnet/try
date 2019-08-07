@@ -15,5 +15,7 @@ namespace Microsoft.DotNet.Interactive
         }
 
         public FileInfo AssemblyFile { get; }
+
+        public override string Name => nameof(LoadExtension);
     }
 }

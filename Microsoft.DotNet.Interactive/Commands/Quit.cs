@@ -3,8 +3,8 @@
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public abstract class KernelCommandBase : IKernelCommand
+    public class Quit : KernelCommandBase
     {
-        public abstract string Name { get; }
+        public override string Name => nameof(Quit);
     }
 }

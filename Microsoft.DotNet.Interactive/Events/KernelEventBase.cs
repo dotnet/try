@@ -18,5 +18,7 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         public IKernelCommand Command { get; }
+
+        public abstract string Type { get; }
     }
 }

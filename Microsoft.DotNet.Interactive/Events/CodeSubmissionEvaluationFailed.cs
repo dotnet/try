@@ -22,5 +22,8 @@ namespace Microsoft.DotNet.Interactive.Events
         public Exception Exception { get; }
 
         public string Message { get; }
+
+        public override string Type => nameof(CodeSubmissionEvaluationFailed);
+
     }
 }

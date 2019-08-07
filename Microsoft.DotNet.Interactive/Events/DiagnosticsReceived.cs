@@ -10,5 +10,7 @@ namespace Microsoft.DotNet.Interactive.Events
         public DiagnosticsReceived(IKernelCommand command) : base(command)
         {
         }
+
+        public override string Type => nameof(DiagnosticsReceived);
     }
 }

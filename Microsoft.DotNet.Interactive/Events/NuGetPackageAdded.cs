@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         public NugetPackageReference PackageReference { get; }
+
+        public override string Type => nameof(NuGetPackageAdded);
     }
 
 }

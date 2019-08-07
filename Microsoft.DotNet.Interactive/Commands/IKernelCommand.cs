@@ -5,5 +5,6 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public interface IKernelCommand
     {
+        string Name { get; }
     }
 }

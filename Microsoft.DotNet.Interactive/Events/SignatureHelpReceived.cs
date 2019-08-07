@@ -11,5 +11,7 @@ namespace Microsoft.DotNet.Interactive.Events
         {
         }
 
+        public override string Type => nameof(StandardErrorReceived);
+
     }
 }

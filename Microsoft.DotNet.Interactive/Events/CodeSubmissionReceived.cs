@@ -14,5 +14,7 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         public string Value { get; }
+
+        public override string Type => nameof(CodeSubmissionReceived);
     }
 }

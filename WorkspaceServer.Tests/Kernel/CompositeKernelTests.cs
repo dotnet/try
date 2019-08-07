@@ -14,6 +14,9 @@ using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -110,6 +113,47 @@ namespace WorkspaceServer.Tests.Kernel
 
             receivedOnFakeRepl.Should()
                               .BeEquivalentTo(new SubmitCode("hello!"));
+        }
+
+        [Fact]
+        public async Task Kernel_can_be_chosen_by_specifying_kernel_name_under_stream_kernel()
+        {
+            var receivedOnFakeRepl = new List<IKernelCommand>();
+
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel(),
+                new FakeKernel("fake")
+                {
+                    Handle = (command, context) =>
+                    {
+                        receivedOnFakeRepl.Add(command);
+                        return Task.CompletedTask;
+                    }
+                }
+            };
+
+            var streamKernel = new KernelStreamServer(kernel);
+            var writer = new StreamWriter(streamKernel.Input, Encoding.UTF8);
+            writer.WriteMessage(new SubmitCode("#kernel csharp"));
+            writer.WriteMessage(new SubmitCode("var x = 123;"));
+            writer.WriteMessage(new SubmitCode("#kernel fake"));
+            writer.WriteMessage(new SubmitCode("hello!"));
+            writer.WriteMessage(new SubmitCode("#kernel csharp"));
+            writer.WriteMessage(new SubmitCode("x"));
+            writer.WriteMessage(new Quit());
+
+
+            var task = streamKernel.Start();
+            await task;
+            streamKernel.Output.Position = 0;
+            var reader = new StreamReader(streamKernel.Output, Encoding.UTF8);
+
+            var output = reader.ReadToEnd();
+            var events = output.Split("\r\n")
+                .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
+
+            events.Should().Contain(e => e.Type == "ValueProduced");
         }
     }
 
