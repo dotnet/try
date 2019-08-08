@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Pocket;
-using XPlot.DotNet.
 using XPlot.DotNet.Interactive.KernelExtensions;
 
 namespace WorkspaceServer.Kernel
@@ -52,6 +51,7 @@ namespace WorkspaceServer.Kernel
         {
 
             var extension = new XPlotKernelExtension();
+            extension.OnLoadAsync(kernel).Wait();
             return kernel;
         }
     }

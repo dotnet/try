@@ -12,7 +12,6 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
     {
         public Task OnLoadAsync(IKernel kernel)
         {
-            KernelBase kernelBase = (KernelBase)kernel;
             Formatter<PlotlyChart>.Register((chart, writer) =>
            {
                PocketView t = html(GetChartHtml(chart));
@@ -31,18 +30,18 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
             int scriptEnd = chartHtml.IndexOf("</script>");
 
             StringBuilder html = new StringBuilder(chartHtml.Length);
-            html.Append(chartHtml.AsSpan().Slice(0, scriptStart));
+            html.Append(chartHtml,0, scriptStart);
 
             html.Append(@"
 require.config({paths:{plotly:'https://cdn.plot.ly/plotly-latest.min'}});
 require(['plotly'], function(Plotly) { 
 ");
 
-            html.Append(chartHtml.AsSpan().Slice(scriptStart + 1, scriptEnd - scriptStart - 1));
+            html.Append(chartHtml, scriptStart + 1, scriptEnd - scriptStart - 1);
 
             html.AppendLine(@"});");
 
-            html.Append(chartHtml.AsSpan().Slice(scriptEnd));
+            html.Append(chartHtml.AsSpan().Slice(scriptEnd).ToString());
 
             return html.ToString();
         }

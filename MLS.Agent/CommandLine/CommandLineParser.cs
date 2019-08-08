@@ -382,6 +382,7 @@ namespace MLS.Agent.CommandLine
                                 .UseNugetDirective()
                                 .UseExtendDirective()
                                 .UseKernelHelpers()
+                                .UseDefaultExtensions()
                         })
                         .AddSingleton(c => new JupyterRequestContextHandler(
                                               c.GetRequiredService<PackageRegistry>(),
