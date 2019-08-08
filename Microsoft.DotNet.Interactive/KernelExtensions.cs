@@ -55,5 +55,12 @@ namespace Microsoft.DotNet.Interactive
 
             return kernel;
         }
+
+        public static T UseXplotExtension<T>(this T kernel)
+            where T: KernelBase
+        {
+            var extension = new XPlotExtension();
+            return kernel;
+        }
     }
 }
