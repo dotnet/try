@@ -10,5 +10,9 @@ namespace Microsoft.DotNet.Interactive.Events
         public CompleteCodeSubmissionReceived(SubmitCode submitCode) : base(submitCode)
         {
         }
+
+        public string Code => ((SubmitCode)Command).Code;
+
+        public override string ToString() => $"{base.ToString()}: {Code.TruncateForDisplay()}";
     }
 }

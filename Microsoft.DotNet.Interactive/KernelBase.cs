@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Interactive
         private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
         private readonly List<Command> _directiveCommands = new List<Command>();
+        private Parser _directiveParser;
 
         protected KernelBase()
         {
@@ -49,61 +50,64 @@ namespace Microsoft.DotNet.Interactive
         private void AddDirectiveMiddleware()
         {
             Pipeline.AddMiddleware(
-                (command, pipelineContext, next) =>
+                (command, context, next) =>
                     command switch
                         {
                         SubmitCode submitCode =>
                         HandleDirectivesAndSubmitCode(
                             submitCode, 
-                            pipelineContext,
+                            context,
                             next),
 
                         LoadExtension loadExtension =>
                         HandleLoadExtension(
                             loadExtension,
-                            pipelineContext, 
+                            context, 
                             next),
 
                         DisplayValue displayValue =>
                         HandleDisplayValue(
                             displayValue,
-                            pipelineContext,
+                            context,
                             next),
 
-                        _ => next(command, pipelineContext)
+                        _ => next(command, context)
                         });
         }
 
         private async Task HandleLoadExtension(
             LoadExtension loadExtension,
-            KernelPipelineContext pipelineContext,
+            KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(loadExtension.AssemblyFile.FullName);
-
-            var extensionTypes = assembly
-                                 .ExportedTypes
-                                 .Where(t => typeof(IKernelExtension).IsAssignableFrom(t))
-                                 .ToArray();
-
-            foreach (var extensionType in extensionTypes)
+            loadExtension.Handler = async context =>
             {
-                var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(loadExtension.AssemblyFile.FullName);
 
-                await extension.OnLoadAsync(pipelineContext.Kernel);
-            }
+                var extensionTypes = assembly
+                                     .ExportedTypes
+                                     .Where(t => typeof(IKernelExtension).IsAssignableFrom(t))
+                                     .ToArray();
+
+                foreach (var extensionType in extensionTypes)
+                {
+                    var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
+
+                    await extension.OnLoadAsync(pipelineContext.Kernel);
+                }
+
+                context.OnCompleted();
+            };
 
             await next(loadExtension, pipelineContext);
         }
 
         private async Task HandleDirectivesAndSubmitCode(
             SubmitCode submitCode,
-            KernelPipelineContext pipelineContext,
+            KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
             var modified = false;
-
-            var directiveParser = BuildDirectiveParser(pipelineContext);
 
             var lines = new Queue<string>(
                 submitCode.Code.Split(new[] { "\r\n", "\n" },
@@ -115,12 +119,12 @@ namespace Microsoft.DotNet.Interactive
             {
                 var currentLine = lines.Dequeue();
 
-                var parseResult = directiveParser.Parse(currentLine);
+                var parseResult = BuildDirectiveParser().Parse(currentLine);
 
                 if (parseResult.Errors.Count == 0)
                 {
                     modified = true;
-                    await directiveParser.InvokeAsync(parseResult);
+                    await _directiveParser.InvokeAsync(parseResult);
                 }
                 else
                 {
@@ -134,12 +138,12 @@ namespace Microsoft.DotNet.Interactive
             {
                 if (string.IsNullOrWhiteSpace(code))
                 {
-                    pipelineContext.OnExecute(context =>
+                    submitCode.Handler = context =>
                     {
                         context.OnNext(new CodeSubmissionEvaluated(submitCode));
                         context.OnCompleted();
                         return Task.CompletedTask;
-                    });
+                    };
 
                     return;
                 }
@@ -154,40 +158,59 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task HandleDisplayValue(
             DisplayValue displayValue,
-            KernelPipelineContext pipelineContext,
+            KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            pipelineContext.OnExecute(invocationContext =>
+            displayValue.Handler = context =>
+            {
+                context.OnNext(
+                    new ValueProduced(
+                        displayValue.FormattedValue,
+                        displayValue,
+                        formattedValues: new[] { displayValue.FormattedValue }));
+
+                context.OnCompleted();
+
+                return Task.CompletedTask;
+            };
+
+            displayValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
                     new ValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue }));
+
                 invocationContext.OnCompleted();
+
                 return Task.CompletedTask;
-            });
+            };
 
             await next(displayValue, pipelineContext);
         }
 
-        protected Parser BuildDirectiveParser(
-            KernelPipelineContext pipelineContext)
+        private Parser BuildDirectiveParser()
         {
-            var root = new RootCommand();
-
-            foreach (var c in _directiveCommands)
+            if (_directiveParser == null)
             {
-                root.Add(c);
+                var root = new RootCommand();
+
+                foreach (var c in _directiveCommands)
+                {
+                    root.Add(c);
+                }
+
+                _directiveParser = new CommandLineBuilder(root)
+                                   .UseMiddleware(
+                                       context => context.BindingContext
+                                                         .AddService(
+                                                             typeof(KernelInvocationContext),
+                                                             () => KernelInvocationContext.Current))
+                                   .Build();
             }
 
-            return new CommandLineBuilder(root)
-                   .UseMiddleware(
-                       context => context.BindingContext
-                                         .AddService(
-                                             typeof(KernelPipelineContext),
-                                             () => pipelineContext))
-                   .Build();
+            return _directiveParser;
         }
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
@@ -197,6 +220,7 @@ namespace Microsoft.DotNet.Interactive
         public void AddDirective(Command command)
         {
             _directiveCommands.Add(command);
+            _directiveParser = null;
         }
 
         private class KernelOperation
@@ -210,6 +234,18 @@ namespace Microsoft.DotNet.Interactive
             public IKernelCommand Command { get; }
 
             public TaskCompletionSource<IKernelCommandResult> TaskCompletionSource { get; }
+        }
+
+        private async Task ExecuteCommand(KernelOperation operation)
+        {
+            using var context = KernelInvocationContext.Establish(operation.Command);
+            using var _ = context.KernelEvents.Subscribe(PublishEvent);
+
+            await Pipeline.SendAsync(operation.Command, context);
+
+            var result = await context.InvokeAsync();
+
+            operation.TaskCompletionSource.SetResult(result);
         }
 
         private readonly ConcurrentQueue<KernelOperation> _commandQueue = 
@@ -232,31 +268,14 @@ namespace Microsoft.DotNet.Interactive
 
             Task.Run(async () =>
             {
-                while (_commandQueue.TryPeek(out var nextOperation) &&
-                       nextOperation != operation)
+                if (_commandQueue.TryDequeue(out var currentOperation))
                 {
-                    // FIX: (SendAsync) make this less nasty
-                }
-
-                if (_commandQueue.TryDequeue(out var theOperationWeCareAbout))
-                {
-                    await ExecuteCommand(theOperationWeCareAbout);
+                    await ExecuteCommand(currentOperation);
                 }
             }, cancellationToken).ConfigureAwait(false);
 
             return tcs.Task;
         }
-
-        private async Task ExecuteCommand(KernelOperation operation)
-        {
-            var pipelineContext = new KernelPipelineContext(PublishEvent);
-
-            await Pipeline.SendAsync(operation.Command, pipelineContext);
-
-            var result = await pipelineContext.InvokeAsync();
-
-            operation.TaskCompletionSource.SetResult(result);
-        } 
 
         protected void PublishEvent(IKernelEvent kernelEvent)
         {
@@ -280,11 +299,11 @@ namespace Microsoft.DotNet.Interactive
 
         protected internal abstract Task HandleAsync(
             IKernelCommand command,
-            KernelPipelineContext context);
+            KernelInvocationContext context);
 
         protected virtual void SetKernel(
             IKernelCommand command,
-            KernelPipelineContext context) => context.Kernel = this;
+            KernelInvocationContext context) => context.Kernel = this;
 
         public void Dispose() => _disposables.Dispose();
     }

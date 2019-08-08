@@ -414,9 +414,7 @@ public class TestKernelExtension : IKernelExtension
                                    .Single()
                                    .FullName;
 
-            var kernel = CreateKernel()
-                         .UseNugetDirective()
-                         .UseExtendDirective();
+            var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 

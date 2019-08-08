@@ -13,9 +13,9 @@ using System.Reactive;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class CSharpKernelTestBase : IDisposable
+    public abstract class CSharpKernelTestBase : IDisposable
     {
-        public CSharpKernelTestBase(ITestOutputHelper output)
+        protected CSharpKernelTestBase(ITestOutputHelper output)
         {
             DisposeAfterTest(output.SubscribeToPocketLogger());
         }
@@ -24,6 +24,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = new CSharpKernel()
                          .UseDefaultRendering()
+                         .UseNugetDirective()
+                         .UseExtendDirective()
+                         .UseKernelHelpers()
                          .LogEventsToPocketLogger();
 
             DisposeAfterTest(
