@@ -11,23 +11,13 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Pocket;
+using XPlot.DotNet.
+using XPlot.DotNet.Interactive.KernelExtensions;
 
 namespace WorkspaceServer.Kernel
 {
     public static class KernelExtensions
     {
-        public static Task<IKernelCommandResult> SendAsync(
-            this IKernel kernel,
-            IKernelCommand command)
-        {
-            if (kernel == null)
-            {
-                throw new ArgumentNullException(nameof(kernel));
-            }
-
-            return kernel.SendAsync(command, CancellationToken.None);
-        }
-
         public static T UseExtendDirective<T>(this T kernel)
             where T : KernelBase
         {
@@ -54,6 +44,14 @@ namespace WorkspaceServer.Kernel
                   .Subscribe(e =>
                                  Logger.Log.Info("KernelEvent: {event}", e));
 
+            return kernel;
+        }
+
+        public static T UseDefaultExtensions<T>(this T kernel)
+            where T: KernelBase
+        {
+
+            var extension = new XPlotKernelExtension();
             return kernel;
         }
     }
