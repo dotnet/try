@@ -18,5 +18,7 @@ namespace Microsoft.DotNet.Interactive.Commands
         public string Code { get; set; }
 
         public string TargetKernelName { get; set; }
+
+        public override string ToString() => $"{base.ToString()}: {Code.TruncateForDisplay()}";
     }
 }

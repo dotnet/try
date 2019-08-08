@@ -64,6 +64,8 @@ namespace WorkspaceServer.Kernel
                     typeof(Enumerable).Assembly,
                     typeof(IEnumerable<>).Assembly,
                     typeof(Task<>).Assembly,
+                    typeof(IKernel).Assembly, 
+                    typeof(CSharpKernel).Assembly, 
                     typeof(PocketView).Assembly);
         }
 
@@ -85,69 +87,68 @@ namespace WorkspaceServer.Kernel
 
         protected override async Task HandleAsync(
             IKernelCommand command,
-            KernelPipelineContext context)
+            KernelInvocationContext context)
         {
             switch (command)
             {
                 case SubmitCode submitCode:
-                    context.OnExecute(async invocationContext =>
+                    submitCode.Handler = async invocationContext =>
                     {
                         await HandleSubmitCode(submitCode, invocationContext);
-                    });
+                    };
                     break;
 
                 case RequestCompletion requestCompletion:
-                    context.OnExecute(async invocationContext =>
+                    requestCompletion.Handler = async invocationContext =>
                     {
                         await HandleRequestCompletion(requestCompletion, invocationContext, _scriptState);
-                    });
+                    };
                     break;
             }
         }
 
         private async Task HandleSubmitCode(
-            SubmitCode codeSubmission,
+            SubmitCode submitCode,
             KernelInvocationContext context)
         {
             var codeSubmissionReceived = new CodeSubmissionReceived(
-                codeSubmission.Code,
-                codeSubmission);
+                submitCode.Code,
+                submitCode);
             context.OnNext(codeSubmissionReceived);
 
-            var (shouldExecute, code) = IsBufferACompleteSubmission(codeSubmission.Code);
+            var (shouldExecute, code) = IsBufferACompleteSubmission(submitCode.Code);
 
             if (shouldExecute)
             {
-                context.OnNext(new CompleteCodeSubmissionReceived(codeSubmission));
+                context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
                 Exception exception = null;
-                using (var console = await ConsoleOutput.Capture())
-                {
-                    console.SubscribeToStandardOutput(std => PublishOutput(std, context, codeSubmission));
 
-                    try
+                using var console = await ConsoleOutput.Capture();
+                using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
+
+                try
+                {
+                    if (_scriptState == null)
                     {
-                        if (_scriptState == null)
-                        {
-                            _scriptState = await CSharpScript.RunAsync(
-                                code,
-                                ScriptOptions);
-                        }
-                        else
-                        {
-                            _scriptState = await _scriptState.ContinueWithAsync(
-                                code,
-                                ScriptOptions,
-                                e =>
-                                {
-                                    exception = e;
-                                    return true;
-                                });
-                        }
+                        _scriptState = await CSharpScript.RunAsync(
+                                           code,
+                                           ScriptOptions);
                     }
-                    catch (Exception e)
+                    else
                     {
-                        exception = e;
+                        _scriptState = await _scriptState.ContinueWithAsync(
+                                           code,
+                                           ScriptOptions,
+                                           e =>
+                                           {
+                                               exception = e;
+                                               return true;
+                                           });
                     }
+                }
+                catch (Exception e)
+                {
+                    exception = e;
                 }
 
                 if (exception != null)
@@ -155,7 +156,7 @@ namespace WorkspaceServer.Kernel
                     var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
                                                      Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
 
-                    context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, codeSubmission));
+                    context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, submitCode));
                     context.OnError(exception);
                 }
                 else
@@ -176,19 +177,20 @@ namespace WorkspaceServer.Kernel
                         context.OnNext(
                             new ValueProduced(
                                 _scriptState.ReturnValue,
-                                codeSubmission,
+                                submitCode,
                                 true,
                                 formattedValues));
                     }
 
-                    context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
+                    context.OnNext(new CodeSubmissionEvaluated(submitCode));
+
                     context.OnCompleted();
                 }
             }
             else
             {
-                context.OnNext(new IncompleteCodeSubmissionReceived(codeSubmission));
-                context.OnNext(new CodeSubmissionEvaluated(codeSubmission));
+                context.OnNext(new IncompleteCodeSubmissionReceived(submitCode));
+                context.OnNext(new CodeSubmissionEvaluated(submitCode));
                 context.OnCompleted();
             }
         }

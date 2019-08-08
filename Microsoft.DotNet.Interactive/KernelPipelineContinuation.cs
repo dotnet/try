@@ -8,5 +8,5 @@ namespace Microsoft.DotNet.Interactive
 {
     public delegate Task KernelPipelineContinuation(
         IKernelCommand command, 
-        KernelPipelineContext context);
+        KernelInvocationContext context);
 }

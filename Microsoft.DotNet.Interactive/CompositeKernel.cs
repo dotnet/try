@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive
             };
 
             chooseKernelCommand.Handler =
-                CommandHandler.Create<string, KernelPipelineContext>((kernelName, context) =>
+                CommandHandler.Create<string, KernelInvocationContext>((kernelName, context) =>
                 {
                     DefaultKernel = this.Single(k => k.Name == kernelName);
                 });
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Interactive
 
         protected override void SetKernel(
             IKernelCommand command,
-            KernelPipelineContext context)
+            KernelInvocationContext context)
         {
             if (context.Kernel == null)
             {
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Interactive
 
         protected internal override async Task HandleAsync(
             IKernelCommand command,
-            KernelPipelineContext context)
+            KernelInvocationContext context)
         {
             var kernel = context.Kernel;
 

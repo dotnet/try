@@ -5,9 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,22 +26,11 @@ namespace WorkspaceServer.Servers.Roslyn
         private int _observerCount;
 
         private readonly CompositeDisposable _disposable;
-        private readonly IObservable<string> _scheduleEvents;
 
         public TrackingStringWriter()
         {
-            var scheduler = new EventLoopScheduler(t =>
-           {
-               var thread = new Thread(t);
-               thread.IsBackground = true;
-               return thread;
-           });
-
-            _scheduleEvents = _writeEvents.ObserveOn(scheduler);
-
             _disposable = new CompositeDisposable
             {
-                scheduler,
                 _writeEvents
             };
         }
@@ -343,11 +330,10 @@ namespace WorkspaceServer.Servers.Roslyn
         public IDisposable Subscribe(IObserver<string> observer)
         {
             Interlocked.Increment(ref _observerCount);
-            return new CompositeDisposable()
+            return new CompositeDisposable
             {
-                Disposable.Create(
-                () => Interlocked.Decrement(ref _observerCount)),
-                _scheduleEvents.Subscribe(observer)
+                Disposable.Create(() => Interlocked.Decrement(ref _observerCount)),
+                _writeEvents.Subscribe(observer)
             };
         }
     }

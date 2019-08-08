@@ -8,6 +8,6 @@ namespace Microsoft.DotNet.Interactive
 {
     public delegate Task KernelCommandPipelineMiddleware(
         IKernelCommand command,
-        KernelPipelineContext context,
+        KernelInvocationContext context,
         KernelPipelineContinuation next);
 }

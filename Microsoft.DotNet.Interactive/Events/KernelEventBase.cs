@@ -8,15 +8,16 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public abstract class KernelEventBase : IKernelEvent
     {
-        protected KernelEventBase(IKernelCommand command)
+        protected KernelEventBase(IKernelCommand command = null)
         {
-            Command = command ?? throw new ArgumentNullException(nameof(command));
-        }
-
-        protected KernelEventBase()
-        {
+            Command = command ?? KernelInvocationContext.Current?.Command;
         }
 
         public IKernelCommand Command { get; }
+
+        public override string ToString()
+        {
+            return $"{GetType().Name}";
+        }
     }
 }

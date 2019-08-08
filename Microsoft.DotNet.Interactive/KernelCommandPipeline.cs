@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Interactive
 
         public async Task SendAsync(
             IKernelCommand command,
-            KernelPipelineContext context)
+            KernelInvocationContext context)
         {
             EnsureMiddlewarePipelineIsInitialized();
 

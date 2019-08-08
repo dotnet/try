@@ -90,13 +90,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case ValueProduced valueProduced:
-                    OnValueProduced(valueProduced, InFlightRequests);
+                    OnValueProduced(valueProduced);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
-                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated, InFlightRequests);
+                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated);
                     break;
                 case CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed:
-                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed, InFlightRequests);
+                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed);
                     break;
                 case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
@@ -105,9 +105,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private static void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed, ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
+        private void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed)
         {
-            openRequests.TryRemove(codeSubmissionEvaluationFailed.Command, out var openRequest);
+            InFlightRequests.TryRemove(codeSubmissionEvaluationFailed.Command, out var openRequest);
 
             var errorContent = new Error(
                 eName: "Unhandled Exception",
@@ -144,11 +144,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Dispose();
         }
 
-        private static void OnValueProduced(
-            ValueProduced valueProduced,
-            ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
+        private void OnValueProduced(ValueProduced valueProduced)
         {
-            openRequests.TryGetValue(valueProduced.Command, out var openRequest);
+            var openRequest = InFlightRequests.Values.SingleOrDefault();
+
             if (openRequest == null)
             {
                 return;
@@ -203,10 +202,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private static void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated,
-            ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
+        private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)
         {
-            openRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest);
+            InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest);
+
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
 

@@ -32,18 +32,22 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact(Skip = "WIP")]
         public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_the_submission_is_passed_to_fsi()
         {
+            // FIX: move to FSharpKernelTests
             throw new NotImplementedException();
         }
 
         [Fact(Skip = "WIP")]
         public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_PackageAdded_event_is_raised()
         {
+            // FIX: move to FSharpKernelTests
             throw new NotImplementedException();
         }
 
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
+            // FIX: move to CSharpKernelTests
+
             var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective()
@@ -58,6 +62,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_PackageAdded_event_is_raised()
         {
+            // FIX: move to CSharpKernelTests
             var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective()
@@ -96,9 +101,9 @@ namespace WorkspaceServer.Tests.Kernel
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = (command, context) =>
+                    Handle = context =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeRepl.Add(context.Command);
                         return Task.CompletedTask;
                     }
                 }
@@ -111,8 +116,10 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("#kernel csharp"));
             await kernel.SendAsync(new SubmitCode("x"));
 
-            receivedOnFakeRepl.Should()
-                              .BeEquivalentTo(new SubmitCode("hello!"));
+            receivedOnFakeRepl
+                .Should()
+                .ContainSingle(c => c is SubmitCode && 
+                                    c.As<SubmitCode>().Code == "hello!");
         }
 
         [Fact]
@@ -125,9 +132,9 @@ namespace WorkspaceServer.Tests.Kernel
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = (command, context) =>
+                     Handle = context =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeRepl.Add(context.Command);
                         return Task.CompletedTask;
                     }
                 }
@@ -164,22 +171,26 @@ namespace WorkspaceServer.Tests.Kernel
 
             events.Should().Contain(e => e.Type == "ValueProduced");
         }
-    }
+    
 
-    public class FakeKernel : KernelBase
-    {
-        public FakeKernel([CallerMemberName] string name = null)
+        public class FakeKernel : KernelBase
         {
-            Name = name;
-        }
+            public FakeKernel([CallerMemberName] string name = null)
+            {
+                Name = name;
+            }
 
-        public override string Name { get; }
+            public override string Name { get; }
 
-        public Func<IKernelCommand, KernelPipelineContext, Task> Handle { get; set; }
+            public KernelCommandInvocation Handle { get; set; }
 
-        protected override Task HandleAsync(IKernelCommand command, KernelPipelineContext context)
-        {
-            return Handle(command, context);
+            protected override Task HandleAsync(
+                IKernelCommand command, 
+                KernelInvocationContext context)
+            {
+                command.As<KernelCommandBase>().Handler = Handle;
+                return Task.CompletedTask;
+            }
         }
     }
 }

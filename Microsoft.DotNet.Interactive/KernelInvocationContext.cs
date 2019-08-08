@@ -2,25 +2,33 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class KernelInvocationContext : IObserver<IKernelEvent>
+    public class KernelInvocationContext : IObserver<IKernelEvent>, IDisposable
     {
+        private readonly KernelInvocationContext _parentContext;
+        private static readonly AsyncLocal<Stack<KernelInvocationContext>> _currentStack = new AsyncLocal<Stack<KernelInvocationContext>>();
+
         private readonly KernelCommandInvocation _invocation;
-        private readonly Action<IKernelEvent> _publishEvent;
         private readonly ReplaySubject<IKernelEvent> _events = new ReplaySubject<IKernelEvent>();
 
-        public KernelInvocationContext(
-            KernelCommandInvocation invocation,
-            Action<IKernelEvent> publishEvent)
+        private KernelInvocationContext(
+            IKernelCommand command,
+            KernelInvocationContext parentContext = null)
         {
-            _invocation = invocation;
-            _publishEvent = publishEvent;
+            _parentContext = parentContext;
+            Command = command;
+            _invocation = command.InvokeAsync;
         }
+
+        public IKernelCommand Command { get; }
 
         public void OnCompleted()
         {
@@ -34,15 +42,56 @@ namespace Microsoft.DotNet.Interactive
 
         public void OnNext(IKernelEvent @event)
         {
-            _events.OnNext(@event);
-            _publishEvent(@event);
+            if (_parentContext != null)
+            {
+                _parentContext.OnNext(@event);
+            }
+            else
+            {
+                _events.OnNext(@event);
+            }
         }
 
-        internal IObservable<IKernelEvent> KernelEvents => _events;
+        public IObservable<IKernelEvent> KernelEvents => _events;
 
-        public async Task InvokeAsync()
+        public async Task<IKernelCommandResult> InvokeAsync()
         {
-            await _invocation(this);
+            try
+            {
+                await _invocation(this);
+            }
+            catch (Exception exception)
+            {
+                OnError(exception);
+            }
+
+            return new KernelCommandResult(KernelEvents);
         }
+
+        public static KernelInvocationContext Establish(IKernelCommand command)
+        {
+            KernelInvocationContext parent = null;
+
+            if (_currentStack.Value == null)
+            {
+                _currentStack.Value = new Stack<KernelInvocationContext>();
+            }
+            else
+            {
+                parent = Current;
+            }
+
+            var context = new KernelInvocationContext(command, parent);
+
+            _currentStack.Value.Push(context);
+
+            return context;
+        }
+
+        public static KernelInvocationContext Current => _currentStack?.Value?.Peek();
+
+        public IKernel Kernel { get; set; }
+
+        void IDisposable.Dispose() => _currentStack?.Value?.Pop();
     }
 }
