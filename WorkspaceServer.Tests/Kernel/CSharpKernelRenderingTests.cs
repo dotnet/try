@@ -14,6 +14,7 @@ using Microsoft.DotNet.Interactive.Rendering;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
+using static Pocket.Logger;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -41,7 +42,7 @@ namespace WorkspaceServer.Tests.Kernel
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
-            Logger.Log.Info(valueProduced.ToDisplayString());
+            Log.Info(valueProduced.ToDisplayString());
 
             valueProduced
                 .FormattedValues
@@ -52,13 +53,13 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
-        [InlineData("div(123).ToString()", "<div>123</div>" )]
-        [InlineData("\"hi\"", "hi" )]
+        [InlineData("div(123).ToString()", "<div>123</div>")]
+        [InlineData("\"hi\"", "hi")]
         public async Task String_is_rendered_as_plain_text(
             string submission,
             string expectedContent)
         {
-             var kernel = CreateKernel();
+            var kernel = CreateKernel();
 
             var result = await kernel.SendAsync(new SubmitCode(submission));
 
@@ -68,7 +69,7 @@ namespace WorkspaceServer.Tests.Kernel
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
-            Logger.Log.Info(valueProduced.ToDisplayString());
+            Log.Info(valueProduced.ToDisplayString());
 
             valueProduced
                 .FormattedValues
@@ -76,6 +77,26 @@ namespace WorkspaceServer.Tests.Kernel
                 .ContainSingle(v =>
                                    v.MimeType == "text/plain" &&
                                    v.Value.ToString().Contains(expectedContent));
+        }
+
+        [Fact]
+        public async Task Display_helper_can_be_called_without_specifying_class_name()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("Display(b(\"hi!\"));"));
+
+            var formatted =
+                KernelEvents
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues);
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Contains("<b>hi!</b>"));
         }
     }
 }

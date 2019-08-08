@@ -375,12 +375,13 @@ namespace MLS.Agent.CommandLine
                                                                                 .Trace()
                                                                                 .Handle(delivery));
                             })
-                        .AddTransient<IKernel>(c => new CompositeKernel
+                        .AddSingleton<IKernel>(c => new CompositeKernel
                         {
                             new CSharpKernel()
                                 .UseDefaultRendering()
                                 .UseNugetDirective()
                                 .UseExtendDirective()
+                                .UseKernelHelpers()
                         })
                         .AddSingleton(c => new JupyterRequestContextHandler(
                                               c.GetRequiredService<PackageRegistry>(),

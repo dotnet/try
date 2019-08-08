@@ -13,6 +13,10 @@ namespace Microsoft.DotNet.Interactive.Events
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        public string Code => ((SubmitCode)Command).Code;
+
         public string Value { get; }
+
+        public override string ToString() => $"{base.ToString()}: {Value.TruncateForDisplay()}";
     }
 }
