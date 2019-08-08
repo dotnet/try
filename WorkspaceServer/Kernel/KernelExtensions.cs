@@ -12,7 +12,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Pocket;
 
-namespace MLS.Agent
+namespace WorkspaceServer.Kernel
 {
     public static class KernelExtensions
     {
