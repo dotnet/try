@@ -50,7 +50,7 @@ namespace MLS.Agent
                     {
                         _console.Out.WriteLine(string.Join('\n', result.Output));
                         _console.Out.WriteLine(string.Join('\n', result.Error));
-                        _console.Out.WriteLine(".NET kernel installation succeded");
+                        _console.Out.WriteLine(".NET kernel installation succeeded");
                         return 0;
                     }
                     else
