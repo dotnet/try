@@ -123,7 +123,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task Kernel_can_be_chosen_by_specifying_kernel_name_under_stream_kernel()
+        public async Task Kernel_can_be_interacted_using_kernel_client()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
@@ -145,9 +145,6 @@ namespace WorkspaceServer.Tests.Kernel
             var writer = new StreamWriter(input, Encoding.UTF8);
             writer.WriteMessage(new SubmitCode("#kernel csharp"));
             writer.WriteMessage(new SubmitCode("var x = 123;"));
-            writer.WriteMessage(new SubmitCode("#kernel fake"));
-            writer.WriteMessage(new SubmitCode("hello!"));
-            writer.WriteMessage(new SubmitCode("#kernel csharp"));
             writer.WriteMessage(new SubmitCode("x"));
             writer.WriteMessage(new Quit());
 

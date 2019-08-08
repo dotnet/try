@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Interactive
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
         {
-
             _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _output = output ?? throw new ArgumentNullException(nameof(output));
@@ -38,35 +37,48 @@ namespace Microsoft.DotNet.Interactive
                         continue;
                     }
 
-                    var message = JsonConvert.DeserializeObject<StreamKernelCommand>(line);
-
-                    if (message.CommandType == "Quit")
+                    try
                     {
-                        return;
-                    }
+                        var message = JsonConvert.DeserializeObject<StreamKernelCommand>(line);
 
-                    var command = DeserializeCommand(message.CommandType, message.Command);
-                    if (command == null)
-                    {
-                        continue;
-                    }
-
-                    var result = await _kernel.SendAsync(command);
-                    result.KernelEvents.Subscribe(e =>
-                    {
-                        var wrapper = new StreamKernelEvent()
+                        if (message.CommandType == "Quit")
                         {
-                            Id = message.Id,
-                            Event = JsonConvert.SerializeObject(e),
-                            Type = e.GetType().Name
-                        };
-                        var serialized = JsonConvert.SerializeObject(wrapper);
-                        _output.WriteLine(serialized);
-                        _output.Flush();
-                    });
+                            return;
+                        }
+
+                        var command = DeserializeCommand(message.CommandType, message.Command);
+                        if (command == null)
+                        {
+                            Write(new UnrecognizedCommand(), message.Id);
+                            continue;
+                        }
+
+                        var result = await _kernel.SendAsync(command);
+                        result.KernelEvents.Subscribe(e =>
+                        {
+                            Write(e, message.Id);
+                        });
+                    }
+                    catch
+                    {
+                        Write(new UnrecognizedCommand() { Body = line }, -1);
+                    }
 
                 }
             });
+        }
+
+        private void Write(IKernelEvent e, int id)
+        {
+            var wrapper = new StreamKernelEvent()
+            {
+                Id = id,
+                Event = JsonConvert.SerializeObject(e),
+                Type = e.GetType().Name
+            };
+            var serialized = JsonConvert.SerializeObject(wrapper);
+            _output.WriteLine(serialized);
+            _output.Flush();
         }
 
         private IKernelCommand DeserializeCommand(string commandType, string command)
