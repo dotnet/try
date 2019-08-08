@@ -24,7 +24,6 @@ namespace WorkspaceServer.Tests.Kernel
         protected KernelBase CreateKernel()
         {
             var kernel = CreateBaseKernel().LogEventsToPocketLogger();
-            kernel.SetDefaultRendering();
 
             DisposeAfterTest(
                 kernel.KernelEvents.Timestamp().Subscribe(KernelEvents.Add));

@@ -77,5 +77,3 @@ type FSharpKernel() =
             | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task
-    override __.SetDefaultRendering() =
-        ()

@@ -506,18 +506,14 @@ namespace MLS.Agent.CommandLine
         {
             return new CompositeKernel
                         {
-                            PrepareKernel(new CSharpKernel()
+                            new CSharpKernel()
+                                .UseDefaultRendering()
                                 .UseNugetDirective()
                                 .UseKernelHelpers()
-                                .UseXplot()),
-                            PrepareKernel(new FSharpKernel())
+                                .UseXplot(),
+                            new FSharpKernel()
+                                .UseDefaultRendering()
                         }.UseExtendDirective();
-        }
-
-        private static KernelBase PrepareKernel(KernelBase kernel)
-        {
-            kernel.SetDefaultRendering();
-            return kernel;
         }
     }
 }

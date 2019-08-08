@@ -189,10 +189,6 @@ namespace WorkspaceServer.Tests.Kernel
                 command.As<KernelCommandBase>().Handler = Handle;
                 return Task.CompletedTask;
             }
-
-            public override void SetDefaultRendering()
-            {
-            }
         }
     }
 }

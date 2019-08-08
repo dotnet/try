@@ -322,8 +322,6 @@ namespace Microsoft.DotNet.Interactive
             IKernelCommand command,
             KernelInvocationContext context) => context.Kernel = this;
 
-        public abstract void SetDefaultRendering();
-
         public void Dispose() => _disposables.Dispose();
     }
 }

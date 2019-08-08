@@ -86,14 +86,6 @@ namespace Microsoft.DotNet.Interactive
             throw new NoSuitableKernelException();
         }
 
-        public override void SetDefaultRendering()
-        {
-            foreach (var kernel in _kernels)
-            {
-                kernel.SetDefaultRendering();
-            }
-        }
-
         public IEnumerator<IKernel> GetEnumerator() => _kernels.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

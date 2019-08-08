@@ -8,6 +8,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
+using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,7 +22,8 @@ namespace WorkspaceServer.Tests.Kernel
 
         protected override KernelBase CreateBaseKernel()
         {
-            return new FSharpKernel();
+            return new FSharpKernel()
+                .UseDefaultRendering();
         }
 
         [Fact]

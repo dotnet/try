@@ -16,6 +16,7 @@ namespace WorkspaceServer.Tests.Kernel
         protected override KernelBase CreateBaseKernel()
         {
             return new CSharpKernel()
+                .UseDefaultRendering()
                 .UseExtendDirective()
                 .UseKernelHelpers();
         }

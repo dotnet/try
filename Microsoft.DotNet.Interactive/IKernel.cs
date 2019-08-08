@@ -16,7 +16,5 @@ namespace Microsoft.DotNet.Interactive
         IObservable<IKernelEvent> KernelEvents { get; }
 
         Task<IKernelCommandResult> SendAsync(IKernelCommand command, CancellationToken cancellationToken);
-
-        void SetDefaultRendering();
     }
 }
