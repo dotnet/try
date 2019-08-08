@@ -8,10 +8,11 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Pocket;
 
-namespace Microsoft.DotNet.Interactive
+namespace MLS.Agent
 {
     public static class KernelExtensions
     {
