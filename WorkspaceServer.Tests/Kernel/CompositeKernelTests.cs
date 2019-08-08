@@ -163,7 +163,7 @@ namespace WorkspaceServer.Tests.Kernel
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            var events = text.Split("\r\n")
+            var events = text.Split(Environment.NewLine)
                 .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
 
             events.Should().Contain(e => e.Type == "ValueProduced");
