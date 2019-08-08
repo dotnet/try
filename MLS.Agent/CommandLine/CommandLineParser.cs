@@ -511,12 +511,11 @@ namespace MLS.Agent.CommandLine
                                 .UseKernelHelpers()
                                 .UseXplot()),
                             PrepareKernel(new FSharpKernel())
-                        };
+                        }.UseExtendDirective();
         }
 
         private static KernelBase PrepareKernel(KernelBase kernel)
         {
-            kernel.UseExtendDirective();
             kernel.SetDefaultRendering();
             return kernel;
         }
