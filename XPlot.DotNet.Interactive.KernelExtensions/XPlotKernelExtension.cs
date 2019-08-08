@@ -14,9 +14,7 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
         {
             Formatter<PlotlyChart>.Register((chart, writer) =>
            {
-               PocketView t = html(GetChartHtml(chart));
-
-               writer.Write(t);
+               writer.Write(GetChartHtml(chart));
            }, "text/html");
 
             return Task.CompletedTask;

@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Interactive
             var kernel = KernelInvocationContext.Current.Kernel;
 
             Task.Run(() =>
-                         kernel.SendAsync(new DisplayValue(formatted), CancellationToken.None)
+                         kernel.SendAsync(new DisplayValue(formatted))
                 .Wait());
         }
     }
