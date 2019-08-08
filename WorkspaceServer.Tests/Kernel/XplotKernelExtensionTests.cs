@@ -29,12 +29,13 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
-            KernelEvents.ValuesOnly()
+            KernelEvents
+                .ValuesOnly()
                 .OfType<ValueProduced>()
                 .Should().
                 ContainSingle(valueProduced =>
                     valueProduced.FormattedValues.Any(formattedValue =>
-                       formattedValue.Value.ToString().Contains("require.config({ paths: { plotly: \'https://cdn.plot.ly/plotly-latest.min\'} });")
+                       formattedValue.Value.ToString().Contains("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});")
                  ));
         }
 
@@ -52,7 +53,7 @@ namespace WorkspaceServer.Tests.Kernel
                 ValuesOnly()
                 .OfType<ValueProduced>()
                 .Should().
-                ContainSingle(valueProduced => valueProduced.FormattedValues.Any(formattedValue =>
+                ContainSingle(valueProduced =>valueProduced.FormattedValues.Any(formattedValue =>
                          formattedValue.Value.ToString().Contains("Plotly.newPlot")
                  ));
         }
@@ -83,9 +84,9 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = CreateKernel();
             kernel.UseDefaultExtensions();
 
-            var formattedValue = KernelEvents.ValuesOnly().OfType<ValueProduced>().First().FormattedValues.First();
-            var a1 = formattedValue.Value.ToString().Contains("Plotly.newPlot");
-            var a2 = formattedValue.MimeType == "text/html";
+            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
+            await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
+            await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
             KernelEvents.ValuesOnly()
                 .OfType<ValueProduced>()
