@@ -5,6 +5,5 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public abstract class KernelCommandBase : IKernelCommand
     {
-        public abstract string Name { get; }
     }
 }

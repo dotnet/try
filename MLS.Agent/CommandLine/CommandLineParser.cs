@@ -56,6 +56,9 @@ namespace MLS.Agent.CommandLine
             StartServer startServer = null,
             InvocationContext context = null);
 
+        public delegate Task<int> KernelServer(
+            IConsole console);
+
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
@@ -64,7 +67,8 @@ namespace MLS.Agent.CommandLine
             Pack pack = null,
             Install install = null,
             Verify verify = null,
-            Jupyter jupyter = null)
+            Jupyter jupyter = null,
+            KernelServer kernelServer = null)
         {
             if (services == null)
             {
@@ -101,6 +105,9 @@ namespace MLS.Agent.CommandLine
             install = install ??
                       InstallCommand.Do;
 
+            kernelServer = kernelServer ?? 
+                           KernelServerCommand.Do;
+
             var dirArgument = new Argument<DirectoryInfo>
             {
                 Arity = ArgumentArity.ZeroOrOne,
@@ -117,6 +124,7 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Verify());
             rootCommand.AddCommand(Jupyter());
+            rootCommand.AddCommand(KernelServer());
 
             return new CommandLineBuilder(rootCommand)
                    .UseDefaults()
@@ -401,6 +409,21 @@ namespace MLS.Agent.CommandLine
                 jupyterCommand.AddCommand(installCommand);
 
                 return jupyterCommand;
+            }
+
+            Command KernelServer()
+            {
+                var kernelServerCommand = new Command("kernel-server", "Starts dotnet try with kernel functionality exposed over standard i/o")
+                {
+                    IsHidden = true
+                };
+
+                kernelServerCommand.Handler = CommandHandler.Create<IConsole>((console) =>
+                {
+                    return kernelServer(console);
+                });
+
+                return kernelServerCommand;
             }
 
             Command Pack()

@@ -10,7 +10,5 @@ namespace Microsoft.DotNet.Interactive.Events
         public CompleteCodeSubmissionReceived(SubmitCode submitCode) : base(submitCode)
         {
         }
-
-        public override string Type => nameof(CompleteCodeSubmissionReceived);
     }
 }

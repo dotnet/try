@@ -5,6 +5,5 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public class SendStandardInput : KernelCommandBase
     {
-        public override string Name => nameof(SendStandardInput);
     }
 }

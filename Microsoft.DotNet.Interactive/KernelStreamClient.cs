@@ -13,32 +13,25 @@ namespace Microsoft.DotNet.Interactive
 {
     public class KernelStreamClient
     {
-
-
-        public Stream Output { get; }
-        public Stream Input { get; }
-
-        private readonly StreamWriter _outputWriter;
         private readonly IKernel _kernel;
+        private readonly TextReader _input;
+        private readonly TextWriter _output;
 
-        public KernelStreamClient(IKernel kernel)
+        public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
         {
-            Output = new MemoryStream();
-            Input = new MemoryStream();
-            _outputWriter = new StreamWriter(Output);
 
-            _kernel = kernel;
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+            _input = input ?? throw new ArgumentNullException(nameof(input));
+            _output = output ?? throw new ArgumentNullException(nameof(output));
         }
 
         public Task Start()
         {
             return Task.Run(async () =>
             {
-                var reader = new StreamReader(Input);
                 while (true)
                 {
-                    Input.Position = 0;
-                    var line = await reader.ReadLineAsync();
+                    var line = await _input.ReadLineAsync();
                     if (line == null)
                     {
                         await Task.Delay(100);
@@ -65,11 +58,11 @@ namespace Microsoft.DotNet.Interactive
                         {
                             Id = message.Id,
                             Event = JsonConvert.SerializeObject(e),
-                            Type = e.Type
+                            Type = e.GetType().Name
                         };
                         var serialized = JsonConvert.SerializeObject(wrapper);
-                        _outputWriter.WriteLine(serialized);
-                        _outputWriter.Flush();
+                        _output.WriteLine(serialized);
+                        _output.Flush();
                     });
 
                 }

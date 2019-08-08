@@ -5,6 +5,5 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public class Started : KernelEventBase
     {
-        public override string Type => nameof(Started);
     }
 }

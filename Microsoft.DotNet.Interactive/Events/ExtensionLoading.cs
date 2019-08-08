@@ -14,7 +14,5 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         public FileInfo Assembly { get; }
-
-        public override string Type => nameof(ExtensionLoading);
     }
 }

@@ -23,7 +23,5 @@ namespace Microsoft.DotNet.Interactive.Events
         public bool IsLastValue { get; }
 
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
-
-        public override string Type => nameof(ValueProduced);
     }
 }

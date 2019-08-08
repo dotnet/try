@@ -133,8 +133,9 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            var streamKernel = new KernelStreamClient(kernel);
-            var writer = new StreamWriter(streamKernel.Input, Encoding.UTF8);
+
+            var input = new MemoryStream();
+            var writer = new StreamWriter(input, Encoding.UTF8);
             writer.WriteMessage(new SubmitCode("#kernel csharp"));
             writer.WriteMessage(new SubmitCode("var x = 123;"));
             writer.WriteMessage(new SubmitCode("#kernel fake"));
@@ -143,14 +144,22 @@ namespace WorkspaceServer.Tests.Kernel
             writer.WriteMessage(new SubmitCode("x"));
             writer.WriteMessage(new Quit());
 
+            input.Position = 0;
+
+            var output = new MemoryStream();
+
+            var streamKernel = new KernelStreamClient(kernel,
+                new StreamReader(input),
+                new StreamWriter(output));
 
             var task = streamKernel.Start();
             await task;
-            streamKernel.Output.Position = 0;
-            var reader = new StreamReader(streamKernel.Output, Encoding.UTF8);
 
-            var output = reader.ReadToEnd();
-            var events = output.Split("\r\n")
+            output.Position = 0;
+            var reader = new StreamReader(output, Encoding.UTF8);
+
+            var text = reader.ReadToEnd();
+            var events = text.Split("\r\n")
                 .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
 
             events.Should().Contain(e => e.Type == "ValueProduced");

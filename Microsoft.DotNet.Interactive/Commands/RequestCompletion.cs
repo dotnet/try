@@ -21,7 +21,5 @@ namespace Microsoft.DotNet.Interactive.Commands
         public int CursorPosition { get; set; }
 
         public string TargetKernelName { get; set; }
-
-        public override string Name => nameof(RequestCompletion);
     }
 }

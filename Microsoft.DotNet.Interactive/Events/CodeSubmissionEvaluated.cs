@@ -12,7 +12,5 @@ namespace Microsoft.DotNet.Interactive.Events
         }
 
         public string Code => ((SubmitCode) Command).Code;
-
-        public override string Type => nameof(CodeSubmissionEvaluated);
     }
 }

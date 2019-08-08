@@ -5,6 +5,5 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public class RequestSignatureHelp : KernelCommandBase
     {
-        public override string Name => nameof(RequestSignatureHelp);
     }
 }

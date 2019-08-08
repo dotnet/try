@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Interactive
             var message = new StreamKernelCommand()
             {
                 Id = id++,
-                CommandType = command.Name,
+                CommandType = command.GetType().Name,
                 Command = JsonConvert.SerializeObject(command)
             };
 

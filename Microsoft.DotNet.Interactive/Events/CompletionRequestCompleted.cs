@@ -15,7 +15,5 @@ namespace Microsoft.DotNet.Interactive.Events
         {
             CompletionList = completionList ?? throw new ArgumentNullException(nameof(completionList));
         }
-
-        public override string Type => nameof(CompletionRequestCompleted);
     }
 }
