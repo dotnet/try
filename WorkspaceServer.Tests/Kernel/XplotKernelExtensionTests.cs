@@ -20,7 +20,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task When_a_chart_is_returned_the_value_produced_has_html_with_the_script()
+        public async Task When_a_chart_is_returned_the_value_produced_has_html_with_the_require_config_call()
         {
             var kernel = CreateKernel();
             kernel.UseDefaultExtensions();
@@ -28,6 +28,60 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
+
+            KernelEvents.ValuesOnly()
+                .OfType<ValueProduced>()
+                .Should().
+                ContainSingle(valueProduced =>
+                    valueProduced.FormattedValues.Any(formattedValue =>
+                       formattedValue.Value.ToString().Contains("require.config({ paths: { plotly: \'https://cdn.plot.ly/plotly-latest.min\'} });")
+                 ));
+        }
+
+        [Fact]
+        public async Task When_a_chart_is_returned_the_value_produced_hash_the_plotly_newPlot_call()
+        {
+            var kernel = CreateKernel();
+            kernel.UseDefaultExtensions();
+
+            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
+            await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
+            await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
+
+            KernelEvents.
+                ValuesOnly()
+                .OfType<ValueProduced>()
+                .Should().
+                ContainSingle(valueProduced => valueProduced.FormattedValues.Any(formattedValue =>
+                         formattedValue.Value.ToString().Contains("Plotly.newPlot")
+                 ));
+        }
+
+        [Fact]
+        public async Task When_a_chart_is_returned_the_value_produced_has_the_require_plotly()
+        {
+            var kernel = CreateKernel();
+            kernel.UseDefaultExtensions();
+
+            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
+            await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
+            await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
+
+            KernelEvents.
+                ValuesOnly()
+                .OfType<ValueProduced>()
+                .Should().
+                ContainSingle(valueProduced =>
+                    valueProduced.FormattedValues.Any(formattedValue =>
+                        formattedValue.Value.ToString().Contains("require([\'plotly\'], function(Plotly)")
+                 ));
+        }
+
+        [Fact]
+        public async Task When_a_chart_is_returned_the_value_produced_has_the_mime_type_html()
+        {
+            var kernel = CreateKernel();
+            kernel.UseDefaultExtensions();
 
             var formattedValue = KernelEvents.ValuesOnly().OfType<ValueProduced>().First().FormattedValues.First();
             var a1 = formattedValue.Value.ToString().Contains("Plotly.newPlot");
@@ -39,10 +93,8 @@ namespace WorkspaceServer.Tests.Kernel
                 ContainSingle(valueProduced =>
                     valueProduced.FormattedValues.Any(formattedValue =>
                         formattedValue.MimeType == "text/html"
-                        && formattedValue.Value.ToString().Contains("require.config({ paths: { plotly: \'https://cdn.plot.ly/plotly-latest.min\'} });")
-                        && formattedValue.Value.ToString().Contains("require([\'plotly\'], function(Plotly)")
-                         && formattedValue.Value.ToString().Contains("Plotly.newPlot")
                  ));
         }
+
     }
 }
