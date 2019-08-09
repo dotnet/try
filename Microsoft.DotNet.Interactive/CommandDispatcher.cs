@@ -16,9 +16,10 @@ namespace Microsoft.DotNet.Interactive
             _map = Assembly
                .GetExecutingAssembly()
                .GetTypes()
-               .Where(t => typeof(IKernelCommand).IsAssignableFrom(t) &&
-                           t != typeof(IKernelCommand) &&
-                           t != typeof(KernelCommandBase))
+               .Where(t => typeof(IKernelCommand).IsAssignableFrom(t)
+                        && !t.IsAbstract
+                        && !t.IsGenericTypeDefinition
+                        && !t.IsInterface)
                .ToDictionary(t => t.Name, t => t);
         }
 
