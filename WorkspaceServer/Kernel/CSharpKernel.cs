@@ -66,7 +66,8 @@ namespace WorkspaceServer.Kernel
                     typeof(Task<>).Assembly,
                     typeof(IKernel).Assembly, 
                     typeof(CSharpKernel).Assembly, 
-                    typeof(PocketView).Assembly);
+                    typeof(PocketView).Assembly,
+                    typeof(XPlot.Plotly.PlotlyChart).Assembly);
         }
 
         private (bool shouldExecute, string completeSubmission) IsBufferACompleteSubmission(string input)

@@ -494,6 +494,7 @@ namespace MLS.Agent.CommandLine
                                 .UseNugetDirective()
                                 .UseExtendDirective()
                                 .UseKernelHelpers()
+                                .UseXplot()
                         };
         }
     }
