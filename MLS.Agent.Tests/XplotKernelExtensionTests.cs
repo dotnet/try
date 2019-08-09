@@ -6,12 +6,8 @@ using HtmlAgilityPack;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Mono.Cecil.Cil;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
-using WorkspaceServer.Kernel;
 using WorkspaceServer.Tests.Kernel;
 using XPlot.DotNet.Interactive.KernelExtensions;
 using XPlot.Plotly;
@@ -31,7 +27,7 @@ namespace MLS.Agent.Tests
         public async Task When_a_chart_is_returned_the_value_produced_has_html_with_the_require_config_call()
         {
             var kernel = CreateKernel();
-            kernel.UseXPlotExtension();
+            kernel.UseXplot();
 
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
@@ -51,7 +47,7 @@ namespace MLS.Agent.Tests
         public class GetChartHtmlTests
         {
             [Fact]
-            public void GetChartHtml_returns_the_html_with_div()
+            public void Returns_the_html_with_div()
             {
                 var extension = new XPlotKernelExtension();
                 var html = extension.GetChartHtml(new PlotlyChart());
@@ -63,7 +59,7 @@ namespace MLS.Agent.Tests
             }
 
             [Fact]
-            public void GetChartHtml_returns_the_html_with_script_containing_require_config()
+            public void Returns_the_html_with_script_containing_require_config()
             {
                 var extension = new XPlotKernelExtension();
                 var html = extension.GetChartHtml(new PlotlyChart());
@@ -74,7 +70,7 @@ namespace MLS.Agent.Tests
             }
 
             [Fact]
-            public void GetChartHtml_returns_the_html_with_script_containing_require_plotly()
+            public void Returns_the_html_with_script_containing_require_plotly_and_call_to_new_plot_function()
             {
                 var extension = new XPlotKernelExtension();
                 var html = extension.GetChartHtml(new PlotlyChart());

@@ -9,7 +9,7 @@ namespace MLS.Agent
 {
     public static class KernelExtensions
     {
-        public static T UseXPlotExtension<T>(this T kernel)
+        public static T UseXplot<T>(this T kernel)
             where T : KernelBase
         {
             var extension = new XPlotKernelExtension();

@@ -23,29 +23,33 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
 
         public string GetChartHtml(PlotlyChart chart)
         {
-            string chartHtml = chart.GetInlineHtml();
+            var document = new HtmlDocument();
+            document.LoadHtml(chart.GetInlineHtml());
 
-            //var document = new HtmlDocument();
-            //document.LoadHtml(chartHtml);
-            //document.DocumentNode.Descendants()
-            int scriptStart = chartHtml.IndexOf("<script>") + "<script>".Length;
-            int scriptEnd = chartHtml.IndexOf("</script>");
+            var divNode = document.DocumentNode.SelectSingleNode("//div");
+            var scriptNode = document.DocumentNode.SelectSingleNode("//script");
 
-            StringBuilder html = new StringBuilder(chartHtml.Length);
-            html.Append(chartHtml, 0, scriptStart);
+            var newHtmlDocument = new HtmlDocument();
+            newHtmlDocument.DocumentNode.ChildNodes.Add(divNode);
+            newHtmlDocument.DocumentNode.ChildNodes.Add(GetScriptNodeWithRequire(scriptNode));
 
-            html.Append(@"
+            return newHtmlDocument.DocumentNode.WriteContentTo();
+        }
+
+        private static HtmlNode GetScriptNodeWithRequire(HtmlNode scriptNode)
+        {
+            var newScript = new StringBuilder();
+
+            newScript.AppendLine("<script>");
+            newScript.Append(@"
 require.config({paths:{plotly:'https://cdn.plot.ly/plotly-latest.min'}});
 require(['plotly'], function(Plotly) {
 ");
 
-            html.Append(chartHtml, scriptStart + 1, scriptEnd - scriptStart - 1);
-
-            html.AppendLine(@"});");
-
-            html.Append(chartHtml.AsSpan().Slice(scriptEnd).ToString());
-
-            return html.ToString();
+            newScript.Append(scriptNode.InnerText);
+            newScript.AppendLine(@"});");
+            newScript.AppendLine("</script>");
+            return HtmlNode.CreateNode(newScript.ToString());
         }
     }
 }
