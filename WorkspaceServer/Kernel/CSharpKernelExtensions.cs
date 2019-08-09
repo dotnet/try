@@ -8,7 +8,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
-using WorkspaceServer.PackageRestore;
+using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Kernel
 {

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.CodeAnalysis;
-using WorkspaceServer.PackageRestore;
+using System.Linq;
+using System.Threading.Tasks;
+using WorkspaceServer.Packaging;
 using Xunit;
 
 namespace WorkspaceServer.Tests
