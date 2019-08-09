@@ -19,10 +19,15 @@
 
   <ItemGroup>
     <Compile Remove="..\Microsoft.DotNet.Try.ProjectTemplate\Tutorial\content\**" />
+    <Compile Remove="TestResults\**" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Microsoft.DotNet.Try.ProjectTemplate\Tutorial\content\**" Link="template\%(RecursiveDir)%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="TestResults\**" />
   </ItemGroup>
 </Project>
