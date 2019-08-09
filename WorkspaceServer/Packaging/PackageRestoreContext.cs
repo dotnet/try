@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.CodeAnalysis;
-using MLS.Agent;
 using MLS.Agent.Tools;
-using Pocket;
-using WorkspaceServer.Packaging;
 
-namespace WorkspaceServer.PackageRestore
+namespace WorkspaceServer.Packaging
 {
     public class PackageRestoreContext
     {

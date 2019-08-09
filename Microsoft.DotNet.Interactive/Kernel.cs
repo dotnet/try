@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public static class Kernel
     {
-        public static void Display(
+        public static void display(
             object value, 
             string mimeType = HtmlFormatter.MimeType)
         {
