@@ -1,4 +1,5 @@
-﻿using Microsoft.DotNet.Interactive;
+﻿using HtmlAgilityPack;
+using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Rendering;
 using System;
 using System.Text;
@@ -20,19 +21,22 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
             return Task.CompletedTask;
         }
 
-        private string GetChartHtml(PlotlyChart chart)
+        public string GetChartHtml(PlotlyChart chart)
         {
             string chartHtml = chart.GetInlineHtml();
 
+            //var document = new HtmlDocument();
+            //document.LoadHtml(chartHtml);
+            //document.DocumentNode.Descendants()
             int scriptStart = chartHtml.IndexOf("<script>") + "<script>".Length;
             int scriptEnd = chartHtml.IndexOf("</script>");
 
             StringBuilder html = new StringBuilder(chartHtml.Length);
-            html.Append(chartHtml,0, scriptStart);
+            html.Append(chartHtml, 0, scriptStart);
 
             html.Append(@"
 require.config({paths:{plotly:'https://cdn.plot.ly/plotly-latest.min'}});
-require(['plotly'], function(Plotly) { 
+require(['plotly'], function(Plotly) {
 ");
 
             html.Append(chartHtml, scriptStart + 1, scriptEnd - scriptStart - 1);

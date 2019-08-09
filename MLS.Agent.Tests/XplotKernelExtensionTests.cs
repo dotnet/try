@@ -2,13 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using HtmlAgilityPack;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Mono.Cecil.Cil;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using WorkspaceServer.Kernel;
 using WorkspaceServer.Tests.Kernel;
+using XPlot.DotNet.Interactive.KernelExtensions;
+using XPlot.Plotly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,6 +22,7 @@ namespace MLS.Agent.Tests
 {
     public class XplotKernelExtensionTests : CSharpKernelTestBase
     {
+     
         public XplotKernelExtensionTests(ITestOutputHelper output) : base(output)
         {
         }
@@ -24,7 +31,7 @@ namespace MLS.Agent.Tests
         public async Task When_a_chart_is_returned_the_value_produced_has_html_with_the_require_config_call()
         {
             var kernel = CreateKernel();
-            kernel.UseDefaultExtensions();
+            kernel.UseXPlotExtension();
 
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
@@ -35,63 +42,57 @@ namespace MLS.Agent.Tests
                 .Should().
                 ContainSingle(valueProduced =>
                     valueProduced.FormattedValues.Any(formattedValue =>
-                       formattedValue.Value.ToString().Contains("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});")
-                 ));
+                    formattedValue.MimeType == "text/html" &&
+                       formattedValue.Value.ToString().Contains("require([\'plotly\'], function(Plotly)")
+                       && formattedValue.Value.ToString().Contains("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});")
+                 )) ;
         }
 
-        [Fact]
-        public async Task When_a_chart_is_returned_the_value_produced_hash_the_plotly_newPlot_call()
+        public class GetChartHtmlTests
         {
-            var kernel = CreateKernel();
-            kernel.UseDefaultExtensions();
+            [Fact]
+            public void GetChartHtml_returns_the_html_with_div()
+            {
+                var extension = new XPlotKernelExtension();
+                var html = extension.GetChartHtml(new PlotlyChart());
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
 
-            await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
-            await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
+                document.DocumentNode.SelectSingleNode("//div").InnerHtml.Should().NotBeNull();
+                document.DocumentNode.SelectSingleNode("//div").Id.Should().NotBeNullOrEmpty();
+            }
 
-            KernelEvents.
-                ValuesOnly()
-                .OfType<ValueProduced>()
-                .Should().
-                ContainSingle(valueProduced =>valueProduced.FormattedValues.Any(formattedValue =>
-                         formattedValue.Value.ToString().Contains("Plotly.newPlot")
-                 ));
-        }
+            [Fact]
+            public void GetChartHtml_returns_the_html_with_script_containing_require_config()
+            {
+                var extension = new XPlotKernelExtension();
+                var html = extension.GetChartHtml(new PlotlyChart());
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
 
-        [Fact]
-        public async Task When_a_chart_is_returned_the_value_produced_has_the_require_plotly()
-        {
-            var kernel = CreateKernel();
-            kernel.UseDefaultExtensions();
+                document.DocumentNode.SelectSingleNode("//script").InnerHtml.Should().Contain("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});");
+            }
 
-            await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
-            await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
+            [Fact]
+            public void GetChartHtml_returns_the_html_with_script_containing_require_plotly()
+            {
+                var extension = new XPlotKernelExtension();
+                var html = extension.GetChartHtml(new PlotlyChart());
+                var document = new HtmlDocument();
+                document.LoadHtml(html);
 
-            KernelEvents.
-                ValuesOnly()
-                .OfType<ValueProduced>()
-                .Should().
-                ContainSingle(valueProduced =>
-                    valueProduced.FormattedValues.Any(formattedValue =>
-                        formattedValue.Value.ToString().Contains("require([\'plotly\'], function(Plotly)")
-                 ));
-        }
-
-        [Fact]
-        public async Task When_a_chart_is_returned_the_value_produced_has_the_mime_type_html()
-        {
-            var kernel = CreateKernel();
-            kernel.UseDefaultExtensions();
-
-            await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
-            await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
-
-            KernelEvents.ValuesOnly()
-                .OfType<ValueProduced>()
-                .Should().
-                ContainSingle(valueProduced =>
-                    valueProduced.FormattedValues.Any(formattedValue =>
-                        formattedValue.MimeType == "text/html"
-                 ));
+                var divId = document.DocumentNode.SelectSingleNode("//div").Id;
+                document.DocumentNode
+                    .SelectSingleNode("//script")
+                    .InnerHtml.Split("\n")
+                    .Select(item => item.Trim())
+                    .Where(item => !string.IsNullOrWhiteSpace(item))
+                    .Should()
+                    .ContainInOrder(@"require(['plotly'], function(Plotly) {",
+                                        "var data = null;",
+                                         @"var layout = """";",
+                                         $"Plotly.newPlot('{divId}', data, layout);");
+            }
         }
 
     }

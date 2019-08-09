@@ -9,10 +9,9 @@ namespace MLS.Agent
 {
     public static class KernelExtensions
     {
-        public static T UseDefaultExtensions<T>(this T kernel)
+        public static T UseXPlotExtension<T>(this T kernel)
             where T : KernelBase
         {
-
             var extension = new XPlotKernelExtension();
             extension.OnLoadAsync(kernel).Wait();
             return kernel;
