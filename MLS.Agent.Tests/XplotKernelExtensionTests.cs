@@ -2,21 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using HtmlAgilityPack;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkspaceServer.Tests.Kernel;
-using XPlot.DotNet.Interactive.KernelExtensions;
-using XPlot.Plotly;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace MLS.Agent.Tests
 {
-    public class XplotKernelExtensionTests : CSharpKernelTestBase
+    public partial class XplotKernelExtensionTests : CSharpKernelTestBase
     {
      
         public XplotKernelExtensionTests(ITestOutputHelper output) : base(output)
@@ -41,55 +38,7 @@ namespace MLS.Agent.Tests
                     formattedValue.MimeType == "text/html" &&
                        formattedValue.Value.ToString().Contains("require([\'plotly\'], function(Plotly)")
                        && formattedValue.Value.ToString().Contains("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});")
-                 )) ;
+                 ));
         }
-
-        public class GetChartHtmlTests
-        {
-            [Fact]
-            public void Returns_the_html_with_div()
-            {
-                var extension = new XPlotKernelExtension();
-                var html = extension.GetChartHtml(new PlotlyChart());
-                var document = new HtmlDocument();
-                document.LoadHtml(html);
-
-                document.DocumentNode.SelectSingleNode("//div").InnerHtml.Should().NotBeNull();
-                document.DocumentNode.SelectSingleNode("//div").Id.Should().NotBeNullOrEmpty();
-            }
-
-            [Fact]
-            public void Returns_the_html_with_script_containing_require_config()
-            {
-                var extension = new XPlotKernelExtension();
-                var html = extension.GetChartHtml(new PlotlyChart());
-                var document = new HtmlDocument();
-                document.LoadHtml(html);
-
-                document.DocumentNode.SelectSingleNode("//script").InnerHtml.Should().Contain("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});");
-            }
-
-            [Fact]
-            public void Returns_the_html_with_script_containing_require_plotly_and_call_to_new_plot_function()
-            {
-                var extension = new XPlotKernelExtension();
-                var html = extension.GetChartHtml(new PlotlyChart());
-                var document = new HtmlDocument();
-                document.LoadHtml(html);
-
-                var divId = document.DocumentNode.SelectSingleNode("//div").Id;
-                document.DocumentNode
-                    .SelectSingleNode("//script")
-                    .InnerHtml.Split("\n")
-                    .Select(item => item.Trim())
-                    .Where(item => !string.IsNullOrWhiteSpace(item))
-                    .Should()
-                    .ContainInOrder(@"require(['plotly'], function(Plotly) {",
-                                        "var data = null;",
-                                         @"var layout = """";",
-                                         $"Plotly.newPlot('{divId}', data, layout);");
-            }
-        }
-
     }
 }
