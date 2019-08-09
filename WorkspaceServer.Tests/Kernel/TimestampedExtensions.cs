@@ -8,7 +8,7 @@ using System.Reactive;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    internal static class TimestampedExtensions
+    public static class TimestampedExtensions
     {
         public static IEnumerable<T> ValuesOnly<T>(this IEnumerable<Timestamped<T>> source)
         {

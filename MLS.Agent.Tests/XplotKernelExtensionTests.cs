@@ -8,10 +8,11 @@ using Microsoft.DotNet.Interactive.Events;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkspaceServer.Kernel;
+using WorkspaceServer.Tests.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace MLS.Agent.Tests
 {
     public class XplotKernelExtensionTests : CSharpKernelTestBase
     {
@@ -25,7 +26,6 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = CreateKernel();
             kernel.UseDefaultExtensions();
 
-            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
@@ -45,7 +45,6 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = CreateKernel();
             kernel.UseDefaultExtensions();
 
-            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
@@ -64,7 +63,6 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = CreateKernel();
             kernel.UseDefaultExtensions();
 
-            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
@@ -84,7 +82,6 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = CreateKernel();
             kernel.UseDefaultExtensions();
 
-            await kernel.SendAsync(new SubmitCode("#r nuget:XPlot.Plotly"));
             await kernel.SendAsync(new SubmitCode("using XPlot.Plotly;"));
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
