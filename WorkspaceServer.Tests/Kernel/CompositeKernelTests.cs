@@ -144,7 +144,8 @@ namespace WorkspaceServer.Tests.Kernel
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
             writer.WriteMessage(new SubmitCode("#kernel csharp"));
-            writer.WriteMessage(new SubmitCode("var x = 123;"));
+            writer.WriteMessage(new SubmitCode(@"var x = 
+123;"));
             writer.WriteMessage(new SubmitCode("x"));
             writer.WriteMessage(new Quit());
 
@@ -166,7 +167,7 @@ namespace WorkspaceServer.Tests.Kernel
             var events = text.Split(Environment.NewLine)
                 .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
 
-            events.Should().Contain(e => e.Type == "ValueProduced");
+            events.Should().Contain(e => e.EventType == "ValueProduced");
         }
     
 

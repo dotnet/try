@@ -12,13 +12,9 @@ namespace MLS.Agent.CommandLine
     public static class KernelServerCommand
     {
         public static async Task<int> Do(
+            IKernel kernel,
             IConsole console)
         {
-            var kernel = new CompositeKernel()
-            {
-                  new CSharpKernel()
-            };
-
             var client = new KernelStreamClient(kernel, Console.In, Console.Out);
             await client.Start();
             return 0;

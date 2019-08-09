@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Interactive
                         var command = DeserializeCommand(message.CommandType, message.Command);
                         if (command == null)
                         {
-                            Write(new UnrecognizedCommand(), message.Id);
+                            Write(new CommandNotRecognized(), message.Id);
                             continue;
                         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Interactive
                     }
                     catch
                     {
-                        Write(new UnrecognizedCommand() { Body = line }, -1);
+                        Write(new CommandNotRecognized() { Body = line }, -1);
                     }
 
                 }
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 Id = id,
                 Event = JsonConvert.SerializeObject(e),
-                Type = e.GetType().Name
+                EventType = e.GetType().Name
             };
             var serialized = JsonConvert.SerializeObject(wrapper);
             _output.WriteLine(serialized);
