@@ -187,11 +187,8 @@ $@"```cs --project {package} --source-file ../src/sample/Program.cs
 ```";
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                .SelectSingleNode("//pre/code").Attributes["data-trydotnet-package"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-package"];
 
             var fullProjectPath = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(package));
             output.Value.Should().Be(fullProjectPath.FullName);
@@ -248,11 +245,8 @@ $@"```cs --package {package} --source-file ../src/sample/Program.cs
 ```";
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                .SelectSingleNode("//pre/code").Attributes["data-trydotnet-package"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-package"];
 
             output.Value.Should().Be(package);
         }
@@ -277,13 +271,10 @@ $@"```cs --package {package} --project {project} --source-file ../src/sample/Pro
 ```";
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-package"];
 
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var node = htmlDocument.DocumentNode
-                                     .SelectSingleNode("//pre/code").Attributes["data-trydotnet-package"];
-
-            node.Value.Should().Be(package);
+            output.Value.Should().Be(package);
         }
 
         [Fact]
@@ -318,12 +309,8 @@ namespace BasicConsoleApp
 ```";
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                .SelectSingleNode("//pre/code")
-                .InnerText.Trim();
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.InnerText.Trim();
 
             output.Should().BeEquivalentTo($"{regionCode.HtmlEncode()}");
         }
@@ -348,11 +335,8 @@ $@"```cs --source-file {filename} --region codeRegion
 ```";
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                .SelectSingleNode("//pre/code").Attributes["data-trydotnet-file-name"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-file-name"];
 
             output.Value.Should().Be(directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(filename)).FullName);
         }
@@ -378,11 +362,8 @@ Console.WriteLine(""Hello World"");
 ```";
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                .SelectSingleNode("//pre/code").Attributes["data-trydotnet-file-name"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-file-name"];
 
             output.Value.Should().Be(directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath(destinationFile)).FullName);
         }
@@ -407,11 +388,8 @@ $@"```cs --source-file Program.cs --region {region}
 ```";
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                .SelectSingleNode("//pre/code").Attributes["data-trydotnet-region"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-region"];
 
             output.Value.Should().Be(region);
         }
@@ -432,10 +410,7 @@ $@"```cs --source-file Program.cs --region {region}
 ```";
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var node = htmlDocument.DocumentNode.SelectSingleNode("//div[@class='notification is-danger']");
+            var node = GetSingleHtmlNode(html, "//div[@class='notification is-danger']");
 
             var expected = $"Region \"{region}\" not found in file {directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./Program.cs"))}".HtmlEncode().ToString();
 
@@ -463,10 +438,7 @@ $@"```cs --source-file Program.cs --region {region}
 ```";
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var pre = htmlDocument.DocumentNode.SelectSingleNode("//div[@class='notification is-danger']");
+            var pre = GetSingleHtmlNode(html, "//div[@class='notification is-danger']");
 
             pre.InnerHtml.Should().Contain($"Multiple regions found: {region}");
         }
@@ -489,12 +461,8 @@ $@"```cs --source-file Program.cs --region {region}
                            .Build();
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                                     .SelectSingleNode("//pre/code")
-                                     .Attributes["data-trydotnet-session-id"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-session-id"];
 
             output.Value.Should().Be(session);
         }
@@ -516,12 +484,8 @@ $@"```cs --source-file Program.cs --region {region}
                            .Build();
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var output = htmlDocument.DocumentNode
-                                     .SelectSingleNode("//pre/code")
-                                     .Attributes["data-trydotnet-session-id"];
+            var node = GetSingleHtmlNode(html, "//pre/code");
+            var output = node.Attributes["data-trydotnet-session-id"];
 
             output.Value.Should().StartWith("Run");
         }
@@ -547,10 +511,7 @@ $@"```cs --package {package}
 ```";
 
             var html = (await pipeline.RenderHtmlAsync(document)).EnforceLF();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            var node = htmlDocument.DocumentNode.SelectSingleNode("//div[@class='notification is-danger']");
+            var node = GetSingleHtmlNode(html, "//div[@class='notification is-danger']");
 
             node.InnerHtml.Should().Contain($"Package named &quot;{package}&quot; not found");
         }
@@ -582,6 +543,15 @@ $@"```cs --package {package}
                                     .Value;
 
             value.Should().Be("--region the-region --source-file Program.cs -- one two \"and three\"".HtmlAttributeEncode().ToString());
+        }
+
+        private static HtmlNode GetSingleHtmlNode(string html, string nodeName)
+        {
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(html);
+            var node = htmlDocument?.DocumentNode?.SelectSingleNode(nodeName);
+            Assert.True(node != null, $"Unexpected value for `{nameof(node)}`.  Html was:\r\n{html}");
+            return node;
         }
     }
 }
