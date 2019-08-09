@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -16,6 +15,7 @@ namespace Microsoft.DotNet.Interactive
         private readonly IKernel _kernel;
         private readonly TextReader _input;
         private readonly TextWriter _output;
+        private readonly CommandDispatcher _dispatcher = new CommandDispatcher();
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
         {
@@ -83,10 +83,7 @@ namespace Microsoft.DotNet.Interactive
 
         private IKernelCommand DeserializeCommand(string commandType, string command)
         {
-            if (commandType == "SubmitCode")
-                return JsonConvert.DeserializeObject<SubmitCode>(command);
-
-            return null;
+            return _dispatcher.Dispatch(commandType, command);
         }
     }
 }
