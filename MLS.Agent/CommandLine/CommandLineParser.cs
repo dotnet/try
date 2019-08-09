@@ -56,6 +56,10 @@ namespace MLS.Agent.CommandLine
             StartServer startServer = null,
             InvocationContext context = null);
 
+        public delegate Task<int> StartKernelServer(
+            IKernel kernel,
+            IConsole console);
+
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
@@ -64,7 +68,8 @@ namespace MLS.Agent.CommandLine
             Pack pack = null,
             Install install = null,
             Verify verify = null,
-            Jupyter jupyter = null)
+            Jupyter jupyter = null,
+            StartKernelServer startKernelServer = null)
         {
             if (services == null)
             {
@@ -101,6 +106,9 @@ namespace MLS.Agent.CommandLine
             install = install ??
                       InstallCommand.Do;
 
+            startKernelServer = startKernelServer ?? 
+                           KernelServerCommand.Do;
+
             var dirArgument = new Argument<DirectoryInfo>
             {
                 Arity = ArgumentArity.ZeroOrOne,
@@ -117,6 +125,7 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Verify());
             rootCommand.AddCommand(Jupyter());
+            rootCommand.AddCommand(KernelServer());
 
             return new CommandLineBuilder(rootCommand)
                    .UseDefaults()
@@ -375,14 +384,7 @@ namespace MLS.Agent.CommandLine
                                                                                 .Trace()
                                                                                 .Handle(delivery));
                             })
-                        .AddSingleton<IKernel>(c => new CompositeKernel
-                        {
-                            new CSharpKernel()
-                                .UseDefaultRendering()
-                                .UseNugetDirective()
-                                .UseExtendDirective()
-                                .UseKernelHelpers()
-                        })
+                        .AddSingleton((Func<IServiceProvider, IKernel>)(c => CreateKernel()))
                         .AddSingleton(c => new JupyterRequestContextHandler(
                                               c.GetRequiredService<PackageRegistry>(),
                                               c.GetRequiredService<IKernel>())
@@ -402,6 +404,21 @@ namespace MLS.Agent.CommandLine
                 jupyterCommand.AddCommand(installCommand);
 
                 return jupyterCommand;
+            }
+
+            Command KernelServer()
+            {
+                var startKernelServerCommand = new Command("kernel-server", "Starts dotnet try with kernel functionality exposed over standard i/o")
+                {
+                    IsHidden = true
+                };
+
+                startKernelServerCommand.Handler = CommandHandler.Create<IConsole>((console) =>
+                {
+                    return startKernelServer(CreateKernel(), console);
+                });
+
+                return startKernelServerCommand;
             }
 
             Command Pack()
@@ -466,6 +483,18 @@ namespace MLS.Agent.CommandLine
 
                 return verifyCommand;
             }
+        }
+
+        private static CompositeKernel CreateKernel()
+        {
+            return new CompositeKernel
+                        {
+                            new CSharpKernel()
+                                .UseDefaultRendering()
+                                .UseNugetDirective()
+                                .UseExtendDirective()
+                                .UseKernelHelpers()
+                        };
         }
     }
 }

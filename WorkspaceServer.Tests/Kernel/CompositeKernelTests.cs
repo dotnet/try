@@ -14,6 +14,9 @@ using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -118,6 +121,55 @@ namespace WorkspaceServer.Tests.Kernel
                 .ContainSingle(c => c is SubmitCode && 
                                     c.As<SubmitCode>().Code == "hello!");
         }
+
+        [Fact]
+        public async Task Kernel_can_be_interacted_using_kernel_client()
+        {
+            var receivedOnFakeRepl = new List<IKernelCommand>();
+
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel(),
+                new FakeKernel("fake")
+                {
+                     Handle = context =>
+                    {
+                        receivedOnFakeRepl.Add(context.Command);
+                        return Task.CompletedTask;
+                    }
+                }
+            };
+
+
+            var input = new MemoryStream();
+            var writer = new StreamWriter(input, Encoding.UTF8);
+            writer.WriteMessage(new SubmitCode("#kernel csharp"));
+            writer.WriteMessage(new SubmitCode(@"var x = 
+123;"));
+            writer.WriteMessage(new SubmitCode("x"));
+            writer.WriteMessage(new Quit());
+
+            input.Position = 0;
+
+            var output = new MemoryStream();
+
+            var streamKernel = new KernelStreamClient(kernel,
+                new StreamReader(input),
+                new StreamWriter(output));
+
+            var task = streamKernel.Start();
+            await task;
+
+            output.Position = 0;
+            var reader = new StreamReader(output, Encoding.UTF8);
+
+            var text = reader.ReadToEnd();
+            var events = text.Split(Environment.NewLine)
+                .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
+
+            events.Should().Contain(e => e.EventType == "ValueProduced");
+        }
+    
 
         public class FakeKernel : KernelBase
         {

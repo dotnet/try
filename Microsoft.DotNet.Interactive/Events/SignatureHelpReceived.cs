@@ -10,6 +10,5 @@ namespace Microsoft.DotNet.Interactive.Events
         public SignatureHelpReceived(IKernelCommand command) : base(command)
         {
         }
-
     }
 }
