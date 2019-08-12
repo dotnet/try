@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $thisDir = Split-Path -Parent $PSCommandPath
 $toolLocation = ""
 $toolVersion = ""
-if (Test-Path '$env:DisableArcade') {
+if (Test-Path 'env:DisableArcade') {
     dotnet pack "$thisDir\MLS.Agent.csproj" /p:Version=0.0.0
     $script:toolLocation = "$thisDir\bin\debug"
     $script:toolVersion = "0.0.0"
