@@ -98,5 +98,28 @@ namespace WorkspaceServer.Tests.Kernel
                                    v.MimeType == "text/html" &&
                                    v.Value.ToString().Contains("<b>hi!</b>"));
         }
+
+        [Fact]
+        public async Task Javascript_helper_emits_string_as_content_within_a_script_element()
+        {
+            var kernel = CreateKernel();
+
+            var scriptContent = "alert('Hello World!');";
+
+            await kernel.SendAsync(new SubmitCode($@"Javascript(""{scriptContent}"");"));
+
+            var formatted =
+                KernelEvents
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues)
+                    .ToArray();
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Contains($@"<script type=""text/javascript"">{scriptContent}</script>"));
+        }
     }
 }
