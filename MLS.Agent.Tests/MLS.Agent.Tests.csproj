@@ -13,6 +13,7 @@
  
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.8.0" />
+    <PackageReference Include="FSharp.Core" Version="4.6.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
     <PackageReference Include="HttpResponseMessageAssertions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>

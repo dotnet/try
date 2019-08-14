@@ -34,6 +34,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="FSharp.Core" Version="4.6.2" />
     <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -108,26 +109,6 @@
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol\Microsoft.DotNet.Try.Protocol.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-     <EmbeddedResource Include="..\MLS.Blazor\Linker.xml" /> 
-    <EmbeddedResource Include="..\MLS.Blazor\Program.cs" />
-    <EmbeddedResource Include="..\MLS.Blazor\Startup.cs" />
-    <EmbeddedResource Include="..\MLS.Blazor\wwwroot\index.html" />
-    <EmbeddedResource Include="..\MLS.Blazor\wwwroot\interop.js" />
-    <!--<EmbeddedResource Include="..\MLS.Blazor\Pages\_Imports.razor" />-->
-    <EmbeddedResource Include="..\MLS.Blazor\_Imports.razor" />
-    <EmbeddedResource Include="..\MLS.Blazor\Pages\Index.razor" />
-
-    <EmbeddedResource Include="..\WasmCodeRunner\CodeRunner.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\InteropMessage.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\SerializableDiagnostic.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\WasmCodeRunnerRequest.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\WasmCodeRunnerResponse.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\CommandLineBuilderExtensions.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\EntryPointDiscoverer.cs" />
-    <EmbeddedResource Include="..\WasmCodeRunner\PreserveConsoleState.cs" />
   </ItemGroup>
 
 </Project>

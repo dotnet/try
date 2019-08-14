@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.8.0" />
+    <PackageReference Include="FSharp.Core" Version="4.6.2" />
   </ItemGroup>
 
   <ItemGroup>
