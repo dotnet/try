@@ -96,8 +96,7 @@ namespace MLS.Agent.CommandLine
                      ((verifyOptions, console, startupOptions) =>
                              VerifyCommand.Do(verifyOptions,
                                               console,
-                                              () => new FileSystemDirectoryAccessor(verifyOptions.Dir),
-                                              PackageRegistry.CreateForTryMode(verifyOptions.Dir),
+                                              (dir) => new FileSystemDirectoryAccessor(dir),
                                               startupOptions));
 
             pack = pack ??
@@ -113,7 +112,7 @@ namespace MLS.Agent.CommandLine
             {
                 Arity = ArgumentArity.ZeroOrOne,
                 Name = nameof(StartupOptions.Dir).ToLower(),
-                Description = "Specify the path to the root directory for your documentation"
+                Description = "Specify the path to the root directory for your documentation",
             }.ExistingOnly();
 
             var rootCommand = StartInTryMode();

@@ -23,11 +23,11 @@ namespace MLS.Agent.CommandLine
         public static async Task<int> Do(
             VerifyOptions options,
             IConsole console,
-            Func<IDirectoryAccessor> getDirectoryAccessor,
-            PackageRegistry packageRegistry,
+            Func<DirectoryInfo, IDirectoryAccessor> getDirectoryAccessor,
             StartupOptions startupOptions = null)
         {
-            var directoryAccessor = getDirectoryAccessor();
+            var packageRegistry = PackageRegistry.CreateForTryMode(options.Dir);
+            var directoryAccessor = getDirectoryAccessor(options.Dir);
             var markdownProject = new MarkdownProject(
                 directoryAccessor,
                 packageRegistry,

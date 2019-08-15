@@ -38,8 +38,7 @@ namespace MLS.Agent.Tests.CommandLine
             var resultCode = await VerifyCommand.Do(
                                  new VerifyOptions(dir: outputDirectory),
                                  console,
-                                 () => new FileSystemDirectoryAccessor(outputDirectory),
-                                 new PackageRegistry(),
+                                 (dir) => new FileSystemDirectoryAccessor(dir),
                                  startupOptions: new StartupOptions(package: packageFile.FullName));
 
             _output.WriteLine(console.Out.ToString());
@@ -65,8 +64,7 @@ namespace MLS.Agent.Tests.CommandLine
             var resultCode = await VerifyCommand.Do(
                                  new VerifyOptions(dir: demoSourcesDir),
                                  console,
-                                 () => new FileSystemDirectoryAccessor(demoSourcesDir),
-                                 new PackageRegistry(),
+                                 (dir) => new FileSystemDirectoryAccessor(dir),
                                  new StartupOptions(package: packageFile.FullName));
 
             _output.WriteLine(console.Out.ToString());
@@ -112,8 +110,7 @@ namespace MLS.Agent.Tests.CommandLine
             var resultCode = await VerifyCommand.Do(
                                  new VerifyOptions(dir: outputDirectory),
                                  console,
-                                 () => new FileSystemDirectoryAccessor(outputDirectory),
-                                 new PackageRegistry());
+                                 (dir) => new FileSystemDirectoryAccessor(dir));
 
             resultCode.Should().NotBe(0);
         }
@@ -134,8 +131,7 @@ namespace MLS.Agent.Tests.CommandLine
             await VerifyCommand.Do(
                 new VerifyOptions(dir: outputDirectory),
                 console,
-                () => new FileSystemDirectoryAccessor(outputDirectory),
-                new PackageRegistry());
+                (dir) => new FileSystemDirectoryAccessor(dir));
 
             _output.WriteLine(console.Out.ToString());
             _output.WriteLine(console.Error.ToString());
