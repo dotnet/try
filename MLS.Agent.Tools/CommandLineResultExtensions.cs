@@ -12,7 +12,7 @@ namespace MLS.Agent.Tools
         {
             if (result.ExitCode != 0)
             {
-                throw new CommandLineInvocationException(result, message + "\n" + string.Join("\n", result.Error.Concat(result.Output)));
+                throw new CommandLineInvocationException(result, $"{message}{Environment.NewLine}{string.Join(Environment.NewLine, result.Error.Concat(result.Output))}");
             }
         }
     }
