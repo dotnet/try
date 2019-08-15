@@ -9,7 +9,7 @@ namespace MLS.Agent.CommandLine
     {
         public VerifyOptions(DirectoryInfo dir)
         {
-            Dir = dir;
+            Dir = dir ?? new DirectoryInfo(Directory.GetCurrentDirectory());
         }
 
         public DirectoryInfo Dir { get; }
