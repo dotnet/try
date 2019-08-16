@@ -82,13 +82,13 @@ namespace WorkspaceServer.Packaging
 
         private void AddEmbeddedResourceContentToProject(string root)
         {
-            var wwwRootFiles = new[] { "index.html", "interop.js" };
-            var pagesFiles = new[] { "Index.razor" };
+            var wwwRootFiles = new[] { "wwwroot.index.html", "wwwroot.interop.js" };
+            var pagesFiles = new[] { "Pages.Index.razor" };
             var rootFiles = new[] { "Program.cs", "Startup.cs", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs", "_Imports.razor", "Linker.xml" };
 
-            WriteResourcesToLocation(wwwRootFiles, Path.Combine(root, "wwwroot"));
-            WriteResourcesToLocation(pagesFiles, Path.Combine(root, "Pages"));
-            WriteResourcesToLocation(rootFiles, root);
+            WriteResourcesToLocation(wwwRootFiles, s => s.Replace("wwwroot.", ""), Path.Combine(root, "wwwroot"));
+            WriteResourcesToLocation(pagesFiles, s => s.Replace("Pages.", ""), Path.Combine(root, "Pages"));
+            WriteResourcesToLocation(rootFiles,s => s, root);
         }
 
         private static void DeleteUnusedFilesFromTemplate(string root)
@@ -108,19 +108,19 @@ namespace WorkspaceServer.Packaging
             File.WriteAllText(file, updated);
         }
 
-        private void WriteResourcesToLocation(string[] resources, string targetDirectory)
+        private void WriteResourcesToLocation(string[] resources, Func<string, string> computeDestinationFileName, string targetDirectory)
         {
             foreach (var resource in resources)
             {
-                WriteResource(resource, targetDirectory);
+                WriteResource(resource, computeDestinationFileName(resource), targetDirectory);
             }
         }
 
-        private void WriteResource(string resourceName, string targetDirectory)
+        private void WriteResource(string resourceName, string destinationFileName, string targetDirectory)
         {
-            var text = GetType().ReadManifestResource($"WorkspaceServer.{resourceName}");
+            var text = typeof(MLS.Blazor.Program).ReadManifestResource($"MLS.Blazor.{resourceName}");
             Directory.CreateDirectory(targetDirectory);
-            var path = Path.Combine(targetDirectory, resourceName);
+            var path = Path.Combine(targetDirectory, destinationFileName);
             File.WriteAllText(path, text);
         }
     }

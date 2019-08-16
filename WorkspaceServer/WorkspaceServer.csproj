@@ -56,8 +56,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.1.0-beta3-final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="3.1.0-beta3-final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
-    <PackageReference Include="MLS.Blazor" Version="1.0.19414.1" />
+    <PackageReference Include="MLS.Blazor" Version="1.0.19416.1" />
     <PackageReference Include="NewtonSoft.Json" Version="12.0.02" />
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19317.1" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />
@@ -77,7 +76,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="TaskExtensions" Version="0.1.5650001">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -90,6 +88,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference> -->
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0-preview7.19362.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0-preview7.19362.4" />
     <PackageReference Include="TaskExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
