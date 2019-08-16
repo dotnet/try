@@ -344,6 +344,13 @@ namespace MLS.Agent.Tests.CommandLine
         }
 
         [Fact]
+        public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
+        {
+            await _parser.InvokeAsync($"verify", _console);
+            _verifyOptions.Dir.FullName.Should().Be(Directory.GetCurrentDirectory());
+        }
+
+        [Fact]
         public async Task Demo_allows_output_path_to_be_specified()
         {
             var expected = Path.GetTempPath();
