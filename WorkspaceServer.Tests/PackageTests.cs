@@ -188,7 +188,7 @@ namespace WorkspaceServer.Tests
         }
 
         [Fact]
-        public async Task If_new_files_are_added_after_one_successful_build_the_workspace_is_rebuilt()
+        public async Task If_new_files_are_added_after_one_successful_build_the_new_workspace_includes_the_file()
         {
             var package = await Create.ConsoleWorkspaceCopy();
 
