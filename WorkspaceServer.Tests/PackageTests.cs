@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
 using WorkspaceServer.Tests.Packaging;
+using System.Linq;
 
 namespace WorkspaceServer.Tests
 {
@@ -184,6 +185,18 @@ namespace WorkspaceServer.Tests
             var registry = await Default.PackageRegistry.ValueAsync();
             var package = await registry.Get<ICanSupportWasm>(packageName);
             package.CanSupportWasm.Should().Be(expected);
+        }
+
+        [Fact]
+        public async Task If_new_files_are_added_after_one_successful_build_the_workspace_is_rebuilt()
+        {
+            var package = await Create.ConsoleWorkspaceCopy();
+
+            await package.CreateRoslynWorkspaceAsync(new TimeBudget(30.Seconds()));
+
+            File.WriteAllText(Path.Combine(package.Directory.FullName, "Sample.cs"), "using System;");
+            var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+            workspace.CurrentSolution.Projects.First().Documents.Should().Contain(document => document.Name == "Sample.cs");
         }
     }
 }
