@@ -186,17 +186,5 @@ namespace WorkspaceServer.Tests
             var package = await registry.Get<ICanSupportWasm>(packageName);
             package.CanSupportWasm.Should().Be(expected);
         }
-
-        [Fact]
-        public async Task If_new_files_are_added_after_one_successful_build_the_new_workspace_includes_the_file()
-        {
-            var package = await Create.ConsoleWorkspaceCopy();
-
-            await package.CreateRoslynWorkspaceAsync(new TimeBudget(30.Seconds()));
-
-            File.WriteAllText(Path.Combine(package.Directory.FullName, "Sample.cs"), "using System;");
-            var workspace = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
-            workspace.CurrentSolution.Projects.First().Documents.Should().Contain(document => document.Name == "Sample.cs");
-        }
     }
 }
