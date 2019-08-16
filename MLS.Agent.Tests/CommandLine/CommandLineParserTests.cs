@@ -8,6 +8,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using WorkspaceServer;
@@ -340,14 +341,14 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
             await _parser.InvokeAsync($"verify {directory}", _console);
-            _verifyDirectoryAccessor.GetFullyQualifiedRoot().FullName.Should().Be(directory);
+            RelativePath.NormalizeDirectory(_verifyDirectoryAccessor.GetFullyQualifiedRoot().FullName).Should().Be(RelativePath.NormalizeDirectory(directory));
         }
 
         [Fact]
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().Be(Directory.GetCurrentDirectory());
+            RelativePath.NormalizeDirectory(_verifyDirectoryAccessor.GetFullyQualifiedRoot().FullName).Should().Be(RelativePath.NormalizeDirectory(Directory.GetCurrentDirectory()));
         }
 
         [Fact]
