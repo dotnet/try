@@ -27,7 +27,7 @@ namespace MLS.Agent.Tests.CommandLine
         private PackOptions _packOptions;
         private InstallOptions _installOptions;
         private PackageSource _installPackageSource;
-        private VerifyOptions _verifyOptions;
+        private IDirectoryAccessor _verifyDirectoryAccessor;
         private DemoOptions _demoOptions;
 
         public CommandLineParserTests(ITestOutputHelper output)
@@ -59,9 +59,9 @@ namespace MLS.Agent.Tests.CommandLine
                     _installPackageSource = options.AddSource;
                     return Task.CompletedTask;
                 },
-                verify: (options, console, startupOptions) =>
+                verify: (directoryAccessor, console, startupOptions) =>
                 {
-                    _verifyOptions = options;
+                    _verifyDirectoryAccessor = directoryAccessor;
                     return Task.FromResult(1);
                 },
                 jupyter: (console, startServer, context) =>
@@ -340,14 +340,14 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
             await _parser.InvokeAsync($"verify {directory}", _console);
-            _verifyOptions.Dir.FullName.Should().Be(directory);
+            _verifyDirectoryAccessor.GetFullyQualifiedRoot().FullName.Should().Be(directory);
         }
 
         [Fact]
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            _verifyOptions.Dir.FullName.Should().Be(Directory.GetCurrentDirectory());
+            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().Be(Directory.GetCurrentDirectory());
         }
 
         [Fact]

@@ -7,6 +7,8 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
@@ -47,7 +49,7 @@ namespace MLS.Agent.CommandLine
             IConsole console);
 
         public delegate Task<int> Verify(
-            VerifyOptions options,
+            IDirectoryAccessor directoryAccessor,
             IConsole console,
             StartupOptions startupOptions);
 
@@ -93,10 +95,9 @@ namespace MLS.Agent.CommandLine
                                                       new GitHubRepoLocator()));
 
             verify = verify ??
-                     ((verifyOptions, console, startupOptions) =>
-                             VerifyCommand.Do(verifyOptions,
+                     ((directoryAccessor, console, startupOptions) =>
+                             VerifyCommand.Do(directoryAccessor,
                                               console,
-                                              (dir) => new FileSystemDirectoryAccessor(dir),
                                               startupOptions));
 
             pack = pack ??
@@ -105,7 +106,7 @@ namespace MLS.Agent.CommandLine
             install = install ??
                       InstallCommand.Do;
 
-            startKernelServer = startKernelServer ?? 
+            startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
 
             var dirArgument = new Argument<DirectoryInfo>
@@ -469,15 +470,17 @@ namespace MLS.Agent.CommandLine
 
             Command Verify()
             {
+
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                    dirArgument
+                   dirArgument
                 };
 
                 verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
                     (options, console, startupOptions) =>
                 {
-                    return verify(options, console, startupOptions);
+                    var directoryAccessor = new FileSystemDirectoryAccessor(options.Dir);
+                    return verify(directoryAccessor, console, startupOptions);
                 });
 
                 return verifyCommand;

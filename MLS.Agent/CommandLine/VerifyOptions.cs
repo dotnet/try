@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
@@ -12,6 +13,7 @@ namespace MLS.Agent.CommandLine
             Dir = dir ?? new DirectoryInfo(Directory.GetCurrentDirectory());
         }
 
+        public IDirectoryAccessor DirectoryAccessor { get; }
         public DirectoryInfo Dir { get; }
     }
 }

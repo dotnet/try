@@ -48,9 +48,8 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             var console = new TestConsole();
 
             var resultCode = await VerifyCommand.Do(
-                new VerifyOptions(outputDirectory),
-                console,
-                (dir) =>  new FileSystemDirectoryAccessor(dir));
+                new FileSystemDirectoryAccessor(outputDirectory),
+                console);
 
             console.Out
                        .ToString()
