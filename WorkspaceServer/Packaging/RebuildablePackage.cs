@@ -19,7 +19,7 @@ namespace WorkspaceServer.Packaging
         public RebuildablePackage(string name = null, IPackageInitializer initializer = null, DirectoryInfo directory = null, IScheduler buildThrottleScheduler = null) 
             : base(name, initializer, directory, buildThrottleScheduler)
         {
-            if(BuildResultNeedsUpdate())
+            if (BuildResultNeedsUpdate())
             {
                 Reset();
             }

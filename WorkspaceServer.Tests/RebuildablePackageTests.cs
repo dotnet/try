@@ -45,6 +45,23 @@ namespace WorkspaceServer.Tests
         }
 
         [Fact]
+        public async Task When_a_rebuildable_package_is_created_from_an_already_built_package_which_contains_new_file_the_new_workspace_contains_the_file()
+        {
+            var oldPackage = await Create.ConsoleWorkspaceCopy(isRebuildable:true);
+            var ws = await oldPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+
+            var newFile = Path.Combine(oldPackage.Directory.FullName, "Sample.cs");
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == newFile);
+
+            File.WriteAllText(newFile, "//this is a new file");
+
+            var newPackage = new RebuildablePackage(directory: oldPackage.Directory);
+            ws = await newPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFile);
+        }
+
+        [Fact]
         public async Task If_the_project_file_is_changed_then_the_workspace_reflects_the_changes()
         {
             var package = Create.EmptyWorkspace();
