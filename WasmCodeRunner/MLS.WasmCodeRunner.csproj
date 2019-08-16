@@ -2,9 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>MLS.WasmCodeRunner</PackageId>
     <IsPackable>true</IsPackable>
+    <Description>
+      Contains the implementation of the try.dot.net code runner
+    </Description>
   </PropertyGroup>
-
   
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.02" />
