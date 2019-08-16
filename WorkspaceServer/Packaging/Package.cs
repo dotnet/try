@@ -575,25 +575,7 @@ namespace WorkspaceServer.Packaging
         protected virtual bool ShouldDoDesignTimeBuild()
         {
             return DesignTimeBuildResult == null
-                   || DesignTimeBuildResult.Succeeded == false
-                   || FilesHaveBeenAddedOrDeleted();
-        }
-
-        protected virtual bool FilesHaveBeenAddedOrDeleted()
-        {
-            if (DesignTimeBuildResult != null)
-            {
-                var filesInDirectory = Directory.GetFiles("*.cs").Select(file => file.FullName);
-                var documentsInLastBuild = DesignTimeBuildResult.GetWorkspace().CurrentSolution.Projects.First().Documents.Select(document => document.FilePath);
-                if (filesInDirectory.Count() != documentsInLastBuild.Count())
-                {
-                    return true;
-                }
-
-                return !documentsInLastBuild.SequenceEqual(filesInDirectory);
-            }
-
-            return true;
+                   || DesignTimeBuildResult.Succeeded == false;
         }
 
         protected async Task<AnalyzerResult> DesignTimeBuild()

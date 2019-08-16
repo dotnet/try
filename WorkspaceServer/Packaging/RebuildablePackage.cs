@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Buildalyzer.Workspaces;
 using Clockwise;
 
 namespace WorkspaceServer.Packaging
@@ -18,6 +19,10 @@ namespace WorkspaceServer.Packaging
         public RebuildablePackage(string name = null, IPackageInitializer initializer = null, DirectoryInfo directory = null, IScheduler buildThrottleScheduler = null) 
             : base(name, initializer, directory, buildThrottleScheduler)
         {
+            if(BuildResultNeedsUpdate())
+            {
+                Reset();
+            }
         }
 
         void SetupFileWatching()
@@ -133,6 +138,23 @@ namespace WorkspaceServer.Packaging
         private void FileSystemWatcherOnChangedOrDeleted(object sender, FileSystemEventArgs e)
         {
             HandleFileChanges(e.Name);
+        }
+
+        private bool BuildResultNeedsUpdate()
+        {
+            if (DesignTimeBuildResult != null)
+            {
+                var filesInDirectory = Directory.GetFiles("*.cs").Select(file => file.FullName);
+                var documentsInLastBuild = DesignTimeBuildResult.GetWorkspace().CurrentSolution.Projects.First().Documents.Select(document => document.FilePath);
+                if (filesInDirectory.Count() != documentsInLastBuild.Count())
+                {
+                    return true;
+                }
+
+                return !documentsInLastBuild.SequenceEqual(filesInDirectory);
+            }
+
+            return true;
         }
     }
 }
