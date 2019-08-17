@@ -45,7 +45,7 @@ namespace WorkspaceServer.Tests
         }
 
         [Fact]
-        public async Task When_a_rebuildable_package_is_created_from_an_already_built_package_which_contains_new_file_the_new_workspace_contains_the_file()
+        public async Task If_an_already_built_package_contains_new_file_the_new_workspace_contains_the_file()
         {
             var oldPackage = await Create.ConsoleWorkspaceCopy(isRebuildable:true);
             var ws = await oldPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
@@ -59,6 +59,27 @@ namespace WorkspaceServer.Tests
             ws = await newPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFile);
+        }
+
+        [Fact]
+        public async Task If_an_already_built_package_contains_a_new_file_and_an_old_file_is_deleted_workspace_reflects_it()
+        {
+            var oldPackage = await Create.ConsoleWorkspaceCopy(isRebuildable: true);
+
+            var sampleCsFile = Path.Combine(oldPackage.Directory.FullName, "Sample.cs");
+            File.WriteAllText(sampleCsFile, "//this is a file which will be deleted later");
+            var ws = await oldPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == sampleCsFile);
+
+            File.Delete(sampleCsFile);
+            var newFileAdded = Path.Combine(oldPackage.Directory.FullName, "foo.cs");
+            File.WriteAllText(newFileAdded, "//this is a file we have just created");
+
+            var newPackage = new RebuildablePackage(directory: oldPackage.Directory);
+            ws = await newPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
+
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == sampleCsFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFileAdded);
         }
 
         [Fact]

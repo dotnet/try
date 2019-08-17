@@ -144,14 +144,10 @@ namespace WorkspaceServer.Packaging
         {
             if (DesignTimeBuildResult != null)
             {
-                var filesInDirectory = Directory.GetFiles("*.cs").Select(file => file.FullName);
+                var filesInDirectory = Directory.GetFiles("*.cs", SearchOption.AllDirectories).Select(file => file.FullName);
                 var documentsInLastBuild = DesignTimeBuildResult.GetWorkspace().CurrentSolution.Projects.First().Documents.Select(document => document.FilePath);
-                if (filesInDirectory.Count() != documentsInLastBuild.Count())
-                {
-                    return true;
-                }
 
-                return !documentsInLastBuild.SequenceEqual(filesInDirectory);
+                return filesInDirectory.Count() != documentsInLastBuild.Count() || !documentsInLastBuild.All(filesInDirectory.Contains);
             }
 
             return true;
