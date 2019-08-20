@@ -89,12 +89,24 @@ namespace Microsoft.DotNet.Interactive.Rendering
                    (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
+        private static readonly HashSet<Type> _knownScalarTypes = new HashSet<Type>
+        {
+            typeof(decimal),
+            typeof(Guid),
+            typeof(string),
+        };
+
         public static bool IsScalar(this Type type)
         {
+            if (_knownScalarTypes.Contains(type))
+            {
+                return true;
+            }
+
             return type.IsPrimitive ||
-                   type == typeof(string) ||
                    (type.IsConstructedGenericType &&
-                    type.GetGenericTypeDefinition() == typeof(Nullable<>));
+                    type.GetGenericTypeDefinition() == typeof(Nullable<>) && 
+                    type.GetGenericArguments()[0].IsScalar());
         }
 
         public static bool IsValueTuple(this Type type)
