@@ -21,10 +21,11 @@ namespace MLS.Agent.CommandLine
     public static class VerifyCommand
     {
         public static async Task<int> Do(
-            IDirectoryAccessor directoryAccessor,
+            VerifyOptions verifyOptions,
             IConsole console,
             StartupOptions startupOptions = null)
         {
+            var directoryAccessor = verifyOptions.DirectoryAccessor;
             var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor);
             var markdownProject = new MarkdownProject(
                 directoryAccessor,

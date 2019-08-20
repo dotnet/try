@@ -49,7 +49,7 @@ namespace MLS.Agent.CommandLine
             IConsole console);
 
         public delegate Task<int> Verify(
-            IDirectoryAccessor directoryAccessor,
+            VerifyOptions options,
             IConsole console,
             StartupOptions startupOptions);
 
@@ -95,8 +95,8 @@ namespace MLS.Agent.CommandLine
                                                       new GitHubRepoLocator()));
 
             verify = verify ??
-                     ((directoryAccessor, console, startupOptions) =>
-                             VerifyCommand.Do(directoryAccessor,
+                     ((options, console, startupOptions) =>
+                             VerifyCommand.Do(options, 
                                               console,
                                               startupOptions));
 
@@ -473,14 +473,16 @@ namespace MLS.Agent.CommandLine
 
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                   dirArgument
+                   new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(new DirectoryInfo(Directory.GetCurrentDirectory())))
+                   {
+                       Name = "Directory to verify"
+                   }
                 };
 
                 verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
                     (options, console, startupOptions) =>
                 {
-                    var directoryAccessor = new FileSystemDirectoryAccessor(options.Dir);
-                    return verify(directoryAccessor, console, startupOptions);
+                    return verify(options, console, startupOptions);
                 });
 
                 return verifyCommand;

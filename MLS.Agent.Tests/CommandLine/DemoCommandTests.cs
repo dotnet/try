@@ -36,7 +36,7 @@ namespace MLS.Agent.Tests.CommandLine
             await DemoCommand.Do(new DemoOptions(output: outputDirectory), console);
 
             var resultCode = await VerifyCommand.Do(
-                                 new FileSystemDirectoryAccessor(outputDirectory),
+                                 new VerifyOptions(new FileSystemDirectoryAccessor(outputDirectory)),
                                  console,
                                  startupOptions: new StartupOptions(package: packageFile.FullName));
 
@@ -61,7 +61,7 @@ namespace MLS.Agent.Tests.CommandLine
             await DemoCommand.Do(new DemoOptions(output: demoSourcesDir), console);
 
             var resultCode = await VerifyCommand.Do(
-                                 new FileSystemDirectoryAccessor(demoSourcesDir),
+                                 new VerifyOptions(new FileSystemDirectoryAccessor(demoSourcesDir)),
                                  console,
                                  new StartupOptions(package: packageFile.FullName));
 
@@ -106,7 +106,7 @@ namespace MLS.Agent.Tests.CommandLine
                 startServer: (options, context) => { });
 
             var resultCode = await VerifyCommand.Do(
-                                 new FileSystemDirectoryAccessor(outputDirectory),
+                                 new VerifyOptions(new FileSystemDirectoryAccessor(outputDirectory)),
                                  console);
 
             resultCode.Should().NotBe(0);
@@ -126,7 +126,7 @@ namespace MLS.Agent.Tests.CommandLine
                 (options, context) => startupOptions = options);
 
             await VerifyCommand.Do(
-                new FileSystemDirectoryAccessor(outputDirectory),
+                new VerifyOptions(new FileSystemDirectoryAccessor(outputDirectory)),
                 console);
 
             _output.WriteLine(console.Out.ToString());

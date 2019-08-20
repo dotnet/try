@@ -29,7 +29,7 @@ namespace MLS.Agent.Tests.CommandLine
         private PackOptions _packOptions;
         private InstallOptions _installOptions;
         private PackageSource _installPackageSource;
-        private IDirectoryAccessor _verifyDirectoryAccessor;
+        private VerifyOptions _verifyOptions;
         private DemoOptions _demoOptions;
 
         public CommandLineParserTests(ITestOutputHelper output)
@@ -61,9 +61,9 @@ namespace MLS.Agent.Tests.CommandLine
                     _installPackageSource = options.AddSource;
                     return Task.CompletedTask;
                 },
-                verify: (directoryAccessor, console, startupOptions) =>
+                verify: (options, console, startupOptions) =>
                 {
-                    _verifyDirectoryAccessor = directoryAccessor;
+                    _verifyOptions = options;
                     return Task.FromResult(1);
                 },
                 jupyter: (console, startServer, context) =>
@@ -98,7 +98,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var path = TestAssets.SampleConsole.FullName;
             await _parser.InvokeAsync(new[] { path }, _console);
-            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().FullName.Should().Be(path);
+            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(path);
         }
 
         [Fact]
@@ -342,14 +342,14 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
             await _parser.InvokeAsync($"verify {directory}", _console);
-            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
+            _verifyOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
         }
 
         [Fact]
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(Directory.GetCurrentDirectory());
+            _verifyOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(Directory.GetCurrentDirectory());
         }
 
         [Fact]

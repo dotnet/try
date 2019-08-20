@@ -8,12 +8,11 @@ namespace MLS.Agent.CommandLine
 {
     public class VerifyOptions
     {
-        public VerifyOptions(DirectoryInfo dir)
+        public VerifyOptions(IDirectoryAccessor directoryAccessor)
         {
-            Dir = dir ?? new DirectoryInfo(Directory.GetCurrentDirectory());
+            DirectoryAccessor = directoryAccessor?? new FileSystemDirectoryAccessor(new DirectoryInfo(Directory.GetCurrentDirectory()));
         }
 
         public IDirectoryAccessor DirectoryAccessor { get; }
-        public DirectoryInfo Dir { get; }
     }
 }
