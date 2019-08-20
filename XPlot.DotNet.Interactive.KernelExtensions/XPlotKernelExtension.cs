@@ -42,8 +42,8 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
 
             newScript.AppendLine("<script>");
             newScript.Append(@"
-require.config({paths:{plotly:'https://cdn.plot.ly/plotly-latest.min'}});
-require(['plotly'], function(Plotly) {
+var xplotRequire = require.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});
+xplotRequire(['plotly'], function(Plotly) {
 ");
 
             newScript.Append(scriptNode.InnerText);

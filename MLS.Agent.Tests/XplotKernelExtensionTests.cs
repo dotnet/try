@@ -35,9 +35,9 @@ namespace MLS.Agent.Tests
                 .Should().
                 ContainSingle(valueProduced =>
                     valueProduced.FormattedValues.Any(formattedValue =>
-                    formattedValue.MimeType == "text/html" &&
-                       formattedValue.Value.ToString().Contains("require([\'plotly\'], function(Plotly)")
-                       && formattedValue.Value.ToString().Contains("require.config({paths:{plotly:\'https://cdn.plot.ly/plotly-latest.min\'}});")
+                    formattedValue.MimeType == "text/html"
+                        && formattedValue.Value.ToString().Contains("var xplotRequire = require.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});")
+                       && formattedValue.Value.ToString().Contains("xplotRequire([\'plotly\'], function(Plotly)")
                  ));
         }
     }
