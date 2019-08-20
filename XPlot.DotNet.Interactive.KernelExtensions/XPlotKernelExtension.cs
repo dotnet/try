@@ -1,12 +1,12 @@
-﻿using HtmlAgilityPack;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using HtmlAgilityPack;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Rendering;
-using System;
 using System.Text;
 using System.Threading.Tasks;
 using XPlot.Plotly;
-using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
-using Html = Microsoft.DotNet.Interactive.Rendering.Html;
 
 namespace XPlot.DotNet.Interactive.KernelExtensions
 {
