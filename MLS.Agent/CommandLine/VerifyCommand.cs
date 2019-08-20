@@ -25,7 +25,7 @@ namespace MLS.Agent.CommandLine
             IConsole console,
             StartupOptions startupOptions = null)
         {
-            var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor.GetFullyQualifiedRoot());
+            var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor);
             var markdownProject = new MarkdownProject(
                 directoryAccessor,
                 packageRegistry,

@@ -236,7 +236,7 @@ namespace MLS.Agent.CommandLine
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {
                     services.AddSingleton(_ => PackageRegistry.CreateForTryMode(
-                                              options.Dir,
+                                              options.DirectoryAccessor,
                                               options.AddPackageSource));
 
                     startServer(options, context);

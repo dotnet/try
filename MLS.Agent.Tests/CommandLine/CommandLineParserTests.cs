@@ -98,7 +98,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var path = TestAssets.SampleConsole.FullName;
             await _parser.InvokeAsync(new[] { path }, _console);
-            _startOptions.Dir.FullName.Should().Be(path);
+            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().FullName.Should().Be(path);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_empty_command_line_has_current_directory_as_root_directory()
         {
             await _parser.InvokeAsync("", _console);
-            _startOptions.Dir.FullName.Should().Be(Directory.GetCurrentDirectory());
+            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(Directory.GetCurrentDirectory());
         }
 
         [Fact]
@@ -340,7 +340,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Verify_argument_specifies_root_directory()
         {
-            var directory = new DirectoryInfo(Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location));
+            var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
             await _parser.InvokeAsync($"verify {directory}", _console);
             _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
         }
@@ -349,7 +349,7 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(new DirectoryInfo(Directory.GetCurrentDirectory()));
+            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(Directory.GetCurrentDirectory());
         }
 
         [Fact]

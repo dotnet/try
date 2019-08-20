@@ -36,5 +36,11 @@ ReferenceTypeAssertions<DirectoryInfo, DirectoryInfoAssertions>
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
+
+        public AndConstraint<DirectoryInfoAssertions> BeNormalizedEqualTo(
+           string directoryPath, string because = "", params object[] becauseArgs)
+        {
+            return BeNormalizedEqualTo(new DirectoryInfo(directoryPath), because, becauseArgs);
+        }
     }
 }
