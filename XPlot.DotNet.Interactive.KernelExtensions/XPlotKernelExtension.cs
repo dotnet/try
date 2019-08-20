@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using XPlot.Plotly;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
+using Html = Microsoft.DotNet.Interactive.Rendering.Html;
 
 namespace XPlot.DotNet.Interactive.KernelExtensions
 {
@@ -30,24 +31,37 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
             var scriptNode = document.DocumentNode.SelectSingleNode("//script");
 
             var newHtmlDocument = new HtmlDocument();
+           
             newHtmlDocument.DocumentNode.ChildNodes.Add(divNode);
             newHtmlDocument.DocumentNode.ChildNodes.Add(GetScriptNodeWithRequire(scriptNode));
 
             return newHtmlDocument.DocumentNode.WriteContentTo();
         }
+      
 
         private static HtmlNode GetScriptNodeWithRequire(HtmlNode scriptNode)
         {
             var newScript = new StringBuilder();
-
-            newScript.AppendLine("<script>");
-            newScript.Append(@"
-var xplotRequire = require.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});
-xplotRequire(['plotly'], function(Plotly) {
-");
+            newScript.AppendLine("<script type=\"text/javascript\">");
+            newScript.AppendLine(@"
+var renderPlotly = function() {
+    var xplotRequire = requirejs.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});
+    xplotRequire(['plotly'], function(Plotly) {");
 
             newScript.Append(scriptNode.InnerText);
-            newScript.AppendLine(@"});");
+            newScript.AppendLine(@"});
+};
+if ((typeof(requirejs) !==  typeof(Function)) || (typeof(requirejs.config) !== typeof(Function))) { 
+    var script = document.createElement(""script""); 
+    script.setAttribute(""src"", ""https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js""); 
+    script.onload = function(){
+        renderPlotly();
+    };
+    document.getElementsByTagName(""head"")[0].appendChild(script); 
+}
+else {
+    renderPlotly();
+}");
             newScript.AppendLine("</script>");
             return HtmlNode.CreateNode(newScript.ToString());
         }
