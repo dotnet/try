@@ -42,9 +42,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             var baseDirectory = Create.EmptyWorkspace().Directory;
             var outputDirectory = baseDirectory.CreateSubdirectory("outputTemplate");
             await InstallTemplateAndCreateProject(baseDirectory, outputDirectory);
-            var dotnet = new Dotnet(outputDirectory);
-            //The template targets 3.0 hence verify should run against 3.0 and not 2.1.503 used in the solution directory
-            await dotnet.New("global.json", "--sdk-version 3.0.100-preview6-012264");
+           
             var console = new TestConsole();
             var directoryAccessor = new FileSystemDirectoryAccessor(outputDirectory);
 
