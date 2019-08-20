@@ -65,6 +65,26 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                 ex.Message.Should().Contain("o => o.DateProperty.ToShortDateString()");
             }
 
+            [Theory]
+            [InlineData(typeof(Boolean), "False")]
+            [InlineData(typeof(Byte), "0")]
+            [InlineData(typeof(Decimal), "0")]
+            [InlineData(typeof(Double), "0")]
+            [InlineData(typeof(Guid), "00000000-0000-0000-0000-000000000000")]
+            [InlineData(typeof(Int16), "0")]
+            [InlineData(typeof(Int32), "0")]
+            [InlineData(typeof(Int64), "0")]
+            [InlineData(typeof(Single), "0")]
+            [InlineData(typeof(UInt16), "0")]
+            [InlineData(typeof(UInt32), "0")]
+            [InlineData(typeof(UInt64), "0")]
+            public void It_does_not_expand_properties_of_scalar_types(Type type, string expected)
+            {
+                var value = Activator.CreateInstance(type);
+
+                value.ToDisplayString().Should().Be(expected);
+            }
+
             [Fact]
             public void It_expands_properties_of_structs()
             {

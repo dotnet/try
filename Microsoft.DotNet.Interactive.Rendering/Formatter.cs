@@ -261,9 +261,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             Action<object, TextWriter> formatter,
             string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
-
-
-
             var delegateType = typeof(Action<,>).MakeGenericType(type, typeof(TextWriter));
 
             var genericRegisterMethod = typeof(Formatter<>)
