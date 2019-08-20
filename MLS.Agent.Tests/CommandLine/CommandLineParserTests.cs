@@ -15,6 +15,7 @@ using WorkspaceServer;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
+using WorkspaceServer.Tests;
 
 namespace MLS.Agent.Tests.CommandLine
 {
@@ -339,16 +340,16 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Verify_argument_specifies_root_directory()
         {
-            var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
+            var directory = new DirectoryInfo(Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location));
             await _parser.InvokeAsync($"verify {directory}", _console);
-            RelativePath.NormalizeDirectory(_verifyDirectoryAccessor.GetFullyQualifiedRoot().FullName).Should().Be(RelativePath.NormalizeDirectory(directory));
+            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
         }
 
         [Fact]
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            RelativePath.NormalizeDirectory(_verifyDirectoryAccessor.GetFullyQualifiedRoot().FullName).Should().Be(RelativePath.NormalizeDirectory(Directory.GetCurrentDirectory()));
+            _verifyDirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(new DirectoryInfo(Directory.GetCurrentDirectory()));
         }
 
         [Fact]

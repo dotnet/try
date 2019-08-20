@@ -5,6 +5,7 @@ using FluentAssertions;
 using System.Linq;
 using FluentAssertions.Collections;
 using FluentAssertions.Execution;
+using System.IO;
 
 namespace WorkspaceServer.Tests
 {
