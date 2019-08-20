@@ -3,7 +3,9 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -12,6 +14,7 @@ using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Kernel
 {
+
     public static class CSharpKernelExtensions
     {
         public static CSharpKernel UseDefaultRendering(
@@ -63,7 +66,16 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
                         if (refs != null)
                         {
-                            kernel.AddMetatadaReferences(refs);
+                            var directives = new StringBuilder();
+                            foreach (var reference in refs)
+                            {
+                                if (reference is PortableExecutableReference pe)
+                                {
+                                    directives.AppendLine($"#r \"{pe.FilePath}\"");
+                                }
+                            }
+
+                            await kernel.SendAsync(new SubmitCode(directives.ToString(), kernel.Name));
                         }
 
                         context.OnNext(new NuGetPackageAdded(package));

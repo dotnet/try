@@ -422,5 +422,30 @@ public class TestKernelExtension : IKernelExtension
                         .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                             e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
+
+        [Fact]
+        public async Task It_can_reuse_loaded_assemblies()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("#r \"nuget:Microsoft.ML.DataView, 1.3.1\""));
+            await kernel.SendAsync(new SubmitCode(@"using Microsoft.ML;
+void DoIt(IDataView view)
+{
+}"));
+            await kernel.SendAsync(new SubmitCode(@"
+IDataView dv = null;
+DoIt(dv);
+"));
+
+            KernelEvents.ValuesOnly()
+                .Last()
+                .Should()
+                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .Which
+                .Message
+                .Should()
+                .Be("(1,1): error CS0103: The name 'aaaadd' does not exist in the current context");
+        }
     }
 }

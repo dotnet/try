@@ -23,6 +23,7 @@ using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 
 namespace WorkspaceServer.Kernel
 {
@@ -40,11 +41,13 @@ namespace WorkspaceServer.Kernel
 
         private StringBuilder _inputBuffer = new StringBuilder();
         private ImmutableArray<MetadataReference> _metadataReferences;
+        private readonly InteractiveAssemblyLoader _loader;
         private WorkspaceFixture _fixture;
 
         public CSharpKernel()
         {
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
+            _loader = new InteractiveAssemblyLoader();
             SetupScriptOptions();
         }
 
@@ -131,9 +134,8 @@ namespace WorkspaceServer.Kernel
                 {
                     if (_scriptState == null)
                     {
-                        _scriptState = await CSharpScript.RunAsync(
-                                           code,
-                                           ScriptOptions);
+                        var script = CSharpScript.Create(code, ScriptOptions, assemblyLoader: _loader);
+                        _scriptState = await script.RunAsync();
                     }
                     else
                     {
