@@ -75,7 +75,7 @@ namespace WorkspaceServer.Tests
                 name,
                 new List<(string, string)>
                 {
-                    ("Microsoft.Extensions.Logging", "2.2.0")
+                    ("HtmlAgilityPack", "1.11.12")
                 });
 
             await initializer.Initialize(dir);
