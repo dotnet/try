@@ -259,7 +259,7 @@ namespace MLS.Agent.Controllers
 <footer>
     <ul>
         <li>
-            <a href=""https://teams.microsoft.com/l/channel/19%3a32c2f8c34d4b4136b4adf554308363fc%40thread.skype/Try%2520.NET?groupId=fdff90ed-0b3b-4caa-a30a-efb4dd47665f&tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47"">Ask a question or tell us about a bug</a>
+            <a href=""https://github.com/dotnet/try/issues"">Ask a question or tell us about a bug</a>
         </li>
         <li>
             <a href=""https://dotnet.microsoft.com/platform/support-policy"">Support Policy</a>
