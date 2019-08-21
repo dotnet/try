@@ -10,13 +10,13 @@ namespace Microsoft.DotNet.Interactive.Events
     {
         public ValueProduced(object value,
             IKernelCommand command,
-            bool isEval = false,
+            bool isReturnValue = false,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
             string valueId= null,
             bool isUpdatedValue = false) : base(command)
         {
             Value = value;
-            IsEval = isEval;
+            IsReturnValue = isReturnValue;
             FormattedValues = formattedValues;
             ValueId = valueId;
             IsUpdatedValue = valueId switch
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive.Events
 
         public object Value { get; }
 
-        public bool IsEval { get; }
+        public bool IsReturnValue { get; }
 
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
 

@@ -156,7 +156,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 var transient = CreateTransient(valueProduced.ValueId);
 
-                var executeResultData = valueProduced.IsEval
+                var executeResultData = valueProduced.IsReturnValue
                 ? new ExecuteResult(
                     openRequest.ExecutionCount,
                     transient: transient,
