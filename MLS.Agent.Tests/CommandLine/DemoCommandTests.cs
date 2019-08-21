@@ -46,12 +46,12 @@ namespace MLS.Agent.Tests.CommandLine
             resultCode.Should().Be(0);
         }
 
-        [Fact(Skip = "wip")]
+        [Fact]
         public async Task Demo_sources_pass_verification()
         {
             var console = new TestConsole();
 
-            var demoSourcesDir = new DirectoryInfo(@"c:\dev\agent\docs\gettingstarted");
+            var demoSourcesDir = Create.EmptyWorkspace().Directory;
             var packageFile = demoSourcesDir.Subdirectory("Snippets")
                                             .File("Snippets.csproj");
 
@@ -62,8 +62,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var resultCode = await VerifyCommand.Do(
                                  new VerifyOptions(new FileSystemDirectoryAccessor(demoSourcesDir)),
-                                 console,
-                                 new StartupOptions(package: packageFile.FullName));
+                                 console);
 
             _output.WriteLine(console.Out.ToString());
             _output.WriteLine(console.Error.ToString());
