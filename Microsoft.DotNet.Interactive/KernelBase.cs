@@ -187,7 +187,8 @@ namespace Microsoft.DotNet.Interactive
                     new ValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue }));
+                        formattedValues: new[] { displayValue.FormattedValue },
+                        id: displayValue.Id));
 
                 invocationContext.OnCompleted();
 
@@ -224,7 +225,9 @@ namespace Microsoft.DotNet.Interactive
                     new ValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue }));
+                        formattedValues: new[] { displayValue.FormattedValue },
+                        id: displayValue.DisplayId,
+                        isUpdatedValue: true));
 
                 invocationContext.OnCompleted();
 
