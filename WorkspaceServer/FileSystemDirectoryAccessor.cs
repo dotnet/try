@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
 using WorkspaceServer.Packaging;
@@ -15,6 +16,10 @@ namespace WorkspaceServer
     public class FileSystemDirectoryAccessor : IDirectoryAccessor
     {
         private readonly DirectoryInfo _rootDirectory;
+
+        public FileSystemDirectoryAccessor(string directory): this(new DirectoryInfo(directory))
+        {
+        }
 
         public FileSystemDirectoryAccessor(DirectoryInfo rootDir)
         {

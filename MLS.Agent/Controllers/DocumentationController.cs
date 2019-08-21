@@ -229,7 +229,7 @@ namespace MLS.Agent.Controllers
 <head>
     <meta http-equiv=""Content-Type"" content=""text/html;charset=utf-8"">
     <link rel=""stylesheet"" href=""/css/trydotnet.css?v={_cacheBuster}"">
-    <title>dotnet try - {_startupOptions.Dir.FullName.HtmlEncode()}</title>
+    <title>dotnet try - {_startupOptions.RootDirectory.GetFullyQualifiedRoot().FullName.HtmlEncode()}</title>
 </head>
 
 <body>
@@ -250,7 +250,7 @@ namespace MLS.Agent.Controllers
 <header>
     <div>
         <span class=""dotnet-try"">Try .NET</span>
-        <span class=""project-file-path"">{_startupOptions.Dir.FullName.ToLowerInvariant().HtmlEncode()}</span>
+        <span class=""project-file-path"">{_startupOptions.RootDirectory.GetFullyQualifiedRoot().FullName.ToLowerInvariant().HtmlEncode()}</span>
     </div>
     <a href=""https://dotnet.microsoft.com/platform/try-dotnet"">Powered by Try .NET</a>
 </header>".ToHtmlContent();

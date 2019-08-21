@@ -89,11 +89,7 @@ This is some sample code:
 
                 var console = new TestConsole();
 
-                await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 console.Out
                     .ToString()
@@ -118,11 +114,7 @@ This is some sample code:
 
                 var console = new TestConsole();
 
-                await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -153,11 +145,7 @@ This is some sample code:
 
                 var console = new TestConsole();
 
-                await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -195,11 +183,7 @@ public class EmptyClassTwo {}
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -227,11 +211,7 @@ public class EmptyClassTwo {}
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -255,17 +235,13 @@ public class EmptyClassTwo {}
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
                 resultCode.Should().NotBe(0);
             }
-       
+
             [Fact]
             public async Task When_there_are_no_markdown_errors_then_return_code_is_0()
             {
@@ -283,11 +259,7 @@ public class EmptyClassTwo {}
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     PackageRegistry.CreateForTryMode(rootDirectory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -325,11 +297,7 @@ public class Program
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     PackageRegistry.CreateForTryMode(rootDirectory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -346,11 +314,7 @@ public class Program
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     PackageRegistry.CreateForTryMode(rootDirectory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 console.Error.ToString().Should().Contain("No markdown files found");
                 resultCode.Should().NotBe(0);
@@ -380,11 +344,7 @@ public class Program
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     PackageRegistry.CreateForTryMode(rootDirectory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 console.Out.ToString().Should().Contain("Session cannot span projects or packages: --session one");
 
@@ -426,11 +386,7 @@ public class Program
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(directory),
-                                     console,
-                                     () => directoryAccessor,
-                                     PackageRegistry.CreateForTryMode(directory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -467,11 +423,7 @@ public class Program
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     PackageRegistry.CreateForTryMode(rootDirectory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -516,11 +468,7 @@ public class Program
 
                 var console = new TestConsole();
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(rootDirectory),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(rootDirectory));
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -547,11 +495,7 @@ This is some sample code:
 
                 var console = new TestConsole();
 
-                await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root));
+                await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -589,23 +533,14 @@ This is some sample code:
 
                 var console = new TestConsole();
 
-                var packageRegistry = PackageRegistry.CreateForTryMode(rootDirectory);
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     packageRegistry);
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
                 resultCode.Should().Be(0);
 
                 File.WriteAllText(directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("Sample.cs")).FullName, "DOES NOT COMPILE");
 
-                resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     packageRegistry);
+                resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -659,22 +594,14 @@ This is some sample code:
 
                 var console = new TestConsole();
 
-                var packageRegistry = PackageRegistry.CreateForTryMode(rootDirectory);
-                var resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     packageRegistry);
+
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 resultCode.Should().Be(0);
 
                 File.WriteAllText(directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("Program.cs")).FullName, invalidCode);
 
-                resultCode = await VerifyCommand.Do(
-                                     new VerifyOptions(rootDirectory),
-                                     console,
-                                     () => directoryAccessor,
-                                     packageRegistry);
+                resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console);
 
                 _output.WriteLine(console.Out.ToString());
 
@@ -715,11 +642,7 @@ Console.WriteLine(""code"");
                 var console = new TestConsole();
                 var project = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./subFolder/some.csproj"));
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root),
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console,
                     new StartupOptions(package: project.FullName));
 
                 _output.WriteLine(console.Out.ToString());
@@ -753,11 +676,7 @@ public class EmptyClassTwo {{}}
                 var console = new TestConsole();
                 var project = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./subFolder/some.csproj"));
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root),
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console,
                     new StartupOptions(package: project.FullName)
                     );
 
@@ -791,11 +710,7 @@ public class EmptyClassTwo {{
                 var console = new TestConsole();
                 var project = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./subFolder/some.csproj"));
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root),
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console,
                     new StartupOptions(package: project.FullName));
 
                 _output.WriteLine(console.Out.ToString());
@@ -824,11 +739,7 @@ Console.WriteLine(""This code should be compiled with the targetRegion in Progra
                 var console = new TestConsole();
                 var project = directoryAccessor.GetFullyQualifiedPath(new RelativeFilePath("./subFolder/some.csproj"));
 
-                var resultCode = await VerifyCommand.Do(
-                    new VerifyOptions(root),
-                    console,
-                    () => directoryAccessor,
-                    PackageRegistry.CreateForTryMode(root),
+                var resultCode = await VerifyCommand.Do(new VerifyOptions(directoryAccessor), console,
                     new StartupOptions(package: project.FullName)
                     );
 

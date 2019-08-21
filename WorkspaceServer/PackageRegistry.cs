@@ -157,7 +157,7 @@ namespace WorkspaceServer
             });
         }
 
-        public static PackageRegistry CreateForTryMode(DirectoryInfo project, PackageSource addSource = null)
+        public static PackageRegistry CreateForTryMode(IDirectoryAccessor projectDirectory, PackageSource addSource = null)
         {
             var finders = GetDefaultPackageFinders().Append(new PackageInstallingWebAssemblyAssetFinder(new FileSystemDirectoryAccessor(Package.DefaultPackagesDirectory), addSource));
             var registry = new PackageRegistry(
@@ -166,10 +166,12 @@ namespace WorkspaceServer
                 finders,
                 additionalStrategies: new LocalToolInstallingPackageDiscoveryStrategy(Package.DefaultPackagesDirectory, addSource));
 
-            registry.Add(project.Name, builder =>
+            var directory = projectDirectory.GetFullyQualifiedRoot();
+
+            registry.Add(directory.Name, builder =>
             {
                 builder.CreateRebuildablePackage = true;
-                builder.Directory = project;
+                builder.Directory = directory;
             });
 
             return registry;

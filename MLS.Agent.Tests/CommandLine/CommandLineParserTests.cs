@@ -8,12 +8,14 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using WorkspaceServer;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
+using WorkspaceServer.Tests;
 
 namespace MLS.Agent.Tests.CommandLine
 {
@@ -96,7 +98,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var path = TestAssets.SampleConsole.FullName;
             await _parser.InvokeAsync(new[] { path }, _console);
-            _startOptions.Dir.FullName.Should().Be(path);
+            _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(path + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -150,7 +152,7 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_empty_command_line_has_current_directory_as_root_directory()
         {
             await _parser.InvokeAsync("", _console);
-            _startOptions.Dir.FullName.Should().Be(Directory.GetCurrentDirectory());
+            _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -340,7 +342,14 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
             await _parser.InvokeAsync($"verify {directory}", _console);
-            _verifyOptions.Dir.FullName.Should().Be(directory);
+            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(directory + Path.DirectorySeparatorChar);
+        }
+
+        [Fact]
+        public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
+        {
+            await _parser.InvokeAsync($"verify", _console);
+            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -366,7 +375,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var binder = new ModelBinder<JupyterOptions>();
 
-            var options = (JupyterOptions) binder.CreateInstance(new BindingContext(result));
+            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
 
             options
                 .ConnectionFile
@@ -386,7 +395,7 @@ namespace MLS.Agent.Tests.CommandLine
             testConsole.Error.ToString().Should().Contain("File does not exist: not_exist.json");
         }
 
-        [Fact(Skip ="Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
+        [Fact(Skip = "Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
         public async Task jupyter_returns_error_if_connection_file_path_is_not_passed()
         {
             var testConsole = new TestConsole();

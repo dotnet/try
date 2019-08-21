@@ -30,6 +30,7 @@ using WorkspaceServer.Tests.Packaging;
 using WorkspaceServer.Tests.TestUtility;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
+using WorkspaceServer;
 
 namespace MLS.Agent.Tests
 {
@@ -995,7 +996,7 @@ namespace FibonacciTest
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
             var startupOptions = new StartupOptions(
-                dir: TestAssets.SampleConsole,
+                 rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
                 addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
                 package: name);
 
@@ -1027,7 +1028,7 @@ namespace FibonacciTest
             using (var disposableDirectory = DisposableDirectory.Create())
             {
                 System.IO.File.WriteAllText(Path.Combine(disposableDirectory.Directory.FullName, "a.js"), "alert('This is an alert from javascript');");
-                var options = new StartupOptions(dir: disposableDirectory.Directory);
+                var options = new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(disposableDirectory.Directory));
 
                 using (var agent = new AgentService(options: options))
                 {

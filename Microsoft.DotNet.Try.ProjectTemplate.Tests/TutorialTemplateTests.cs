@@ -44,13 +44,10 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
             await InstallTemplateAndCreateProject(baseDirectory, outputDirectory);
            
             var console = new TestConsole();
-            var directoryAccessor = new FileSystemDirectoryAccessor(outputDirectory);
 
             var resultCode = await VerifyCommand.Do(
-                new VerifyOptions(outputDirectory),
-                console,
-                () => directoryAccessor,
-                PackageRegistry.CreateForTryMode(outputDirectory));
+                new VerifyOptions(new FileSystemDirectoryAccessor(outputDirectory)),
+                console);
 
             console.Out
                        .ToString()

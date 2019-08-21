@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
@@ -61,7 +62,7 @@ namespace MLS.Agent.CommandLine
           
             startServer?.Invoke(new StartupOptions(
                                     uri: new Uri("QuickStart.md", UriKind.Relative),
-                                    dir: options.Output),
+                                    rootDirectory: new FileSystemDirectoryAccessor(options.Output)),
                                 context);
 
             return Task.FromResult(0);
