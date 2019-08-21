@@ -161,7 +161,7 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-
+      
 
         private DateTimeOffset? LastDesignTimeBuild { get; set; }
 
