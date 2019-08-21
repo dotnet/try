@@ -92,7 +92,7 @@ namespace WorkspaceServer.Tests
 
             var workspace = await registry.Get<IHaveADirectory>(workspaceName);
 
-            workspace.Directory.FullName.Should().Be(childDirectory.FullName);
+            workspace.Directory.Should().Be(childDirectory);
         }
     }
 }

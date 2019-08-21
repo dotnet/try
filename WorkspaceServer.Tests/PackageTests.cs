@@ -14,7 +14,6 @@ using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
 using WorkspaceServer.Tests.Packaging;
-using System.Linq;
 
 namespace WorkspaceServer.Tests
 {
