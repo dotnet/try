@@ -5,7 +5,6 @@
 - [Show snippets using regions](./Regions.md)
 - [Verify your Project](./Verify.md)
 - [Passing Arguments](./PassingArgs.md)
-- [Using Read-only Snippets](./ReadOnlySnippets.md)
 - [Reference](./Reference.md)
 
 Congratulations! You just ran `dotnet try demo`. This is an interactive guide to get you familiar with the `dotnet try` tool. 
