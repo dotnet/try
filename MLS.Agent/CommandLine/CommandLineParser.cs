@@ -470,19 +470,18 @@ namespace MLS.Agent.CommandLine
 
             Command Verify()
             {
-
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
                    new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(new DirectoryInfo(Directory.GetCurrentDirectory())))
                    {
-                       Name = "Directory to verify"
+                       Name = nameof(VerifyOptions.DirectoryAccessor)
                    }
                 };
 
                 verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
                     (options, console, startupOptions) =>
                 {
-                    return verify(options, console, startupOptions);
+                        return verify(options, console, startupOptions);
                 });
 
                 return verifyCommand;

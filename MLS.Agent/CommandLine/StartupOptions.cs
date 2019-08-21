@@ -46,8 +46,7 @@ namespace MLS.Agent.CommandLine
             string packageVersion = null,
             ParseResult parseResult = null,
             ushort? port = null,
-            bool isJupyter = false,
-            Func<DirectoryInfo, IDirectoryAccessor> getDirectoryAccessor = null)
+            bool isJupyter = false)
         {
             _parseResult = parseResult;
             LogPath = logPath;
@@ -59,7 +58,7 @@ namespace MLS.Agent.CommandLine
             ApplicationInsightsKey = applicationInsightsKey;
             RegionId = regionId;
             Dir = dir ?? new DirectoryInfo(Directory.GetCurrentDirectory());
-            DirectoryAccessor = getDirectoryAccessor != null ? getDirectoryAccessor(Dir) : new FileSystemDirectoryAccessor(Dir);
+            DirectoryAccessor = new FileSystemDirectoryAccessor(Dir);
             AddPackageSource = addPackageSource;
             Uri = uri;
             EnablePreviewFeatures = enablePreviewFeatures;
