@@ -8,12 +8,12 @@ using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class Display : IDisplay
+    public class DisplayedValue 
     {
         private readonly string _displayId;
         private readonly string _mimeType;
 
-        public Display(string displayId, string mimeType)
+        public DisplayedValue(string displayId, string mimeType)
         {
             if (string.IsNullOrWhiteSpace(displayId))
             {

@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public static class Kernel
     {
-        public static IDisplay display(
+        public static DisplayedValue display(
             object value,
             string mimeType = HtmlFormatter.MimeType)
         {
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Interactive
             Task.Run(() =>
                          kernel.SendAsync(new DisplayValue(formatted, displayId)))
                 .Wait();
-            return new Display(displayId,  mimeType);
+            return new DisplayedValue(displayId,  mimeType);
         }
 
       
