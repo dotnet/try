@@ -104,7 +104,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var handle = display(b(\"hello\")); handle.Update(b(\"world\"));"));
+            await kernel.SendAsync(new SubmitCode("var d = display(b(\"hello\")); d.Update(b(\"world\"));"));
 
             var formatted =
                 KernelEvents
