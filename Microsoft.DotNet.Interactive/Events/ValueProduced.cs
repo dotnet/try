@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Interactive.Commands;
 
@@ -15,6 +16,11 @@ namespace Microsoft.DotNet.Interactive.Events
             string valueId= null,
             bool isUpdatedValue = false) : base(command)
         {
+            if (isUpdatedValue && valueId == null)
+            {
+                throw new ArgumentException("isUpdatedValue cannot be true with a null valueId", nameof(valueId));
+            }
+
             Value = value;
             IsReturnValue = isReturnValue;
             FormattedValues = formattedValues;
