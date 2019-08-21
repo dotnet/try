@@ -96,9 +96,9 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Parse_root_directory_with_a_valid_path_succeeds()
         {
-            var directory = Create.EmptyWorkspace().Directory;
-            await _parser.InvokeAsync(new[] { directory.FullName }, _console);
-            _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.TrimEnd(Path.DirectorySeparatorChar).Should().Be(directory.FullName);
+            var path = TestAssets.SampleConsole.FullName;
+            await _parser.InvokeAsync(new[] { path }, _console);
+            _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(path + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_empty_command_line_has_current_directory_as_root_directory()
         {
             await _parser.InvokeAsync("", _console);
-            _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.TrimEnd(Path.DirectorySeparatorChar).Should().Be(Directory.GetCurrentDirectory());
+            _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -340,16 +340,16 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Verify_argument_specifies_root_directory()
         {
-            var directory = Create.EmptyWorkspace().Directory;
+            var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
             await _parser.InvokeAsync($"verify {directory}", _console);
-            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.TrimEnd(Path.DirectorySeparatorChar).Should().Be(directory.FullName);
+            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(directory + Path.DirectorySeparatorChar);
         }
 
         [Fact]
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.TrimEnd(Path.DirectorySeparatorChar).Should().Be(Directory.GetCurrentDirectory());
+            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -375,7 +375,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var binder = new ModelBinder<JupyterOptions>();
 
-            var options = (JupyterOptions) binder.CreateInstance(new BindingContext(result));
+            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
 
             options
                 .ConnectionFile
@@ -395,7 +395,7 @@ namespace MLS.Agent.Tests.CommandLine
             testConsole.Error.ToString().Should().Contain("File does not exist: not_exist.json");
         }
 
-        [Fact(Skip ="Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
+        [Fact(Skip = "Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
         public async Task jupyter_returns_error_if_connection_file_path_is_not_passed()
         {
             var testConsole = new TestConsole();
