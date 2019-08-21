@@ -71,7 +71,13 @@ namespace Microsoft.DotNet.Interactive
                             context,
                             next),
 
-                        _ => next(command, context)
+                        UpdateDisplayValue updateDisplayValue =>
+                        HandleUpdateDisplayValue(
+                            updateDisplayValue,
+                            context,
+                            next),
+
+                            _ => next(command, context)
                         });
         }
 
@@ -167,7 +173,45 @@ namespace Microsoft.DotNet.Interactive
                     new ValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
+                        formattedValues: new[] { displayValue.FormattedValue },
+                        id: displayValue.Id));
+
+                context.OnCompleted();
+
+                return Task.CompletedTask;
+            };
+
+            displayValue.Handler = invocationContext =>
+            {
+                invocationContext.OnNext(
+                    new ValueProduced(
+                        displayValue.FormattedValue,
+                        displayValue,
                         formattedValues: new[] { displayValue.FormattedValue }));
+
+                invocationContext.OnCompleted();
+
+                return Task.CompletedTask;
+            };
+
+            await next(displayValue, pipelineContext);
+        }
+
+        private async Task HandleUpdateDisplayValue(
+            UpdateDisplayValue displayValue,
+            KernelInvocationContext pipelineContext,
+            KernelPipelineContinuation next)
+        {
+            displayValue.Handler = context =>
+            {
+                context.OnNext(
+                    new ValueProduced(
+                        displayValue.FormattedValue,
+                        displayValue,
+                        formattedValues: new[] { displayValue.FormattedValue },
+                        id: displayValue.DisplayId,
+                        isUpdatedValue:true)
+                    );
 
                 context.OnCompleted();
 

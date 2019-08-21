@@ -100,6 +100,30 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task Display_handle_can_update_value()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("var handle = display(b(\"hello\")); handle.Update(b(\"world\"));"));
+
+            var formatted =
+                KernelEvents
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues);
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                    v.MimeType == "text/html" &&
+                    v.Value.ToString().Contains("<b>hello</b>"))
+                .And
+                .ContainSingle(v =>
+                    v.MimeType == "text/html" &&
+                    v.Value.ToString().Contains("<b>world</b>"));
+        }
+
+        [Fact]
         public async Task Javascript_helper_emits_string_as_content_within_a_script_element()
         {
             var kernel = CreateKernel();

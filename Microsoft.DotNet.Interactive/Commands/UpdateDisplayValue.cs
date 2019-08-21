@@ -3,15 +3,15 @@
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class DisplayValue : KernelCommandBase
+    public class UpdateDisplayValue : KernelCommandBase
     {
-        public DisplayValue(FormattedValue formattedValue, string id = null)
+        public UpdateDisplayValue(FormattedValue formattedValue, string displayId = null)
         {
             FormattedValue = formattedValue;
-            Id = id;
+            DisplayId = displayId;
         }
 
         public FormattedValue FormattedValue { get; }
-        public string Id { get; }
+        public string DisplayId { get; }
     }
 }

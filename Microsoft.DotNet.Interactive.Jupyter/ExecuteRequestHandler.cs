@@ -78,10 +78,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private static Dictionary<string, object> CreateTransient()
+        private static Dictionary<string, object> CreateTransient(string displayId)
         {
-            var id = Guid.NewGuid();
-            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
+            var transient = new Dictionary<string, object> { { "display_id", displayId ?? Guid.NewGuid().ToString() } };
             return transient;
         }
 
@@ -155,18 +154,23 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             try
             {
-                var transient = CreateTransient();
-                // executeResult data
+                var transient = CreateTransient(valueProduced.Id);
+
                 var executeResultData = valueProduced.IsLastValue
                 ? new ExecuteResult(
                     openRequest.ExecutionCount,
                     transient: transient,
                     data: valueProduced?.FormattedValues
                         ?.ToDictionary(k => k.MimeType, v => v.Value))
-                : new DisplayData(
-                    transient: transient,
-                    data: valueProduced?.FormattedValues
-                                       ?.ToDictionary(k => k.MimeType, v => v.Value));
+                : valueProduced.IsUpdatedValue
+                    ? new UpdateDisplayData(
+                        transient: transient,
+                        data: valueProduced?.FormattedValues
+                            ?.ToDictionary(k => k.MimeType, v => v.Value))
+                    : new DisplayData(
+                        transient: transient,
+                        data: valueProduced?.FormattedValues
+                            ?.ToDictionary(k => k.MimeType, v => v.Value));
 
                 if (!openRequest.Request.Silent)
                 {
