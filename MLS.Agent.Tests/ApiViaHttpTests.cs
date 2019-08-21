@@ -996,7 +996,7 @@ namespace FibonacciTest
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
             var startupOptions = new StartupOptions(
-                 directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
+                 rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
                 addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
                 package: name);
 
@@ -1028,7 +1028,7 @@ namespace FibonacciTest
             using (var disposableDirectory = DisposableDirectory.Create())
             {
                 System.IO.File.WriteAllText(Path.Combine(disposableDirectory.Directory.FullName, "a.js"), "alert('This is an alert from javascript');");
-                var options = new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(disposableDirectory.Directory));
+                var options = new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(disposableDirectory.Directory));
 
                 using (var agent = new AgentService(options: options))
                 {

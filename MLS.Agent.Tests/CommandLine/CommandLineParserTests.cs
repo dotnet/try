@@ -98,7 +98,7 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var directory = Create.EmptyWorkspace().Directory;
             await _parser.InvokeAsync(new[] { directory.FullName }, _console);
-            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
+            _startOptions.RootDirectory.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Parse_empty_command_line_has_current_directory_as_root_directory()
         {
             await _parser.InvokeAsync("", _console);
-            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(Directory.GetCurrentDirectory());
+            _startOptions.RootDirectory.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(Directory.GetCurrentDirectory());
         }
 
         [Fact]

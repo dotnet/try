@@ -17,7 +17,7 @@ namespace WorkspaceServer
     {
         private readonly DirectoryInfo _rootDirectory;
 
-        public FileSystemDirectoryAccessor(string value): this(new DirectoryInfo(value))
+        public FileSystemDirectoryAccessor(string directory): this(new DirectoryInfo(directory))
         {
         }
 

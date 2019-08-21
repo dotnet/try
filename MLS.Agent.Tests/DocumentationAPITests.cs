@@ -25,7 +25,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Request_for_non_existent_markdown_file_returns_404()
         {
-            using (var agent = new AgentService(new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
+            using (var agent = new AgentService(new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
             {
                 var response = await agent.GetAsync(@"/DOESNOTEXIST");
 
@@ -36,7 +36,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Return_html_for_an_existing_markdown_file()
         {
-            using (var agent = new AgentService(new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
+            using (var agent = new AgentService(new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
             {
                 var response = await agent.GetAsync(@"Readme.md");
 
@@ -51,7 +51,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Return_html_for_existing_markdown_files_in_a_subdirectory()
         {
-            using (var agent = new AgentService(new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
+            using (var agent = new AgentService(new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
             {
                 var response = await agent.GetAsync(@"Subdirectory/Tutorial.md");
 
@@ -65,7 +65,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Lists_markdown_files_when_a_folder_is_requested()
         {
-            using (var agent = new AgentService(new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
+            using (var agent = new AgentService(new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
             {
                 var response = await agent.GetAsync(@"/");
 
@@ -89,7 +89,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Scaffolding_HTML_includes_trydotnet_js_script_link()
         {
-            using (var agent = new AgentService(new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
+            using (var agent = new AgentService(new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
             {
                 var response = await agent.GetAsync(@"Subdirectory/Tutorial.md");
 
@@ -113,7 +113,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task Scaffolding_HTML_includes_trydotnet_js_autoEnable_invocation_with_useBlazor_defaulting_to_false()
         {
-            using (var agent = new AgentService(new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
+            using (var agent = new AgentService(new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole))))
             {
                 var response = await agent.GetAsync(@"Subdirectory/Tutorial.md");
 
@@ -141,7 +141,7 @@ namespace MLS.Agent.Tests
             var (name, addSource) = await Create.NupkgWithBlazorEnabled("packageName");
 
             var startupOptions = new StartupOptions(
-                directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
+                rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
                 addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
                 package: name);
 
@@ -183,7 +183,7 @@ namespace MLS.Agent.Tests
                 File.WriteAllText(path, text);
 
                 var startupOptions = new StartupOptions(
-                    directoryAccessor: new FileSystemDirectoryAccessor(dir.Directory),
+                    rootDirectory: new FileSystemDirectoryAccessor(dir.Directory),
                     addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
 
                 using (var agent = new AgentService(startupOptions))
@@ -216,7 +216,7 @@ namespace MLS.Agent.Tests
 
             using (var clock = VirtualClock.Start())
             using (var agent = new AgentService(new StartupOptions(
-                                                    directoryAccessor: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
+                                                    rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
                                                     uri: launchUri)))
             {
                 await clock.Wait(5.Seconds());
@@ -242,7 +242,7 @@ namespace MLS.Agent.Tests
 
             var root = directoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath(".")) as DirectoryInfo;
 
-            var options = new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(root));
+            var options = new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(root));
 
             using (var clock = VirtualClock.Start())
             using (var agent = new AgentService(options: options, directoryAccessor: directoryAccessor))

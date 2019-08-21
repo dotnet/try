@@ -112,7 +112,7 @@ namespace MLS.Agent.CommandLine
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
-                Name = nameof(StartupOptions.DirectoryAccessor),
+                Name = nameof(StartupOptions.RootDirectory),
                 Arity = ArgumentArity.ZeroOrOne,
                 Description = "Specify the path to the root directory for your documentation",
             };
@@ -252,7 +252,7 @@ namespace MLS.Agent.CommandLine
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {
                     services.AddSingleton(_ => PackageRegistry.CreateForTryMode(
-                                              options.DirectoryAccessor,
+                                              options.RootDirectory,
                                               options.AddPackageSource));
 
                     startServer(options, context);

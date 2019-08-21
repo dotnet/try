@@ -92,7 +92,7 @@ namespace MLS.Agent
 
                         case StartupMode.Try:
                             return PackageRegistry.CreateForTryMode(
-                                StartupOptions.DirectoryAccessor,
+                                StartupOptions.RootDirectory,
                                 StartupOptions.AddPackageSource);
 
                         default:
@@ -126,7 +126,7 @@ namespace MLS.Agent
                     }
                     else
                     {
-                        return StartupOptions.DirectoryAccessor;
+                        return StartupOptions.RootDirectory;
                     }
                 });
 

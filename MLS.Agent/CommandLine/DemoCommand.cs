@@ -62,7 +62,7 @@ namespace MLS.Agent.CommandLine
           
             startServer?.Invoke(new StartupOptions(
                                     uri: new Uri("QuickStart.md", UriKind.Relative),
-                                    directoryAccessor: new FileSystemDirectoryAccessor(options.Output)),
+                                    rootDirectory: new FileSystemDirectoryAccessor(options.Output)),
                                 context);
 
             return Task.FromResult(0);

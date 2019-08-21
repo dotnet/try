@@ -17,7 +17,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void When_Production_is_true_and_in_hosted_mode_then_EnvironmentName_is_production()
         {
-            var options = new StartupOptions(production: true, directoryAccessor: null);
+            var options = new StartupOptions(production: true, rootDirectory: null);
 
             options.EnvironmentName.Should().Be(Environments.Production);
         }
@@ -25,7 +25,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void When_Production_is_true_and_not_in_hosted_mode_then_EnvironmentName_is_production()
         {
-            var options = new StartupOptions(production: true, directoryAccessor: new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()));
+            var options = new StartupOptions(production: true, rootDirectory: new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()));
 
             options.EnvironmentName.Should().Be(Environments.Production);
         }
@@ -33,7 +33,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void When_not_in_hosted_mode_then_EnvironmentName_is_production()
         {
-            var options = new StartupOptions(directoryAccessor: new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()));
+            var options = new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()));
 
             options.EnvironmentName.Should().Be(Environments.Production);
         }
