@@ -96,9 +96,9 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Parse_root_directory_with_a_valid_path_succeeds()
         {
-            var path = TestAssets.SampleConsole.FullName;
-            await _parser.InvokeAsync(new[] { path }, _console);
-            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(path);
+            var directory = Create.EmptyWorkspace().Directory;
+            await _parser.InvokeAsync(new[] { directory.FullName }, _console);
+            _startOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
         }
 
         [Fact]

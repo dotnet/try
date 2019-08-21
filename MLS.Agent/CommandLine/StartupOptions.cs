@@ -57,8 +57,7 @@ namespace MLS.Agent.CommandLine
             Key = key;
             ApplicationInsightsKey = applicationInsightsKey;
             RegionId = regionId;
-            Dir = dir ?? new DirectoryInfo(Directory.GetCurrentDirectory());
-            DirectoryAccessor = new FileSystemDirectoryAccessor(Dir);
+            DirectoryAccessor = new FileSystemDirectoryAccessor(dir ?? new DirectoryInfo(Directory.GetCurrentDirectory()));
             AddPackageSource = addPackageSource;
             Uri = uri;
             EnablePreviewFeatures = enablePreviewFeatures;
@@ -73,7 +72,6 @@ namespace MLS.Agent.CommandLine
         public string Id { get; }
         public string RegionId { get; }
         public IDirectoryAccessor DirectoryAccessor { get; }
-        public DirectoryInfo Dir { get; }
         public PackageSource AddPackageSource { get; }
         public Uri Uri { get; set; }
         public bool Production { get; }

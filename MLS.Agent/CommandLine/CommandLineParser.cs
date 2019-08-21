@@ -12,6 +12,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
@@ -96,7 +97,7 @@ namespace MLS.Agent.CommandLine
 
             verify = verify ??
                      ((options, console, startupOptions) =>
-                             VerifyCommand.Do(options, 
+                             VerifyCommand.Do(options,
                                               console,
                                               startupOptions));
 
@@ -109,12 +110,27 @@ namespace MLS.Agent.CommandLine
             startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
 
-            var dirArgument = new Argument<DirectoryInfo>
+            var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
+                Name = nameof(StartupOptions.DirectoryAccessor),
                 Arity = ArgumentArity.ZeroOrOne,
-                Name = nameof(StartupOptions.Dir).ToLower(),
                 Description = "Specify the path to the root directory for your documentation",
-            }.ExistingOnly();
+            };
+
+            dirArgument.AddValidator(symbolResult =>
+            {
+                var directory = symbolResult.Tokens
+                               .Select(t => t.Value)
+                               .FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    return $"Directory does not exist: {directory}";
+                }
+
+                return null;
+            });
+
 
             var rootCommand = StartInTryMode();
 
@@ -472,16 +488,13 @@ namespace MLS.Agent.CommandLine
             {
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                   new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
-                   {
-                       Name = nameof(VerifyOptions.DirectoryAccessor)
-                   }
+                   dirArgument
                 };
 
                 verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
                     (options, console, startupOptions) =>
                 {
-                        return verify(options, console, startupOptions);
+                    return verify(options, console, startupOptions);
                 });
 
                 return verifyCommand;
