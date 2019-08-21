@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public static class Kernel
     {
-        public static IDisplayHandle display(
+        public static IDisplay display(
             object value,
             string mimeType = HtmlFormatter.MimeType)
         {
@@ -25,15 +25,15 @@ namespace Microsoft.DotNet.Interactive
             Task.Run(() =>
                          kernel.SendAsync(new DisplayValue(formatted, displayId)))
                 .Wait();
-            return new DisplayHandle(displayId,  mimeType);
+            return new Display(displayId,  mimeType);
         }
 
-        public class DisplayHandle : IDisplayHandle
+        private class Display : IDisplay
         {
             private readonly string _displayId;
             private readonly string _mimeType;
 
-            public DisplayHandle(string displayId, string mimeType)
+            public Display(string displayId, string mimeType)
             {
                 if (string.IsNullOrWhiteSpace(displayId))
                 {
@@ -48,16 +48,16 @@ namespace Microsoft.DotNet.Interactive
                 _mimeType = mimeType;
             }
 
-            public void Update(object value)
+            public void Update(object updatedValue)
             {
                 var formatted = new FormattedValue(
                     _mimeType,
-                    value.ToDisplayString(_mimeType));
+                    updatedValue.ToDisplayString(_mimeType));
 
                 var kernel = KernelInvocationContext.Current.Kernel;
 
                 Task.Run(() =>
-                        kernel.SendAsync(new UpdateDisplayValue(formatted, _displayId)))
+                        kernel.SendAsync(new UpdateDisplayedValue(formatted, _displayId)))
                     .Wait();
             }
         }

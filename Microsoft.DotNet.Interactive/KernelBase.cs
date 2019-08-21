@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Interactive
                             context,
                             next),
 
-                        UpdateDisplayValue updateDisplayValue =>
+                        UpdateDisplayedValue updateDisplayValue =>
                         HandleUpdateDisplayValue(
                             updateDisplayValue,
                             context,
@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Interactive
                         displayValue.FormattedValue,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue },
-                        id: displayValue.Id));
+                        valueId: displayValue.ValueId));
 
                 context.OnCompleted();
 
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Interactive
                         displayValue.FormattedValue,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue },
-                        id: displayValue.Id));
+                        valueId: displayValue.ValueId));
 
                 invocationContext.OnCompleted();
 
@@ -199,18 +199,18 @@ namespace Microsoft.DotNet.Interactive
         }
 
         private async Task HandleUpdateDisplayValue(
-            UpdateDisplayValue displayValue,
+            UpdateDisplayedValue displayedValue,
             KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            displayValue.Handler = context =>
+            displayedValue.Handler = context =>
             {
                 context.OnNext(
                     new ValueProduced(
-                        displayValue.FormattedValue,
-                        displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue },
-                        id: displayValue.DisplayId,
+                        displayedValue.FormattedValue,
+                        displayedValue,
+                        formattedValues: new[] { displayedValue.FormattedValue },
+                        valueId: displayedValue.ValueId,
                         isUpdatedValue:true)
                     );
 
@@ -219,14 +219,14 @@ namespace Microsoft.DotNet.Interactive
                 return Task.CompletedTask;
             };
 
-            displayValue.Handler = invocationContext =>
+            displayedValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
                     new ValueProduced(
-                        displayValue.FormattedValue,
-                        displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue },
-                        id: displayValue.DisplayId,
+                        displayedValue.FormattedValue,
+                        displayedValue,
+                        formattedValues: new[] { displayedValue.FormattedValue },
+                        valueId: displayedValue.ValueId,
                         isUpdatedValue: true));
 
                 invocationContext.OnCompleted();
@@ -234,7 +234,7 @@ namespace Microsoft.DotNet.Interactive
                 return Task.CompletedTask;
             };
 
-            await next(displayValue, pipelineContext);
+            await next(displayedValue, pipelineContext);
         }
 
         private Parser BuildDirectiveParser()

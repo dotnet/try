@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             try
             {
-                var transient = CreateTransient(valueProduced.Id);
+                var transient = CreateTransient(valueProduced.ValueId);
 
                 var executeResultData = valueProduced.IsLastValue
                 ? new ExecuteResult(

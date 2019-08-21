@@ -12,13 +12,13 @@ namespace Microsoft.DotNet.Interactive.Events
             IKernelCommand command,
             bool isLastValue = false,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
-            string id= null,
+            string valueId= null,
             bool isUpdatedValue = false) : base(command)
         {
             Value = value;
             IsLastValue = isLastValue;
             FormattedValues = formattedValues;
-            Id = id;
+            ValueId = valueId;
             IsUpdatedValue = isUpdatedValue;
         }
 
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive.Events
 
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
 
-        public string Id { get; }
+        public string ValueId { get; }
 
         public bool IsUpdatedValue { get; }
     }

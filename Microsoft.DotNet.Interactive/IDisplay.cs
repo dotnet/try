@@ -3,8 +3,8 @@
 
 namespace Microsoft.DotNet.Interactive
 {
-    public interface IDisplayHandle
+    public interface IDisplay
     {
-        void Update(object value);
+        void Update(object updatedValue);
     }
 }
