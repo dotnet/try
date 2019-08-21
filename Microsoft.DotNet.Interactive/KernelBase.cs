@@ -167,20 +167,6 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            displayValue.Handler = context =>
-            {
-                context.OnNext(
-                    new ValueProduced(
-                        displayValue.FormattedValue,
-                        displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue },
-                        valueId: displayValue.ValueId));
-
-                context.OnCompleted();
-
-                return Task.CompletedTask;
-            };
-
             displayValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
@@ -203,22 +189,6 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            displayedValue.Handler = context =>
-            {
-                context.OnNext(
-                    new ValueProduced(
-                        displayedValue.FormattedValue,
-                        displayedValue,
-                        formattedValues: new[] { displayedValue.FormattedValue },
-                        valueId: displayedValue.ValueId,
-                        isUpdatedValue:true)
-                    );
-
-                context.OnCompleted();
-
-                return Task.CompletedTask;
-            };
-
             displayedValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(

@@ -100,7 +100,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task Display_handle_can_update_value()
+        public async Task Displayed_value_can_be_updated()
         {
             var kernel = CreateKernel();
 
@@ -108,6 +108,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var formatted =
                 KernelEvents
+                    .OrderBy(e => e.Timestamp)
                     .ValuesOnly()
                     .OfType<ValueProduced>()
                     .SelectMany(v => v.FormattedValues);
@@ -121,6 +122,33 @@ namespace WorkspaceServer.Tests.Kernel
                 .ContainSingle(v =>
                     v.MimeType == "text/html" &&
                     v.Value.ToString().Contains("<b>world</b>"));
+        }
+
+        [Fact]
+        public async Task Value_display_and_update_are_in_right_order()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("var d = display(b(\"hello\")); d.Update(b(\"world\"));"));
+
+            var formatted =
+                KernelEvents
+                    .OrderBy(e => e.Timestamp)
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues).ToList();
+
+            var firstValue = formatted.Select((v, i) => new {v, i}).First(e => e.v.MimeType == "text/html" &&
+                                                                               e.v.Value.ToString()
+                                                                                   .Contains("<b>hello</b>")).i;
+
+            var updatedValue = formatted.Select((v, i) => new { v, i }).First(e => e.v.MimeType == "text/html" &&
+                                                                                 e.v.Value.ToString()
+                                                                                     .Contains("<b>world</b>")).i;
+
+            updatedValue
+                .Should()
+                .BeGreaterOrEqualTo(firstValue);
         }
 
         [Fact]
