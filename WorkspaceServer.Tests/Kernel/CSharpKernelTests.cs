@@ -226,7 +226,7 @@ Console.Write(""value three"");
                 .Should()
                 .HaveCount(4)
                 .And
-                .ContainSingle(e => e.IsLastValue);
+                .ContainSingle(e => e.IsEval);
 
         }
 

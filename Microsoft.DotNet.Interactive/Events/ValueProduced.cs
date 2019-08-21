@@ -10,21 +10,25 @@ namespace Microsoft.DotNet.Interactive.Events
     {
         public ValueProduced(object value,
             IKernelCommand command,
-            bool isLastValue = false,
+            bool isEval = false,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
             string valueId= null,
             bool isUpdatedValue = false) : base(command)
         {
             Value = value;
-            IsLastValue = isLastValue;
+            IsEval = isEval;
             FormattedValues = formattedValues;
             ValueId = valueId;
-            IsUpdatedValue = isUpdatedValue;
+            IsUpdatedValue = valueId switch
+            {
+                null => false,
+                _ => isUpdatedValue
+            };
         }
 
         public object Value { get; }
 
-        public bool IsLastValue { get; }
+        public bool IsEval { get; }
 
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
 
