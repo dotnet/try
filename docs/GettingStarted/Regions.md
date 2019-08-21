@@ -3,8 +3,10 @@
 - [Quick Start](./QuickStart.md)
 - [Create a New Project](./NewProject.md)
 - **Show snippets using regions**
+- [Create Sessions](./Sessions.md)
 - [Verify your Project](./Verify.md)
 - [Passing Arguments](./PassingArgs.md)
+- [Using Read-only Snippets](./ReadOnlySnippets.md)
 - [Reference](./Reference.md)
 
 Code documentation almost always features code snippets in isolation, like this:

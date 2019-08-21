@@ -1,4 +1,14 @@
-# Read-only code snippets
+# Step-by-step tutorial: Read-only code snippets
+
+- [Quick Start](./QuickStart.md)
+- [Create a New Project](./NewProject.md)
+- [Define Regions](./Regions.md)
+- [Create Sessions](./Sessions.md)
+- [Verify your Project](./Verify.md)
+- [Passing Arguments](./PassingArgs.md)
+- **Using Read-only Snippets**
+- [Glossary](./Glossary.md)
+
 
 ```cs  --editable false --region usings --destination-file ./Snippets/Program.cs --project ./Snippets/Snippets.csproj
 using System;
@@ -82,5 +92,7 @@ and the following code will run after the editable part
 ```cs --editable false --destination-file ./Snippets/Program.cs --region run1 --project ./Snippets/Snippets.csproj
 Console.WriteLine($"printed after the region execution: counter value is {counter}");
 ```
+
+**NEXT: [Reference &raquo;](./Reference.md)**
 
 
