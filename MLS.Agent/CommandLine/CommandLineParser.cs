@@ -472,7 +472,7 @@ namespace MLS.Agent.CommandLine
             {
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                   new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(new DirectoryInfo(Directory.GetCurrentDirectory())))
+                   new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
                    {
                        Name = nameof(VerifyOptions.DirectoryAccessor)
                    }

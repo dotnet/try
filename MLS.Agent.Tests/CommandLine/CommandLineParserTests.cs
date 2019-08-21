@@ -340,7 +340,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Verify_argument_specifies_root_directory()
         {
-            var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
+            var directory = Create.EmptyWorkspace().Directory;
             await _parser.InvokeAsync($"verify {directory}", _console);
             _verifyOptions.DirectoryAccessor.GetFullyQualifiedRoot().Should().BeNormalizedEqualTo(directory);
         }

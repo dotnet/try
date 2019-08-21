@@ -10,7 +10,7 @@ namespace MLS.Agent.CommandLine
     {
         public VerifyOptions(IDirectoryAccessor directoryAccessor)
         {
-            DirectoryAccessor = directoryAccessor?? new FileSystemDirectoryAccessor(new DirectoryInfo(Directory.GetCurrentDirectory()));
+            DirectoryAccessor = directoryAccessor ?? throw new System.ArgumentNullException(nameof(directoryAccessor));
         }
 
         public IDirectoryAccessor DirectoryAccessor { get; }
