@@ -238,6 +238,12 @@ namespace Microsoft.DotNet.Interactive
 
         public void AddDirective(Command command)
         {
+            if (!command.Name.StartsWith("#") &&
+                !command.Name.StartsWith("%"))
+            {
+                throw new ArgumentException("Directives must begin with # or %");
+            }
+
             _directiveCommands.Add(command);
             _directiveParser = null;
         }

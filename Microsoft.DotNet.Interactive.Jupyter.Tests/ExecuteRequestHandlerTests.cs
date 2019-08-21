@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             };
 
             var handler = new ExecuteRequestHandler(kernel);
-            var request = Message.Create(new ExecuteRequest("#kernel csharp"), null);
+            var request = Message.Create(new ExecuteRequest("%%csharp"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.DecodedMessages

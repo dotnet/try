@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Tests;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -47,37 +47,23 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            await kernel.SendAsync(new SubmitCode("#kernel csharp"));
-            await kernel.SendAsync(new SubmitCode("var x = 123;"));
-            await kernel.SendAsync(new SubmitCode("#kernel fake"));
-            await kernel.SendAsync(new SubmitCode("hello!"));
-            await kernel.SendAsync(new SubmitCode("#kernel csharp"));
-            await kernel.SendAsync(new SubmitCode("x"));
+            await kernel.SendAsync(
+                new SubmitCode(
+                    @"%%csharp
+var x = 123;"));
+            await kernel.SendAsync(
+                new SubmitCode(
+                    @"%%fake
+hello!"));
+            await kernel.SendAsync(
+                new SubmitCode(
+                    @"%%csharp
+x"));
 
             receivedOnFakeRepl
                 .Should()
-                .ContainSingle(c => c is SubmitCode && 
+                .ContainSingle(c => c is SubmitCode &&
                                     c.As<SubmitCode>().Code == "hello!");
-        }
-
-        public class FakeKernel : KernelBase
-        {
-            public FakeKernel([CallerMemberName] string name = null)
-            {
-                Name = name;
-            }
-
-            public override string Name { get; }
-
-            public KernelCommandInvocation Handle { get; set; }
-
-            protected override Task HandleAsync(
-                IKernelCommand command, 
-                KernelInvocationContext context)
-            {
-                command.As<KernelCommandBase>().Handler = Handle;
-                return Task.CompletedTask;
-            }
         }
     }
 }
