@@ -344,6 +344,51 @@ json
         }
 
         [Fact]
+        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
+
+            var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
+            await kernel.SendAsync(command);
+
+            command.Code.Should().Be("var a = new List<int>();");
+        }
+
+        [Fact]
+        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_PackageAdded_event_is_raised()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
+
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
+
+            var result = await kernel.SendAsync(command);
+
+            var events = result.KernelEvents
+                               .ToEnumerable()
+                               .ToArray();
+
+            events
+                .Should()
+                .ContainSingle(e => e is NuGetPackageAdded);
+
+            events.OfType<NuGetPackageAdded>()
+                  .Single()
+                  .PackageReference
+                  .Should()
+                  .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+
+            events
+                .Should()
+                .ContainSingle(e => e is CodeSubmissionEvaluated);
+        }
+
+        [Fact]
         public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
         {
             var extensionDir = Create.EmptyWorkspace()

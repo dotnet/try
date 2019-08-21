@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Interactive
 
             AddSetKernelMiddleware();
 
-            AddDirectiveMiddleware();
+            AddDirectiveMiddlewareAndCommonCommandHandlers();
         }
 
         public KernelCommandPipeline Pipeline { get; }
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Interactive
             });
         }
 
-        private void AddDirectiveMiddleware()
+        private void AddDirectiveMiddlewareAndCommonCommandHandlers()
         {
             Pipeline.AddMiddleware(
                 (command, context, next) =>
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 var currentLine = lines.Dequeue();
 
-                var parseResult = BuildDirectiveParser().Parse(currentLine);
+                var parseResult = GetDirectiveParser().Parse(currentLine);
 
                 if (parseResult.Errors.Count == 0 &&
                     !parseResult.Directives.Any() && // System.CommandLine directives should not be considered as valid
@@ -209,7 +209,7 @@ namespace Microsoft.DotNet.Interactive
             await next(displayedValue, pipelineContext);
         }
 
-        private Parser BuildDirectiveParser()
+        private Parser GetDirectiveParser()
         {
             if (_directiveParser == null)
             {
