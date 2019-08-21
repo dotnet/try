@@ -34,7 +34,10 @@ namespace MLS.Agent.Tests
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
 
-                document.DocumentNode.SelectSingleNode("//script").InnerHtml.Should().Contain("var xplotRequire = require.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});");
+                document.DocumentNode.SelectSingleNode("//script")
+                    .InnerHtml
+                    .Should()
+                    .Contain("var xplotRequire = requirejs.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});");
             }
 
             [Fact]
