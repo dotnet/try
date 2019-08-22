@@ -53,9 +53,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
                 .Select((t, pos) => (t.Value, pos))
-                .Single(t => t.Value is CodeSubmissionEvaluationFailed);
+                .Single(t => t.Value is CommandFailed);
 
-            ((CodeSubmissionEvaluationFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
+            ((CommandFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
 
             var lastCodeSubmissionPosition = KernelEvents
                 .Select((e, pos) => (e.Value, pos))
@@ -84,7 +84,7 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents.ValuesOnly()
                 .Last()
                 .Should()
-                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .BeOfType<CommandFailed>()
                 .Which
                 .Exception
                 .Should()
@@ -102,7 +102,7 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents.ValuesOnly()
                 .Last()
                 .Should()
-                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .BeOfType<CommandFailed>()
                 .Which
                 .Message
                 .Should()
@@ -123,7 +123,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .Contain(e => e.Value is CodeSubmissionEvaluationFailed);
+                .Contain(e => e.Value is CommandFailed);
         }
      
 

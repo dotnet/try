@@ -266,11 +266,16 @@ namespace Microsoft.DotNet.Interactive
             using var context = KernelInvocationContext.Establish(operation.Command);
             using var _ = context.KernelEvents.Subscribe(PublishEvent);
 
-            await Pipeline.SendAsync(operation.Command, context);
-
-            var result = await context.InvokeAsync();
-
-            operation.TaskCompletionSource.SetResult(result);
+            try
+            {
+                await Pipeline.SendAsync(operation.Command, context);
+                var result = await context.InvokeAsync();
+                operation.TaskCompletionSource.SetResult(result);
+            }
+            catch (Exception exception)
+            {
+                operation.TaskCompletionSource.SetException(exception);
+            }
         }
 
         private readonly ConcurrentQueue<KernelOperation> _commandQueue = 

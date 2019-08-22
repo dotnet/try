@@ -3,20 +3,27 @@
 
 using System;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class CodeSubmissionEvaluationFailed : KernelEventBase
+    public class CommandFailed : KernelEventBase
     {
-        public CodeSubmissionEvaluationFailed(
+        public CommandFailed(
             Exception exception,
-            string message,
-            SubmitCode submitCode) : base(submitCode)
+            IKernelCommand command,
+            string message = null) : base(command)
         {
             Exception = exception;
-            Message = string.IsNullOrWhiteSpace(message)
-                          ? exception.Message 
-                          : message;
+            
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                Message = exception.ToString();
+            }
+            else
+            {
+                Message = message;
+            }
         }
 
         public CodeSubmissionEvaluationFailed(
@@ -25,12 +32,10 @@ namespace Microsoft.DotNet.Interactive.Events
         {
         }
 
-        public string Code => ((SubmitCode)Command).Code;
-
         public Exception Exception { get; }
 
         public string Message { get; }
 
-        public override string ToString() => $"{base.ToString()}: {Code}";
+        public override string ToString() => $"{base.ToString()}: {Message}";
     }
 }
