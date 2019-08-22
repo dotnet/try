@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
@@ -34,11 +33,7 @@ namespace WorkspaceServer.Kernel
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private ScriptState _scriptState;
-
-        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
         protected ScriptOptions ScriptOptions;
-
-        private StringBuilder _inputBuffer = new StringBuilder();
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
 
@@ -64,26 +59,10 @@ namespace WorkspaceServer.Kernel
                     typeof(Enumerable).Assembly,
                     typeof(IEnumerable<>).Assembly,
                     typeof(Task<>).Assembly,
-                    typeof(IKernel).Assembly, 
-                    typeof(CSharpKernel).Assembly, 
+                    typeof(IKernel).Assembly,
+                    typeof(CSharpKernel).Assembly,
                     typeof(PocketView).Assembly,
                     typeof(XPlot.Plotly.PlotlyChart).Assembly);
-        }
-
-        private (bool shouldExecute, string completeSubmission) IsBufferACompleteSubmission(string input)
-        {
-            _inputBuffer.AppendLine(input);
-
-            var code = _inputBuffer.ToString();
-            var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
-
-            if (!SyntaxFactory.IsCompleteSubmission(syntaxTree))
-            {
-                return (false, code);
-            }
-
-            _inputBuffer = new StringBuilder();
-            return (true, code);
         }
 
         protected override async Task HandleAsync(
@@ -115,83 +94,75 @@ namespace WorkspaceServer.Kernel
             var codeSubmissionReceived = new CodeSubmissionReceived(
                 submitCode.Code,
                 submitCode);
+
             context.OnNext(codeSubmissionReceived);
 
-            var (shouldExecute, code) = IsBufferACompleteSubmission(submitCode.Code);
+            var code = submitCode.Code;
 
-            if (shouldExecute)
+            context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
+            Exception exception = null;
+
+            using var console = await ConsoleOutput.Capture();
+            using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
+
+            try
             {
-                context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
-                Exception exception = null;
-
-                using var console = await ConsoleOutput.Capture();
-                using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
-
-                try
+                if (_scriptState == null)
                 {
-                    if (_scriptState == null)
-                    {
-                        _scriptState = await CSharpScript.RunAsync(
-                                           code,
-                                           ScriptOptions);
-                    }
-                    else
-                    {
-                        _scriptState = await _scriptState.ContinueWithAsync(
-                                           code,
-                                           ScriptOptions,
-                                           e =>
-                                           {
-                                               exception = e;
-                                               return true;
-                                           });
-                    }
-                }
-                catch (Exception e)
-                {
-                    exception = e;
-                }
-
-                if (exception != null)
-                {
-                    var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
-                                                     Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
-
-                    context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, submitCode));
-                    context.OnError(exception);
+                    _scriptState = await CSharpScript.RunAsync(
+                                       code,
+                                       ScriptOptions);
                 }
                 else
                 {
-                    if (HasReturnValue)
-                    {
-                        var returnValueType = _scriptState.ReturnValue?.GetType();
+                    _scriptState = await _scriptState.ContinueWithAsync(
+                                       code,
+                                       ScriptOptions,
+                                       e =>
+                                       {
+                                           exception = e;
+                                           return true;
+                                       });
+                }
+            }
+            catch (Exception e)
+            {
+                exception = e;
+            }
 
-                        var mimeType = MimeTypeFor(returnValueType);
+            if (exception != null)
+            {
+                var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
+                                                 Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
 
-                        var formatted = _scriptState.ReturnValue.ToDisplayString(mimeType);
+                context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, submitCode));
+                context.OnError(exception);
+            }
+            else
+            {
+                if (HasReturnValue)
+                {
+                    var returnValueType = _scriptState.ReturnValue?.GetType();
 
-                        var formattedValues = new List<FormattedValue>
+                    var mimeType = MimeTypeFor(returnValueType);
+
+                    var formatted = _scriptState.ReturnValue.ToDisplayString(mimeType);
+
+                    var formattedValues = new List<FormattedValue>
                         {
                             new FormattedValue(mimeType, formatted)
                         };
 
-                        context.OnNext(
-                            new ValueProduced(
-                                _scriptState.ReturnValue,
-                                submitCode,
-                                true,
-                                formattedValues));
-                    }
-
-                    context.OnNext(new CodeSubmissionEvaluated(submitCode));
-
-                    context.OnCompleted();
+                    context.OnNext(
+                        new ValueProduced(
+                            _scriptState.ReturnValue,
+                            submitCode,
+                            true,
+                            formattedValues));
                 }
-            }
-            else
-            {
-                context.OnNext(new IncompleteCodeSubmissionReceived(submitCode));
+
                 context.OnNext(new CodeSubmissionEvaluated(submitCode));
+
                 context.OnCompleted();
             }
         }
@@ -205,8 +176,8 @@ namespace WorkspaceServer.Kernel
         }
 
         private void PublishOutput(
-            string output, 
-            KernelInvocationContext context, 
+            string output,
+            KernelInvocationContext context,
             IKernelCommand command)
         {
             var formattedValues = new List<FormattedValue>
@@ -251,14 +222,20 @@ namespace WorkspaceServer.Kernel
             var forcedState = false;
             if (scriptState == null)
             {
-                scriptState = await CSharpScript.RunAsync("", ScriptOptions);
+                scriptState = await CSharpScript.RunAsync(string.Empty, ScriptOptions);
                 forcedState = true;
             }
 
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
+            var originalCode = forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty;
+            
+            var buffer = new StringBuilder(originalCode);
+            if (!string.IsNullOrWhiteSpace(originalCode) && !originalCode.EndsWith(Environment.NewLine))
+            {
+                buffer.AppendLine();
+            }
 
-            var buffer = new StringBuilder(forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty);
             buffer.AppendLine(code);
             var fullScriptCode = buffer.ToString();
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
