@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
@@ -223,14 +222,20 @@ namespace WorkspaceServer.Kernel
             var forcedState = false;
             if (scriptState == null)
             {
-                scriptState = await CSharpScript.RunAsync("", ScriptOptions);
+                scriptState = await CSharpScript.RunAsync(string.Empty, ScriptOptions);
                 forcedState = true;
             }
 
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
+            var originalCode = forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty;
+            
+            var buffer = new StringBuilder(originalCode);
+            if (!string.IsNullOrWhiteSpace(originalCode) && !originalCode.EndsWith(Environment.NewLine))
+            {
+                buffer.AppendLine();
+            }
 
-            var buffer = new StringBuilder(forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty);
             buffer.AppendLine(code);
             var fullScriptCode = buffer.ToString();
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
