@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Events
         {
             if (isUpdatedValue && valueId == null)
             {
-                throw new ArgumentException("isUpdatedValue cannot be true with a null valueId", nameof(valueId));
+                throw new ArgumentException($"{nameof(isUpdatedValue)} cannot be true with a null {nameof(valueId)}", nameof(valueId));
             }
 
             Value = value;
