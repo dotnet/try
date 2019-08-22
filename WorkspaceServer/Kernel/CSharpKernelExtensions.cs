@@ -17,7 +17,7 @@ namespace WorkspaceServer.Kernel
         public static CSharpKernel UseDefaultRendering(
             this CSharpKernel kernel)
         {
-            Task.Run(() => 
+            Task.Run(() =>
                          kernel.SendAsync(
                          new SubmitCode($@"
 using static {typeof(PocketViewTags).FullName};

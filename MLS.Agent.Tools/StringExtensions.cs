@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace MLS.Agent.Tools
 {
@@ -22,6 +23,21 @@ namespace MLS.Agent.Tools
             {
                 throw new ArgumentException($"Couldn't find a file or directory called {path}");
             }
+        }
+
+        public static string ExecutableName(this string withoutExtension) =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? withoutExtension + ".exe"
+                : withoutExtension;
+
+        public static string RemoveTrailingSlash(this string path)
+        {
+            if (path.EndsWith("\\"))
+            {
+                return path.Substring(0, path.Length - 1);
+            }
+
+            return path;
         }
     }
 }

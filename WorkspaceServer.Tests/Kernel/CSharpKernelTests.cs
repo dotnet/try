@@ -3,9 +3,11 @@
 
 using System;
 using System.IO;
-using FluentAssertions;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
+using FluentAssertions.Extensions;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -16,7 +18,6 @@ using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
-using FluentAssertions.Extensions;
 
 namespace WorkspaceServer.Tests.Kernel
 {

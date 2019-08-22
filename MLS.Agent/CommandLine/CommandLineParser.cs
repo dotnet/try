@@ -14,6 +14,7 @@ using Clockwise;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -508,10 +509,11 @@ namespace MLS.Agent.CommandLine
                             new CSharpKernel()
                                 .UseDefaultRendering()
                                 .UseNugetDirective()
-                                .UseExtendDirective()
                                 .UseKernelHelpers()
-                                .UseXplot()
-                        };
+                                .UseXplot(),
+                            new FSharpKernel()
+                                .UseDefaultRendering()
+                        }.UseExtendDirective();
         }
     }
 }
