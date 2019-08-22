@@ -15,8 +15,6 @@ namespace Microsoft.DotNet.Interactive.Tests
             Name = name;
         }
 
-        public override string Name { get; }
-
         public KernelCommandInvocation Handle { get; set; }
 
         protected override Task HandleAsync(

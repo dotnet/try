@@ -20,15 +20,13 @@ namespace Microsoft.DotNet.Interactive
                 mimeType,
                 value.ToDisplayString(mimeType));
 
-            var kernel = KernelInvocationContext.Current.Kernel;
+            var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
                          kernel.SendAsync(new DisplayValue(formatted, displayId)))
                 .Wait();
-            return new DisplayedValue(displayId,  mimeType);
+            return new DisplayedValue(displayId, mimeType);
         }
-
-      
 
         public static void Javascript(
             string scriptContent)
@@ -42,7 +40,7 @@ namespace Microsoft.DotNet.Interactive
                 HtmlFormatter.MimeType,
                 value.ToString());
 
-            var kernel = KernelInvocationContext.Current.Kernel;
+            var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
                          kernel.SendAsync(new DisplayValue(formatted)))

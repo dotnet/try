@@ -41,9 +41,8 @@ namespace WorkspaceServer.Kernel
         {
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
+            Name = KernelName;
         }
-
-        public override string Name => KernelName;
 
         private void SetupScriptOptions()
         {

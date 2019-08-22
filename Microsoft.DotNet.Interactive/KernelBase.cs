@@ -42,8 +42,15 @@ namespace Microsoft.DotNet.Interactive
         {
             Pipeline.AddMiddleware(async (command, context, next) =>
             {
-                SetKernel(command, context);
+                SetHandlingKernel(command, context);
+
+                var originalKernel = context.CurrentKernel;
+
+                context.CurrentKernel = this;
+
                 await next(command, context);
+
+                context.CurrentKernel = originalKernel;
             });
         }
 
@@ -83,7 +90,7 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task HandleLoadExtension(
             LoadExtension loadExtension,
-            KernelInvocationContext pipelineContext,
+            KernelInvocationContext invocationContext,
             KernelPipelineContinuation next)
         {
             loadExtension.Handler = async context =>
@@ -99,13 +106,13 @@ namespace Microsoft.DotNet.Interactive
                 {
                     var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
 
-                    await extension.OnLoadAsync(pipelineContext.Kernel);
+                    await extension.OnLoadAsync(invocationContext.HandlingKernel);
                 }
 
                 context.OnCompleted();
             };
 
-            await next(loadExtension, pipelineContext);
+            await next(loadExtension, invocationContext);
         }
 
         private async Task HandleDirectivesAndSubmitCode(
@@ -234,7 +241,9 @@ namespace Microsoft.DotNet.Interactive
 
         public IObservable<IKernelEvent> KernelEvents => _channel;
 
-        public abstract string Name { get; }
+        public string Name { get; set; }
+
+        public IReadOnlyCollection<ICommand> Directives => _directiveCommands;
 
         public void AddDirective(Command command)
         {
@@ -331,10 +340,12 @@ namespace Microsoft.DotNet.Interactive
             IKernelCommand command,
             KernelInvocationContext context);
 
-        protected virtual void SetKernel(
+        protected virtual void SetHandlingKernel(
             IKernelCommand command,
-            KernelInvocationContext context) => context.Kernel = this;
+            KernelInvocationContext context) => context.HandlingKernel = this;
 
         public void Dispose() => _disposables.Dispose();
+
+        string IKernel.Name => Name;
     }
 }

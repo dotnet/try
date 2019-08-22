@@ -90,7 +90,9 @@ namespace Microsoft.DotNet.Interactive
 
         public static KernelInvocationContext Current => _currentStack?.Value?.Peek();
 
-        public IKernel Kernel { get; set; }
+        public IKernel HandlingKernel { get; set; }
+
+        public IKernel CurrentKernel { get; internal set; }
 
         void IDisposable.Dispose() => _currentStack?.Value?.Pop();
     }

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -11,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -124,21 +124,30 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 var transient = CreateTransient(valueProduced.ValueId);
 
-                var executeResultData = valueProduced.IsReturnValue
-                ? new ExecuteResult(
-                    openRequest.ExecutionCount,
-                    transient: transient,
-                    data: valueProduced?.FormattedValues
-                        ?.ToDictionary(k => k.MimeType, v => v.Value))
-                : valueProduced.IsUpdatedValue
-                    ? new UpdateDisplayData(
-                        transient: transient,
-                        data: valueProduced?.FormattedValues
-                            ?.ToDictionary(k => k.MimeType, v => v.Value))
-                    : new DisplayData(
-                        transient: transient,
-                        data: valueProduced?.FormattedValues
-                            ?.ToDictionary(k => k.MimeType, v => v.Value));
+                var formattedValues = valueProduced
+                                      .FormattedValues
+                                      .ToDictionary(k => k.MimeType, v => v.Value);
+
+                if (formattedValues.Count == 0)
+                {
+                    formattedValues.Add( 
+                        PlainTextFormatter.MimeType,
+                        valueProduced.Value.ToDisplayString());
+                }
+
+                var executeResultData =
+                    valueProduced.IsReturnValue
+                        ? new ExecuteResult(
+                            openRequest.ExecutionCount,
+                            transient: transient,
+                            data: formattedValues)
+                        : valueProduced.IsUpdatedValue
+                            ? new UpdateDisplayData(
+                                transient: transient,
+                                data: formattedValues)
+                            : new DisplayData(
+                                transient: transient,
+                                data: formattedValues);
 
                 if (!openRequest.Request.Silent)
                 {
@@ -176,10 +185,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)
         {
-            if (InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest))
+            if (!InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest))
             {
-                // reply ok
-                var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
+                return;
+            }
+
+            // reply ok
+            var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
 
                 // send to server
                 var executeReply = Message.CreateResponse(

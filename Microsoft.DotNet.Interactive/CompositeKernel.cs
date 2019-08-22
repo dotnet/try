@@ -12,11 +12,14 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class CompositeKernel : KernelBase, IEnumerable<IKernel>
+    public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel
     {
-        private readonly List<IKernel> _kernels = new List<IKernel>();
+        private readonly List<IKernel> _childKernels = new List<IKernel>();
 
-        public override string Name => nameof(CompositeKernel);
+        public CompositeKernel()
+        {
+            Name = nameof(CompositeKernel);
+        }
 
         public void Add(IKernel kernel)
         {
@@ -25,14 +28,14 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(kernel));
             }
 
-            _kernels.Add(kernel);
+            _childKernels.Add(kernel);
 
             var chooseKernelCommand = new Command($"%%{kernel.Name}");
 
             chooseKernelCommand.Handler =
                 CommandHandler.Create<KernelInvocationContext>(context =>
                 {
-                    context.Kernel = kernel;
+                    context.HandlingKernel = kernel;
                 });
 
             AddDirective(chooseKernelCommand);
@@ -40,15 +43,20 @@ namespace Microsoft.DotNet.Interactive
             AddDisposable(kernel.KernelEvents.Subscribe(PublishEvent));
         }
 
-        protected override void SetKernel(
+        protected override void SetHandlingKernel(
             IKernelCommand command,
             KernelInvocationContext context)
         {
-            if (context.Kernel == null)
+            if (context.HandlingKernel == null)
             {
-                if (_kernels.Count == 1)
+                switch (_childKernels.Count)
                 {
-                    context.Kernel = _kernels[0];
+                    case 0:
+                        context.HandlingKernel = this;
+                        break;
+                    case 1:
+                        context.HandlingKernel = _childKernels[0];
+                        break;
                 }
             }
         }
@@ -57,7 +65,7 @@ namespace Microsoft.DotNet.Interactive
             IKernelCommand command,
             KernelInvocationContext context)
         {
-            var kernel = context.Kernel;
+            var kernel = context.HandlingKernel;
 
             if (kernel is KernelBase kernelBase)
             {
@@ -68,7 +76,9 @@ namespace Microsoft.DotNet.Interactive
             throw new NoSuitableKernelException();
         }
 
-        public IEnumerator<IKernel> GetEnumerator() => _kernels.GetEnumerator();
+        public IReadOnlyCollection<IKernel> ChildKernels => _childKernels;
+
+        public IEnumerator<IKernel> GetEnumerator() => _childKernels.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

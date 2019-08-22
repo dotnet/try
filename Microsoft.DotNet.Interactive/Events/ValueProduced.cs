@@ -9,11 +9,12 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public class ValueProduced : KernelEventBase
     {
-        public ValueProduced(object value,
-            IKernelCommand command,
+        public ValueProduced(
+            object value,
+            IKernelCommand command = null,
             bool isReturnValue = false,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
-            string valueId= null,
+            string valueId = null,
             bool isUpdatedValue = false) : base(command)
         {
             if (isUpdatedValue && valueId == null)
@@ -23,7 +24,7 @@ namespace Microsoft.DotNet.Interactive.Events
 
             Value = value;
             IsReturnValue = isReturnValue;
-            FormattedValues = formattedValues;
+            FormattedValues = formattedValues ?? Array.Empty<FormattedValue>();
             ValueId = valueId;
             IsUpdatedValue = valueId switch
             {
