@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -21,5 +23,27 @@ namespace Microsoft.DotNet.Interactive
         public string MimeType { get; }
 
         public object Value { get; }
+
+        public static IReadOnlyCollection<FormattedValue> FromObject(object value)
+        {
+            var type = value?.GetType();
+
+            var mimeType = MimeTypeFor(type);
+
+            var formatted = value.ToDisplayString(mimeType);
+
+            return new FormattedValue[]
+            {
+                new FormattedValue(mimeType, formatted)
+            };
+        }
+
+        private static string MimeTypeFor(Type returnValueType)
+        {
+            return returnValueType?.IsPrimitive == true ||
+                   returnValueType == typeof(string)
+                       ? "text/plain"
+                       : "text/html";
+        }
     }
 }

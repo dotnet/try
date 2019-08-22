@@ -208,19 +208,20 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)
         {
-            InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest);
+            if (InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest))
+            {
+                // reply ok
+                var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
 
-            // reply ok
-            var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
+                // send to server
+                var executeReply = Message.CreateResponse(
+                    executeReplyPayload,
+                    openRequest.Context.Request);
 
-            // send to server
-            var executeReply = Message.CreateResponse(
-                executeReplyPayload,
-                openRequest.Context.Request);
-
-            openRequest.Context.ServerChannel.Send(executeReply);
-            openRequest.Context.RequestHandlerStatus.SetAsIdle();
-            openRequest.Dispose();
+                openRequest.Context.ServerChannel.Send(executeReply);
+                openRequest.Context.RequestHandlerStatus.SetAsIdle();
+                openRequest.Dispose();
+            }
         }
     }
 }

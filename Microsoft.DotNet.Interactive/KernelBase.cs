@@ -127,7 +127,9 @@ namespace Microsoft.DotNet.Interactive
 
                 var parseResult = BuildDirectiveParser().Parse(currentLine);
 
-                if (parseResult.Errors.Count == 0)
+                if (parseResult.Errors.Count == 0 &&
+                    !parseResult.Directives.Any() && // System.CommandLine directives should not be considered as valid
+                    !parseResult.Tokens.Any(t => t.Type == TokenType.Directive))
                 {
                     modified = true;
                     await _directiveParser.InvokeAsync(parseResult);

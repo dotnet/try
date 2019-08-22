@@ -142,17 +142,7 @@ namespace WorkspaceServer.Kernel
             {
                 if (HasReturnValue)
                 {
-                    var returnValueType = _scriptState.ReturnValue?.GetType();
-
-                    var mimeType = MimeTypeFor(returnValueType);
-
-                    var formatted = _scriptState.ReturnValue.ToDisplayString(mimeType);
-
-                    var formattedValues = new List<FormattedValue>
-                        {
-                            new FormattedValue(mimeType, formatted)
-                        };
-
+                    var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
                     context.OnNext(
                         new ValueProduced(
                             _scriptState.ReturnValue,
@@ -165,14 +155,6 @@ namespace WorkspaceServer.Kernel
 
                 context.OnCompleted();
             }
-        }
-
-        private static string MimeTypeFor(Type returnValueType)
-        {
-            return returnValueType?.IsPrimitive == true ||
-                   returnValueType == typeof(string)
-                       ? "text/plain"
-                       : "text/html";
         }
 
         private void PublishOutput(

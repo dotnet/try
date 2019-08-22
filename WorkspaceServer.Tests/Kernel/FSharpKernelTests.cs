@@ -31,7 +31,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
             await kernel.SendAsync(new SubmitCode("123"));
-            AssertLastValue("> val it : int = 123");
+            AssertLastValue(123);
         }
 
         [Fact]
@@ -39,12 +39,22 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
             await kernel.SendAsync(new SubmitCode("let add x y = x + y"));
-            AssertLastValue("> val add : x:int -> y:int -> int");
             await kernel.SendAsync(new SubmitCode("add 2 3"));
-            AssertLastValue("> val it : int = 5");
+            AssertLastValue(5);
         }
 
-        private void AssertLastValue(string value)
+        [Fact]
+        public async Task kernel_base_ignores_command_line_directives()
+        {
+            // The text `[1;2;3;4]` parses as a System.CommandLine directive; ensure it's not consumed and is passed on to the kernel.
+            var kernel = CreateKernel();
+            await kernel.SendAsync(new SubmitCode(@"
+[1;2;3;4]
+|> List.sum"));
+            AssertLastValue(10);
+        }
+
+        private void AssertLastValue(object value)
         {
             KernelEvents.ValuesOnly()
                 .OfType<ValueProduced>()

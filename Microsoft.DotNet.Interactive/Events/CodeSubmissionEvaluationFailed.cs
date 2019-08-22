@@ -19,6 +19,12 @@ namespace Microsoft.DotNet.Interactive.Events
                           : message;
         }
 
+        public CodeSubmissionEvaluationFailed(
+            string message,
+            SubmitCode submitCode) : this(null, message, submitCode)
+        {
+        }
+
         public string Code => ((SubmitCode)Command).Code;
 
         public Exception Exception { get; }
