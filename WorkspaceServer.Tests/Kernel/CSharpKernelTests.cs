@@ -109,7 +109,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task it_notifies_when_submission_is_complete()
+        public async Task it_cannot_execute_incomplete_submissions()
         {
             var kernel = CreateKernel();
 
@@ -122,27 +122,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .Contain(e => e.Value is CodeSubmissionEvaluated);
+                .Contain(e => e.Value is CodeSubmissionEvaluationFailed);
         }
-
-        [Fact]
-        public async Task it_notifies_when_submission_is_incomplete()
-        {
-            var kernel = CreateKernel();
-
-            await kernel.SendAsync(new SubmitCode("var a ="));
-
-            KernelEvents
-                .Should()
-                .NotContain(e => e.Value is ValueProduced);
-
-            KernelEvents
-                .ValuesOnly()
-                .Should()
-                .Contain(e => e is CodeSubmissionEvaluated)
-                .And
-                .Contain(e => e is IncompleteCodeSubmissionReceived);
-        }
+     
 
         [Fact]
         public async Task expression_evaluated_to_null_has_result_with_null_value()
