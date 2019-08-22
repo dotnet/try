@@ -100,6 +100,58 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task Displayed_value_can_be_updated()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("var d = display(b(\"hello\")); d.Update(b(\"world\"));"));
+
+            var formatted =
+                KernelEvents
+                    .OrderBy(e => e.Timestamp)
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues);
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                    v.MimeType == "text/html" &&
+                    v.Value.ToString().Contains("<b>hello</b>"))
+                .And
+                .ContainSingle(v =>
+                    v.MimeType == "text/html" &&
+                    v.Value.ToString().Contains("<b>world</b>"));
+        }
+
+        [Fact]
+        public async Task Value_display_and_update_are_in_right_order()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode("var d = display(b(\"hello\")); d.Update(b(\"world\"));"));
+
+            var formatted =
+                KernelEvents
+                    .OrderBy(e => e.Timestamp)
+                    .ValuesOnly()
+                    .OfType<ValueProduced>()
+                    .SelectMany(v => v.FormattedValues).ToList();
+
+            var firstValue = formatted.Select((v, i) => new {v, i}).First(e => e.v.MimeType == "text/html" &&
+                                                                               e.v.Value.ToString()
+                                                                                   .Contains("<b>hello</b>")).i;
+
+            var updatedValue = formatted.Select((v, i) => new { v, i }).First(e => e.v.MimeType == "text/html" &&
+                                                                                 e.v.Value.ToString()
+                                                                                     .Contains("<b>world</b>")).i;
+
+            updatedValue
+                .Should()
+                .BeGreaterOrEqualTo(firstValue);
+        }
+
+        [Fact]
         public async Task Javascript_helper_emits_string_as_content_within_a_script_element()
         {
             var kernel = CreateKernel();

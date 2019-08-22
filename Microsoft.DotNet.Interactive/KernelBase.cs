@@ -71,7 +71,13 @@ namespace Microsoft.DotNet.Interactive
                             context,
                             next),
 
-                        _ => next(command, context)
+                        UpdateDisplayedValue updateDisplayValue =>
+                        HandleUpdateDisplayValue(
+                            updateDisplayValue,
+                            context,
+                            next),
+
+                            _ => next(command, context)
                         });
         }
 
@@ -161,26 +167,14 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            displayValue.Handler = context =>
-            {
-                context.OnNext(
-                    new ValueProduced(
-                        displayValue.FormattedValue,
-                        displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue }));
-
-                context.OnCompleted();
-
-                return Task.CompletedTask;
-            };
-
             displayValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
                     new ValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue }));
+                        formattedValues: new[] { displayValue.FormattedValue },
+                        valueId: displayValue.ValueId));
 
                 invocationContext.OnCompleted();
 
@@ -188,6 +182,29 @@ namespace Microsoft.DotNet.Interactive
             };
 
             await next(displayValue, pipelineContext);
+        }
+
+        private async Task HandleUpdateDisplayValue(
+            UpdateDisplayedValue displayedValue,
+            KernelInvocationContext pipelineContext,
+            KernelPipelineContinuation next)
+        {
+            displayedValue.Handler = invocationContext =>
+            {
+                invocationContext.OnNext(
+                    new ValueProduced(
+                        displayedValue.FormattedValue,
+                        displayedValue,
+                        formattedValues: new[] { displayedValue.FormattedValue },
+                        valueId: displayedValue.ValueId,
+                        isUpdatedValue: true));
+
+                invocationContext.OnCompleted();
+
+                return Task.CompletedTask;
+            };
+
+            await next(displayedValue, pipelineContext);
         }
 
         private Parser BuildDirectiveParser()
