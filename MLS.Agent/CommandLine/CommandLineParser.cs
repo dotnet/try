@@ -402,9 +402,7 @@ namespace MLS.Agent.CommandLine
                                                                                 .Handle(delivery));
                             })
                         .AddSingleton((Func<IServiceProvider, IKernel>)(c => CreateKernel()))
-                        .AddSingleton(c => new JupyterRequestContextHandler(
-                                              c.GetRequiredService<PackageRegistry>(),
-                                              c.GetRequiredService<IKernel>())
+                        .AddSingleton(c => new JupyterRequestContextHandler(c.GetRequiredService<IKernel>())
                                           .Trace())
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
