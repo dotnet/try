@@ -2,7 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PublishWindowsPdb>false</PublishWindowsPdb>
+    <NoWarn>$(NoWarn);2003</NoWarn> <!-- AssemblyInformationalVersionAttribute contains a non-standard value -->
+    <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>;NU5104;2003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
