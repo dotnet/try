@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private readonly ExecuteRequestHandler _executeHandler;
         private readonly CompleteRequestHandler _completeHandler;
+        private InterruptRequestHandler _interruptHandler;
 
         public JupyterRequestContextHandler(
             IKernel kernel)
@@ -27,6 +28,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             _executeHandler = new ExecuteRequestHandler(kernel, scheduler);
             _completeHandler = new CompleteRequestHandler(kernel, scheduler);
+            _interruptHandler = new InterruptRequestHandler(kernel, scheduler);
 
         }
 
@@ -40,6 +42,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     break;
                 case MessageTypeValues.CompleteRequest:
                     await _completeHandler.Handle(delivery.Command);
+                    break;
+                case MessageTypeValues.InterruptRequest:
+                    await _interruptHandler.Handle(delivery.Command);
                     break;
             }
 
