@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
@@ -36,6 +37,7 @@ namespace WorkspaceServer.Kernel
         protected ScriptOptions ScriptOptions;
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
+        private CancellationTokenSource _evaluationInFlight;
 
         public CSharpKernel()
         {
@@ -104,14 +106,15 @@ namespace WorkspaceServer.Kernel
 
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
-
+            _evaluationInFlight = new CancellationTokenSource();
             try
             {
                 if (_scriptState == null)
                 {
                     _scriptState = await CSharpScript.RunAsync(
                                        code,
-                                       ScriptOptions);
+                                       ScriptOptions,
+                                       cancellationToken: _evaluationInFlight.Token);
                 }
                 else
                 {
@@ -122,7 +125,7 @@ namespace WorkspaceServer.Kernel
                                        {
                                            exception = e;
                                            return true;
-                                       });
+                                       }, cancellationToken: _evaluationInFlight.Token);
                 }
             }
             catch (Exception e)
@@ -130,17 +133,14 @@ namespace WorkspaceServer.Kernel
                 exception = e;
             }
 
-            if (exception != null)
+            if (_evaluationInFlight.IsCancellationRequested)
             {
-                var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
-                                                 Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
-
-                context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, submitCode));
-                context.OnError(exception);
+                context.OnNext(new CodeSubmissionInterrupted(submitCode));
+                context.OnCompleted();
             }
             else
             {
-                if (HasReturnValue)
+                if (exception != null)
                 {
                     var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
                     context.OnNext(
@@ -150,11 +150,9 @@ namespace WorkspaceServer.Kernel
                             true,
                             formattedValues));
                 }
-
-                context.OnNext(new CodeSubmissionEvaluated(submitCode));
-
-                context.OnCompleted();
             }
+
+            _evaluationInFlight = null;
         }
 
         private void PublishOutput(
