@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private readonly ExecuteRequestHandler _executeHandler;
         private readonly CompleteRequestHandler _completeHandler;
-        private InterruptRequestHandler _interruptHandler;
+        private readonly InterruptRequestHandler _interruptHandler;
 
         public JupyterRequestContextHandler(
             IKernel kernel)

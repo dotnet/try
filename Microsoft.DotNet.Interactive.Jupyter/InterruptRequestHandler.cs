@@ -3,6 +3,7 @@
 
 using System.Reactive.Concurrency;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
@@ -28,7 +29,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             context.RequestHandlerStatus.SetAsBusy();
 
-            var command = new InterrupEvaluation();
+            var command = new InterruptExecution();
 
             var openRequest = new InflightRequest(context, interruptRequest, 0);
 
