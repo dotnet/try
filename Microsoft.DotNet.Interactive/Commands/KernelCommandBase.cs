@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Interactive.Commands
         {
             if (Handler == null)
             {
-                throw new InvalidOperationException($"{GetType().Name}.{nameof(Handler)} was not set.");    
+                throw new InvalidOperationException($"{GetType().Name}.{nameof(Handler)} was not set.");
             }
 
             await Handler(context);

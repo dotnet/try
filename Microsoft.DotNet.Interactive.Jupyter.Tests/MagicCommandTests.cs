@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using WorkspaceServer.Kernel;
@@ -53,9 +54,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task lsmagic_lists_registered_magic_commands_in_subkernels()
         {
-            var subkernel1 = new CSharpKernel { Name = "subkernel1" };
+            var subkernel1 = new CSharpKernel();
             subkernel1.AddDirective(new Command("%%from-subkernel-1"));
-            var subkernel2 = new CSharpKernel { Name = "subkernel2" };
+            var subkernel2 = new FSharpKernel();
             subkernel2.AddDirective(new Command("%%from-subkernel-2"));
 
             var compositeKernel = new CompositeKernel
@@ -78,8 +79,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                              .As<string>()
                              .Should()
                              .ContainAll("%lsmagic",
-                                         "%%subkernel1",
-                                         "%%subkernel2",
+                                         "%%csharp",
+                                         "%%fsharp",
                                          "%%from-compositekernel");
 
             valueProduceds[1].Value

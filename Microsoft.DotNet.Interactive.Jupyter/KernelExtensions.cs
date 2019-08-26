@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             kernel.AddDirective(lsmagic());
 
-            kernel.VisitAllSubkernels(k =>
+            kernel.VisitSubkernels(k =>
             {
                 if (k is KernelBase kb)
                 {
@@ -37,17 +37,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 {
                     var commands = new List<ICommand>();
 
-                    AddCommands(context.CurrentKernel, commands);
+                    commands.AddRange(context.CurrentKernel.Directives);
 
                     var s = string.Join(" ", commands.Select(c => c.Name).OrderBy(v => v));
 
                     context.OnNext(
                         new ValueProduced(
                             $"{context.CurrentKernel.Name}:{Environment.NewLine}    {s}",
-                            context.Command,
-                            false));
+                            context.Command));
 
-                    await context.CurrentKernel.VisitAllSubkernelsAsync(async k =>
+                    await context.CurrentKernel.VisitSubkernelsAsync(async k =>
                     {
                         if (k.Directives.Any(d => d.Name == "%lsmagic"))
                         {
@@ -56,14 +55,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     });
                 })
             };
-
-            void AddCommands(IKernel kernel, List<ICommand> commands)
-            {
-                foreach (var directive in kernel.Directives)
-                {
-                    commands.Add(directive);
-                }
-            }
         }
     }
 }

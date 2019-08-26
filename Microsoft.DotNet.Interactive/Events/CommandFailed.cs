@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
@@ -15,7 +14,7 @@ namespace Microsoft.DotNet.Interactive.Events
             string message = null) : base(command)
         {
             Exception = exception;
-            
+
             if (string.IsNullOrWhiteSpace(message))
             {
                 Message = exception.ToString();
@@ -26,9 +25,9 @@ namespace Microsoft.DotNet.Interactive.Events
             }
         }
 
-        public CodeSubmissionEvaluationFailed(
+        public CommandFailed(
             string message,
-            SubmitCode submitCode) : this(null, message, submitCode)
+            IKernelCommand command) : this(null, command, message)
         {
         }
 

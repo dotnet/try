@@ -8,28 +8,42 @@ namespace Microsoft.DotNet.Interactive.Extensions
 {
     public static class KernelExtensions
     {
-        public static void VisitAllSubkernels(
+        public static void VisitSubkernels(
             this IKernel kernel,
-            Action<IKernel> onVisit)
+            Action<IKernel> onVisit,
+            bool recursive = false)
         {
             if (kernel is ICompositeKernel compositeKernel)
             {
                 foreach (var subkernel in compositeKernel.ChildKernels)
                 {
                     onVisit(subkernel);
+
+                    if (recursive &&
+                        subkernel is ICompositeKernel childCompositeKernel)
+                    {
+                        childCompositeKernel.VisitSubkernels(onVisit, true);
+                    }
                 }
             }
         }
 
-        public static async Task VisitAllSubkernelsAsync(
+        public static async Task VisitSubkernelsAsync(
             this IKernel kernel,
-            Func<IKernel, Task> onVisit)
+            Func<IKernel, Task> onVisit,
+            bool recursive = false)
         {
             if (kernel is ICompositeKernel compositeKernel)
             {
                 foreach (var subkernel in compositeKernel.ChildKernels)
                 {
                     await onVisit(subkernel);
+
+                    if (recursive &&
+                        subkernel is ICompositeKernel childCompositeKernel)
+                    {
+                        await childCompositeKernel.VisitSubkernelsAsync(onVisit, true);
+                    }
                 }
             }
         }

@@ -74,7 +74,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCommandFailed(CommandFailed commandFailed)
         {
-            InFlightRequests.TryRemove(commandFailed.Command, out var openRequest);
+            if (!InFlightRequests.TryRemove(commandFailed.Command, out var openRequest))
+            {
+                return;
+            }
 
             var errorContent = new Error(
                 eName: "Unhandled Exception",
@@ -193,15 +196,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
 
-                // send to server
-                var executeReply = Message.CreateResponse(
-                    executeReplyPayload,
-                    openRequest.Context.Request);
+            // send to server
+            var executeReply = Message.CreateResponse(
+                executeReplyPayload,
+                openRequest.Context.Request);
 
-                openRequest.Context.ServerChannel.Send(executeReply);
-                openRequest.Context.RequestHandlerStatus.SetAsIdle();
-                openRequest.Dispose();
-            }
+            openRequest.Context.ServerChannel.Send(executeReply);
+            openRequest.Context.RequestHandlerStatus.SetAsIdle();
+            openRequest.Dispose();
         }
     }
 }
