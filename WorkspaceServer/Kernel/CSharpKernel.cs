@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
@@ -31,6 +32,9 @@ namespace WorkspaceServer.Kernel
 
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
+
 
         private ScriptState _scriptState;
         protected ScriptOptions ScriptOptions;
@@ -84,6 +88,22 @@ namespace WorkspaceServer.Kernel
                     };
                     break;
             }
+        }
+
+        public Task<bool> IsCompleteSubmissionAsync(SubmitCode submitCode)
+        {
+            if (submitCode == null) throw new ArgumentNullException(nameof(submitCode));
+            var code = submitCode.Code;
+
+            var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
+
+            if (!SyntaxFactory.IsCompleteSubmission(syntaxTree))
+            {
+                return Task.FromResult(false);
+            }
+
+
+            return Task.FromResult(true);
         }
 
         private async Task HandleSubmitCode(
@@ -216,7 +236,7 @@ namespace WorkspaceServer.Kernel
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
             var originalCode = forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty;
-            
+
             var buffer = new StringBuilder(originalCode);
             if (!string.IsNullOrWhiteSpace(originalCode) && !originalCode.EndsWith(Environment.NewLine))
             {
