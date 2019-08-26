@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         }
 
         public static string ToDisplayString(
-            this object obj, 
+            this object obj,
             string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
             // TODO: (ToDisplayString) rename
@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         }
 
         public static void FormatTo<T>(
-            this T obj, 
+            this T obj,
             TextWriter writer,
             string mimeType = Rendering.PlainTextFormatter.MimeType)
         {
@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             var writerParam = Expression.Parameter(typeof(TextWriter), "target");
             var mimeTypeParam = Expression.Parameter(typeof(string), "target");
 
-            var methodCallExpr = Expression.Call(null, 
+            var methodCallExpr = Expression.Call(null,
                                                  methodInfo,
                                                  Expression.Convert(targetParam, type),
                                                  writerParam,

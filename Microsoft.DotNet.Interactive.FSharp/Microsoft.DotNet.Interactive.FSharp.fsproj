@@ -21,7 +21,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive\Microsoft.DotNet.Interactive.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Compiler.Private.Scripting" Version="10.5.0-beta.19425.1" />
+    <PackageReference Include="FSharp.Core" Version="4.6.3-beta.19425.1" />
   </ItemGroup>
 
 </Project>
