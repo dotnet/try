@@ -95,20 +95,8 @@ namespace Microsoft.DotNet.Interactive
         {
             loadExtension.Handler = async context =>
             {
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(loadExtension.AssemblyFile.FullName);
-
-                var extensionTypes = assembly
-                                     .ExportedTypes
-                                     .Where(t => typeof(IKernelExtension).IsAssignableFrom(t))
-                                     .ToArray();
-
-                foreach (var extensionType in extensionTypes)
-                {
-                    var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
-
-                    await extension.OnLoadAsync(invocationContext.HandlingKernel);
-                }
-
+                var kernelextensionLoader = new KernelExtensionLoader();
+                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel);
                 context.Complete();
             };
 
