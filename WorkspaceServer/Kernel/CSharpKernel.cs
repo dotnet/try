@@ -41,9 +41,8 @@ namespace WorkspaceServer.Kernel
         {
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
+            Name = KernelName;
         }
-
-        public override string Name => KernelName;
 
         private void SetupScriptOptions()
         {
@@ -132,10 +131,16 @@ namespace WorkspaceServer.Kernel
 
             if (exception != null)
             {
-                var message = string.Join("\n", (_scriptState?.Script?.GetDiagnostics() ??
-                                                 Enumerable.Empty<Diagnostic>()).Select(d => d.GetMessage()));
+                string message = null;
 
-                context.OnNext(new CodeSubmissionEvaluationFailed(exception, message, submitCode));
+                if (exception is CompilationErrorException compilationError)
+                {
+                    message =
+                        string.Join(Environment.NewLine,
+                                    compilationError.Diagnostics.Select(d => d.ToString()));
+                }
+
+                context.OnNext(new CommandFailed(exception, submitCode, message));
                 context.OnError(exception);
             }
             else

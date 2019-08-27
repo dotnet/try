@@ -10,7 +10,7 @@ open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
 
 type FSharpKernel() =
-    inherit KernelBase()
+    inherit KernelBase(Name = "fsharp")
     let script = new FSharpScript()
     do base.AddDisposable(script)
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
@@ -24,7 +24,7 @@ type FSharpKernel() =
                 | ex -> Error(ex), [||]
             if errors.Length > 0 then
                 let aggregateErrorMessage = System.String.Join("\n", errors)
-                context.OnNext(CodeSubmissionEvaluationFailed(aggregateErrorMessage, codeSubmission))
+                context.OnNext(CommandFailed(aggregateErrorMessage, codeSubmission))
             match result with
             | Ok(Some(value)) ->
                 let value = value.ReflectionValue
@@ -35,10 +35,10 @@ type FSharpKernel() =
             context.OnNext(CodeSubmissionEvaluated(codeSubmission))
             context.OnCompleted()
         }
-    override __.Name = "fsharp"
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
         async {
             match command with
             | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task
+

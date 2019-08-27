@@ -71,7 +71,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     }
                 };
 
-                await pipelineContext.Kernel.SendAsync(addPackage);
+                await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });
 
             kernel.AddDirective(r);

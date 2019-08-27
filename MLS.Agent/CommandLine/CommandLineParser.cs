@@ -7,12 +7,9 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
@@ -401,7 +398,7 @@ namespace MLS.Agent.CommandLine
                                                                                 .Trace()
                                                                                 .Handle(delivery));
                             })
-                        .AddSingleton((Func<IServiceProvider, IKernel>)(c => CreateKernel()))
+                        .AddSingleton(c => CreateKernel())
                         .AddSingleton(c => new JupyterRequestContextHandler(c.GetRequiredService<IKernel>())
                                           .Trace())
                         .AddSingleton<IHostedService, Shell>()
@@ -500,7 +497,7 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        private static CompositeKernel CreateKernel()
+        private static IKernel CreateKernel()
         {
             return new CompositeKernel
                         {
@@ -511,7 +508,9 @@ namespace MLS.Agent.CommandLine
                                 .UseXplot(),
                             new FSharpKernel()
                                 .UseDefaultRendering()
-                        }.UseExtendDirective();
+                        }
+                        .UseDefaultMagicCommands()
+                        .UseExtendDirective();
         }
     }
 }

@@ -53,9 +53,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
                 .Select((t, pos) => (t.Value, pos))
-                .Single(t => t.Value is CodeSubmissionEvaluationFailed);
+                .Single(t => t.Value is CommandFailed);
 
-            ((CodeSubmissionEvaluationFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
+            ((CommandFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
 
             var lastCodeSubmissionPosition = KernelEvents
                 .Select((e, pos) => (e.Value, pos))
@@ -84,7 +84,7 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents.ValuesOnly()
                 .Last()
                 .Should()
-                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .BeOfType<CommandFailed>()
                 .Which
                 .Exception
                 .Should()
@@ -102,7 +102,7 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents.ValuesOnly()
                 .Last()
                 .Should()
-                .BeOfType<CodeSubmissionEvaluationFailed>()
+                .BeOfType<CommandFailed>()
                 .Which
                 .Message
                 .Should()
@@ -123,7 +123,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .Contain(e => e.Value is CodeSubmissionEvaluationFailed);
+                .Contain(e => e.Value is CommandFailed);
         }
      
 
@@ -341,6 +341,51 @@ json
                 .CompletionList
                 .Should()
                 .Contain(i => i.DisplayText == "SerializeObject");
+        }
+
+        [Fact]
+        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
+
+            var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
+            await kernel.SendAsync(command);
+
+            command.Code.Should().Be("var a = new List<int>();");
+        }
+
+        [Fact]
+        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_PackageAdded_event_is_raised()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
+
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
+
+            var result = await kernel.SendAsync(command);
+
+            var events = result.KernelEvents
+                               .ToEnumerable()
+                               .ToArray();
+
+            events
+                .Should()
+                .ContainSingle(e => e is NuGetPackageAdded);
+
+            events.OfType<NuGetPackageAdded>()
+                  .Single()
+                  .PackageReference
+                  .Should()
+                  .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+
+            events
+                .Should()
+                .ContainSingle(e => e is CodeSubmissionEvaluated);
         }
 
         [Fact]

@@ -7,11 +7,11 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive
 {
-    class CommandDispatcher
+    internal class CommandDeserializer
     {
         private readonly Dictionary<string, Type> _map;
 
-        public CommandDispatcher()
+        public CommandDeserializer()
         {
             _map = Assembly
                .GetExecutingAssembly()
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive
                .ToDictionary(t => t.Name, t => t);
         }
 
-        public IKernelCommand Dispatch(string commandType, string body)
+        public IKernelCommand Deserialize(string commandType, string body)
         {
             if (!_map.ContainsKey(commandType))
             {
