@@ -13,10 +13,10 @@ using HtmlAgilityPack;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 using Recipes;
 using WorkspaceServer;
 using WorkspaceServer.Tests;
-using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 
 namespace MLS.Agent.Tests

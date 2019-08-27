@@ -14,6 +14,7 @@ using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 using Recipes;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests.Packaging;

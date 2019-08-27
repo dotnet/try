@@ -9,7 +9,7 @@ using Clockwise;
 using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
 
-namespace WorkspaceServer.Tests.Packaging
+namespace MLS.Agent.Tools.Tests
 {
     public static class PackageUtilities
     {

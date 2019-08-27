@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using FluentAssertions;
+using MLS.Agent.Tools.Tests;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests.Packaging;
 using Xunit;
