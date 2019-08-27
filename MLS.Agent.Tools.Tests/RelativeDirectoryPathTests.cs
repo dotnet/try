@@ -6,7 +6,7 @@ using FluentAssertions;
 using MLS.Agent.Tools;
 using Xunit;
 
-namespace Microsoft.DotNet.Try.Markdown.Tests
+namespace MLS.Agent.Tools.Tests
 {
     public class RelativeDirectoryPathTests
     {
