@@ -585,7 +585,7 @@ namespace MLS.Agent.Tools.Roslyn
 
         private static string[] GetPathParts(string path)
         {
-            var pathParts = path.Split(s_pathChars);
+            var pathParts = path.Split(s_pathChars).Where(p => !string.IsNullOrWhiteSpace(p));
 
             // remove references to self directories ('.')
             if (pathParts.Contains(ThisDirectory))
@@ -593,7 +593,7 @@ namespace MLS.Agent.Tools.Roslyn
                 pathParts = pathParts.Where(s => s != ThisDirectory).ToArray();
             }
 
-            return pathParts;
+            return pathParts.ToArray();
         }
 
         /// <summary>
