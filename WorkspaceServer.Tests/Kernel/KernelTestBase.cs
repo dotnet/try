@@ -14,7 +14,7 @@ namespace WorkspaceServer.Tests.Kernel
 {
     public abstract class KernelTestBase : IDisposable
     {
-        public KernelTestBase(ITestOutputHelper output)
+        protected KernelTestBase(ITestOutputHelper output)
         {
             DisposeAfterTest(output.SubscribeToPocketLogger());
         }

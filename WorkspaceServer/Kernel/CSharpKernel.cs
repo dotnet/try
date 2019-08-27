@@ -43,9 +43,8 @@ namespace WorkspaceServer.Kernel
         {
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
+            Name = KernelName;
         }
-
-        public override string Name => KernelName;
 
         private void SetupScriptOptions()
         {
@@ -140,7 +139,23 @@ namespace WorkspaceServer.Kernel
             }
             else
             {
-                if (exception != null)
+ if (exception != null)
+            {
+                string message = null;
+
+                if (exception is CompilationErrorException compilationError)
+                {
+                    message =
+                        string.Join(Environment.NewLine,
+                                    compilationError.Diagnostics.Select(d => d.ToString()));
+                }
+
+                context.OnNext(new CommandFailed(exception, submitCode, message));
+                context.OnError(exception);
+            }
+            else
+            {
+                if (HasReturnValue)
                 {
                     var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
                     context.OnNext(
@@ -150,6 +165,11 @@ namespace WorkspaceServer.Kernel
                             true,
                             formattedValues));
                 }
+
+                context.OnNext(new CodeSubmissionEvaluated(submitCode));
+
+                context.OnCompleted();
+            }
             }
 
             _evaluationInFlight = null;

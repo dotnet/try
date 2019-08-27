@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Interactive
                 _mimeType,
                 updatedValue.ToDisplayString(_mimeType));
 
-            var kernel = KernelInvocationContext.Current.Kernel;
+            var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
                     kernel.SendAsync(new UpdateDisplayedValue(formatted, _displayId)))
