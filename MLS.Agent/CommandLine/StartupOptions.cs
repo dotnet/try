@@ -8,6 +8,7 @@ using System.IO;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine

@@ -35,5 +35,9 @@
   <ItemGroup>
     <Folder Include="%28External%29\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
+  </ItemGroup>
   
 </Project>

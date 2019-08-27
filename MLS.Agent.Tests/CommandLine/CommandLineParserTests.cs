@@ -15,6 +15,7 @@ using WorkspaceServer;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
+using MLS.Agent.Tools;
 using WorkspaceServer.Tests;
 
 namespace MLS.Agent.Tests.CommandLine

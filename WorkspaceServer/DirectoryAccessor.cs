@@ -3,6 +3,7 @@
 
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
+using MLS.Agent.Tools;
 using WorkspaceServer.Servers.Roslyn;
 
 namespace WorkspaceServer

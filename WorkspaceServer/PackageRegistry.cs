@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer

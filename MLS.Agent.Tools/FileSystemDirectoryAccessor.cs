@@ -8,10 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
-using WorkspaceServer.Packaging;
-using WorkspaceServer.Servers.Roslyn;
 
-namespace WorkspaceServer
+namespace MLS.Agent.Tools
 {
     public class FileSystemDirectoryAccessor : IDirectoryAccessor
     {
