@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 // adapted from http://source.roslyn.io/#System.Reflection.Metadata/System/Reflection/Internal/Utilities/PathUtilities.cs,36b27d7696df4d1e
 
@@ -511,6 +512,11 @@ namespace MLS.Agent.Tools.Roslyn
                 return GetRelativeChildPath(directory, fullPath);
             }
 
+            if (IsChildPath(fullPath, directory))
+            {
+                return GetRelativeParentPath(directory, fullPath);
+            }
+
             var directoryPathParts = GetPathParts(directory);
             var fullPathParts = GetPathParts(fullPath);
 
@@ -554,6 +560,20 @@ namespace MLS.Agent.Tools.Roslyn
             }
 
             return relativePath;
+        }
+
+        private static string GetRelativeParentPath(string childPath, string parentPath)
+        {
+            var childPathParts = GetPathParts(childPath);
+            var parentPathParts = GetPathParts(parentPath);
+
+            var relativePath = new StringBuilder();
+            for (int i = 0; i < childPathParts.Length - parentPathParts.Length; i++)
+            {
+                relativePath.Append(ParentRelativeDirectory + DirectorySeparatorStr);
+            }
+
+            return relativePath.ToString();
         }
 
         /// <summary>
