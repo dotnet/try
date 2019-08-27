@@ -97,24 +97,16 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public Task<bool> IsCompleteSubmissionAsync(AnalyzeCode analyzeCode)
+        public Task<bool> IsCompleteSubmissionAsync(string code)
         {
-            if (analyzeCode == null)
-            {
-                throw new ArgumentNullException(nameof(analyzeCode));
-            }
-
-            var code = analyzeCode.Code;
-
             var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
-
             return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
         }
 
         private async Task HandleAnalyzeCode(AnalyzeCode analyzeCode,
             KernelInvocationContext context)
         {
-            var isComplete = await IsCompleteSubmissionAsync(analyzeCode);
+            var isComplete = await IsCompleteSubmissionAsync(analyzeCode.Code);
             context.OnNext(new CodeAnalyzed(analyzeCode, isComplete));
         }
 
@@ -129,8 +121,16 @@ namespace WorkspaceServer.Kernel
             context.OnNext(codeSubmissionReceived);
 
             var code = submitCode.Code;
+            var isComplete = await IsCompleteSubmissionAsync(submitCode.Code);
+            if(isComplete)
+            {
+                context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
+            }
+            else
+            {
+                context.OnNext(new IncompleteCodeSubmissionReceived(submitCode));
+            }
 
-            context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
             Exception exception = null;
 
             using var console = await ConsoleOutput.Capture();
