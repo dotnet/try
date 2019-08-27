@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.Try.Markdown;
 
 namespace MLS.Agent.Tools
 {

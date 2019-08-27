@@ -585,11 +585,7 @@ namespace MLS.Agent.Tools
 
         private static string[] GetPathParts(string path)
         {
-<<<<<<< HEAD:WorkspaceServer/Servers/Roslyn/PathUtilities.cs
             var pathParts = path.Split(s_pathChars);
-=======
-            var pathParts = path.Split(s_pathChars).Where(p => !string.IsNullOrWhiteSpace(p));
->>>>>>> 20ddea7... Move the directory accessor below in the dependency graph:MLS.Agent.Tools/PathUtilities.cs
 
             // remove references to self directories ('.')
             if (pathParts.Contains(ThisDirectory))
