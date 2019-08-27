@@ -114,9 +114,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new SubmitCode("var a ="));
-
-            await kernel.SendAsync(new SubmitCode("12;"));
+            await kernel.SendAsync(new SubmitCode("var a = 12"));
 
             KernelEvents.Should()
                 .NotContain(e => e.Value is ValueProduced);
@@ -125,7 +123,20 @@ namespace WorkspaceServer.Tests.Kernel
                 .Should()
                 .Contain(e => e.Value is CommandFailed);
         }
-     
+
+        [Fact]
+        public async Task it_can_analyze_code_submissions()
+        {
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new AnalyzeCode("var a = 12"));
+
+            var analysisResult = KernelEvents.ValuesOnly().OfType<CodeAnalyzed>().Single();
+
+            analysisResult.Should().NotBeNull();
+            analysisResult.IsCompleteSubmission.Should().BeFalse();
+        }
+
 
         [Fact]
         public async Task expression_evaluated_to_null_has_result_with_null_value()

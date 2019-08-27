@@ -16,12 +16,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         //to indent the next line. This is only a hint: frontends may ignore it
         // and use their own autoindentation rules. For other statuses, this
         // field does not exist.
-        [JsonProperty("ident")]
-        public string Ident { get; }
+        [JsonProperty("indent")]
+        public string Indent { get; }
 
-        public IsCompleteReply(string ident, string status)
+        public IsCompleteReply(string indent, string status)
         {
-            Ident = ident;
+            Indent = indent;
             Status = status;
         }
     }

@@ -17,14 +17,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
        
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        protected IObservable<IKernelEvent> _kernelEventSource { get; }
+        protected IObservable<IKernelEvent> KernelEventSource { get; }
 
         protected RequestHandlerBase(IKernel kernel, IScheduler scheduler)
         {
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
 
-            _kernelEventSource = Kernel.KernelEvents.ObserveOn(scheduler ?? throw new ArgumentNullException(nameof(scheduler)));
-            _disposables.Add(_kernelEventSource.Subscribe(OnKernelEvent));
+            KernelEventSource = Kernel.KernelEvents.ObserveOn(scheduler ?? throw new ArgumentNullException(nameof(scheduler)));
+            _disposables.Add(KernelEventSource.Subscribe(OnKernelEvent));
         }
 
         protected abstract void OnKernelEvent(IKernelEvent @event);

@@ -87,23 +87,35 @@ namespace WorkspaceServer.Kernel
                         await HandleRequestCompletion(requestCompletion, invocationContext, _scriptState);
                     };
                     break;
+
+                case AnalyzeCode analyzeCode:
+                    analyzeCode.Handler = async invocationContext =>
+                    {
+                        await HandleAnalyzeCode(analyzeCode, invocationContext);
+                    };
+                    break;
             }
         }
 
-        public Task<bool> IsCompleteSubmissionAsync(SubmitCode submitCode)
+        public Task<bool> IsCompleteSubmissionAsync(AnalyzeCode analyzeCode)
         {
-            if (submitCode == null) throw new ArgumentNullException(nameof(submitCode));
-            var code = submitCode.Code;
+            if (analyzeCode == null)
+            {
+                throw new ArgumentNullException(nameof(analyzeCode));
+            }
+
+            var code = analyzeCode.Code;
 
             var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
 
-            if (!SyntaxFactory.IsCompleteSubmission(syntaxTree))
-            {
-                return Task.FromResult(false);
-            }
+            return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
+        }
 
-
-            return Task.FromResult(true);
+        private async Task HandleAnalyzeCode(AnalyzeCode analyzeCode,
+            KernelInvocationContext context)
+        {
+            var isComplete = await IsCompleteSubmissionAsync(analyzeCode);
+            context.OnNext(new CodeAnalyzed(analyzeCode, isComplete));
         }
 
         private async Task HandleSubmitCode(
