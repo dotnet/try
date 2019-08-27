@@ -6,7 +6,6 @@ using System.IO;
 using System.Reactive.Concurrency;
 using System.Threading.Tasks;
 using Clockwise;
-using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
 
 namespace MLS.Agent.Tools.Tests

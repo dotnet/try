@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
+    <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
 
 </Project>
