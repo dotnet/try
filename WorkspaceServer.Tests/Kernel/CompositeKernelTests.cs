@@ -17,6 +17,7 @@ using Xunit.Abstractions;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -169,7 +170,100 @@ namespace WorkspaceServer.Tests.Kernel
 
             events.Should().Contain(e => e.EventType == "ValueProduced");
         }
-    
+
+        [Fact]
+        public async Task Kernel_client_surfaces_json_errors()
+        {
+            var receivedOnFakeRepl = new List<IKernelCommand>();
+
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel(),
+                new FakeKernel("fake")
+                {
+                     Handle = context =>
+                    {
+                        receivedOnFakeRepl.Add(context.Command);
+                        return Task.CompletedTask;
+                    }
+                }
+            };
+
+
+            var input = new MemoryStream();
+            var writer = new StreamWriter(input, Encoding.UTF8);
+            writer.WriteLine("{ hello");
+            writer.WriteMessage(new Quit());
+            writer.Flush();
+
+            input.Position = 0;
+
+            var output = new MemoryStream();
+
+            var streamKernel = new KernelStreamClient(kernel,
+                new StreamReader(input),
+                new StreamWriter(output));
+
+            var task = streamKernel.Start();
+            await task;
+
+            output.Position = 0;
+            var reader = new StreamReader(output, Encoding.UTF8);
+
+            var text = reader.ReadToEnd();
+            var events = text.Split(Environment.NewLine)
+                .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
+
+            events.Should().Contain(e => e.EventType == "CommandParseFailure");
+        }
+
+        [Fact]
+        public async Task Kernel_can_pound_r_nuget_using_kernel_client()
+        {
+            var receivedOnFakeRepl = new List<IKernelCommand>();
+
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective(),
+                new FakeKernel("fake")
+                {
+                     Handle = context =>
+                    {
+                        receivedOnFakeRepl.Add(context.Command);
+                        return Task.CompletedTask;
+                    }
+                }
+            };
+
+            var test =  JsonConvert.SerializeObject(new SubmitCode(@"#r nuget:""Microsoft.Extensions.Logging"""));
+
+            var input = new MemoryStream();
+            var writer = new StreamWriter(input, Encoding.UTF8);
+            writer.WriteMessage(new SubmitCode("#kernel csharp"));
+            writer.WriteMessage(new SubmitCode(@"#r nuget:""Microsoft.Extensions.Logging"""));
+            writer.WriteMessage(new Quit());
+
+            input.Position = 0;
+
+            var output = new MemoryStream();
+
+            var streamKernel = new KernelStreamClient(kernel,
+                new StreamReader(input),
+                new StreamWriter(output));
+
+            var task = streamKernel.Start();
+            await task;
+
+            output.Position = 0;
+            var reader = new StreamReader(output, Encoding.UTF8);
+
+            var text = reader.ReadToEnd();
+            var events = text.Split(Environment.NewLine)
+                .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
+
+            events.Should().Contain(e => e.EventType == "NuGetPackageAdded");
+        }
+
 
         public class FakeKernel : KernelBase
         {

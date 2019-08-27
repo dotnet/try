@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 Id = Interlocked.Increment(ref id),
                 CommandType = command.GetType().Name,
-                Command = JsonConvert.SerializeObject(command)
+                Command = command
             };
 
             writer.WriteLine(JsonConvert.SerializeObject(message));

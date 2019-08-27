@@ -39,25 +39,35 @@ namespace Microsoft.DotNet.Interactive
 
                     try
                     {
-                        var message = JsonConvert.DeserializeObject<StreamKernelCommand>(line);
+                        var obj = JObject.Parse(line);
+                        var streamKernelCommand = obj.ToObject<StreamKernelCommand>();
 
-                        if (message.CommandType == "Quit")
+                        IKernelCommand command = null;
+                        if (obj.TryGetValue("Command", out var commandValue))
+                        {
+                            command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
+                        }
+
+                        if (streamKernelCommand.CommandType == "Quit")
                         {
                             return;
                         }
 
-                        var command = DeserializeCommand(message.CommandType, message.Command);
                         if (command == null)
                         {
-                            Write(new CommandNotRecognized(), message.Id);
+                            Write(new CommandNotRecognized(), streamKernelCommand.Id);
                             continue;
                         }
 
                         var result = await _kernel.SendAsync(command);
                         result.KernelEvents.Subscribe(e =>
                         {
-                            Write(e, message.Id);
+                            Write(e, streamKernelCommand.Id);
                         });
+                    }
+                    catch (JsonReaderException)
+                    {
+                        Write(new CommandParseFailure() { Body = line }, -1);
                     }
                     catch
                     {
@@ -81,7 +91,7 @@ namespace Microsoft.DotNet.Interactive
             _output.Flush();
         }
 
-        private IKernelCommand DeserializeCommand(string commandType, string command)
+        private IKernelCommand DeserializeCommand(string commandType, JToken command)
         {
             return _dispatcher.Dispatch(commandType, command);
         }
