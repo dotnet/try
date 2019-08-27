@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;
 

@@ -3,6 +3,7 @@
 
 using System;
 using FluentAssertions;
+using MLS.Agent.Tools;
 using Xunit;
 using Xunit.Abstractions;
 

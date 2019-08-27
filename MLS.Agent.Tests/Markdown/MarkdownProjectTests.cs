@@ -11,6 +11,7 @@ using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Markdown;
 using WorkspaceServer.Tests;
 using WorkspaceServer.Tests.TestUtility;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {

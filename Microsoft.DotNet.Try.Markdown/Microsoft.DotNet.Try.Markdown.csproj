@@ -16,4 +16,8 @@
     <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19317.1" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.1.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
+  </ItemGroup>
 </Project>

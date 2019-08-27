@@ -14,6 +14,7 @@ using WorkspaceServer.Tests;
 using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests.Markdown
 {

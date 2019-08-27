@@ -32,7 +32,7 @@ namespace WorkspaceServer.Tests
             var locator = new PrebuiltBlazorPackageLocator();
 
             var asset = await locator.Locate(packageName);
-            asset.DirectoryAccessor.FileExists("index.html").Should().Be(true);
+            asset.DirectoryAccessor.FileExists(new MLS.Agent.Tools.RelativeFilePath("index.html")).Should().Be(true);
         }
 
         public void Dispose()

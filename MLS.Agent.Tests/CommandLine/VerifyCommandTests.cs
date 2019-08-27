@@ -8,6 +8,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 using WorkspaceServer.Tests;
 using Xunit;

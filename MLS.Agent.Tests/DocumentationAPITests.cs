@@ -12,6 +12,7 @@ using FluentAssertions.Extensions;
 using HtmlAgilityPack;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Tools;
 using Recipes;
 using WorkspaceServer;
 using WorkspaceServer.Tests;

@@ -3,6 +3,7 @@
 
 using System;
 using FluentAssertions;
+using MLS.Agent.Tools;
 using Xunit;
 
 namespace Microsoft.DotNet.Try.Markdown.Tests

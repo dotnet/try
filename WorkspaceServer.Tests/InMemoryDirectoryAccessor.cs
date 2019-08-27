@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
+using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Tests
 {

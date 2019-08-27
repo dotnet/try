@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Markdig;
 using Microsoft.DotNet.Try.Markdown;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 
 namespace MLS.Agent.Markdown
