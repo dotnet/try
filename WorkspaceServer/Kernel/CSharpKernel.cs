@@ -139,37 +139,37 @@ namespace WorkspaceServer.Kernel
             }
             else
             {
- if (exception != null)
-            {
-                string message = null;
-
-                if (exception is CompilationErrorException compilationError)
+                if (exception != null)
                 {
-                    message =
-                        string.Join(Environment.NewLine,
-                                    compilationError.Diagnostics.Select(d => d.ToString()));
-                }
+                    string message = null;
 
-                context.OnNext(new CommandFailed(exception, submitCode, message));
-                context.OnError(exception);
-            }
-            else
-            {
-                if (HasReturnValue)
+                    if (exception is CompilationErrorException compilationError)
+                    {
+                        message =
+                            string.Join(Environment.NewLine,
+                                        compilationError.Diagnostics.Select(d => d.ToString()));
+                    }
+
+                    context.OnNext(new CommandFailed(exception, submitCode, message));
+                    context.OnError(exception);
+                }
+                else
                 {
-                    var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
-                    context.OnNext(
-                        new ValueProduced(
-                            _scriptState.ReturnValue,
-                            submitCode,
-                            true,
-                            formattedValues));
+                    if (HasReturnValue)
+                    {
+                        var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
+                        context.OnNext(
+                            new ValueProduced(
+                                _scriptState.ReturnValue,
+                                submitCode,
+                                true,
+                                formattedValues));
+                    }
+
+                    context.OnNext(new CodeSubmissionEvaluated(submitCode));
+
+                    context.OnCompleted();
                 }
-
-                context.OnNext(new CodeSubmissionEvaluated(submitCode));
-
-                context.OnCompleted();
-            }
             }
 
             _evaluationInFlight = null;
@@ -229,7 +229,7 @@ namespace WorkspaceServer.Kernel
             var compilation = scriptState.Script.GetCompilation();
             metadataReferences = metadataReferences.AddRange(compilation.References);
             var originalCode = forcedState ? string.Empty : scriptState.Script.Code ?? string.Empty;
-            
+
             var buffer = new StringBuilder(originalCode);
             if (!string.IsNullOrWhiteSpace(originalCode) && !originalCode.EndsWith(Environment.NewLine))
             {
