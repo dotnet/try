@@ -499,18 +499,23 @@ namespace MLS.Agent.CommandLine
 
         private static IKernel CreateKernel()
         {
-            return new CompositeKernel
-                        {
-                            new CSharpKernel()
-                                .UseDefaultRendering()
-                                .UseNugetDirective()
-                                .UseKernelHelpers()
-                                .UseXplot(),
-                            new FSharpKernel()
-                                .UseDefaultRendering()
-                        }
-                        .UseDefaultMagicCommands()
-                        .UseExtendDirective();
+            var kernel = new CompositeKernel
+                                     {
+                                         new CSharpKernel()
+                                             .UseDefaultRendering()
+                                             .UseNugetDirective()
+                                             .UseKernelHelpers()
+                                             .UseXplot(),
+                                         new FSharpKernel()
+                                             .UseDefaultRendering()
+                                     }
+                                     .UseDefaultMagicCommands()
+                                     .UseExtendDirective();
+
+            kernel.DefaultKernelName = "csharp";
+            kernel.Name = ".NET";
+
+            return kernel;
         }
     }
 }
