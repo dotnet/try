@@ -116,9 +116,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnValueProduced(ValueProduced valueProduced)
         {
-            var openRequest = InFlightRequests.Values.SingleOrDefault();
-
-            if (openRequest == null)
+            if (!InFlightRequests.TryGetValue(valueProduced.Command, out var openRequest))
             {
                 return;
             }
@@ -134,8 +132,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 if (formattedValues.Count == 0)
                 {
                     formattedValues.Add( 
-                        PlainTextFormatter.MimeType,
-                        valueProduced.Value.ToDisplayString());
+                        HtmlFormatter.MimeType,
+                        valueProduced.Value.ToDisplayString("text/html"));
                 }
 
                 var executeResultData =
@@ -165,8 +163,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 var errorContent = new Error(
                     eName: "Unhandled Exception",
-                    eValue: $"{e.Message}"
-                );
+                    eValue: $"{e.Message}");
 
                 if (!openRequest.Request.Silent)
                 {

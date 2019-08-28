@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Interactive
 
         public void OnCompleted()
         {
+            IsCompleted = true;
             _events.OnCompleted();
         }
 
@@ -93,6 +94,8 @@ namespace Microsoft.DotNet.Interactive
         public IKernel HandlingKernel { get; set; }
 
         public IKernel CurrentKernel { get; internal set; }
+
+        public bool IsCompleted { get; private set; }
 
         void IDisposable.Dispose() => _currentStack?.Value?.Pop();
     }

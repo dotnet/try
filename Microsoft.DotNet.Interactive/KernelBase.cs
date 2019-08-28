@@ -44,13 +44,13 @@ namespace Microsoft.DotNet.Interactive
             {
                 SetHandlingKernel(command, context);
 
-                var originalKernel = context.CurrentKernel;
+                var previousKernel = context.CurrentKernel;
 
                 context.CurrentKernel = this;
 
                 await next(command, context);
 
-                context.CurrentKernel = originalKernel;
+                context.CurrentKernel = previousKernel;
             });
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Interactive
 
             var unhandledLines = new List<string>();
 
-            while (lines.Count > 0)
+            while (lines.Count > 0 && !pipelineContext.IsCompleted)
             {
                 var currentLine = lines.Dequeue();
 
