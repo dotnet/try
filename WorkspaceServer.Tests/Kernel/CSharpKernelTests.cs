@@ -36,7 +36,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("123"));
 
             KernelEvents.ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<ReturnValueProduced>()
                 .Last()
                 .Value
                 .Should()
@@ -64,7 +64,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var lastValueProducedPosition = KernelEvents
                 .Select((e, pos) => (e.Value, pos))
-                .Last(t => t.Value is ValueProduced).pos;
+                .Last(t => t.Value is ReturnValueProduced).pos;
 
             lastValueProducedPosition
                 .Should()
@@ -145,7 +145,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("null"));
 
             KernelEvents.ValuesOnly()
-                        .OfType<ValueProduced>()
+                        .OfType<ReturnValueProduced>()
                         .Last()
                         .Value
                         .Should()
@@ -174,7 +174,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("x.Max()"));
 
             KernelEvents.ValuesOnly()
-                        .OfType<ValueProduced>()
+                        .OfType<ReturnValueProduced>()
                         .Last()
                         .Value
                         .Should()
@@ -217,9 +217,13 @@ Console.Write(""value three"");
             KernelEvents.ValuesOnly()
                 .OfType<ValueProduced>()
                 .Should()
-                .HaveCount(4)
-                .And
-                .ContainSingle(e => e.IsReturnValue);
+                .HaveCount(3);
+
+            KernelEvents
+                .ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value.Should().Be(5);
 
         }
 
@@ -277,10 +281,10 @@ json
 
             KernelEvents.ValuesOnly()
                         .Should()
-                        .ContainSingle(e => e is ValueProduced);
+                        .ContainSingle(e => e is ReturnValueProduced);
 
             KernelEvents.ValuesOnly()
-                        .OfType<ValueProduced>()
+                        .OfType<ReturnValueProduced>()
                         .Single()
                         .Value
                         .Should()

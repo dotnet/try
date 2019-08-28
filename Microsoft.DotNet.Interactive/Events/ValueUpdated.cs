@@ -7,40 +7,29 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class ValueProduced : KernelEventBase
+    public class ValueUpdated : KernelEventBase
     {
-        public ValueProduced(
+        public ValueUpdated(
             object value,
+            string valueId,
             IKernelCommand command = null,
-            bool isReturnValue = false,
-            IReadOnlyCollection<FormattedValue> formattedValues = null,
-            string valueId = null,
-            bool isUpdatedValue = false) : base(command)
+            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(command)
         {
-            if (isUpdatedValue && valueId == null)
+            if (string.IsNullOrWhiteSpace(valueId))
             {
-                throw new ArgumentException($"{nameof(isUpdatedValue)} cannot be true with a null {nameof(valueId)}", nameof(valueId));
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(valueId));
             }
 
             Value = value;
-            IsReturnValue = isReturnValue;
             FormattedValues = formattedValues ?? Array.Empty<FormattedValue>();
             ValueId = valueId;
-            IsUpdatedValue = valueId switch
-            {
-                null => false,
-                _ => isUpdatedValue
-            };
+           
         }
 
         public object Value { get; }
 
-        public bool IsReturnValue { get; }
-
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
 
         public string ValueId { get; }
-
-        public bool IsUpdatedValue { get; }
     }
 }

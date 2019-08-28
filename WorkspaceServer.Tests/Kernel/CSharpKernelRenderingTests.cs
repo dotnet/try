@@ -39,7 +39,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueProduced = await result
                                       .KernelEvents
-                                      .OfType<ValueProduced>()
+                                      .OfType<ReturnValueProduced>()
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
@@ -66,7 +66,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueProduced = await result
                                       .KernelEvents
-                                      .OfType<ValueProduced>()
+                                      .OfType<ReturnValueProduced>()
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 

@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private static Dictionary<string, object> CreateTransient(string displayId)
+        private static Dictionary<string, object> CreateTransient(string displayId = null)
         {
             var transient = new Dictionary<string, object> { { "display_id", displayId ?? Guid.NewGuid().ToString() } };
             return transient;
@@ -58,6 +58,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 case ValueProduced valueProduced:
                     OnValueProduced(valueProduced);
+                    break;
+                case ReturnValueProduced returnValueProduced:
+                    OnReturnValueProduced(returnValueProduced);
                     break;
                 case ValueUpdated valueUpdated:
                     OnValueUpdated(valueUpdated);
@@ -163,6 +166,38 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                             data: formattedValues);
 
             SendDisplayData(executeResultData);
+        }
+
+        private void OnReturnValueProduced(ReturnValueProduced returnValueProduced)
+        {
+            var openRequest = InFlightRequests.Values.SingleOrDefault();
+
+            if (openRequest == null)
+            {
+                return;
+            }
+
+            var transient = CreateTransient();
+
+            var formattedValues = returnValueProduced
+                .FormattedValues
+                .ToDictionary(k => k.MimeType, v => v.Value);
+
+            if (formattedValues.Count == 0)
+            {
+                formattedValues.Add(
+                    PlainTextFormatter.MimeType,
+                    returnValueProduced.Value.ToDisplayString());
+            }
+
+            var executeResultData = new ExecuteResult(
+                openRequest.ExecutionCount,
+                transient: transient,
+                data: formattedValues);
+
+            SendDisplayData(executeResultData);
+
+            
         }
 
         private void OnValueProduced(ValueProduced valueProduced)

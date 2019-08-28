@@ -173,10 +173,9 @@ namespace WorkspaceServer.Kernel
                 {
                     var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
                     context.OnNext(
-                        new ValueProduced(
+                        new ReturnValueProduced(
                             _scriptState.ReturnValue,
                             submitCode,
-                            true,
                             formattedValues));
                 }
 
