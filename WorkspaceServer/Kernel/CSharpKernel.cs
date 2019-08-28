@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.CodeAnalysis.Scripting;
@@ -32,6 +33,9 @@ namespace WorkspaceServer.Kernel
 
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
+
 
         private ScriptState _scriptState;
         protected ScriptOptions ScriptOptions;
@@ -88,6 +92,13 @@ namespace WorkspaceServer.Kernel
             }
         }
 
+        public Task<bool> IsCompleteSubmissionAsync(string code)
+        {
+            var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
+            return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
+        }
+       
+
         private async Task HandleSubmitCode(
             SubmitCode submitCode,
             KernelInvocationContext context)
@@ -99,8 +110,21 @@ namespace WorkspaceServer.Kernel
             context.OnNext(codeSubmissionReceived);
 
             var code = submitCode.Code;
+            var isComplete = await IsCompleteSubmissionAsync(submitCode.Code);
+            if(isComplete)
+            {
+                context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
+            }
+            else
+            {
+                context.OnNext(new IncompleteCodeSubmissionReceived(submitCode));
+            }
 
-            context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
+            if (submitCode.SubmissionType == SubmissionType.AnalysisOnly)
+            {
+                return;
+            }
+
             Exception exception = null;
 
             using var console = await ConsoleOutput.Capture();
