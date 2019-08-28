@@ -18,6 +18,7 @@ using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 using File = Microsoft.DotNet.Try.Protocol.File;
 using WorkspaceServer;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {

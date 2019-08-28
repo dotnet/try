@@ -1,6 +1,6 @@
 // adpated from http://source.roslyn.io/#Microsoft.CodeAnalysis/InternalUtilities/FileNameUtilities.cs,c5e9631691356ed7
 
-namespace WorkspaceServer.Servers.Roslyn
+namespace MLS.Agent.Tools
 {
     /// <summary>
     /// Implements a few file name utilities that are needed by the compiler.

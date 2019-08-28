@@ -27,10 +27,11 @@ using HtmlAgilityPack;
 using System.Web;
 using MLS.Agent.Controllers;
 using WorkspaceServer.Tests.Packaging;
-using WorkspaceServer.Tests.TestUtility;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
 using WorkspaceServer;
+using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 
 namespace MLS.Agent.Tests
 {

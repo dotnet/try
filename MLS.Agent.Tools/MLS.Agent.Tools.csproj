@@ -35,5 +35,4 @@
   <ItemGroup>
     <Folder Include="%28External%29\" />
   </ItemGroup>
-  
 </Project>

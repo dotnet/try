@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using MLS.Agent.Tools.Tests;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.WorkspaceFeatures;
 

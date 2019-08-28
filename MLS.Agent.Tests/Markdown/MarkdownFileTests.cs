@@ -11,9 +11,10 @@ using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
 using WorkspaceServer.Tests;
-using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
+using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 
 namespace MLS.Agent.Tests.Markdown
 {
@@ -123,10 +124,9 @@ namespace BasicConsoleApp
             [Fact]
             public async Task Should_parse_markdown_file_and_set_package_with_fully_resolved_path()
             {
-                var workingDir = TestAssets.SampleConsole;
                 var packagePathRelativeToBaseDir = "src/sample/sample.csproj";
 
-                var dirAccessor = new InMemoryDirectoryAccessor(workingDir)
+                var dirAccessor = new InMemoryDirectoryAccessor()
                                   {
                                       ("src/sample/Program.cs", ""),
                                       (packagePathRelativeToBaseDir, ""),

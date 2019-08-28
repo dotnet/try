@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Try.Protocol;
+using MLS.Agent.Tools;
+using MLS.Agent.Tools.Roslyn;
 using WorkspaceServer.Servers.Roslyn;
 using Package = WorkspaceServer.Packaging.Package;
 

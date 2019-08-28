@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.DotNet.Try.Markdown
+namespace MLS.Agent.Tools
 {
     public class RelativeDirectoryPath :
         RelativePath,

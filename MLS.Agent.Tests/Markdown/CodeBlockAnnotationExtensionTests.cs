@@ -13,10 +13,10 @@ using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.Controllers;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
-using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 
 namespace MLS.Agent.Tests.Markdown
@@ -45,7 +45,6 @@ namespace MLS.Agent.Tests.Markdown
         [InlineData("C#")]
         public async Task Inserts_code_when_an_existing_file_is_specified_using_source_file_option(string language)
         {
-            var testDir = TestAssets.SampleConsole;
             var fileContent = @"using System;
 
 namespace BasicConsoleApp
@@ -58,7 +57,7 @@ namespace BasicConsoleApp
             }
         }
     }".EnforceLF();
-            var directoryAccessor = new InMemoryDirectoryAccessor(testDir)
+            var directoryAccessor = new InMemoryDirectoryAccessor()
             {
                  ("Program.cs", fileContent),
                  ("sample.csproj", "")
@@ -104,8 +103,7 @@ $@"<pre><code class=""{expectedClass}"">Console.WriteLine(&quot;Hello World&quot
 </code></pre>
 ".EnforceLF();
 
-            var testDir = TestAssets.SampleConsole;
-            var directoryAccessor = new InMemoryDirectoryAccessor(testDir);
+            var directoryAccessor = new InMemoryDirectoryAccessor();
             var pipeline = new MarkdownPipelineBuilder().UseCodeBlockAnnotations(directoryAccessor,await  Default.PackageRegistry.ValueAsync()).Build();
             var document = $@"
 ```{fenceLanguage}
@@ -119,8 +117,7 @@ Console.WriteLine(""Hello World"");
         [Fact]
         public async Task Error_message_is_displayed_when_the_linked_file_does_not_exist()
         {
-            var testDir = TestAssets.SampleConsole;
-            var directoryAccessor = new InMemoryDirectoryAccessor(testDir)
+            var directoryAccessor = new InMemoryDirectoryAccessor()
             {
                 ("sample.csproj", "")
             };

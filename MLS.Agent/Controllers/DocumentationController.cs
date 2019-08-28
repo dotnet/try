@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
+using MLS.Agent.Tools;
 using Recipes;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;

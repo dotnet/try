@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Protocol;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 

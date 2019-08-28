@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
+using MLS.Agent.Tools.Tests;
 using WorkspaceServer.Tests.Packaging;
 using Xunit;
 using Xunit.Abstractions;

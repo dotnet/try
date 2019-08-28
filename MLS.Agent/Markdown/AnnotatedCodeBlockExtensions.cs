@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Protocol;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 
 namespace MLS.Agent.Markdown

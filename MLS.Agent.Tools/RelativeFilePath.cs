@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 
-namespace Microsoft.DotNet.Try.Markdown
-{
+namespace MLS.Agent.Tools
+{ 
     public class RelativeFilePath :
         RelativePath,
         IEquatable<RelativeFilePath>

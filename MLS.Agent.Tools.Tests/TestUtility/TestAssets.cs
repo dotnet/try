@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace WorkspaceServer.Tests.TestUtility
+namespace MLS.Agent.Tools.Tests
 {
     public static class TestAssets
     {

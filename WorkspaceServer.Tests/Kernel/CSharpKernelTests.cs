@@ -13,6 +13,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;

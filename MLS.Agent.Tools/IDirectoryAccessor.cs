@@ -3,9 +3,8 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.Try.Markdown;
 
-namespace WorkspaceServer
+namespace MLS.Agent.Tools
 {
     public interface IDirectoryAccessor
     {
