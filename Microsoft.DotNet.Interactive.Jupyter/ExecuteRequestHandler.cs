@@ -114,13 +114,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Dispose();
         }
 
-        private void SendDisplayData(DisplayData displayData)
+        private void SendDisplayData(DisplayData displayData, InflightRequest openRequest)
         {
-            if (!InFlightRequests.TryGetValue(valueProduced.Command, out var openRequest))
-            {
-                return;
-            }
-
             if (!openRequest.Request.Silent)
             {
                 // send on io
@@ -172,7 +167,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     throw new ArgumentException("Unsupported event type", nameof(@event));
             }
 
-            SendDisplayData(executeResultData);
+            SendDisplayData(executeResultData, openRequest);
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
