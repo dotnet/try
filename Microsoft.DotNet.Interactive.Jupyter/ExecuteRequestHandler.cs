@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 formattedValues.Add(
                     HtmlFormatter.MimeType,
-                    value.ToDisplayString("text/html")););
+                    value.ToDisplayString("text/html"));
             }
         }
 
