@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private static Dictionary<string, object> CreateTransient(string displayId = null)
+        private static Dictionary<string, object> CreateTransient(string displayId)
         {
             var transient = new Dictionary<string, object> { { "display_id", displayId ?? Guid.NewGuid().ToString() } };
             return transient;
@@ -154,12 +154,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                   .FormattedValues
                                   .ToDictionary(k => k.MimeType, v => v.Value);
 
-            if (formattedValues.Count == 0)
-            {
-                formattedValues.Add(
-                    PlainTextFormatter.MimeType,
-                    valueUpdated.Value.ToDisplayString());
-            }
+            var value = valueUpdated.Value;
+
+            CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             var executeResultData = new UpdateDisplayData(
                             transient: transient,
@@ -177,18 +174,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 return;
             }
 
-            var transient = CreateTransient();
+            var transient = CreateTransient(returnValueProduced.ValueId);
 
             var formattedValues = returnValueProduced
                 .FormattedValues
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
-            if (formattedValues.Count == 0)
-            {
-                formattedValues.Add(
-                    PlainTextFormatter.MimeType,
-                    returnValueProduced.Value.ToDisplayString());
-            }
+            var value = returnValueProduced.Value;
+
+            CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             var executeResultData = new ExecuteResult(
                 openRequest.ExecutionCount,
@@ -196,8 +190,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 data: formattedValues);
 
             SendDisplayData(executeResultData);
+        }
 
-            
+        private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
+        {
+            if (formattedValues.Count == 0)
+            {
+                formattedValues.Add(
+                    PlainTextFormatter.MimeType,
+                    value.ToDisplayString());
+            }
         }
 
         private void OnValueProduced(ValueProduced valueProduced)
@@ -208,68 +210,21 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 return;
             }
+            var transient = CreateTransient(valueProduced.ValueId);
 
-            try
-            {
-                var transient = CreateTransient(valueProduced.ValueId);
+            var formattedValues = valueProduced
+                                  .FormattedValues
+                                  .ToDictionary(k => k.MimeType, v => v.Value);
 
-                var formattedValues = valueProduced
-                                      .FormattedValues
-                                      .ToDictionary(k => k.MimeType, v => v.Value);
+            var value = valueProduced.Value;
 
-                if (formattedValues.Count == 0)
-                {
-                    formattedValues.Add( 
-                        PlainTextFormatter.MimeType,
-                        valueProduced.Value.ToDisplayString());
-                }
+            CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-                var executeResultData =
-                    valueProduced.IsReturnValue
-                        ? new ExecuteResult(
-                            openRequest.ExecutionCount,
+            var executeResultData = new DisplayData(
                             transient: transient,
-                            data: formattedValues)
-                        : valueProduced.IsUpdatedValue
-                            ? new UpdateDisplayData(
-                                transient: transient,
-                                data: formattedValues)
-                            : new DisplayData(
-                                transient: transient,
-                                data: formattedValues);
+                            data: formattedValues);
 
-                if (!openRequest.Request.Silent)
-                {
-                    // send on io
-                    var executeResultMessage = Message.Create(
-                        executeResultData,
-                        openRequest.Context.Request.Header);
-                    openRequest.Context.IoPubChannel.Send(executeResultMessage);
-                }
-            }
-            catch (Exception e)
-            {
-                var errorContent = new Error(
-                    eName: "Unhandled Exception",
-                    eValue: $"{e.Message}"
-                );
-
-                if (!openRequest.Request.Silent)
-                {
-                    // send on io
-                    var error = Message.Create(
-                        errorContent,
-                        openRequest.Context.Request.Header);
-                    openRequest.Context.IoPubChannel.Send(error);
-
-                    // send on stderr
-                    var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = Message.Create(
-                        stdErr,
-                        openRequest.Context.Request.Header);
-                    openRequest.Context.IoPubChannel.Send(stream);
-                }
-            }
+            SendDisplayData(executeResultData);
         }
 
         private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)

@@ -197,9 +197,9 @@ Console.Write(""value three"");");
                 .OfType<ValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new ValueProduced("value one", kernelCommand, false, new[] { new FormattedValue("text/plain", "value one"), }),
-                    new ValueProduced("value two", kernelCommand, false, new[] { new FormattedValue("text/plain", "value two"), }),
-                    new ValueProduced("value three", kernelCommand, false, new[] { new FormattedValue("text/plain", "value three"), }));
+                    new ValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
+                    new ValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
+                    new ValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
         [Fact]

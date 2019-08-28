@@ -12,12 +12,16 @@ namespace Microsoft.DotNet.Interactive.Events
         public ReturnValueProduced(
             object value,
             IKernelCommand command = null,
-            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(command)
+            IReadOnlyCollection<FormattedValue> formattedValues = null,
+            string valueId = null) : base(command)
         {
 
             Value = value;
             FormattedValues = formattedValues ?? Array.Empty<FormattedValue>();
+            ValueId = valueId;
         }
+
+        public string ValueId { get; }
 
         public object Value { get; }
 

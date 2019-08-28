@@ -29,7 +29,7 @@ type FSharpKernel() =
             | Ok(Some(value)) ->
                 let value = value.ReflectionValue
                 let formattedValues = FormattedValue.FromObject(value)
-                context.OnNext(ValueProduced(value, codeSubmission, true, formattedValues))
+                context.OnNext(ReturnValueProduced(value, codeSubmission, formattedValues))
             | Ok(None) -> ()
             | Error(ex) -> context.OnError(ex)
             context.OnNext(CodeSubmissionEvaluated(codeSubmission))

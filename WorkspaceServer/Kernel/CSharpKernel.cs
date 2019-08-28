@@ -200,7 +200,6 @@ namespace WorkspaceServer.Kernel
                 new ValueProduced(
                     output,
                     command,
-                    false,
                     formattedValues));
         }
 
