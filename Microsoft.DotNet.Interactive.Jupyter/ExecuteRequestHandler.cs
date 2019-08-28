@@ -135,9 +135,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnValueProductionEvent(ValueProductionEvent @event)
         {
-            var openRequest = InFlightRequests.Values.SingleOrDefault();
-
-            if (openRequest == null)
+            if (!InFlightRequests.TryGetValue(@event.Command, out var openRequest))
             {
                 return;
             }
@@ -184,8 +182,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             if (formattedValues.Count == 0)
             {
                 formattedValues.Add(
-                    PlainTextFormatter.MimeType,
-                    value.ToDisplayString());
+                    HtmlFormatter.MimeType,
+                    value.ToDisplayString("text/html")););
             }
         }
 
