@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -49,17 +50,42 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_isCompleteReply_with_true_if_the_code_is_a_complete_submission()
+        public async Task sends_isCompleteReply_with_complete_if_the_code_is_a_complete_submission()
         {
             var kernel = new CSharpKernel();
             var handler = new IsCompleteRequestHandler(kernel);
             var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
-            var reply = _serverRecordingSocket.DecodedMessages.FirstOrDefault(message =>
-                message.Contains(MessageTypeValues.IsCompleteReply));
+            _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
+                message.Contains(MessageTypeValues.IsCompleteReply))
+                .Should()
+                .NotBeNullOrWhiteSpace();
 
-            reply.Should().NotBeNull();
+            _serverRecordingSocket.DecodedMessages
+                .SingleOrDefault(m => m == new IsCompleteReply(string.Empty, "complete").ToJson())
+                .Should()
+                .NotBeNullOrWhiteSpace();
+
+        }
+
+        [Fact]
+        public async Task sends_isCompleteReply_with_incomplete_and_indent_if_the_code_is_not_a_complete_submission()
+        {
+            var kernel = new CSharpKernel();
+            var handler = new IsCompleteRequestHandler(kernel);
+            var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
+                    message.Contains(MessageTypeValues.IsCompleteReply))
+                .Should()
+                .NotBeNullOrWhiteSpace();
+
+            _serverRecordingSocket.DecodedMessages
+                .SingleOrDefault(m => m == new IsCompleteReply("*", "incomplete").ToJson())
+                .Should()
+                .NotBeNullOrWhiteSpace();
 
         }
     }

@@ -48,8 +48,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             if (InFlightRequests.TryRemove(@event.Command, out var openRequest))
             {
+                var status = isComplete ? "complete" : "incomplete";
+                var indent = isComplete ? string.Empty : "*";
                 // reply 
-                var isCompleteReplyPayload = new IsCompleteReply(indent:null,status: isComplete ? "complete": "incomplete");
+                var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
                 var executeReply = Message.CreateResponse(
