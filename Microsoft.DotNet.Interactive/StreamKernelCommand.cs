@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
         public string CommandType { get; set; }
-        public string Command { get; set; }
+        public object Command { get; set; }
     }
 }

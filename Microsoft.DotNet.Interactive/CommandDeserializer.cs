@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Interactive.Commands;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -23,14 +24,14 @@ namespace Microsoft.DotNet.Interactive
                .ToDictionary(t => t.Name, t => t);
         }
 
-        public IKernelCommand Deserialize(string commandType, string body)
+        public IKernelCommand Dispatch(string commandType, JToken body)
         {
             if (!_map.ContainsKey(commandType))
             {
                 return null;
             }
 
-            return (IKernelCommand)JsonConvert.DeserializeObject(body, _map[commandType]);
+            return (IKernelCommand)body.ToObject(_map[commandType]);
         }
     }
 }
