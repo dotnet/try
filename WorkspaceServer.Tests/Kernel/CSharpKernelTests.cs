@@ -129,12 +129,10 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new AnalyzeCode("var a = 12"));
+            await kernel.SendAsync(new SubmitCode("var a = 12", submissionType:SubmissionType.AnalysisOnly));
 
-            var analysisResult = KernelEvents.ValuesOnly().OfType<CodeAnalyzed>().Single();
-
-            analysisResult.Should().NotBeNull();
-            analysisResult.IsCompleteSubmission.Should().BeFalse();
+            var analysisResult = KernelEvents.ValuesOnly()
+                .Single(e => e is IncompleteCodeSubmissionReceived);
         }
 
 

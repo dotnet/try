@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public async Task Handle(JupyterRequestContext context)
         {
             var isCompleteRequest = GetJupyterRequest(context);
-            var command = new AnalyzeCode(isCompleteRequest.Code);
+            var command = new SubmitCode(isCompleteRequest.Code, submissionType:SubmissionType.AnalysisOnly);
            
             var openRequest = new InflightRequest(context, isCompleteRequest, 0);
 
@@ -35,18 +35,21 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case CodeAnalyzed codeAnalyzed:
-                    OnCodeAnalyzed(codeAnalyzed);
+                case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
+                    OnKernelEvent(completeCodeSubmissionReceived, true);
+                    break;
+                case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
+                    OnKernelEvent(incompleteCodeSubmissionReceived, false);
                     break;
             }
         }
 
-        private void OnCodeAnalyzed(CodeAnalyzed codeAnalyzed)
+        private void OnKernelEvent(IKernelEvent @event, bool isComplete)
         {
-            if (InFlightRequests.TryRemove(codeAnalyzed.Command, out var openRequest))
+            if (InFlightRequests.TryRemove(@event.Command, out var openRequest))
             {
                 // reply 
-                var isCompleteReplyPayload = new IsCompleteReply(indent:null,status: codeAnalyzed.IsCompleteSubmission? "complete" : "incomplete");
+                var isCompleteReplyPayload = new IsCompleteReply(indent:null,status: isComplete ? "complete": "incomplete");
 
                 // send to server
                 var executeReply = Message.CreateResponse(
@@ -58,5 +61,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Dispose();
             }
         }
+
+      
     }
 }

@@ -9,16 +9,25 @@ namespace Microsoft.DotNet.Interactive.Commands
     {
         public SubmitCode(
             string code,
-            string targetKernelName = null)
+            string targetKernelName = null,
+            SubmissionType submissionType = SubmissionType.Execution)
         {
             Code = code ?? throw new ArgumentNullException(nameof(code));
             TargetKernelName = targetKernelName;
+            SubmissionType = submissionType;
         }
 
         public string Code { get; set; }
 
         public string TargetKernelName { get; set; }
+        public SubmissionType SubmissionType { get; }
 
         public override string ToString() => $"{base.ToString()}: {Code.TruncateForDisplay()}";
+    }
+
+    public enum SubmissionType
+    {
+        Execution,
+        AnalysisOnly
     }
 }
