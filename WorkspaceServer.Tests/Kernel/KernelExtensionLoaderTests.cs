@@ -11,6 +11,7 @@ using System.Linq;
 using MLS.Agent.Tools.Tests;
 using Microsoft.DotNet.Interactive.Commands;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace WorkspaceServer.Tests
 {
@@ -24,7 +25,7 @@ namespace WorkspaceServer.Tests
         public async Task Can_load_from_assembly()
         {
             var directory = Create.EmptyWorkspace().Directory;
-            var extensionDll = await CreateAndGetExtensionDll(directory);
+            var extensionDll = await CreateExtensionInDirectory(directory);
 
             var kernel = CreateKernel();
             await new KernelExtensionLoader().LoadFromAssembly(extensionDll, kernel);
@@ -38,17 +39,12 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Can_load_from_nuget_package()
         {
-            var directory = Create.EmptyWorkspace().Directory;
-
-            var extensionDll = await CreateAndGetExtensionDll(directory);
-
-            var nugetPackageDirectory = new InMemoryDirectoryAccessor(directory.Subdirectory("myNugetPackage"))
+            var nugetPackageDirectory = new InMemoryDirectoryAccessor(Create.EmptyWorkspace().Directory.Subdirectory("myNugetPackage"))
             {
                 ($"2.0.0/lib/netstandard2.0/myNugetPackage.dll", ""),
-                ($"2.0.0/interactive-extensions/a.dll", "")
             }.CreateFiles();
 
-            File.Copy(extensionDll.FullName, nugetPackageDirectory.GetFullyQualifiedFilePath($"2.0.0/interactive-extensions/{extensionDll.Name}").FullName);
+            var extensionDll = await CreateExtensionInDirectory((DirectoryInfo)nugetPackageDirectory.GetFullyQualifiedPath(new RelativeDirectoryPath("2.0.0/interactive-extensions")));
 
             var loadExtensionCommand = new LoadCSharpExtension(new NugetPackageReference("myNugetPackage"), new List<FileInfo>() { nugetPackageDirectory.GetFullyQualifiedFilePath($"2.0.0/lib/netstandard2.0/myNugetPackage.dll") });
             var kernel = CreateKernel();
@@ -59,8 +55,9 @@ namespace WorkspaceServer.Tests
                                           e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
 
-        private static async Task<FileInfo> CreateAndGetExtensionDll(DirectoryInfo directory)
+        private static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDirectory, [CallerMemberName] string extensionName = null)
         {
+            var directory = Create.EmptyWorkspace(extensionName).Directory;
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
             new InMemoryDirectoryAccessor(directory)
@@ -79,7 +76,7 @@ public class TestKernelExtension : IKernelExtension
     }}
 }}
 " ),
-                    ("TestExtension.csproj", $@"
+                    ($"{extensionName}.csproj", $@"
 <Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -94,14 +91,13 @@ public class TestKernelExtension : IKernelExtension
                 }
                  .CreateFiles();
 
-            var buildResult = await new Dotnet(directory).Build();
+            var buildResult = await new Dotnet(directory).Build($"/p:OutDir={extensionDirectory.FullName}");
             buildResult.ThrowOnFailure();
 
-            var extensionDll = directory
-                            .GetDirectories("bin", SearchOption.AllDirectories)
-                            .Single()
+            var extensionDll = extensionDirectory
                             .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
                             .Single();
+
             return extensionDll;
         }
 
