@@ -56,14 +56,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ValueProduced valueProduced:
-                    OnValueProduced(valueProduced);
-                    break;
-                case ReturnValueProduced returnValueProduced:
-                    OnReturnValueProduced(returnValueProduced);
-                    break;
-                case ValueUpdated valueUpdated:
-                    OnValueUpdated(valueUpdated);
+                case ValueProductionEvent valueProductionEvent:
+                    OnValueProductionEvent(valueProductionEvent);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
                     OnCodeSubmissionEvaluated(codeSubmissionEvaluated);
@@ -139,7 +133,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnValueUpdated(ValueUpdated valueUpdated)
+        private void OnValueProductionEvent(ValueProductionEvent @event)
         {
             var openRequest = InFlightRequests.Values.SingleOrDefault();
 
@@ -148,46 +142,39 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 return;
             }
 
-            var transient = CreateTransient(valueUpdated.ValueId);
+            var transient = CreateTransient(@event.ValueId);
 
-            var formattedValues = valueUpdated
-                                  .FormattedValues
-                                  .ToDictionary(k => k.MimeType, v => v.Value);
-
-            var value = valueUpdated.Value;
-
-            CreateDefaultFormattedValueIfEmpty(formattedValues, value);
-
-            var executeResultData = new UpdateDisplayData(
-                            transient: transient,
-                            data: formattedValues);
-
-            SendDisplayData(executeResultData);
-        }
-
-        private void OnReturnValueProduced(ReturnValueProduced returnValueProduced)
-        {
-            var openRequest = InFlightRequests.Values.SingleOrDefault();
-
-            if (openRequest == null)
-            {
-                return;
-            }
-
-            var transient = CreateTransient(returnValueProduced.ValueId);
-
-            var formattedValues = returnValueProduced
+            var formattedValues = @event
                 .FormattedValues
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
-            var value = returnValueProduced.Value;
+            var value = @event.Value;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            var executeResultData = new ExecuteResult(
-                openRequest.ExecutionCount,
-                transient: transient,
-                data: formattedValues);
+            DisplayData executeResultData;
+
+            switch (@event)
+            {
+                case ValueProduced _:
+                    executeResultData = new DisplayData(
+                        transient: transient,
+                        data: formattedValues);
+                    break;
+                case ReturnValueProduced _:
+                    executeResultData = new ExecuteResult(
+                        openRequest.ExecutionCount,
+                        transient: transient,
+                        data: formattedValues);
+                    break;
+                case ValueUpdated _:
+                    executeResultData = new UpdateDisplayData(
+                        transient: transient,
+                        data: formattedValues);
+                    break;
+                default:
+                    throw new ArgumentException("Unsupported event type", nameof(@event));
+            }
 
             SendDisplayData(executeResultData);
         }
@@ -200,31 +187,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     PlainTextFormatter.MimeType,
                     value.ToDisplayString());
             }
-        }
-
-        private void OnValueProduced(ValueProduced valueProduced)
-        {
-            var openRequest = InFlightRequests.Values.SingleOrDefault();
-
-            if (openRequest == null)
-            {
-                return;
-            }
-            var transient = CreateTransient(valueProduced.ValueId);
-
-            var formattedValues = valueProduced
-                                  .FormattedValues
-                                  .ToDictionary(k => k.MimeType, v => v.Value);
-
-            var value = valueProduced.Value;
-
-            CreateDefaultFormattedValueIfEmpty(formattedValues, value);
-
-            var executeResultData = new DisplayData(
-                            transient: transient,
-                            data: formattedValues);
-
-            SendDisplayData(executeResultData);
         }
 
         private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)

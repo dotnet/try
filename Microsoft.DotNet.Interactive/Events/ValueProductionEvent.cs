@@ -7,15 +7,23 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class ReturnValueProduced : ValueProductionEvent
+    public abstract class ValueProductionEvent : KernelEventBase
     {
-        public ReturnValueProduced(
+        protected ValueProductionEvent(
             object value,
             IKernelCommand command = null,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
-            string valueId = null) : base(value,command, formattedValues, valueId)
+            string valueId = null) : base(command)
         {
-
+            Value = value;
+            FormattedValues = formattedValues ?? Array.Empty<FormattedValue>();
+            ValueId = valueId;
         }
+
+        public object Value { get; }
+
+        public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
+
+        public string ValueId { get; }
     }
 }

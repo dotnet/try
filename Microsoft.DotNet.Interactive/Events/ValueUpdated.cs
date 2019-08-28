@@ -7,29 +7,19 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class ValueUpdated : KernelEventBase
+    public class ValueUpdated : ValueProductionEvent
     {
         public ValueUpdated(
             object value,
             string valueId,
             IKernelCommand command = null,
-            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(command)
+            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(value,command,formattedValues,valueId)
         {
             if (string.IsNullOrWhiteSpace(valueId))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(valueId));
             }
-
-            Value = value;
-            FormattedValues = formattedValues ?? Array.Empty<FormattedValue>();
-            ValueId = valueId;
            
         }
-
-        public object Value { get; }
-
-        public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
-
-        public string ValueId { get; }
     }
 }
