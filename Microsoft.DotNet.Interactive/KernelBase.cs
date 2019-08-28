@@ -102,11 +102,11 @@ namespace Microsoft.DotNet.Interactive
             loadCSharpExtension.Handler = async context =>
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
-                kernelExtensionLoader.LoadFromNuGetPackage(loadCSharpExtension, invocationContext.HandlingKernel);
+                await kernelExtensionLoader.LoadFromNuGetPackage(loadCSharpExtension, invocationContext.HandlingKernel);
                 context.OnCompleted();
             };
-                
-            throw new NotImplementedException();
+
+            await next(loadCSharpExtension, invocationContext);
         }
 
         private async Task HandleLoadExtension(
