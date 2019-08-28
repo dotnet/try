@@ -59,6 +59,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case ValueProduced valueProduced:
                     OnValueProduced(valueProduced);
                     break;
+                case ValueUpdated valueUpdated:
+                    OnValueUpdated(valueUpdated);
+                    break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
                     OnCodeSubmissionEvaluated(codeSubmissionEvaluated);
                     break;
@@ -112,6 +115,54 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
             openRequest.Dispose();
+        }
+
+        private void SendDisplayData(DisplayData displayData)
+        {
+            var openRequest = InFlightRequests.Values.SingleOrDefault();
+
+            if (openRequest == null)
+            {
+                return;
+            }
+
+            if (!openRequest.Request.Silent)
+            {
+                // send on io
+                var executeResultMessage = Message.Create(
+                    displayData,
+                    openRequest.Context.Request.Header);
+                openRequest.Context.IoPubChannel.Send(executeResultMessage);
+            }
+        }
+
+        private void OnValueUpdated(ValueUpdated valueUpdated)
+        {
+            var openRequest = InFlightRequests.Values.SingleOrDefault();
+
+            if (openRequest == null)
+            {
+                return;
+            }
+
+            var transient = CreateTransient(valueUpdated.ValueId);
+
+            var formattedValues = valueUpdated
+                                  .FormattedValues
+                                  .ToDictionary(k => k.MimeType, v => v.Value);
+
+            if (formattedValues.Count == 0)
+            {
+                formattedValues.Add(
+                    PlainTextFormatter.MimeType,
+                    valueUpdated.Value.ToDisplayString());
+            }
+
+            var executeResultData = new UpdateDisplayData(
+                            transient: transient,
+                            data: formattedValues);
+
+            SendDisplayData(executeResultData);
         }
 
         private void OnValueProduced(ValueProduced valueProduced)

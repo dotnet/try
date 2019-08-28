@@ -43,4 +43,31 @@ namespace Microsoft.DotNet.Interactive.Events
 
         public bool IsUpdatedValue { get; }
     }
+
+    public class ValueUpdated : KernelEventBase
+    {
+        public ValueUpdated(
+            object value,
+            string valueId,
+            IKernelCommand command = null,
+            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(command)
+        {
+            if (string.IsNullOrWhiteSpace(valueId))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(valueId));
+            }
+
+            Value = value;
+            FormattedValues = formattedValues ?? Array.Empty<FormattedValue>();
+            ValueId = valueId;
+           
+        }
+
+        public object Value { get; }
+
+        public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
+
+        public string ValueId { get; }
+
+    }
 }

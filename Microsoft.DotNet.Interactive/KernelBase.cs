@@ -201,12 +201,12 @@ namespace Microsoft.DotNet.Interactive
             displayedValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
-                    new ValueProduced(
+                    new ValueUpdated(
                         displayedValue.FormattedValue,
-                        displayedValue,
-                        formattedValues: new[] { displayedValue.FormattedValue },
                         valueId: displayedValue.ValueId,
-                        isUpdatedValue: true));
+                        command: displayedValue,
+                        formattedValues: new[] { displayedValue.FormattedValue }
+                        ));
 
                 invocationContext.OnCompleted();
 
