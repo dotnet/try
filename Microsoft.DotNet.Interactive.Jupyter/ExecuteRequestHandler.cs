@@ -116,9 +116,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void SendDisplayData(DisplayData displayData)
         {
-            var openRequest = InFlightRequests.Values.SingleOrDefault();
-
-            if (openRequest == null)
+            if (!InFlightRequests.TryGetValue(valueProduced.Command, out var openRequest))
             {
                 return;
             }
