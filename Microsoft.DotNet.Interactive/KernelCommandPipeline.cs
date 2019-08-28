@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -36,7 +37,17 @@ namespace Microsoft.DotNet.Interactive
         {
             EnsureMiddlewarePipelineIsInitialized();
 
-            await _pipeline(command, context, (_, __) => Task.CompletedTask);
+            try
+            {
+                await _pipeline(command, context, (_, __) => Task.CompletedTask);
+            }
+            catch (Exception exception)
+            {
+                context.OnNext(
+                    new CommandFailed(
+                        exception,
+                        command));
+            }
         }
 
         private KernelCommandPipelineMiddleware BuildPipeline()

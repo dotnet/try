@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -15,7 +13,7 @@ namespace Microsoft.DotNet.Interactive
         private readonly IKernel _kernel;
         private readonly TextReader _input;
         private readonly TextWriter _output;
-        private readonly CommandDispatcher _dispatcher = new CommandDispatcher();
+        private readonly CommandDeserializer _deserializer = new CommandDeserializer();
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
         {
@@ -71,7 +69,10 @@ namespace Microsoft.DotNet.Interactive
                     }
                     catch
                     {
-                        Write(new CommandNotRecognized() { Body = line }, -1);
+                        Write(new CommandNotRecognized
+                        {
+                            Body = line
+                        }, -1);
                     }
 
                 }
@@ -80,7 +81,7 @@ namespace Microsoft.DotNet.Interactive
 
         private void Write(IKernelEvent e, int id)
         {
-            var wrapper = new StreamKernelEvent()
+            var wrapper = new StreamKernelEvent
             {
                 Id = id,
                 Event = JsonConvert.SerializeObject(e),
@@ -93,7 +94,7 @@ namespace Microsoft.DotNet.Interactive
 
         private IKernelCommand DeserializeCommand(string commandType, JToken command)
         {
-            return _dispatcher.Dispatch(commandType, command);
+            return _deserializer.Dispatch(commandType, command);
         }
     }
 }

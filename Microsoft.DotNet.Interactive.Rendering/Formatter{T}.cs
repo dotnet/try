@@ -118,11 +118,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
             switch (mimeType)
             {
                 case "text/html":
-
                     return HtmlFormatter<T>.Create();
 
                 default:
-
                     return PlainTextFormatter<T>.Create();
             }
         }

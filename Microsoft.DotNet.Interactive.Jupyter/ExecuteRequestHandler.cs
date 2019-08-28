@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -11,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -42,46 +42,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
             catch (Exception e)
             {
-                InFlightRequests.TryRemove(command, out _);
-
-                var errorContent = new Error(
-                    eName: "Unhandled Exception",
-                    eValue: $"{e.Message}"
-                );
-
-                if (!executeRequest.Silent)
-                {
-                    // send on io
-                    var error = Message.Create(
-                        errorContent,
-                        context.Request.Header);
-                    context.IoPubChannel.Send(error);
-
-                    // send on stderr
-                    var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = Message.Create(
-                        stdErr,
-                        context.Request.Header);
-                    context.IoPubChannel.Send(stream);
-                }
-
-                //  reply Error
-                var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: executionCount);
-
-                // send to server
-                var executeReply = Message.CreateResponse(
-                    executeReplyPayload,
-                    context.Request);
-
-                context.ServerChannel.Send(executeReply);
-                context.RequestHandlerStatus.SetAsIdle();
+                OnCommandFailed(new CommandFailed(e, command));
             }
         }
 
-        private static Dictionary<string, object> CreateTransient()
+        private static Dictionary<string, object> CreateTransient(string displayId)
         {
-            var id = Guid.NewGuid();
-            var transient = new Dictionary<string, object> { { "display_id", id.ToString() } };
+            var transient = new Dictionary<string, object> { { "display_id", displayId ?? Guid.NewGuid().ToString() } };
             return transient;
         }
 
@@ -95,8 +62,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
                     OnCodeSubmissionEvaluated(codeSubmissionEvaluated);
                     break;
-                case CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed:
-                    OnCodeSubmissionEvaluatedFailed(codeSubmissionEvaluationFailed);
+                case CommandFailed codeSubmissionEvaluationFailed:
+                    OnCommandFailed(codeSubmissionEvaluationFailed);
                     break;
                 case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
@@ -105,13 +72,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCodeSubmissionEvaluatedFailed(CodeSubmissionEvaluationFailed codeSubmissionEvaluationFailed)
+        private void OnCommandFailed(CommandFailed commandFailed)
         {
-            InFlightRequests.TryRemove(codeSubmissionEvaluationFailed.Command, out var openRequest);
+            if (!InFlightRequests.TryRemove(commandFailed.Command, out var openRequest))
+            {
+                return;
+            }
 
             var errorContent = new Error(
                 eName: "Unhandled Exception",
-                eValue: $"{codeSubmissionEvaluationFailed.Message}"
+                eValue: commandFailed.Message
             );
 
             if (!openRequest.Request.Silent)
@@ -155,18 +125,32 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             try
             {
-                var transient = CreateTransient();
-                // executeResult data
-                var executeResultData = valueProduced.IsLastValue
-                ? new ExecuteResult(
-                    openRequest.ExecutionCount,
-                    transient: transient,
-                    data: valueProduced?.FormattedValues
-                        ?.ToDictionary(k => k.MimeType, v => v.Value))
-                : new DisplayData(
-                    transient: transient,
-                    data: valueProduced?.FormattedValues
-                                       ?.ToDictionary(k => k.MimeType, v => v.Value));
+                var transient = CreateTransient(valueProduced.ValueId);
+
+                var formattedValues = valueProduced
+                                      .FormattedValues
+                                      .ToDictionary(k => k.MimeType, v => v.Value);
+
+                if (formattedValues.Count == 0)
+                {
+                    formattedValues.Add( 
+                        PlainTextFormatter.MimeType,
+                        valueProduced.Value.ToDisplayString());
+                }
+
+                var executeResultData =
+                    valueProduced.IsReturnValue
+                        ? new ExecuteResult(
+                            openRequest.ExecutionCount,
+                            transient: transient,
+                            data: formattedValues)
+                        : valueProduced.IsUpdatedValue
+                            ? new UpdateDisplayData(
+                                transient: transient,
+                                data: formattedValues)
+                            : new DisplayData(
+                                transient: transient,
+                                data: formattedValues);
 
                 if (!openRequest.Request.Silent)
                 {
@@ -204,7 +188,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)
         {
-            InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest);
+            if (!InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest))
+            {
+                return;
+            }
 
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);

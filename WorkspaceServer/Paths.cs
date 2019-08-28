@@ -32,11 +32,6 @@ namespace WorkspaceServer
 
         public static string NugetCache { get; }
 
-        public static string ExecutableName(this string withoutExtension) =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? withoutExtension + ".exe"
-                : withoutExtension;
-
         public static readonly string InstallDirectory = Path.GetDirectoryName(typeof(WorkspaceUtilities).Assembly.Location);
     }
 }

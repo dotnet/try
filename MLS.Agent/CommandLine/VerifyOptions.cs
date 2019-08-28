@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
     public class VerifyOptions
     {
-        public VerifyOptions(DirectoryInfo dir)
+        public VerifyOptions(IDirectoryAccessor rootDirectory)
         {
-            Dir = dir;
+            RootDirectory = rootDirectory ?? throw new System.ArgumentNullException(nameof(rootDirectory));
         }
 
-        public DirectoryInfo Dir { get; }
+        public IDirectoryAccessor RootDirectory { get; }
     }
 }

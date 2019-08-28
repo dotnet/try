@@ -196,8 +196,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 pair.Value.FormatTo(writer);
             }),
 
-            [typeof(string)] = new PlainTextFormatter<string>((s, writer) => writer.Write(s)),
-
             [typeof(Type)] = new PlainTextFormatter<Type>((type, writer) =>
             {
                 var typeName = type.Name;
@@ -224,15 +222,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 }
             }),
 
-            [typeof(bool)] = new PlainTextFormatter<bool>((value, writer) => writer.Write(value)),
-            [typeof(byte)] = new PlainTextFormatter<byte>((value, writer) => writer.Write(value)),
-            [typeof(short)] = new PlainTextFormatter<short>((value, writer) => writer.Write(value)),
-            [typeof(int)] = new PlainTextFormatter<int>((value, writer) => writer.Write(value)),
-            [typeof(long)] = new PlainTextFormatter<long>((value, writer) => writer.Write(value)),
-            [typeof(Guid)] = new PlainTextFormatter<Guid>((value, writer) => writer.Write(value)),
-            [typeof(decimal)] = new PlainTextFormatter<decimal>((value, writer) => writer.Write(value)),
-            [typeof(float)] = new PlainTextFormatter<float>((value, writer) => writer.Write(value)),
-            [typeof(double)] = new PlainTextFormatter<double>((value, writer) => writer.Write(value)),
             [typeof(DateTime)] = new PlainTextFormatter<DateTime>((value, writer) => writer.Write(value.ToString("u"))),
             [typeof(DateTimeOffset)] = new PlainTextFormatter<DateTimeOffset>((value, writer) => writer.Write(value.ToString("u"))),
         };

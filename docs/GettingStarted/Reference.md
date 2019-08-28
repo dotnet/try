@@ -6,6 +6,7 @@
 - [Create Sessions](./Sessions.md)
 - [Verify your Project](./Verify.md)
 - [Passing Arguments](./PassingArgs.md)
+- [Using Read-only Snippets](./ReadOnlySnippets.md)
 - **Glossary**
 
 ### dotnet try

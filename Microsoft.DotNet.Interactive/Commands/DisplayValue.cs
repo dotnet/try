@@ -5,11 +5,14 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public class DisplayValue : KernelCommandBase
     {
-        public DisplayValue(FormattedValue formattedValue)
+        public DisplayValue(FormattedValue formattedValue, string valueId = null)
         {
             FormattedValue = formattedValue;
+            ValueId = valueId;
         }
 
         public FormattedValue FormattedValue { get; }
+
+        public string ValueId { get; }
     }
 }

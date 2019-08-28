@@ -17,7 +17,7 @@ namespace WorkspaceServer.Kernel
         public static CSharpKernel UseDefaultRendering(
             this CSharpKernel kernel)
         {
-            Task.Run(() => 
+            Task.Run(() =>
                          kernel.SendAsync(
                          new SubmitCode($@"
 using static {typeof(PocketViewTags).FullName};
@@ -71,7 +71,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     }
                 };
 
-                await pipelineContext.Kernel.SendAsync(addPackage);
+                await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });
 
             kernel.AddDirective(r);

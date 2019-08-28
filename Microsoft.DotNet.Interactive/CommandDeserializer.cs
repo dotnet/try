@@ -8,11 +8,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
-    class CommandDispatcher
+    internal class CommandDeserializer
     {
         private readonly Dictionary<string, Type> _map;
 
-        public CommandDispatcher()
+        public CommandDeserializer()
         {
             _map = Assembly
                .GetExecutingAssembly()

@@ -51,6 +51,11 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         private static PlainTextFormatter<T> CreateForAllMembers(bool includeInternals = false)
         {
+            if (typeof(T).IsScalar())
+            {
+                return new PlainTextFormatter<T>((value, writer) => writer.Write(value));
+            }
+
             return new PlainTextFormatter<T>(
                 PlainTextFormatter.CreateFormatDelegate<T>(
                     typeof(T).GetAllMembers(includeInternals).ToArray()));

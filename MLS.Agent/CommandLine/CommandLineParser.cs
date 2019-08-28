@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -93,11 +94,9 @@ namespace MLS.Agent.CommandLine
                                                       new GitHubRepoLocator()));
 
             verify = verify ??
-                     ((verifyOptions, console, startupOptions) =>
-                             VerifyCommand.Do(verifyOptions,
+                     ((options, console, startupOptions) =>
+                             VerifyCommand.Do(options,
                                               console,
-                                              () => new FileSystemDirectoryAccessor(verifyOptions.Dir),
-                                              PackageRegistry.CreateForTryMode(verifyOptions.Dir),
                                               startupOptions));
 
             pack = pack ??
@@ -106,15 +105,30 @@ namespace MLS.Agent.CommandLine
             install = install ??
                       InstallCommand.Do;
 
-            startKernelServer = startKernelServer ?? 
+            startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
 
-            var dirArgument = new Argument<DirectoryInfo>
+            var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
+                Name = nameof(StartupOptions.RootDirectory),
                 Arity = ArgumentArity.ZeroOrOne,
-                Name = nameof(StartupOptions.Dir).ToLower(),
-                Description = "Specify the path to the root directory for your documentation"
-            }.ExistingOnly();
+                Description = "Specify the path to the root directory for your documentation",
+            };
+
+            dirArgument.AddValidator(symbolResult =>
+            {
+                var directory = symbolResult.Tokens
+                               .Select(t => t.Value)
+                               .FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    return $"Directory does not exist: {directory}";
+                }
+
+                return null;
+            });
+
 
             var rootCommand = StartInTryMode();
 
@@ -236,7 +250,7 @@ namespace MLS.Agent.CommandLine
                 command.Handler = CommandHandler.Create<InvocationContext, StartupOptions>((context, options) =>
                 {
                     services.AddSingleton(_ => PackageRegistry.CreateForTryMode(
-                                              options.Dir,
+                                              options.RootDirectory,
                                               options.AddPackageSource));
 
                     startServer(options, context);
@@ -384,10 +398,8 @@ namespace MLS.Agent.CommandLine
                                                                                 .Trace()
                                                                                 .Handle(delivery));
                             })
-                        .AddSingleton((Func<IServiceProvider, IKernel>)(c => CreateKernel()))
-                        .AddSingleton(c => new JupyterRequestContextHandler(
-                                              c.GetRequiredService<PackageRegistry>(),
-                                              c.GetRequiredService<IKernel>())
+                        .AddSingleton(c => CreateKernel())
+                        .AddSingleton(c => new JupyterRequestContextHandler(c.GetRequiredService<IKernel>())
                                           .Trace())
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
@@ -472,7 +484,7 @@ namespace MLS.Agent.CommandLine
             {
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
                 {
-                    dirArgument
+                   dirArgument
                 };
 
                 verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
@@ -485,17 +497,20 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        private static CompositeKernel CreateKernel()
+        private static IKernel CreateKernel()
         {
             return new CompositeKernel
                         {
                             new CSharpKernel()
                                 .UseDefaultRendering()
                                 .UseNugetDirective()
-                                .UseExtendDirective()
                                 .UseKernelHelpers()
-                                .UseXplot()
-                        };
+                                .UseXplot(),
+                            new FSharpKernel()
+                                .UseDefaultRendering()
+                        }
+                        .UseDefaultMagicCommands()
+                        .UseExtendDirective();
         }
     }
 }

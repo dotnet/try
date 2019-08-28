@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.CommandLine;
+using WorkspaceServer;
 using Xunit;
 
 namespace MLS.Agent.Tests.CommandLine
@@ -16,7 +17,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void When_Production_is_true_and_in_hosted_mode_then_EnvironmentName_is_production()
         {
-            var options = new StartupOptions(production: true, dir: null);
+            var options = new StartupOptions(production: true, rootDirectory: null);
 
             options.EnvironmentName.Should().Be(Environments.Production);
         }
@@ -24,7 +25,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void When_Production_is_true_and_not_in_hosted_mode_then_EnvironmentName_is_production()
         {
-            var options = new StartupOptions(production: true, dir: new DirectoryInfo(Directory.GetCurrentDirectory()));
+            var options = new StartupOptions(production: true, rootDirectory: new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()));
 
             options.EnvironmentName.Should().Be(Environments.Production);
         }
@@ -32,7 +33,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void When_not_in_hosted_mode_then_EnvironmentName_is_production()
         {
-            var options = new StartupOptions(dir: new DirectoryInfo(Directory.GetCurrentDirectory()));
+            var options = new StartupOptions(rootDirectory: new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()));
 
             options.EnvironmentName.Should().Be(Environments.Production);
         }
