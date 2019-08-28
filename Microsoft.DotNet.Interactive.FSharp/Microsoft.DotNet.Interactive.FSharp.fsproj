@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="FSharpKernel.fs" />
+    <Compile Include="FSharpPocketViewTags.fs" />
   </ItemGroup>
 
   <ItemGroup>
