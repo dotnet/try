@@ -12,9 +12,9 @@ using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using WorkspaceServer;
-using WorkspaceServer.Tests.TestUtility;
 using Xunit;
 using Xunit.Abstractions;
+using MLS.Agent.Tools;
 using WorkspaceServer.Tests;
 
 namespace MLS.Agent.Tests.CommandLine
@@ -96,7 +96,7 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public async Task Parse_root_directory_with_a_valid_path_succeeds()
         {
-            var path = TestAssets.SampleConsole.FullName;
+            var path = Directory.GetCurrentDirectory();
             await _parser.InvokeAsync(new[] { path }, _console);
             _startOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(path + Path.DirectorySeparatorChar);
         }

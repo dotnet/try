@@ -3,10 +3,11 @@
 
 using System;
 using FluentAssertions;
+using MLS.Agent.Tools;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Try.Markdown.Tests
+namespace MLS.Agent.Tools.Tests
 {
     public class RelativeFilePathTests
     {

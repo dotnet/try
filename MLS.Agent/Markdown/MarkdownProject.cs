@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Markdig;
 using Markdig.Extensions.Mathematics;
 using Microsoft.DotNet.Try.Markdown;
+using MLS.Agent.Tools;
 using Recipes;
 using WorkspaceServer;
 

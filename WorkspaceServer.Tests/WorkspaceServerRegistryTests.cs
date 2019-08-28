@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 using FluentAssertions.Extensions;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests.Packaging;
+using MLS.Agent.Tools.Tests;
 
 namespace WorkspaceServer.Tests
 {

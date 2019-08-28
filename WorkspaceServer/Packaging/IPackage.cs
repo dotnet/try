@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.CodeAnalysis;
+using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
 {

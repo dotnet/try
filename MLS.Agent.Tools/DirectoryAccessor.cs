@@ -1,11 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using MLS.Agent.Tools.Roslyn;
 using System.IO;
-using Microsoft.DotNet.Try.Markdown;
-using WorkspaceServer.Servers.Roslyn;
 
-namespace WorkspaceServer
+namespace MLS.Agent.Tools
 {
     public static class DirectoryAccessor
     {

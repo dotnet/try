@@ -7,6 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Binding;
 using System.Linq;
 using Markdig;
+using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Try.Markdown
 {

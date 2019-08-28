@@ -6,10 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Try.Markdown;
 
-namespace WorkspaceServer.Tests
+namespace MLS.Agent.Tools.Tests
 {
     public class InMemoryDirectoryAccessor : IDirectoryAccessor, IEnumerable
     {

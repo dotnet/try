@@ -6,12 +6,8 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.DotNet.Try.Markdown;
-using WorkspaceServer;
-using WorkspaceServer.Packaging;
-using WorkspaceServer.Tests;
-using WorkspaceServer.Tests.Packaging;
-using WorkspaceServer.Tests.TestUtility;
+using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 using Xunit;
 using static Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 

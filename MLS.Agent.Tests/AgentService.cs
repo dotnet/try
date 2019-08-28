@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Tools;
 using Pocket;
 using Recipes;
 using WorkspaceServer;

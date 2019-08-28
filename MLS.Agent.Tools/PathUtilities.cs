@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 // adapted from http://source.roslyn.io/#System.Reflection.Metadata/System/Reflection/Internal/Utilities/PathUtilities.cs,36b27d7696df4d1e
 
-namespace WorkspaceServer.Servers.Roslyn
+namespace MLS.Agent.Tools.Roslyn
 {
     // Contains path parsing utilities.
     // We need our own because System.IO.Path is insufficient for our purposes

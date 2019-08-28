@@ -15,6 +15,7 @@ using WorkspaceServer;
 using WorkspaceServer.Servers;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 using File = Microsoft.DotNet.Try.Protocol.File;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.CommandLine
 {

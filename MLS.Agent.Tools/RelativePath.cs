@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.DotNet.Try.Markdown
+namespace MLS.Agent.Tools
 {
     public abstract class RelativePath
     {

@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Markdown;
 using WorkspaceServer.Tests;
-using WorkspaceServer.Tests.TestUtility;
+using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 
 namespace MLS.Agent.Tests
 {
@@ -21,8 +22,7 @@ namespace MLS.Agent.Tests
             [Fact]
             public async Task Returns_list_of_all_relative_paths_to_all_markdown_files()
             {
-                var workingDir = TestAssets.SampleConsole;
-                var dirAccessor = new InMemoryDirectoryAccessor(workingDir)
+                var dirAccessor = new InMemoryDirectoryAccessor()
                                   {
                                       ("Readme.md", ""),
                                       ("Subdirectory/Tutorial.md", ""),
