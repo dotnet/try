@@ -84,8 +84,29 @@ namespace Microsoft.DotNet.Interactive
                             context,
                             next),
 
+                        LoadCSharpExtension loadCSharpExtension =>
+                        HandleCSharpLoadExtension(
+                            loadCSharpExtension, 
+                            context, 
+                            next),
+
                             _ => next(command, context)
                         });
+        }
+
+        private async Task HandleCSharpLoadExtension(
+            LoadCSharpExtension loadCSharpExtension, 
+            KernelInvocationContext invocationContext, 
+            KernelPipelineContinuation next)
+        {
+            loadCSharpExtension.Handler = async context =>
+            {
+                var kernelExtensionLoader = new KernelExtensionLoader();
+                kernelExtensionLoader.LoadFromNuGetPackage(loadCSharpExtension, invocationContext.HandlingKernel);
+                context.OnCompleted();
+            };
+                
+            throw new NotImplementedException();
         }
 
         private async Task HandleLoadExtension(

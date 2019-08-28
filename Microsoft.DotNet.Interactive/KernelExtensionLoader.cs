@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools;
 using System;
@@ -14,21 +15,6 @@ namespace Microsoft.DotNet.Interactive
 {
     public class KernelExtensionLoader
     {
-        //public async Task LoadFromNuGetPackage(NuGetPackageAdded nugetPackageAdded, IKernel kernel)
-        //{
-        //    var nuGetPackageKernelExtensionFinder = new NuGetPackageKernelExtensionFinder();
-
-        //    foreach (var referencePath in nugetPackageAdded.MetadataReferencesPaths)
-        //    {
-        //        var directoryAccessor = new FileSystemDirectoryAccessor(referencePath.Directory);
-        //        var extensionDlls = nuGetPackageKernelExtensionFinder.FindExtensionDlls(directoryAccessor, nugetPackageAdded.PackageReference.PackageName);
-        //        foreach (var extensionDll in extensionDlls)
-        //        {
-        //            await LoadFromAssembly(extensionDll, kernel);
-        //        }
-        //    }
-        //}
-
         public async Task LoadFromAssembly(FileInfo assemblyFile, IKernel kernel)
         {
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
@@ -42,6 +28,19 @@ namespace Microsoft.DotNet.Interactive
                 var extension = (IKernelExtension)Activator.CreateInstance(extensionType);
 
                 await extension.OnLoadAsync(kernel);
+            }
+        }
+
+        public async Task LoadFromNuGetPackage(LoadCSharpExtension loadCSharpExtension, IKernel kernel)
+        {
+            foreach (var referencePath in loadCSharpExtension.MetadataReferencesPaths)
+            {
+                var directoryAccessor = new FileSystemDirectoryAccessor(referencePath.Directory);
+                var extensionDlls = NuGetPackageKernelExtensionFinder.FindExtensionDlls(directoryAccessor, loadCSharpExtension.PackageReference.PackageName);
+                foreach (var extensionDll in extensionDlls)
+                {
+                    await LoadFromAssembly(extensionDll, kernel);
+                }
             }
         }
     }

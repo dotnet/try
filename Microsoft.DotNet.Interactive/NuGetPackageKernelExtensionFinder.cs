@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public class NuGetPackageKernelExtensionFinder
     {
-        public IEnumerable<FileInfo> FindExtensionDlls(IDirectoryAccessor nugetPackageAssemblyDirectory, string packageName)
+        public static IEnumerable<FileInfo> FindExtensionDlls(IDirectoryAccessor nugetPackageAssemblyDirectory, string packageName)
         {
             var directory = nugetPackageAssemblyDirectory.GetFullyQualifiedRoot();
             while (directory != null && directory.Parent != null && directory.Parent.Name.ToLower().CompareTo(packageName.ToLower()) != 0)

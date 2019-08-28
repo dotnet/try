@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             };
 
             var assemblyDirectory = directoryAccessor.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath(assemblyDirectoryPath));
-            var dlls = new NuGetPackageKernelExtensionFinder().FindExtensionDlls(assemblyDirectory, nugetpackageName);
+            var dlls = NuGetPackageKernelExtensionFinder.FindExtensionDlls(assemblyDirectory, nugetpackageName);
 
             dlls.Count().Should().Be(1);
             dlls.Should().Contain(dll => dll.FullName == directoryAccessor.GetFullyQualifiedFilePath($"{extensionsDirectory}/testExtension.dll").FullName);

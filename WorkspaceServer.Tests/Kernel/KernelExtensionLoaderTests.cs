@@ -9,6 +9,8 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.Events;
 using System.Linq;
 using MLS.Agent.Tools.Tests;
+using Microsoft.DotNet.Interactive.Commands;
+using System.Collections.Generic;
 
 namespace WorkspaceServer.Tests
 {
@@ -33,31 +35,29 @@ namespace WorkspaceServer.Tests
 
         }
 
-        //[Fact]
-        //public async Task Can_load_from_nuget_package()
-        //{
-        //    var directory = Create.EmptyWorkspace().Directory;
+        [Fact]
+        public async Task Can_load_from_nuget_package()
+        {
+            var directory = Create.EmptyWorkspace().Directory;
 
-        //    var extensionDll = await CreateAndGetExtensionDll(directory);
+            var extensionDll = await CreateAndGetExtensionDll(directory);
 
-        //    var nugetPackageDirectory = new InMemoryDirectoryAccessor(directory.Subdirectory("myNugetPackage"))
-        //    {
-        //        ($"2.0.0/interactive-extensions/{extensionDll.Name}", extensionDll.Read()),
-        //        ($"2.0.0/lib/netstandard2.0/myNugetPackage.dll", "")
-        //    }.CreateFiles();
+            var nugetPackageDirectory = new InMemoryDirectoryAccessor(directory.Subdirectory("myNugetPackage"))
+            {
+                ($"2.0.0/lib/netstandard2.0/myNugetPackage.dll", ""),
+                ($"2.0.0/interactive-extensions/a.dll", "")
+            }.CreateFiles();
 
-        //    File.Copy(extensionDll.FullName, "");
+            File.Copy(extensionDll.FullName, nugetPackageDirectory.GetFullyQualifiedFilePath($"2.0.0/interactive-extensions/{extensionDll.Name}").FullName);
 
-        //    var nugetPackageAdded = new NuGetPackageAdded(new NugetPackageReference("myNugetPackage"), new List<FileInfo>() { nugetPackageDirectory.GetFullyQualifiedFilePath($"2.0.0/interactive-extensions/{extensionDll.Name}") });
-        //    var kernel = CreateKernel();
-        //    await new KernelExtensionLoader().LoadFromNuGetPackage(nugetPackageAdded, kernel);
+            var loadExtensionCommand = new LoadCSharpExtension(new NugetPackageReference("myNugetPackage"), new List<FileInfo>() { nugetPackageDirectory.GetFullyQualifiedFilePath($"2.0.0/lib/netstandard2.0/myNugetPackage.dll") });
+            var kernel = CreateKernel();
+            await new KernelExtensionLoader().LoadFromNuGetPackage(loadExtensionCommand, kernel);
 
-        //    KernelEvents.Should()
-        //              .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-        //                                  e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
-
-        //    throw new NotImplementedException();
-        //}
+            KernelEvents.Should()
+                      .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
+                                          e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+        }
 
         private static async Task<FileInfo> CreateAndGetExtensionDll(DirectoryInfo directory)
         {
