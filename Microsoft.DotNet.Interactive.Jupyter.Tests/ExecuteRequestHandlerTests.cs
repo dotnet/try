@@ -7,10 +7,6 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using WorkspaceServer.Kernel;
 using Xunit;
-using System.Reactive.Linq;
-using Microsoft.DotNet.Interactive.Events;
-using FluentAssertions.Extensions;
-using System.Reactive.Concurrency;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
