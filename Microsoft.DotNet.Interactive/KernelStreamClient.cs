@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Interactive
                     }
                     catch (JsonReaderException)
                     {
-                        Write(new CommandParseFailure() { Body = line }, -1);
+                        Write(new CommandParseFailure { Body = line }, -1);
                     }
                     catch
                     {

@@ -208,10 +208,7 @@ x"));
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                     Handle = context =>
-                    {
-                        return Task.CompletedTask;
-                    }
+                     Handle = context => Task.CompletedTask
                 }
             };
 
@@ -254,8 +251,8 @@ x"));
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode("#kernel csharp"));
-            writer.WriteMessage(new SubmitCode(@"#r nuget:""Microsoft.Extensions.Logging"""));
+            writer.WriteMessage(new SubmitCode(@"%%csharp
+#r nuget:""Microsoft.Extensions.Logging"""));
             writer.WriteMessage(new Quit());
 
             input.Position = 0;
@@ -274,9 +271,12 @@ x"));
 
             var text = reader.ReadToEnd();
             var events = text.Split(Environment.NewLine)
-                .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
+                .Select(JsonConvert.DeserializeObject<StreamKernelEvent>);
 
-            events.Should().Contain(e => e.EventType == "NuGetPackageAdded");
+            events.Should()
+                .Contain(e => e.EventType == "NuGetPackageAdded")
+                .And
+                .NotContain(e => e.EventType == "CommandNotRecognized");
         }
     }
 }
