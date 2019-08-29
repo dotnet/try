@@ -49,8 +49,8 @@ namespace Microsoft.DotNet.Interactive
                     {
                         obj = JObject.Parse(line);
                         streamKernelCommand = obj.ToObject<StreamKernelCommand>();
-
                         IKernelCommand command = null;
+
                         if (obj.TryGetValue("Command", out var commandValue))
                         {
                             command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
@@ -64,9 +64,10 @@ namespace Microsoft.DotNet.Interactive
                         if (command == null)
                         {
                             Write(new CommandNotRecognized
-                            {
-                                Body = obj
-                            }, streamKernelCommand.Id);
+                                {
+                                    Body = obj
+                                }, 
+                                streamKernelCommand.Id);
                             continue;
                         }
 
@@ -78,7 +79,11 @@ namespace Microsoft.DotNet.Interactive
                     }
                     catch (JsonReaderException)
                     {
-                        Write(new CommandParseFailure { Body = line }, streamKernelCommand?.Id ?? -1);
+                        Write(new CommandParseFailure
+                            {
+                                Body = line
+                            }, 
+                            streamKernelCommand?.Id ?? -1);
                     }
                     catch
                     {

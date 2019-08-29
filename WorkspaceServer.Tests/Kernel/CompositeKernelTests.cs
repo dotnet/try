@@ -249,8 +249,7 @@ x"));
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode(@"%%csharp
-#r nuget:""Microsoft.Extensions.Logging"""));
+            writer.WriteMessage(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""));
             writer.WriteMessage(new Quit());
 
             input.Position = 0;
