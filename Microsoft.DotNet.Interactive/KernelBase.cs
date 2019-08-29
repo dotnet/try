@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.Interactive
             displayValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
-                    new ValueProduced(
+                    new Events.DisplayedValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue },
@@ -201,12 +201,12 @@ namespace Microsoft.DotNet.Interactive
             displayedValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
-                    new ValueProduced(
+                    new DisplayedValueUpdated(
                         displayedValue.FormattedValue,
-                        displayedValue,
-                        formattedValues: new[] { displayedValue.FormattedValue },
                         valueId: displayedValue.ValueId,
-                        isUpdatedValue: true));
+                        command: displayedValue,
+                        formattedValues: new[] { displayedValue.FormattedValue }
+                        ));
 
                 invocationContext.OnCompleted();
 

@@ -36,7 +36,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("123"));
 
             KernelEvents.ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<ReturnValueProduced>()
                 .Last()
                 .Value
                 .Should()
@@ -64,7 +64,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var lastValueProducedPosition = KernelEvents
                 .Select((e, pos) => (e.Value, pos))
-                .Last(t => t.Value is ValueProduced).pos;
+                .Last(t => t.Value is ReturnValueProduced).pos;
 
             lastValueProducedPosition
                 .Should()
@@ -118,7 +118,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("var a = 12"));
 
             KernelEvents.Should()
-                .NotContain(e => e.Value is ValueProduced);
+                .NotContain(e => e.Value is DisplayedValueProduced);
 
             KernelEvents
                 .Should()
@@ -145,7 +145,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("null"));
 
             KernelEvents.ValuesOnly()
-                        .OfType<ValueProduced>()
+                        .OfType<ReturnValueProduced>()
                         .Last()
                         .Value
                         .Should()
@@ -161,7 +161,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e.Value is ValueProduced);
+                .NotContain(e => e.Value is DisplayedValueProduced);
         }
 
         [Fact]
@@ -174,7 +174,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("x.Max()"));
 
             KernelEvents.ValuesOnly()
-                        .OfType<ValueProduced>()
+                        .OfType<ReturnValueProduced>()
                         .Last()
                         .Value
                         .Should()
@@ -194,12 +194,12 @@ Console.Write(""value three"");");
 
             KernelEvents
                 .ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<DisplayedValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new ValueProduced("value one", kernelCommand, false, new[] { new FormattedValue("text/plain", "value one"), }),
-                    new ValueProduced("value two", kernelCommand, false, new[] { new FormattedValue("text/plain", "value two"), }),
-                    new ValueProduced("value three", kernelCommand, false, new[] { new FormattedValue("text/plain", "value three"), }));
+                    new DisplayedValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
+                    new DisplayedValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
+                    new DisplayedValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
         [Fact]
@@ -215,11 +215,15 @@ Console.Write(""value three"");
             await kernel.SendAsync(kernelCommand);
 
             KernelEvents.ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<DisplayedValueProduced>()
                 .Should()
-                .HaveCount(4)
-                .And
-                .ContainSingle(e => e.IsReturnValue);
+                .HaveCount(3);
+
+            KernelEvents
+                .ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value.Should().Be(5);
 
         }
 
@@ -235,7 +239,7 @@ Console.Write(DateTime.Now);
 5", "csharp");
             await kernel.SendAsync(kernelCommand);
             var events = KernelEvents
-                .Where(e => e.Value is ValueProduced).ToArray();
+                .Where(e => e.Value is DisplayedValueProduced).ToArray();
             var diff = events[1].Timestamp - events[0].Timestamp;
             diff.Should().BeCloseTo(1.Seconds(), precision: 200);
 
@@ -250,7 +254,7 @@ Console.Write(DateTime.Now);
             await kernel.SendAsync(new SubmitCode("text[^5..^0]"));
 
             KernelEvents.ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<DisplayedValueProduced>()
                 .Last()
                 .Value
                 .Should()
@@ -277,10 +281,10 @@ json
 
             KernelEvents.ValuesOnly()
                         .Should()
-                        .ContainSingle(e => e is ValueProduced);
+                        .ContainSingle(e => e is ReturnValueProduced);
 
             KernelEvents.ValuesOnly()
-                        .OfType<ValueProduced>()
+                        .OfType<ReturnValueProduced>()
                         .Single()
                         .Value
                         .Should()

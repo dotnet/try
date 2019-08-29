@@ -7,6 +7,7 @@ using FluentAssertions;
 using FluentAssertions.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -38,7 +39,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueProduced = await result
                                       .KernelEvents
-                                      .OfType<ValueProduced>()
+                                      .OfType<ReturnValueProduced>()
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
@@ -65,7 +66,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueProduced = await result
                                       .KernelEvents
-                                      .OfType<ValueProduced>()
+                                      .OfType<ReturnValueProduced>()
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 
@@ -89,7 +90,7 @@ namespace WorkspaceServer.Tests.Kernel
             var formatted =
                 KernelEvents
                     .ValuesOnly()
-                    .OfType<ValueProduced>()
+                    .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues);
 
             formatted
@@ -106,19 +107,24 @@ namespace WorkspaceServer.Tests.Kernel
 
             await kernel.SendAsync(new SubmitCode("var d = display(b(\"hello\")); d.Update(b(\"world\"));"));
 
-            var formatted =
-                KernelEvents
-                    .OrderBy(e => e.Timestamp)
-                    .ValuesOnly()
-                    .OfType<ValueProduced>()
-                    .SelectMany(v => v.FormattedValues);
 
-            formatted
+            KernelEvents
+                .OrderBy(e => e.Timestamp)
+                .ValuesOnly()
+                .OfType<DisplayedValueProduced>()
+                .SelectMany(v => v.FormattedValues)
                 .Should()
                 .ContainSingle(v =>
                     v.MimeType == "text/html" &&
-                    v.Value.ToString().Contains("<b>hello</b>"))
-                .And
+                    v.Value.ToString().Contains("<b>hello</b>"));
+
+
+            KernelEvents
+                .OrderBy(e => e.Timestamp)
+                .ValuesOnly()
+                .OfType<DisplayedValueUpdated>()
+                .SelectMany(v => v.FormattedValues)
+                .Should()
                 .ContainSingle(v =>
                     v.MimeType == "text/html" &&
                     v.Value.ToString().Contains("<b>world</b>"));
@@ -131,24 +137,15 @@ namespace WorkspaceServer.Tests.Kernel
 
             await kernel.SendAsync(new SubmitCode("var d = display(b(\"hello\")); d.Update(b(\"world\"));"));
 
-            var formatted =
+            var valueEvents =
                 KernelEvents
                     .OrderBy(e => e.Timestamp)
-                    .ValuesOnly()
-                    .OfType<ValueProduced>()
-                    .SelectMany(v => v.FormattedValues).ToList();
+                    .Where(e => e.Value is DisplayedValueProduced || e.Value is DisplayedValueUpdated)
+                    .Select(e => e.Value)
+                   .ToList();
 
-            var firstValue = formatted.Select((v, i) => new {v, i}).First(e => e.v.MimeType == "text/html" &&
-                                                                               e.v.Value.ToString()
-                                                                                   .Contains("<b>hello</b>")).i;
-
-            var updatedValue = formatted.Select((v, i) => new { v, i }).First(e => e.v.MimeType == "text/html" &&
-                                                                                 e.v.Value.ToString()
-                                                                                     .Contains("<b>world</b>")).i;
-
-            updatedValue
-                .Should()
-                .BeGreaterOrEqualTo(firstValue);
+            valueEvents.First().Should().BeOfType<DisplayedValueProduced>();
+            valueEvents.Last().Should().BeOfType<DisplayedValueUpdated>();
         }
 
         [Fact]
@@ -163,7 +160,7 @@ namespace WorkspaceServer.Tests.Kernel
             var formatted =
                 KernelEvents
                     .ValuesOnly()
-                    .OfType<ValueProduced>()
+                    .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
 

@@ -57,7 +57,7 @@ namespace WorkspaceServer.Tests.Kernel
         private void AssertLastValue(object value)
         {
             KernelEvents.ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<ReturnValueProduced>()
                 .Last()
                 .Value
                 .Should()
