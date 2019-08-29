@@ -118,7 +118,7 @@ namespace WorkspaceServer.Kernel
                 context.OnNext(new IncompleteCodeSubmissionReceived(submitCode));
             }
 
-            if (submitCode.SubmissionType == SubmissionType.AnalysisOnly)
+            if (submitCode.SubmissionType == SubmissionType.Diagnose)
             {
                 return;
             }
