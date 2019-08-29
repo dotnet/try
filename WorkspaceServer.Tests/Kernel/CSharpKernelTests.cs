@@ -514,7 +514,7 @@ try
 }
 catch (Exception e)
 {
-    Console.WriteLine(e);
+    Display(e);
 }", "csharp");
 
             var result = await kernel.SendAsync(command);
