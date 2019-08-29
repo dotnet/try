@@ -9,16 +9,25 @@ namespace Microsoft.DotNet.Interactive
 {
     public class NuGetPackagePathResolver
     {
-        public static DirectoryInfo GetNuGetPackageBasePath(NugetPackageReference nugetPackage, IEnumerable<FileInfo> metadataReferences)
+        public static bool TryGetNuGetPackageBasePath(NugetPackageReference nugetPackage, IEnumerable<FileInfo> metadataReferences, out DirectoryInfo nugetPackageDirectory)
         {
-            var nugetPackageAssembly = metadataReferences.Single(file => string.Compare(Path.GetFileNameWithoutExtension(file.Name), nugetPackage.PackageName) == 0);
-            var directory = nugetPackageAssembly.Directory;
-            while (directory != null && directory.Parent != null && directory.Parent.Name.ToLower().CompareTo(nugetPackage.PackageName.ToLower()) != 0)
+            var nugetPackageAssembly = metadataReferences.FirstOrDefault(file => string.Compare(Path.GetFileNameWithoutExtension(file.Name), nugetPackage.PackageName) == 0);
+            if (nugetPackageAssembly != null)
             {
-                directory = directory.Parent;
-            }
+                var directory = nugetPackageAssembly.Directory;
+                while (directory != null && directory.Parent != null && directory.Parent.Name.ToLower().CompareTo(nugetPackage.PackageName.ToLower()) != 0)
+                {
+                    directory = directory.Parent;
+                }
 
-            return directory;
+                nugetPackageDirectory = directory;
+                return true;
+            }
+            else
+            {
+                nugetPackageDirectory = null;
+                return false;
+            }
         }
     }
 }

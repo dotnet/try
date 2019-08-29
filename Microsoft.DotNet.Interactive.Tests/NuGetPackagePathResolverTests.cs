@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 ($"{nugetPackageReference.PackageName}/2.0.0/lib/netstandard2.0/{nugetPackageReference.PackageName}.dll", "")
             };
 
-            var nugetPackageDirectory = NuGetPackagePathResolver.GetNuGetPackageBasePath(nugetPackageReference, directory.GetAllFilesRecursively().Select(file => directory.GetFullyQualifiedFilePath(file)));
+            NuGetPackagePathResolver.TryGetNuGetPackageBasePath(nugetPackageReference, directory.GetAllFilesRecursively().Select(file => directory.GetFullyQualifiedFilePath(file)), out var nugetPackageDirectory);
 
             (nugetPackageDirectory.FullName + Path.DirectorySeparatorChar).Should().Be(directory.GetFullyQualifiedPath(new RelativeDirectoryPath("myNugetPackage/2.0.0")).FullName);
         }
