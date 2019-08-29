@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public enum SubmissionType
     {
-        Execution = 0,
-        AnalysisOnly
+        Run = 0,
+        Diagnose
     }
 }
