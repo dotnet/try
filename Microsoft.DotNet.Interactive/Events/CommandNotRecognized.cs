@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    internal class CommandNotRecognized : IKernelEvent
+    public class CommandNotRecognized : IKernelEvent
     {
         public IKernelCommand Command => null;
-        public string Body { get; set; }
+        public object Body { get; set; }
     }
 }

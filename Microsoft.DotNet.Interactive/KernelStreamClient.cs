@@ -1,10 +1,14 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -14,6 +18,10 @@ namespace Microsoft.DotNet.Interactive
         private readonly TextReader _input;
         private readonly TextWriter _output;
         private readonly CommandDeserializer _deserializer = new CommandDeserializer();
+        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        };
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
         {
@@ -35,12 +43,14 @@ namespace Microsoft.DotNet.Interactive
                         continue;
                     }
 
+                    StreamKernelCommand streamKernelCommand = null;
+                    JObject obj = null;
                     try
                     {
-                        var obj = JObject.Parse(line);
-                        var streamKernelCommand = obj.ToObject<StreamKernelCommand>();
-
+                        obj = JObject.Parse(line);
+                        streamKernelCommand = obj.ToObject<StreamKernelCommand>();
                         IKernelCommand command = null;
+
                         if (obj.TryGetValue("Command", out var commandValue))
                         {
                             command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
@@ -53,7 +63,11 @@ namespace Microsoft.DotNet.Interactive
 
                         if (command == null)
                         {
-                            Write(new CommandNotRecognized(), streamKernelCommand.Id);
+                            Write(new CommandNotRecognized
+                                {
+                                    Body = obj
+                                }, 
+                                streamKernelCommand.Id);
                             continue;
                         }
 
@@ -65,14 +79,18 @@ namespace Microsoft.DotNet.Interactive
                     }
                     catch (JsonReaderException)
                     {
-                        Write(new CommandParseFailure() { Body = line }, -1);
+                        Write(new CommandParseFailure
+                            {
+                                Body = line
+                            }, 
+                            streamKernelCommand?.Id ?? -1);
                     }
                     catch
                     {
                         Write(new CommandNotRecognized
                         {
-                            Body = line
-                        }, -1);
+                            Body = obj ?? (object)line
+                        }, streamKernelCommand?.Id ?? -1);
                     }
 
                 }
@@ -87,7 +105,7 @@ namespace Microsoft.DotNet.Interactive
                 Event = JsonConvert.SerializeObject(e),
                 EventType = e.GetType().Name
             };
-            var serialized = JsonConvert.SerializeObject(wrapper);
+            var serialized = JsonConvert.SerializeObject(wrapper, _jsonSerializerSettings);
             _output.WriteLine(serialized);
             _output.Flush();
         }
