@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 
     public enum SubmissionType
     {
-        Execution,
+        Execution = 0,
         AnalysisOnly
     }
 }
