@@ -22,6 +22,7 @@ using Microsoft.DotNet.Interactive.Rendering;
 using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
+using DisplayedValue = Microsoft.DotNet.Interactive.Events.DisplayedValue;
 using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
@@ -197,7 +198,7 @@ namespace WorkspaceServer.Kernel
                         };
 
             context.OnNext(
-                new ValueProduced(
+                new DisplayedValue(
                     output,
                     command,
                     formattedValues));

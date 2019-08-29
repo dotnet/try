@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                       .Trim();
 
                       
-                        context.OnNext(new ValueProduced(
+                        context.OnNext(new Events.DisplayedValue(
                                            htmlContent,
                                            context.Command,
                                            formattedValues: new[]
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     supportedDirectives.Commands.AddRange(context.CurrentKernel.Directives);
 
-                    context.OnNext(new ValueProduced(supportedDirectives));
+                    context.OnNext(new Events.DisplayedValue(supportedDirectives));
 
                     await context.CurrentKernel.VisitSubkernelsAsync(async k =>
                     {
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                     scriptContent))
                                 .ToString();
 
-                        context.OnNext(new ValueProduced(
+                        context.OnNext(new Events.DisplayedValue(
                                            scriptContent,
                                            context.Command,
                                            formattedValues: new[]

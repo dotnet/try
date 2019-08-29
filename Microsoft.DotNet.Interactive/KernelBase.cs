@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.Interactive
             displayValue.Handler = invocationContext =>
             {
                 invocationContext.OnNext(
-                    new ValueProduced(
+                    new Events.DisplayedValue(
                         displayValue.FormattedValue,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue },

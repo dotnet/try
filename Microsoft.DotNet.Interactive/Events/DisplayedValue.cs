@@ -6,9 +6,9 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class ValueProduced : ValueProductionEvent
+    public class DisplayedValue : ValueProducedEventBase
     {
-        public ValueProduced(
+        public DisplayedValue(
             object value,
             IKernelCommand command = null,
             IReadOnlyCollection<FormattedValue> formattedValues = null,

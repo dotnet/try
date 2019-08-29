@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ValueProductionEvent valueProductionEvent:
+                case ValueProducedEventBase valueProductionEvent:
                     OnValueProductionEvent(valueProductionEvent);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
@@ -126,28 +126,28 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnValueProductionEvent(ValueProductionEvent @event)
+        private void OnValueProductionEvent(ValueProducedEventBase eventBase)
         {
-            if (!InFlightRequests.TryGetValue(@event.Command, out var openRequest))
+            if (!InFlightRequests.TryGetValue(eventBase.Command, out var openRequest))
             {
                 return;
             }
 
-            var transient = CreateTransient(@event.ValueId);
+            var transient = CreateTransient(eventBase.ValueId);
 
-            var formattedValues = @event
+            var formattedValues = eventBase
                 .FormattedValues
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
-            var value = @event.Value;
+            var value = eventBase.Value;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             DisplayData executeResultData;
 
-            switch (@event)
+            switch (eventBase)
             {
-                case ValueProduced _:
+                case Events.DisplayedValue _:
                     executeResultData = new DisplayData(
                         transient: transient,
                         data: formattedValues);
@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         data: formattedValues);
                     break;
                 default:
-                    throw new ArgumentException("Unsupported event type", nameof(@event));
+                    throw new ArgumentException("Unsupported event type", nameof(eventBase));
             }
 
             SendDisplayData(executeResultData, openRequest);
