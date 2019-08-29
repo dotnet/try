@@ -16,7 +16,6 @@ using Pocket;
 using Xunit;
 using Xunit.Abstractions;
 using static Pocket.Logger;
-using DisplayedValue = Microsoft.DotNet.Interactive.Events.DisplayedValue;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -91,7 +90,7 @@ namespace WorkspaceServer.Tests.Kernel
             var formatted =
                 KernelEvents
                     .ValuesOnly()
-                    .OfType<DisplayedValue>()
+                    .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues);
 
             formatted
@@ -112,7 +111,7 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents
                 .OrderBy(e => e.Timestamp)
                 .ValuesOnly()
-                .OfType<DisplayedValue>()
+                .OfType<DisplayedValueProduced>()
                 .SelectMany(v => v.FormattedValues)
                 .Should()
                 .ContainSingle(v =>
@@ -123,7 +122,7 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents
                 .OrderBy(e => e.Timestamp)
                 .ValuesOnly()
-                .OfType<ValueUpdated>()
+                .OfType<DisplayedValueUpdated>()
                 .SelectMany(v => v.FormattedValues)
                 .Should()
                 .ContainSingle(v =>
@@ -141,12 +140,12 @@ namespace WorkspaceServer.Tests.Kernel
             var valueEvents =
                 KernelEvents
                     .OrderBy(e => e.Timestamp)
-                    .Where(e => e.Value is DisplayedValue || e.Value is ValueUpdated)
+                    .Where(e => e.Value is DisplayedValueProduced || e.Value is DisplayedValueUpdated)
                     .Select(e => e.Value)
                    .ToList();
 
-            valueEvents.First().Should().BeOfType<DisplayedValue>();
-            valueEvents.Last().Should().BeOfType<ValueUpdated>();
+            valueEvents.First().Should().BeOfType<DisplayedValueProduced>();
+            valueEvents.Last().Should().BeOfType<DisplayedValueUpdated>();
         }
 
         [Fact]
@@ -161,7 +160,7 @@ namespace WorkspaceServer.Tests.Kernel
             var formatted =
                 KernelEvents
                     .ValuesOnly()
-                    .OfType<DisplayedValue>()
+                    .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
 

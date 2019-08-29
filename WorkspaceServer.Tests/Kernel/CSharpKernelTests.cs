@@ -19,7 +19,6 @@ using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
-using DisplayedValue = Microsoft.DotNet.Interactive.Events.DisplayedValue;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -119,7 +118,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("var a = 12"));
 
             KernelEvents.Should()
-                .NotContain(e => e.Value is DisplayedValue);
+                .NotContain(e => e.Value is DisplayedValueProduced);
 
             KernelEvents
                 .Should()
@@ -162,7 +161,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e.Value is DisplayedValue);
+                .NotContain(e => e.Value is DisplayedValueProduced);
         }
 
         [Fact]
@@ -195,12 +194,12 @@ Console.Write(""value three"");");
 
             KernelEvents
                 .ValuesOnly()
-                .OfType<DisplayedValue>()
+                .OfType<DisplayedValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new DisplayedValue("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
-                    new DisplayedValue("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
-                    new DisplayedValue("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
+                    new DisplayedValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
+                    new DisplayedValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
+                    new DisplayedValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
         [Fact]
@@ -216,7 +215,7 @@ Console.Write(""value three"");
             await kernel.SendAsync(kernelCommand);
 
             KernelEvents.ValuesOnly()
-                .OfType<DisplayedValue>()
+                .OfType<DisplayedValueProduced>()
                 .Should()
                 .HaveCount(3);
 
@@ -240,7 +239,7 @@ Console.Write(DateTime.Now);
 5", "csharp");
             await kernel.SendAsync(kernelCommand);
             var events = KernelEvents
-                .Where(e => e.Value is DisplayedValue).ToArray();
+                .Where(e => e.Value is DisplayedValueProduced).ToArray();
             var diff = events[1].Timestamp - events[0].Timestamp;
             diff.Should().BeCloseTo(1.Seconds(), precision: 200);
 
@@ -255,7 +254,7 @@ Console.Write(DateTime.Now);
             await kernel.SendAsync(new SubmitCode("text[^5..^0]"));
 
             KernelEvents.ValuesOnly()
-                .OfType<DisplayedValue>()
+                .OfType<DisplayedValueProduced>()
                 .Last()
                 .Value
                 .Should()

@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await kernel.SendAsync(new SubmitCode("%lsmagic"));
 
             events.Should()
-                  .ContainSingle(e => e is Events.DisplayedValue)
+                  .ContainSingle(e => e is Events.DisplayedValueProduced)
                   .Which
-                  .As<Events.DisplayedValue>()
+                  .As<Events.DisplayedValueProduced>()
                   .Value
                   .ToDisplayString("text/html")
                   .Should()
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             await compositeKernel.SendAsync(new SubmitCode("%lsmagic"));
 
-            var valueProduceds = events.OfType<Events.DisplayedValue>().ToArray();
+            var valueProduceds = events.OfType<Events.DisplayedValueProduced>().ToArray();
 
             valueProduceds[0].Value
                              .ToDisplayString("text/html")
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             var formatted =
                 events
-                    .OfType<Events.DisplayedValue>()
+                    .OfType<Events.DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
 
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             var formatted =
                 events
-                    .OfType<Events.DisplayedValue>()
+                    .OfType<Events.DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
 
