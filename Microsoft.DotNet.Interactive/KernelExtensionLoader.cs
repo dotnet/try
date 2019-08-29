@@ -26,21 +26,17 @@ namespace Microsoft.DotNet.Interactive
             foreach (var extensionType in extensionTypes)
             {
                 var extension = (IKernelExtension)Activator.CreateInstance(extensionType);
-
                 await extension.OnLoadAsync(kernel);
             }
         }
 
-        public async Task LoadFromNuGetPackage(LoadCSharpExtension loadCSharpExtension, IKernel kernel)
+        public async Task LoadCSharpExtension(LoadCSharpExtension loadCSharpExtension, IKernel kernel)
         {
-            foreach (var referencePath in loadCSharpExtension.MetadataReferencesPaths)
+            var extensionsDirectory = new FileSystemDirectoryAccessor(loadCSharpExtension.Directory.Subdirectory("interactive-extensions"));
+            var extensionDlls = extensionsDirectory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => extensionsDirectory.GetFullyQualifiedFilePath(file));
+            foreach (var extensionDll in extensionDlls)
             {
-                var directoryAccessor = new FileSystemDirectoryAccessor(referencePath.Directory);
-                var extensionDlls = NuGetPackageKernelExtensionFinder.FindExtensionDlls(directoryAccessor, loadCSharpExtension.PackageReference.PackageName);
-                foreach (var extensionDll in extensionDlls)
-                {
-                    await LoadFromAssembly(extensionDll, kernel);
-                }
+                await LoadFromAssembly(extensionDll, kernel);
             }
         }
     }

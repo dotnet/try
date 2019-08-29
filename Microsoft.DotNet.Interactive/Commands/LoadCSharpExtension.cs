@@ -9,13 +9,11 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public class LoadCSharpExtension : KernelCommandBase
     {
-        public LoadCSharpExtension(NugetPackageReference packageReference, DirectoryInfo)
+        public LoadCSharpExtension(DirectoryInfo directory)
         {
-            PackageReference = packageReference ?? throw new ArgumentNullException(nameof(packageReference));
-            MetadataReferencesPaths = metadataReferencesPaths ?? throw new ArgumentNullException(nameof(metadataReferencesPaths));
+            Directory = directory;
         }
 
-        public IEnumerable<FileInfo> MetadataReferencesPaths { get; }
-        public NugetPackageReference PackageReference { get; }
+        public DirectoryInfo Directory { get; }
     }
 }

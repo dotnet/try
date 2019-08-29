@@ -25,7 +25,8 @@ namespace WorkspaceServer.Tests
         public async Task Can_load_from_assembly()
         {
             var directory = Create.EmptyWorkspace().Directory;
-            var extensionDll = await CreateExtensionInDirectory(directory);
+            var extensionOutputDirectory = directory.CreateSubdirectory("extensionOutput");
+            var extensionDll = await CreateExtensionDll(directory, extensionOutputDirectory);
 
             var kernel = CreateKernel();
             await new KernelExtensionLoader().LoadFromAssembly(extensionDll, kernel);
@@ -39,28 +40,27 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Can_load_from_nuget_package()
         {
-            var nugetPackageDirectory = new InMemoryDirectoryAccessor(Create.EmptyWorkspace().Directory.Subdirectory("myNugetPackage"))
-            {
-                ($"2.0.0/lib/netstandard2.0/myNugetPackage.dll", ""),
-            }.CreateFiles();
+            var baseDirectory = Create.EmptyWorkspace().Directory;
+            var extensionOutputDirectory = baseDirectory.CreateSubdirectory("interactive-extensions");
 
-            var extensionDll = await CreateExtensionInDirectory((DirectoryInfo)nugetPackageDirectory.GetFullyQualifiedPath(new RelativeDirectoryPath("2.0.0/interactive-extensions")));
+            var extensionDll = await CreateExtensionDll(baseDirectory, extensionOutputDirectory);
 
-            var loadExtensionCommand = new LoadCSharpExtension(new NugetPackageReference("myNugetPackage"), new List<FileInfo>() { nugetPackageDirectory.GetFullyQualifiedFilePath($"2.0.0/lib/netstandard2.0/myNugetPackage.dll") });
+            var loadExtensionCommand = new LoadCSharpExtension(baseDirectory);
             var kernel = CreateKernel();
-            await new KernelExtensionLoader().LoadFromNuGetPackage(loadExtensionCommand, kernel);
+            await new KernelExtensionLoader().LoadCSharpExtension(loadExtensionCommand, kernel);
 
             KernelEvents.Should()
                       .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                           e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
 
-        private static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDirectory, [CallerMemberName] string extensionName = null)
+        private static async Task<FileInfo> CreateExtensionDll(DirectoryInfo baseDirectory, DirectoryInfo extensionOutputDirectory)
         {
-            var directory = Create.EmptyWorkspace(extensionName).Directory;
+            var extensionCodeDirectory = baseDirectory.CreateSubdirectory("extensionCode");
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
+            var extensionName = baseDirectory.Name;
 
-            new InMemoryDirectoryAccessor(directory)
+            new InMemoryDirectoryAccessor(extensionCodeDirectory)
                 {
                     ( "Extension.cs", $@"
 using System;
@@ -91,15 +91,19 @@ public class TestKernelExtension : IKernelExtension
                 }
                  .CreateFiles();
 
-            var buildResult = await new Dotnet(directory).Build($"/p:OutDir={extensionDirectory.FullName}");
+            var buildResult = await new Dotnet(extensionCodeDirectory).Build();
             buildResult.ThrowOnFailure();
 
-            var extensionDll = extensionDirectory
-                            .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
+            var extensionDll = extensionCodeDirectory
+                            .GetDirectories("bin", SearchOption.AllDirectories)
+                            .Single()
+                            .GetFiles($"{extensionName}.dll", SearchOption.AllDirectories)
                             .Single();
 
-            return extensionDll;
+            File.Copy(extensionDll.FullName, Path.Combine(extensionOutputDirectory.FullName, extensionDll.Name));
+            return extensionOutputDirectory
+                    .GetFiles($"{extensionName}.dll", SearchOption.AllDirectories)
+                    .Single(); ;
         }
-
     }
 }
