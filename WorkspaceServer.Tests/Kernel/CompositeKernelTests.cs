@@ -13,10 +13,6 @@ using Pocket;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
-using System.IO;
-using System.Text;
-using Microsoft.DotNet.Interactive.Events;
-using Newtonsoft.Json;
 
 namespace WorkspaceServer.Tests.Kernel
 {
