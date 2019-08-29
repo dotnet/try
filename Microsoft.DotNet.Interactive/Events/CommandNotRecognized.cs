@@ -8,6 +8,6 @@ namespace Microsoft.DotNet.Interactive.Events
     public class CommandNotRecognized : IKernelEvent
     {
         public IKernelCommand Command => null;
-        public string Body { get; set; }
+        public object Body { get; set; }
     }
 }
