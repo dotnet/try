@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                       .Trim();
 
                       
-                        context.Publish(new Events.DisplayedValueProduced(
+                        context.Publish(new DisplayedValueProduced(
                                            htmlContent,
                                            context.Command,
                                            formattedValues: new[]
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 PocketView t = div(
                     h6(directives.KernelName),
-                    p(directives.Commands.Select(Describe)));
+                    pre(directives.Commands.Select(Describe)));
 
                 t.WriteTo(writer, HtmlEncoder.Default);
             }, "text/html");
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                     scriptContent))
                                 .ToString();
 
-                        context.Publish(new Events.DisplayedValueProduced(
+                        context.Publish(new DisplayedValueProduced(
                                            scriptContent,
                                            context.Command,
                                            formattedValues: new[]
