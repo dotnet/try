@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
@@ -41,7 +40,6 @@ namespace WorkspaceServer.Kernel
         protected ScriptOptions ScriptOptions;
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
-        private CancellationTokenSource _evaluationInFlight;
 
         public CSharpKernel()
         {
@@ -129,15 +127,14 @@ namespace WorkspaceServer.Kernel
 
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
-            _evaluationInFlight = new CancellationTokenSource();
+
             try
             {
                 if (_scriptState == null)
                 {
                     _scriptState = await CSharpScript.RunAsync(
                                        code,
-                                       ScriptOptions,
-                                       cancellationToken: _evaluationInFlight.Token);
+                                       ScriptOptions);
                 }
                 else
                 {
@@ -148,7 +145,7 @@ namespace WorkspaceServer.Kernel
                                        {
                                            exception = e;
                                            return true;
-                                       }, cancellationToken: _evaluationInFlight.Token);
+                                       });
                 }
             }
             catch (Exception e)
@@ -156,47 +153,36 @@ namespace WorkspaceServer.Kernel
                 exception = e;
             }
 
-            if (_evaluationInFlight.IsCancellationRequested)
+            if (exception != null)
             {
-                context.OnNext(new CodeSubmissionInterrupted(submitCode));
-                context.OnCompleted();
+                string message = null;
+
+                if (exception is CompilationErrorException compilationError)
+                {
+                    message =
+                        string.Join(Environment.NewLine,
+                                    compilationError.Diagnostics.Select(d => d.ToString()));
+                }
+
+                context.OnNext(new CommandFailed(exception, submitCode, message));
+                context.OnError(exception);
             }
             else
             {
-                if (exception != null)
+                if (HasReturnValue)
                 {
-                    string message = null;
-
-                    if (exception is CompilationErrorException compilationError)
-                    {
-                        message =
-                            string.Join(Environment.NewLine,
-                                        compilationError.Diagnostics.Select(d => d.ToString()));
-                    }
-
-                    context.OnNext(new CommandFailed(exception, submitCode, message));
-                    context.OnError(exception);
+                    var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
+                    context.OnNext(
+                        new ReturnValueProduced(
+                            _scriptState.ReturnValue,
+                            submitCode,
+                            formattedValues));
                 }
-                else
-                {
-                    if (HasReturnValue)
-                    {
-                        var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
-                        context.OnNext(
-                            new ValueProduced(
-                                _scriptState.ReturnValue,
-                                submitCode,
-                                true,
-                                formattedValues));
-                    }
 
-                    context.OnNext(new CodeSubmissionEvaluated(submitCode));
+                context.OnNext(new CodeSubmissionEvaluated(submitCode));
 
-                    context.OnCompleted();
-                }
+                context.OnCompleted();
             }
-
-            _evaluationInFlight = null;
         }
 
         private void PublishOutput(
@@ -211,10 +197,9 @@ namespace WorkspaceServer.Kernel
                         };
 
             context.OnNext(
-                new ValueProduced(
+                new DisplayedValueProduced(
                     output,
                     command,
-                    false,
                     formattedValues));
         }
 

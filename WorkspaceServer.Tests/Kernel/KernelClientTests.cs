@@ -50,7 +50,7 @@ namespace WorkspaceServer.Tests.Kernel
             var events = text.Split(Environment.NewLine)
                              .Select(JsonConvert.DeserializeObject<StreamKernelEvent>);
 
-            events.Should().Contain(e => e.EventType == "ValueProduced");
+            events.Should().Contain(e => e.EventType == "ReturnValueProduced");
         }
     }
 }

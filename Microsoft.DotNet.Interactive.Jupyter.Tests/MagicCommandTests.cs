@@ -9,11 +9,13 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
+using Microsoft.DotNet.Interactive.Rendering;
 using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
+using static Pocket.Logger;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -42,13 +44,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await kernel.SendAsync(new SubmitCode("%lsmagic"));
 
             events.Should()
-                  .ContainSingle(e => e is ValueProduced)
+                  .ContainSingle(e => e is Events.DisplayedValueProduced)
                   .Which
-                  .As<ValueProduced>()
+                  .As<Events.DisplayedValueProduced>()
                   .Value
-                  .As<string>()
+                  .ToDisplayString("text/html")
                   .Should()
-                  .ContainAll("%lsmagic", "%%one %%three %%two");
+                  .ContainAll("%lsmagic", "%%one", "%%three", "%%two");
         }
 
         [Fact]
@@ -73,10 +75,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             await compositeKernel.SendAsync(new SubmitCode("%lsmagic"));
 
-            var valueProduceds = events.OfType<ValueProduced>().ToArray();
+            var valueProduceds = events.OfType<Events.DisplayedValueProduced>().ToArray();
 
             valueProduceds[0].Value
-                             .As<string>()
+                             .ToDisplayString("text/html")
                              .Should()
                              .ContainAll("%lsmagic",
                                          "%%csharp",
@@ -84,15 +86,71 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                                          "%%from-compositekernel");
 
             valueProduceds[1].Value
-                             .As<string>()
+                             .ToDisplayString("text/html")
                              .Should()
                              .ContainAll("%lsmagic",
                                          "%%from-subkernel-1");
             valueProduceds[2].Value
-                             .As<string>()
+                             .ToDisplayString("text/html")
                              .Should()
                              .ContainAll("%lsmagic",
                                          "%%from-subkernel-2");
+        }
+
+        [Fact]
+        public async Task html_emits_string_as_content_within_a_script_element()
+        {
+            var kernel = new CompositeKernel()
+                .UseDefaultMagicCommands();
+
+            var html = "<b>hello!</b>";
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(new SubmitCode(
+                                       $"%%html\n\n{html}"));
+
+            var formatted =
+                events
+                    .OfType<Events.DisplayedValueProduced>()
+                    .SelectMany(v => v.FormattedValues)
+                    .ToArray();
+
+            Log.Info(events.ToDisplayString());
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Equals(html));
+        }
+
+        [Fact]
+        public async Task javascript_emits_string_as_content_within_a_script_element()
+        {
+            var kernel = new CompositeKernel()
+                .UseDefaultMagicCommands();
+
+            var scriptContent = "alert('Hello World!');";
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(new SubmitCode(
+                                       $"%%javascript\n{scriptContent}"));
+
+            var formatted =
+                events
+                    .OfType<Events.DisplayedValueProduced>()
+                    .SelectMany(v => v.FormattedValues)
+                    .ToArray();
+
+            Log.Info(events.ToDisplayString());
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Equals($@"<script type=""text/javascript"">{scriptContent}</script>"));
         }
     }
 }

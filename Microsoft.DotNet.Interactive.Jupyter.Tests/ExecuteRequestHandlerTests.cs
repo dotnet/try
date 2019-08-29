@@ -82,7 +82,25 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_ExecuteReply_message_on_ValueProduced()
+        public async Task sends_DisplayData_message_on_ValueProduced()
+        {
+            var kernel = new CSharpKernel();
+
+            var handler = new ExecuteRequestHandler(kernel);
+            var request = Message.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            _serverRecordingSocket.DecodedMessages
+                .Should().Contain(message =>
+                    message.Contains(MessageTypeValues.ExecuteReply));
+
+            _ioRecordingSocket.DecodedMessages
+                .Should().Contain(message =>
+                    message.Contains(MessageTypeValues.DisplayData));
+        }
+
+        [Fact]
+        public async Task sends_ExecuteReply_message_on_ReturnValueProduced()
         {
             var kernel = new CSharpKernel();
 

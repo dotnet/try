@@ -31,7 +31,7 @@ namespace MLS.Agent.Tests
 
             KernelEvents
                 .ValuesOnly()
-                .OfType<ValueProduced>()
+                .OfType<ReturnValueProduced>()
                 .Should().
                 ContainSingle(valueProduced =>
                     valueProduced.FormattedValues.Any(formattedValue =>

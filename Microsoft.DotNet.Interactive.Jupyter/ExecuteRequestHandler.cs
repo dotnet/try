@@ -56,8 +56,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ValueProduced valueProduced:
-                    OnValueProduced(valueProduced);
+                case ValueProducedEventBase valueProductionEvent:
+                    OnValueProductionEvent(valueProductionEvent);
                     break;
                 case CodeSubmissionEvaluated codeSubmissionEvaluated:
                     OnCodeSubmissionEvaluated(codeSubmissionEvaluated);
@@ -114,75 +114,69 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Dispose();
         }
 
-        private void OnValueProduced(ValueProduced valueProduced)
+        private void SendDisplayData(DisplayData displayData, InflightRequest openRequest)
         {
-            var openRequest = InFlightRequests.Values.SingleOrDefault();
+            if (!openRequest.Request.Silent)
+            {
+                // send on io
+                var executeResultMessage = Message.Create(
+                    displayData,
+                    openRequest.Context.Request.Header);
+                openRequest.Context.IoPubChannel.Send(executeResultMessage);
+            }
+        }
 
-            if (openRequest == null)
+        private void OnValueProductionEvent(ValueProducedEventBase eventBase)
+        {
+            if (!InFlightRequests.TryGetValue(eventBase.Command, out var openRequest))
             {
                 return;
             }
 
-            try
+            var transient = CreateTransient(eventBase.ValueId);
+
+            var formattedValues = eventBase
+                .FormattedValues
+                .ToDictionary(k => k.MimeType, v => v.Value);
+
+            var value = eventBase.Value;
+
+            CreateDefaultFormattedValueIfEmpty(formattedValues, value);
+
+            DisplayData executeResultData;
+
+            switch (eventBase)
             {
-                var transient = CreateTransient(valueProduced.ValueId);
-
-                var formattedValues = valueProduced
-                                      .FormattedValues
-                                      .ToDictionary(k => k.MimeType, v => v.Value);
-
-                if (formattedValues.Count == 0)
-                {
-                    formattedValues.Add( 
-                        PlainTextFormatter.MimeType,
-                        valueProduced.Value.ToDisplayString());
-                }
-
-                var executeResultData =
-                    valueProduced.IsReturnValue
-                        ? new ExecuteResult(
-                            openRequest.ExecutionCount,
-                            transient: transient,
-                            data: formattedValues)
-                        : valueProduced.IsUpdatedValue
-                            ? new UpdateDisplayData(
-                                transient: transient,
-                                data: formattedValues)
-                            : new DisplayData(
-                                transient: transient,
-                                data: formattedValues);
-
-                if (!openRequest.Request.Silent)
-                {
-                    // send on io
-                    var executeResultMessage = Message.Create(
-                        executeResultData,
-                        openRequest.Context.Request.Header);
-                    openRequest.Context.IoPubChannel.Send(executeResultMessage);
-                }
+                case Events.DisplayedValueProduced _:
+                    executeResultData = new DisplayData(
+                        transient: transient,
+                        data: formattedValues);
+                    break;
+                case ReturnValueProduced _:
+                    executeResultData = new ExecuteResult(
+                        openRequest.ExecutionCount,
+                        transient: transient,
+                        data: formattedValues);
+                    break;
+                case DisplayedValueUpdated _:
+                    executeResultData = new UpdateDisplayData(
+                        transient: transient,
+                        data: formattedValues);
+                    break;
+                default:
+                    throw new ArgumentException("Unsupported event type", nameof(eventBase));
             }
-            catch (Exception e)
+
+            SendDisplayData(executeResultData, openRequest);
+        }
+
+        private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
+        {
+            if (formattedValues.Count == 0)
             {
-                var errorContent = new Error(
-                    eName: "Unhandled Exception",
-                    eValue: $"{e.Message}"
-                );
-
-                if (!openRequest.Request.Silent)
-                {
-                    // send on io
-                    var error = Message.Create(
-                        errorContent,
-                        openRequest.Context.Request.Header);
-                    openRequest.Context.IoPubChannel.Send(error);
-
-                    // send on stderr
-                    var stdErr = new StdErrStream(errorContent.EValue);
-                    var stream = Message.Create(
-                        stdErr,
-                        openRequest.Context.Request.Header);
-                    openRequest.Context.IoPubChannel.Send(stream);
-                }
+                formattedValues.Add(
+                    HtmlFormatter.MimeType,
+                    value.ToDisplayString("text/html"));
             }
         }
 
