@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -535,6 +537,85 @@ catch (Exception e)
                 .Should()
                 .Contain(e => e is DisplayedValueProduced &&
                 (((DisplayedValueProduced)e).Value as string).Contains("success"));
+
+        [Fact]
+        public async Task Should_load_extension_in_nuget_package()
+        {
+            var directory = Create.EmptyWorkspace()
+                                     .Directory;
+            const string nugetPackageName = "myNugetPackage";
+
+            var extensionDll = await CreateExtension(directory);
+
+            string nugetDllPath = $"{nugetPackageName}/2.0.0/lib/netstandard2.0/{nugetPackageName}.dll";
+            var directoryAccessor = new InMemoryDirectoryAccessor(directory)
+            {
+                (nugetDllPath,"")
+            }.CreateFiles();
+
+            directoryAccessor.EnsureDirectoryExists(new RelativeDirectoryPath($"{nugetPackageName}/2.0.0/interactive-extensions/cs"));
+
+            File.Copy(extensionDll.FullName, directoryAccessor.GetFullyQualifiedFilePath($"{nugetPackageName}/2.0.0/interactive-extensions/cs/TestExtension.dll").FullName);
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new LoadExtensionInNuGetPackage(new NugetPackageReference(nugetPackageName), new List<FileInfo>() { directoryAccessor.GetFullyQualifiedFilePath(nugetDllPath) }));
+
+            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded);
+
+            KernelEvents.Should()
+                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
+                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+        }
+
+        private static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir)
+        {
+            var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
+
+            var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
+                {
+                    ( "Extension.cs", $@"
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Commands;
+
+public class TestKernelExtension : IKernelExtension
+{{
+    public async Task OnLoadAsync(IKernel kernel)
+    {{
+        await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));
+    }}
+}}
+" ),
+                    ("TestExtension.csproj", $@"
+<Project Sdk=""Microsoft.NET.Sdk"">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+
+    <Reference Include=""Microsoft.DotNet.Interactive"">
+      <HintPath>{microsoftDotNetInteractiveDllPath}</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
+")
+                }
+                .CreateFiles();
+
+            var buildResult = await new Dotnet(extensionDir).Build();
+            buildResult.ThrowOnFailure();
+
+            return extensionDir
+                                   .GetDirectories("bin", SearchOption.AllDirectories)
+                                   .Single()
+                                   .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
+                                   .Single();
+                                   
         }
     }
 }
