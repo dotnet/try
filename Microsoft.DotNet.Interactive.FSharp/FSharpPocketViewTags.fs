@@ -3,31 +3,34 @@
 
 namespace Microsoft.DotNet.Interactive.FSharp
 
+open Microsoft.AspNetCore.Html
 open Microsoft.DotNet.Interactive.Rendering
 
 type FSharpPocketViewTags(p: PocketView) as this =
     override __.ToString() = p.ToString()
-    abstract member HTML: obj -> FSharpPocketViewTags
+    abstract member innerHTML: obj -> FSharpPocketViewTags
     abstract member Item: string * obj -> FSharpPocketViewTags with get
-    default __.HTML content =
+    default __.innerHTML content =
         p.SetContent([|content|])
         this
     default __.Item
         with get (attribute: string, value: obj) =
             p.HtmlAttributes.[attribute] <- value
             this
+    interface IHtmlContent with
+        member __.WriteTo(writer, encoder) = p.WriteTo(writer, encoder)
 
 // This class exists because F# can't open static classes like it can modules.  All items on the `FSharpPocketViewTags`
 // module below are essentially fields that are initialized at runtime start, which means that there is only one
-// instance of the `div` item.  Since calling the indexer to set attributes or the `HTML()` method to set the content
-// mutates the inner value, we need a way to get around that.  The fix is for this class to exist at the root level,
-// but as soon as a mutating method is called, a clone is made.  The base type is kept the same to simplify the public
-// API surface area.
+// instance of the `div` item.  Since calling the indexer to set attributes or the `innerHTML()` method to set the
+// content mutates the inner value, we need a way to get around that.  The fix is for this class to exist at the root
+// level, but as soon as a mutating method is called, a clone is made.  The base type is kept the same to simplify the
+// public API surface area.
 type internal FSharpPocketViewTagsRoot(p: PocketView) =
     inherit FSharpPocketViewTags(p)
     let wrapped () = FSharpPocketViewTags(PocketView(tagName=p.Name, nested=p))
     override __.ToString() = p.ToString()
-    override __.HTML content = wrapped().HTML(content)
+    override __.innerHTML content = wrapped().innerHTML(content)
     override __.Item
         with get (attribute: string, value: obj) = wrapped().[attribute, value]
 

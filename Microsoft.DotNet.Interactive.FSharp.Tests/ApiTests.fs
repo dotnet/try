@@ -18,8 +18,12 @@ type ApiTests() =
 
     [<Fact>]
     member __.``inner HTML from content``() =
-        Assert.Equal("<div>d</div>", div.HTML("d").ToString())
+        Assert.Equal("<div>d</div>", div.innerHTML("d").ToString())
 
     [<Fact>]
     member __.``inner HTML from content with attribute``() =
-        Assert.Equal("<div class=\"c\">d</div>", div.["class", "c"].HTML("d").ToString())
+        Assert.Equal("<div class=\"c\">d</div>", div.["class", "c"].innerHTML("d").ToString())
+
+    [<Fact>]
+    member __.``inner HTML from another tag``() =
+        Assert.Equal("<div><a>foo</a></div>", div.innerHTML(a.innerHTML("foo")).ToString())
