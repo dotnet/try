@@ -106,9 +106,10 @@ namespace Microsoft.DotNet.Interactive
                 var nugetPackageDirectory = NuGetPackagePathResolver.GetNuGetPackageBasePath(loadCSharpExtension.NugetPackageReference, loadCSharpExtension.MetadataReferences);
                 if(KernelExtensionPathResolver.TryGetExtensionPath(nugetPackageDirectory, invocationContext.HandlingKernel, out var extensionDirectory))
                 {
-                    await kernelExtensionLoader.LoadExtensionInDirectory(extensionDirectory, invocationContext.HandlingKernel);
+                    await kernelExtensionLoader.LoadExtensionInDirectory(extensionDirectory, invocationContext);
                 }
-                context.OnCompleted();
+
+                context.Complete();
             };
 
             await next(loadCSharpExtension, invocationContext);
@@ -122,7 +123,7 @@ namespace Microsoft.DotNet.Interactive
             loadExtension.Handler = async context =>
             {
                 var kernelextensionLoader = new KernelExtensionLoader();
-                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel);
+                await kernelextensionLoader.TryLoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel);
                 context.Complete();
             };
 

@@ -66,9 +66,11 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
-                var addPackage = new AddNugetPackage(package)
+                var addPackage = new AddNugetPackage(package);
+                addPackage.Handler = async context =>
                 {
-                    Handler = async context =>
+                    var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    if (refs != null)
                     {
                         var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
                         helper?.Configure(await restoreContext.OutputPath());
@@ -85,10 +87,10 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             kernel.AddMetatadaReferences(refs);
                             await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionInNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
                         }
-
-                        context.Publish(new NuGetPackageAdded(package));
-                        context.Complete();
                     }
+
+                    context.Publish(new NuGetPackageAdded(addPackage, package));
+                    context.Complete();
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

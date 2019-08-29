@@ -29,28 +29,12 @@ namespace WorkspaceServer.Tests
             var extensionDll = await CreateExtensionDll(directory, extensionOutputDirectory);
 
             var kernel = CreateKernel();
-            await new KernelExtensionLoader().LoadFromAssembly(extensionDll, kernel);
+            await new KernelExtensionLoader().TryLoadFromAssembly(extensionDll, kernel);
 
             KernelEvents.Should()
                       .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                           e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
 
-        }
-
-        [Fact]
-        public async Task Can_load_from_nuget_package()
-        {
-            var baseDirectory = Create.EmptyWorkspace().Directory;
-            var extensionOutputDirectory = baseDirectory.CreateSubdirectory("interactive-extensions");
-
-            var extensionDll = await CreateExtensionDll(baseDirectory, extensionOutputDirectory);
-
-            var kernel = CreateKernel();
-            await new KernelExtensionLoader().LoadExtensionInDirectory(baseDirectory, kernel);
-
-            KernelEvents.Should()
-                      .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-                                          e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
 
         private static async Task<FileInfo> CreateExtensionDll(DirectoryInfo baseDirectory, DirectoryInfo extensionOutputDirectory)
