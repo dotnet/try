@@ -15,6 +15,7 @@ using Xunit;
 using Xunit.Abstractions;
 using System.IO;
 using System.Text;
+using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -233,8 +234,8 @@ x"));
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            var events = text.Split(Environment.NewLine)
-                .Select(e => JsonConvert.DeserializeObject<StreamKernelEvent>(e));
+            var events = text.Split(new [] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(JsonConvert.DeserializeObject<StreamKernelEvent>);
 
             events.Should().Contain(e => e.EventType == "CommandParseFailure");
         }
@@ -270,13 +271,14 @@ x"));
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            var events = text.Split(Environment.NewLine)
-                .Select(JsonConvert.DeserializeObject<StreamKernelEvent>);
+            var events = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                 .Select(JsonConvert.DeserializeObject<StreamKernelEvent>).ToList();
 
             events.Should()
-                .Contain(e => e.EventType == "NuGetPackageAdded")
-                .And
-                .NotContain(e => e.EventType == "CommandNotRecognized");
+                .Contain(e => e.EventType == nameof(NuGetPackageAdded));
+
+            events.Should()
+                 .NotContain(e => e.EventType == nameof(CommandNotRecognized));
         }
     }
 }

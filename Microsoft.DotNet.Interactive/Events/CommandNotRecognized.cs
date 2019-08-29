@@ -5,7 +5,7 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    internal class CommandNotRecognized : IKernelEvent
+    public class CommandNotRecognized : IKernelEvent
     {
         public IKernelCommand Command => null;
         public string Body { get; set; }
