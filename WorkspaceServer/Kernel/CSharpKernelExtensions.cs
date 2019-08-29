@@ -83,8 +83,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             }
 
                             kernel.AddMetatadaReferences(refs);
-                            await pipelineContext.HandlingKernel.SendAsync(new LoadCSharpExtension(
-                                NuGetPackagePathResolver.GetNuGetPackageBasePath(package, refs.Select(reference => new FileInfo(reference.Display)))));
+                            await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionInNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
                         }
 
                         context.Publish(new NuGetPackageAdded(package));
@@ -98,21 +97,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             kernel.AddDirective(r);
 
             return kernel;
-        }
-    }
-
-    public class NuGetPackagePathResolver
-    {
-        public static DirectoryInfo GetNuGetPackageBasePath(NugetPackageReference nugetPackage, IEnumerable<FileInfo> metadataReferences)
-        {
-            var nugetPackageAssembly = metadataReferences.Single(file => string.Compare(Path.GetFileNameWithoutExtension(file.Name), nugetPackage.PackageName) ==0);
-            var directory = nugetPackageAssembly.Directory;
-            while (directory != null && directory.Parent != null && directory.Parent.Name.ToLower().CompareTo(nugetPackage.PackageName.ToLower()) != 0)
-            {
-                directory = directory.Parent;
-            }
-
-            return directory;
         }
     }
 }

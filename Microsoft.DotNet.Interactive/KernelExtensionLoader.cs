@@ -30,9 +30,9 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        public async Task LoadCSharpExtension(LoadCSharpExtension loadCSharpExtension, IKernel kernel)
+        public async Task LoadExtensionInDirectory(DirectoryInfo directory, IKernel kernel)
         {
-            var extensionsDirectory = new FileSystemDirectoryAccessor(loadCSharpExtension.Directory.Subdirectory("interactive-extensions"));
+            var extensionsDirectory = new FileSystemDirectoryAccessor(directory);
             var extensionDlls = extensionsDirectory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => extensionsDirectory.GetFullyQualifiedFilePath(file));
             foreach (var extensionDll in extensionDlls)
             {

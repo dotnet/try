@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -84,8 +85,8 @@ namespace Microsoft.DotNet.Interactive
                             context,
                             next),
 
-                        LoadCSharpExtension loadCSharpExtension =>
-                        HandleCSharpLoadExtension(
+                        LoadExtensionInNuGetPackage loadCSharpExtension =>
+                        HandleLoadExtensionInNuGetPackage(
                             loadCSharpExtension, 
                             context, 
                             next),
@@ -94,15 +95,17 @@ namespace Microsoft.DotNet.Interactive
                         });
         }
 
-        private async Task HandleCSharpLoadExtension(
-            LoadCSharpExtension loadCSharpExtension, 
+        private async Task HandleLoadExtensionInNuGetPackage(
+            LoadExtensionInNuGetPackage loadCSharpExtension, 
             KernelInvocationContext invocationContext, 
             KernelPipelineContinuation next)
         {
             loadCSharpExtension.Handler = async context =>
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
-                await kernelExtensionLoader.LoadCSharpExtension(loadCSharpExtension, invocationContext.HandlingKernel);
+                var nugetPackageDirectory = NuGetPackagePathResolver.GetNuGetPackageBasePath(loadCSharpExtension.NugetPackageReference, loadCSharpExtension.MetadataReferences);
+                var csharpExtensionDirectory = KernelExtensionPathResolver.GetExtensionPath(nugetPackageDirectory, invocationContext.HandlingKernel);
+                await kernelExtensionLoader.LoadExtensionInDirectory(csharpExtensionDirectory, invocationContext.HandlingKernel);
                 context.OnCompleted();
             };
 

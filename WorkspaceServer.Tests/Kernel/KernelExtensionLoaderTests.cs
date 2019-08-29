@@ -45,9 +45,8 @@ namespace WorkspaceServer.Tests
 
             var extensionDll = await CreateExtensionDll(baseDirectory, extensionOutputDirectory);
 
-            var loadExtensionCommand = new LoadCSharpExtension(baseDirectory);
             var kernel = CreateKernel();
-            await new KernelExtensionLoader().LoadCSharpExtension(loadExtensionCommand, kernel);
+            await new KernelExtensionLoader().LoadExtensionInDirectory(baseDirectory, kernel);
 
             KernelEvents.Should()
                       .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
