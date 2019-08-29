@@ -8,19 +8,22 @@ namespace Microsoft.DotNet.Interactive
 {
     public class KernelExtensionPathResolver
     {
-        public static DirectoryInfo GetExtensionPath(DirectoryInfo directory, IKernel handlingKernel)
+        public static bool TryGetExtensionPath(DirectoryInfo directory, IKernel handlingKernel, out DirectoryInfo extensionDirectory)
         {
             if(handlingKernel.Name == "csharp")
             {
-                return directory.Subdirectory("interactive-extensions/cs");
+                extensionDirectory = directory.Subdirectory("interactive-extensions/cs");
+                return true;
             }
 
             else if(handlingKernel.Name == "fsharp")
             {
-                return directory.Subdirectory("interactive-extensions/fs");
+                extensionDirectory =  directory.Subdirectory("interactive-extensions/fs");
+                return true;
             }
 
-            return null;
+            extensionDirectory = null;
+            return false;
         }
     }
 }

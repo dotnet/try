@@ -104,8 +104,10 @@ namespace Microsoft.DotNet.Interactive
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
                 var nugetPackageDirectory = NuGetPackagePathResolver.GetNuGetPackageBasePath(loadCSharpExtension.NugetPackageReference, loadCSharpExtension.MetadataReferences);
-                var csharpExtensionDirectory = KernelExtensionPathResolver.GetExtensionPath(nugetPackageDirectory, invocationContext.HandlingKernel);
-                await kernelExtensionLoader.LoadExtensionInDirectory(csharpExtensionDirectory, invocationContext.HandlingKernel);
+                if(KernelExtensionPathResolver.TryGetExtensionPath(nugetPackageDirectory, invocationContext.HandlingKernel, out var extensionDirectory))
+                {
+                    await kernelExtensionLoader.LoadExtensionInDirectory(extensionDirectory, invocationContext.HandlingKernel);
+                }
                 context.OnCompleted();
             };
 
