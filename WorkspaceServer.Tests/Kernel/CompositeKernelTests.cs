@@ -17,7 +17,6 @@ using System.IO;
 using System.Text;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -247,8 +246,6 @@ x"));
             {
                 new CSharpKernel().UseNugetDirective(),
             };
-
-            var test =  JsonConvert.SerializeObject(new SubmitCode(@"#r nuget:""Microsoft.Extensions.Logging"""));
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
