@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -16,7 +17,7 @@ namespace WorkspaceServer.Tests.Kernel
         internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, DirectoryInfo outputDir)
         {
             var extensionDll = await CreateExtension(extensionDir);
-            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, extensionDll.Name));
+            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, Path.GetRandomFileName()+".dll"));
             File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
 
             return finalExtensionDll;
@@ -26,7 +27,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
-            var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
+            new InMemoryDirectoryAccessor(extensionDir)
                 {
                     ( "Extension.cs", $@"
 using System;
@@ -65,11 +66,11 @@ public class TestKernelExtension : IKernelExtension
             var buildResult = await new Dotnet(extensionDir).Build();
             buildResult.ThrowOnFailure();
 
-           return extensionDir
-                                   .GetDirectories("bin", SearchOption.AllDirectories)
-                                   .Single()
-                                   .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
-                                   .Single();
+            return extensionDir
+                               .GetDirectories("bin", SearchOption.AllDirectories)
+                               .Single()
+                               .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
+                               .Single();
         }
     }
 }
