@@ -5,9 +5,9 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class CodeSubmissionInterrupted:KernelEventBase
+    public class KernelInterrupted:KernelEventBase
     {
-        public CodeSubmissionInterrupted(SubmitCode command) : base(command)
+        public KernelInterrupted(IKernelCommand command) : base(command)
         {
             
         }

@@ -20,7 +20,30 @@ namespace Microsoft.DotNet.Interactive.Jupyter
        
         protected override void OnKernelEvent(IKernelEvent @event)
         {
-            throw new System.NotImplementedException();
+            switch (@event)
+            {
+                case KernelInterrupted kernelInterrupted:
+                    OnKernelInterrupted(kernelInterrupted);
+                    break;
+            }
+        }
+
+        private void OnKernelInterrupted(KernelInterrupted kernelInterrupted)
+        {
+            if (InFlightRequests.TryRemove(kernelInterrupted.Command, out var openRequest))
+            {
+                // reply 
+                var interruptReplyPayload = new InterruptReply();
+
+                // send to server
+                var executeReply = Message.CreateResponse(
+                    interruptReplyPayload,
+                    openRequest.Context.Request);
+
+                openRequest.Context.ServerChannel.Send(executeReply);
+                openRequest.Context.RequestHandlerStatus.SetAsIdle();
+                openRequest.Dispose();
+            }
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -29,7 +52,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             context.RequestHandlerStatus.SetAsBusy();
 
-            var command = new InterruptExecution();
+            var command = new InterruptKernel();
 
             var openRequest = new InflightRequest(context, interruptRequest, 0);
 
