@@ -165,7 +165,7 @@ namespace WorkspaceServer.Kernel
                 }
 
                 context.OnNext(new CommandFailed(exception, submitCode, message));
-                context.OnError(exception);
+                context.OnCompleted();
             }
             else
             {
@@ -180,7 +180,6 @@ namespace WorkspaceServer.Kernel
                 }
 
                 context.OnNext(new CodeSubmissionEvaluated(submitCode));
-
                 context.OnCompleted();
             }
         }

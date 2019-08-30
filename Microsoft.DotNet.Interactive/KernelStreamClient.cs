@@ -85,14 +85,6 @@ namespace Microsoft.DotNet.Interactive
                             }, 
                             streamKernelCommand?.Id ?? -1);
                     }
-                    catch
-                    {
-                        Write(new CommandNotRecognized
-                        {
-                            Body = obj ?? (object)line
-                        }, streamKernelCommand?.Id ?? -1);
-                    }
-
                 }
             });
         }

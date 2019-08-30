@@ -36,9 +36,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode(@"var x = 123;"),1);
-            writer.WriteMessage(new SubmitCode("x"),2);
-            writer.WriteMessage(new Quit(),3);
+            writer.WriteMessage(new SubmitCode(@"var x = 123;"), 1);
+            writer.WriteMessage(new SubmitCode("x"), 2);
+            writer.WriteMessage(new Quit(), 3);
 
             input.Position = 0;
 
@@ -73,7 +73,45 @@ namespace WorkspaceServer.Tests.Kernel
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
             writer.WriteLine("{ hello");
-            writer.WriteMessage(new Quit(),2);
+            writer.WriteMessage(new Quit(), 2);
+            writer.Flush();
+
+            input.Position = 0;
+
+            var output = new MemoryStream();
+
+            var streamKernel = new KernelStreamClient(kernel,
+                new StreamReader(input),
+                new StreamWriter(output));
+
+            var task = streamKernel.Start();
+            await task;
+
+            output.Position = 0;
+            var reader = new StreamReader(output, Encoding.UTF8);
+
+            var text = reader.ReadToEnd();
+            this.Assent(text, _configuration);
+        }
+
+        [Fact]
+        public async Task Kernel_client_surfaces_code_submission_Errors()
+        {
+            var kernel = new CompositeKernel()
+            {
+                new CSharpKernel(),
+                new FakeKernel("fake")
+                {
+                    Handle = context => Task.CompletedTask
+                }
+            };
+
+            kernel.DefaultKernelName = "csharp";
+
+            var input = new MemoryStream();
+            var writer = new StreamWriter(input, Encoding.UTF8);
+            writer.WriteMessage(new SubmitCode(@"var a = 12"), 1);
+            writer.WriteMessage(new Quit(), 2);
             writer.Flush();
 
             input.Position = 0;
@@ -104,8 +142,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""),1);
-            writer.WriteMessage(new Quit(),2);
+            writer.WriteMessage(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 1);
+            writer.WriteMessage(new Quit(), 2);
 
             input.Position = 0;
 
