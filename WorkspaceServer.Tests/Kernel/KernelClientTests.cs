@@ -36,9 +36,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode(@"var x = 123;"));
-            writer.WriteMessage(new SubmitCode("x"));
-            writer.WriteMessage(new Quit());
+            writer.WriteMessage(new SubmitCode(@"var x = 123;"),1);
+            writer.WriteMessage(new SubmitCode("x"),2);
+            writer.WriteMessage(new Quit(),3);
 
             input.Position = 0;
 
@@ -73,7 +73,7 @@ namespace WorkspaceServer.Tests.Kernel
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
             writer.WriteLine("{ hello");
-            writer.WriteMessage(new Quit());
+            writer.WriteMessage(new Quit(),2);
             writer.Flush();
 
             input.Position = 0;
