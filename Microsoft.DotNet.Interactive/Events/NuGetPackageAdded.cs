@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Interactive.Events
     {
         public NuGetPackageAdded(AddNugetPackage addNugetPackage,  NugetPackageReference packageReference): base(addNugetPackage)
         {
+            if (addNugetPackage == null)
+            {
+                throw new System.ArgumentNullException(nameof(addNugetPackage));
+            }
+
             PackageReference = packageReference;
         }
 

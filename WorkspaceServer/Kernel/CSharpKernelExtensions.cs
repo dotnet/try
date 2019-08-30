@@ -70,23 +70,19 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 addPackage.Handler = async context =>
                 {
                     var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    helper?.Configure(await restoreContext.OutputPath());
                     if (refs != null)
                     {
-                        var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
-                        helper?.Configure(await restoreContext.OutputPath());
-                        if (refs != null)
+                        foreach (var reference in refs)
                         {
-                            foreach (var reference in refs)
+                            if (reference is PortableExecutableReference peRef)
                             {
-                                if (reference is PortableExecutableReference peRef)
-                                {
-                                    helper?.Handle(peRef.FilePath);
-                                }
+                                helper?.Handle(peRef.FilePath);
                             }
-
-                            kernel.AddMetatadaReferences(refs);
-                            await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionInNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
                         }
+
+                        kernel.AddMetatadaReferences(refs);
+                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
                     }
 
                     context.Publish(new NuGetPackageAdded(addPackage, package));

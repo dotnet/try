@@ -558,7 +558,7 @@ catch (Exception e)
             File.Copy(extensionDll.FullName, directoryAccessor.GetFullyQualifiedFilePath($"{nugetPackageName}/2.0.0/interactive-extensions/cs/TestExtension.dll").FullName);
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadExtensionInNuGetPackage(new NugetPackageReference(nugetPackageName), new List<FileInfo>() { directoryAccessor.GetFullyQualifiedFilePath(nugetDllPath) }));
+            await kernel.SendAsync(new LoadExtensionFromNuGetPackage(new NugetPackageReference(nugetPackageName), new List<FileInfo>() { directoryAccessor.GetFullyQualifiedFilePath(nugetDllPath) }));
 
             KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded);
 

@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Interactive
                             context,
                             next),
 
-                        LoadExtensionInNuGetPackage loadCSharpExtension =>
+                        LoadExtensionFromNuGetPackage loadCSharpExtension =>
                         HandleLoadExtensionInNuGetPackage(
                             loadCSharpExtension, 
                             context, 
@@ -96,14 +96,14 @@ namespace Microsoft.DotNet.Interactive
         }
 
         private async Task HandleLoadExtensionInNuGetPackage(
-            LoadExtensionInNuGetPackage loadExtensionInNuGetPackage, 
+            LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage, 
             KernelInvocationContext invocationContext, 
             KernelPipelineContinuation next)
         {
-            loadExtensionInNuGetPackage.Handler = async context =>
+            loadExtensionFromNuGetPackage.Handler = async context =>
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
-                if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionInNuGetPackage.NugetPackageReference, loadExtensionInNuGetPackage.MetadataReferences, out DirectoryInfo nugetPackageDirectory))
+                if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out DirectoryInfo nugetPackageDirectory))
                 {
                     if (KernelExtensionPathResolver.TryGetExtensionPath(nugetPackageDirectory, invocationContext.HandlingKernel, out var extensionDirectory))
                     {
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Interactive
                 context.Complete();
             };
 
-            await next(loadExtensionInNuGetPackage, invocationContext);
+            await next(loadExtensionFromNuGetPackage, invocationContext);
         }
 
         private async Task HandleLoadExtension(

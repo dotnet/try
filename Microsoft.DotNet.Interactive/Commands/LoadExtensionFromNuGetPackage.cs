@@ -8,15 +8,14 @@ using System.IO;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class LoadExtensionInNuGetPackage : KernelCommandBase
+    public class LoadExtensionFromNuGetPackage : KernelCommandBase
     {
-        public LoadExtensionInNuGetPackage(NugetPackageReference nugetPackageReference, IEnumerable<FileInfo> metadataReferences)
+        public LoadExtensionFromNuGetPackage(NugetPackageReference nugetPackageReference, IEnumerable<FileInfo> metadataReferences)
         {
-            NugetPackageReference = nugetPackageReference;
-            MetadataReferences = metadataReferences;
+            NugetPackageReference = nugetPackageReference ?? throw new ArgumentNullException(nameof(nugetPackageReference));
+            MetadataReferences = metadataReferences ?? throw new ArgumentNullException(nameof(metadataReferences));
         }
 
-        public DirectoryInfo Directory { get; }
         public NugetPackageReference NugetPackageReference { get; }
         public IEnumerable<FileInfo> MetadataReferences { get; }
     }
