@@ -42,22 +42,27 @@ namespace MLS.Agent
                         resourceStream.CopyTo(fileStream);
                     }
 
-                    var dotnetDirectory = disposableDirectory.Directory.CreateSubdirectory(".NET");
+                    var dotnetDirectory = disposableDirectory.Directory;
                     ZipFile.ExtractToDirectory(zipPath, dotnetDirectory.FullName);
 
-                    var result = await _jupyterKernelSpec.InstallKernel(dotnetDirectory);
-                    if (result.ExitCode == 0)
+                    var installErrors = 0;
+                    foreach (var kernelDirectory in dotnetDirectory.GetDirectories())
                     {
-                        _console.Out.WriteLine(string.Join('\n', result.Output));
-                        _console.Out.WriteLine(string.Join('\n', result.Error));
-                        _console.Out.WriteLine(".NET kernel installation succeeded");
-                        return 0;
+                        var result = await _jupyterKernelSpec.InstallKernel(kernelDirectory);
+                        if (result.ExitCode == 0)
+                        {
+                            _console.Out.WriteLine(string.Join('\n', result.Output));
+                            _console.Out.WriteLine(string.Join('\n', result.Error));
+                            _console.Out.WriteLine(".NET kernel installation succeeded");
+                        }
+                        else
+                        {
+                            _console.Error.WriteLine($".NET kernel installation failed with error: {string.Join('\n', result.Error)}");
+                            installErrors++;
+                        }
                     }
-                    else
-                    {
-                        _console.Error.WriteLine($".NET kernel installation failed with error: {string.Join('\n', result.Error)}");
-                        return -1;
-                    }
+
+                    return installErrors;
                 }
             }
         }

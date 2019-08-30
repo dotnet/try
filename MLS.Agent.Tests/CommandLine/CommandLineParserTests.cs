@@ -8,14 +8,12 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Tools;
 using WorkspaceServer;
 using Xunit;
 using Xunit.Abstractions;
-using MLS.Agent.Tools;
-using WorkspaceServer.Tests;
 
 namespace MLS.Agent.Tests.CommandLine
 {
@@ -382,6 +380,24 @@ namespace MLS.Agent.Tests.CommandLine
                 .FullName
                 .Should()
                 .Be(expected);
+        }
+
+        [Fact]
+        public void jupyter_default_kernel_option_value()
+        {
+            var result = _parser.Parse($"jupyter {Path.GetTempFileName()}");
+            var binder = new ModelBinder<JupyterOptions>();
+            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
+            options.DefaultKernel.Should().Be("csharp");
+        }
+
+        [Fact]
+        public void jupyter_honors_default_kernel_option()
+        {
+            var result = _parser.Parse($"jupyter --default-kernel bsharp {Path.GetTempFileName()}");
+            var binder = new ModelBinder<JupyterOptions>();
+            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
+            options.DefaultKernel.Should().Be("bsharp");
         }
 
         [Fact]

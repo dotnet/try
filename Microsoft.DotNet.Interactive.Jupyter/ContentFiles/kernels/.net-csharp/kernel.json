@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "dotnet",
+    "try",
+    "jupyter",
+    "--default-kernel",
+    "csharp",
+    "{connection_file}"
+  ],
+  "display_name": ".NET (C#)",
+  "language": "C#"
+}

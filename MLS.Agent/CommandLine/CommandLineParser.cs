@@ -380,6 +380,11 @@ namespace MLS.Agent.CommandLine
                 {
                     IsHidden = true
                 };
+                var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
+                {
+                    Argument = new Argument<string>(defaultValue: () => "csharp")
+                };
+                jupyterCommand.AddOption(defaultKernelOption);
                 var connectionFileArgument = new Argument<FileInfo>
                 {
                     Name = "ConnectionFile",
@@ -399,7 +404,7 @@ namespace MLS.Agent.CommandLine
                                                                                 .Trace()
                                                                                 .Handle(delivery));
                             })
-                        .AddSingleton(c => CreateKernel())
+                        .AddSingleton(c => CreateKernel(options.DefaultKernel))
                         .AddSingleton(c => new JupyterRequestContextHandler(c.GetRequiredService<IKernel>())
                                           .Trace())
                         .AddSingleton<IHostedService, Shell>()
@@ -425,10 +430,16 @@ namespace MLS.Agent.CommandLine
                 {
                     IsHidden = true
                 };
-
-                startKernelServerCommand.Handler = CommandHandler.Create<IConsole>((console) =>
+                var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
-                    return startKernelServer(CreateKernel(), console);
+                    Name = nameof(KernelServerOptions.DefaultKernel),
+                    Argument = new Argument<string>(defaultValue: () => "csharp")
+                };
+                startKernelServerCommand.AddOption(defaultKernelOption);
+
+                startKernelServerCommand.Handler = CommandHandler.Create<KernelServerOptions, IConsole>((options, console) =>
+                {
+                    return startKernelServer(CreateKernel(options.DefaultKernel), console);
                 });
 
                 return startKernelServerCommand;
@@ -498,7 +509,7 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        private static IKernel CreateKernel()
+        private static IKernel CreateKernel(string defaultKernelName)
         {
             var kernel = new CompositeKernel
                                      {
@@ -513,7 +524,7 @@ namespace MLS.Agent.CommandLine
                                      .UseDefaultMagicCommands()
                                      .UseExtendDirective();
 
-            kernel.DefaultKernelName = "csharp";
+            kernel.DefaultKernelName = defaultKernelName;
             kernel.Name = ".NET";
 
             return kernel;
