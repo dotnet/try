@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public async Task Handle(JupyterRequestContext context)
         {
             var isCompleteRequest = GetJupyterRequest(context);
-            var command = new SubmitCode(isCompleteRequest.Code, submissionType:SubmissionType.AnalysisOnly);
+            var command = new SubmitCode(isCompleteRequest.Code, submissionType:SubmissionType.Diagnose);
            
             var openRequest = new InflightRequest(context, isCompleteRequest, 0);
 

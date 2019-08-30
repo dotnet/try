@@ -1,9 +1,11 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Interactive.Commands;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
@@ -21,17 +23,17 @@ namespace Microsoft.DotNet.Interactive
                         && !t.IsAbstract
                         && !t.IsGenericTypeDefinition
                         && !t.IsInterface)
-               .ToDictionary(t => t.Name, t => t);
+               .ToDictionary(t => t.Name, t => t, StringComparer.InvariantCultureIgnoreCase);
         }
 
         public IKernelCommand Dispatch(string commandType, JToken body)
         {
-            if (!_map.ContainsKey(commandType))
+            if (_map.TryGetValue(commandType, out var mappedCommand))
             {
-                return null;
+                return (IKernelCommand)body.ToObject(mappedCommand);
             }
 
-            return (IKernelCommand)body.ToObject(_map[commandType]);
+            return null;
         }
     }
 }

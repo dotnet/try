@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return true;
         }
 
-        private void SetContent(object[] args)
+        internal void SetContent(object[] args)
         {
             if (args?.Length == 0)
             {
