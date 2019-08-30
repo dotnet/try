@@ -532,7 +532,7 @@ catch (Exception e)
                 .ContainSingle(e => e is CodeSubmissionEvaluated);
 
             events.Should()
-                .Contain(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value as string == "success\r\n");
+                .Contain(e => e is DisplayedValueProduced && (((DisplayedValueProduced)e).Value as string).Contains("success"));
 
         }
     }
