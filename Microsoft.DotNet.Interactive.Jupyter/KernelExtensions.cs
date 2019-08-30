@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                       .Trim();
 
                       
-                        context.OnNext(new Events.DisplayedValueProduced(
+                        context.Publish(new Events.DisplayedValueProduced(
                                            htmlContent,
                                            context.Command,
                                            formattedValues: new[]
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                new FormattedValue("text/html", htmlContent)
                                            }));
                         
-                        context.OnCompleted();
+                        context.Complete();
                     }
                 })
             });
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     supportedDirectives.Commands.AddRange(context.CurrentKernel.Directives);
 
-                    context.OnNext(new Events.DisplayedValueProduced(supportedDirectives));
+                    context.Publish(new Events.DisplayedValueProduced(supportedDirectives));
 
                     await context.CurrentKernel.VisitSubkernelsAsync(async k =>
                     {
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                     scriptContent))
                                 .ToString();
 
-                        context.OnNext(new Events.DisplayedValueProduced(
+                        context.Publish(new Events.DisplayedValueProduced(
                                            scriptContent,
                                            context.Command,
                                            formattedValues: new[]
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                new FormattedValue("text/html",
                                                                   value)
                                            }));
-                        context.OnCompleted();
+                        context.Complete();
                     }
                 })
             };

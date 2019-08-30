@@ -51,12 +51,12 @@ namespace Microsoft.DotNet.Interactive
                         streamKernelCommand = obj.ToObject<StreamKernelCommand>();
                         IKernelCommand command = null;
 
-                        if (obj.TryGetValue("Command", out var commandValue))
+                        if (obj.TryGetValue("command", StringComparison.InvariantCultureIgnoreCase ,out var commandValue))
                         {
                             command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
                         }
 
-                        if (streamKernelCommand.CommandType == "Quit")
+                        if (streamKernelCommand.CommandType == nameof(Quit))
                         {
                             return;
                         }
@@ -85,14 +85,6 @@ namespace Microsoft.DotNet.Interactive
                             }, 
                             streamKernelCommand?.Id ?? -1);
                     }
-                    catch
-                    {
-                        Write(new CommandNotRecognized
-                        {
-                            Body = obj ?? (object)line
-                        }, streamKernelCommand?.Id ?? -1);
-                    }
-
                 }
             });
         }
@@ -102,7 +94,7 @@ namespace Microsoft.DotNet.Interactive
             var wrapper = new StreamKernelEvent
             {
                 Id = id,
-                Event = JsonConvert.SerializeObject(e),
+                Event = e,
                 EventType = e.GetType().Name
             };
             var serialized = JsonConvert.SerializeObject(wrapper, _jsonSerializerSettings);
