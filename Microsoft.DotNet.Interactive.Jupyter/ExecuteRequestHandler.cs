@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCommandFailed(CommandFailed commandFailed)
         {
-            if (!InFlightRequests.TryRemove(commandFailed.Command, out var openRequest))
+            if (!InFlightRequests.TryRemove(commandFailed.GetRootCommand(), out var openRequest))
             {
                 return;
             }
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnValueProductionEvent(ValueProducedEventBase eventBase)
         {
-            if (!InFlightRequests.TryGetValue(eventBase.Command, out var openRequest))
+            if (!InFlightRequests.TryGetValue(eventBase.GetRootCommand(), out var openRequest))
             {
                 return;
             }
@@ -182,7 +182,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)
         {
-            if (!InFlightRequests.TryRemove(codeSubmissionEvaluated.Command, out var openRequest))
+            if (!InFlightRequests.TryRemove(codeSubmissionEvaluated.GetRootCommand(), out var openRequest))
             {
                 return;
             }
