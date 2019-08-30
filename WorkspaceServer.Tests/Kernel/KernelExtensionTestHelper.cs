@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using MLS.Agent.Tools;
@@ -14,16 +15,16 @@ namespace WorkspaceServer.Tests.Kernel
 {
     internal static class KernelExtensionTestHelper
     {
-        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, DirectoryInfo outputDir)
+        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, DirectoryInfo outputDir, [CallerMemberName] string testName = null)
         {
-            var extensionDll = await CreateExtension(extensionDir);
-            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, Path.GetRandomFileName()+".dll"));
+            var extensionDll = await CreateExtension(extensionDir, testName);
+            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, extensionDll.Name));
             File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
 
             return finalExtensionDll;
         }
 
-        internal static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir)
+        internal static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir, [CallerMemberName] string extensionName = null)
         {
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
@@ -49,6 +50,7 @@ public class TestKernelExtension : IKernelExtension
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>{extensionName}</AssemblyName>
   </PropertyGroup>
 
     <ItemGroup>
@@ -69,7 +71,7 @@ public class TestKernelExtension : IKernelExtension
             return extensionDir
                                .GetDirectories("bin", SearchOption.AllDirectories)
                                .Single()
-                               .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
+                               .GetFiles($"{extensionName}.dll", SearchOption.AllDirectories)
                                .Single();
         }
     }
