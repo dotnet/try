@@ -23,10 +23,11 @@ using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
+using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CSharpKernel : KernelBase
+    public class CSharpKernel : KernelBase, IExtensibleKernel
     {
         internal const string KernelName = "csharp";
 
@@ -34,6 +35,7 @@ namespace WorkspaceServer.Kernel
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
         protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
+        public RelativeDirectoryPath ExtensionsPath { get; }
 
 
         private ScriptState _scriptState;
@@ -46,6 +48,7 @@ namespace WorkspaceServer.Kernel
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
             Name = KernelName;
+            ExtensionsPath = new RelativeDirectoryPath("interactive-extensions/cs");
         }
 
         private void SetupScriptOptions()
@@ -279,5 +282,6 @@ namespace WorkspaceServer.Kernel
         private bool HasReturnValue =>
             _scriptState != null &&
             (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
+
     }
 }

@@ -3,16 +3,17 @@
 
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using System.IO;
 
 namespace Microsoft.DotNet.Interactive
 {
     public class ExtensionLoaded : KernelEventBase
     { 
-        public ExtensionLoaded(string extensionPath)
+        public ExtensionLoaded(FileInfo extensionPath)
         {
             ExtensionPath = extensionPath;
         }
 
-        public string ExtensionPath { get; }
+        public FileInfo ExtensionPath { get; }
     }
 }

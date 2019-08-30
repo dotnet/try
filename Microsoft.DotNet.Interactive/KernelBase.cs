@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -61,56 +62,57 @@ namespace Microsoft.DotNet.Interactive
                 (command, context, next) =>
                     command switch
                         {
-                        SubmitCode submitCode =>
-                        HandleDirectivesAndSubmitCode(
-                            submitCode, 
-                            context,
-                            next),
+                            SubmitCode submitCode =>
+                            HandleDirectivesAndSubmitCode(
+                                submitCode,
+                                context,
+                                next),
 
-                        LoadExtension loadExtension =>
-                        HandleLoadExtension(
-                            loadExtension,
-                            context, 
-                            next),
+                            LoadExtension loadExtension =>
+                            HandleLoadExtension(
+                                loadExtension,
+                                context,
+                                next),
 
-                        DisplayValue displayValue =>
-                        HandleDisplayValue(
-                            displayValue,
-                            context,
-                            next),
+                            DisplayValue displayValue =>
+                            HandleDisplayValue(
+                                displayValue,
+                                context,
+                                next),
 
-                        UpdateDisplayedValue updateDisplayValue =>
-                        HandleUpdateDisplayValue(
-                            updateDisplayValue,
-                            context,
-                            next),
+                            UpdateDisplayedValue updateDisplayValue =>
+                            HandleUpdateDisplayValue(
+                                updateDisplayValue,
+                                context,
+                                next),
 
-                        LoadExtensionFromNuGetPackage loadCSharpExtension =>
-                        HandleLoadExtensionInNuGetPackage(
-                            loadCSharpExtension, 
-                            context, 
-                            next),
+                            LoadExtensionFromNuGetPackage loadCSharpExtension =>
+                            HandleLoadExtensionInNuGetPackage(
+                                loadCSharpExtension,
+                                context,
+                                next),
 
                             _ => next(command, context)
                         });
         }
 
         private async Task HandleLoadExtensionInNuGetPackage(
-            LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage, 
-            KernelInvocationContext invocationContext, 
+            LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage,
+            KernelInvocationContext invocationContext,
             KernelPipelineContinuation next)
         {
             loadExtensionFromNuGetPackage.Handler = async context =>
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
-                if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out DirectoryInfo nugetPackageDirectory))
+                if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
                 {
-                    if (KernelExtensionPathResolver.TryGetExtensionPath(nugetPackageDirectory, invocationContext.HandlingKernel, out var extensionDirectory))
+                    var extensibleKernel = invocationContext.HandlingKernel as IExtensibleKernel;
+                    if (extensibleKernel != null)
                     {
+                        var extensionDirectory = nugetPackageDirectory.GetDirectoryAccessorForRelativePath(extensibleKernel.ExtensionsPath);
                         await kernelExtensionLoader.LoadExtensionInDirectory(extensionDirectory, invocationContext);
                     }
                 }
-                
 
                 context.Complete();
             };
@@ -126,7 +128,10 @@ namespace Microsoft.DotNet.Interactive
             loadExtension.Handler = async context =>
             {
                 var kernelextensionLoader = new KernelExtensionLoader();
-                await kernelextensionLoader.TryLoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel);
+                if(await kernelextensionLoader.TryLoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel))
+                {
+                    context.Publish(new ExtensionLoaded(loadExtension.AssemblyFile));
+                }
                 context.Complete();
             };
 
@@ -305,7 +310,7 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        private readonly ConcurrentQueue<KernelOperation> _commandQueue = 
+        private readonly ConcurrentQueue<KernelOperation> _commandQueue =
             new ConcurrentQueue<KernelOperation>();
 
         public Task<IKernelCommandResult> SendAsync(

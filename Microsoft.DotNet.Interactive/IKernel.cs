@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Interactive
 {
