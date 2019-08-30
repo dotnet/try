@@ -9,8 +9,10 @@ namespace Microsoft.DotNet.Interactive
     {
         [JsonProperty("id")]
         public int Id { get; set; }
+
         [JsonProperty("eventType")]
         public string EventType { get; set; }
+
         [JsonProperty("event")]
         public string Event { get; set; }
     }
