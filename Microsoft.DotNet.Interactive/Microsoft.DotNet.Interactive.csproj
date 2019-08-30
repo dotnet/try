@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />
-    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19317.1" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19420.2" />
         <PackageReference Include="PocketLogger" Version="0.3.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

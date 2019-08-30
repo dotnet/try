@@ -25,7 +25,7 @@ namespace MLS.Agent.Tests
             var console = new TestConsole();
             var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(true));
             await jupyterCommandLine.InvokeAsync();
-            console.Out.ToString().Should().MatchEquivalentOf($"*[InstallKernelSpec] Installed kernelspec .net in *.net *");
+            console.Out.ToString().Should().MatchEquivalentOf($"*[InstallKernelSpec] Installed kernelspec .net-csharp in *.net-csharp *");
             console.Out.ToString().Should().Contain(".NET kernel installation succeeded");
         }
     }
