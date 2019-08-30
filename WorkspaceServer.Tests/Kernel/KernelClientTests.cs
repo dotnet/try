@@ -1,13 +1,19 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Assent;
+using FluentAssertions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Tests;
+using Newtonsoft.Json.Linq;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -97,16 +103,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task Kernel_client_surfaces_code_submission_Errors()
         {
-            var kernel = new CompositeKernel()
-            {
-                new CSharpKernel(),
-                new FakeKernel("fake")
-                {
-                    Handle = context => Task.CompletedTask
-                }
-            };
-
-            kernel.DefaultKernelName = "csharp";
+            var kernel = new CSharpKernel();
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
@@ -129,7 +126,13 @@ namespace WorkspaceServer.Tests.Kernel
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            this.Assent(text, _configuration);
+            var events = text.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(JObject.Parse).ToList();
+
+            events.Should()
+                .Contain(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived))
+                .And
+                .Contain(e => e["eventType"].Value<string>() == nameof(CommandFailed));
         }
 
         [Fact]
@@ -160,7 +163,10 @@ namespace WorkspaceServer.Tests.Kernel
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            this.Assent(text, _configuration);
+            var events = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(JObject.Parse).ToList();
+
+            events.Should().Contain(e => e["eventType"].Value<string>() == nameof(NuGetPackageAdded));
         }
     }
 }
