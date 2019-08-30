@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Interactive
             return false;
         }
 
-        public async Task LoadExtensionInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        public async Task LoadFromAssembliesInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
         {
             if (directory.RootDirectoryExists())
             {

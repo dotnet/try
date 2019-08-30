@@ -35,7 +35,6 @@ namespace WorkspaceServer.Kernel
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
         protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
-        public RelativeDirectoryPath ExtensionsPath { get; }
 
 
         private ScriptState _scriptState;
@@ -279,9 +278,16 @@ namespace WorkspaceServer.Kernel
             return items;
         }
 
+        public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        {
+            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(ExtensionsPath);
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context);
+        }
+
         private bool HasReturnValue =>
             _scriptState != null &&
             (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
 
+        public RelativeDirectoryPath ExtensionsPath { get; }
     }
 }

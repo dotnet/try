@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using MLS.Agent.Tools;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive
 {
     public interface IExtensibleKernel
     {
-        RelativeDirectoryPath ExtensionsPath { get; }
+        public Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext invocationContext);
     }
 }

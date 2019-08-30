@@ -104,12 +104,12 @@ namespace Microsoft.DotNet.Interactive
             loadExtensionFromNuGetPackage.Handler = async context =>
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
-                if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
+
+                if (invocationContext.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
-                    if (invocationContext.HandlingKernel is IExtensibleKernel extensibleKernel)
+                    if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
                     {
-                        var extensionDirectory = nugetPackageDirectory.GetDirectoryAccessorForRelativePath(extensibleKernel.ExtensionsPath);
-                        await kernelExtensionLoader.LoadExtensionInDirectory(extensionDirectory, invocationContext);
+                        await extensibleKernel.LoadExtensionsInDirectory(nugetPackageDirectory, context);
                     }
                 }
 
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Interactive
             loadExtension.Handler = async context =>
             {
                 var kernelextensionLoader = new KernelExtensionLoader();
-                if(await kernelextensionLoader.TryLoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel))
+                if (await kernelextensionLoader.TryLoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel))
                 {
                     context.Publish(new ExtensionLoaded(loadExtension.AssemblyFile));
                 }
