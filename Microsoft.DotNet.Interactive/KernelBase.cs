@@ -106,8 +106,7 @@ namespace Microsoft.DotNet.Interactive
                 var kernelExtensionLoader = new KernelExtensionLoader();
                 if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
                 {
-                    var extensibleKernel = invocationContext.HandlingKernel as IExtensibleKernel;
-                    if (extensibleKernel != null)
+                    if (invocationContext.HandlingKernel is IExtensibleKernel extensibleKernel)
                     {
                         var extensionDirectory = nugetPackageDirectory.GetDirectoryAccessorForRelativePath(extensibleKernel.ExtensionsPath);
                         await kernelExtensionLoader.LoadExtensionInDirectory(extensionDirectory, invocationContext);
