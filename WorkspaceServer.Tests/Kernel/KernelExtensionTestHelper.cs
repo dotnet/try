@@ -15,10 +15,11 @@ namespace WorkspaceServer.Tests.Kernel
 {
     internal static class KernelExtensionTestHelper
     {
-        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, DirectoryInfo outputDir, [CallerMemberName] string testName = null)
+        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, FileSystemDirectoryAccessor outputDir, [CallerMemberName] string testName = null)
         {
             var extensionDll = await CreateExtension(extensionDir, testName);
-            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, extensionDll.Name));
+            outputDir.EnsureRootDirectoryExists();
+            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.GetFullyQualifiedRoot().FullName, extensionDll.Name));
             File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
 
             return finalExtensionDll;

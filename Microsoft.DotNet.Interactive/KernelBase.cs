@@ -103,8 +103,6 @@ namespace Microsoft.DotNet.Interactive
         {
             loadExtensionFromNuGetPackage.Handler = async context =>
             {
-                var kernelExtensionLoader = new KernelExtensionLoader();
-
                 if (invocationContext.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
                     if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))

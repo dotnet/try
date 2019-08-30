@@ -5,6 +5,8 @@ using FluentAssertions;
 using System.Linq;
 using MLS.Agent.Tools.Tests;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
@@ -13,16 +15,17 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact]
         public void Can_find_path_of_nuget_package()
         {
-            var nugetPackageReference = new NugetPackageReference("myNugetPackage", "2.0.0");
+            var firstPackageRef = new NugetPackageReference("first", "2.0.0");
+            var secondPackageRef = new NugetPackageReference("second", "3.0.0");
             var directory = new InMemoryDirectoryAccessor()
             {
-                ("nugetPackage1/2.0.0/lib/netstandard2.0/nugetPackage1.dll", ""),
-                ($"{nugetPackageReference.PackageName}/{nugetPackageReference.PackageVersion}/lib/netstandard2.0/{nugetPackageReference.PackageName}.dll", "")
+                ($"{firstPackageRef.PackageName}/{firstPackageRef.PackageVersion}/lib/netstandard2.0/{firstPackageRef.PackageName}.dll", ""),
+                ($"{secondPackageRef.PackageName}/{secondPackageRef.PackageVersion}/lib/netstandard2.0/{secondPackageRef.PackageName}.dll", "")
             };
 
-            NuGetPackagePathResolver.TryGetNuGetPackageBasePath(nugetPackageReference, directory.GetAllFilesRecursively().Select(file => directory.GetFullyQualifiedFilePath(file)), out var nugetPackageDirectory);
+            NuGetPackagePathResolver.TryGetNuGetPackageBasePath(firstPackageRef, directory.GetAllFilesRecursively().Select(file => directory.GetFullyQualifiedFilePath(file)), out var nugetPackageDirectory);
 
-            nugetPackageDirectory.GetFullyQualifiedRoot().FullName.Should().Be(directory.GetFullyQualifiedPath(new RelativeDirectoryPath($"{nugetPackageReference.PackageName}/{nugetPackageReference.PackageVersion}")).FullName);
+            nugetPackageDirectory.GetFullyQualifiedRoot().FullName.Should().Be(directory.GetFullyQualifiedPath(new RelativeDirectoryPath($"{firstPackageRef.PackageName}/{firstPackageRef.PackageVersion}")).FullName);
         }
     }
 }

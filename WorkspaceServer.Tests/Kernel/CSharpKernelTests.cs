@@ -505,10 +505,9 @@ catch (Exception e)
             const string nugetPackageName = "myNugetPackage";
             var nugetPackageDirectory = new FileSystemDirectoryAccessor(directory.Subdirectory($"{nugetPackageName}/2.0.0"));
             var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
-            var extensionsDir = nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/cs"));
+            var extensionsDir = (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/cs"));
 
-            extensionsDir.EnsureRootDirectoryExists();
-            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, extensionsDir.GetFullyQualifiedRoot());
+            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, extensionsDir);
 
             var kernel = CreateKernel();
 
