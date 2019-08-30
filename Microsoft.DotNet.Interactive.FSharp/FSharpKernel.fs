@@ -16,7 +16,7 @@ type FSharpKernel() =
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
-            context.OnNext(codeSubmissionReceived)
+            context.Publish(codeSubmissionReceived)
             let result, errors =
                 try
                     script.Eval(codeSubmission.Code)
@@ -24,16 +24,16 @@ type FSharpKernel() =
                 | ex -> Error(ex), [||]
             if errors.Length > 0 then
                 let aggregateErrorMessage = System.String.Join("\n", errors)
-                context.OnNext(CommandFailed(aggregateErrorMessage, codeSubmission))
+                context.Publish(CommandFailed(aggregateErrorMessage, codeSubmission))
             match result with
             | Ok(Some(value)) ->
                 let value = value.ReflectionValue
                 let formattedValues = FormattedValue.FromObject(value)
-                context.OnNext(ReturnValueProduced(value, codeSubmission, formattedValues))
+                context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
             | Ok(None) -> ()
             | Error(ex) -> context.OnError(ex)
-            context.OnNext(CodeSubmissionEvaluated(codeSubmission))
-            context.OnCompleted()
+            context.Publish(CodeSubmissionEvaluated(codeSubmission))
+            context.Complete()
         }
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
         async {

@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Interactive
             }
             catch (Exception exception)
             {
-                context.OnNext(
+                context.Publish(
                     new CommandFailed(
                         exception,
                         command));

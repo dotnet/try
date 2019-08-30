@@ -66,8 +66,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             kernel.AddMetatadaReferences(refs);
                         }
 
-                        context.OnNext(new NuGetPackageAdded(package));
-                        context.OnCompleted();
+                        context.Publish(new NuGetPackageAdded(package));
+                        context.Complete();
                     }
                 };
 

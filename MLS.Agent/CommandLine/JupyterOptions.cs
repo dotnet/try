@@ -7,11 +7,13 @@ namespace MLS.Agent.CommandLine
 {
     public class JupyterOptions
     {
-        public JupyterOptions(FileInfo connectionFile)
+        public JupyterOptions(FileInfo connectionFile, string defaultKernel)
         {
             ConnectionFile = connectionFile;
+            DefaultKernel = defaultKernel;
         }
 
         public FileInfo ConnectionFile { get; }
+        public string DefaultKernel { get; }
     }
 }

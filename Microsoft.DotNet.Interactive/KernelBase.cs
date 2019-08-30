@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Interactive
                     await extension.OnLoadAsync(invocationContext.HandlingKernel);
                 }
 
-                context.OnCompleted();
+                context.Complete();
             };
 
             await next(loadExtension, invocationContext);
@@ -155,8 +155,8 @@ namespace Microsoft.DotNet.Interactive
                 {
                     submitCode.Handler = context =>
                     {
-                        context.OnNext(new CodeSubmissionEvaluated(submitCode));
-                        context.OnCompleted();
+                        context.Publish(new CodeSubmissionEvaluated(submitCode));
+                        context.Complete();
                         return Task.CompletedTask;
                     };
 
@@ -178,14 +178,14 @@ namespace Microsoft.DotNet.Interactive
         {
             displayValue.Handler = invocationContext =>
             {
-                invocationContext.OnNext(
+                invocationContext.Publish(
                     new Events.DisplayedValueProduced(
                         displayValue.FormattedValue,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue },
                         valueId: displayValue.ValueId));
 
-                invocationContext.OnCompleted();
+                invocationContext.Complete();
 
                 return Task.CompletedTask;
             };
@@ -200,7 +200,7 @@ namespace Microsoft.DotNet.Interactive
         {
             displayedValue.Handler = invocationContext =>
             {
-                invocationContext.OnNext(
+                invocationContext.Publish(
                     new DisplayedValueUpdated(
                         displayedValue.FormattedValue,
                         valueId: displayedValue.ValueId,
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.Interactive
                         formattedValues: new[] { displayedValue.FormattedValue }
                         ));
 
-                invocationContext.OnCompleted();
+                invocationContext.Complete();
 
                 return Task.CompletedTask;
             };
