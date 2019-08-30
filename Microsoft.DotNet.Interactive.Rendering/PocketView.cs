@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Html;
 namespace Microsoft.DotNet.Interactive.Rendering
 {
     /// <summary>
-    /// Writes HTML using a C# DSL, bypasing the need for specialized parser and compiler infrastructure such as Razor or WebForms require.
+    /// Writes HTML using a C# DSL, bypassing the need for specialized parser and compiler infrastructure such as Razor or WebForms require.
     /// </summary>
     public class PocketView : DynamicObject, ITag
     {
