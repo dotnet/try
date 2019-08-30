@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Interactive
                         streamKernelCommand = obj.ToObject<StreamKernelCommand>();
                         IKernelCommand command = null;
 
-                        if (obj.TryGetValue("Command", out var commandValue))
+                        if (obj.TryGetValue("command", out var commandValue))
                         {
                             command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
                         }

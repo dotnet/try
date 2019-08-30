@@ -29,8 +29,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode(@"var x = 
-123;"));
+            writer.WriteMessage(new SubmitCode(@"var x = 123;"));
             writer.WriteMessage(new SubmitCode("x"));
             writer.WriteMessage(new Quit());
 
