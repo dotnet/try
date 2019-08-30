@@ -51,12 +51,12 @@ namespace Microsoft.DotNet.Interactive
                         streamKernelCommand = obj.ToObject<StreamKernelCommand>();
                         IKernelCommand command = null;
 
-                        if (obj.TryGetValue("command", out var commandValue))
+                        if (obj.TryGetValue("command", StringComparison.InvariantCultureIgnoreCase ,out var commandValue))
                         {
                             command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
                         }
 
-                        if (streamKernelCommand.CommandType == "Quit")
+                        if (streamKernelCommand.CommandType == nameof(Quit))
                         {
                             return;
                         }
