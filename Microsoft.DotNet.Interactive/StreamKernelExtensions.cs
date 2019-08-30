@@ -11,17 +11,17 @@ namespace Microsoft.DotNet.Interactive
 {
     public static class StreamKernelExtensions
     {
-        private static int _id = 0;
+        private static int _id;
         private static readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
-        public static int WriteMessage(this StreamWriter writer, IKernelCommand command)
+        public static int WriteMessage(this StreamWriter writer, IKernelCommand command, int? correlationId = null)
         {
-            var message = new StreamKernelCommand()
+            var message = new StreamKernelCommand
             {
-                Id = Interlocked.Increment(ref _id),
+                Id = correlationId?? Interlocked.Increment(ref _id),
                 CommandType = command.GetType().Name,
                 Command = command
             };

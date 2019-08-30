@@ -104,8 +104,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             var input = new MemoryStream();
             var writer = new StreamWriter(input, Encoding.UTF8);
-            writer.WriteMessage(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""));
-            writer.WriteMessage(new Quit());
+            writer.WriteMessage(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""),1);
+            writer.WriteMessage(new Quit(),2);
 
             input.Position = 0;
 

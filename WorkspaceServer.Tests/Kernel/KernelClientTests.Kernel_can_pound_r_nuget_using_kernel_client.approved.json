@@ -1,2 +1,2 @@
-{"id":2,"eventType":"NuGetPackageAdded","event":{"packageReference":{"packageName":"Microsoft.Spark","packageVersion":"0.4.0"},"command":{"packageReference":{"packageName":"Microsoft.Spark","packageVersion":"0.4.0"}}}}
-{"id":2,"eventType":"CodeSubmissionEvaluated","event":{"code":"#r \"nuget:Microsoft.Spark, 0.4.0\"","command":{"code":"#r \"nuget:Microsoft.Spark, 0.4.0\"","targetKernelName":null,"submissionType":0}}}
+{"id":1,"eventType":"NuGetPackageAdded","event":{"packageReference":{"packageName":"Microsoft.Spark","packageVersion":"0.4.0"},"command":{"packageReference":{"packageName":"Microsoft.Spark","packageVersion":"0.4.0"}}}}
+{"id":1,"eventType":"CodeSubmissionEvaluated","event":{"code":"#r \"nuget:Microsoft.Spark, 0.4.0\"","command":{"code":"#r \"nuget:Microsoft.Spark, 0.4.0\"","targetKernelName":null,"submissionType":0}}}
