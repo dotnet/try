@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         /// </summary>
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="nested">A nested instance.</param>
-        protected internal PocketView(string tagName, PocketView nested = null) : this(nested)
+        public PocketView(string tagName, PocketView nested = null) : this(nested)
         {
             _tag = tagName.Tag();
         }
@@ -173,7 +173,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return true;
         }
 
-        internal void SetContent(object[] args)
+        public void SetContent(object[] args)
         {
             if (args?.Length == 0)
             {
