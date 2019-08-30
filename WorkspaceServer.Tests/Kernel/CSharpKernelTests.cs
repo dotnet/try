@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -16,7 +17,6 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent;
 using MLS.Agent.Tools;
-using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
@@ -414,7 +414,7 @@ json
 
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
-            var extensionDllPath = (await CreateExtension(extensionDir, outputDir)).FullName;
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir)).FullName;
 
             var kernel = CreateKernel();
 
@@ -506,7 +506,7 @@ catch (Exception e)
             var extensionsDir = nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/cs"));
 
             extensionsDir.EnsureRootDirectoryExists();
-            var extensionDll = await CreateExtension(directory, extensionsDir.GetFullyQualifiedRoot());
+            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, extensionsDir.GetFullyQualifiedRoot());
 
             var kernel = CreateKernel();
 
@@ -518,61 +518,6 @@ catch (Exception e)
             KernelEvents.Should()
                         .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                             e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
-        }
-
-        private static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir, DirectoryInfo outputDir)
-        {
-            var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
-
-            var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
-                {
-                    ( "Extension.cs", $@"
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Commands;
-
-public class TestKernelExtension : IKernelExtension
-{{
-    public async Task OnLoadAsync(IKernel kernel)
-    {{
-        await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));
-    }}
-}}
-" ),
-                    ("TestExtension.csproj", $@"
-<Project Sdk=""Microsoft.NET.Sdk"">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
-    <ItemGroup>
-
-    <Reference Include=""Microsoft.DotNet.Interactive"">
-      <HintPath>{microsoftDotNetInteractiveDllPath}</HintPath>
-    </Reference>
-  </ItemGroup>
-
-</Project>
-")
-                }
-                .CreateFiles();
-
-            var buildResult = await new Dotnet(extensionDir).Build();
-            buildResult.ThrowOnFailure();
-
-            var extensionDll = extensionDir
-                                   .GetDirectories("bin", SearchOption.AllDirectories)
-                                   .Single()
-                                   .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
-                                   .Single();
-
-            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, extensionDll.Name));
-            File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
-
-            return finalExtensionDll;
         }
     }
 }
