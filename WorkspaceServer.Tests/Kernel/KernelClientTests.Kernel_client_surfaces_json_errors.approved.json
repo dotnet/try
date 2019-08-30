@@ -1,1 +1,1 @@
-﻿{"id":-1,"eventType":"CommandParseFailure","event":"{\"Command\":null,\"Body\":\"{ hello\"}"}
+﻿{"id":-1,"eventType":"CommandParseFailure","event":{"command":null,"body":"{ hello"}}

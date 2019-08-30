@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Interactive
             var wrapper = new StreamKernelEvent
             {
                 Id = id,
-                Event = JsonConvert.SerializeObject(e),
+                Event = e,
                 EventType = e.GetType().Name
             };
             var serialized = JsonConvert.SerializeObject(wrapper, _jsonSerializerSettings);

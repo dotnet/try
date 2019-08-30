@@ -14,6 +14,6 @@ namespace Microsoft.DotNet.Interactive
         public string EventType { get; set; }
 
         [JsonProperty("event")]
-        public string Event { get; set; }
+        public object Event { get; set; }
     }
 }

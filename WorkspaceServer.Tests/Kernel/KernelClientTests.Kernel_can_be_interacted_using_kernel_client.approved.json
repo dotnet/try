@@ -1,7 +1,7 @@
-﻿{"id":1,"eventType":"CodeSubmissionReceived","event":"{\"Code\":\"var x = 123;\",\"Value\":\"var x = 123;\",\"Command\":{\"Code\":\"var x = 123;\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
-{"id":1,"eventType":"CompleteCodeSubmissionReceived","event":"{\"Code\":\"var x = 123;\",\"Command\":{\"Code\":\"var x = 123;\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
-{"id":1,"eventType":"CodeSubmissionEvaluated","event":"{\"Code\":\"var x = 123;\",\"Command\":{\"Code\":\"var x = 123;\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
-{"id":2,"eventType":"CodeSubmissionReceived","event":"{\"Code\":\"x\",\"Value\":\"x\",\"Command\":{\"Code\":\"x\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
-{"id":2,"eventType":"CompleteCodeSubmissionReceived","event":"{\"Code\":\"x\",\"Command\":{\"Code\":\"x\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
-{"id":2,"eventType":"ReturnValueProduced","event":"{\"Value\":123,\"FormattedValues\":[{\"MimeType\":\"text/plain\",\"Value\":\"123\"}],\"ValueId\":null,\"Command\":{\"Code\":\"x\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
-{"id":2,"eventType":"CodeSubmissionEvaluated","event":"{\"Code\":\"x\",\"Command\":{\"Code\":\"x\",\"TargetKernelName\":null,\"SubmissionType\":0}}"}
+﻿{"id":1,"eventType":"CodeSubmissionReceived","event":{"code":"var x = 123;","value":"var x = 123;","command":{"code":"var x = 123;","targetKernelName":null,"submissionType":0}}}
+{"id":1,"eventType":"CompleteCodeSubmissionReceived","event":{"code":"var x = 123;","command":{"code":"var x = 123;","targetKernelName":null,"submissionType":0}}}
+{"id":1,"eventType":"CodeSubmissionEvaluated","event":{"code":"var x = 123;","command":{"code":"var x = 123;","targetKernelName":null,"submissionType":0}}}
+{"id":2,"eventType":"CodeSubmissionReceived","event":{"code":"x","value":"x","command":{"code":"x","targetKernelName":null,"submissionType":0}}}
+{"id":2,"eventType":"CompleteCodeSubmissionReceived","event":{"code":"x","command":{"code":"x","targetKernelName":null,"submissionType":0}}}
+{"id":2,"eventType":"ReturnValueProduced","event":{"value":123,"formattedValues":[{"mimeType":"text/plain","value":"123"}],"valueId":null,"command":{"code":"x","targetKernelName":null,"submissionType":0}}}
+{"id":2,"eventType":"CodeSubmissionEvaluated","event":{"code":"x","command":{"code":"x","targetKernelName":null,"submissionType":0}}}
