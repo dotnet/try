@@ -5,7 +5,6 @@ using System;
 using System.CommandLine;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
-using WorkspaceServer.Kernel;
 
 namespace MLS.Agent.CommandLine
 {
