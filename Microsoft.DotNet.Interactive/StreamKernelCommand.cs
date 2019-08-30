@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class StreamKernelCommand
+    internal class StreamKernelCommand
     {
         [JsonProperty("id")]
         public int Id { get; set; }

@@ -1,17 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Assent;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Tests;
-using Newtonsoft.Json;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -19,6 +15,17 @@ namespace WorkspaceServer.Tests.Kernel
 {
     public class KernelClientTests
     {
+
+        private readonly Configuration _configuration;
+
+        public KernelClientTests()
+        {
+            _configuration = new Configuration()
+                .UsingExtension("json");
+
+            _configuration = _configuration.SetInteractive(true);
+        }
+
         [Fact]
         public async Task Kernel_can_be_interacted_using_kernel_client()
         {
@@ -48,10 +55,7 @@ namespace WorkspaceServer.Tests.Kernel
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            var events = text.Split(Environment.NewLine)
-                             .Select(JsonConvert.DeserializeObject<StreamKernelEvent>);
-
-            events.Should().Contain(e => e.EventType == "ReturnValueProduced");
+            this.Assent(text, _configuration);
         }
 
         [Fact]
@@ -87,10 +91,7 @@ namespace WorkspaceServer.Tests.Kernel
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            var events = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(JsonConvert.DeserializeObject<StreamKernelEvent>);
-
-            events.Should().Contain(e => e.EventType == "CommandParseFailure");
+            this.Assent(text, _configuration);
         }
 
         [Fact]
@@ -121,14 +122,7 @@ namespace WorkspaceServer.Tests.Kernel
             var reader = new StreamReader(output, Encoding.UTF8);
 
             var text = reader.ReadToEnd();
-            var events = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(JsonConvert.DeserializeObject<StreamKernelEvent>).ToList();
-
-            events.Should()
-                .Contain(e => e.EventType == nameof(NuGetPackageAdded));
-
-            events.Should()
-                .NotContain(e => e.EventType == nameof(CommandNotRecognized));
+            this.Assent(text, _configuration);
         }
     }
 }
