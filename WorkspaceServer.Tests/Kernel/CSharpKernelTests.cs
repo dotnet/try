@@ -420,6 +420,8 @@ json
 
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
+            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded &&
+                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDllPath) == 0);
             KernelEvents.Should()
                         .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                             e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
