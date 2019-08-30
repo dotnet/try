@@ -11,7 +11,7 @@ using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class KernelInvocationContext : IObserver<IKernelEvent>, IDisposable
+    public class KernelInvocationContext : IDisposable
     {
         private readonly KernelInvocationContext _parentContext;
         private static readonly AsyncLocal<Stack<KernelInvocationContext>> _currentStack = new AsyncLocal<Stack<KernelInvocationContext>>();
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive
 
         public IKernelCommand Command { get; }
 
-        public void OnCompleted()
+        public void Complete()
         {
             IsCompleted = true;
             _events.OnCompleted();
@@ -41,11 +41,11 @@ namespace Microsoft.DotNet.Interactive
             _events.OnError(exception);
         }
 
-        public void OnNext(IKernelEvent @event)
+        public void Publish(IKernelEvent @event)
         {
             if (_parentContext != null)
             {
-                _parentContext.OnNext(@event);
+                _parentContext.Publish(@event);
             }
             else
             {

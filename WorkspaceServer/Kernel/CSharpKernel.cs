@@ -105,17 +105,17 @@ namespace WorkspaceServer.Kernel
                 submitCode.Code,
                 submitCode);
 
-            context.OnNext(codeSubmissionReceived);
+            context.Publish(codeSubmissionReceived);
 
             var code = submitCode.Code;
             var isComplete = await IsCompleteSubmissionAsync(submitCode.Code);
             if(isComplete)
             {
-                context.OnNext(new CompleteCodeSubmissionReceived(submitCode));
+                context.Publish(new CompleteCodeSubmissionReceived(submitCode));
             }
             else
             {
-                context.OnNext(new IncompleteCodeSubmissionReceived(submitCode));
+                context.Publish(new IncompleteCodeSubmissionReceived(submitCode));
             }
 
             if (submitCode.SubmissionType == SubmissionType.Diagnose)
@@ -164,23 +164,23 @@ namespace WorkspaceServer.Kernel
                                     compilationError.Diagnostics.Select(d => d.ToString()));
                 }
 
-                context.OnNext(new CommandFailed(exception, submitCode, message));
-                context.OnCompleted();
+                context.Publish(new CommandFailed(exception, submitCode, message));
+                context.Complete();
             }
             else
             {
                 if (HasReturnValue)
                 {
                     var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
-                    context.OnNext(
+                    context.Publish(
                         new ReturnValueProduced(
                             _scriptState.ReturnValue,
                             submitCode,
                             formattedValues));
                 }
 
-                context.OnNext(new CodeSubmissionEvaluated(submitCode));
-                context.OnCompleted();
+                context.Publish(new CodeSubmissionEvaluated(submitCode));
+                context.Complete();
             }
         }
 
@@ -195,7 +195,7 @@ namespace WorkspaceServer.Kernel
                                 PlainTextFormatter.MimeType, output)
                         };
 
-            context.OnNext(
+            context.Publish(
                 new DisplayedValueProduced(
                     output,
                     command,
@@ -209,12 +209,12 @@ namespace WorkspaceServer.Kernel
         {
             var completionRequestReceived = new CompletionRequestReceived(requestCompletion);
 
-            context.OnNext(completionRequestReceived);
+            context.Publish(completionRequestReceived);
 
             var completionList =
                 await GetCompletionList(requestCompletion.Code, requestCompletion.CursorPosition, scriptState);
 
-            context.OnNext(new CompletionRequestCompleted(completionList, requestCompletion));
+            context.Publish(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
         public void AddMetatadaReferences(IEnumerable<MetadataReference> references)
