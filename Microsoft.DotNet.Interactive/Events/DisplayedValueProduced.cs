@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Interactive.Events
     {
         public DisplayedValueProduced(
             object value,
-            IKernelCommand command = null,
+            IKernelCommand command,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
             string valueId = null) : base(value, command,formattedValues, valueId)
         {

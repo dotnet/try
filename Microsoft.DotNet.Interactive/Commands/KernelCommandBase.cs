@@ -12,6 +12,15 @@ namespace Microsoft.DotNet.Interactive.Commands
         [JsonIgnore]
         public KernelCommandInvocation Handler { get; set; }
 
+        [JsonIgnore]
+        public IKernelCommand Parent { get; }
+
+        protected KernelCommandBase()
+        {
+            Parent = KernelInvocationContext.Current?.Command;
+        }
+        
+
         public async Task InvokeAsync(KernelInvocationContext context)
         {
             if (Handler == null)

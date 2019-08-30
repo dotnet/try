@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -106,7 +105,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     supportedDirectives.Commands.AddRange(context.CurrentKernel.Directives);
 
-                    context.Publish(new Events.DisplayedValueProduced(supportedDirectives));
+                    context.Publish(new DisplayedValueProduced(supportedDirectives, context.Command));
 
                     await context.CurrentKernel.VisitSubkernelsAsync(async k =>
                     {

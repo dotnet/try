@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive.Events
     {
         protected ValueProducedEventBase(
             object value,
-            IKernelCommand command = null,
+            IKernelCommand command,
             IReadOnlyCollection<FormattedValue> formattedValues = null,
             string valueId = null) : base(command)
         {
