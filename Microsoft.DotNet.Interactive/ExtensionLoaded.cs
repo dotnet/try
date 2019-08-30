@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive
     { 
         public ExtensionLoaded(FileInfo extensionPath)
         {
-            ExtensionPath = extensionPath;
+            ExtensionPath = extensionPath ?? throw new System.ArgumentNullException(nameof(extensionPath));
         }
 
         public FileInfo ExtensionPath { get; }
