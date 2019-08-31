@@ -4,8 +4,11 @@
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
+using Markdig;
+using Markdig.Renderers;
 using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -22,7 +25,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             kernel.UseLsMagic()
                   .UseHtml()
-                  .UseJavaScript();
+                  .UseJavaScript()
+                  .UseMarkdown();
 
             return kernel;
         }
@@ -49,6 +53,55 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                new FormattedValue("text/html", htmlContent)
                                            }));
                         
+                        context.Complete();
+                    }
+                })
+            });
+
+            return kernel;
+        }
+
+        private static T UseMarkdown<T>(this T kernel)
+            where T : KernelBase
+        {
+            var pipeline = new MarkdownPipelineBuilder()
+                   .UseMathematics()
+                   .UseAdvancedExtensions()
+                   .Build();
+
+            kernel.AddDirective(new Command("%%markdown")
+            {
+                Handler = CommandHandler.Create((KernelInvocationContext context) =>
+                {
+                    if (context.Command is SubmitCode submitCode)
+                    {
+                        var markdown = submitCode.Code
+                                                 .Replace("%%markdown", "")
+                                                 .Trim();
+
+                        var document = Markdown.Parse(
+                            markdown,
+                            pipeline);
+
+                        string html;
+
+                        using (var writer = new StringWriter())
+                        {
+                            var renderer = new HtmlRenderer(writer);
+                            pipeline.Setup(renderer);
+                            renderer.Render(document);
+                            html = writer.ToString();
+                        }
+
+                        context.Publish(
+                            new DisplayedValueProduced(
+                                html,
+                                context.Command,
+                                new[]
+                                {
+                                    new FormattedValue("text/html", html)
+                                }));
+
                         context.Complete();
                     }
                 })
