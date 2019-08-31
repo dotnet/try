@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Clockwise;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using WorkspaceServer.Packaging;
@@ -125,41 +127,36 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task When_invalidated_while_producing_a_value_the_consumer_waiting_will_wait_for_latest_production_to_be_finished()
         {
-            var seed = 0;
-            var consumerBarrier = new Barrier(2);
-            var producerBarrier = new Barrier(2);
+            // FIX: flaky test
 
-            var producer = new PipelineStep<int>(() =>
+            var seed = 0;
+            var barrier = new Barrier(2);
+
+            PipelineStep<int> producer = null;
+
+            producer = new PipelineStep<int>(() =>
             {
                 // will require all consumer to reach this point to move on
-                producerBarrier.SignalAndWait();
+                barrier.SignalAndWait(3.Seconds());
+                barrier.RemoveParticipant();
+
+                producer.Invalidate();
+
                 return Task.FromResult(Interlocked.Increment(ref seed));
             });
 
-            var firstConsumer = Task.Run(() =>
-                {
-                    var task = producer.GetLatestAsync();
-                    // block waiting for the other consumer
-                    consumerBarrier.SignalAndWait();
-                    return task;
-                }
-            );
 
-            var secondConsumer = Task.Run(() =>
-                {
-                    // now both consumer reached the barrier
-                    consumerBarrier.SignalAndWait();
-                    producer.Invalidate();
-                    // let the firs request fire
-                    producerBarrier.RemoveParticipant();
-                    // second request after invalidation
-                    var task = producer.GetLatestAsync();
-                    return task;
-                }
-            );
 
-            var values = await Task.WhenAll(firstConsumer, secondConsumer);
-            values.Should().HaveCount(2).And.OnlyContain(i => i == 2);
+          var values=  await Task.WhenAll(
+                producer.GetLatestAsync(),
+                producer.GetLatestAsync());
+
+
+
+            values.Should().BeEquivalentTo(2, 2);
+
+            // var values = await Task.WhenAll(firstConsumer, secondConsumer);
+            // values.Should().HaveCount(2).And.OnlyContain(i => i == 2);
 
         }
 
