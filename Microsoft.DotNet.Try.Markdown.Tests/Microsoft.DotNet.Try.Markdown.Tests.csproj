@@ -25,4 +25,8 @@
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+  </ItemGroup>
+
 </Project>
