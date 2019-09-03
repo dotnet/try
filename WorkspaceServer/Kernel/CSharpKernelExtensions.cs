@@ -80,7 +80,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                                 }
                             }
 
-                            kernel.AddMetatadaReferences(refs);
+                            kernel.AddMetadataReferences(refs);
                         }
 
                         context.Publish(new NuGetPackageAdded(package));

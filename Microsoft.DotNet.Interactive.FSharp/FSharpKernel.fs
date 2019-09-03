@@ -36,9 +36,9 @@ type FSharpKernel() =
             context.Complete()
         }
 
-    let handleInterruptExecution (interruptExecution: InterruptExecution) (context: KernelInvocationContext) =
+    let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =
         async {
-            let reply = ExecutionInterrupted(interruptExecution)           
+            let reply = CurrentCommandCancelled(cancelCurrentCommand)           
             context.Publish(reply)
             context.Complete()
         }
@@ -47,7 +47,7 @@ type FSharpKernel() =
         async {
             match command with
             | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
-            | :? InterruptExecution as interruptExecution -> interruptExecution.Handler <- fun invocationContext -> (handleInterruptExecution interruptExecution invocationContext) |> Async.StartAsTask :> Task
+            | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task
 

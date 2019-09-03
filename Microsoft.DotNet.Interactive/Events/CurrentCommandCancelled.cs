@@ -5,9 +5,9 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class ExecutionInterrupted:KernelEventBase
+    public class CurrentCommandCancelled:KernelEventBase
     {
-        public ExecutionInterrupted(IKernelCommand command) : base(command)
+        public CurrentCommandCancelled(IKernelCommand command) : base(command)
         {
             
         }

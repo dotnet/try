@@ -9,7 +9,7 @@ namespace WorkspaceServer.Kernel
 {
     internal static class ScriptExecutionExtensions
     {
-        public static async Task<ScriptState<object>> UnlessCancelled(
+        public static async Task<ScriptState<object>> UntilCancelled(
             this Task<ScriptState<object>> source,
             CancellationToken cancellationToken)
         {

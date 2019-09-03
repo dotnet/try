@@ -95,10 +95,10 @@ namespace WorkspaceServer.Kernel
                     };
                     break;
 
-                case InterruptExecution interruptExecution:
+                case CancelCurrentCommand interruptExecution:
                     interruptExecution.Handler = async invocationContext =>
                     {
-                        await HandleInterruptExecution(interruptExecution, invocationContext);
+                        await HandleCancelCurrentCommand(interruptExecution, invocationContext);
                     };
                     break;
             }
@@ -110,11 +110,11 @@ namespace WorkspaceServer.Kernel
             return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
         }
 
-        private async Task HandleInterruptExecution(
-            InterruptExecution interruptExecution,
+        private async Task HandleCancelCurrentCommand(
+            CancelCurrentCommand cancelCurrentCommand,
             KernelInvocationContext context)
         {
-            var reply = new ExecutionInterrupted(interruptExecution);
+            var reply = new CurrentCommandCancelled(cancelCurrentCommand);
             lock (_cancellationSourceLock)
             {
                 _cancellationSource.Cancel();
@@ -160,33 +160,37 @@ namespace WorkspaceServer.Kernel
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
             var scriptState = _scriptState;
-            try
+
+            if (!cancellationSource.IsCancellationRequested)
             {
-                if (scriptState == null)
+                try
                 {
-                    scriptState = await CSharpScript.RunAsync(
-                                       code,
-                                       ScriptOptions,
-                                       cancellationToken: cancellationSource.Token)
-                        .UnlessCancelled(cancellationSource.Token);
+                    if (scriptState == null)
+                    {
+                        scriptState = await CSharpScript.RunAsync(
+                                code,
+                                ScriptOptions,
+                                cancellationToken: cancellationSource.Token)
+                            .UntilCancelled(cancellationSource.Token);
+                    }
+                    else
+                    {
+                        scriptState = await _scriptState.ContinueWithAsync(
+                                code,
+                                ScriptOptions,
+                                e =>
+                                {
+                                    exception = e;
+                                    return true;
+                                },
+                                cancellationToken: cancellationSource.Token)
+                            .UntilCancelled(cancellationSource.Token);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    scriptState = await _scriptState.ContinueWithAsync(
-                                       code,
-                                       ScriptOptions,
-                                       e =>
-                                       {
-                                           exception = e;
-                                           return true;
-                                       },
-                                       cancellationToken: cancellationSource.Token)
-                        .UnlessCancelled(cancellationSource.Token);
+                    exception = e;
                 }
-            }
-            catch (Exception e)
-            {
-                exception = e;
             }
 
             if (!cancellationSource.Token.IsCancellationRequested)
@@ -222,7 +226,7 @@ namespace WorkspaceServer.Kernel
             }
             else
             {
-                context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
+                context.Publish(new CommandFailed(null, submitCode, "Command cancelled"));
             }
 
             context.Complete();
@@ -261,7 +265,7 @@ namespace WorkspaceServer.Kernel
             context.Publish(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
-        public void AddMetatadaReferences(IEnumerable<MetadataReference> references)
+        public void AddMetadataReferences(IEnumerable<MetadataReference> references)
         {
             _metadataReferences.AddRange(references);
             ScriptOptions = ScriptOptions.AddReferences(references);

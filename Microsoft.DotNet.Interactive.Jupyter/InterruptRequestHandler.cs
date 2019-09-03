@@ -22,15 +22,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ExecutionInterrupted kernelInterrupted:
+                case CurrentCommandCancelled kernelInterrupted:
                     OnExecutionInterrupted(kernelInterrupted);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(ExecutionInterrupted executionInterrupted)
+        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled)
         {
-            if (InFlightRequests.TryRemove(executionInterrupted.Command, out var openRequest))
+            if (InFlightRequests.TryRemove(currentCommandCancelled.Command, out var openRequest))
             {
                 // reply 
                 var interruptReplyPayload = new InterruptReply();
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             context.RequestHandlerStatus.SetAsBusy();
 
-            var command = new InterruptExecution();
+            var command = new CancelCurrentCommand();
 
             var openRequest = new InflightRequest(context, interruptRequest, 0);
 

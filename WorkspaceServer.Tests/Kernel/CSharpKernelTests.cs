@@ -210,19 +210,19 @@ Console.Write(""value three"");");
 
             var submitCodeCommand = new SubmitCode(@"System.Threading.Thread.Sleep(90000000);");
             var codeSubmission = kernel.SendAsync(submitCodeCommand);
-            var interruptionCommand = new InterruptExecution();
+            var interruptionCommand = new CancelCurrentCommand();
             await kernel.SendAsync(interruptionCommand);
             await codeSubmission;
 
             KernelEvents
                 .ValuesOnly()
-                .Single(e => e is ExecutionInterrupted);
+                .Single(e => e is CurrentCommandCancelled);
 
             KernelEvents
                 .ValuesOnly()
                 .OfType<CommandFailed>()
                 .Should()
-                .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Operation cancelled"));
+                .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Command cancelled"));
         }
 
         [Fact]
