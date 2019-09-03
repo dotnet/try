@@ -411,6 +411,24 @@ namespace MLS.Agent.Tests.CommandLine
             testConsole.Error.ToString().Should().Contain("File does not exist: not_exist.json");
         }
 
+        [Fact]
+        public void kernel_server_starts_with_default_kernel()
+        {
+            var result = _parser.Parse($"kernel-server");
+            var binder = new ModelBinder<KernelServerOptions>();
+            var options = (KernelServerOptions)binder.CreateInstance(new BindingContext(result));
+            options.DefaultKernel.Should().Be("csharp");
+        }
+
+        [Fact]
+        public void kernel_server__honors_default_kernel_option()
+        {
+            var result = _parser.Parse($"kernel-server --default-kernel bsharp");
+            var binder = new ModelBinder<KernelServerOptions>();
+            var options = (KernelServerOptions)binder.CreateInstance(new BindingContext(result));
+            options.DefaultKernel.Should().Be("bsharp");
+        }
+
         [Fact(Skip = "Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
         public async Task jupyter_returns_error_if_connection_file_path_is_not_passed()
         {

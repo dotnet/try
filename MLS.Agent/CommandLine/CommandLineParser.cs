@@ -432,7 +432,6 @@ namespace MLS.Agent.CommandLine
                 };
                 var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
-                    Name = nameof(KernelServerOptions.DefaultKernel),
                     Argument = new Argument<string>(defaultValue: () => "csharp")
                 };
                 startKernelServerCommand.AddOption(defaultKernelOption);

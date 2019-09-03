@@ -29,5 +29,9 @@
     <ProjectReference Include="..\MLS.Agent\MLS.Agent.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol\Microsoft.DotNet.Try.Protocol.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+  </ItemGroup>
   
 </Project>
