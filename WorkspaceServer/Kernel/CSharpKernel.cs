@@ -72,7 +72,7 @@ namespace WorkspaceServer.Kernel
                     typeof(PocketView).Assembly,
                     typeof(XPlot.Plotly.PlotlyChart).Assembly);
 
-            
+
         }
 
         protected override async Task HandleAsync(
@@ -125,9 +125,9 @@ namespace WorkspaceServer.Kernel
             context.Complete();
         }
 
-    private async Task HandleSubmitCode(
-            SubmitCode submitCode,
-            KernelInvocationContext context)
+        private async Task HandleSubmitCode(
+                SubmitCode submitCode,
+                KernelInvocationContext context)
         {
             CancellationTokenSource cancellationSource;
             lock (_cancellationSourceLock)
@@ -142,7 +142,7 @@ namespace WorkspaceServer.Kernel
 
             var code = submitCode.Code;
             var isComplete = await IsCompleteSubmissionAsync(submitCode.Code);
-            if(isComplete)
+            if (isComplete)
             {
                 context.Publish(new CompleteCodeSubmissionReceived(submitCode));
             }
@@ -167,7 +167,7 @@ namespace WorkspaceServer.Kernel
                     scriptState = await CSharpScript.RunAsync(
                                        code,
                                        ScriptOptions,
-                                       cancellationToken:cancellationSource.Token)
+                                       cancellationToken: cancellationSource.Token)
                         .UnlessCancelled(cancellationSource.Token);
                 }
                 else
