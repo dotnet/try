@@ -10,6 +10,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Rendering;
+using Microsoft.DotNet.Interactive.Rendering.Tests;
 using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using WorkspaceServer.Kernel;
@@ -44,9 +45,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await kernel.SendAsync(new SubmitCode("%lsmagic"));
 
             events.Should()
-                  .ContainSingle(e => e is Events.DisplayedValueProduced)
+                  .ContainSingle(e => e is DisplayedValueProduced)
                   .Which
-                  .As<Events.DisplayedValueProduced>()
+                  .As<DisplayedValueProduced>()
                   .Value
                   .ToDisplayString("text/html")
                   .Should()
@@ -75,7 +76,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             await compositeKernel.SendAsync(new SubmitCode("%lsmagic"));
 
-            var valueProduceds = events.OfType<Events.DisplayedValueProduced>().ToArray();
+            var valueProduceds = events.OfType<DisplayedValueProduced>().ToArray();
 
             valueProduceds[0].Value
                              .ToDisplayString("text/html")
@@ -112,7 +113,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             var formatted =
                 events
-                    .OfType<Events.DisplayedValueProduced>()
+                    .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
 
@@ -140,7 +141,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             var formatted =
                 events
-                    .OfType<Events.DisplayedValueProduced>()
+                    .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
 
@@ -151,6 +152,33 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 .ContainSingle(v =>
                                    v.MimeType == "text/html" &&
                                    v.Value.ToString().Equals($@"<script type=""text/javascript"">{scriptContent}</script>"));
+        }
+
+
+        [Fact]
+        public async Task markdown_renders_markdown_content_as_html()
+        {
+            var kernel = new CompositeKernel()
+                .UseDefaultMagicCommands();
+
+            var expectedHtml = @"<h1 id=""topic"">Topic!</h1><p>Content</p>";
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(new SubmitCode(
+                                       $"%%markdown\n\n# Topic!\nContent"));
+
+            var formatted =
+                events
+                    .OfType<DisplayedValueProduced>()
+                    .SelectMany(v => v.FormattedValues)
+                    .ToArray();
+
+            formatted
+                .Should()
+                .ContainSingle(v =>
+                                   v.MimeType == "text/html" &&
+                                   v.Value.ToString().Crunch().Equals(expectedHtml));
         }
     }
 }

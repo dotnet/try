@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             switch (eventBase)
             {
-                case Events.DisplayedValueProduced _:
+                case DisplayedValueProduced _:
                     executeResultData = new DisplayData(
                         transient: transient,
                         data: formattedValues);

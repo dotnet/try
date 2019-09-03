@@ -5,6 +5,7 @@
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise isn't strongly signed -->
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.17.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
     <PackageReference Include="NetMQ" Version="4.0.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.02" />
@@ -21,6 +22,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive\Microsoft.DotNet.Interactive.csproj" />
-    <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
 </Project>
