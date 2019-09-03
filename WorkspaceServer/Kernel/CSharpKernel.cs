@@ -27,29 +27,6 @@ using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
 {
-    internal static class ScriptExecutionExtensions
-    {
-        public static async Task<ScriptState<object>> UnlessCancelled(
-            this Task<ScriptState<object>> source,
-            CancellationToken cancellationToken)
-        {
-            var completed = await Task.WhenAny(
-                source,
-                Task.Run(async () =>
-                {
-                    while (!cancellationToken.IsCancellationRequested)
-                    {
-                        await Task.Delay(100, cancellationToken);
-                    }
-                    return (ScriptState<object>) null;
-                }, cancellationToken));
-
-          
-            return  completed.Result;
-
-        }
-    }
-
     public class CSharpKernel : KernelBase
     {
         internal const string KernelName = "csharp";
