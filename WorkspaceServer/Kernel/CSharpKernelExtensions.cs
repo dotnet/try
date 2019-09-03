@@ -44,6 +44,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
         public interface INativeAssemblyLoadHelper
         {
             void Handle(string assembly);
+            void Configure(string v);
         }
 
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel, INativeAssemblyLoadHelper helper = null)
@@ -68,10 +69,17 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     Handler = async context =>
                     {
                         var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
-                        helper?.Handle(await restoreContext.OutputPath());
+                        helper?.Configure(await restoreContext.OutputPath());
                         if (refs != null)
                         {
-                            
+                            foreach (var reference in refs)
+                            {
+                                if (reference is PortableExecutableReference peRef)
+                                {
+                                    helper?.Handle(peRef.FilePath);
+                                }
+                            }
+
                             kernel.AddMetatadaReferences(refs);
                         }
 

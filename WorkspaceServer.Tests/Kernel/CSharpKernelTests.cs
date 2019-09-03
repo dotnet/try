@@ -534,7 +534,7 @@ catch (Exception e)
                 .ContainSingle(e => e is CodeSubmissionEvaluated);
 
             var displayed = events.OfType<DisplayedValueProduced>().First();
-            displayed.Value.Should().Be("success");
+            displayed.Value.Should().BeEquivalentTo("success");
 
         }
     }
