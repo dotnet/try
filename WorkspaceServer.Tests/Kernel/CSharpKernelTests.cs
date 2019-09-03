@@ -497,6 +497,7 @@ catch (Exception e)
                 .Should()
                 .Contain(e => e is DisplayedValueProduced &&
                 (((DisplayedValueProduced)e).Value as string).Contains("success"));
+        }
 
         [Fact]
         public async Task Should_load_extension_in_nuget_package()
