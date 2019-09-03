@@ -29,9 +29,9 @@ namespace WorkspaceServer.Kernel
 {
     internal static class ScriptExecutionExtensions
     {
-        public static async Task<ScriptState<object>> UnlessCancelled(this Task<ScriptState<object>> source,
-            CancellationToken cancellationToken,
-            Action onCancelled)
+        public static async Task<ScriptState<object>> UnlessCancelled(
+            this Task<ScriptState<object>> source,
+            CancellationToken cancellationToken)
         {
             var completed = await Task.WhenAny(
                 source,
@@ -44,11 +44,7 @@ namespace WorkspaceServer.Kernel
                     return (ScriptState<object>) null;
                 }, cancellationToken));
 
-            if (completed != source)
-            {
-                onCancelled();
-            }
-
+          
             return  completed.Result;
 
         }
@@ -195,10 +191,7 @@ namespace WorkspaceServer.Kernel
                                        code,
                                        ScriptOptions,
                                        cancellationToken:cancellationSource.Token)
-                        .UnlessCancelled(cancellationSource.Token,() =>
-                        {
-                            context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
-                        });
+                        .UnlessCancelled(cancellationSource.Token);
                 }
                 else
                 {
@@ -211,10 +204,7 @@ namespace WorkspaceServer.Kernel
                                            return true;
                                        },
                                        cancellationToken: cancellationSource.Token)
-                        .UnlessCancelled(cancellationSource.Token,() =>
-                        {
-                            context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
-                        });
+                        .UnlessCancelled(cancellationSource.Token);
                 }
             }
             catch (Exception e)
@@ -252,6 +242,10 @@ namespace WorkspaceServer.Kernel
 
                     context.Publish(new CodeSubmissionEvaluated(submitCode));
                 }
+            }
+            else
+            {
+                context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
             }
 
             context.Complete();
