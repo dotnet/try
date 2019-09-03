@@ -9,24 +9,29 @@ namespace MLS.Agent
     public class NativeAssemblyLoadHelper : INativeAssemblyLoadHelper
     {
         private readonly string _tfm;
+        private readonly string _suffix;
 
         public NativeAssemblyLoadHelper()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 _tfm = "osx-x64";
+                _suffix = "dylib";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 _tfm = "linux-x64";
+                _suffix = "so";
             }
             else if (RuntimeInformation.OSArchitecture == Architecture.X86)
             {
                 _tfm = "win-x86";
+                _suffix = ".dll";
             }
             else
             {
                 _tfm = "win-x64";
+                _suffix = ".dll";
             }
         }
 
