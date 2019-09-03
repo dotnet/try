@@ -36,12 +36,7 @@ namespace Microsoft.DotNet.Interactive
                 await extension.OnLoadAsync(kernel);
             }
 
-            if (extensionTypes.Count() > 0)
-            {
-                return true;
-            }
-
-            return false;
+            return extensionTypes.Length > 0;
         }
 
         public async Task LoadFromAssembliesInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
