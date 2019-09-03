@@ -35,10 +35,19 @@ type FSharpKernel() =
             context.Publish(CodeSubmissionEvaluated(codeSubmission))
             context.Complete()
         }
+
+    let handleInterruptExecution (interruptExecution: InterruptExecution) (context: KernelInvocationContext) =
+        async {
+            let reply = ExecutionInterrupted(interruptExecution)           
+            context.Publish(reply)
+            context.Complete()
+        }
+
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
         async {
             match command with
             | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
+            | :? InterruptExecution as interruptExecution -> interruptExecution.Handler <- fun invocationContext -> (handleInterruptExecution interruptExecution invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task
 

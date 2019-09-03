@@ -69,6 +69,8 @@ namespace WorkspaceServer.Kernel
                     typeof(CSharpKernel).Assembly,
                     typeof(PocketView).Assembly,
                     typeof(XPlot.Plotly.PlotlyChart).Assembly);
+
+            
         }
 
         protected override async Task HandleAsync(
@@ -112,8 +114,8 @@ namespace WorkspaceServer.Kernel
         {
             var reply = new ExecutionInterrupted(interruptExecution);
             _cancellationSource?.Cancel();
-            _cancellationSource = null;
             context.Publish(reply);
+            context.Complete();
         }
 
 
@@ -146,7 +148,7 @@ namespace WorkspaceServer.Kernel
 
             Exception exception = null;
 
-            _cancellationSource = new CancellationTokenSource();
+            var cancellationSource = _cancellationSource = new CancellationTokenSource();
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
 
@@ -177,7 +179,12 @@ namespace WorkspaceServer.Kernel
                 exception = e;
             }
 
-            _cancellationSource = null;
+            
+            if (cancellationSource.Token.IsCancellationRequested)
+            {
+                context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
+                context.Complete();
+            }
 
             if (exception != null)
             {

@@ -203,6 +203,28 @@ Console.Write(""value three"");");
         }
 
         [Fact]
+        public async Task it_can_cancel_execution()
+        {
+            var kernel = CreateKernel();
+
+            var kernelCommand = new SubmitCode(@"while (true) { Console.Write(""value one""); }");
+            var codeSubmission = kernel.SendAsync(kernelCommand);
+            var interruptionCommand = new InterruptExecution();
+            await kernel.SendAsync(interruptionCommand);
+            await codeSubmission;
+
+            KernelEvents
+                .ValuesOnly()
+                .Single(e => e is ExecutionInterrupted);
+
+            KernelEvents
+                .ValuesOnly()
+                .OfType<CommandFailed>()
+                .Should()
+                .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Operation cancelled"));
+        }
+
+        [Fact]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates()
         {
             var kernel = CreateKernel();
