@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
@@ -33,16 +34,20 @@ namespace WorkspaceServer.Kernel
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
+        protected CSharpParseOptions ParseOptions =
+            new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
 
 
         private ScriptState _scriptState;
         protected ScriptOptions ScriptOptions;
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
+        private CancellationTokenSource _cancellationSource;
+        private readonly object _cancellationSourceLock = new object();
 
         public CSharpKernel()
         {
+            _cancellationSource = new CancellationTokenSource();
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
             Name = KernelName;
@@ -66,6 +71,8 @@ namespace WorkspaceServer.Kernel
                     typeof(CSharpKernel).Assembly,
                     typeof(PocketView).Assembly,
                     typeof(XPlot.Plotly.PlotlyChart).Assembly);
+
+
         }
 
         protected override async Task HandleAsync(
@@ -87,6 +94,13 @@ namespace WorkspaceServer.Kernel
                         await HandleRequestCompletion(requestCompletion, invocationContext, _scriptState);
                     };
                     break;
+
+                case CancelCurrentCommand interruptExecution:
+                    interruptExecution.Handler = async invocationContext =>
+                    {
+                        await HandleCancelCurrentCommand(interruptExecution, invocationContext);
+                    };
+                    break;
             }
         }
 
@@ -95,12 +109,31 @@ namespace WorkspaceServer.Kernel
             var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
             return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
         }
-       
 
-        private async Task HandleSubmitCode(
-            SubmitCode submitCode,
+        private async Task HandleCancelCurrentCommand(
+            CancelCurrentCommand cancelCurrentCommand,
             KernelInvocationContext context)
         {
+            var reply = new CurrentCommandCancelled(cancelCurrentCommand);
+            lock (_cancellationSourceLock)
+            {
+                _cancellationSource.Cancel();
+                _cancellationSource = new CancellationTokenSource();
+            }
+
+            context.Publish(reply);
+            context.Complete();
+        }
+
+        private async Task HandleSubmitCode(
+                SubmitCode submitCode,
+                KernelInvocationContext context)
+        {
+            CancellationTokenSource cancellationSource;
+            lock (_cancellationSourceLock)
+            {
+                cancellationSource = _cancellationSource;
+            }
             var codeSubmissionReceived = new CodeSubmissionReceived(
                 submitCode.Code,
                 submitCode);
@@ -109,7 +142,7 @@ namespace WorkspaceServer.Kernel
 
             var code = submitCode.Code;
             var isComplete = await IsCompleteSubmissionAsync(submitCode.Code);
-            if(isComplete)
+            if (isComplete)
             {
                 context.Publish(new CompleteCodeSubmissionReceived(submitCode));
             }
@@ -124,64 +157,79 @@ namespace WorkspaceServer.Kernel
             }
 
             Exception exception = null;
-
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
+            var scriptState = _scriptState;
 
-            try
+            if (!cancellationSource.IsCancellationRequested)
             {
-                if (_scriptState == null)
+                try
                 {
-                    _scriptState = await CSharpScript.RunAsync(
-                                       code,
-                                       ScriptOptions);
+                    if (scriptState == null)
+                    {
+                        scriptState = await CSharpScript.RunAsync(
+                                code,
+                                ScriptOptions,
+                                cancellationToken: cancellationSource.Token)
+                            .UntilCancelled(cancellationSource.Token);
+                    }
+                    else
+                    {
+                        scriptState = await _scriptState.ContinueWithAsync(
+                                code,
+                                ScriptOptions,
+                                e =>
+                                {
+                                    exception = e;
+                                    return true;
+                                },
+                                cancellationToken: cancellationSource.Token)
+                            .UntilCancelled(cancellationSource.Token);
+                    }
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+            }
+
+            if (!cancellationSource.IsCancellationRequested)
+            {
+                _scriptState = scriptState;
+                if (exception != null)
+                {
+                    string message = null;
+
+                    if (exception is CompilationErrorException compilationError)
+                    {
+                        message =
+                            string.Join(Environment.NewLine,
+                                compilationError.Diagnostics.Select(d => d.ToString()));
+                    }
+
+                    context.Publish(new CommandFailed(exception, submitCode, message));
                 }
                 else
                 {
-                    _scriptState = await _scriptState.ContinueWithAsync(
-                                       code,
-                                       ScriptOptions,
-                                       e =>
-                                       {
-                                           exception = e;
-                                           return true;
-                                       });
+                    if (_scriptState != null && HasReturnValue)
+                    {
+                        var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
+                        context.Publish(
+                            new ReturnValueProduced(
+                                _scriptState.ReturnValue,
+                                submitCode,
+                                formattedValues));
+                    }
+
+                    context.Publish(new CodeSubmissionEvaluated(submitCode));
                 }
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            if (exception != null)
-            {
-                string message = null;
-
-                if (exception is CompilationErrorException compilationError)
-                {
-                    message =
-                        string.Join(Environment.NewLine,
-                                    compilationError.Diagnostics.Select(d => d.ToString()));
-                }
-
-                context.Publish(new CommandFailed(exception, submitCode, message));
-                context.Complete();
             }
             else
             {
-                if (HasReturnValue)
-                {
-                    var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
-                    context.Publish(
-                        new ReturnValueProduced(
-                            _scriptState.ReturnValue,
-                            submitCode,
-                            formattedValues));
-                }
-
-                context.Publish(new CodeSubmissionEvaluated(submitCode));
-                context.Complete();
+                context.Publish(new CommandFailed(null, submitCode, "Command cancelled"));
             }
+
+            context.Complete();
         }
 
         private void PublishOutput(
@@ -217,7 +265,7 @@ namespace WorkspaceServer.Kernel
             context.Publish(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
-        public void AddMetatadaReferences(IEnumerable<MetadataReference> references)
+        public void AddMetadataReferences(IEnumerable<MetadataReference> references)
         {
             _metadataReferences.AddRange(references);
             ScriptOptions = ScriptOptions.AddReferences(references);

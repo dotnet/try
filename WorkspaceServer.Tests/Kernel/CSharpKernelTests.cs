@@ -204,6 +204,28 @@ Console.Write(""value three"");");
         }
 
         [Fact]
+        public async Task it_can_cancel_execution()
+        {
+            var kernel = CreateKernel();
+
+            var submitCodeCommand = new SubmitCode(@"System.Threading.Thread.Sleep(90000000);");
+            var codeSubmission = kernel.SendAsync(submitCodeCommand);
+            var interruptionCommand = new CancelCurrentCommand();
+            await kernel.SendAsync(interruptionCommand);
+            await codeSubmission;
+
+            KernelEvents
+                .ValuesOnly()
+                .Single(e => e is CurrentCommandCancelled);
+
+            KernelEvents
+                .ValuesOnly()
+                .OfType<CommandFailed>()
+                .Should()
+                .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Command cancelled"));
+        }
+
+        [Fact]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates()
         {
             var kernel = CreateKernel();
