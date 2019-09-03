@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using static WorkspaceServer.Kernel.CSharpKernelExtensions;
 
 namespace MLS.Agent
@@ -10,9 +11,12 @@ namespace MLS.Agent
     {
         private readonly string _tfm;
         private readonly string _suffix;
+        private AssemblyDependencyResolver _resolver;
 
         public NativeAssemblyLoadHelper()
         {
+            
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 _tfm = "osx-x64";
@@ -37,6 +41,10 @@ namespace MLS.Agent
 
         public void Handle(string assembly)
         {
+            if (_resolver != null)
+                return;
+
+            _resolver = new AssemblyDependencyResolver(assembly);
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyLoad += AssemblyLoaded(assembly);
         }

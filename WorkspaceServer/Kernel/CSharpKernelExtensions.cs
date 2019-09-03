@@ -68,16 +68,10 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     Handler = async context =>
                     {
                         var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                        helper?.Handle(await restoreContext.OutputPath());
                         if (refs != null)
                         {
-                            foreach (var reference in refs)
-                            {
-                                if (reference is PortableExecutableReference pe)
-                                {
-                                    helper?.Handle(pe.FilePath);
-                                }
-
-                            }
+                            
                             kernel.AddMetatadaReferences(refs);
                         }
 
