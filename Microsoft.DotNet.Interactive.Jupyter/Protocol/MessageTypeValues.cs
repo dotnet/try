@@ -62,5 +62,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         public const string CommInfoRequest = "comm_info_request";
 
         public const string CommInfoReply = "comm_info_reply";
+
+        public const string InterruptRequest = "interrupt_request";
+
+        public const string InterruptReply = "interrupt_reply";
     }
 }

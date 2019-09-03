@@ -81,7 +81,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             }
                         }
 
-                        kernel.AddMetatadaReferences(refs);
+                        kernel.AddMetadataReferences(refs);
                         await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
                     }
 

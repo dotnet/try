@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Interactive
         private readonly TextReader _input;
         private readonly TextWriter _output;
         private readonly CommandDeserializer _deserializer = new CommandDeserializer();
+
         private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()

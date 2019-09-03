@@ -63,7 +63,5 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Dispose();
             }
         }
-
-      
     }
 }
