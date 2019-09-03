@@ -87,19 +87,17 @@ namespace Microsoft.DotNet.Interactive
                                 next),
 
                             LoadExtensionFromNuGetPackage loadCSharpExtension =>
-                            HandleLoadExtensionInNuGetPackage(
+                            HandleLoadExtensionFromNuGetPackage(
                                 loadCSharpExtension,
-                                context,
-                                next),
+                                context),
 
                             _ => next(command, context)
                         });
         }
 
-        private async Task HandleLoadExtensionInNuGetPackage(
+        private async Task HandleLoadExtensionFromNuGetPackage(
             LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage,
-            KernelInvocationContext invocationContext,
-            KernelPipelineContinuation next)
+            KernelInvocationContext invocationContext)
         {
             loadExtensionFromNuGetPackage.Handler = async context =>
             {
