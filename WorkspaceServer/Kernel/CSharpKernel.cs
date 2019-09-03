@@ -193,7 +193,7 @@ namespace WorkspaceServer.Kernel
                 }
             }
 
-            if (!cancellationSource.Token.IsCancellationRequested)
+            if (!cancellationSource.IsCancellationRequested)
             {
                 _scriptState = scriptState;
                 if (exception != null)
