@@ -18,7 +18,9 @@ namespace MLS.Agent
         public void Configure(string path)
         {
             if (_resolver != null)
+            {
                 return;
+            }
 
             _resolver = new AssemblyDependencyResolver(path);
         }
