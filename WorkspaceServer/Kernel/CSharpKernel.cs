@@ -47,7 +47,7 @@ namespace WorkspaceServer.Kernel
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
             Name = KernelName;
-            AssemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/cs");
+            AssemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
         }
 
         private void SetupScriptOptions()
