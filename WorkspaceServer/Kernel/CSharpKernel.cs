@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
@@ -41,6 +42,7 @@ namespace WorkspaceServer.Kernel
         protected ScriptOptions ScriptOptions;
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
+        private CancellationTokenSource _cancellationSource;
 
         public CSharpKernel()
         {
@@ -109,8 +111,9 @@ namespace WorkspaceServer.Kernel
             KernelInvocationContext context)
         {
             var reply = new ExecutionInterrupted(interruptExecution);
+            _cancellationSource?.Cancel();
+            _cancellationSource = null;
             context.Publish(reply);
-            throw new NotImplementedException();
         }
 
 
@@ -143,6 +146,7 @@ namespace WorkspaceServer.Kernel
 
             Exception exception = null;
 
+            _cancellationSource = new CancellationTokenSource();
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
 
@@ -152,7 +156,8 @@ namespace WorkspaceServer.Kernel
                 {
                     _scriptState = await CSharpScript.RunAsync(
                                        code,
-                                       ScriptOptions);
+                                       ScriptOptions,
+                                       cancellationToken:_cancellationSource.Token);
                 }
                 else
                 {
@@ -163,13 +168,16 @@ namespace WorkspaceServer.Kernel
                                        {
                                            exception = e;
                                            return true;
-                                       });
+                                       },
+                                       cancellationToken: _cancellationSource.Token);
                 }
             }
             catch (Exception e)
             {
                 exception = e;
             }
+
+            _cancellationSource = null;
 
             if (exception != null)
             {

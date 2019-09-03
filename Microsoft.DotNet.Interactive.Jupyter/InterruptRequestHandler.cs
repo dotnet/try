@@ -36,11 +36,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var interruptReplyPayload = new InterruptReply();
 
                 // send to server
-                var executeReply = Message.CreateResponse(
+                var interruptReply = Message.CreateResponse(
                     interruptReplyPayload,
                     openRequest.Context.Request);
 
-                openRequest.Context.ServerChannel.Send(executeReply);
+                openRequest.Context.ServerChannel.Send(interruptReply);
                 openRequest.Context.RequestHandlerStatus.SetAsIdle();
                 openRequest.Dispose();
             }

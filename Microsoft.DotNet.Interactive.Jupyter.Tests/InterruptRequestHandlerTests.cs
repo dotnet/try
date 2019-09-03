@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_InterruptReply()
         {
             var kernel = new CSharpKernel();
-            var handler = new IsCompleteRequestHandler(kernel);
+            var handler = new InterruptRequestHandler(kernel);
             var request = Message.Create(new InterruptRequest(), null);
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
