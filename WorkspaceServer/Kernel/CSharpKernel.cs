@@ -47,7 +47,7 @@ namespace WorkspaceServer.Kernel
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
             Name = KernelName;
-            ExtensionsPath = new RelativeDirectoryPath("interactive-extensions/cs");
+            AssemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/cs");
         }
 
         private void SetupScriptOptions()
@@ -280,7 +280,7 @@ namespace WorkspaceServer.Kernel
 
         public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
         {
-            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(ExtensionsPath);
+            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(AssemblyExtensionsPath);
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context);
         }
 
@@ -288,6 +288,6 @@ namespace WorkspaceServer.Kernel
             _scriptState != null &&
             (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
 
-        public RelativeDirectoryPath ExtensionsPath { get; }
+        private RelativeDirectoryPath AssemblyExtensionsPath { get; }
     }
 }

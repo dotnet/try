@@ -17,6 +17,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent;
 using MLS.Agent.Tools;
+using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
@@ -503,7 +504,7 @@ catch (Exception e)
             var directory = Create.EmptyWorkspace().Directory;
 
             const string nugetPackageName = "myNugetPackage";
-            var nugetPackageDirectory = new FileSystemDirectoryAccessor(directory.Subdirectory($"{nugetPackageName}/2.0.0"));
+            var nugetPackageDirectory = new InMemoryDirectoryAccessor(directory.Subdirectory($"{nugetPackageName}/2.0.0")).CreateFiles();
             var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
             var extensionsDir = (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/cs"));
 
