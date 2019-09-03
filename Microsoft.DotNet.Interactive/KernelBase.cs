@@ -117,6 +117,8 @@ namespace Microsoft.DotNet.Interactive
 
                 context.Complete();
             };
+
+            await Task.CompletedTask;
         }
 
         private async Task HandleLoadExtension(

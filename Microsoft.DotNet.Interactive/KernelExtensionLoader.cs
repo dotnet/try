@@ -14,6 +14,16 @@ namespace Microsoft.DotNet.Interactive
     {
         public async Task<bool> TryLoadFromAssembly(FileInfo assemblyFile, IKernel kernel)
         {
+            if (assemblyFile == null)
+            {
+                throw new ArgumentNullException(nameof(assemblyFile));
+            }
+
+            if (kernel == null)
+            {
+                throw new ArgumentNullException(nameof(kernel));
+            }
+
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
             var extensionTypes = assembly
                                    .ExportedTypes
