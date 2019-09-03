@@ -27,6 +27,14 @@ using Task = System.Threading.Tasks.Task;
 
 namespace WorkspaceServer.Kernel
 {
+    internal static class ScriptExecutionExtensions
+    {
+        public static Task<ScriptState> UnlessCancelled(this Task<ScriptState> execution)
+        {
+
+        }
+    }
+
     public class CSharpKernel : KernelBase
     {
         internal const string KernelName = "csharp";
@@ -118,8 +126,6 @@ namespace WorkspaceServer.Kernel
             context.Complete();
         }
 
-
-
     private async Task HandleSubmitCode(
             SubmitCode submitCode,
             KernelInvocationContext context)
@@ -159,7 +165,7 @@ namespace WorkspaceServer.Kernel
                     _scriptState = await CSharpScript.RunAsync(
                                        code,
                                        ScriptOptions,
-                                       cancellationToken:_cancellationSource.Token);
+                                       cancellationToken:cancellationSource.Token);
                 }
                 else
                 {
@@ -171,7 +177,7 @@ namespace WorkspaceServer.Kernel
                                            exception = e;
                                            return true;
                                        },
-                                       cancellationToken: _cancellationSource.Token);
+                                       cancellationToken: cancellationSource.Token);
                 }
             }
             catch (Exception e)
