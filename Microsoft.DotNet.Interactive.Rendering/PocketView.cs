@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Html;
 namespace Microsoft.DotNet.Interactive.Rendering
 {
     /// <summary>
-    /// Writes HTML using a C# DSL, bypassing the need for specialized parser and compiler infrastructure such as Razor or WebForms require.
+    /// Writes HTML using a C# DSL, bypassing the need for specialized parser and compiler infrastructure such as Razor.
     /// </summary>
     public class PocketView : DynamicObject, ITag
     {
@@ -37,12 +37,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
         }
 
-        private void AddDefaultTransforms()
-        {
-            ((dynamic) this).br = Transform((t, u) => { t.SelfClosing(); });
-            ((dynamic) this).input = Transform((t, u) => { t.SelfClosing(); });
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PocketView"/> class.
         /// </summary>
@@ -51,6 +45,12 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public PocketView(string tagName, PocketView nested = null) : this(nested)
         {
             _tag = tagName.Tag();
+        }
+
+        private void AddDefaultTransforms()
+        {
+            ((dynamic) this).br = Transform((t, u) => { t.SelfClosing(); });
+            ((dynamic) this).input = Transform((t, u) => { t.SelfClosing(); });
         }
 
         /// <summary>

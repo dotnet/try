@@ -6,7 +6,6 @@ using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Markdown;
