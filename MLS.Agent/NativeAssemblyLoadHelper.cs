@@ -16,12 +16,12 @@ namespace MLS.Agent
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 _tfm = "osx-x64";
-                _suffix = "dylib";
+                _suffix = ".dylib";
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 _tfm = "linux-x64";
-                _suffix = "so";
+                _suffix = ".so";
             }
             else if (RuntimeInformation.OSArchitecture == Architecture.X86)
             {
@@ -55,7 +55,7 @@ namespace MLS.Agent
         private IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
             var basePath = Path.GetDirectoryName(assembly.Location);
-            var nativeAssembly = Path.Combine(basePath, "..", "..", "runtimes", _tfm, "native", libraryName) + ".dll";
+            var nativeAssembly = Path.Combine(basePath, "..", "..", "runtimes", _tfm, "native", libraryName) + _suffix;
             return NativeLibrary.Load(nativeAssembly);
         }
     }
