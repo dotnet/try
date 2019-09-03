@@ -523,8 +523,6 @@ catch (Exception e)
                               .ToEnumerable()
                               .ToArray();
 
-
-
             events
                 .Should()
                 .ContainSingle(e => e is NuGetPackageAdded);
@@ -533,9 +531,10 @@ catch (Exception e)
                 .Should()
                 .ContainSingle(e => e is CodeSubmissionEvaluated);
 
-            var displayed = events.OfType<DisplayedValueProduced>().First();
-            displayed.Value.Should().BeEquivalentTo("success");
-
+            events
+                .Should()
+                .Contain(e => e is DisplayedValueProduced &&
+                (((DisplayedValueProduced)e).Value as string).Contains("success"));
         }
     }
 }
