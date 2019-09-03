@@ -70,9 +70,11 @@ namespace WorkspaceServer.Kernel
         private ImmutableArray<MetadataReference> _metadataReferences;
         private WorkspaceFixture _fixture;
         private CancellationTokenSource _cancellationSource;
+        private readonly object _cancellationSourceLock = new object();
 
         public CSharpKernel()
         {
+            _cancellationSource = new CancellationTokenSource();
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
             Name = KernelName;
@@ -140,7 +142,12 @@ namespace WorkspaceServer.Kernel
             KernelInvocationContext context)
         {
             var reply = new ExecutionInterrupted(interruptExecution);
-            _cancellationSource?.Cancel();
+            lock (_cancellationSourceLock)
+            {
+                _cancellationSource.Cancel();
+                _cancellationSource = new CancellationTokenSource();
+            }
+
             context.Publish(reply);
             context.Complete();
         }
@@ -149,7 +156,11 @@ namespace WorkspaceServer.Kernel
             SubmitCode submitCode,
             KernelInvocationContext context)
         {
-            var cancellationSource = _cancellationSource = new CancellationTokenSource();
+            CancellationTokenSource cancellationSource;
+            lock (_cancellationSourceLock)
+            {
+                cancellationSource = _cancellationSource;
+            }
             var codeSubmissionReceived = new CodeSubmissionReceived(
                 submitCode.Code,
                 submitCode);
