@@ -29,8 +29,27 @@ namespace WorkspaceServer.Kernel
 {
     internal static class ScriptExecutionExtensions
     {
-        public static Task<ScriptState> UnlessCancelled(this Task<ScriptState> execution)
+        public static async Task<ScriptState<object>> UnlessCancelled(this Task<ScriptState<object>> source,
+            CancellationToken cancellationToken,
+            Action onCancelled)
         {
+            var completed = await Task.WhenAny(
+                source,
+                Task.Run(async () =>
+                {
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        await Task.Delay(100, cancellationToken);
+                    }
+                    return (ScriptState<object>) null;
+                }, cancellationToken));
+
+            if (completed != source)
+            {
+                onCancelled();
+            }
+
+            return  completed.Result;
 
         }
     }
@@ -130,6 +149,7 @@ namespace WorkspaceServer.Kernel
             SubmitCode submitCode,
             KernelInvocationContext context)
         {
+            var cancellationSource = _cancellationSource = new CancellationTokenSource();
             var codeSubmissionReceived = new CodeSubmissionReceived(
                 submitCode.Code,
                 submitCode);
@@ -153,23 +173,25 @@ namespace WorkspaceServer.Kernel
             }
 
             Exception exception = null;
-
-            var cancellationSource = _cancellationSource = new CancellationTokenSource();
             using var console = await ConsoleOutput.Capture();
             using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
-
+            var scriptState = _scriptState;
             try
             {
-                if (_scriptState == null)
+                if (scriptState == null)
                 {
-                    _scriptState = await CSharpScript.RunAsync(
+                    scriptState = await CSharpScript.RunAsync(
                                        code,
                                        ScriptOptions,
-                                       cancellationToken:cancellationSource.Token);
+                                       cancellationToken:cancellationSource.Token)
+                        .UnlessCancelled(cancellationSource.Token,() =>
+                        {
+                            context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
+                        });
                 }
                 else
                 {
-                    _scriptState = await _scriptState.ContinueWithAsync(
+                    scriptState = await _scriptState.ContinueWithAsync(
                                        code,
                                        ScriptOptions,
                                        e =>
@@ -177,7 +199,11 @@ namespace WorkspaceServer.Kernel
                                            exception = e;
                                            return true;
                                        },
-                                       cancellationToken: cancellationSource.Token);
+                                       cancellationToken: cancellationSource.Token)
+                        .UnlessCancelled(cancellationSource.Token,() =>
+                        {
+                            context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
+                        });
                 }
             }
             catch (Exception e)
@@ -185,42 +211,39 @@ namespace WorkspaceServer.Kernel
                 exception = e;
             }
 
-            
-            if (cancellationSource.Token.IsCancellationRequested)
+            if (!cancellationSource.Token.IsCancellationRequested)
             {
-                context.Publish(new CommandFailed(null, submitCode, "Operation cancelled"));
-                context.Complete();
-            }
-
-            if (exception != null)
-            {
-                string message = null;
-
-                if (exception is CompilationErrorException compilationError)
+                _scriptState = scriptState;
+                if (exception != null)
                 {
-                    message =
-                        string.Join(Environment.NewLine,
-                                    compilationError.Diagnostics.Select(d => d.ToString()));
-                }
+                    string message = null;
 
-                context.Publish(new CommandFailed(exception, submitCode, message));
-                context.Complete();
-            }
-            else
-            {
-                if (HasReturnValue)
+                    if (exception is CompilationErrorException compilationError)
+                    {
+                        message =
+                            string.Join(Environment.NewLine,
+                                compilationError.Diagnostics.Select(d => d.ToString()));
+                    }
+
+                    context.Publish(new CommandFailed(exception, submitCode, message));
+                }
+                else
                 {
-                    var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
-                    context.Publish(
-                        new ReturnValueProduced(
-                            _scriptState.ReturnValue,
-                            submitCode,
-                            formattedValues));
-                }
+                    if (_scriptState != null && HasReturnValue)
+                    {
+                        var formattedValues = FormattedValue.FromObject(_scriptState.ReturnValue);
+                        context.Publish(
+                            new ReturnValueProduced(
+                                _scriptState.ReturnValue,
+                                submitCode,
+                                formattedValues));
+                    }
 
-                context.Publish(new CodeSubmissionEvaluated(submitCode));
-                context.Complete();
+                    context.Publish(new CodeSubmissionEvaluated(submitCode));
+                }
             }
+
+            context.Complete();
         }
 
         private void PublishOutput(

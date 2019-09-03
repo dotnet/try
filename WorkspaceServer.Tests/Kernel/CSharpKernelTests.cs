@@ -207,8 +207,8 @@ Console.Write(""value three"");");
         {
             var kernel = CreateKernel();
 
-            var kernelCommand = new SubmitCode(@"while (true) { Console.Write(""value one""); }");
-            var codeSubmission = kernel.SendAsync(kernelCommand);
+            var submitCodeCommand = new SubmitCode(@"System.Threading.Thread.Sleep(90000000);");
+            var codeSubmission = kernel.SendAsync(submitCodeCommand);
             var interruptionCommand = new InterruptExecution();
             await kernel.SendAsync(interruptionCommand);
             await codeSubmission;
