@@ -110,6 +110,10 @@ namespace Microsoft.DotNet.Interactive
                         await extensibleKernel.LoadExtensionsInDirectory(nugetPackageDirectory, context);
                     }
                 }
+                else
+                {
+                    context.Publish(new CommandFailed($"Kernel {invocationContext.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
+                }
 
                 context.Complete();
             };
