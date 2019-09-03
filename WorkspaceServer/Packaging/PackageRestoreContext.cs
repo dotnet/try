@@ -17,6 +17,9 @@ namespace WorkspaceServer.Packaging
             _lazyPackage = new AsyncLazy<Package>(CreatePackage);
         }
 
+        public async Task<string> OutputPath()
+            => (await _lazyPackage.ValueAsync()).EntryPointAssemblyPath.FullName;
+
         private async Task<Package> CreatePackage()
         {
             var packageBuilder = new PackageBuilder(Guid.NewGuid().ToString("N"));

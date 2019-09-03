@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using MLS.Agent;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
@@ -387,7 +388,7 @@ json
                 new CSharpKernel().UseNugetDirective()
             };
 
-            var command = new SubmitCode("#r \"nuget:PocketLogger, 1.2.3\" \nvar a = new List<int>();", "csharp");
+            var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();", "csharp");
             await kernel.SendAsync(command);
 
             command.Code.Should().Be("var a = new List<int>();");
@@ -485,6 +486,77 @@ public class TestKernelExtension : IKernelExtension
             KernelEvents.Should()
                         .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                             e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+        }
+
+        [Fact]
+        public async Task Loads_native_dependencies_from_nugets()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective(new NativeAssemblyLoadHelper())
+            };
+
+            var command = new SubmitCode(@"#r ""nuget:Microsoft.ML, 1.3.1""
+using Microsoft.ML;
+using Microsoft.ML.Data;
+using System;
+
+class IrisData
+        {
+            public IrisData(float sepalLength, float sepalWidth, float petalLength, float petalWidth)
+            {
+                SepalLength = sepalLength;
+                SepalWidth = sepalWidth;
+                PetalLength = petalLength;
+                PetalWidth = petalWidth;
+            }
+            public float SepalLength;
+            public float SepalWidth;
+            public float PetalLength;
+            public float PetalWidth;
+        }
+
+        var data = new[]
+        {
+    new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
+    new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
+    new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
+    new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
+};
+
+        MLContext mlContext = new MLContext();
+        var pipeline = mlContext.Transforms
+            .Concatenate(""Features"", ""SepalLength"", ""SepalWidth"", ""PetalLength"", ""PetalWidth"")
+            .Append(mlContext.Clustering.Trainers.KMeans(""Features"", numberOfClusters: 2));
+
+try
+{
+    pipeline.Fit(mlContext.Data.LoadFromEnumerable(data));
+    Console.WriteLine(""success"");
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}", "csharp");
+
+            var result = await kernel.SendAsync(command);
+
+            var events = result.KernelEvents
+                              .ToEnumerable()
+                              .ToArray();
+
+            events
+                .Should()
+                .ContainSingle(e => e is NuGetPackageAdded);
+
+            events
+                .Should()
+                .ContainSingle(e => e is CodeSubmissionEvaluated);
+
+            events
+                .Should()
+                .Contain(e => e is DisplayedValueProduced &&
+                (((DisplayedValueProduced)e).Value as string).Contains("success"));
         }
     }
 }

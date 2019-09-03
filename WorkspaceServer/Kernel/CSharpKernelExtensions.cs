@@ -3,7 +3,9 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -39,7 +41,13 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             return kernel;
         }
 
-        public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
+        public interface INativeAssemblyLoadHelper
+        {
+            void Handle(string assembly);
+            void Configure(string v);
+        }
+
+        public static CSharpKernel UseNugetDirective(this CSharpKernel kernel, INativeAssemblyLoadHelper helper = null)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
                                                                         NugetPackageReference.TryParse(result.Token.Value, out reference))
@@ -61,8 +69,17 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     Handler = async context =>
                     {
                         var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                        helper?.Configure(await restoreContext.OutputPath());
                         if (refs != null)
                         {
+                            foreach (var reference in refs)
+                            {
+                                if (reference is PortableExecutableReference peRef)
+                                {
+                                    helper?.Handle(peRef.FilePath);
+                                }
+                            }
+
                             kernel.AddMetatadaReferences(refs);
                         }
 
