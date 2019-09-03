@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class InterruptKernel : KernelCommandBase
+    public class InterruptExecution : KernelCommandBase
     {
 
     }

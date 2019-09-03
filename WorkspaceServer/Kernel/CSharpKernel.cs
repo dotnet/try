@@ -33,7 +33,8 @@ namespace WorkspaceServer.Kernel
         private static readonly MethodInfo _hasReturnValueMethod = typeof(Script)
             .GetMethod("HasReturnValue", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
+        protected CSharpParseOptions ParseOptions =
+            new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
 
 
         private ScriptState _scriptState;
@@ -87,6 +88,13 @@ namespace WorkspaceServer.Kernel
                         await HandleRequestCompletion(requestCompletion, invocationContext, _scriptState);
                     };
                     break;
+
+                case InterruptExecution interruptExecution:
+                    interruptExecution.Handler = async invocationContext =>
+                    {
+                        await HandleInterruptExecution(interruptExecution, invocationContext);
+                    };
+                    break;
             }
         }
 
@@ -95,9 +103,19 @@ namespace WorkspaceServer.Kernel
             var syntaxTree = SyntaxFactory.ParseSyntaxTree(code, ParseOptions);
             return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
         }
-       
 
-        private async Task HandleSubmitCode(
+        private async Task HandleInterruptExecution(
+            InterruptExecution interruptExecution,
+            KernelInvocationContext context)
+        {
+            var reply = new ExecutionInterrupted(interruptExecution);
+            context.Publish(reply);
+            throw new NotImplementedException();
+        }
+
+
+
+    private async Task HandleSubmitCode(
             SubmitCode submitCode,
             KernelInvocationContext context)
         {
