@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
             var extensionTypes = assembly
                                    .ExportedTypes
-                                   .Where(t => typeof(IKernelExtension).IsAssignableFrom(t) && !t.IsInterface)
+                                   .Where(t => t.CanBeInstantiatedFrom(typeof(IKernelExtension)))
                                    .ToArray();
 
             foreach (var extensionType in extensionTypes)
