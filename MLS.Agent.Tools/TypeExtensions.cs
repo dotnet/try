@@ -17,12 +17,11 @@ namespace MLS.Agent.Tools
             }
         }
 
-        public static bool CanBeInstantiatedFrom(this Type type, Type resultantType)
+        public static bool CanBeInstantiated(this Type type)
         {
-            return resultantType.IsAssignableFrom(type)
-                        && !type.IsAbstract
-                        && !type.IsGenericTypeDefinition
-                        && !type.IsInterface;
+            return !type.IsAbstract
+                    && !type.IsGenericTypeDefinition
+                    && !type.IsInterface;
         }
     }
 }

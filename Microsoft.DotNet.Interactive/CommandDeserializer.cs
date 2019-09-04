@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Interactive
             _map = Assembly
                .GetExecutingAssembly()
                .GetTypes()
-               .Where(t => t.CanBeInstantiatedFrom(typeof(IKernelCommand)))
+               .Where(t => t.CanBeInstantiated() && (typeof(IKernelCommand).IsAssignableFrom(t)))
                .ToDictionary(t => t.Name, t => t, StringComparer.InvariantCultureIgnoreCase);
         }
 
