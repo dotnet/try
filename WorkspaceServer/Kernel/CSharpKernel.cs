@@ -329,7 +329,7 @@ namespace WorkspaceServer.Kernel
         public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
         {
             var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(AssemblyExtensionsPath);
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context);
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
         }
 
         private bool HasReturnValue =>

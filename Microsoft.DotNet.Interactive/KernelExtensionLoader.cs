@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools;
 using System;
 using System.IO;
@@ -12,7 +13,9 @@ namespace Microsoft.DotNet.Interactive
 {
     public class KernelExtensionLoader
     {
-        public async Task<bool> TryLoadFromAssembly(FileInfo assemblyFile, IKernel kernel)
+        public delegate void PublishEvent(IKernelEvent kernelEvent);
+
+        public async Task<bool> LoadFromAssembly(FileInfo assemblyFile, IKernel kernel, PublishEvent publishEvent)
         {
             if (assemblyFile == null)
             {
@@ -33,23 +36,29 @@ namespace Microsoft.DotNet.Interactive
             foreach (var extensionType in extensionTypes)
             {
                 var extension = (IKernelExtension)Activator.CreateInstance(extensionType);
-                await extension.OnLoadAsync(kernel);
+
+                try
+                {
+                    await extension.OnLoadAsync(kernel);
+                    publishEvent(new ExtensionLoaded(assemblyFile));
+                }
+                catch(Exception e)
+                {
+                    publishEvent(new KernelExtensionLoadException($"Extension {assemblyFile.FullName} threw exception {e.Message}"));
+                }
             }
 
             return extensionTypes.Length > 0;
         }
 
-        public async Task LoadFromAssembliesInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        public async Task LoadFromAssembliesInDirectory(IDirectoryAccessor directory, IKernel kernel, PublishEvent publishEvent)
         {
             if (directory.RootDirectoryExists())
             {
                 var extensionDlls = directory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => directory.GetFullyQualifiedFilePath(file));
                 foreach (var extensionDll in extensionDlls)
                 {
-                    if (await TryLoadFromAssembly(extensionDll, context.HandlingKernel))
-                    {
-                        context.Publish(new ExtensionLoaded(extensionDll));
-                    }
+                    await LoadFromAssembly(extensionDll, kernel, publishEvent);
                 }
             }
         }

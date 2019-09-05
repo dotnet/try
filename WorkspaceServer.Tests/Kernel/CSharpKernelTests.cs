@@ -437,7 +437,7 @@ json
 
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir)).FullName;
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));")).FullName;
 
             var kernel = CreateKernel();
 
@@ -531,7 +531,7 @@ catch (Exception e)
             var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
             var extensionsDir = (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/dotnet/cs"));
 
-            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, extensionsDir);
+            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));", extensionsDir);
 
             var kernel = CreateKernel();
 

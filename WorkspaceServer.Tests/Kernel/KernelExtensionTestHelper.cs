@@ -15,9 +15,9 @@ namespace WorkspaceServer.Tests.Kernel
 {
     internal static class KernelExtensionTestHelper
     {
-        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, FileSystemDirectoryAccessor outputDir, [CallerMemberName] string testName = null)
+        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, string body, FileSystemDirectoryAccessor outputDir, [CallerMemberName] string testName = null)
         {
-            var extensionDll = await CreateExtension(extensionDir, testName);
+            var extensionDll = await CreateExtension(extensionDir, body, testName);
             outputDir.EnsureRootDirectoryExists();
             var finalExtensionDll = new FileInfo(Path.Combine(outputDir.GetFullyQualifiedRoot().FullName, extensionDll.Name));
             File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
@@ -25,7 +25,7 @@ namespace WorkspaceServer.Tests.Kernel
             return finalExtensionDll;
         }
 
-        internal static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir, [CallerMemberName] string extensionName = null)
+        internal static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir, string body, [CallerMemberName] string extensionName = null)
         {
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
@@ -42,7 +42,7 @@ public class TestKernelExtension : IKernelExtension
 {{
     public async Task OnLoadAsync(IKernel kernel)
     {{
-        await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));
+        {body}
     }}
 }}
 " ),

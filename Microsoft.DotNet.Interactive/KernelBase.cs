@@ -127,10 +127,7 @@ namespace Microsoft.DotNet.Interactive
             loadExtension.Handler = async context =>
             {
                 var kernelextensionLoader = new KernelExtensionLoader();
-                if (await kernelextensionLoader.TryLoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel))
-                {
-                    context.Publish(new ExtensionLoaded(loadExtension.AssemblyFile));
-                }
+                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
                 context.Complete();
             };
 
