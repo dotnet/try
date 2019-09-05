@@ -112,8 +112,6 @@ namespace Microsoft.DotNet.Interactive
                 {
                     context.Publish(new CommandFailed($"Kernel {invocationContext.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
                 }
-
-                context.Complete();
             };
 
             await Task.CompletedTask;
@@ -128,7 +126,6 @@ namespace Microsoft.DotNet.Interactive
             {
                 var kernelextensionLoader = new KernelExtensionLoader();
                 await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
-                context.Complete();
             };
 
             await next(loadExtension, invocationContext);
@@ -147,7 +144,7 @@ namespace Microsoft.DotNet.Interactive
 
             var unhandledLines = new List<string>();
 
-            while (lines.Count > 0 && !pipelineContext.IsCompleted)
+            while (lines.Count > 0)
             {
                 var currentLine = lines.Dequeue();
 
@@ -197,8 +194,6 @@ namespace Microsoft.DotNet.Interactive
                         formattedValues: new[] { displayValue.FormattedValue },
                         valueId: displayValue.ValueId));
 
-                invocationContext.Complete();
-
                 return Task.CompletedTask;
             };
 
@@ -219,8 +214,6 @@ namespace Microsoft.DotNet.Interactive
                         command: displayedValue,
                         formattedValues: new[] { displayedValue.FormattedValue }
                         ));
-
-                invocationContext.Complete();
 
                 return Task.CompletedTask;
             };
@@ -297,7 +290,6 @@ namespace Microsoft.DotNet.Interactive
                 {
                     result = new KernelCommandResult(KernelEvents);
                     context.Publish(new CommandHandled(context.Command));
-                    context.Complete();
                 }
 
                 operation.TaskCompletionSource.SetResult(result);

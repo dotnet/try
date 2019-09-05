@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Tests;
 using MLS.Agent;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
@@ -408,9 +409,7 @@ json
 
             var result = await kernel.SendAsync(command);
 
-            var events = result.KernelEvents
-                               .ToEnumerable()
-                               .ToArray();
+            using var events = result.KernelEvents.ToSubscribedList();
 
             events
                 .Should()
@@ -506,10 +505,7 @@ catch (Exception e)
 
             var result = await kernel.SendAsync(command);
 
-            var events = result.KernelEvents
-                               .Timeout(30.Seconds())
-                               .ToEnumerable()
-                               .ToArray();
+            using var events = result.KernelEvents.ToSubscribedList();
 
             events
                 .Should()

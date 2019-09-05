@@ -51,8 +51,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                            {
                                                new FormattedValue("text/html", htmlContent)
                                            }));
-                        
-                        context.Complete();
                     }
                 })
             });
@@ -100,8 +98,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                 {
                                     new FormattedValue("text/html", html)
                                 }));
-
-                        context.Complete();
                     }
                 })
             });
@@ -196,7 +192,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                new FormattedValue("text/html",
                                                                   value)
                                            }));
-                        context.Complete();
                     }
                 })
             };

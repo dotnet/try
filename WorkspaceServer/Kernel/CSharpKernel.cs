@@ -131,7 +131,6 @@ namespace WorkspaceServer.Kernel
             }
 
             context.Publish(reply);
-            context.Complete();
         }
 
         private async Task HandleSubmitCode(
@@ -236,8 +235,6 @@ namespace WorkspaceServer.Kernel
             {
                 context.Publish(new CommandFailed(null, submitCode, "Command cancelled"));
             }
-
-            context.Complete();
         }
 
         private void PublishOutput(

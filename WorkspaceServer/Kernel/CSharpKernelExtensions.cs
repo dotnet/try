@@ -80,7 +80,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     }
 
                     context.Publish(new NuGetPackageAdded(addPackage, package));
-                    context.Complete();
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

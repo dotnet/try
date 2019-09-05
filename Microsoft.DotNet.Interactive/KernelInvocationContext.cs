@@ -27,12 +27,6 @@ namespace Microsoft.DotNet.Interactive
 
         public IKernelCommand Command { get; }
 
-        public void Complete()
-        {
-            IsCompleted = true;
-            _events.OnCompleted();
-        }
-
         public void OnError(Exception exception)
         {
             _events.OnError(exception);
@@ -79,8 +73,6 @@ namespace Microsoft.DotNet.Interactive
         public IKernel HandlingKernel { get; set; }
 
         public IKernel CurrentKernel { get; internal set; }
-
-        public bool IsCompleted { get; private set; }
 
         void IDisposable.Dispose() => _currentStack?.Value?.Pop();
     }

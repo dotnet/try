@@ -33,14 +33,12 @@ type FSharpKernel() =
             | Ok(None) -> ()
             | Error(ex) -> context.OnError(ex)
             context.Publish(CommandHandled(codeSubmission))
-            context.Complete()
         }
 
     let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =
         async {
             let reply = CurrentCommandCancelled(cancelCurrentCommand)           
             context.Publish(reply)
-            context.Complete()
         }
 
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
