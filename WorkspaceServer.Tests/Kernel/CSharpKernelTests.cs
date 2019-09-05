@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -430,59 +433,18 @@ json
         {
             var extensionDir = Create.EmptyWorkspace()
                                      .Directory;
+            var outputDir = extensionDir.CreateSubdirectory("outputDir");
 
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
-            var dirAccessor = new InMemoryDirectoryAccessor(extensionDir)
-                {
-                    ( "Extension.cs", $@"
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Commands;
-
-public class TestKernelExtension : IKernelExtension
-{{
-    public async Task OnLoadAsync(IKernel kernel)
-    {{
-        await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));
-    }}
-}}
-" ),
-                    ("TestExtension.csproj", $@"
-<Project Sdk=""Microsoft.NET.Sdk"">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-
-    <ItemGroup>
-
-    <Reference Include=""Microsoft.DotNet.Interactive"">
-      <HintPath>{microsoftDotNetInteractiveDllPath}</HintPath>
-    </Reference>
-  </ItemGroup>
-
-</Project>
-")
-                }
-                .CreateFiles();
-
-            var buildResult = await new Dotnet(extensionDir).Build();
-            buildResult.ThrowOnFailure();
-
-            var extensionDllPath = extensionDir
-                                   .GetDirectories("bin", SearchOption.AllDirectories)
-                                   .Single()
-                                   .GetFiles("TestExtension.dll", SearchOption.AllDirectories)
-                                   .Single()
-                                   .FullName;
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));")).FullName;
 
             var kernel = CreateKernel();
 
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
+            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded &&
+                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDllPath) == 0);
             KernelEvents.Should()
                         .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
                                             e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
@@ -557,6 +519,30 @@ catch (Exception e)
                 .Should()
                 .Contain(e => e is DisplayedValueProduced &&
                 (((DisplayedValueProduced)e).Value as string).Contains("success"));
+        }
+
+        [Fact]
+        public async Task Should_load_extension_in_nuget_package()
+        {
+            var directory = Create.EmptyWorkspace().Directory;
+
+            const string nugetPackageName = "myNugetPackage";
+            var nugetPackageDirectory = new InMemoryDirectoryAccessor(directory.Subdirectory($"{nugetPackageName}/2.0.0")).CreateFiles();
+            var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
+            var extensionsDir = (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/dotnet/cs"));
+
+            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));", extensionsDir);
+
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new LoadExtensionFromNuGetPackage(new NugetPackageReference(nugetPackageName), new List<FileInfo>() { nugetPackageDll }));
+
+            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded && 
+                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDll.FullName) ==0);
+
+            KernelEvents.Should()
+                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
+                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
         }
     }
 }

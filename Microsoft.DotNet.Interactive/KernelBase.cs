@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -15,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -60,32 +62,61 @@ namespace Microsoft.DotNet.Interactive
                 (command, context, next) =>
                     command switch
                         {
-                        SubmitCode submitCode =>
-                        HandleDirectivesAndSubmitCode(
-                            submitCode, 
-                            context,
-                            next),
+                            SubmitCode submitCode =>
+                            HandleDirectivesAndSubmitCode(
+                                submitCode,
+                                context,
+                                next),
 
-                        LoadExtension loadExtension =>
-                        HandleLoadExtension(
-                            loadExtension,
-                            context, 
-                            next),
+                            LoadExtension loadExtension =>
+                            HandleLoadExtension(
+                                loadExtension,
+                                context,
+                                next),
 
-                        DisplayValue displayValue =>
-                        HandleDisplayValue(
-                            displayValue,
-                            context,
-                            next),
+                            DisplayValue displayValue =>
+                            HandleDisplayValue(
+                                displayValue,
+                                context,
+                                next),
 
-                        UpdateDisplayedValue updateDisplayValue =>
-                        HandleUpdateDisplayValue(
-                            updateDisplayValue,
-                            context,
-                            next),
+                            UpdateDisplayedValue updateDisplayValue =>
+                            HandleUpdateDisplayValue(
+                                updateDisplayValue,
+                                context,
+                                next),
+
+                            LoadExtensionFromNuGetPackage loadCSharpExtension =>
+                            HandleLoadExtensionFromNuGetPackage(
+                                loadCSharpExtension,
+                                context),
 
                             _ => next(command, context)
                         });
+        }
+
+        private async Task HandleLoadExtensionFromNuGetPackage(
+            LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage,
+            KernelInvocationContext invocationContext)
+        {
+            loadExtensionFromNuGetPackage.Handler = async context =>
+            {
+                if (invocationContext.HandlingKernel is IExtensibleKernel extensibleKernel)
+                {
+                    if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
+                    {
+                        await extensibleKernel.LoadExtensionsInDirectory(nugetPackageDirectory, context);
+                    }
+                }
+                else
+                {
+                    context.Publish(new CommandFailed($"Kernel {invocationContext.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
+                }
+
+                context.Complete();
+            };
+
+            await Task.CompletedTask;
         }
 
         private async Task HandleLoadExtension(
@@ -95,20 +126,8 @@ namespace Microsoft.DotNet.Interactive
         {
             loadExtension.Handler = async context =>
             {
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(loadExtension.AssemblyFile.FullName);
-
-                var extensionTypes = assembly
-                                     .ExportedTypes
-                                     .Where(t => typeof(IKernelExtension).IsAssignableFrom(t))
-                                     .ToArray();
-
-                foreach (var extensionType in extensionTypes)
-                {
-                    var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
-
-                    await extension.OnLoadAsync(invocationContext.HandlingKernel);
-                }
-
+                var kernelextensionLoader = new KernelExtensionLoader();
+                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
                 context.Complete();
             };
 
@@ -287,7 +306,7 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        private readonly ConcurrentQueue<KernelOperation> _commandQueue = 
+        private readonly ConcurrentQueue<KernelOperation> _commandQueue =
             new ConcurrentQueue<KernelOperation>();
 
         public Task<IKernelCommandResult> SendAsync(

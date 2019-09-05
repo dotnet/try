@@ -24,10 +24,11 @@ using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
+using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CSharpKernel : KernelBase
+    public class CSharpKernel : KernelBase, IExtensibleKernel
     {
         internal const string KernelName = "csharp";
 
@@ -51,6 +52,7 @@ namespace WorkspaceServer.Kernel
             _metadataReferences = ImmutableArray<MetadataReference>.Empty;
             SetupScriptOptions();
             Name = KernelName;
+            AssemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
         }
 
         private void SetupScriptOptions()
@@ -324,8 +326,16 @@ namespace WorkspaceServer.Kernel
             return items;
         }
 
+        public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        {
+            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(AssemblyExtensionsPath);
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
+        }
+
         private bool HasReturnValue =>
             _scriptState != null &&
             (bool)_hasReturnValueMethod.Invoke(_scriptState.Script, null);
+
+        private RelativeDirectoryPath AssemblyExtensionsPath { get; }
     }
 }

@@ -1,9 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Reflection;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
@@ -64,28 +66,27 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
-                var addPackage = new AddNugetPackage(package)
+                var addPackage = new AddNugetPackage(package);
+                addPackage.Handler = async context =>
                 {
-                    Handler = async context =>
+                    var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    helper?.Configure(await restoreContext.OutputPath());
+                    if (refs != null)
                     {
-                        var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
-                        helper?.Configure(await restoreContext.OutputPath());
-                        if (refs != null)
+                        foreach (var reference in refs)
                         {
-                            foreach (var reference in refs)
+                            if (reference is PortableExecutableReference peRef)
                             {
-                                if (reference is PortableExecutableReference peRef)
-                                {
-                                    helper?.Handle(peRef.FilePath);
-                                }
+                                helper?.Handle(peRef.FilePath);
                             }
-
-                            kernel.AddMetadataReferences(refs);
                         }
 
-                        context.Publish(new NuGetPackageAdded(package));
-                        context.Complete();
+                        kernel.AddMetadataReferences(refs);
+                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
                     }
+
+                    context.Publish(new NuGetPackageAdded(addPackage, package));
+                    context.Complete();
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

@@ -16,5 +16,12 @@ namespace MLS.Agent.Tools
                 return reader.ReadToEnd();
             }
         }
+
+        public static bool CanBeInstantiated(this Type type)
+        {
+            return !type.IsAbstract
+                    && !type.IsGenericTypeDefinition
+                    && !type.IsInterface;
+        }
     }
 }

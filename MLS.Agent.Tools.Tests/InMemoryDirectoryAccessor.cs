@@ -160,7 +160,7 @@ namespace MLS.Agent.Tools.Tests
         {
             return _files.Keys
                 .OfType<FileInfo>()
-                .Where(key => key.Directory.FullName == WorkingDirectory.FullName)
+                .Where(key => FileSystemInfoComparer.Instance.Equals(key.Directory, WorkingDirectory))
                 .Select(key => new RelativeFilePath(
                     Path.GetRelativePath(WorkingDirectory.FullName, key.FullName)));
         }
