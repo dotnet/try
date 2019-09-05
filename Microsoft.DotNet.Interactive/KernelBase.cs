@@ -170,20 +170,13 @@ namespace Microsoft.DotNet.Interactive
 
             if (modified)
             {
-                if (string.IsNullOrWhiteSpace(code))
+                if (!string.IsNullOrWhiteSpace(code))
                 {
-                    submitCode.Handler = context =>
-                    {
-                        context.Publish(new CodeSubmissionEvaluated(submitCode));
-                        context.Complete();
-                        return Task.CompletedTask;
-                    };
-
-                    return;
+                    submitCode.Code = code;
                 }
                 else
                 {
-                    submitCode.Code = code;
+                    return;
                 }
             }
 
@@ -297,7 +290,16 @@ namespace Microsoft.DotNet.Interactive
             try
             {
                 await Pipeline.SendAsync(operation.Command, context);
-                var result = await context.InvokeAsync();
+
+                var result = context.Result;
+
+                if (result == null)
+                {
+                    result = new KernelCommandResult(KernelEvents);
+                    context.Publish(new CommandHandled(context.Command));
+                    context.Complete();
+                }
+
                 operation.TaskCompletionSource.SetResult(result);
             }
             catch (Exception exception)
@@ -306,7 +308,15 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        private readonly ConcurrentQueue<KernelOperation> _commandQueue =
+        internal virtual async Task HandleInternalAsync(
+            IKernelCommand command,
+            KernelInvocationContext context)
+        {
+            await HandleAsync(command, context);
+            await command.InvokeAsync(context);
+        }
+
+        private readonly ConcurrentQueue<KernelOperation> _commandQueue = 
             new ConcurrentQueue<KernelOperation>();
 
         public Task<IKernelCommandResult> SendAsync(

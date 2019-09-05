@@ -32,7 +32,7 @@ type FSharpKernel() =
                 context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
             | Ok(None) -> ()
             | Error(ex) -> context.OnError(ex)
-            context.Publish(CodeSubmissionEvaluated(codeSubmission))
+            context.Publish(CommandHandled(codeSubmission))
             context.Complete()
         }
 

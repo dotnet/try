@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using WorkspaceServer.Kernel;
 using Xunit;
@@ -123,7 +124,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var kernel = new CompositeKernel
             {
                 new CSharpKernel()
-            };
+            }.UseDefaultMagicCommands();
 
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("%%csharp"), null);

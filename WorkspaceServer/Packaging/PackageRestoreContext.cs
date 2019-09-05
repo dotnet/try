@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,12 +28,12 @@ namespace WorkspaceServer.Packaging
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
             packageBuilder.AddPackageReference("Newtonsoft.Json");
-            var package = packageBuilder.GetPackage() as Package;
+            var package = (Package) packageBuilder.GetPackage();
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             return package;
         }
 
-        public async Task<IEnumerable<MetadataReference>> AddPackage(string packageName, string packageVersion)
+        public async Task<IReadOnlyCollection<MetadataReference>> AddPackage(string packageName, string packageVersion)
         {
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -51,15 +52,7 @@ namespace WorkspaceServer.Packaging
             var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             var newRefs = new HashSet<MetadataReference>(newWorkspace.CurrentSolution.Projects.First().MetadataReferences);
 
-            var resultRefs = newRefs.Where(n => !currentRefs.Contains(n.Display));
-            return resultRefs;
-        }
-
-        public async Task<IEnumerable<MetadataReference>> GetAllReferences()
-        {
-            var package = await _lazyPackage.ValueAsync();
-            var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
-            return currentWorkspace.CurrentSolution.Projects.First().MetadataReferences;
+            return newRefs.Where(n => !currentRefs.Contains(n.Display)).ToArray();
         }
     }
 }

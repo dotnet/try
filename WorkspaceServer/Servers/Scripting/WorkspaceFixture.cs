@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 
@@ -15,7 +13,6 @@ namespace WorkspaceServer.Servers.Scripting
     {
         private readonly AdhocWorkspace _workspace = new AdhocWorkspace(MefHostServices.DefaultHost);
         private readonly DocumentId _documentId;
-        private Project _project;
 
         public WorkspaceFixture(
             CompilationOptions compilationOptions,
@@ -40,7 +37,7 @@ namespace WorkspaceServer.Servers.Scripting
                 compilationOptions: compilationOptions,
                 metadataReferences: metadataReferences);
 
-            _project =  _workspace.AddProject(projectInfo);
+            _workspace.AddProject(projectInfo);
 
             _documentId = DocumentId.CreateNewId(projectId, "ScriptDocument");
 
@@ -49,16 +46,6 @@ namespace WorkspaceServer.Servers.Scripting
                 sourceCodeKind: SourceCodeKind.Script);
 
             _workspace.AddDocument(documentInfo);
-        }
-
-
-        public WorkspaceFixture(
-            IEnumerable<string> defaultUsings,
-            ImmutableArray<MetadataReference> metadataReferences) : this(new CSharpCompilationOptions(
-            OutputKind.DynamicallyLinkedLibrary,
-            usings: defaultUsings), metadataReferences)
-        {
-            
         }
 
         public Document ForkDocument(string text)

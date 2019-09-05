@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        public async Task SendAsync(
+        internal async Task SendAsync(
             IKernelCommand command,
             KernelInvocationContext context)
         {
@@ -56,7 +56,8 @@ namespace Microsoft.DotNet.Interactive
 
             invocations.Add(async (command, context, _) =>
             {
-                await _kernel.HandleAsync(command, context);
+                await _kernel.HandleInternalAsync(command, context);
+                context.Result = new KernelCommandResult(context.KernelEvents);
             });
 
             return invocations.Aggregate(

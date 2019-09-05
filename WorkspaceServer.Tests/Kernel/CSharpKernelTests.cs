@@ -340,12 +340,12 @@ json
         [Fact]
         public async Task it_returns_completion_list_for_previously_declared_variables()
         {
-
             var kernel = CreateKernel();
 
             await kernel.SendAsync(
                 new SubmitCode("var alpha = new Random();"));
-            await kernel.SendAsync(new RequestCompletion("al", 2));
+            await kernel.SendAsync(
+                new RequestCompletion("al", 2));
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -362,7 +362,6 @@ json
         [Fact]
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
-
             var kernel = CreateKernel();
 
             var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
@@ -425,7 +424,7 @@ json
 
             events
                 .Should()
-                .ContainSingle(e => e is CodeSubmissionEvaluated);
+                .ContainSingle(e => e is CommandHandled);
         }
 
         [Fact]
@@ -446,14 +445,18 @@ json
             KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded &&
                                                      e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDllPath) == 0);
             KernelEvents.Should()
-                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+                        .ContainSingle(e => e.Value is CommandHandled &&
+                                            e.Value.As<CommandHandled>()
+                                             .Command
+                                             .As<SubmitCode>()
+                                             .Code
+                                             .Contains("using System.Reflection;"));
         }
 
         [Fact]
         public async Task Loads_native_dependencies_from_nugets()
         {
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective(new NativeAssemblyLoadHelper())
             };
@@ -480,11 +483,11 @@ class IrisData
 
         var data = new[]
         {
-    new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
-    new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
-    new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
-    new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
-};
+            new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
+            new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
+            new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
+            new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
+        };
 
         MLContext mlContext = new MLContext();
         var pipeline = mlContext.Transforms
@@ -504,8 +507,9 @@ catch (Exception e)
             var result = await kernel.SendAsync(command);
 
             var events = result.KernelEvents
-                              .ToEnumerable()
-                              .ToArray();
+                               .Timeout(30.Seconds())
+                               .ToEnumerable()
+                               .ToArray();
 
             events
                 .Should()
@@ -513,12 +517,45 @@ catch (Exception e)
 
             events
                 .Should()
-                .ContainSingle(e => e is CodeSubmissionEvaluated);
+                .ContainSingle(e => e is CommandHandled);
 
             events
                 .Should()
                 .Contain(e => e is DisplayedValueProduced &&
-                (((DisplayedValueProduced)e).Value as string).Contains("success"));
+                              (((DisplayedValueProduced) e).Value as string).Contains("success"));
+        }
+
+        [Fact]
+        public async Task Script_state_is_available_within_middleware_pipeline()
+        {
+            var variableCountBeforeEvaluation = 0;
+            var variableCountAfterEvaluation = 0;
+
+            using var kernel = new CSharpKernel();
+
+            kernel.Pipeline.AddMiddleware(async (command, context, next) =>
+            {
+                var k = context.HandlingKernel as CSharpKernel;
+
+                // variableCountBeforeEvaluation = k.ScriptState.Variables.Length;
+
+                await next(command, context);
+
+                variableCountAfterEvaluation = k.ScriptState.Variables.Length;
+            });
+
+            await kernel.SendAsync(new SubmitCode("var x = 1;"));
+
+            variableCountBeforeEvaluation.Should().Be(0);
+            variableCountAfterEvaluation.Should().Be(1);
+        }
+
+        [Fact(Skip="wip")]
+        public void ScriptState_is_not_null_prior_to_receiving_code_submissions()
+        {
+            using var kernel = new CSharpKernel();
+
+            kernel.ScriptState.Should().NotBeNull();
         }
 
         [Fact]
