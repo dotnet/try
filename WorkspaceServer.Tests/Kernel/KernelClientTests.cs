@@ -139,7 +139,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = new CompositeKernel
             {
-                new CSharpKernel().UseNugetDirective(),
+                new CSharpKernel().UseNugetDirective()
             };
 
             var input = new MemoryStream();
@@ -155,8 +155,7 @@ namespace WorkspaceServer.Tests.Kernel
                 new StreamReader(input),
                 new StreamWriter(output));
 
-            var task = streamKernel.Start();
-            await task;
+            await streamKernel.Start();
 
             output.Position = 0;
             var reader = new StreamReader(output, Encoding.UTF8);

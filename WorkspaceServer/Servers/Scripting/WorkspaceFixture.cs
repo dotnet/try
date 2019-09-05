@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
@@ -16,7 +16,7 @@ namespace WorkspaceServer.Servers.Scripting
 
         public WorkspaceFixture(
             CompilationOptions compilationOptions,
-            ImmutableArray<MetadataReference> metadataReferences)
+            IEnumerable<MetadataReference> metadataReferences)
         {
             if (compilationOptions == null)
             {
@@ -26,6 +26,9 @@ namespace WorkspaceServer.Servers.Scripting
             {
                 throw new ArgumentNullException(nameof(metadataReferences));
             }
+
+            MetadataReferences = metadataReferences;
+
             var projectId = ProjectId.CreateNewId("ScriptProject");
 
             var projectInfo = ProjectInfo.Create(
@@ -47,6 +50,8 @@ namespace WorkspaceServer.Servers.Scripting
 
             _workspace.AddDocument(documentInfo);
         }
+
+        public IEnumerable<MetadataReference> MetadataReferences { get; }
 
         public Document ForkDocument(string text)
         {

@@ -574,8 +574,13 @@ catch (Exception e)
                                                      e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDll.FullName) ==0);
 
             KernelEvents.Should()
-                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+                        .ContainSingle(e => e.Value is CommandHandled &&
+                                            e.Value
+                                            .As<CommandHandled>()
+                                            .Command
+                                            .As<SubmitCode>()
+                                            .Code
+                                            .Contains("using System.Reflection;"));
         }
     }
 }

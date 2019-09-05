@@ -6,6 +6,7 @@ using Microsoft.DotNet.Interactive;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Events;
 using System.Collections.Generic;
+using Microsoft.DotNet.Interactive.Commands;
 
 namespace WorkspaceServer.Tests
 {
@@ -26,8 +27,13 @@ namespace WorkspaceServer.Tests
             await new KernelExtensionLoader().LoadFromAssembly(extensionDll, kernel, (kernelEvent) => extensionLoadEvents.Add(kernelEvent));
 
             KernelEvents.Should()
-                      .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-                                          e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+                        .ContainSingle(e => e.Value is CommandHandled &&
+                                            e.Value
+                                             .As<CommandHandled>()
+                                             .Command
+                                             .As<SubmitCode>()
+                                             .Code
+                                             .Contains("using System.Reflection;"));
 
         }
 

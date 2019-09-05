@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -39,19 +38,16 @@ namespace WorkspaceServer.Kernel
         protected CSharpParseOptions _csharpParseOptions =
             new CSharpParseOptions(LanguageVersion.Default, kind: SourceCodeKind.Script);
 
-        // FIX: (CSharpKernel) remove this?
-        private ImmutableArray<MetadataReference> _metadataReferences;
-
         private WorkspaceFixture _fixture;
         private CancellationTokenSource _cancellationSource;
         private readonly object _cancellationSourceLock = new object();
-        private ScriptState _scriptState;
+        private readonly RelativeDirectoryPath _assemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
+
 
         public CSharpKernel()
         {
             _cancellationSource = new CancellationTokenSource();
             Name = DefaultKernelName;
-            AssemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
         }
 
         public ScriptOptions ScriptOptions { get; private set; } =
@@ -72,11 +68,7 @@ namespace WorkspaceServer.Kernel
                              typeof(PocketView).Assembly,
                              typeof(PlotlyChart).Assembly);
 
-        public ScriptState ScriptState
-        {
-            get => _scriptState;
-            private set => _scriptState = value;
-        }
+        public ScriptState ScriptState { get; private set; }
 
         protected override async Task HandleAsync(
             IKernelCommand command,
@@ -273,7 +265,6 @@ namespace WorkspaceServer.Kernel
 
         public void AddMetadataReferences(IReadOnlyCollection<MetadataReference> references)
         {
-            _metadataReferences.AddRange(references);
             ScriptOptions = ScriptOptions.AddReferences(references);
         }
 
@@ -281,15 +272,12 @@ namespace WorkspaceServer.Kernel
             string code,
             int cursorPosition)
         {
-            var metadataReferences = ImmutableArray<MetadataReference>.Empty;
-
             if (ScriptState == null)
             {
                 ScriptState = await CSharpScript.RunAsync(string.Empty, ScriptOptions);
             }
 
             var compilation = ScriptState.Script.GetCompilation();
-            metadataReferences = metadataReferences.AddRange(compilation.References);
             var originalCode =
                 ScriptState?.Script.Code ?? string.Empty;
 
@@ -304,10 +292,9 @@ namespace WorkspaceServer.Kernel
             var offset = fullScriptCode.LastIndexOf(code, StringComparison.InvariantCulture);
             var absolutePosition = Math.Max(offset, 0) + cursorPosition;
 
-            if (_fixture == null || _metadataReferences != metadataReferences)
+            if (_fixture == null || ShouldRebuild())
             {
-                _fixture = new WorkspaceFixture(compilation.Options, metadataReferences);
-                _metadataReferences = metadataReferences;
+                _fixture = new WorkspaceFixture(compilation.Options, compilation.References);
             }
 
             var document = _fixture.ForkDocument(fullScriptCode);
@@ -329,15 +316,18 @@ namespace WorkspaceServer.Kernel
             var items = completionList.Items.Select(item => item.ToModel(symbolToSymbolKey, document).ToDomainObject()).ToArray();
 
             return items;
+
+            bool ShouldRebuild()
+            {
+                return compilation.References.Count() != _fixture.MetadataReferences.Count();
+            }
         }
 
         public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
         {
-            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(AssemblyExtensionsPath);
+            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
         }
-
-        private RelativeDirectoryPath AssemblyExtensionsPath { get; }
         
         private bool HasReturnValue =>
             ScriptState != null &&
