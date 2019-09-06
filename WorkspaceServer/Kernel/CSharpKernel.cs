@@ -220,7 +220,7 @@ namespace WorkspaceServer.Kernel
                                 formattedValues));
                     }
 
-                    context.Publish(new CommandHandled(submitCode));
+                    context.Complete();
                 }
             }
             else

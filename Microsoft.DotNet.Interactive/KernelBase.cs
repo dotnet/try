@@ -7,16 +7,13 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
-using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -89,7 +86,8 @@ namespace Microsoft.DotNet.Interactive
                             LoadExtensionFromNuGetPackage loadCSharpExtension =>
                             HandleLoadExtensionFromNuGetPackage(
                                 loadCSharpExtension,
-                                context),
+                                context, 
+                                next),
 
                             _ => next(command, context)
                         });
@@ -97,11 +95,12 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task HandleLoadExtensionFromNuGetPackage(
             LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage,
-            KernelInvocationContext invocationContext)
+            KernelInvocationContext invocationContext,
+            KernelPipelineContinuation next)
         {
             loadExtensionFromNuGetPackage.Handler = async context =>
             {
-                if (invocationContext.HandlingKernel is IExtensibleKernel extensibleKernel)
+                if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
                     if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
                     {
@@ -110,11 +109,11 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
-                    context.Publish(new CommandFailed($"Kernel {invocationContext.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
+                    context.Publish(new CommandFailed($"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
                 }
             };
 
-            await Task.CompletedTask;
+            await next(loadExtensionFromNuGetPackage, invocationContext);
         }
 
         private async Task HandleLoadExtension(
@@ -133,7 +132,7 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task HandleDirectivesAndSubmitCode(
             SubmitCode submitCode,
-            KernelInvocationContext pipelineContext,
+            KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
             var modified = false;
@@ -144,7 +143,7 @@ namespace Microsoft.DotNet.Interactive
 
             var unhandledLines = new List<string>();
 
-            while (lines.Count > 0)
+            while (lines.Count > 0 && !context.IsComplete)
             {
                 var currentLine = lines.Dequeue();
 
@@ -177,12 +176,12 @@ namespace Microsoft.DotNet.Interactive
                 }
             }
 
-            await next(submitCode, pipelineContext);
+            await next(submitCode, context);
         }
 
         private async Task HandleDisplayValue(
             DisplayValue displayValue,
-            KernelInvocationContext pipelineContext,
+            KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
             displayValue.Handler = invocationContext =>
@@ -197,7 +196,7 @@ namespace Microsoft.DotNet.Interactive
                 return Task.CompletedTask;
             };
 
-            await next(displayValue, pipelineContext);
+            await next(displayValue, context);
         }
 
         private async Task HandleUpdateDisplayValue(

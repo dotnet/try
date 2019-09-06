@@ -38,8 +38,9 @@ namespace Microsoft.DotNet.Interactive
                 extensionDllArg
             };
 
-            extend.Handler = CommandHandler.Create<FileInfo, KernelInvocationContext>((dll, pipelineContext) =>
-                                                                                        kernel.SendAsync(new LoadExtension(dll)));
+            extend.Handler = CommandHandler.Create<FileInfo, KernelInvocationContext>(
+                (dll, pipelineContext) =>
+                    kernel.SendAsync(new LoadExtension(dll)));
 
             kernel.AddDirective(extend);
 

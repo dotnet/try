@@ -27,9 +27,17 @@ namespace Microsoft.DotNet.Interactive
 
         public IKernelCommand Command { get; }
 
+        public bool IsComplete { get; private set; }
+
         public void OnError(Exception exception)
         {
             _events.OnError(exception);
+        }
+
+        public void Complete()
+        {
+            Publish(new CommandHandled(Command));
+            IsComplete = true;
         }
 
         public void Publish(IKernelEvent @event)

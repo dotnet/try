@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_ExecuteReply_message_on_CodeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_message_on_when_code_submission_is_handled()
         {
             var kernel = new CSharpKernel();
 
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_ExecuteReply_with_error_message_on_CodeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_with_error_message_on_when_code_submission_contains_errors()
         {
             var kernel = new CSharpKernel();
 
