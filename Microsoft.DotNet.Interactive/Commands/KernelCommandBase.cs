@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Interactive.Commands
         {
             Parent = KernelInvocationContext.Current?.Command;
         }
-        
 
         public async Task InvokeAsync(KernelInvocationContext context)
         {

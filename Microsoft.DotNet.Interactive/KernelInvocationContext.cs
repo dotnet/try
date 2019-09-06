@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 
@@ -16,7 +15,6 @@ namespace Microsoft.DotNet.Interactive
         private readonly KernelInvocationContext _parentContext;
         private static readonly AsyncLocal<Stack<KernelInvocationContext>> _currentStack = new AsyncLocal<Stack<KernelInvocationContext>>();
 
-        private readonly KernelCommandInvocation _invocation;
         private readonly ReplaySubject<IKernelEvent> _events = new ReplaySubject<IKernelEvent>();
 
         private KernelInvocationContext(
@@ -25,20 +23,21 @@ namespace Microsoft.DotNet.Interactive
         {
             _parentContext = parentContext;
             Command = command;
-            _invocation = command.InvokeAsync;
         }
 
         public IKernelCommand Command { get; }
 
-        public void Complete()
-        {
-            IsCompleted = true;
-            _events.OnCompleted();
-        }
+        public bool IsComplete { get; private set; }
 
         public void OnError(Exception exception)
         {
             _events.OnError(exception);
+        }
+
+        public void Complete()
+        {
+            Publish(new CommandHandled(Command));
+            IsComplete = true;
         }
 
         public void Publish(IKernelEvent @event)
@@ -55,19 +54,7 @@ namespace Microsoft.DotNet.Interactive
 
         public IObservable<IKernelEvent> KernelEvents => _events;
 
-        public async Task<IKernelCommandResult> InvokeAsync()
-        {
-            try
-            {
-                await _invocation(this);
-            }
-            catch (Exception exception)
-            {
-                OnError(exception);
-            }
-
-            return new KernelCommandResult(KernelEvents);
-        }
+        public IKernelCommandResult Result { get; internal set; }
 
         public static KernelInvocationContext Establish(IKernelCommand command)
         {
@@ -94,8 +81,6 @@ namespace Microsoft.DotNet.Interactive
         public IKernel HandlingKernel { get; set; }
 
         public IKernel CurrentKernel { get; internal set; }
-
-        public bool IsCompleted { get; private set; }
 
         void IDisposable.Dispose() => _currentStack?.Value?.Pop();
     }

@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using WorkspaceServer.Kernel;
 using Xunit;
@@ -48,7 +49,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_ExecuteReply_message_on_CodeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_message_on_when_code_submission_is_handled()
         {
             var kernel = new CSharpKernel();
 
@@ -62,7 +63,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
-        public async Task sends_ExecuteReply_with_error_message_on_CodeSubmissionEvaluated()
+        public async Task sends_ExecuteReply_with_error_message_on_when_code_submission_contains_errors()
         {
             var kernel = new CSharpKernel();
 
@@ -123,7 +124,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var kernel = new CompositeKernel
             {
                 new CSharpKernel()
-            };
+            }.UseDefaultMagicCommands();
 
             var handler = new ExecuteRequestHandler(kernel);
             var request = Message.Create(new ExecuteRequest("%%csharp"), null);

@@ -43,12 +43,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             return kernel;
         }
 
-        public interface INativeAssemblyLoadHelper
-        {
-            void Handle(string assembly);
-            void Configure(string v);
-        }
-
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel, INativeAssemblyLoadHelper helper = null)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
@@ -86,7 +80,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     }
 
                     context.Publish(new NuGetPackageAdded(addPackage, package));
-                    context.Complete();
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

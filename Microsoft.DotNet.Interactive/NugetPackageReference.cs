@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public class NugetPackageReference
     {
-        private static Regex _regex = new Regex(
+        private static readonly Regex _regex = new Regex(
             @"nuget:\s*(?<packageName>[\w\.]+)(\s*,\s*(?<packageVersion>[\w\.\-]+))?",
             RegexOptions.Compiled |
             RegexOptions.CultureInvariant |

@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -15,6 +12,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Tests;
 using MLS.Agent;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
@@ -56,7 +54,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode("2 + 2"));
             await kernel.SendAsync(new SubmitCode("adddddddddd"));
 
-            var (failure, lastCodeSubmissionEvaluationFailedPosition) = KernelEvents
+            var (failure, lastFailureIndex) = KernelEvents
                 .Select((t, pos) => (t.Value, pos))
                 .Single(t => t.Value is CommandFailed);
 
@@ -75,7 +73,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .BeLessThan(lastCodeSubmissionPosition);
             lastCodeSubmissionPosition
                 .Should()
-                .BeLessThan(lastCodeSubmissionEvaluationFailedPosition);
+                .BeLessThan(lastFailureIndex);
         }
 
         [Fact]
@@ -340,12 +338,12 @@ json
         [Fact]
         public async Task it_returns_completion_list_for_previously_declared_variables()
         {
-
             var kernel = CreateKernel();
 
             await kernel.SendAsync(
                 new SubmitCode("var alpha = new Random();"));
-            await kernel.SendAsync(new RequestCompletion("al", 2));
+            await kernel.SendAsync(
+                new RequestCompletion("al", 2));
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -362,7 +360,6 @@ json
         [Fact]
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
-
             var kernel = CreateKernel();
 
             var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
@@ -409,9 +406,7 @@ json
 
             var result = await kernel.SendAsync(command);
 
-            var events = result.KernelEvents
-                               .ToEnumerable()
-                               .ToArray();
+            using var events = result.KernelEvents.ToSubscribedList();
 
             events
                 .Should()
@@ -425,7 +420,7 @@ json
 
             events
                 .Should()
-                .ContainSingle(e => e is CodeSubmissionEvaluated);
+                .ContainSingle(e => e is CommandHandled);
         }
 
         [Fact]
@@ -433,9 +428,6 @@ json
         {
             var extensionDir = Create.EmptyWorkspace()
                                      .Directory;
-            var outputDir = extensionDir.CreateSubdirectory("outputDir");
-
-            var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
             var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));")).FullName;
 
@@ -444,16 +436,20 @@ json
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
             KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded &&
-                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDllPath) == 0);
+                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
             KernelEvents.Should()
-                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+                        .ContainSingle(e => e.Value is CommandHandled &&
+                                            e.Value.As<CommandHandled>()
+                                             .Command
+                                             .As<SubmitCode>()
+                                             .Code
+                                             .Contains("using System.Reflection;"));
         }
 
         [Fact]
         public async Task Loads_native_dependencies_from_nugets()
         {
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective(new NativeAssemblyLoadHelper())
             };
@@ -480,11 +476,11 @@ class IrisData
 
         var data = new[]
         {
-    new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
-    new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
-    new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
-    new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
-};
+            new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
+            new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
+            new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
+            new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
+        };
 
         MLContext mlContext = new MLContext();
         var pipeline = mlContext.Transforms
@@ -503,9 +499,7 @@ catch (Exception e)
 
             var result = await kernel.SendAsync(command);
 
-            var events = result.KernelEvents
-                              .ToEnumerable()
-                              .ToArray();
+            using var events = result.KernelEvents.ToSubscribedList();
 
             events
                 .Should()
@@ -513,12 +507,41 @@ catch (Exception e)
 
             events
                 .Should()
-                .ContainSingle(e => e is CodeSubmissionEvaluated);
-
-            events
-                .Should()
                 .Contain(e => e is DisplayedValueProduced &&
-                (((DisplayedValueProduced)e).Value as string).Contains("success"));
+                              (((DisplayedValueProduced) e).Value as string).Contains("success"));
+        }
+
+        [Fact]
+        public async Task Script_state_is_available_within_middleware_pipeline()
+        {
+            var variableCountBeforeEvaluation = 0;
+            var variableCountAfterEvaluation = 0;
+
+            using var kernel = new CSharpKernel();
+
+            kernel.Pipeline.AddMiddleware(async (command, context, next) =>
+            {
+                var k = context.HandlingKernel as CSharpKernel;
+
+                // variableCountBeforeEvaluation = k.ScriptState.Variables.Length;
+
+                await next(command, context);
+
+                variableCountAfterEvaluation = k.ScriptState.Variables.Length;
+            });
+
+            await kernel.SendAsync(new SubmitCode("var x = 1;"));
+
+            variableCountBeforeEvaluation.Should().Be(0);
+            variableCountAfterEvaluation.Should().Be(1);
+        }
+
+        [Fact(Skip="wip")]
+        public void ScriptState_is_not_null_prior_to_receiving_code_submissions()
+        {
+            using var kernel = new CSharpKernel();
+
+            kernel.ScriptState.Should().NotBeNull();
         }
 
         [Fact]
@@ -527,22 +550,41 @@ catch (Exception e)
             var directory = Create.EmptyWorkspace().Directory;
 
             const string nugetPackageName = "myNugetPackage";
-            var nugetPackageDirectory = new InMemoryDirectoryAccessor(directory.Subdirectory($"{nugetPackageName}/2.0.0")).CreateFiles();
-            var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
-            var extensionsDir = (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath($"interactive-extensions/dotnet/cs"));
+            var nugetPackageDirectory = new InMemoryDirectoryAccessor(
+                    directory.Subdirectory($"{nugetPackageName}/2.0.0"))
+                .CreateFiles();
 
-            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));", extensionsDir);
+            var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
+
+            var extensionsDir =
+                (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
+
+            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(
+                                   directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));",
+                                   extensionsDir);
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadExtensionFromNuGetPackage(new NugetPackageReference(nugetPackageName), new List<FileInfo>() { nugetPackageDll }));
-
-            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded && 
-                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.CompareTo(extensionDll.FullName) ==0);
+            await kernel.SendAsync(
+                new LoadExtensionFromNuGetPackage(
+                    new NugetPackageReference(nugetPackageName),
+                    new List<FileInfo>
+                    {
+                        nugetPackageDll
+                    }));
 
             KernelEvents.Should()
-                        .ContainSingle(e => e.Value is CodeSubmissionEvaluated &&
-                                            e.Value.As<CodeSubmissionEvaluated>().Code.Contains("using System.Reflection;"));
+                        .ContainSingle(e => e.Value is ExtensionLoaded &&
+                                            e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDll.FullName));
+
+            KernelEvents.Should()
+                        .ContainSingle(e => e.Value is CommandHandled &&
+                                            e.Value
+                                             .As<CommandHandled>()
+                                             .Command
+                                             .As<SubmitCode>()
+                                             .Code
+                                             .Contains("using System.Reflection;"));
         }
     }
 }

@@ -9,8 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="PackageRestore\**" />
     <Compile Remove="TestResults\**" />
+    <EmbeddedResource Remove="PackageRestore\**" />
     <EmbeddedResource Remove="TestResults\**" />
+    <None Remove="PackageRestore\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
 
@@ -97,7 +100,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PackageRestore\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
