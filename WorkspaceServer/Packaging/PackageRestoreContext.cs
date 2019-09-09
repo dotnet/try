@@ -4,12 +4,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
 {
     public class PackageRestoreContext
     {
+        public class AddReferenceResult
+        {
+            public AddReferenceResult(bool succeeded, MetadataReference[] references = null)
+            {
+                Succeeded = succeeded;
+                References = references ?? Array.Empty<MetadataReference>();
+            }
+
+            public bool Succeeded { get; }
+            public MetadataReference[] References { get; }
+        }
+
         private readonly AsyncLazy<Package> _lazyPackage;
 
         public PackageRestoreContext()
@@ -32,7 +45,7 @@ namespace WorkspaceServer.Packaging
             return package;
         }
 
-        public async Task<IEnumerable<MetadataReference>> AddPackage(string packageName, string packageVersion)
+        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion)
         {
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -45,14 +58,15 @@ namespace WorkspaceServer.Packaging
 
             if (result.ExitCode != 0)
             {
-                return Array.Empty<MetadataReference>();
+                return new AddReferenceResult(succeeded: false);
             }
 
             var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             var newRefs = new HashSet<MetadataReference>(newWorkspace.CurrentSolution.Projects.First().MetadataReferences);
 
-            var resultRefs = newRefs.Where(n => !currentRefs.Contains(n.Display));
-            return resultRefs;
+            return new AddReferenceResult(succeeded: true, newRefs
+                .Where(n => !currentRefs.Contains(n.Display))
+                .ToArray());
         }
 
         public async Task<IEnumerable<MetadataReference>> GetAllReferences()

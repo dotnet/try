@@ -69,7 +69,12 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 {
                     Handler = async context =>
                     {
-                        var message = $"Attempting to install package {package.PackageName}, version {package.PackageVersion}";
+                        var message = $"Attempting to install package {package.PackageName}";
+                        if (!string.IsNullOrWhiteSpace(package.PackageVersion))
+                        {
+                            message += $", version {package.PackageVersion}";
+                        }
+
                         var key = message;
                         var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
                         context.Publish(displayed);
@@ -82,11 +87,15 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             context.Publish(new DisplayedValueUpdated(message, key));
                         }
 
-                        var refs = await installTask;
+                        message += "done!";
+                        context.Publish(new DisplayedValueUpdated(message, key));
+
+                        var result = await installTask;
                         helper?.Configure(await restoreContext.OutputPath());
-                        if (refs != null)
+
+                        if (result.Succeeded)
                         {
-                            foreach (var reference in refs)
+                            foreach (var reference in result.References)
                             {
                                 if (reference is PortableExecutableReference peRef)
                                 {
@@ -94,12 +103,16 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                                 }
                             }
 
-                            kernel.AddMetadataReferences(refs);
+                            kernel.AddMetadataReferences(result.References);
+
+                            context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}", context.Command));
+                            context.Publish(new NuGetPackageAdded(package));
+                        }
+                        else
+                        {
+                            context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
                         }
 
-                        message += "done!";
-                        context.Publish(new DisplayedValueUpdated(message, key));
-                        context.Publish(new NuGetPackageAdded(package));
                         context.Complete();
                     }
                 };
