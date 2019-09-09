@@ -48,6 +48,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case MessageTypeValues.InterruptRequest:
                     await _interruptHandler.Handle(delivery.Command);
                     break;
+                case MessageTypeValues.IsCompleteRequest:
+                    await _isCompleteHandler.Handle(delivery.Command);
+                    break;
             }
 
             return delivery.Complete();
