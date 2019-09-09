@@ -102,14 +102,12 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}", context.Command));
                         context.Publish(new NuGetPackageAdded(addPackage, package));
-                        context.Complete();
 
                         await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, result.References.Select(reference => new FileInfo(reference.Display))));
                     }
                     else
                     {
                         context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
-                        context.Complete();
                     }
 
                 };
