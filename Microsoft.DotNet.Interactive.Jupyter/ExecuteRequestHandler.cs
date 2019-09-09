@@ -30,6 +30,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             context.RequestHandlerStatus.SetAsBusy();
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
+            var executeInputPayload = new ExecuteInput(executeRequest.Code, executionCount);
+            var executeReply = Message.Create(executeInputPayload, context.Request.Header);
+            context.ServerChannel.Send(executeReply);
+
             var command = new SubmitCode(executeRequest.Code);
 
             var openRequest = new InflightRequest(context, executeRequest, executionCount);

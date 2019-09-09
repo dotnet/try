@@ -49,6 +49,23 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
+        public async Task sends_ExecuteInput_when_ExecuteRequest_is_handled()
+        {
+            var kernel = new CSharpKernel();
+            var handler = new ExecuteRequestHandler(kernel);
+            var request = Message.Create(new ExecuteRequest("var a =12;"), null);
+            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            _serverRecordingSocket.DecodedMessages
+                .Should().Contain(message =>
+                    message.Contains(MessageTypeValues.ExecuteInput));
+
+            _serverRecordingSocket.DecodedMessages
+                .Should().Contain(message =>
+                    message.Contains("var a =12;"));
+        }
+
+        [Fact]
         public async Task sends_ExecuteReply_message_on_when_code_submission_is_handled()
         {
             var kernel = new CSharpKernel();
