@@ -10,19 +10,8 @@ using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
 {
-    public class PackageRestoreContext
+    public partial class PackageRestoreContext
     {
-        public class AddReferenceResult
-        {
-            public AddReferenceResult(bool succeeded, MetadataReference[] references = null)
-            {
-                Succeeded = succeeded;
-                References = references ?? Array.Empty<MetadataReference>();
-            }
-
-            public bool Succeeded { get; }
-            public MetadataReference[] References { get; }
-        }
 
         private readonly AsyncLazy<Package> _lazyPackage;
 
