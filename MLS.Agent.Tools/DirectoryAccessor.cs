@@ -13,10 +13,18 @@ namespace MLS.Agent.Tools
             string relativePath) =>
             directoryAccessor.DirectoryExists(new RelativeDirectoryPath(relativePath));
 
+        public static bool RootDirectoryExists(
+            this IDirectoryAccessor directoryAccessor) =>
+            directoryAccessor.DirectoryExists(new RelativeDirectoryPath("."));
+
         public static void EnsureDirectoryExists(
             this IDirectoryAccessor directoryAccessor,
             string relativePath) =>
             directoryAccessor.EnsureDirectoryExists(new RelativeDirectoryPath(relativePath));
+
+        public static void EnsureRootDirectoryExists(
+            this IDirectoryAccessor directoryAccessor) =>
+            directoryAccessor.EnsureDirectoryExists(new RelativeDirectoryPath("."));
 
         public static bool FileExists(
             this IDirectoryAccessor directoryAccessor,
@@ -57,5 +65,8 @@ namespace MLS.Agent.Tools
 
         public static FileInfo GetFullyQualifiedFilePath(this IDirectoryAccessor directoryAccessor, RelativeFilePath relativePath) => 
             (FileInfo) directoryAccessor.GetFullyQualifiedPath(relativePath);
+
+        public static DirectoryInfo GetFullyQualifiedDirectoryPath(this IDirectoryAccessor directoryAccessor, RelativeDirectoryPath relativePath) =>
+            (DirectoryInfo)directoryAccessor.GetFullyQualifiedPath(relativePath);
     }
 }

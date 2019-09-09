@@ -11,9 +11,7 @@
     <ToolCommandName>dotnet-try</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <Description>
-      Try .NET is an interactive documentation generator for .NET Core.
-    </Description>
+    <Description>Try .NET is an interactive documentation generator for .NET Core.</Description>
     <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise and Markdig aren't strongly signed -->
   </PropertyGroup>
@@ -97,9 +95,6 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
-  <ImportGroup>
-    <Import Project="AssemblyInfo.props" Condition="Exists('AssemblyInfo.props')" />
-  </ImportGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive.Jupyter\Microsoft.DotNet.Interactive.Jupyter.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />

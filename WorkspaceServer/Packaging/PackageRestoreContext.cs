@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,7 +41,7 @@ namespace WorkspaceServer.Packaging
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
             packageBuilder.AddPackageReference("Newtonsoft.Json");
-            var package = packageBuilder.GetPackage() as Package;
+            var package = (Package) packageBuilder.GetPackage();
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             return package;
         }

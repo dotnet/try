@@ -10,7 +10,6 @@ using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -60,32 +59,61 @@ namespace Microsoft.DotNet.Interactive
                 (command, context, next) =>
                     command switch
                         {
-                        SubmitCode submitCode =>
-                        HandleDirectivesAndSubmitCode(
-                            submitCode, 
-                            context,
-                            next),
+                            SubmitCode submitCode =>
+                            HandleDirectivesAndSubmitCode(
+                                submitCode,
+                                context,
+                                next),
 
-                        LoadExtension loadExtension =>
-                        HandleLoadExtension(
-                            loadExtension,
-                            context, 
-                            next),
+                            LoadExtension loadExtension =>
+                            HandleLoadExtension(
+                                loadExtension,
+                                context,
+                                next),
 
-                        DisplayValue displayValue =>
-                        HandleDisplayValue(
-                            displayValue,
-                            context,
-                            next),
+                            DisplayValue displayValue =>
+                            HandleDisplayValue(
+                                displayValue,
+                                context,
+                                next),
 
-                        UpdateDisplayedValue updateDisplayValue =>
-                        HandleUpdateDisplayValue(
-                            updateDisplayValue,
-                            context,
-                            next),
+                            UpdateDisplayedValue updateDisplayValue =>
+                            HandleUpdateDisplayValue(
+                                updateDisplayValue,
+                                context,
+                                next),
+
+                            LoadExtensionFromNuGetPackage loadCSharpExtension =>
+                            HandleLoadExtensionFromNuGetPackage(
+                                loadCSharpExtension,
+                                context, 
+                                next),
 
                             _ => next(command, context)
                         });
+        }
+
+        private async Task HandleLoadExtensionFromNuGetPackage(
+            LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage,
+            KernelInvocationContext invocationContext,
+            KernelPipelineContinuation next)
+        {
+            loadExtensionFromNuGetPackage.Handler = async context =>
+            {
+                if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
+                {
+                    if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
+                    {
+                        await extensibleKernel.LoadExtensionsInDirectory(nugetPackageDirectory, context);
+                    }
+                }
+                else
+                {
+                    context.Publish(new CommandFailed($"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
+                }
+            };
+
+            await next(loadExtensionFromNuGetPackage, invocationContext);
         }
 
         private async Task HandleLoadExtension(
@@ -95,21 +123,8 @@ namespace Microsoft.DotNet.Interactive
         {
             loadExtension.Handler = async context =>
             {
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(loadExtension.AssemblyFile.FullName);
-
-                var extensionTypes = assembly
-                                     .ExportedTypes
-                                     .Where(t => typeof(IKernelExtension).IsAssignableFrom(t))
-                                     .ToArray();
-
-                foreach (var extensionType in extensionTypes)
-                {
-                    var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
-
-                    await extension.OnLoadAsync(invocationContext.HandlingKernel);
-                }
-
-                context.Complete();
+                var kernelextensionLoader = new KernelExtensionLoader();
+                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
             };
 
             await next(loadExtension, invocationContext);
@@ -117,7 +132,7 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task HandleDirectivesAndSubmitCode(
             SubmitCode submitCode,
-            KernelInvocationContext pipelineContext,
+            KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
             var modified = false;
@@ -128,7 +143,7 @@ namespace Microsoft.DotNet.Interactive
 
             var unhandledLines = new List<string>();
 
-            while (lines.Count > 0 && !pipelineContext.IsCompleted)
+            while (lines.Count > 0 && !context.IsComplete)
             {
                 var currentLine = lines.Dequeue();
 
@@ -151,29 +166,22 @@ namespace Microsoft.DotNet.Interactive
 
             if (modified)
             {
-                if (string.IsNullOrWhiteSpace(code))
-                {
-                    submitCode.Handler = context =>
-                    {
-                        context.Publish(new CodeSubmissionEvaluated(submitCode));
-                        context.Complete();
-                        return Task.CompletedTask;
-                    };
-
-                    return;
-                }
-                else
+                if (!string.IsNullOrWhiteSpace(code))
                 {
                     submitCode.Code = code;
                 }
+                else
+                {
+                    return;
+                }
             }
 
-            await next(submitCode, pipelineContext);
+            await next(submitCode, context);
         }
 
         private async Task HandleDisplayValue(
             DisplayValue displayValue,
-            KernelInvocationContext pipelineContext,
+            KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
             displayValue.Handler = invocationContext =>
@@ -185,12 +193,10 @@ namespace Microsoft.DotNet.Interactive
                         formattedValues: new[] { displayValue.FormattedValue },
                         valueId: displayValue.ValueId));
 
-                invocationContext.Complete();
-
                 return Task.CompletedTask;
             };
 
-            await next(displayValue, pipelineContext);
+            await next(displayValue, context);
         }
 
         private async Task HandleUpdateDisplayValue(
@@ -207,8 +213,6 @@ namespace Microsoft.DotNet.Interactive
                         command: displayedValue,
                         formattedValues: new[] { displayedValue.FormattedValue }
                         ));
-
-                invocationContext.Complete();
 
                 return Task.CompletedTask;
             };
@@ -278,13 +282,29 @@ namespace Microsoft.DotNet.Interactive
             try
             {
                 await Pipeline.SendAsync(operation.Command, context);
-                var result = await context.InvokeAsync();
+
+                var result = context.Result;
+
+                if (result == null)
+                {
+                    result = new KernelCommandResult(KernelEvents);
+                    context.Publish(new CommandHandled(context.Command));
+                }
+
                 operation.TaskCompletionSource.SetResult(result);
             }
             catch (Exception exception)
             {
                 operation.TaskCompletionSource.SetException(exception);
             }
+        }
+
+        internal virtual async Task HandleInternalAsync(
+            IKernelCommand command,
+            KernelInvocationContext context)
+        {
+            await HandleAsync(command, context);
+            await command.InvokeAsync(context);
         }
 
         private readonly ConcurrentQueue<KernelOperation> _commandQueue = 

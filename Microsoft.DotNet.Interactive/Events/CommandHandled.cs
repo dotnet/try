@@ -5,14 +5,10 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class CodeSubmissionEvaluated : KernelEventBase
+    public class CommandHandled : KernelEventBase
     {
-        public CodeSubmissionEvaluated(SubmitCode command) : base(command)
+        public CommandHandled(IKernelCommand command) : base(command)
         {
         }
-
-        public string Code => ((SubmitCode) Command).Code;
-
-        public override string ToString() => $"{base.ToString()}: {Code.TruncateForDisplay()}";
     }
 }

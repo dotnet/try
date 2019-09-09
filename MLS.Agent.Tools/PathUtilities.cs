@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 // adapted from http://source.roslyn.io/#System.Reflection.Metadata/System/Reflection/Internal/Utilities/PathUtilities.cs,36b27d7696df4d1e
 
@@ -511,6 +512,11 @@ namespace MLS.Agent.Tools.Roslyn
                 return GetRelativeChildPath(directory, fullPath);
             }
 
+            if (IsChildPath(fullPath, directory))
+            {
+                return GetRelativeParentPath(directory, fullPath);
+            }
+
             var directoryPathParts = GetPathParts(directory);
             var fullPathParts = GetPathParts(fullPath);
 
@@ -556,6 +562,20 @@ namespace MLS.Agent.Tools.Roslyn
             return relativePath;
         }
 
+        private static string GetRelativeParentPath(string childPath, string parentPath)
+        {
+            var childPathParts = GetPathParts(childPath);
+            var parentPathParts = GetPathParts(parentPath);
+
+            var relativePath = new StringBuilder();
+            for (int i = 0; i < childPathParts.Length - parentPathParts.Length; i++)
+            {
+                relativePath.Append(ParentRelativeDirectory + DirectorySeparatorStr);
+            }
+
+            return relativePath.ToString();
+        }
+
         /// <summary>
         /// True if the child path is a child of the parent path.
         /// </summary>
@@ -585,7 +605,7 @@ namespace MLS.Agent.Tools.Roslyn
 
         private static string[] GetPathParts(string path)
         {
-            var pathParts = path.Split(s_pathChars);
+            var pathParts = path.Split(s_pathChars).Where(p => !string.IsNullOrWhiteSpace(p));
 
             // remove references to self directories ('.')
             if (pathParts.Contains(ThisDirectory))
@@ -593,7 +613,7 @@ namespace MLS.Agent.Tools.Roslyn
                 pathParts = pathParts.Where(s => s != ThisDirectory).ToArray();
             }
 
-            return pathParts;
+            return pathParts.ToArray();
         }
 
         /// <summary>

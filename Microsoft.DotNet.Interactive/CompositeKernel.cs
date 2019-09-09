@@ -94,6 +94,11 @@ namespace Microsoft.DotNet.Interactive
             throw new NoSuitableKernelException();
         }
 
+        internal override Task HandleInternalAsync(IKernelCommand command, KernelInvocationContext context)
+        {
+            return HandleAsync(command, context);
+        }
+
         public IReadOnlyCollection<IKernel> ChildKernels => _childKernels;
 
         public IEnumerator<IKernel> GetEnumerator() => _childKernels.GetEnumerator();

@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Text;
 
@@ -15,11 +13,10 @@ namespace WorkspaceServer.Servers.Scripting
     {
         private readonly AdhocWorkspace _workspace = new AdhocWorkspace(MefHostServices.DefaultHost);
         private readonly DocumentId _documentId;
-        private Project _project;
 
         public WorkspaceFixture(
             CompilationOptions compilationOptions,
-            ImmutableArray<MetadataReference> metadataReferences)
+            IEnumerable<MetadataReference> metadataReferences)
         {
             if (compilationOptions == null)
             {
@@ -29,6 +26,9 @@ namespace WorkspaceServer.Servers.Scripting
             {
                 throw new ArgumentNullException(nameof(metadataReferences));
             }
+
+            MetadataReferences = metadataReferences;
+
             var projectId = ProjectId.CreateNewId("ScriptProject");
 
             var projectInfo = ProjectInfo.Create(
@@ -40,7 +40,7 @@ namespace WorkspaceServer.Servers.Scripting
                 compilationOptions: compilationOptions,
                 metadataReferences: metadataReferences);
 
-            _project =  _workspace.AddProject(projectInfo);
+            _workspace.AddProject(projectInfo);
 
             _documentId = DocumentId.CreateNewId(projectId, "ScriptDocument");
 
@@ -51,15 +51,7 @@ namespace WorkspaceServer.Servers.Scripting
             _workspace.AddDocument(documentInfo);
         }
 
-
-        public WorkspaceFixture(
-            IEnumerable<string> defaultUsings,
-            ImmutableArray<MetadataReference> metadataReferences) : this(new CSharpCompilationOptions(
-            OutputKind.DynamicallyLinkedLibrary,
-            usings: defaultUsings), metadataReferences)
-        {
-            
-        }
+        public IEnumerable<MetadataReference> MetadataReferences { get; }
 
         public Document ForkDocument(string text)
         {

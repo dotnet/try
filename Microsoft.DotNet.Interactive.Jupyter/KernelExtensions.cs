@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
@@ -43,7 +42,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         var htmlContent = submitCode.Code
                                                       .Replace("%%html", "")
                                                       .Trim();
-
                       
                         context.Publish(new DisplayedValueProduced(
                                            htmlContent,
@@ -52,7 +50,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                            {
                                                new FormattedValue("text/html", htmlContent)
                                            }));
-                        
+
                         context.Complete();
                     }
                 })
@@ -197,22 +195,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                new FormattedValue("text/html",
                                                                   value)
                                            }));
+
                         context.Complete();
                     }
                 })
             };
         }
-    }
-
-    public class SupportedDirectives
-    {
-        public string KernelName { get; }
-
-        public SupportedDirectives(string kernelName)
-        {
-            KernelName = kernelName;
-        }
-
-        public List<ICommand> Commands { get; } = new List<ICommand>();
     }
 }

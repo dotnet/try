@@ -1,9 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Reflection;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.CodeAnalysis;
@@ -42,12 +44,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             return kernel;
         }
 
-        public interface INativeAssemblyLoadHelper
-        {
-            void Handle(string assembly);
-            void Configure(string v);
-        }
-
         public static CSharpKernel UseNugetDirective(this CSharpKernel kernel, INativeAssemblyLoadHelper helper = null)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
@@ -65,56 +61,57 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
-                var addPackage = new AddNugetPackage(package)
+                var addPackage = new AddNugetPackage(package);
+                addPackage.Handler = async context =>
                 {
-                    Handler = async context =>
+                    var message = $"Attempting to install package {package.PackageName}";
+                    if (!string.IsNullOrWhiteSpace(package.PackageVersion))
                     {
-                        var message = $"Attempting to install package {package.PackageName}";
-                        if (!string.IsNullOrWhiteSpace(package.PackageVersion))
-                        {
-                            message += $", version {package.PackageVersion}";
-                        }
+                        message += $", version {package.PackageVersion}";
+                    }
 
-                        var key = message;
-                        var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
-                        context.Publish(displayed);
+                    var key = message;
+                    var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
+                    context.Publish(displayed);
 
-                        var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
 
-                        while ((await Task.WhenAny(Task.Delay(1000), installTask)) != installTask)
-                        {
-                            message += "...";
-                            context.Publish(new DisplayedValueUpdated(message, key));
-                        }
-
-                        message += "done!";
+                    while ((await Task.WhenAny(Task.Delay(1000), installTask)) != installTask)
+                    {
+                        message += "...";
                         context.Publish(new DisplayedValueUpdated(message, key));
+                    }
 
-                        var result = await installTask;
-                        helper?.Configure(await restoreContext.OutputPath());
+                    message += "done!";
+                    context.Publish(new DisplayedValueUpdated(message, key));
 
-                        if (result.Succeeded)
+                    var result = await installTask;
+                    helper?.Configure(await restoreContext.OutputPath());
+
+                    if (result.Succeeded)
+                    {
+                        foreach (var reference in result.References)
                         {
-                            foreach (var reference in result.References)
+                            if (reference is PortableExecutableReference peRef)
                             {
-                                if (reference is PortableExecutableReference peRef)
-                                {
-                                    helper?.Handle(peRef.FilePath);
-                                }
+                                helper?.Handle(peRef.FilePath);
                             }
-
-                            kernel.AddMetadataReferences(result.References);
-
-                            context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}", context.Command));
-                            context.Publish(new NuGetPackageAdded(package));
-                        }
-                        else
-                        {
-                            context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
                         }
 
+                        kernel.AddMetadataReferences(result.References);
+
+                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}", context.Command));
+                        context.Publish(new NuGetPackageAdded(addPackage, package));
+                        context.Complete();
+
+                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, result.References.Select(reference => new FileInfo(reference.Display))));
+                    }
+                    else
+                    {
+                        context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
                         context.Complete();
                     }
+
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

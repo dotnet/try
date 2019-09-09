@@ -59,11 +59,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case ValueProducedEventBase valueProductionEvent:
                     OnValueProductionEvent(valueProductionEvent);
                     break;
-                case CodeSubmissionEvaluated codeSubmissionEvaluated:
-                    OnCodeSubmissionEvaluated(codeSubmissionEvaluated);
+                case CommandHandled commandHandled:
+                    OnCommandHandled(commandHandled);
                     break;
-                case CommandFailed codeSubmissionEvaluationFailed:
-                    OnCommandFailed(codeSubmissionEvaluationFailed);
+                case CommandFailed commandFailed:
+                    OnCommandFailed(commandFailed);
                     break;
                 case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
@@ -180,9 +180,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCodeSubmissionEvaluated(CodeSubmissionEvaluated codeSubmissionEvaluated)
+        private void OnCommandHandled(CommandHandled commandHandled)
         {
-            if (!InFlightRequests.TryRemove(codeSubmissionEvaluated.GetRootCommand(), out var openRequest))
+            if (!InFlightRequests.TryRemove(commandHandled.GetRootCommand(), out var openRequest))
             {
                 return;
             }

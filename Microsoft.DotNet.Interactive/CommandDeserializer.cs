@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Interactive.Commands;
+using MLS.Agent.Tools;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
@@ -19,10 +20,7 @@ namespace Microsoft.DotNet.Interactive
             _map = Assembly
                .GetExecutingAssembly()
                .GetTypes()
-               .Where(t => typeof(IKernelCommand).IsAssignableFrom(t)
-                        && !t.IsAbstract
-                        && !t.IsGenericTypeDefinition
-                        && !t.IsInterface)
+               .Where(t => t.CanBeInstantiated() && (typeof(IKernelCommand).IsAssignableFrom(t)))
                .ToDictionary(t => t.Name, t => t, StringComparer.InvariantCultureIgnoreCase);
         }
 
