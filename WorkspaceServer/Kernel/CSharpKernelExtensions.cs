@@ -5,6 +5,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -68,7 +69,20 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 {
                     Handler = async context =>
                     {
-                        var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                        var message = $"Attempting to install package {package.PackageName}, version {package.PackageVersion}";
+                        var key = message;
+                        var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
+                        context.Publish(displayed);
+
+                        var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+
+                        while ((await Task.WhenAny(Task.Delay(1000), installTask)) != installTask)
+                        {
+                            message += "...";
+                            context.Publish(new DisplayedValueUpdated(message, key));
+                        }
+
+                        var refs = await installTask;
                         helper?.Configure(await restoreContext.OutputPath());
                         if (refs != null)
                         {
@@ -83,6 +97,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             kernel.AddMetadataReferences(refs);
                         }
 
+                        message += "done!";
+                        context.Publish(new DisplayedValueUpdated(message, key));
                         context.Publish(new NuGetPackageAdded(package));
                         context.Complete();
                     }
