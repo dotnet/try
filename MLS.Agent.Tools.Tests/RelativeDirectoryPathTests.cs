@@ -3,7 +3,6 @@
 
 using System;
 using FluentAssertions;
-using MLS.Agent.Tools;
 using Xunit;
 
 namespace MLS.Agent.Tools.Tests

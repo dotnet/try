@@ -27,8 +27,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var socket = new TextSocket();
             var sender = new MessageSender(socket, new SignatureValidator("key", "HMACSHA256"));
             var kernelInfoReply = new KernelInfoReply(
-
-                                       "5.3",
+                                      Constants.VERSION,
                                       ".NET",
                                       "0.0.3",
                                        new LanguageInfo(
