@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Interactive
 
             var formatted = value.ToDisplayString(mimeType);
 
-            return new FormattedValue[]
+            return new[]
             {
                 new FormattedValue(mimeType, formatted)
             };

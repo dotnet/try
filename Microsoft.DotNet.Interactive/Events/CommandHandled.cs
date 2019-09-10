@@ -10,5 +10,7 @@ namespace Microsoft.DotNet.Interactive.Events
         public CommandHandled(IKernelCommand command) : base(command)
         {
         }
+
+        public override string ToString() => $"{nameof(CommandHandled)}: {Command}";
     }
 }

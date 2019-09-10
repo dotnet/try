@@ -46,11 +46,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _disposables.Dispose();
         }
 
-        protected class InflightRequest : IDisposable
+        protected class InflightRequest 
         {
-            private readonly CompositeDisposable _disposables = new CompositeDisposable();
             public JupyterRequestContext Context { get; }
+
             public T Request { get; }
+
             public int ExecutionCount { get; }
 
             public InflightRequest(JupyterRequestContext context, T request, int executionCount)
@@ -59,17 +60,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 Request = request;
                 ExecutionCount = executionCount;
             }
-
-            public void AddDisposable(IDisposable disposable)
-            {
-                _disposables.Add(disposable);
-            }
-            public void Dispose()
-            {
-                _disposables.Dispose();
-            }
         }
-    
-       
     }
 }

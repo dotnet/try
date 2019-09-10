@@ -23,6 +23,6 @@ namespace Microsoft.DotNet.Interactive.Commands
 
         public SubmissionType SubmissionType { get; }
 
-        public override string ToString() => $"{base.ToString()}: {Code.TruncateForDisplay()}";
+        public override string ToString() => $"{nameof(SubmitCode)}: {Code.TruncateForDisplay()}";
     }
 }

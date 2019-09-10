@@ -25,5 +25,7 @@ namespace Microsoft.DotNet.Interactive.Events
         public IReadOnlyCollection<FormattedValue> FormattedValues { get; }
 
         public string ValueId { get; }
+
+        public override string ToString() => $"{GetType().Name}: {Value?.ToString().TruncateForDisplay()}";
     }
 }

@@ -21,7 +21,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public CompleteRequestHandler(IKernel kernel, IScheduler scheduler = null)
             : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
-
         }
 
         public async Task Handle(JupyterRequestContext context)
@@ -65,8 +64,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var completeReply = Message.CreateResponse(reply, openRequest.Context.Request);
             openRequest.Context.ServerChannel.Send(completeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
-            openRequest.Dispose();
-
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -25,7 +26,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             kernel.UseLsMagic()
                   .UseHtml()
                   .UseJavaScript()
-                  .UseMarkdown();
+                  .UseMarkdown()
+                  .UseTime();
 
             return kernel;
         }
@@ -116,6 +118,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return kernel;
         }
 
+        private static T UseTime<T>(this T kernel)
+            where T : KernelBase
+        {
+            kernel.AddDirective(time());
+
+            return kernel;
+        }
+
         private static T UseLsMagic<T>(this T kernel)
             where T : KernelBase
         {
@@ -183,18 +193,55 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                         string value =
                             script[type: "text/javascript"](
-                                HTML(
-                                    scriptContent))
+                                    HTML(
+                                        scriptContent))
                                 .ToString();
 
                         context.Publish(new DisplayedValueProduced(
-                                           scriptContent,
-                                           context.Command,
-                                           formattedValues: new[]
-                                           {
-                                               new FormattedValue("text/html",
-                                                                  value)
-                                           }));
+                                            scriptContent,
+                                            context.Command,
+                                            formattedValues: new[]
+                                            {
+                                                new FormattedValue("text/html",
+                                                                   value)
+                                            }));
+
+                        context.Complete();
+                    }
+                })
+            };
+        }
+
+        private static Command time()
+        {
+            return new Command("%%time")
+            {
+                Handler = CommandHandler.Create(async (KernelInvocationContext context) =>
+                {
+                    if (context.Command is SubmitCode submitCode)
+                    {
+                        var code = submitCode.Code
+                                             .Replace("%%time", "")
+                                             .Trim();
+
+                        var timer = new Stopwatch();
+                        timer.Start();
+
+                        await context.CurrentKernel.SendAsync(
+                            new SubmitCode(code, submitCode.TargetKernelName));
+
+                        var elapsed = timer.Elapsed;
+
+                        var formattableString = $"Wall time: {elapsed.TotalMilliseconds}ms";
+
+                        context.Publish(
+                            new DisplayedValueProduced(
+                                elapsed, 
+                                context.Command,
+                                new[]
+                                {
+                                    new FormattedValue(PlainTextFormatter.MimeType, formattableString)
+                                }));
 
                         context.Complete();
                     }

@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.DotNet.Interactive.FSharp;
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using WorkspaceServer.Kernel;
 using Xunit;

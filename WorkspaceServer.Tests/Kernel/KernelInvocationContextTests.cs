@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Events;
 using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
