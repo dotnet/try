@@ -10,8 +10,7 @@ namespace MLS.Agent.Tools
     {
         public class AddPackageResult : CommandLineResult
         {
-            // Successful installation will print a message like
-            // @"info : PackageReference for package 'xunit' version '2.4.1' added to file 'E:\testdll\testdll.csproj'.";
+            
             public string InstalledVersion { get; }
             public IEnumerable<string> DetailedErrors { get; }
 
@@ -36,7 +35,14 @@ namespace MLS.Agent.Tools
                 {
                     if (line.StartsWith("info : PackageReference for package"))
                     {
+                        // Successful installation will print a message like
+                        // @"info : PackageReference for package 'xunit' version '2.4.1' added to file 'E:\testdll\testdll.csproj'.";
                         var quote1 = line.IndexOf('\'');
+                        if (quote1 == -1)
+                        {
+                            continue;
+                        }
+
                         var quote2 = line.IndexOf('\'', quote1 + 1);
                         var quote3 = line.IndexOf('\'', quote2 + 1);
                         var quote4 = line.IndexOf('\'', quote3 + 1);
