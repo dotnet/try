@@ -48,7 +48,7 @@ namespace WorkspaceServer.Packaging
 
             if (result.ExitCode != 0)
             {
-                return new AddReferenceResult(succeeded: false);
+                return new AddReferenceResult(succeeded: false, detailedErrors: result.DetailedErrors);
             }
 
             var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -56,7 +56,8 @@ namespace WorkspaceServer.Packaging
 
             return new AddReferenceResult(succeeded: true, newRefs
                 .Where(n => !currentRefs.Contains(n.Display))
-                .ToArray());
+                .ToArray(),
+                 installedVersion: result.InstalledVersion);
         }
 
         public async Task<IEnumerable<MetadataReference>> GetAllReferences()
