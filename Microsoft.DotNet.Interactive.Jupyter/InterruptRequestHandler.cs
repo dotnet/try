@@ -40,15 +40,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     openRequest.Context.Request);
 
                 openRequest.Context.ServerChannel.Send(interruptReply);
-                openRequest.Context.KernelStatus.SetAsIdle();
             }
         }
 
         public async Task Handle(JupyterRequestContext context)
         {
             var interruptRequest = GetJupyterRequest(context);
-
-            context.KernelStatus.SetAsBusy();
 
             var command = new CancelCurrentCommand();
 

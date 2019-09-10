@@ -4,10 +4,14 @@
 using System;
 using FluentAssertions;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
+using MLS.Agent.Tools.Tests;
+using WorkspaceServer.Kernel;
 using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
@@ -45,6 +49,33 @@ namespace WorkspaceServer.Tests.Kernel
                           .NotBe(commandInTask2)
                           .And
                           .NotBeNull();
+        }
+
+        [Fact]
+        public async Task When_a_command_spawns_another_command_then_parent_context_is_not_complete_until_child_context_is_complete()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseKernelHelpers()
+            };
+
+            kernel.Pipeline.AddMiddleware(async (command, context, next) =>
+            {
+                context.Publish(new DisplayedValueProduced("1", command));
+
+                await next(command, context);
+
+                context.Publish(new DisplayedValueProduced("3", command));
+            });
+
+            var result = await kernel.SendAsync(new SubmitCode("display(2);"));
+
+            var events = result.KernelEvents.ToEnumerable();
+
+            events.OfType<DisplayedValueProduced>()
+                  .Select(v => v.Value)
+                  .Should()
+                  .BeEquivalentSequenceTo(1, 2, 3);
         }
     }
 }

@@ -17,8 +17,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly InterruptRequestHandler _interruptHandler;
         private readonly IsCompleteRequestHandler _isCompleteHandler;
 
-        public JupyterRequestContextHandler(
-            IKernel kernel)
+        public JupyterRequestContextHandler(IKernel kernel)
         {
             var scheduler = new EventLoopScheduler(t =>
             {
@@ -52,6 +51,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 default:
                     break;
             }
+
+            delivery.Command.Complete();
 
             return delivery.Complete();
         }

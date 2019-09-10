@@ -22,16 +22,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public async Task Handle(JupyterRequestContext context)
         {
             var isCompleteRequest = GetJupyterRequest(context);
-            var command = new SubmitCode(isCompleteRequest.Code, submissionType:SubmissionType.Diagnose);
-           
-            var openRequest = new InflightRequest(context, isCompleteRequest, 0);
+            var command = new SubmitCode(isCompleteRequest.Code, submissionType: SubmissionType.Diagnose);
 
-            InFlightRequests[command] = openRequest;
-
-            await Kernel.SendAsync(command);
+            await SendTheThingAndWaitForTheStuff(context, command);
         }
 
-        protected override void OnKernelEvent(IKernelEvent @event)
+        protected override void OnKernelEventReceived(
+            IKernelEvent @event,
+            JupyterRequestContext context)
         {
             switch (@event)
             {
@@ -43,6 +41,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     break;
             }
         }
+
+        protected override void OnKernelEvent(IKernelEvent @event){}
 
         private void OnKernelEvent(IKernelEvent @event, bool isComplete)
         {
@@ -59,7 +59,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     openRequest.Context.Request);
 
                 openRequest.Context.ServerChannel.Send(executeReply);
-                openRequest.Context.KernelStatus.SetAsIdle();
             }
         }
     }

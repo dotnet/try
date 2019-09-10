@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
@@ -24,10 +26,28 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
 
             KernelEvents = Kernel.KernelEvents.ObserveOn(scheduler ?? throw new ArgumentNullException(nameof(scheduler)));
+
+            // FIX: (RequestHandlerBase) do we care about this?
             _disposables.Add(KernelEvents.Subscribe(OnKernelEvent));
         }
 
         protected abstract void OnKernelEvent(IKernelEvent @event);
+
+        protected async Task SendTheThingAndWaitForTheStuff(
+            JupyterRequestContext context, 
+            IKernelCommand command)
+        {
+            var sub = Kernel.KernelEvents.Subscribe(e => OnKernelEventReceived(e, context));
+
+            await ((KernelBase) Kernel).SendAsync(
+                command,
+                CancellationToken.None,
+                onDone: () => sub.Dispose());
+        }
+
+        protected abstract void OnKernelEventReceived(
+            IKernelEvent @event,
+            JupyterRequestContext context);
 
         protected static T GetJupyterRequest(JupyterRequestContext context)
         {

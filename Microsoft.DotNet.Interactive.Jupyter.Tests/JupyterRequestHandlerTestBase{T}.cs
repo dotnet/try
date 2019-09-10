@@ -13,35 +13,36 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
     public abstract class JupyterRequestHandlerTestBase<T> : IDisposable
         where T : JupyterMessageContent
     {
-        private readonly CompositeDisposable _disposables =new CompositeDisposable();
-        protected MessageSender IoPubChannel { get; }
-        protected MessageSender ServerChannel { get; }
-        protected RecordingSocket ServerRecordingSocket { get; }
-        protected RecordingSocket IoRecordingSocket { get; }
-        protected KernelStatus KernelStatus { get; }
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        protected readonly MessageSender _ioPubChannel;
+        protected readonly MessageSender _serverChannel;
+        protected readonly RecordingSocket _serverRecordingSocket;
+        protected readonly RecordingSocket _ioRecordingSocket;
+        protected readonly IKernel _kernel;
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
         {
             _disposables.Add(output.SubscribeToPocketLogger());
 
+            _kernel = new CompositeKernel
+            {
+                new CSharpKernel()
+            }.UseDefaultMagicCommands();
+
+            _disposables.Add(_kernel.LogEventsToPocketLogger());
+
             var signatureValidator = new SignatureValidator("key", "HMACSHA256");
-            ServerRecordingSocket = new RecordingSocket();
-            ServerChannel = new MessageSender(ServerRecordingSocket, signatureValidator);
-            IoRecordingSocket = new RecordingSocket();
-            IoPubChannel = new MessageSender(IoRecordingSocket, signatureValidator);
-            KernelStatus = new KernelStatus(
-                Header.Create<T>("test"),
-                ServerChannel);
+            _serverRecordingSocket = new RecordingSocket();
+            _serverChannel = new MessageSender(_serverRecordingSocket, signatureValidator);
+            _ioRecordingSocket = new RecordingSocket();
+            _ioPubChannel = new MessageSender(_ioRecordingSocket, signatureValidator);
         }
 
         public void Dispose() => _disposables.Dispose();
 
         protected ICommandScheduler<JupyterRequestContext> CreateScheduler()
         {
-            var handler = new JupyterRequestContextHandler(new CompositeKernel
-            {
-                new CSharpKernel()
-            }.UseDefaultMagicCommands());
+            var handler = new JupyterRequestContextHandler(_kernel);
 
             return CommandScheduler.Create<JupyterRequestContext>(handler.Handle).Trace();
         }

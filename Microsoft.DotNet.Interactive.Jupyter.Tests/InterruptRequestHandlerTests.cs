@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Clockwise;
 using FluentAssertions;
 using System.Linq;
@@ -23,9 +22,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new InterruptRequest(), null);
-            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
 
-            await KernelStatus.Idle();
+            await _kernel.Idle();
 
             ServerRecordingSocket.DecodedMessages
                                   .SingleOrDefault(message =>
