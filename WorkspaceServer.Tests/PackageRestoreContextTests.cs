@@ -18,6 +18,7 @@ namespace WorkspaceServer.Tests
             var refs = result.References;
             refs.Should().Contain(r => r.Display.Contains("FluentAssertions.dll"));
             refs.Should().Contain(r => r.Display.Contains("System.Configuration.ConfigurationManager"));
+            result.InstalledVersion.Should().Be("5.7.0");
         }
 
         [Fact]
@@ -25,6 +26,7 @@ namespace WorkspaceServer.Tests
         {
             var result = await new PackageRestoreContext().AddPackage("not-a-real-package-definitely-not", "5.7.0");
             result.Succeeded.Should().BeFalse();
+            result.DetailedErrors.Should().NotBeEmpty();
         }
     }
 }

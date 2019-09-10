@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +13,7 @@ using Clockwise;
 
 namespace MLS.Agent.Tools
 {
-    public class Dotnet
+    public partial class Dotnet
     {
         protected readonly DirectoryInfo _workingDirectory;
 
@@ -32,13 +33,13 @@ namespace MLS.Agent.Tools
             return Execute($@"new ""{templateName}"" {args}", budget);
         }
 
-        public Task<CommandLineResult> AddPackage(string packageId, string version = null, Budget budget = null)
+        public async Task<AddPackageResult> AddPackage(string packageId, string version = null, Budget budget = null)
         {
             var versionArg = string.IsNullOrWhiteSpace(version)
                 ? ""
                 : $"--version {version}";
-
-            return Execute($"add package {versionArg} {packageId}", budget);
+            var executionResult = await Execute($"add package {versionArg} {packageId}", budget);
+            return new AddPackageResult(executionResult.ExitCode, executionResult.Output, executionResult.Error);
         }
 
         public Task<CommandLineResult> AddReference(FileInfo projectToReference, Budget budget = null)
@@ -63,7 +64,7 @@ namespace MLS.Agent.Tools
             CommandLine.StartProcess(
                 Path.FullName,
                 args,
-                _workingDirectory, 
+                _workingDirectory,
                 output,
                 error);
 

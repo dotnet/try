@@ -100,7 +100,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                         kernel.AddMetadataReferences(result.References);
 
-                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}", context.Command));
+                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}", context.Command));
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
                         await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, result.References.Select(reference => new FileInfo(reference.Display))));
@@ -108,6 +108,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     else
                     {
                         context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
+                        context.Publish(new DisplayedValueProduced(result.DetailedErrors, context.Command));
                     }
 
                 };
