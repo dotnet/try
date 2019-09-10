@@ -519,6 +519,7 @@ namespace MLS.Agent.CommandLine
                                              .UseXplot(),
                                          new FSharpKernel()
                                              .UseDefaultRendering()
+                                             .UseXplot()
                                      }
                                      .UseDefaultMagicCommands()
                                      .UseExtendDirective();
