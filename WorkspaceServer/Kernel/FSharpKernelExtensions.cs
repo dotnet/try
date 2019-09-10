@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.FSharp;
+using XPlot.Plotly;
 
 namespace WorkspaceServer.Kernel
 {
@@ -20,7 +21,9 @@ namespace WorkspaceServer.Kernel
                          new SubmitCode($@"
 {ReferenceFromType(typeof(IHtmlContent))}
 {ReferenceFromType(typeof(FSharpPocketViewTags))}
+{ReferenceFromType(typeof(PlotlyChart))}
 open {typeof(FSharpPocketViewTags).FullName}
+open {typeof(PlotlyChart).Namespace}
 "))).Wait();
 
             return kernel;

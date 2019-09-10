@@ -37,7 +37,7 @@ type FSharpKernel() =
 
     let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =
         async {
-            let reply = CurrentCommandCancelled(cancelCurrentCommand)           
+            let reply = CurrentCommandCancelled(cancelCurrentCommand)
             context.Publish(reply)
         }
 
@@ -48,4 +48,3 @@ type FSharpKernel() =
             | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task
-
