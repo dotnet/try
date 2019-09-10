@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
 {
-    public class PackageRestoreContext
+    public partial class PackageRestoreContext
     {
+
         private readonly AsyncLazy<Package> _lazyPackage;
 
         public PackageRestoreContext()
@@ -33,7 +35,7 @@ namespace WorkspaceServer.Packaging
             return package;
         }
 
-        public async Task<IReadOnlyCollection<MetadataReference>> AddPackage(string packageName, string packageVersion)
+        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion)
         {
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -46,13 +48,22 @@ namespace WorkspaceServer.Packaging
 
             if (result.ExitCode != 0)
             {
-                return Array.Empty<MetadataReference>();
+                return new AddReferenceResult(succeeded: false);
             }
 
             var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             var newRefs = new HashSet<MetadataReference>(newWorkspace.CurrentSolution.Projects.First().MetadataReferences);
 
-            return newRefs.Where(n => !currentRefs.Contains(n.Display)).ToArray();
+            return new AddReferenceResult(succeeded: true, newRefs
+                .Where(n => !currentRefs.Contains(n.Display))
+                .ToArray());
+        }
+
+        public async Task<IEnumerable<MetadataReference>> GetAllReferences()
+        {
+            var package = await _lazyPackage.ValueAsync();
+            var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            return currentWorkspace.CurrentSolution.Projects.First().MetadataReferences;
         }
     }
 }

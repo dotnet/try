@@ -7,6 +7,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -63,11 +64,33 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 var addPackage = new AddNugetPackage(package);
                 addPackage.Handler = async context =>
                 {
-                    var refs = await restoreContext.AddPackage(package.PackageName, package.PackageVersion);
-                    helper?.Configure(await restoreContext.OutputPath());
-                    if (refs != null)
+                    var message = $"Attempting to install package {package.PackageName}";
+                    if (!string.IsNullOrWhiteSpace(package.PackageVersion))
                     {
-                        foreach (var reference in refs)
+                        message += $", version {package.PackageVersion}";
+                    }
+
+                    var key = message;
+                    var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
+                    context.Publish(displayed);
+
+                    var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+
+                    while ((await Task.WhenAny(Task.Delay(1000), installTask)) != installTask)
+                    {
+                        message += "...";
+                        context.Publish(new DisplayedValueUpdated(message, key));
+                    }
+
+                    message += "done!";
+                    context.Publish(new DisplayedValueUpdated(message, key));
+
+                    var result = await installTask;
+                    helper?.Configure(await restoreContext.OutputPath());
+
+                    if (result.Succeeded)
+                    {
+                        foreach (var reference in result.References)
                         {
                             if (reference is PortableExecutableReference peRef)
                             {
@@ -75,11 +98,18 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             }
                         }
 
-                        kernel.AddMetadataReferences(refs);
-                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, refs.Select(reference => new FileInfo(reference.Display))));
+                        kernel.AddMetadataReferences(result.References);
+
+                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}", context.Command));
+                        context.Publish(new NuGetPackageAdded(addPackage, package));
+
+                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, result.References.Select(reference => new FileInfo(reference.Display))));
+                    }
+                    else
+                    {
+                        context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
                     }
 
-                    context.Publish(new NuGetPackageAdded(addPackage, package));
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

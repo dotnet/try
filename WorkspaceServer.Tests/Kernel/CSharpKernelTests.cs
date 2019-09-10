@@ -409,6 +409,16 @@ json
             using var events = result.KernelEvents.ToSubscribedList();
 
             events
+                .First()
+                .Should()
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Attempting to install"));
+
+            events
+                .Should()
+                .Contain(e => e is DisplayedValueUpdated);
+
+
+            events
                 .Should()
                 .ContainSingle(e => e is NuGetPackageAdded);
 

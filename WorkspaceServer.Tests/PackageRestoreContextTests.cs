@@ -13,16 +13,18 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Returns_new_references_if_they_are_added()
         {
-            var refs = await new PackageRestoreContext().AddPackage("FluentAssertions", "5.7.0");
+            var result = await new PackageRestoreContext().AddPackage("FluentAssertions", "5.7.0");
+            result.Succeeded.Should().BeTrue();
+            var refs = result.References;
             refs.Should().Contain(r => r.Display.Contains("FluentAssertions.dll"));
             refs.Should().Contain(r => r.Display.Contains("System.Configuration.ConfigurationManager"));
         }
 
         [Fact]
-        public async Task Returns_null_if_package_installation_fails()
+        public async Task Returns_failure_if_package_installation_fails()
         {
-            var refs = await new PackageRestoreContext().AddPackage("not-a-real-package-definitely-not", "5.7.0");
-            refs.Should().BeEmpty();
+            var result = await new PackageRestoreContext().AddPackage("not-a-real-package-definitely-not", "5.7.0");
+            result.Succeeded.Should().BeFalse();
         }
     }
 }
