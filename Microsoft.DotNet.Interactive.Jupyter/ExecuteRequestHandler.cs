@@ -60,8 +60,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ValueProducedEventBase valueProductionEvent:
-                    OnValueProductionEvent(valueProductionEvent);
+                case ValueProducedEventBase valueProduced:
+                    OnValueProduced(valueProduced);
                     break;
                 case CommandHandled commandHandled:
                     OnCommandHandled(commandHandled);
@@ -71,6 +71,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     break;
                 case CodeSubmissionReceived _:
                 case IncompleteCodeSubmissionReceived _:
+                    break;
                 case CompleteCodeSubmissionReceived _:
                     break;
             }
@@ -113,9 +114,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Context.Request);
 
             openRequest.Context.ServerChannel.Send(executeReply);
-
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
-            openRequest.Dispose();
         }
 
         private void SendDisplayData(DisplayData displayData, InflightRequest openRequest)
@@ -130,26 +129,26 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnValueProductionEvent(ValueProducedEventBase eventBase)
+        private void OnValueProduced(ValueProducedEventBase valueProduced)
         {
-            if (!InFlightRequests.TryGetValue(eventBase.GetRootCommand(), out var openRequest))
+            if (!InFlightRequests.TryGetValue(valueProduced.GetRootCommand(), out var openRequest))
             {
                 return;
             }
 
-            var transient = CreateTransient(eventBase.ValueId);
+            var transient = CreateTransient(valueProduced.ValueId);
 
-            var formattedValues = eventBase
+            var formattedValues = valueProduced
                 .FormattedValues
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
-            var value = eventBase.Value;
+            var value = valueProduced.Value;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             DisplayData executeResultData;
 
-            switch (eventBase)
+            switch (valueProduced)
             {
                 case DisplayedValueProduced _:
                     executeResultData = new DisplayData(
@@ -168,7 +167,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         data: formattedValues);
                     break;
                 default:
-                    throw new ArgumentException("Unsupported event type", nameof(eventBase));
+                    throw new ArgumentException("Unsupported event type", nameof(valueProduced));
             }
 
             SendDisplayData(executeResultData, openRequest);
@@ -201,7 +200,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             openRequest.Context.ServerChannel.Send(executeReply);
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
-            openRequest.Dispose();
         }
     }
 }

@@ -180,5 +180,44 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                                    v.MimeType == "text/html" &&
                                    v.Value.ToString().Crunch().Equals(expectedHtml));
         }
+
+        [Fact]
+        public async Task time_produces_time_elapsed_to_run_the_code_submission()
+        {
+            var kernel = new CompositeKernel
+                {
+                    new CSharpKernel().UseKernelHelpers()
+                }
+                .UseDefaultMagicCommands()
+                .LogEventsToPocketLogger();
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(new SubmitCode(
+                                       @"
+%%time
+
+using System.Threading.Tasks;
+await Task.Delay(500);
+display(""done!"");
+"));
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced &&
+                                      e.As<DisplayedValueProduced>().Value is TimeSpan)
+                  .Which
+                  .As<DisplayedValueProduced>()
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(v =>
+                                     v.MimeType == "text/plain" &&
+                                     v.Value.ToString().StartsWith("Wall time:") &&
+                                     v.Value.ToString().EndsWith("ms"));
+
+            events.OfType<DisplayedValueProduced>()
+                  .SelectMany(e => e.FormattedValues)
+                  .Should()
+                  .Contain(v => v.Value.Equals("done!"));
+        }
     }
 }

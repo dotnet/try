@@ -15,7 +15,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public InterruptRequestHandler(IKernel kernel, IScheduler scheduler = null)
             : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
-
         }
        
         protected override void OnKernelEvent(IKernelEvent @event)
@@ -42,7 +41,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                 openRequest.Context.ServerChannel.Send(interruptReply);
                 openRequest.Context.RequestHandlerStatus.SetAsIdle();
-                openRequest.Dispose();
             }
         }
 

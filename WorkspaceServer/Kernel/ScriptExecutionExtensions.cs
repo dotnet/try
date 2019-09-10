@@ -24,7 +24,6 @@ namespace WorkspaceServer.Kernel
                     return (ScriptState<object>) null;
                 }, cancellationToken));
 
-          
             return  completed.Result;
 
         }
