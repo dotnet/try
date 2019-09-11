@@ -8,11 +8,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class InterruptRequestHandlerTests : JupyterRequestHandlerTestBase<InterruptRequest>
     {
+        public InterruptRequestHandlerTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public async Task sends_InterruptReply()
         {

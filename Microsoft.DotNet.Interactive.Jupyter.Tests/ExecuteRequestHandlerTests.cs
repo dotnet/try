@@ -7,11 +7,16 @@ using Clockwise;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class ExecuteRequestHandlerTests : JupyterRequestHandlerTestBase<ExecuteRequest>
     {
+        public ExecuteRequestHandlerTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public async Task sends_ExecuteInput_when_ExecuteRequest_is_handled()
         {

@@ -7,20 +7,30 @@ using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Pocket;
 using Recipes;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public class IsCompleteRequestHandlerTests : JupyterRequestHandlerTestBase<IsCompleteRequest>
     {
+        public IsCompleteRequestHandlerTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         [Fact]
         public async Task sends_isCompleteReply_with_complete_if_the_code_is_a_complete_submission()
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
+
             await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
             await _kernelStatus.Idle();
+
+            Logger.Log.Info("DecodedMessages: {messages}", _serverRecordingSocket.DecodedMessages);
+
             _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
                                                                        message.Contains(MessageTypeValues.IsCompleteReply))
                                   .Should()
