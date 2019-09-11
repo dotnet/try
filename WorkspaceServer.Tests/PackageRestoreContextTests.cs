@@ -33,10 +33,22 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Can_get_path_to_nuget_package()
         {
-            PackageRestoreContext packageRestoreContext = new PackageRestoreContext();
+            var packageRestoreContext = new PackageRestoreContext();
             await packageRestoreContext.AddPackage("fluentAssertions", "5.7.0");
             var path = await packageRestoreContext.GetDirectoryForPackage("fluentassertions");
             path.FullName.Should().EndWith("fluentassertions" + Path.DirectorySeparatorChar + "5.7.0");
+            path.Exists.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Can_get_path_to_nuget_package_when_multiple_packages_are_added()
+        {
+            var packageRestoreContext = new PackageRestoreContext();
+            await packageRestoreContext.AddPackage("fluentAssertions", "5.7.0");
+            await packageRestoreContext.AddPackage("htmlagilitypack", "1.11.12");
+            var path = await packageRestoreContext.GetDirectoryForPackage("htmlagilitypack");
+            path.FullName.Should().EndWith("htmlagilitypack" + Path.DirectorySeparatorChar + "1.11.12");
+            path.Exists.Should().BeTrue();
         }
     }
 }
