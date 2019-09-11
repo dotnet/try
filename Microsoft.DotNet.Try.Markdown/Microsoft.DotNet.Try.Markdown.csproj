@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>Microsoft.DotNet.Try.Markdown</PackageId>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <NoWarn>$(NoWarn);659;660</NoWarn><!-- override for `GetHashCode()` not provided -->
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Markdig isn't strongly signed -->
+     <NuspecFile>Microsoft.DotNet.Try.Markdown.nuspec</NuspecFile>
   </PropertyGroup>
 
   <PropertyGroup>
