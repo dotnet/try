@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
@@ -12,7 +13,6 @@ namespace WorkspaceServer.Packaging
 {
     public partial class PackageRestoreContext
     {
-
         private readonly AsyncLazy<Package> _lazyPackage;
 
         public PackageRestoreContext()
@@ -30,8 +30,9 @@ namespace WorkspaceServer.Packaging
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
             packageBuilder.AddPackageReference("Newtonsoft.Json");
-            var package = (Package) packageBuilder.GetPackage();
+            var package = (Package)packageBuilder.GetPackage();
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
+            AddDirectoryProps(package);
             return package;
         }
 
@@ -65,6 +66,69 @@ namespace WorkspaceServer.Packaging
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             return currentWorkspace.CurrentSolution.Projects.First().MetadataReferences;
+        }
+
+        public async Task<DirectoryInfo> GetDirectoryForPackage(string packageName)
+        {
+            var package = await _lazyPackage.ValueAsync();
+            var nugetPathsFile = package.Directory.GetFiles("*.nuget.paths").Single();
+            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',','\r', '\n').Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
+            var pathsDictionary = nugetPackagePaths
+                                    .Select((v, i) => new { Index = i, Value = v })
+                                    .GroupBy(p => p.Index / 2)
+                                    .ToDictionary(g => g.First().Value, g => g.Last().Value, StringComparer.OrdinalIgnoreCase);
+
+            return new DirectoryInfo(pathsDictionary[packageName.ToLower()]);
+        }
+
+        private void AddDirectoryProps(Package package)
+        {
+            const string generatePathsPropertyTarget =
+@"  <Target Name=""AddGeneratePathsProperty"" BeforeTargets=""CollectPackageReferences"">
+    <!--Show the properties-->
+        <Message Text = ""Starting: Add GeneratePathProperty=true for package %(PackageReference.Identity)"" Importance = ""high"" />
+       
+       <ItemGroup>
+         <PackageReference Condition = ""'%(PackageReference.GeneratePathProperty)' != 'true'"">
+            <GeneratePathProperty>true </GeneratePathProperty>
+          </PackageReference>
+        </ItemGroup>
+
+        <!--Show the changes -->
+        <Message Text = ""Done:  GeneratePathProperty:%(PackageReference.GeneratePathProperty) for package %(PackageReference.Identity)"" Importance = ""high"" />
+    </Target> ";
+
+            const string computePackageRootsTarget =
+@"  <Target Name='ComputePackageRoots' BeforeTargets='CoreCompile;PrintNuGetPackagesPaths' DependsOnTargets='CollectPackageReferences'>
+        <ItemGroup>
+        <!-- Read the package path from the Pkg{PackageName} properties that are present in the nuget.g.props file -->
+            <AddedNuGetPackage Include='@(ResolvedCompileFileDefinitions)'>
+                <PackageRootProperty>Pkg$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NugetPackageId)').Replace('.','_'))</PackageRootProperty>
+                <PackageRoot>$(%(AddedNuGetPackage.PackageRootProperty))</PackageRoot>
+            </AddedNuGetPackage>
+        </ItemGroup>
+
+        <Message Text=""Done: Read package root : %(AddedNuGetPackage.PackageRoot) for %(AddedNuGetPackage.NuGetPackageId)"" Condition=""%(AddedNuGetPackage.PackageRoot) != ''"" Importance=""high""/>
+    </Target>";
+
+            const string writePackageRootsToDiskTarget =
+@"  <Target Name='PrintNuGetPackagesPaths' DependsOnTargets='ResolvePackageAssets;ComputePackageRoots' AfterTargets='PrepareForBuild'>
+        <ItemGroup>
+            <ReferenceLines Remove='@(ReferenceLines)' />
+            <ReferenceLines Include='%(AddedNuGetPackage.NuGetPackageId),%(AddedNuGetPackage.PackageRoot)' Condition=""%(AddedNuGetPackage.PackageRoot) != ''""/>
+        </ItemGroup>
+
+        <WriteLinesToFile Lines='@(ReferenceLines)' File='$(MSBuildProjectFullPath).nuget.paths' Overwrite='True' WriteOnlyWhenDifferent='True' />
+    </Target>";
+
+            string directoryPropsContent =
+$@"<Project>
+{generatePathsPropertyTarget}
+{computePackageRootsTarget}
+{writePackageRootsToDiskTarget}
+</Project>";
+
+            File.WriteAllText(Path.Combine(package.Directory.FullName, "Directory.Build.props"), directoryPropsContent);
         }
     }
 }

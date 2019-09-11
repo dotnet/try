@@ -13,6 +13,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
+using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Kernel
@@ -103,7 +104,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}", context.Command));
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
-                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionFromNuGetPackage(package, result.References.Select(reference => new FileInfo(reference.Display))));
+                        var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
+                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
                     }
                     else
                     {
