@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                                            fileExtension: ".cs",
                                            pygmentsLexer: "c#"
                                        ));
-            var header = new Header(messageType: MessageTypeValues.KernelInfoReply, messageId: Guid.Empty.ToString(),
+            var header = new Header(messageType: JupyterMessageContentTypes.KernelInfoReply, messageId: Guid.Empty.ToString(),
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
             var replyMessage = new Message(header, content: kernelInfoReply);
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
                 });
 
-            var header = new Header(messageType: MessageTypeValues.ExecuteResult, messageId: Guid.Empty.ToString(),
+            var header = new Header(messageType: JupyterMessageContentTypes.ExecuteResult, messageId: Guid.Empty.ToString(),
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 transient: transient);
 
 
-            var header = new Header(messageType: MessageTypeValues.DisplayData, messageId: Guid.Empty.ToString(),
+            var header = new Header(messageType: JupyterMessageContentTypes.DisplayData, messageId: Guid.Empty.ToString(),
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
             var replyMessage = new Message(header, content: displayData);
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             var completeReply = new CompleteReply(0, 0, matches: new List<string> { "Write", "WriteLine" });
 
-            var header = new Header(messageType: MessageTypeValues.CompleteReply, messageId: Guid.Empty.ToString(),
+            var header = new Header(messageType: JupyterMessageContentTypes.CompleteReply, messageId: Guid.Empty.ToString(),
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 transient: transient
             );
 
-            var header = new Header(messageType: MessageTypeValues.UpdateDisplayData, messageId: Guid.Empty.ToString(),
+            var header = new Header(messageType: JupyterMessageContentTypes.UpdateDisplayData, messageId: Guid.Empty.ToString(),
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 

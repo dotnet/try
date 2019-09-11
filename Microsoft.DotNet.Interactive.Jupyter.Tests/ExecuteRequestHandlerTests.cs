@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteInput));
+                    message.Contains(JupyterMessageContentTypes.ExecuteInput));
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteReply));
+                    message.Contains(JupyterMessageContentTypes.ExecuteReply));
         }
 
         [Fact]
@@ -91,13 +91,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should()
-                .Contain(message => message.Contains(MessageTypeValues.ExecuteReply))
+                .Contain(message => message.Contains(JupyterMessageContentTypes.ExecuteReply))
                 .And
                 .Contain(message => message.Contains($"\"status\":\"{StatusValues.Error}\""));
 
             _ioRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.Stream));
+                    message.Contains(JupyterMessageContentTypes.Stream));
         }
 
         [Fact]
@@ -111,11 +111,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteReply));
+                    message.Contains(JupyterMessageContentTypes.ExecuteReply));
 
             _ioRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.DisplayData));
+                    message.Contains(JupyterMessageContentTypes.DisplayData));
         }
 
         [Fact]
@@ -129,11 +129,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteReply));
+                    message.Contains(JupyterMessageContentTypes.ExecuteReply));
 
             _ioRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteResult));
+                    message.Contains(JupyterMessageContentTypes.ExecuteResult));
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteReply));
+                    message.Contains(JupyterMessageContentTypes.ExecuteReply));
         }
     }
 }

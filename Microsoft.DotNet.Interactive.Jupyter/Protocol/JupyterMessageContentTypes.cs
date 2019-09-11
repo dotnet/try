@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    public class MessageTypeValues
+    public class JupyterMessageContentTypes
     {
         public const string ExecuteRequest = "execute_request";
 

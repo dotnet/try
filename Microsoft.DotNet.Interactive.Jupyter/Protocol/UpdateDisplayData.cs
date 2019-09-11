@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.UpdateDisplayData)]
+    [JupyterMessageType(JupyterMessageContentTypes.UpdateDisplayData)]
     public class UpdateDisplayData : DisplayData
     {
         public UpdateDisplayData(string source = null, IReadOnlyDictionary<string, object> data = null, IReadOnlyDictionary<string, object> metaData = null, IReadOnlyDictionary<string, object> transient = null) : base(source, data, metaData, transient)

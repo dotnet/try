@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _serverRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.CompleteReply));
+                    message.Contains(JupyterMessageContentTypes.CompleteReply));
         }
     }
 }

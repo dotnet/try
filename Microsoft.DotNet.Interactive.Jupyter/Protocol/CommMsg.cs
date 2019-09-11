@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.CommMsg)]
+    [JupyterMessageType(JupyterMessageContentTypes.CommMsg)]
     public class CommMsg : JupyterMessageContent
     {
         [JsonProperty("comm_id")]

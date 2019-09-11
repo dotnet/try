@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.Stream)]
+    [JupyterMessageType(JupyterMessageContentTypes.Stream)]
     public class StdOutStream : Stream
     {
         public StdOutStream(string text) : base("stdout", text)

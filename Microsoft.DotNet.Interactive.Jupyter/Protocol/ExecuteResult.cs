@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.ExecuteResult)]
+    [JupyterMessageType(JupyterMessageContentTypes.ExecuteResult)]
     public class ExecuteResult : DisplayData
     {
         public ExecuteResult(int executionCount, string source = null, IReadOnlyDictionary<string, object> data = null, IReadOnlyDictionary<string, object> metaData = null, IReadOnlyDictionary<string, object> transient = null) : base(source, data, metaData, transient)

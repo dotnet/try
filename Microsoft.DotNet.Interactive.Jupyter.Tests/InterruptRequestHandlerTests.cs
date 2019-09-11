@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
 
             _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                    message.Contains(MessageTypeValues.InterruptReply))
+                    message.Contains(JupyterMessageContentTypes.InterruptReply))
                 .Should()
                 .NotBeNullOrWhiteSpace();
         }

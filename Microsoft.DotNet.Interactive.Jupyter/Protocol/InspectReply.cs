@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.InspectReply)]
+    [JupyterMessageType(JupyterMessageContentTypes.InspectReply)]
     public class InspectReply : JupyterMessageContent
     {
         public static InspectReply Ok(string source, IReadOnlyDictionary<string, object> data, IReadOnlyDictionary<string, object> metaData) => new InspectReply(source, StatusValues.Ok, data, metaData);

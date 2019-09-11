@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JsonConverter(typeof(HistoryReplyConverter))]
-    [JupyterMessageType(MessageTypeValues.HistoryReply)]
+    [JupyterMessageType(JupyterMessageContentTypes.HistoryReply)]
     public class HistoryReply : JupyterMessageContent
     {
         [JsonProperty("history")]

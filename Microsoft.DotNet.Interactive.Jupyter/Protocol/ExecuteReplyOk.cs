@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.ExecuteReply)]
+    [JupyterMessageType(JupyterMessageContentTypes.ExecuteReply)]
     public class ExecuteReplyOk : ExecuteReply
     {
         public ExecuteReplyOk(IReadOnlyList<IReadOnlyDictionary<string, string>> payload = null, IReadOnlyDictionary<string, string> userExpressions = null , int executionCount = 0): base(status: StatusValues.Ok, executionCount: executionCount)

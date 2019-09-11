@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.Stream)]
+    [JupyterMessageType(JupyterMessageContentTypes.Stream)]
     public class StdErrStream : Stream
     {
         public StdErrStream(string text) : base("stderr", text)
