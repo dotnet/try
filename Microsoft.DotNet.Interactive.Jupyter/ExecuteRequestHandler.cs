@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Context.IoPubChannel.Send(error);
 
                 // send on stderr
-                var stdErr = new StdErrStream(errorContent.EValue);
+                var stdErr = Stream.StdErr(errorContent.EValue);
                 var stream = Message.Create(
                     stdErr,
                     openRequest.Context.Request.Header);

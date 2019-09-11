@@ -51,9 +51,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             Date = date;
         }
 
-        public static Header Create(Type messageType, string session)
+        public static Header Create(JupyterMessageContent messageContent, string session)
         {
-            return Create(JupyterMessageContent.GetMessageType(messageType), session);
+            return Create(messageContent.MessageType, session);
         }
 
         public static Header Create(string messageType, string session)

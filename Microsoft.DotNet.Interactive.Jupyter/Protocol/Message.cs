@@ -54,10 +54,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(content));
             }
 
-            var messageType = JupyterMessageContent.GetMessageType(content);
             var session = parentHeader?.Session ?? Guid.NewGuid().ToString();
 
-            var message = new Message(Header.Create(messageType, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
+            var message = new Message(Header.Create(content, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
 
 
             return message;

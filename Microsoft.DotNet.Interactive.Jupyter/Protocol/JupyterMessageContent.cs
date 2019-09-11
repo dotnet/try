@@ -13,23 +13,33 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
     public abstract class JupyterMessageContent
     {
         private static readonly IReadOnlyDictionary<string, Type> _messageTypeToClrType;
+        private static readonly IReadOnlyDictionary<Type, string> _clrTypeToMessageType;
+
+        private string _messageType;
+
         static JupyterMessageContent()
         {
             var messageImplementations = typeof(JupyterMessageContent).Assembly.GetExportedTypes().Where(t =>
                 t.IsAbstract == false && typeof(JupyterMessageContent).IsAssignableFrom(t)).ToList();
 
             var messageTypeToClrType = new Dictionary<string, Type>();
+            var clrTypeToMessageType = new Dictionary<Type, string>();
             foreach (var messageImplementation in messageImplementations)
             {
-                var messageType = messageImplementation.GetCustomAttribute<JupyterMessageTypeAttribute>();
+                var messageType = messageImplementation.GetCustomAttribute<JupyterMessageTypeAttribute>(true);
                 if (messageType != null)
                 {
                     messageTypeToClrType[messageType.Type] = messageImplementation;
+                    clrTypeToMessageType[messageImplementation] = messageType.Type;
                 }
             }
 
             _messageTypeToClrType = messageTypeToClrType;
+            _clrTypeToMessageType = clrTypeToMessageType;
         }
+
+        [JsonIgnore]
+        public string MessageType => _messageType ?? (_messageType  = _clrTypeToMessageType[GetType()]);
 
         public static JupyterMessageContent FromJsonString(string jsonString, string messageType)
         {

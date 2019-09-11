@@ -6,14 +6,15 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    public abstract class Stream : JupyterMessageContent
+    [JupyterMessageType(JupyterMessageContentTypes.Stream)]
+    public class Stream : JupyterMessageContent
     {
         [JsonProperty("name")]
         public string Name { get; }
         [JsonProperty("text")]
         public string Text { get; }
 
-        protected Stream(string name, string text)
+        public Stream(string name, string text)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -21,6 +22,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             }
             Name = name;
             Text = text;
+        }
+
+        public static Stream StdErr(string text)
+        {
+            return new Stream("stderr", text);
+        }
+
+        public static Stream StdOut(string text)
+        {
+            return new Stream("stdout", text);
         }
     }
 }
