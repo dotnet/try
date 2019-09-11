@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     openRequest.Context.Request);
 
                 openRequest.Context.ServerChannel.Send(interruptReply);
-                openRequest.Context.RequestHandlerStatus.SetAsIdle();
+                openRequest.Context.KernelStatus.SetAsIdle();
             }
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var interruptRequest = GetJupyterRequest(context);
 
-            context.RequestHandlerStatus.SetAsBusy();
+            context.KernelStatus.SetAsBusy();
 
             var command = new CancelCurrentCommand();
 

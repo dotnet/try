@@ -58,7 +58,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         public static Header Create(string messageType, string session)
         {
-            var newHeader = new Header(messageType: messageType, messageId: Guid.NewGuid().ToString(), version: "5.3", username: Constants.USERNAME, session: session, date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+            var newHeader = new Header(
+                messageType: messageType, 
+                messageId: Guid.NewGuid().ToString(), 
+                version: Constants.VERSION, 
+                username: Constants.USERNAME, 
+                session: session, 
+                date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
             return newHeader;
         }

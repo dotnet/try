@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         public const string USERNAME = "dotnet_kernel";
 
-        public const string VERSION = "5.0";
+        public const string VERSION = "5.3";
 
         public const string DELIMITER = "<IDS|MSG>";
     }

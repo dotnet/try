@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -27,7 +28,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var executeRequest = GetJupyterRequest(context);
 
-            context.RequestHandlerStatus.SetAsBusy();
+            context.KernelStatus.SetAsBusy();
             var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, executionCount);
@@ -114,7 +115,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Context.Request);
 
             openRequest.Context.ServerChannel.Send(executeReply);
-            openRequest.Context.RequestHandlerStatus.SetAsIdle();
+            openRequest.Context.KernelStatus.SetAsIdle();
         }
 
         private void SendDisplayData(DisplayData displayData, InflightRequest openRequest)
@@ -199,7 +200,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Context.Request);
 
             openRequest.Context.ServerChannel.Send(executeReply);
-            openRequest.Context.RequestHandlerStatus.SetAsIdle();
+            openRequest.Context.KernelStatus.SetAsIdle();
         }
     }
 }

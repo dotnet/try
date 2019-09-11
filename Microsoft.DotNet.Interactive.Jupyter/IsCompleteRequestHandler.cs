@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     openRequest.Context.Request);
 
                 openRequest.Context.ServerChannel.Send(executeReply);
-                openRequest.Context.RequestHandlerStatus.SetAsIdle();
+                openRequest.Context.KernelStatus.SetAsIdle();
             }
         }
     }

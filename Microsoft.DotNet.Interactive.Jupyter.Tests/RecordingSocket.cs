@@ -7,7 +7,7 @@ using NetMQ;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
-    internal class RecordingSocket : IOutgoingSocket
+    public class RecordingSocket : IOutgoingSocket
     {
         public List<string> DecodedMessages { get; } = new List<string>();
 

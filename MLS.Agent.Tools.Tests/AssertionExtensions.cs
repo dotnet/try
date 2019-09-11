@@ -1,13 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
+using System.Diagnostics;
 using System.Linq;
+using FluentAssertions;
 using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 
-namespace WorkspaceServer.Tests
+namespace MLS.Agent.Tools.Tests
 {
+    [DebuggerStepThrough]
     public static class AssertionExtensions
     {
         public static AndConstraint<GenericCollectionAssertions<T>> BeEquivalentSequenceTo<T>(
