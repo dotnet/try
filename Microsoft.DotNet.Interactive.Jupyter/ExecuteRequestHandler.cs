@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Context.RequestHandlerStatus.SetAsIdle();
         }
 
-        private void SendDisplayData(DisplayData displayData, InflightRequest openRequest)
+        private void SendDisplayData(JupyterMessageContent displayData, InflightRequest openRequest)
         {
             if (!openRequest.Request.Silent)
             {
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            DisplayData executeResultData;
+            JupyterMessageContent executeResultData;
 
             switch (valueProduced)
             {

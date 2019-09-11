@@ -47,7 +47,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             Signature = signature ?? string.Empty;
         }
 
-        public static Message Create(JupyterMessageContent content, Header parentHeader, IReadOnlyList<IReadOnlyList<byte>> identifiers = null, string signature = null)
+        public static Message Create<T>(
+            T content,
+            Header parentHeader,
+            IReadOnlyList<IReadOnlyList<byte>> identifiers = null,
+            string signature = null)
+            where T : JupyterMessageContent
         {
             if (content == null)
             {
@@ -62,8 +67,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             return message;
         }
 
-        public static Message CreateResponse(JupyterMessageContent content,
+        public static Message CreateResponse<T>(
+            T content,
             Message request)
+            where T : JupyterMessageContent
         {
             if (content == null)
             {
