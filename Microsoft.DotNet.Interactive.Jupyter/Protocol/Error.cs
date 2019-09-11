@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.Error)]
+    [JupyterMessageType(JupyterMessageContentTypes.Error)]
     public class Error : JupyterMessageContent
     {
         [JsonProperty("ename")]

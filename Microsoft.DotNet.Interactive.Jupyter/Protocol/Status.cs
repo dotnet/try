@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.Status)]
+    [JupyterMessageType(JupyterMessageContentTypes.Status)]
     public class Status : JupyterMessageContent
     {
         [JsonProperty("execution_state")]

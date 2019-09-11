@@ -6,15 +6,31 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    [JupyterMessageType(MessageTypeValues.ExecuteResult)]
-    public class ExecuteResult : DisplayData
+    [JupyterMessageType(JupyterMessageContentTypes.ExecuteResult)]
+    public class ExecuteResult : JupyterMessageContent
     {
-        public ExecuteResult(int executionCount, string source = null, IReadOnlyDictionary<string, object> data = null, IReadOnlyDictionary<string, object> metaData = null, IReadOnlyDictionary<string, object> transient = null) : base(source, data, metaData, transient)
-        {
-            ExecutionCount = executionCount;
-        }
+        [JsonProperty("source", NullValueHandling = NullValueHandling.Ignore)]
+        public string Source { get; }
+
+        [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
+        public IReadOnlyDictionary<string, object> Data { get; }
+
+        [JsonProperty("metadata", NullValueHandling = NullValueHandling.Ignore)]
+        public IReadOnlyDictionary<string, object> MetaData { get; }
+
+        [JsonProperty("transient", NullValueHandling = NullValueHandling.Ignore)]
+        public IReadOnlyDictionary<string, object> Transient { get; }
 
         [JsonProperty("execution_count", NullValueHandling = NullValueHandling.Ignore)]
         public int ExecutionCount { get; }
+
+        public ExecuteResult(int executionCount, string source = null, IReadOnlyDictionary<string, object> data = null, IReadOnlyDictionary<string, object> metaData = null, IReadOnlyDictionary<string, object> transient = null)
+        {
+            Source = source;
+            Data = data ?? new Dictionary<string, object>();
+            Transient = transient ?? new Dictionary<string, object>();
+            MetaData = metaData ?? new Dictionary<string, object>();
+            ExecutionCount = executionCount;
+        }
     }
 }

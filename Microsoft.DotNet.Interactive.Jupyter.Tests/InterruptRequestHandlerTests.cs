@@ -23,13 +23,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new InterruptRequest(), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                                   .SingleOrDefault(message =>
-                                                       message.Contains(MessageTypeValues.InterruptReply))
+                                                       message.Contains(JupyterMessageContentTypes.InterruptReply))
                                   .Should()
                                   .NotBeNullOrWhiteSpace();
         }

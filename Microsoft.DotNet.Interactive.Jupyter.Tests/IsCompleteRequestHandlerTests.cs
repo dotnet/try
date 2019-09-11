@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Clockwise;
 using FluentAssertions;
 using System.Linq;
@@ -26,17 +25,17 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
 
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
-            await _kernelStatus.Idle();
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
+            await KernelStatus.Idle();
 
-            Logger.Log.Info("DecodedMessages: {messages}", _serverRecordingSocket.DecodedMessages);
+            Logger.Log.Info("DecodedMessages: {messages}", ServerRecordingSocket.DecodedMessages);
 
-            _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(MessageTypeValues.IsCompleteReply))
+            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
+                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
                                   .Should()
                                   .NotBeNullOrWhiteSpace();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                                   .SingleOrDefault(m => m == new IsCompleteReply(string.Empty, "complete").ToJson())
                                   .Should()
                                   .NotBeNullOrWhiteSpace();
@@ -47,14 +46,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
-            await _kernelStatus.Idle();
-            _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(MessageTypeValues.IsCompleteReply))
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
+            await KernelStatus.Idle();
+            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
+                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
                                   .Should()
                                   .NotBeNullOrWhiteSpace();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                                   .SingleOrDefault(m => m == new IsCompleteReply("*", "incomplete").ToJson())
                                   .Should()
                                   .NotBeNullOrWhiteSpace();

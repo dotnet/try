@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public  static class NetMQExtensions
+    internal static class NetMQExtensions
     {
         private static T DeserializeFromJsonString<T>(string source)
         {

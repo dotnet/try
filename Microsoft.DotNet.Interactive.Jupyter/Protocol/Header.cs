@@ -9,19 +9,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
     public class Header
     {
         [JsonProperty("msg_id")]
-        public string MessageId { get;  }
+        public string MessageId { get; }
 
         [JsonProperty("username")]
         public string Username { get; }
 
         [JsonProperty("session")]
-        public string Session { get;  }
+        public string Session { get; }
 
         [JsonProperty("date")]
-        public string Date { get;  }
+        public string Date { get; }
 
         [JsonProperty("msg_type")]
-        public string MessageType { get;  }
+        public string MessageType { get; }
 
         [JsonProperty("version")]
         public string Version { get; }
@@ -51,19 +51,31 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             Date = date;
         }
 
-        public static Header Create(Type messageType, string session)
+        public static Header Create<T>(T messageContent, string session)
+            where T : JupyterMessageContent
         {
-            return Create(JupyterMessageContent.GetMessageType(messageType), session);
+            if (messageContent == null)
+            {
+                throw new ArgumentNullException(nameof(messageContent));
+            }
+            return Create(messageContent.MessageType, session);
         }
 
-        public static Header Create(string messageType, string session)
+        public static Header Create<T>(string session)
+            where T : JupyterMessageContent
+        {
+            var messageType = JupyterMessageContent.GetMessageType(typeof(T));
+            return Create(messageType, session);
+        }
+
+        private static Header Create(string messageType, string session)
         {
             var newHeader = new Header(
-                messageType: messageType, 
-                messageId: Guid.NewGuid().ToString(), 
-                version: Constants.VERSION, 
-                username: Constants.USERNAME, 
-                session: session, 
+                messageType: messageType,
+                messageId: Guid.NewGuid().ToString(),
+                version: Constants.VERSION,
+                username: Constants.USERNAME,
+                session: session,
                 date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
             return newHeader;

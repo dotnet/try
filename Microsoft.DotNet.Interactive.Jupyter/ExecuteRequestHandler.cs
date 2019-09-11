@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 openRequest.Context.IoPubChannel.Send(error);
 
                 // send on stderr
-                var stdErr = new StdErrStream(errorContent.EValue);
+                var stdErr = Stream.StdErr(errorContent.EValue);
                 var stream = Message.Create(
                     stdErr,
                     openRequest.Context.Request.Header);
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             openRequest.Context.KernelStatus.SetAsIdle();
         }
 
-        private void SendDisplayData(DisplayData displayData, InflightRequest openRequest)
+        private void SendDisplayData(JupyterMessageContent displayData, InflightRequest openRequest)
         {
             if (!openRequest.Request.Silent)
             {
@@ -147,7 +147,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            DisplayData executeResultData;
+            JupyterMessageContent executeResultData;
 
             switch (valueProduced)
             {

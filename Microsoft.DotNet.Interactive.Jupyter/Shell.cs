@@ -84,13 +84,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     switch (message.Header.MessageType)
                     {
-                        case MessageTypeValues.KernelInfoRequest:
+                        case JupyterMessageContentTypes.KernelInfoRequest:
                             status.SetAsBusy();
                             HandleKernelInfoRequest(message);
                             status.SetAsIdle();
                             break;
 
-                        case MessageTypeValues.KernelShutdownRequest:
+                        case JupyterMessageContentTypes.KernelShutdownRequest:
                             status.SetAsBusy();
                             status.SetAsIdle();
                             break;

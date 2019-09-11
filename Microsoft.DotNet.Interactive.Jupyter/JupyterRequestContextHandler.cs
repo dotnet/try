@@ -35,18 +35,18 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public async Task<ICommandDeliveryResult> Handle(
             ICommandDelivery<JupyterRequestContext> delivery)
         {
-            switch (delivery.Command.Request.Header.MessageType)
+            switch (delivery.Command.Request.Content)
             {
-                case MessageTypeValues.ExecuteRequest:
+                case ExecuteRequest _:
                     await _executeHandler.Handle(delivery.Command);
                     break;
-                case MessageTypeValues.CompleteRequest:
+                case CompleteRequest _:
                     await _completeHandler.Handle(delivery.Command);
                     break;
-                case MessageTypeValues.InterruptRequest:
+                case InterruptRequest _:
                     await _interruptHandler.Handle(delivery.Command);
                     break;
-                case MessageTypeValues.IsCompleteRequest:
+                case IsCompleteRequest _:
                     await _isCompleteHandler.Handle(delivery.Command);
                     break;
                 default:
