@@ -17,15 +17,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Request?.Content as T;
         }
 
-        public IRequestHandlerStatus RequestHandlerStatus { get; }
+        public IKernelStatus KernelStatus { get; }
 
         public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request,
-            IRequestHandlerStatus requestHandlerStatus)
+            IKernelStatus kernelStatus)
         {
             ServerChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
             IoPubChannel = ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
             Request = request ?? throw new ArgumentNullException(nameof(request));
-            RequestHandlerStatus = requestHandlerStatus;
+            KernelStatus = kernelStatus;
         }
     }
 }

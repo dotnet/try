@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var completeRequest = GetJupyterRequest(context);
 
-            context.RequestHandlerStatus.SetAsBusy();
+            context.KernelStatus.SetAsBusy();
 
             var command = new RequestCompletion(completeRequest.Code, completeRequest.CursorPosition);
 
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             var completeReply = Message.CreateResponse(reply, openRequest.Context.Request);
             openRequest.Context.ServerChannel.Send(completeReply);
-            openRequest.Context.RequestHandlerStatus.SetAsIdle();
+            openRequest.Context.KernelStatus.SetAsIdle();
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

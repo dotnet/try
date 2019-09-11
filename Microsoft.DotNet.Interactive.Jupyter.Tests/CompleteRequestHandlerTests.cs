@@ -3,52 +3,33 @@
 
 using System;
 using System.Threading.Tasks;
+using Clockwise;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using WorkspaceServer.Kernel;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
-    public class CompleteRequestHandlerTests 
+    public class CompleteRequestHandlerTests : JupyterRequestHandlerTestBase<CompleteRequest>
     {
-        private readonly MessageSender _ioPubChannel;
-        private readonly MessageSender _serverChannel;
-        private readonly RecordingSocket _serverRecordingSocket;
-        private readonly RecordingSocket _ioRecordingSocket;
-        private readonly KernelStatus _kernelStatus;
-
-        public CompleteRequestHandlerTests()
+        public CompleteRequestHandlerTests(ITestOutputHelper output) : base(output)
         {
-            var signatureValidator = new SignatureValidator("key", "HMACSHA256");
-            _serverRecordingSocket = new RecordingSocket();
-            _serverChannel = new MessageSender(_serverRecordingSocket, signatureValidator);
-            _ioRecordingSocket = new RecordingSocket();
-            _ioPubChannel = new MessageSender(_ioRecordingSocket, signatureValidator);
-            _kernelStatus = new KernelStatus();
-        }
-
-        [Fact]
-        public void cannot_handle_requests_that_are_not_CompleteRequest()
-        {
-            var kernel = new CSharpKernel();
-            var handler = new CompleteRequestHandler(kernel);
-            var request = Message.Create(new DisplayData(), null);
-            Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
-            messageHandling.Should().ThrowExactly<InvalidOperationException>();
         }
 
         [Fact]
         public async Task send_completeReply_on_CompleteRequest()
         {
-            var kernel = new CSharpKernel();
-            var handler = new CompleteRequestHandler(kernel);
-            var request = Message.Create(new CompleteRequest("System.Console.", 15 ), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            var scheduler = CreateScheduler();
+            var request = Message.Create(new CompleteRequest("System.Console.", 15), null);
+            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            await _kernelStatus.Idle();
 
             _serverRecordingSocket.DecodedMessages
-                .Should().Contain(message =>
-                    message.Contains(JupyterMessageContentTypes.CompleteReply));
+                                  .Should()
+                                  .Contain(message =>
+                                               message.Contains(MessageTypeValues.CompleteReply));
         }
     }
 }

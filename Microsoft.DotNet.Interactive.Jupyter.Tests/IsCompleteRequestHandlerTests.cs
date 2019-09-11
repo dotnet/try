@@ -2,91 +2,62 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Clockwise;
+using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Pocket;
 using Recipes;
-using WorkspaceServer.Kernel;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
-    public class IsCompleteRequestHandlerTests
+    public class IsCompleteRequestHandlerTests : JupyterRequestHandlerTestBase<IsCompleteRequest>
     {
-        private readonly MessageSender _ioPubChannel;
-        private readonly MessageSender _serverChannel;
-        private readonly RecordingSocket _serverRecordingSocket;
-        private readonly RecordingSocket _ioRecordingSocket;
-        private readonly KernelStatus _kernelStatus;
-
-        public IsCompleteRequestHandlerTests()
+        public IsCompleteRequestHandlerTests(ITestOutputHelper output) : base(output)
         {
-            var signatureValidator = new SignatureValidator("key", "HMACSHA256");
-            _serverRecordingSocket = new RecordingSocket();
-            _serverChannel = new MessageSender(_serverRecordingSocket, signatureValidator);
-            _ioRecordingSocket = new RecordingSocket();
-            _ioPubChannel = new MessageSender(_ioRecordingSocket, signatureValidator);
-            _kernelStatus = new KernelStatus();
-        }
-
-        [Fact]
-        public void cannot_handle_requests_that_are_not_ExecuteRequest()
-        {
-            var kernel = new CSharpKernel();
-            var handler = new IsCompleteRequestHandler(kernel);
-            var request = Message.Create(new DisplayData(), null);
-            Func<Task> messageHandling = () => handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
-            messageHandling.Should().ThrowExactly<InvalidOperationException>();
-        }
-
-        [Fact]
-        public async Task handles_isCompleteRequest()
-        {
-            var kernel = new CSharpKernel();
-            var handler = new IsCompleteRequestHandler(kernel);
-            var request = Message.Create(new IsCompleteRequest("var a =12;"), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
         }
 
         [Fact]
         public async Task sends_isCompleteReply_with_complete_if_the_code_is_a_complete_submission()
         {
-            var kernel = new CSharpKernel();
-            var handler = new IsCompleteRequestHandler(kernel);
+            var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+
+            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await _kernelStatus.Idle();
+
+            Logger.Log.Info("DecodedMessages: {messages}", _serverRecordingSocket.DecodedMessages);
 
             _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                message.Contains(JupyterMessageContentTypes.IsCompleteReply))
-                .Should()
-                .NotBeNullOrWhiteSpace();
+                                                                       message.Contains(MessageTypeValues.IsCompleteReply))
+                                  .Should()
+                                  .NotBeNullOrWhiteSpace();
 
             _serverRecordingSocket.DecodedMessages
-                .SingleOrDefault(m => m == new IsCompleteReply(string.Empty, "complete").ToJson())
-                .Should()
-                .NotBeNullOrWhiteSpace();
-
+                                  .SingleOrDefault(m => m == new IsCompleteReply(string.Empty, "complete").ToJson())
+                                  .Should()
+                                  .NotBeNullOrWhiteSpace();
         }
 
         [Fact]
         public async Task sends_isCompleteReply_with_incomplete_and_indent_if_the_code_is_not_a_complete_submission()
         {
-            var kernel = new CSharpKernel();
-            var handler = new IsCompleteRequestHandler(kernel);
+            var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
-            await handler.Handle(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
-
+            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await _kernelStatus.Idle();
             _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                    message.Contains(JupyterMessageContentTypes.IsCompleteReply))
-                .Should()
-                .NotBeNullOrWhiteSpace();
+                                                                       message.Contains(MessageTypeValues.IsCompleteReply))
+                                  .Should()
+                                  .NotBeNullOrWhiteSpace();
 
             _serverRecordingSocket.DecodedMessages
-                .SingleOrDefault(m => m == new IsCompleteReply("*", "incomplete").ToJson())
-                .Should()
-                .NotBeNullOrWhiteSpace();
-
+                                  .SingleOrDefault(m => m == new IsCompleteReply("*", "incomplete").ToJson())
+                                  .Should()
+                                  .NotBeNullOrWhiteSpace();
         }
     }
 }

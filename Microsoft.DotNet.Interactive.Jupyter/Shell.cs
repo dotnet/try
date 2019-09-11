@@ -80,8 +80,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     activity.Info("Received: {message}", message.ToJson());
 
-                    var status = new RequestHandlerStatus(message.Header, new MessageSender(_ioPubSocket, _signatureValidator));
-
+                    var status = new KernelStatus(message.Header, new MessageSender(_ioPubSocket, _signatureValidator));
 
                     switch (message.Header.MessageType)
                     {
@@ -101,7 +100,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                 _shellSender,
                                 _ioPubSender,
                                 message,
-                                new RequestHandlerStatus(message.Header, _shellSender));
+                                new KernelStatus(message.Header, _shellSender));
 
                             await _scheduler.Schedule(context);
 
