@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using System.IO;
 using System.Threading.Tasks;
 using WorkspaceServer.Packaging;
 using Xunit;
@@ -27,6 +28,15 @@ namespace WorkspaceServer.Tests
             var result = await new PackageRestoreContext().AddPackage("not-a-real-package-definitely-not", "5.7.0");
             result.Succeeded.Should().BeFalse();
             result.DetailedErrors.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public async Task Can_get_path_to_nuget_package()
+        {
+            PackageRestoreContext packageRestoreContext = new PackageRestoreContext();
+            await packageRestoreContext.AddPackage("fluentAssertions", "5.7.0");
+            var path = await packageRestoreContext.GetDirectoryForPackage("fluentassertions");
+            path.FullName.Should().EndWith("fluentassertions" + Path.DirectorySeparatorChar + "5.7.0");
         }
     }
 }

@@ -83,37 +83,34 @@ namespace Microsoft.DotNet.Interactive
                                 context,
                                 next),
 
-                            LoadExtensionFromNuGetPackage loadCSharpExtension =>
-                            HandleLoadExtensionFromNuGetPackage(
-                                loadCSharpExtension,
-                                context, 
+                            LoadExtensionsInDirectory loadExtensionsInDirectory =>
+                            HandleLoadExtensionsInDirectory(
+                                loadExtensionsInDirectory,
+                                context,
                                 next),
 
                             _ => next(command, context)
                         });
         }
 
-        private async Task HandleLoadExtensionFromNuGetPackage(
-            LoadExtensionFromNuGetPackage loadExtensionFromNuGetPackage,
+        private async Task HandleLoadExtensionsInDirectory(
+            LoadExtensionsInDirectory loadExtensionsInDirectory,
             KernelInvocationContext invocationContext,
             KernelPipelineContinuation next)
         {
-            loadExtensionFromNuGetPackage.Handler = async context =>
+            loadExtensionsInDirectory.Handler = async context =>
             {
                 if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
-                    if (NuGetPackagePathResolver.TryGetNuGetPackageBasePath(loadExtensionFromNuGetPackage.NugetPackageReference, loadExtensionFromNuGetPackage.MetadataReferences, out var nugetPackageDirectory))
-                    {
-                        await extensibleKernel.LoadExtensionsInDirectory(nugetPackageDirectory, context);
-                    }
+                    await extensibleKernel.LoadExtensionsInDirectory(loadExtensionsInDirectory.Directory, context);
                 }
                 else
                 {
-                    context.Publish(new CommandFailed($"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", loadExtensionFromNuGetPackage));
+                    context.Publish(new CommandFailed($"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", loadExtensionsInDirectory));
                 }
             };
 
-            await next(loadExtensionFromNuGetPackage, invocationContext);
+            await next(loadExtensionsInDirectory, invocationContext);
         }
 
         private async Task HandleLoadExtension(
@@ -307,7 +304,7 @@ namespace Microsoft.DotNet.Interactive
             await command.InvokeAsync(context);
         }
 
-        private readonly ConcurrentQueue<KernelOperation> _commandQueue = 
+        private readonly ConcurrentQueue<KernelOperation> _commandQueue =
             new ConcurrentQueue<KernelOperation>();
 
         public Task<IKernelCommandResult> SendAsync(

@@ -555,7 +555,7 @@ catch (Exception e)
         }
 
         [Fact]
-        public async Task Should_load_extension_in_nuget_package()
+        public async Task Should_load_extension_in_directory()
         {
             var directory = Create.EmptyWorkspace().Directory;
 
@@ -563,8 +563,6 @@ catch (Exception e)
             var nugetPackageDirectory = new InMemoryDirectoryAccessor(
                     directory.Subdirectory($"{nugetPackageName}/2.0.0"))
                 .CreateFiles();
-
-            var nugetPackageDll = nugetPackageDirectory.GetFullyQualifiedFilePath($"lib/netstandard2.0/{nugetPackageName}.dll");
 
             var extensionsDir =
                 (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
@@ -575,13 +573,8 @@ catch (Exception e)
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(
-                new LoadExtensionFromNuGetPackage(
-                    new NugetPackageReference(nugetPackageName),
-                    new List<FileInfo>
-                    {
-                        nugetPackageDll
-                    }));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+                    
 
             KernelEvents.Should()
                         .ContainSingle(e => e.Value is ExtensionLoaded &&
