@@ -21,8 +21,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public KernelStatusTests()
         {
             _kernelStatus = new KernelStatus(
-                Header.Create(
-                    typeof(ExecuteRequest), "test"),
+                Header.Create<ExecuteRequest>("test"),
                 new MessageSender(_recordingSocket, new SignatureValidator("key", "HMACSHA256")
                 ));
         }
@@ -62,7 +61,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 .DecodedMessages
                 .Where(m => m.StartsWith("{"))
                 .Select(JObject.Parse)
-                .SelectMany(jobj => jobj.Properties()
+                .SelectMany(jObj => jObj.Properties()
                                         .Where(p => p.Name == "execution_state")
                                         .Select(p => p.Value.Value<string>()))
                 .Should()

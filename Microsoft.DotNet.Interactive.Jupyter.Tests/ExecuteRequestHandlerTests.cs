@@ -22,15 +22,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                                   .Should().Contain(message =>
-                    message.Contains(MessageTypeValues.ExecuteInput));
+                    message.Contains(JupyterMessageContentTypes.ExecuteInput));
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains("var a =12;"));
         }
@@ -40,11 +40,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.ExecuteReply));
         }
@@ -54,17 +54,17 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("asdes"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                 .Should()
                 .Contain(message => message.Contains(JupyterMessageContentTypes.ExecuteReply))
                 .And
                 .Contain(message => message.Contains($"\"status\":\"{StatusValues.Error}\""));
 
-            _ioRecordingSocket.DecodedMessages
+            IoRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.Stream));
         }
@@ -74,15 +74,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.ExecuteReply));
 
-            _ioRecordingSocket.DecodedMessages
+            IoRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.DisplayData));
         }
@@ -92,15 +92,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("2+2"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.ExecuteReply));
 
-            _ioRecordingSocket.DecodedMessages
+            IoRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.ExecuteResult));
         }
@@ -110,11 +110,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("%%csharp"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request, _kernelStatus));
+            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
 
-            await _kernelStatus.Idle();
+            await KernelStatus.Idle();
 
-            _serverRecordingSocket.DecodedMessages
+            ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.ExecuteReply));
         }

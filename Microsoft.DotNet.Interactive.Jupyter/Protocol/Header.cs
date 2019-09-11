@@ -53,20 +53,31 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         public static Header Create(JupyterMessageContent messageContent, string session)
         {
+            if (messageContent == null)
+            {
+                throw new ArgumentNullException(nameof(messageContent));
+            }
             return Create(messageContent.MessageType, session);
         }
 
-        public static Header Create(string messageType, string session)
+        private static Header Create(string messageType, string session)
         {
             var newHeader = new Header(
-                messageType: messageType, 
-                messageId: Guid.NewGuid().ToString(), 
-                version: Constants.VERSION, 
-                username: Constants.USERNAME, 
-                session: session, 
+                messageType: messageType,
+                messageId: Guid.NewGuid().ToString(),
+                version: Constants.VERSION,
+                username: Constants.USERNAME,
+                session: session,
                 date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
             return newHeader;
+        }
+
+        public static Header Create<T>(string session)
+        where T : JupyterMessageContent
+        {
+            var messageType = JupyterMessageContent.GetMessageType(typeof(T));
+            return Create(messageType, session);
         }
     }
 }

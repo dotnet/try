@@ -14,24 +14,24 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         where T : JupyterMessageContent
     {
         private readonly CompositeDisposable _disposables =new CompositeDisposable();
-        protected readonly MessageSender _ioPubChannel;
-        protected readonly MessageSender _serverChannel;
-        protected readonly RecordingSocket _serverRecordingSocket;
-        protected readonly RecordingSocket _ioRecordingSocket;
-        protected readonly KernelStatus _kernelStatus;
+        protected MessageSender IoPubChannel { get; }
+        protected MessageSender ServerChannel { get; }
+        protected RecordingSocket ServerRecordingSocket { get; }
+        protected RecordingSocket IoRecordingSocket { get; }
+        protected KernelStatus KernelStatus { get; }
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
         {
             _disposables.Add(output.SubscribeToPocketLogger());
 
             var signatureValidator = new SignatureValidator("key", "HMACSHA256");
-            _serverRecordingSocket = new RecordingSocket();
-            _serverChannel = new MessageSender(_serverRecordingSocket, signatureValidator);
-            _ioRecordingSocket = new RecordingSocket();
-            _ioPubChannel = new MessageSender(_ioRecordingSocket, signatureValidator);
-            _kernelStatus = new KernelStatus(
-                Header.Create(typeof(T), "test"),
-                _serverChannel);
+            ServerRecordingSocket = new RecordingSocket();
+            ServerChannel = new MessageSender(ServerRecordingSocket, signatureValidator);
+            IoRecordingSocket = new RecordingSocket();
+            IoPubChannel = new MessageSender(IoRecordingSocket, signatureValidator);
+            KernelStatus = new KernelStatus(
+                Header.Create<T>("test"),
+                ServerChannel);
         }
 
         public void Dispose() => _disposables.Dispose();
