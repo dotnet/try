@@ -1,0 +1,8 @@
+<Project>
+
+  <ItemGroup>
+    <NuspecProperty Include="Configuration=$(Configuration)" />
+    <NuspecProperty Include="TargetFramework=$(TargetFramework)" />
+  </ItemGroup>
+
+</Project>

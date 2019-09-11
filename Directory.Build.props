@@ -2,6 +2,7 @@
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" Condition="'$(DisableArcade)' != '1'" />
   <Import Project="eng\targets\Settings.props" />
+  <Import Project="eng\targets\NuGet.targets" />
 
   <PropertyGroup>
     <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>

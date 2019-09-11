@@ -5,10 +5,6 @@
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise isn't strongly signed -->
   </PropertyGroup>
   
-  <PropertyGroup>
-    <IsPackable>true</IsPackable>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="TestResults\**" />
     <EmbeddedResource Remove="TestResults\**" />
