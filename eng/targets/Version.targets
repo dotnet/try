@@ -1,4 +1,4 @@
 <Project>
-  <Target Name="_InitializeAssemblyVersion">
-  </Target>
+    <Target Name="_InitializeAssemblyVersion">
+    </Target>
 </Project>
