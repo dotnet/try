@@ -20,8 +20,6 @@
     <PackageReference Update="FSharp.Compiler.Service" Version="28.0.0" />
   </ItemGroup>
 
-  <Target Name="_InitializeAssemblyVersion">
-    <!-- don't let Arcade override assembly versions -->
-  </Target>
+  <Import Project="eng\targets\Versions.targets" Condition="'$(UseStableVersion)' == 'true'" />
 
 </Project>

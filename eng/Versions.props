@@ -3,14 +3,16 @@
     <!-- opt-out properties -->
     <UsingToolSourceLink>false</UsingToolSourceLink>
     <!-- opt-in properties -->
+    <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
   </PropertyGroup>
   <PropertyGroup>
     <MajorVersion>1</MajorVersion>
     <MinorVersion>0</MinorVersion>
-    <AutoGenerateAssemblyVersion>false</AutoGenerateAssemblyVersion> 
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <PatchVersion>0</PatchVersion>
+    <PreReleaseVersionLabel>beta</PreReleaseVersionLabel>
+    <VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
   </PropertyGroup>
   <PropertyGroup>
     <!-- package settings -->
@@ -20,7 +22,10 @@
     <PublishRepositoryUrl>false</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/dotnet/try</RepositoryUrl>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(UseStableVersion)' == 'true'">
+    <AutoGenerateAssemblyVersion>false</AutoGenerateAssemblyVersion>
+    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <PreReleaseVersionLabel></PreReleaseVersionLabel>
     <!--
     Mimic the build number calculation from here:
     https://github.com/dotnet/arcade/blob/ce8e852e418ca52d28e562f9697fbb926d0b0bb1/src/Microsoft.DotNet.Arcade.Sdk/tools/Version.BeforeCommonTargets.targets#L24-L36
