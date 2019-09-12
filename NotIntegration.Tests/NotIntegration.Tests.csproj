@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-
     <IsPackable>true</IsPackable>
+    <NoWarn>$(NoWarn);CS8002</NoWarn><!-- Clockwise doesn't have a strong name -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,12 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="FluentAssertions" Version="5.8.0" />
   </ItemGroup>
 

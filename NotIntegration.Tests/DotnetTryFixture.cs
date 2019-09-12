@@ -13,7 +13,7 @@ using MLS.Agent;
 using MLS.Agent.Tools;
 using WorkspaceServer;
 
-namespace NotIntegrationTests
+namespace NotIntegration.Tests
 {
     public class DotnetTryFixture : IDisposable
     {

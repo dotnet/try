@@ -365,7 +365,7 @@ namespace MLS.Agent.Tests.CommandLine
         }
 
         [Fact]
-        public async Task jupyter_parses_connection_file_path()
+        public void jupyter_parses_connection_file_path()
         {
             var expected = Path.GetTempFileName();
 

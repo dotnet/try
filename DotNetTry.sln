@@ -51,7 +51,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.ProjectTem
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpWorkspaceShim", "FSharpWorkspaceShim\FSharpWorkspaceShim.fsproj", "{9128FCED-2A19-4502-BCEE-BE1BAB6882EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotIntegrationTests", "NotIntegrationTests\NotIntegrationTests.csproj", "{EA6DDD48-941D-43C6-BAC1-07CF24F4C792}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotIntegration.Tests", "NotIntegration.Tests\NotIntegration.Tests.csproj", "{EA6DDD48-941D-43C6-BAC1-07CF24F4C792}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Interactive.Rendering", "Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj", "{FBEA5F71-23F5-4412-A936-9B8E6E228968}"
 EndProject

@@ -25,15 +25,15 @@ namespace MLS.Agent.Tests
             throw new NotImplementedException();
         }
 
-        public async Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
+        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
             if(_successfulInstall)
             {
                 var installPath = Path.Combine(Directory.GetCurrentDirectory(), sourceDirectory.Name.ToLower());
-                return new CommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" });
+                return Task.FromResult(new CommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" }));
             }
 
-            return new CommandLineResult(1);
+            return Task.FromResult(new CommandLineResult(1));
         }
     }
 }

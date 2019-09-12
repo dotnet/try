@@ -120,7 +120,7 @@ jobs:
       - task: PublishBuildArtifacts@1
         displayName: Publish integration tests dll
         inputs:
-          pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\NotIntegrationTests\$(_BuildConfig)
+          pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\NotIntegration.Tests\$(_BuildConfig)
           artifactName: integrationTests
           artifactType: container
 
@@ -265,7 +265,7 @@ jobs:
           artifactName: integrationTests
           downloadPath: $(System.DefaultWorkingDirectory)
 
-      - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegrationTests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
+      - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegration.Tests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
         displayName: Run integration tests
 
       - task: PublishTestResults@2
