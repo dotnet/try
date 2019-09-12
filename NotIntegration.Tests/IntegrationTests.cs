@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
-namespace NotIntegrationTests
+namespace NotIntegration.Tests
 {
     public class IntegrationTests : IClassFixture<DotnetTryFixture>
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 
-namespace NotIntegrationTests
+namespace NotIntegration.Tests
 {
     public class ConditionalIntegrationTestFactAttribute : FactAttribute
     {

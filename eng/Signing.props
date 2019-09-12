@@ -9,6 +9,7 @@
     <FileSignInfo Include="System.Data.dll" CertificateName="None" />
     <FileSignInfo Include="System.dll" CertificateName="None" />
     <FileSignInfo Include="System.Drawing.dll" CertificateName="None" />
+    <FileSignInfo Include="System.Drawing.Common.dll" CertificateName="None" />
     <FileSignInfo Include="System.IO.Compression.dll" CertificateName="None" />
     <FileSignInfo Include="System.IO.Compression.FileSystem.dll" CertificateName="None" />
     <FileSignInfo Include="System.Linq.dll" CertificateName="None" />
@@ -27,6 +28,7 @@
     <FileSignInfo Include="MsBuildPipeLogger.Logger.dll" CertificateName="None" />
     <FileSignInfo Include="Buildalyzer.Workspaces.dll" CertificateName="None" />
     <FileSignInfo Include="Clockwise.dll" CertificateName="None" />
+    <FileSignInfo Include="HtmlAgilityPack.dll" CertificateName="None" />
     <FileSignInfo Include="Markdig.dll" CertificateName="None" />
     <FileSignInfo Include="MessagePack.dll" CertificateName="None" />
     <FileSignInfo Include="Mono.Cecil.Mdb.dll" CertificateName="None" />
@@ -39,6 +41,7 @@
     <FileSignInfo Include="Octokit.dll" CertificateName="None" />
     <FileSignInfo Include="Serilog.dll" CertificateName="None" />
     <FileSignInfo Include="Serilog.Sinks.RollingFileAlternate.dll" CertificateName="None" />
+    <FileSignInfo Include="XPlot.Plotly.dll" CertificateName="None" />
 
     <FileSignInfo Include="materialdesignicons-webfont.ttf" CertificateName="None" />
   </ItemGroup>
