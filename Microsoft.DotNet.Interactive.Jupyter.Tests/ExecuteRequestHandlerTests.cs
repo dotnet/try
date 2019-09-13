@@ -5,7 +5,9 @@ using System;
 using System.Threading.Tasks;
 using Clockwise;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Recipes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,9 +24,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            await scheduler.Schedule(context);
 
-            await _kernel.Idle();
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                                   .Should().Contain(message =>
@@ -40,9 +43,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            await scheduler.Schedule(context);
 
-            await _kernel.Idle();
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
@@ -54,9 +58,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("asdes"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            await scheduler.Schedule(context);
 
-            await _kernel.Idle();
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should()
@@ -74,9 +79,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            await scheduler.Schedule(context);
 
-            await _kernel.Idle();
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
@@ -92,9 +98,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("2+2"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            await scheduler.Schedule(context);
 
-            await _kernel.Idle();
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
@@ -110,9 +117,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("%%csharp"), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            await scheduler.Schedule(context);
 
-            await _kernel.Idle();
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
