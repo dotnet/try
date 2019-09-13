@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
+    <PackageId>Microsoft.DotNet.Interactive.Rendering</PackageId>
+    <NuspecFile>Microsoft.DotNet.Interactive.Rendering.nuspec</NuspecFile>
   </PropertyGroup>
   
   <PropertyGroup>
