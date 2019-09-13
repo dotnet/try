@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+  <!-- Any new dependency added here must also be included in the Microsoft.DotNet.Try.Markdown, Microsoft.DotNet.Interactive and Microsoft.DotNet.Interactive.Rendering nuspec files -->
     <PackageReference Include="Clockwise" Version="$(ClockwiseVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
