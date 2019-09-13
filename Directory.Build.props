@@ -15,4 +15,14 @@
     <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ClockwiseVersion>1.0.261-beta</ClockwiseVersion>
+    <NewtonsoftJsonVersion>12.0.02</NewtonsoftJsonVersion>
+    <PocketLoggerVersion>0.3.0</PocketLoggerVersion>
+    <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
+    <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
+    <MicrosoftCodeAnalysisCommonVersion>3.1.0-beta3-final</MicrosoftCodeAnalysisCommonVersion>
+     <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.1.0-beta3-final</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <TaskExtensionsVersion>0.1.8580001</TaskExtensionsVersion>
+  </PropertyGroup>
 </Project>
