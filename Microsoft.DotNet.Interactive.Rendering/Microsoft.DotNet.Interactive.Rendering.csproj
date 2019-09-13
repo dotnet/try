@@ -12,12 +12,22 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.2.0" />
-    <PackageReference Include="microsoft.csharp" Version="4.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
+    <PackageReference Include="microsoft.csharp" Version="$(microsoftcsharpVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.02" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+  </ItemGroup>
+
+   <PropertyGroup>
+    <MicrosoftAspNetCoreHtmlAbstractionsVersion>2.2.0</MicrosoftAspNetCoreHtmlAbstractionsVersion>
+    <microsoftcsharpVersion>4.5.0</microsoftcsharpVersion>
+  </PropertyGroup>
+
+   <ItemGroup>
+    <NuspecProperty Include="MicrosoftAspNetCoreHtmlAbstractionsVersion=$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
+    <NuspecProperty Include="microsoftcsharpVersion=$(microsoftcsharpVersion)" />
   </ItemGroup>
 
 </Project>
