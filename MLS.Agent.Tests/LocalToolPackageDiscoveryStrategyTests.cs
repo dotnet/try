@@ -34,7 +34,7 @@ namespace MLS.Agent.Tests
                 var package = await Create.ConsoleWorkspaceCopy();
                 File.Move(package.Directory.GetFiles("*.csproj").First().FullName, Path.Combine(package.Directory.FullName, "not-console.csproj"));
                 await PackCommand.Do(new PackOptions(package.Directory, outputDirectory: temp, enableWasm: false), console);
-                var result = await Tools.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} not-console --tool-path {temp.FullName}");
+                var result = await WorkspaceServer.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} not-console --tool-path {temp.FullName}");
                 output.WriteLine(string.Join("\n", result.Error));
                 result.ExitCode.Should().Be(0);
 
