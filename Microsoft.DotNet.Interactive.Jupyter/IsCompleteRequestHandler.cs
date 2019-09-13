@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-using System;
-using System.Linq;
 using System.Reactive.Concurrency;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -22,32 +20,31 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public async Task Handle(JupyterRequestContext context)
         {
             var isCompleteRequest = GetJupyterRequest(context);
-            var command = new SubmitCode(isCompleteRequest.Code, submissionType:SubmissionType.Diagnose);
-           
-            var openRequest = new InflightRequest(context, isCompleteRequest, 0);
+            var command = new SubmitCode(isCompleteRequest.Code, submissionType: SubmissionType.Diagnose);
 
-            InFlightRequests[command] = openRequest;
-
-            await Kernel.SendAsync(command);
+            await SendTheThingAndWaitForTheStuff(context, command);
         }
+      
 
-        protected override void OnKernelEvent(IKernelEvent @event)
+        protected override void OnKernelEventReceived(
+            IKernelEvent @event,
+            JupyterRequestContext context)
         {
             switch (@event)
             {
                 case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
-                    OnKernelEvent(completeCodeSubmissionReceived, true);
+                    Reply( true, context.Request, context.ServerChannel);
                     break;
                 case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
-                    OnKernelEvent(incompleteCodeSubmissionReceived, false);
+                    Reply( false, context.Request, context.ServerChannel);
                     break;
             }
         }
 
-        private void OnKernelEvent(IKernelEvent @event, bool isComplete)
+        private void Reply(bool isComplete, Message request, IMessageSender serverChannel)
         {
-            if (InFlightRequests.TryRemove(@event.Command, out var openRequest))
-            {
+            
+            
                 var status = isComplete ? "complete" : "incomplete";
                 var indent = isComplete ? string.Empty : "*";
                 // reply 
@@ -56,11 +53,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 // send to server
                 var executeReply = Message.CreateResponse(
                     isCompleteReplyPayload,
-                    openRequest.Context.Request);
+                    request);
 
-                openRequest.Context.ServerChannel.Send(executeReply);
-                openRequest.Context.KernelStatus.SetAsIdle();
-            }
+                serverChannel.Send(executeReply);
+            
         }
     }
 }

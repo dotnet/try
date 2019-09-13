@@ -9,6 +9,7 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,12 +18,24 @@ using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
+    public class KernelIdleState
+    {
+        private readonly BehaviorSubject<bool> _idleState = new BehaviorSubject<bool>(true);
+
+        public IObservable<bool> IdleState => _idleState.DistinctUntilChanged();
+
+        public void SetAsBusy() => _idleState.OnNext(false);
+
+        public void SetAsIdle() => _idleState.OnNext(true);
+    }
+
     public abstract class KernelBase : IKernel
     {
         private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
         private readonly List<Command> _directiveCommands = new List<Command>();
         private Parser _directiveParser;
+        private readonly KernelIdleState _idleState =new KernelIdleState();
 
         protected KernelBase()
         {
@@ -33,6 +46,23 @@ namespace Microsoft.DotNet.Interactive
             AddSetKernelMiddleware();
 
             AddDirectiveMiddlewareAndCommonCommandHandlers();
+
+            _disposables.Add(_idleState.IdleState.Subscribe(idle =>
+            {
+                if (idle)
+                {
+                    PublishEvent(new KernelIdle());
+                }
+                else
+                {
+                    PublishEvent(new KernelBusy());
+                }
+            }));
+        }
+
+        public void WhenIdle(Func<object> p)
+        {
+            throw new NotImplementedException();
         }
 
         public KernelCommandPipeline Pipeline { get; }
@@ -185,7 +215,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 invocationContext.Publish(
                     new DisplayedValueProduced(
-                        displayValue.FormattedValue,
+                        displayValue.Value,
                         displayValue,
                         formattedValues: new[] { displayValue.FormattedValue },
                         valueId: displayValue.ValueId));
@@ -205,7 +235,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 invocationContext.Publish(
                     new DisplayedValueUpdated(
-                        displayedValue.FormattedValue,
+                        displayedValue.Value,
                         valueId: displayedValue.ValueId,
                         command: displayedValue,
                         formattedValues: new[] { displayedValue.FormattedValue }
@@ -307,9 +337,19 @@ namespace Microsoft.DotNet.Interactive
         private readonly ConcurrentQueue<KernelOperation> _commandQueue =
             new ConcurrentQueue<KernelOperation>();
 
+
+
         public Task<IKernelCommandResult> SendAsync(
             IKernelCommand command,
             CancellationToken cancellationToken)
+        {
+            return SendAsync(command, cancellationToken, null);
+        }
+
+        public Task<IKernelCommandResult> SendAsync(
+            IKernelCommand command,
+            CancellationToken cancellationToken, 
+            Action onDone)
         {
             if (command == null)
             {
@@ -322,15 +362,29 @@ namespace Microsoft.DotNet.Interactive
 
             _commandQueue.Enqueue(operation);
 
-            Task.Run(async () =>
-            {
-                if (_commandQueue.TryDequeue(out var currentOperation))
-                {
-                    await ExecuteCommand(currentOperation);
-                }
-            }, cancellationToken).ConfigureAwait(false);
+            DoTheThing(_commandQueue);
 
             return tcs.Task;
+
+            void DoTheThing(ConcurrentQueue<KernelOperation> commandQueue)
+            {
+                if (commandQueue.TryDequeue(out var currentOperation))
+                {
+                    _idleState.SetAsBusy();
+                    
+                    Task.Run(async () =>
+                    {
+                        await ExecuteCommand(currentOperation);
+
+                        DoTheThing(commandQueue);
+                    }, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    _idleState.SetAsIdle();
+                    onDone?.Invoke();
+                }
+            }
         }
 
         protected void PublishEvent(IKernelEvent kernelEvent)

@@ -42,7 +42,10 @@ namespace Microsoft.DotNet.Interactive
 
             AddDirective(chooseKernelCommand);
 
-            AddDisposable(kernel.KernelEvents.Subscribe(PublishEvent));
+            AddDisposable(kernel.KernelEvents.Subscribe(e =>
+            {
+                PublishEvent(e);
+            }));
         }
 
         protected override void SetHandlingKernel(

@@ -13,35 +13,36 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
     public abstract class JupyterRequestHandlerTestBase<T> : IDisposable
         where T : JupyterMessageContent
     {
-        private readonly CompositeDisposable _disposables =new CompositeDisposable();
-        protected MessageSender IoPubChannel { get; }
-        protected MessageSender ServerChannel { get; }
-        protected RecordingSocket ServerRecordingSocket { get; }
-        protected RecordingSocket IoRecordingSocket { get; }
-        protected KernelStatus KernelStatus { get; }
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        protected readonly MessageSender IoPubChannel;
+        protected readonly MessageSender ServerChannel;
+        protected readonly RecordingSocket ServerRecordingSocket;
+        protected readonly RecordingSocket IoRecordingSocket;
+        protected readonly IKernel Kernel;
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
         {
             _disposables.Add(output.SubscribeToPocketLogger());
+
+            Kernel = new CompositeKernel
+            {
+                new CSharpKernel()
+            }.UseDefaultMagicCommands();
+
+            _disposables.Add(Kernel.LogEventsToPocketLogger());
 
             var signatureValidator = new SignatureValidator("key", "HMACSHA256");
             ServerRecordingSocket = new RecordingSocket();
             ServerChannel = new MessageSender(ServerRecordingSocket, signatureValidator);
             IoRecordingSocket = new RecordingSocket();
             IoPubChannel = new MessageSender(IoRecordingSocket, signatureValidator);
-            KernelStatus = new KernelStatus(
-                Header.Create<T>("test"),
-                ServerChannel);
         }
 
         public void Dispose() => _disposables.Dispose();
 
         protected ICommandScheduler<JupyterRequestContext> CreateScheduler()
         {
-            var handler = new JupyterRequestContextHandler(new CompositeKernel
-            {
-                new CSharpKernel()
-            }.UseDefaultMagicCommands());
+            var handler = new JupyterRequestContextHandler(Kernel);
 
             return CommandScheduler.Create<JupyterRequestContext>(handler.Handle).Trace();
         }

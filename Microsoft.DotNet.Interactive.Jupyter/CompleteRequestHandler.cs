@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Text.RegularExpressions;
@@ -27,43 +26,35 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var completeRequest = GetJupyterRequest(context);
 
-            context.KernelStatus.SetAsBusy();
-
             var command = new RequestCompletion(completeRequest.Code, completeRequest.CursorPosition);
 
-            var openRequest = new InflightRequest(context, completeRequest, 0);
-
-            InFlightRequests[command] = openRequest;
-
-            await Kernel.SendAsync(command);
+            await SendTheThingAndWaitForTheStuff(context, command);
         }
 
-        protected override void OnKernelEvent(IKernelEvent @event)
+        protected override void OnKernelEventReceived(
+            IKernelEvent @event, 
+            JupyterRequestContext context)
         {
             switch (@event)
             {
                 case CompletionRequestCompleted completionRequestCompleted:
-                    OnCompletionRequestCompleted(completionRequestCompleted, InFlightRequests);
-                    break;
-                case CompletionRequestReceived _:
+                    OnCompletionRequestCompleted(
+                        completionRequestCompleted, 
+                        context.Request, 
+                        context.ServerChannel);
                     break;
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, ConcurrentDictionary<IKernelCommand, InflightRequest> openRequests)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IMessageSender serverChannel)
         {
-            openRequests.TryGetValue(completionRequestCompleted.Command, out var openRequest);
-            if (openRequest == null)
-            {
-                return;
-            }
+            var command = completionRequestCompleted.Command as RequestCompletion;
 
-            var pos = ComputeReplacementStartPosition(openRequest.Request.Code, openRequest.Request.CursorPosition);
-            var reply = new CompleteReply(pos, openRequest.Request.CursorPosition, matches: completionRequestCompleted.CompletionList.Select(e => e.InsertText).ToList());
+            var pos = ComputeReplacementStartPosition(command.Code, command.CursorPosition);
+            var reply = new CompleteReply(pos, command.CursorPosition, matches: completionRequestCompleted.CompletionList.Select(e => e.InsertText).ToList());
 
-            var completeReply = Message.CreateResponse(reply, openRequest.Context.Request);
-            openRequest.Context.ServerChannel.Send(completeReply);
-            openRequest.Context.KernelStatus.SetAsIdle();
+            var completeReply = Message.CreateResponse(reply, request);
+            serverChannel.Send(completeReply);
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

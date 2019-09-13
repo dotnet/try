@@ -49,8 +49,11 @@ namespace MLS.Agent
             typeof(Shell).Assembly
         };
 
-        private static void StartLogging(CompositeDisposable disposables, StartupOptions options)
+        private static IDisposable StartAppInsightsLogging(StartupOptions options)
         {
+
+            var disposables = new CompositeDisposable();
+
             if (options.Production)
             {
                 var applicationVersion = VersionSensor.Version().AssemblyInformationalVersion;
@@ -65,6 +68,24 @@ namespace MLS.Agent
                         a(("id", options.Id));
                     }));
             }
+
+            if (options.ApplicationInsightsKey != null)
+            {
+                var telemetryClient = new TelemetryClient(new TelemetryConfiguration(options.ApplicationInsightsKey))
+                {
+                    InstrumentationKey = options.ApplicationInsightsKey
+                };
+                disposables.Add(telemetryClient.SubscribeToPocketLogger(_assembliesEmittingPocketLoggerLogs));
+            }
+
+            Log.Event("AgentStarting");
+
+            return disposables;
+        }
+
+        internal static IDisposable StartToolLogging(StartupOptions options)
+        {
+            var disposables = new CompositeDisposable();
 
             if (options.LogPath != null)
             {
@@ -94,22 +115,16 @@ namespace MLS.Agent
                 args.SetObserved();
             };
 
-            if (options.ApplicationInsightsKey != null)
-            {
-                var telemetryClient = new TelemetryClient(new TelemetryConfiguration(options.ApplicationInsightsKey))
-                {
-                    InstrumentationKey = options.ApplicationInsightsKey
-                };
-                disposables.Add(telemetryClient.SubscribeToPocketLogger(_assembliesEmittingPocketLoggerLogs));
-            }
-
-            Log.Event("AgentStarting");
+            return disposables;
         }
 
         public static IWebHost ConstructWebHost(StartupOptions options)
         {
-            var disposables = new CompositeDisposable();
-            StartLogging(disposables, options);
+            var disposables = new CompositeDisposable
+            {
+                StartAppInsightsLogging(options),
+                StartToolLogging(options)
+            };
 
             if (options.Key is null)
             {
@@ -119,7 +134,6 @@ namespace MLS.Agent
             {
                 Log.Trace("Received Key: {key}", options.Key);
             }
-
 
             var webHost = new WebHostBuilder()
                           .UseKestrel()

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using WorkspaceServer.Kernel;
@@ -194,6 +195,31 @@ x"));
                 .Code
                 .Should()
                 .Be("hello!");
+        }
+
+        [Fact]
+        public async Task Events_published_by_child_kernel_are_visible_in_parent_kernel()
+        {
+            var subKernel = new CSharpKernel();
+
+            var compositeKernel = new CompositeKernel
+            {
+                subKernel
+            };
+
+            var events = compositeKernel.KernelEvents.ToSubscribedList();
+
+            await subKernel.SendAsync(new SubmitCode("var x = 1;"));
+
+            events
+                .Select(e => e.GetType())
+                .Should()
+                .ContainInOrder(
+                    typeof(KernelBusy),
+                    typeof(CodeSubmissionReceived),
+                    typeof(CompleteCodeSubmissionReceived),
+                    typeof(CommandHandled),
+                    typeof(KernelIdle));
         }
     }
 }

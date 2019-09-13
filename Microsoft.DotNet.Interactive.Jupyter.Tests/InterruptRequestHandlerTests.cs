@@ -1,12 +1,13 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Clockwise;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Recipes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,9 +24,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new InterruptRequest(), null);
-            await scheduler.Schedule(new JupyterRequestContext(ServerChannel, IoPubChannel, request, KernelStatus));
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
 
-            await KernelStatus.Idle();
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                                   .SingleOrDefault(message =>

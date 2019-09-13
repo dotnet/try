@@ -11,11 +11,13 @@ using Microsoft.Extensions.Hosting;
 using NetMQ.Sockets;
 using Pocket;
 using Recipes;
+using static Pocket.Logger<Microsoft.DotNet.Interactive.Jupyter.Shell>;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class Shell : IHostedService
     {
+        private readonly IKernel _kernel;
         private readonly ICommandScheduler<JupyterRequestContext> _scheduler;
         private readonly RouterSocket _shell;
         private readonly PublisherSocket _ioPubSocket;
@@ -31,6 +33,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly RouterSocket _control;
 
         public Shell(
+            IKernel kernel,
             ICommandScheduler<JupyterRequestContext> scheduler,
             ConnectionInformation connectionInformation)
         {
@@ -39,6 +42,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 throw new ArgumentNullException(nameof(connectionInformation));
             }
 
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
             _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
 
             _shellAddress = $"{connectionInformation.Transport}://{connectionInformation.IP}:{connectionInformation.ShellPort}";
@@ -71,8 +75,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _ioPubSocket.Bind(_ioPubAddress);
             _stdIn.Bind(_stdInAddress);
             _control.Bind(_controlAddress);
-
-            using (var activity = Logger<Shell>.Log.OnEnterAndExit())
+          
+            using (var activity = Log.OnEnterAndExit())
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -80,34 +84,40 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     activity.Info("Received: {message}", message.ToJson());
 
-                    var status = new KernelStatus(message.Header, new MessageSender(_ioPubSocket, _signatureValidator));
+                    SetBusy();
 
                     switch (message.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
-                            status.SetAsBusy();
                             HandleKernelInfoRequest(message);
-                            status.SetAsIdle();
+                            SetIdle();
                             break;
 
                         case JupyterMessageContentTypes.KernelShutdownRequest:
-                            status.SetAsBusy();
-                            status.SetAsIdle();
+                            SetIdle();
                             break;
 
                         default:
                             var context = new JupyterRequestContext(
                                 _shellSender,
                                 _ioPubSender,
-                                message,
-                                new KernelStatus(message.Header, _shellSender));
+                                message);
 
                             await _scheduler.Schedule(context);
 
+                            await context.Done();
+
+                            SetIdle();
+
                             break;
                     }
+
+                    void SetBusy() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
+
+                    void SetIdle() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
                 }
             }
+
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -121,7 +131,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
 
             var replyMessage = Message.CreateResponse(kernelInfoReply, request);
-
 
             _shellSender.Send(replyMessage);
         }

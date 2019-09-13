@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -28,26 +27,32 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var executeRequest = GetJupyterRequest(context);
 
-            context.KernelStatus.SetAsBusy();
-            var executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
+            _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
-            var executeInputPayload = new ExecuteInput(executeRequest.Code, executionCount);
+            var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
             var executeReply = Message.Create(executeInputPayload, context.Request.Header);
             context.ServerChannel.Send(executeReply);
 
             var command = new SubmitCode(executeRequest.Code);
 
-            var openRequest = new InflightRequest(context, executeRequest, executionCount);
+            await SendTheThingAndWaitForTheStuff(context, command);
+        }
 
-            InFlightRequests[command] = openRequest;
-
-            try
+        protected override void OnKernelEventReceived(
+            IKernelEvent @event, 
+            JupyterRequestContext context)
+        {
+            switch (@event)
             {
-                await Kernel.SendAsync(command);
-            }
-            catch (Exception e)
-            {
-                OnCommandFailed(new CommandFailed(e, command));
+                case ValueProducedEventBase valueProduced:
+                    OnValueProduced(valueProduced, context.Request, context.IoPubChannel);
+                    break;
+                case CommandHandled commandHandled:
+                    OnCommandHandled(commandHandled, context.Request, context.ServerChannel);
+                    break;
+                case CommandFailed commandFailed:
+                    OnCommandFailed(commandFailed, context.Request, context.ServerChannel, context.IoPubChannel);
+                    break;
             }
         }
 
@@ -57,86 +62,70 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return transient;
         }
 
-        protected override void OnKernelEvent(IKernelEvent @event)
+        private void OnCommandFailed(
+            CommandFailed commandFailed,
+            Message request, 
+            IMessageSender serverChannel, 
+            IMessageSender ioPubChannel)
         {
-            switch (@event)
-            {
-                case ValueProducedEventBase valueProduced:
-                    OnValueProduced(valueProduced);
-                    break;
-                case CommandHandled commandHandled:
-                    OnCommandHandled(commandHandled);
-                    break;
-                case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed);
-                    break;
-                case CodeSubmissionReceived _:
-                case IncompleteCodeSubmissionReceived _:
-                    break;
-                case CompleteCodeSubmissionReceived _:
-                    break;
-            }
-        }
-
-        private void OnCommandFailed(CommandFailed commandFailed)
-        {
-            if (!InFlightRequests.TryRemove(commandFailed.GetRootCommand(), out var openRequest))
-            {
-                return;
-            }
-
-            var errorContent = new Error(
+            var errorContent = new Error (
                 eName: "Unhandled Exception",
                 eValue: commandFailed.Message
             );
 
-            if (!openRequest.Request.Silent)
+            var isSilent = ((ExecuteRequest)request.Content).Silent;
+
+            if (!isSilent)
             {
                 // send on io
                 var error = Message.Create(
                     errorContent,
-                    openRequest.Context.Request.Header);
-                openRequest.Context.IoPubChannel.Send(error);
+                    request.Header);
+                
+                ioPubChannel.Send(error);
 
                 // send on stderr
                 var stdErr = Stream.StdErr(errorContent.EValue);
                 var stream = Message.Create(
                     stdErr,
-                    openRequest.Context.Request.Header);
-                openRequest.Context.IoPubChannel.Send(stream);
+                    request.Header);
+
+                ioPubChannel.Send(stream);
             }
 
             //  reply Error
-            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: openRequest.ExecutionCount);
+            var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
             var executeReply = Message.CreateResponse(
                 executeReplyPayload,
-                openRequest.Context.Request);
+                request);
 
-            openRequest.Context.ServerChannel.Send(executeReply);
-            openRequest.Context.KernelStatus.SetAsIdle();
+            serverChannel.Send(executeReply);
         }
 
-        private void SendDisplayData(JupyterMessageContent displayData, InflightRequest openRequest)
+        private void SendDisplayData(
+            JupyterMessageContent messageContent, 
+            Message request, 
+            IMessageSender ioPubChannel)
         {
-            if (!openRequest.Request.Silent)
+            var isSilent = ((ExecuteRequest) request.Content).Silent;
+
+            if (!isSilent)
             {
                 // send on io
                 var executeResultMessage = Message.Create(
-                    displayData,
-                    openRequest.Context.Request.Header);
-                openRequest.Context.IoPubChannel.Send(executeResultMessage);
+                    messageContent,
+                    request.Header);
+                ioPubChannel.Send(executeResultMessage);
             }
         }
 
-        private void OnValueProduced(ValueProducedEventBase valueProduced)
+        private void OnValueProduced(
+            ValueProducedEventBase valueProduced, 
+            Message request, 
+            IMessageSender ioPubChannel)
         {
-            if (!InFlightRequests.TryGetValue(valueProduced.GetRootCommand(), out var openRequest))
-            {
-                return;
-            }
-
             var transient = CreateTransient(valueProduced.ValueId);
 
             var formattedValues = valueProduced
@@ -158,7 +147,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     break;
                 case ReturnValueProduced _:
                     executeResultData = new ExecuteResult(
-                        openRequest.ExecutionCount,
+                        _executionCount,
                         transient: transient,
                         data: formattedValues);
                     break;
@@ -171,7 +160,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     throw new ArgumentException("Unsupported event type", nameof(valueProduced));
             }
 
-            SendDisplayData(executeResultData, openRequest);
+            SendDisplayData(executeResultData, request, ioPubChannel);
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
@@ -184,23 +173,22 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(CommandHandled commandHandled)
+        private void OnCommandHandled(
+            CommandHandled commandHandled,
+            Message request, 
+            IMessageSender serverChannel)
         {
-            if (!InFlightRequests.TryRemove(commandHandled.GetRootCommand(), out var openRequest))
-            {
-                return;
-            }
+           
 
             // reply ok
-            var executeReplyPayload = new ExecuteReplyOk(executionCount: openRequest.ExecutionCount);
+            var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
             var executeReply = Message.CreateResponse(
                 executeReplyPayload,
-                openRequest.Context.Request);
+                request);
 
-            openRequest.Context.ServerChannel.Send(executeReply);
-            openRequest.Context.KernelStatus.SetAsIdle();
+           serverChannel.Send(executeReply);
         }
     }
 }

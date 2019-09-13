@@ -16,47 +16,39 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             : base(kernel, scheduler ?? CurrentThreadScheduler.Instance)
         {
         }
-       
-        protected override void OnKernelEvent(IKernelEvent @event)
+
+        protected override void OnKernelEventReceived(
+            IKernelEvent @event,
+            JupyterRequestContext context)
         {
             switch (@event)
             {
                 case CurrentCommandCancelled kernelInterrupted:
-                    OnExecutionInterrupted(kernelInterrupted);
+                    OnExecutionInterrupted(kernelInterrupted, context.Request, context.ServerChannel);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled)
+        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, IMessageSender serverChannel)
         {
-            if (InFlightRequests.TryRemove(currentCommandCancelled.Command, out var openRequest))
-            {
-                // reply 
-                var interruptReplyPayload = new InterruptReply();
 
-                // send to server
-                var interruptReply = Message.CreateResponse(
-                    interruptReplyPayload,
-                    openRequest.Context.Request);
+            // reply 
+            var interruptReplyPayload = new InterruptReply();
 
-                openRequest.Context.ServerChannel.Send(interruptReply);
-                openRequest.Context.KernelStatus.SetAsIdle();
-            }
+            // send to server
+            var interruptReply = Message.CreateResponse(
+                interruptReplyPayload,
+                request);
+
+            serverChannel.Send(interruptReply);
+
         }
 
         public async Task Handle(JupyterRequestContext context)
         {
-            var interruptRequest = GetJupyterRequest(context);
-
-            context.KernelStatus.SetAsBusy();
-
             var command = new CancelCurrentCommand();
 
-            var openRequest = new InflightRequest(context, interruptRequest, 0);
-
-            InFlightRequests[command] = openRequest;
-
-            await Kernel.SendAsync(command);
+            await SendTheThingAndWaitForTheStuff(context, command);
         }
     }
 }

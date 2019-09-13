@@ -2,14 +2,27 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Reactive;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class JupyterRequestContext
     {
+        private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
+
+        public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request)
+        {
+            ServerChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
+            IoPubChannel = ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
+            Request = request ?? throw new ArgumentNullException(nameof(request));
+        }
+
         public IMessageSender ServerChannel { get; }
+
         public IMessageSender IoPubChannel { get; }
+
         public Message Request { get; }
 
         public T GetRequestContent<T>() where T : JupyterMessageContent
@@ -17,15 +30,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Request?.Content as T;
         }
 
-        public IKernelStatus KernelStatus { get; }
+        public void Complete() => _done.SetResult(Unit.Default);
 
-        public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request,
-            IKernelStatus kernelStatus)
-        {
-            ServerChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
-            IoPubChannel = ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
-            Request = request ?? throw new ArgumentNullException(nameof(request));
-            KernelStatus = kernelStatus;
-        }
+        public Task Done() => _done.Task;
     }
 }
