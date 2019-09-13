@@ -3,31 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>preview</LangVersion>
-    <PackageId>Microsoft.DotNet.Interactive.Rendering</PackageId>
-    <NuspecFile>Microsoft.DotNet.Interactive.Rendering.nuspec</NuspecFile>
   </PropertyGroup>
-  
-  <PropertyGroup>
-    <IsPackable>true</IsPackable>
-  </PropertyGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
-    <PackageReference Include="microsoft.csharp" Version="$(microsoftcsharpVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.2.0" />
+    <PackageReference Include="microsoft.csharp" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-  </ItemGroup>
-
-   <PropertyGroup>
-    <MicrosoftAspNetCoreHtmlAbstractionsVersion>2.2.0</MicrosoftAspNetCoreHtmlAbstractionsVersion>
-    <microsoftcsharpVersion>4.5.0</microsoftcsharpVersion>
-  </PropertyGroup>
-
-   <ItemGroup>
-    <NuspecProperty Include="MicrosoftAspNetCoreHtmlAbstractionsVersion=$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
-    <NuspecProperty Include="microsoftcsharpVersion=$(microsoftcsharpVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.02" />
   </ItemGroup>
 
 </Project>
