@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Clockwise;
+using WorkspaceServer;
 
 namespace MLS.Agent
 {
@@ -20,7 +21,7 @@ namespace MLS.Agent
                 return new CommandLineResult(1, new List<string>() { "Could not find jupyter kernelspec module" });
             }
 
-            return await Tools.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
+            return await WorkspaceServer.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
         }
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
@@ -34,7 +35,7 @@ namespace MLS.Agent
             bool jupyterKernelSpecExists = false ;
 
             Task.Run(async ()=> {
-                var result = await Tools.CommandLine.Execute(command, "jupyter-kernelspec");
+                var result = await WorkspaceServer.CommandLine.Execute(command, "jupyter-kernelspec");
                 jupyterKernelSpecExists = result.ExitCode == 0;
             }).Wait(2000);
 

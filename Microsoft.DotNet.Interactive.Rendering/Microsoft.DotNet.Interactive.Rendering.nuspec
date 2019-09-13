@@ -10,7 +10,6 @@
                 <dependency id="microsoft.csharp" version="$microsoftcsharpVersion$" />
                
                 <!-- Dependencies of MLS.Agent.Tools -->
-                <dependency id="Clockwise" version="$ClockwiseVersion$" />
                 <dependency id="Newtonsoft.Json" version="$NewtonsoftJsonVersion$" />
                 <dependency id="PocketLogger" version="$PocketLoggerVersion$" />
                 <dependency id="System.Diagnostics.Process" version="$SystemDiagnosticsProcessVersion$" />
