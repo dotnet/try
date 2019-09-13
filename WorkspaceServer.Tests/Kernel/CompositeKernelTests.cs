@@ -10,7 +10,6 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Tests;
-using MLS.Agent.Tools.Tests;
 using Pocket;
 using WorkspaceServer.Kernel;
 using Xunit;

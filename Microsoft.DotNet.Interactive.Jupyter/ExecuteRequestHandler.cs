@@ -104,7 +104,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             serverChannel.Send(executeReply);
         }
 
-        private void SendDisplayData(DisplayData displayData, Message request, IMessageSender ioPubChannel)
+        private void SendDisplayData(
+            JupyterMessageContent messageContent, 
+            Message request, 
+            IMessageSender ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
 
@@ -112,7 +115,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 // send on io
                 var executeResultMessage = Message.Create(
-                    displayData,
+                    messageContent,
                     request.Header);
                 ioPubChannel.Send(executeResultMessage);
             }

@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
-            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
@@ -48,13 +48,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
-            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            _serverRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(MessageTypeValues.IsCompleteReply))
+            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
+                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
                                   .Should()
                                   .NotBeNullOrWhiteSpace();
 

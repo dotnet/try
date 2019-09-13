@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             Kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
 
             KernelEvents = Kernel.KernelEvents.ObserveOn(scheduler ?? throw new ArgumentNullException(nameof(scheduler)));
-
         }
 
         protected async Task SendTheThingAndWaitForTheStuff(
