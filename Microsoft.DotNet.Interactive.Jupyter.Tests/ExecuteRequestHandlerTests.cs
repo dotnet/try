@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
             await scheduler.Schedule(context);
 
-            await context.Done().Timeout(5.Seconds());
+            await context.Done().Timeout(10.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>

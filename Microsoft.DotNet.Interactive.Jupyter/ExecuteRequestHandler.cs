@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnValueProduced(valueProduced, context.Request, context.IoPubChannel);
                     break;
                 case CommandHandled commandHandled:
-                    OnCommandHandled(commandHandled, context.Request, context.IoPubChannel);
+                    OnCommandHandled(commandHandled, context.Request, context.ServerChannel);
                     break;
                 case CommandFailed commandFailed:
                     OnCommandFailed(commandFailed, context.Request, context.ServerChannel, context.IoPubChannel);
