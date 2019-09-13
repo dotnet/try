@@ -5,7 +5,9 @@ using Clockwise;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Recipes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,9 +24,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new InterruptRequest(), null);
-            await scheduler.Schedule(new JupyterRequestContext(_serverChannel, _ioPubChannel, request));
+            var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
 
-            await _kernel.Idle();
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(5.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                                   .SingleOrDefault(message =>

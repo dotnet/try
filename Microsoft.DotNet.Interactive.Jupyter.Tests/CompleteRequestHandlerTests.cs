@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new CompleteRequest("System.Console.", 15), null);
-
             var context = new JupyterRequestContext(_serverChannel, _ioPubChannel, request);
 
             await scheduler.Schedule(context);
