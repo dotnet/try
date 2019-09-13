@@ -1,9 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using FluentAssertions;
+using System;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive;
@@ -60,17 +61,18 @@ namespace WorkspaceServer.Tests.Kernel
 
             kernel.Pipeline.AddMiddleware(async (command, context, next) =>
             {
-                context.Publish(new DisplayedValueProduced("1", command));
+                context.Publish(new DisplayedValueProduced(1, command));
 
                 await next(command, context);
 
-                context.Publish(new DisplayedValueProduced("3", command));
+                context.Publish(new DisplayedValueProduced(3, command));
             });
 
             var result = await kernel.SendAsync(new SubmitCode("display(2);"));
+            var events = new List<IKernelEvent>();
 
-            var events = result.KernelEvents.ToEnumerable();
-
+            result.KernelEvents.Subscribe(e => events.Add(e));
+           
             events.OfType<DisplayedValueProduced>()
                   .Select(v => v.Value)
                   .Should()

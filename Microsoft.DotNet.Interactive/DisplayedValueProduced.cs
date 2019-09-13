@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Interactive
             var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
-                    kernel.SendAsync(new UpdateDisplayedValue(formatted, _displayId)))
+                    kernel.SendAsync(new UpdateDisplayedValue(updatedValue, formatted, _displayId)))
                 .Wait();
         }
     }

@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive
             var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
-                         kernel.SendAsync(new DisplayValue(formatted, displayId)))
+                         kernel.SendAsync(new DisplayValue(value, formatted, displayId)))
                 .Wait();
             return new DisplayedValue(displayId, mimeType);
         }
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Interactive
             var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
-                         kernel.SendAsync(new DisplayValue(formatted)))
+                         kernel.SendAsync(new DisplayValue(value,formatted)))
                 .Wait();
         }
     }
