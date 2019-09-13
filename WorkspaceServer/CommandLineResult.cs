@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MLS.Agent.Tools
+namespace WorkspaceServer
 {
     public class CommandLineResult
     {
