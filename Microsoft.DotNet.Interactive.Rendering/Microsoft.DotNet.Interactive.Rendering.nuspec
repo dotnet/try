@@ -5,7 +5,7 @@
         <language>en-US</language>
          <dependencies>
             <group targetFramework=".NETStandard2.0">
-                <!-- Dependencies of Microsoft.Dotnet.Interactive -->
+                <!-- Dependencies of Microsoft.Dotnet.Interactive.Rendering -->
                 <dependency id="Microsoft.AspNetCore.Html.Abstractions" version="$MicrosoftAspNetCoreHtmlAbstractionsVersion$" />
                 <dependency id="microsoft.csharp" version="$microsoftcsharpVersion$" />
                
