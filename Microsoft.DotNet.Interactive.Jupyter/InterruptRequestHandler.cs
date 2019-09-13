@@ -21,19 +21,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             IKernelEvent @event,
             JupyterRequestContext context)
         {
-
             switch (@event)
             {
                 case CurrentCommandCancelled kernelInterrupted:
                     OnExecutionInterrupted(kernelInterrupted, context.Request, context.ServerChannel);
                     break;
             }
-
-        }
-
-        protected override void OnKernelEvent(IKernelEvent @event)
-        {
-
         }
 
         private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, IMessageSender serverChannel)

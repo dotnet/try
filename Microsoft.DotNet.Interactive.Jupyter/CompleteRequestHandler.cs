@@ -46,10 +46,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        protected override void OnKernelEvent(IKernelEvent @event)
-        {
-        }
-
         private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IMessageSender serverChannel)
         {
             var command = completionRequestCompleted.Command as RequestCompletion;

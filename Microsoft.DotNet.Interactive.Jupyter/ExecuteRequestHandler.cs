@@ -62,10 +62,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return transient;
         }
 
-        protected override void OnKernelEvent(IKernelEvent @event)
-        {
-        }
-
         private void OnCommandFailed(
             CommandFailed commandFailed,
             Message request, 

@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-using System;
-using System.Linq;
 using System.Reactive.Concurrency;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -26,6 +24,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             await SendTheThingAndWaitForTheStuff(context, command);
         }
+      
 
         protected override void OnKernelEventReceived(
             IKernelEvent @event,
@@ -34,20 +33,18 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
-                    OnKernelEvent(completeCodeSubmissionReceived, true);
+                    Reply( true, context.Request, context.ServerChannel);
                     break;
                 case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
-                    OnKernelEvent(incompleteCodeSubmissionReceived, false);
+                    Reply( false, context.Request, context.ServerChannel);
                     break;
             }
         }
 
-        protected override void OnKernelEvent(IKernelEvent @event){}
-
-        private void OnKernelEvent(IKernelEvent @event, bool isComplete)
+        private void Reply(bool isComplete, Message request, IMessageSender serverChannel)
         {
-            if (InFlightRequests.TryRemove(@event.Command, out var openRequest))
-            {
+            
+            
                 var status = isComplete ? "complete" : "incomplete";
                 var indent = isComplete ? string.Empty : "*";
                 // reply 
@@ -56,10 +53,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 // send to server
                 var executeReply = Message.CreateResponse(
                     isCompleteReplyPayload,
-                    openRequest.Context.Request);
+                    request);
 
-                openRequest.Context.ServerChannel.Send(executeReply);
-            }
+                serverChannel.Send(executeReply);
+            
         }
     }
 }
