@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Interactive.Commands;
-using MLS.Agent.Tools;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive

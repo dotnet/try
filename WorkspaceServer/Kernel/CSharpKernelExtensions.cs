@@ -104,7 +104,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}", context.Command));
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
-                        var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
+                        var nugetPackageDirectory =await restoreContext.GetDirectoryForPackage(package.PackageName);
                         await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
                     }
                     else

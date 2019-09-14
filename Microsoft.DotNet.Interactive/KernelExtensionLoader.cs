@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Interactive.Events;
-using MLS.Agent.Tools;
 using System;
 using System.IO;
 using System.Linq;
@@ -49,18 +48,6 @@ namespace Microsoft.DotNet.Interactive
             }
 
             return extensionTypes.Length > 0;
-        }
-
-        public async Task LoadFromAssembliesInDirectory(IDirectoryAccessor directory, IKernel kernel, PublishEvent publishEvent)
-        {
-            if (directory.RootDirectoryExists())
-            {
-                var extensionDlls = directory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => directory.GetFullyQualifiedFilePath(file));
-                foreach (var extensionDll in extensionDlls)
-                {
-                    await LoadFromAssembly(extensionDll, kernel, publishEvent);
-                }
-            }
         }
     }
 }

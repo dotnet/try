@@ -573,7 +573,7 @@ catch (Exception e)
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory.GetFullyQualifiedRoot()));
                     
 
             KernelEvents.Should()

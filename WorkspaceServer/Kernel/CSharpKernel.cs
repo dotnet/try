@@ -25,6 +25,7 @@ using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
+using System.IO;
 
 namespace WorkspaceServer.Kernel
 {
@@ -323,14 +324,30 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        public async Task LoadExtensionsInDirectory(DirectoryInfo directory, KernelInvocationContext context)
         {
-            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
+            var directoryAccessor = new FileSystemDirectoryAccessor(directory);
+            var extensionsDirectory = directoryAccessor.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
         }
         
         private bool HasReturnValue =>
             ScriptState != null &&
             (bool)_hasReturnValueMethod.Invoke(ScriptState.Script, null);
+    }
+
+    public static class KernelExtensionLoaderExtensions
+    {
+        public static async Task LoadFromAssembliesInDirectory(this KernelExtensionLoader loader, IDirectoryAccessor directory, IKernel kernel, KernelExtensionLoader.PublishEvent publishEvent)
+        {
+            if (directory.RootDirectoryExists())
+            {
+                var extensionDlls = directory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => directory.GetFullyQualifiedFilePath(file));
+                foreach (var extensionDll in extensionDlls)
+                {
+                    await loader.LoadFromAssembly(extensionDll, kernel, publishEvent);
+                }
+            }
+        }
     }
 }
