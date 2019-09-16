@@ -335,19 +335,4 @@ namespace WorkspaceServer.Kernel
             ScriptState != null &&
             (bool)_hasReturnValueMethod.Invoke(ScriptState.Script, null);
     }
-
-    public static class KernelExtensionLoaderExtensions
-    {
-        public static async Task LoadFromAssembliesInDirectory(this KernelExtensionLoader loader, IDirectoryAccessor directory, IKernel kernel, KernelExtensionLoader.PublishEvent publishEvent)
-        {
-            if (directory.RootDirectoryExists())
-            {
-                var extensionDlls = directory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => directory.GetFullyQualifiedFilePath(file));
-                foreach (var extensionDll in extensionDlls)
-                {
-                    await loader.LoadFromAssembly(extensionDll, kernel, publishEvent);
-                }
-            }
-        }
-    }
 }
