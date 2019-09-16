@@ -434,6 +434,45 @@ json
         }
 
         [Fact]
+        public async Task When_SubmitCode_command_only_adds_packages_to_csharp_kernel_then_CommandHandled_event_is_raised()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
+
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\"");
+
+            var result = await kernel.SendAsync(command);
+
+            using var events = result.KernelEvents.ToSubscribedList();
+
+            events
+                .First()
+                .Should()
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Attempting to install"));
+
+            events
+                .Should()
+                .Contain(e => e is DisplayedValueUpdated);
+
+
+            events
+                .Should()
+                .ContainSingle(e => e is NuGetPackageAdded);
+
+            events.OfType<NuGetPackageAdded>()
+                .Single()
+                .PackageReference
+                .Should()
+                .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+
+            events
+                .Should()
+                .ContainSingle(e => e is CommandHandled);
+        }
+
+        [Fact]
         public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
         {
             var extensionDir = Create.EmptyWorkspace()

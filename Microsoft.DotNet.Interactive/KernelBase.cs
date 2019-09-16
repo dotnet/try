@@ -199,6 +199,7 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
+                    context.Complete();
                     return;
                 }
             }
