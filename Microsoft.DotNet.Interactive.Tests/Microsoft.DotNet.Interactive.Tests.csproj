@@ -12,7 +12,7 @@
     <None Remove="TestResults\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="5.8.0" />
+    <PackageReference Include="FluentAssertions" Version="5.9.0" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

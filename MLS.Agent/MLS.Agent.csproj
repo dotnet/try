@@ -57,7 +57,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Markdig" Version="0.17.0" />
+    <PackageReference Include="Markdig" Version="0.17.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview7.19365.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview7.19365.7" />

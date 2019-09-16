@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
-    <PackageReference Include="FluentAssertions" Version="5.8.0" />
+    <PackageReference Include="FluentAssertions" Version="5.9.0" />
   </ItemGroup>
 
   <ItemGroup>
