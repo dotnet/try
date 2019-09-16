@@ -3,60 +3,37 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.PlatformAbstractions;
 using System.IO;
-using System.Security;
-using Microsoft.DotNet.Configurer;
-using Microsoft.Win32;
-using System.Linq;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using RuntimeInformation = System.Runtime.InteropServices.RuntimeInformation;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
+using MLS.Agent.Telemetry.Utils;
 
-namespace Microsoft.DotNet.Cli.Telemetry
+namespace MLS.Agent.Telemetry
 {
     internal class TelemetryCommonProperties
     {
         public TelemetryCommonProperties(
             Func<string> getCurrentDirectory = null,
             Func<string, string> hasher = null,
-            Func<string> getMACAddress = null,
-            IDockerContainerDetector dockerContainerDetector = null,
-            IUserLevelCacheWriter userLevelCacheWriter = null)
+            Func<string> getMACAddress = null)
         {
             _getCurrentDirectory = getCurrentDirectory ?? Directory.GetCurrentDirectory;
             _hasher = hasher ?? Sha256Hasher.Hash;
             _getMACAddress = getMACAddress ?? MacAddressGetter.GetMacAddress;
-            _dockerContainerDetector = dockerContainerDetector ?? new DockerContainerDetectorForTelemetry();
-            _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter();
         }
 
-        private readonly IDockerContainerDetector _dockerContainerDetector;
         private Func<string> _getCurrentDirectory;
         private Func<string, string> _hasher;
         private Func<string> _getMACAddress;
-        private IUserLevelCacheWriter _userLevelCacheWriter;
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
         private const string TelemetryProfile = "Telemetry Profile";
         private const string CurrentPathHash = "Current Path Hash";
-        private const string MachineId = "Machine ID";
-        private const string DockerContainer = "Docker Container";
         private const string KernelVersion = "Kernel Version";
-        private const string InstallationType = "Installation Type";
-        private const string ProductType = "Product Type";
-        private const string LibcRelease = "Libc Release";
-        private const string LibcVersion = "Libc Version";
 
         private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
-        private const string CannotFindMacAddress = "Unknown";
-
-        private const string MachineIdCacheKey = "MachineId";
-        private const string IsDockerContainerCacheKey = "IsDockerContainer";
 
         public Dictionary<string, string> GetTelemetryCommonProperties()
         {
@@ -67,14 +44,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
-                {DockerContainer, _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () => _dockerContainerDetector.IsDockerContainer().ToString("G") )},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
-                {MachineId, _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, GetMachineId)},
-                {KernelVersion, GetKernelVersion()},
-                {InstallationType, ExternalTelemetryProperties.GetInstallationType()},
-                {ProductType, ExternalTelemetryProperties.GetProductType()},
-                {LibcRelease, ExternalTelemetryProperties.GetLibcRelease()},
-                {LibcVersion, ExternalTelemetryProperties.GetLibcVersion()}
+                {KernelVersion, GetKernelVersion()}
             };
         }
 

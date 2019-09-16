@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.DotNet.Cli.Telemetry
+namespace MLS.Agent.Telemetry
 {
     public interface ITelemetry
     {

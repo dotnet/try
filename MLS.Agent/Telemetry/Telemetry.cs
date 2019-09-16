@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
+using Microsoft.DotNet.PlatformAbstractions;
+using MLS.Agent.Telemetry.Configurer;
 
-namespace Microsoft.DotNet.Cli.Telemetry
+namespace MLS.Agent.Telemetry
 {
-    public class Telemetry : ITelemetry
+    internal class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
         private TelemetryClient _client = null;
@@ -17,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
 
-        private const string InstrumentationKey = "74cc1c9e-3e6e-4d05-b3fc-dde9101d0254";
+        private const string InstrumentationKey = ""; // TODO: Add InstrumentationKey
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
 
         public bool Enabled { get; }
@@ -28,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
         {
-            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
+            Enabled = !GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
             if (!Enabled)
             {
@@ -46,6 +48,29 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 //initialize in task to offload to parallel thread
                 _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+            }
+        }
+
+        private static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
+        {
+            var str = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrEmpty(str))
+            {
+                return defaultValue;
+            }
+
+            switch (str.ToLowerInvariant())
+            {
+                case "true":
+                case "1":
+                case "yes":
+                    return true;
+                case "false":
+                case "0":
+                case "no":
+                    return false;
+                default:
+                    return defaultValue;
             }
         }
 

@@ -1,12 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.CommandLine;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Cli.Telemetry
+namespace MLS.Agent.Telemetry
 {
     internal class TopLevelCommandNameAndOptionToLog : IParseResultLogRule
     {
@@ -20,27 +19,26 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private HashSet<string> _topLevelCommandName { get; }
         private HashSet<string> _optionsToLog { get; }
-        private const string DotnetName = "dotnet";
+        private const string TryName = "try";
 
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
         {
-            var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
+            var topLevelCommandName = parseResult[TryName]?.Tokens?.FirstOrDefault()?.Value;
             var result = new List<ApplicationInsightsEntryFormat>();
             foreach (var option in _optionsToLog)
             {
                 if (_topLevelCommandName.Contains(topLevelCommandName)
-                    && parseResult[DotnetName]?[topLevelCommandName]?.AppliedOptions != null
-                    && parseResult[DotnetName][topLevelCommandName].AppliedOptions.Contains(option))
+                    && parseResult[TryName].ParentCommandResult[topLevelCommandName].Tokens != null
+                    && parseResult[TryName].ParentCommandResult[topLevelCommandName].Tokens.Any(x => x.Value == option))
                 {
-                    AppliedOption appliedOptions =
-                        parseResult[DotnetName][topLevelCommandName]
-                            .AppliedOptions[option];
+                    Token commandOption =
+                        parseResult[TryName].ParentCommandResult[topLevelCommandName].Tokens.First(x => x.Value == option);
                     result.Add(new ApplicationInsightsEntryFormat(
                         "sublevelparser/command",
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            {option, appliedOptions.Arguments.ElementAt(0)}
+                            {option, commandOption.Value}
                         }));
                 }
             }

@@ -73,8 +73,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MLS.Agent.Tools.Tests", "ML
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Microsoft.DotNet.Interactive.FSharp.Tests", "Microsoft.DotNet.Interactive.FSharp.Tests\Microsoft.DotNet.Interactive.FSharp.Tests.fsproj", "{FAB15755-070C-4DF6-9E00-173FD5305DD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Try.Telemetry", "Microsoft.DotNet.Try.Telemetry\Microsoft.DotNet.Try.Telemetry.csproj", "{7AF19E15-9517-4A89-837C-394EE50C18B5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,10 +211,6 @@ Global
 		{FAB15755-070C-4DF6-9E00-173FD5305DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAB15755-070C-4DF6-9E00-173FD5305DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAB15755-070C-4DF6-9E00-173FD5305DD4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7AF19E15-9517-4A89-837C-394EE50C18B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7AF19E15-9517-4A89-837C-394EE50C18B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7AF19E15-9517-4A89-837C-394EE50C18B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7AF19E15-9517-4A89-837C-394EE50C18B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -255,7 +249,6 @@ Global
 		{12821999-9F44-486B-8EE3-38F0EFDFDA32} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 		{0F8F3C1A-F1D3-4476-9E5B-219BBAC8DBC6} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
 		{FAB15755-070C-4DF6-9E00-173FD5305DD4} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
-		{7AF19E15-9517-4A89-837C-394EE50C18B5} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D6CD99BA-B16B-4570-8910-225CBDFFA3AD}
