@@ -10,7 +10,7 @@ using MLS.Agent.Telemetry.Utils;
 
 namespace MLS.Agent.Telemetry
 {
-    internal class TelemetryCommonProperties
+    public class TelemetryCommonProperties
     {
         public TelemetryCommonProperties(
             Func<string> getCurrentDirectory = null,
@@ -31,6 +31,7 @@ namespace MLS.Agent.Telemetry
         private const string ProductVersion = "Product Version";
         private const string TelemetryProfile = "Telemetry Profile";
         private const string CurrentPathHash = "Current Path Hash";
+        private const string MachineId = "Machine ID";
         private const string KernelVersion = "Kernel Version";
 
         private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
@@ -45,6 +46,7 @@ namespace MLS.Agent.Telemetry
                 {ProductVersion, Product.Version},
                 {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
+                {MachineId, GetMachineId()},
                 {KernelVersion, GetKernelVersion()}
             };
         }
@@ -58,6 +60,7 @@ namespace MLS.Agent.Telemetry
             }
             else
             {
+                // TODO We might want to cache this?
                 return Guid.NewGuid().ToString();
             }
         }
