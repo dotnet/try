@@ -167,6 +167,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             await kernel.SendAsync(new SubmitCode(
                                        $"%%markdown\n\n# Topic!\nContent"));
+            
 
             var formatted =
                 events
