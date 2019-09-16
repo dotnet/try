@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Compiler.Service" Version="31.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis" />
   </ItemGroup>
 
 </Project>
