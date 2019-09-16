@@ -82,7 +82,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19420.2" />
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="TaskExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

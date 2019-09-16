@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.17.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
-    <PackageReference Include="NetMQ" Version="4.0.0.1" />
+    <PackageReference Include="NetMQ" Version="4.0.0.207" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.02" />
     <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
@@ -18,7 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.1" />
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive\Microsoft.DotNet.Interactive.csproj" />

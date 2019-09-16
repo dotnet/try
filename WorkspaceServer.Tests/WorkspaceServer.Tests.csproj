@@ -46,7 +46,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.2.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.2.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.2.1" />
-    <PackageReference Include="Microsoft.Reactive.Testing" Version="4.1.5" />
+    <PackageReference Include="Microsoft.Reactive.Testing" Version="4.1.6" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -61,7 +61,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
 
   <ItemGroup>
