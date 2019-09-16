@@ -34,7 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Linker.xml" /> 
+    <EmbeddedResource Include="Linker.xml" />
+    <EmbeddedResource Include="App.razor" />
     <EmbeddedResource Include="Program.cs" />
     <EmbeddedResource Include="Startup.cs" />
     <EmbeddedResource Include="wwwroot\index.html" />
