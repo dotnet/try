@@ -18,7 +18,7 @@ variables:
   - name: BlazorTemplateVersion
     value: 3.0.0-preview7.19365.7
   - name: DotNetSdkVersion
-    value: 3.0.100-preview7-012821
+    value: 3.0.100-preview9-014004
   - name: NodeJSVersion
     value: '>=12'
   - name: TryDotNetPackagesPath
@@ -140,7 +140,7 @@ jobs:
       variables:
       # Enable signing for internal, non-PR builds
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-        - name: _SignType
+        - name: _SignType//
           value: Test
         - name: _BuildArgs
           value: /p:SignType=$(_SignType)
