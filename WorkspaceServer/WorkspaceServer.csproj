@@ -51,14 +51,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="3.1.0-beta3-final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.1.0-beta3-final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="3.2.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.2.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="NewtonSoft.Json" Version="12.0.02" />
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19420.2" />
