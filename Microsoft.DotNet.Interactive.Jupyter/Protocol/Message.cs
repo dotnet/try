@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
@@ -49,7 +50,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         public static Message Create<T>(
             T content,
-            Header parentHeader,
+            Header parentHeader = null,
             IReadOnlyList<IReadOnlyList<byte>> identifiers = null,
             string signature = null)
             where T : JupyterMessageContent
@@ -85,6 +86,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
 
             return replyMessage;
+        }
+
+        public static byte[] Topic(string topic, string ident)
+        {
+            var fullTopic = $"kernel.{ident}.{topic}";
+            return Encoding.Unicode.GetBytes(fullTopic);
         }
 
     }

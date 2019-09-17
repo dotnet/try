@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             var newHeader = new Header(
                 messageType: messageType,
                 messageId: Guid.NewGuid().ToString(),
-                version: Constants.VERSION,
+                version: Constants.MESSAGE_PROTOCOL_VERSION,
                 username: Constants.USERNAME,
                 session: session,
                 date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
