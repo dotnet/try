@@ -25,6 +25,7 @@ using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
+using System.IO;
 
 namespace WorkspaceServer.Kernel
 {

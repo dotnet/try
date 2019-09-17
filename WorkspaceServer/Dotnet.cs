@@ -9,8 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Clockwise;
+using MLS.Agent.Tools;
 
-namespace MLS.Agent.Tools
+namespace WorkspaceServer
 {
     public partial class Dotnet
     {

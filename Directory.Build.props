@@ -2,6 +2,7 @@
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" Condition="'$(DisableArcade)' != '1'" />
   <Import Project="eng\targets\Settings.props" />
+  <Import Project="eng\targets\NuGet.targets" />
 
   <PropertyGroup>
     <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
@@ -14,4 +15,14 @@
     <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+   <!-- These properties are needed so that version number can be same for MLS.Agent.Tools and the libraries that depend on it -->  
+    <NewtonsoftJsonVersion>12.0.02</NewtonsoftJsonVersion>
+    <PocketLoggerVersion>0.3.0</PocketLoggerVersion>
+    <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
+    <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
+    <MicrosoftCodeAnalysisCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisCommonVersion>
+     <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <TaskExtensionsVersion>0.1.8580001</TaskExtensionsVersion>
+  </PropertyGroup>
 </Project>

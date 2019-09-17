@@ -12,7 +12,7 @@ using Clockwise;
 using Pocket;
 using Recipes;
 
-namespace MLS.Agent.Tools
+namespace WorkspaceServer
 {
     public static class CommandLine
     {

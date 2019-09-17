@@ -3,7 +3,6 @@
 
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using MLS.Agent.Tools;
 using System;
 using System.IO;
 using System.Linq;
@@ -52,21 +51,6 @@ namespace Microsoft.DotNet.Interactive
             }
 
             return extensionTypes.Length > 0;
-        }
-
-        public async Task LoadFromAssembliesInDirectory(IDirectoryAccessor directory, IKernel kernel, KernelInvocationContext context)
-        {
-            if (directory.RootDirectoryExists())
-            {
-                context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.GetFullyQualifiedRoot().FullName}", context.Command));
-                var extensionDlls = directory.GetAllFiles().Where(file => file.Extension == ".dll").Select(file => directory.GetFullyQualifiedFilePath(file));
-                foreach (var extensionDll in extensionDlls)
-                {
-                    await LoadFromAssembly(extensionDll, kernel, context);
-                }
-
-                context.Publish(new DisplayedValueProduced($"Loaded kernel extensions in directory {directory.GetFullyQualifiedRoot().FullName}", context.Command));
-            }
         }
     }
 }

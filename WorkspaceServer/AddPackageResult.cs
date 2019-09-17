@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MLS.Agent.Tools
+namespace WorkspaceServer
 {
     public partial class Dotnet
     {
