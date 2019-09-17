@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                     void SetBusy() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
 
-                    void SetIdle() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
+                    void SetIdle() => _shellSender.Send(Message.Create(new Status(StatusValues.Idle), message.Header));
                 }
             }
 
