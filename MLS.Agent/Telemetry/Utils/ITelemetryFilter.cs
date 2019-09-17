@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace MLS.Agent.Telemetry.Utils
 {
-    internal interface ITelemetryFilter
+    public interface ITelemetryFilter
     {
         IEnumerable<ApplicationInsightsEntryFormat> Filter(object o);
     }

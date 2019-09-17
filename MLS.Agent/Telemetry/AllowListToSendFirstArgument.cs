@@ -5,6 +5,7 @@ using System.CommandLine;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using MLS.Agent.Telemetry.Utils;
 
 namespace MLS.Agent.Telemetry
 {

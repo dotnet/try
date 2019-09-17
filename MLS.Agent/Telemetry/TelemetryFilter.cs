@@ -9,7 +9,7 @@ using MLS.Agent.Telemetry.Utils;
 
 namespace MLS.Agent.Telemetry
 {
-    internal class TelemetryFilter : ITelemetryFilter
+    public class TelemetryFilter : ITelemetryFilter
     {
         private const string TryName = "try";
         private readonly Func<string, string> _hash;

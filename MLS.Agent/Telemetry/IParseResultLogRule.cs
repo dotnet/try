@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.Collections.Generic;
+using MLS.Agent.Telemetry.Utils;
 
 namespace MLS.Agent.Telemetry
 {
