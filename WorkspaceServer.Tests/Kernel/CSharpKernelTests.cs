@@ -493,6 +493,29 @@ json
                                              .As<SubmitCode>()
                                              .Code
                                              .Contains("using System.Reflection;"));
+
+            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
+                                                     e.Value.As<DisplayedValueProduced>()
+                                                     .Value
+                                                     .ToString()
+                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
+        }
+
+        [Fact]
+        public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load()
+        {
+            var extensionDir = Create.EmptyWorkspace()
+                                     .Directory;
+
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"throw new Exception();")).FullName;
+
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
+
+            KernelEvents.Should()
+                      .ContainSingle(e => e.Value is KernelExtensionLoadException);
+
         }
 
         [Fact]
@@ -627,6 +650,12 @@ catch (Exception e)
                                              .As<SubmitCode>()
                                              .Code
                                              .Contains("using System.Reflection;"));
+
+            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
+                                                    e.Value.As<DisplayedValueProduced>()
+                                                    .Value
+                                                    .ToString()
+                                                    .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
         }
     }
 }
