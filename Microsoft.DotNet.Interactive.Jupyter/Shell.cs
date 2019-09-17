@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void HandleKernelInfoRequest(Message request)
         {
-            var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
+            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", new CSharpLanguageInfo());
 
             var replyMessage = Message.CreateResponse(kernelInfoReply, request);
 
