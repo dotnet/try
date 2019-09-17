@@ -328,7 +328,7 @@ namespace WorkspaceServer.Kernel
         {
             var directoryAccessor = new FileSystemDirectoryAccessor(directory);
             var extensionsDirectory = directoryAccessor.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context);
         }
         
         private bool HasReturnValue =>

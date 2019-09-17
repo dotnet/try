@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var socket = new TextSocket();
             var sender = new MessageSender(socket, new SignatureValidator("key", "HMACSHA256"));
             var kernelInfoReply = new KernelInfoReply(
-                                      Constants.VERSION,
+                                      Constants.MESSAGE_PROTOCOL_VERSION,
                                       ".NET",
                                       "0.0.3",
                                        new LanguageInfo(
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                                            pygmentsLexer: "c#"
                                        ));
             var header = new Header(messageType: JupyterMessageContentTypes.KernelInfoReply, messageId: Guid.Empty.ToString(),
-                version: "5.3", username: Constants.USERNAME, session: "test session",
+                version: Constants.MESSAGE_PROTOCOL_VERSION, username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
             var replyMessage = new Message(header, content: kernelInfoReply);
             sender.Send(replyMessage);

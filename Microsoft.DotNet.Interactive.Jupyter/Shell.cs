@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Reactive.Disposables;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
@@ -75,9 +77,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _ioPubSocket.Bind(_ioPubAddress);
             _stdIn.Bind(_stdInAddress);
             _control.Bind(_controlAddress);
+            var id = Guid.NewGuid().ToString();
           
             using (var activity = Log.OnEnterAndExit())
             {
+                SetStarting();
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var message = _shell.GetMessage();
@@ -89,6 +93,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     switch (message.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
+                            id = Encoding.Unicode.GetString(message.Identifiers[0].ToArray());
                             HandleKernelInfoRequest(message);
                             SetIdle();
                             break;
@@ -101,7 +106,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                             var context = new JupyterRequestContext(
                                 _shellSender,
                                 _ioPubSender,
-                                message);
+                                message, id);
 
                             await _scheduler.Schedule(context);
 
@@ -112,10 +117,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                             break;
                     }
 
-                    void SetBusy() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
-
-                    void SetIdle() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
+                    
                 }
+
+                void SetBusy() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Busy), identifiers:new []{Message.Topic("status", id)}));
+
+                void SetIdle() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Idle), identifiers: new[] { Message.Topic("status", id) }));
+
+                void SetStarting() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Starting), identifiers: new[] { Message.Topic("status", id) }));
             }
 
         }
@@ -128,7 +137,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void HandleKernelInfoRequest(Message request)
         {
-            var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
+            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", new CSharpLanguageInfo());
 
             var replyMessage = Message.CreateResponse(kernelInfoReply, request);
 

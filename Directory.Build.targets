@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="5.0.0-beta.19460.2" />
     <PackageReference Update="FSharp.Compiler.Private.Scripting" Version="11.0.0-beta.19460.2" />
-    <PackageReference Update="FSharp.Compiler.Service" Version="28.0.0" />
+    <PackageReference Update="FSharp.Compiler.Service" Version="31.0.0" />
   </ItemGroup>
 
   <Import Project="eng\targets\Versions.targets" Condition="'$(UseStableVersion)' == 'true'" />

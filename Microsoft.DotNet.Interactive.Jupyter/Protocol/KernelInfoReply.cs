@@ -25,6 +25,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         [JsonProperty("banner")]
         public string Banner { get; }
 
+        [JsonProperty("status")]
+        public string Status { get; }
+
         [JsonProperty("help_links")]
         public IReadOnlyList<Link> HelpLinks { get; }
 
@@ -51,6 +54,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             LanguageInfo = languageInfo ?? throw new ArgumentNullException(nameof(languageInfo));
             Banner = banner;
             HelpLinks = helpLinks ?? new List<Link>();
+            Status = StatusValues.Ok;
         }
     }
 }
