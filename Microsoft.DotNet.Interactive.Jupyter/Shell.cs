@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Reactive.Disposables;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
@@ -91,6 +93,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     switch (message.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
+                            id = Encoding.Unicode.GetString(message.Identifiers[0].ToArray());
                             HandleKernelInfoRequest(message);
                             SetIdle();
                             break;
