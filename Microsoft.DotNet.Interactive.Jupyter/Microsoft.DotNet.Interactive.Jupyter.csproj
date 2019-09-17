@@ -5,6 +5,7 @@
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise isn't strongly signed -->
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Clockwise" Version="1.0.261-beta" />
     <PackageReference Include="Markdig" Version="0.17.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
     <PackageReference Include="NetMQ" Version="4.0.0.207" />
