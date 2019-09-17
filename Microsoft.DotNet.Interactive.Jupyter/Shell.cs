@@ -75,9 +75,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _ioPubSocket.Bind(_ioPubAddress);
             _stdIn.Bind(_stdInAddress);
             _control.Bind(_controlAddress);
+            var id = Guid.NewGuid().ToString();
           
             using (var activity = Log.OnEnterAndExit())
             {
+                SetStarting();
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var message = _shell.GetMessage();
@@ -112,10 +114,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                             break;
                     }
 
-                    void SetBusy() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
-
-                    void SetIdle() => _shellSender.Send(Message.Create(new Status(StatusValues.Idle), message.Header));
+                    
                 }
+
+                void SetBusy() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Busy), identifiers:new []{Message.Topic("status", id)}));
+
+                void SetIdle() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Idle), identifiers: new[] { Message.Topic("status", id) }));
+
+                void SetStarting() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Starting), identifiers: new[] { Message.Topic("status", id) }));
             }
 
         }
