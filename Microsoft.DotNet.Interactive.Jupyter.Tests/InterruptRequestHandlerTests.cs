@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new InterruptRequest(), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
 
             await scheduler.Schedule(context);
 

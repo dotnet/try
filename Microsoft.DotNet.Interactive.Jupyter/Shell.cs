@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                             var context = new JupyterRequestContext(
                                 _shellSender,
                                 _ioPubSender,
-                                message);
+                                message, id);
 
                             await _scheduler.Schedule(context);
 

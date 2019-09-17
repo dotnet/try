@@ -23,16 +23,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            ServerRecordingSocket.DecodedMessages
+            IoRecordingSocket.DecodedMessages
                                   .Should().Contain(message =>
                     message.Contains(JupyterMessageContentTypes.ExecuteInput));
 
-            ServerRecordingSocket.DecodedMessages
+            IoRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
                     message.Contains("var a =12;"));
         }
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("var a =12;"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("asdes"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(10.Seconds());
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("2+2"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new ExecuteRequest("%%csharp"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
