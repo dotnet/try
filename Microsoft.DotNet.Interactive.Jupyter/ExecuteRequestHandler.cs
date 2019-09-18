@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ValueProducedEventBase valueProduced:
+                case DisplayedValueBase valueProduced:
                     OnValueProduced(valueProduced, context.Request, context.IoPubChannel);
                     break;
                 case CommandHandled commandHandled:
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         private void OnValueProduced(
-            ValueProducedEventBase valueProduced, 
+            DisplayedValueBase valueProduced, 
             Message request, 
             IMessageSender ioPubChannel)
         {
