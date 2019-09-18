@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Rendering;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
@@ -28,6 +29,8 @@ namespace Microsoft.DotNet.Interactive
             return new DisplayedValue(displayId, mimeType);
         }
 
+        public static IHtmlContent HTML(string content) => content.ToHtmlContent();
+
         public static void Javascript(
             string scriptContent)
         {
@@ -43,7 +46,7 @@ namespace Microsoft.DotNet.Interactive
             var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
-                         kernel.SendAsync(new DisplayValue(value,formatted)))
+                         kernel.SendAsync(new DisplayValue(value, formatted)))
                 .Wait();
         }
     }
