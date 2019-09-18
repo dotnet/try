@@ -375,3 +375,5 @@ docs/\.ionide/
 
 
 NotebookExamples/csharp/.ipynb_checkpoints/
+
+NotebookExamples/fsharp/Docs/.ipynb_checkpoints/
