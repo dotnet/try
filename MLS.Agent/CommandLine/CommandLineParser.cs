@@ -411,6 +411,8 @@ namespace MLS.Agent.CommandLine
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
 
+                    TelemetryEventEntry.SendFiltered(context.ParseResult);
+
                     return jupyter(console, startServer, context);
                 });
 

@@ -1,21 +1,20 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using MLS.Agent.CommandLine;
-using MLS.Agent.Telemetry;
-using MLS.Agent.Telemetry.Utils;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WorkspaceServer;
 using Xunit;
 using Xunit.Abstractions;
+using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using MLS.Agent.CommandLine;
+using MLS.Agent.Telemetry;
+using MLS.Agent.Telemetry.Utils;
+using System.Collections.Generic;
 
 namespace MLS.Agent.Tests
 {
@@ -24,14 +23,7 @@ namespace MLS.Agent.Tests
         private readonly FakeRecordEventNameTelemetry _fakeTelemetry;
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console = new TestConsole();
-        private StartupOptions _startOptions;
         private readonly Parser _parser;
-        private TryGitHubOptions _tryGitHubOptions;
-        private PackOptions _packOptions;
-        private InstallOptions _installOptions;
-        private PackageSource _installPackageSource;
-        private VerifyOptions _verifyOptions;
-        private DemoOptions _demoOptions;
 
         public TelemetryTests(ITestOutputHelper output)
         {
@@ -43,32 +35,25 @@ namespace MLS.Agent.Tests
 
             _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
             {
-                _startOptions = options;
             },
                 demo: (options, console, context, startOptions) =>
                 {
-                    _demoOptions = options;
                     return Task.CompletedTask;
                 },
                 tryGithub: (options, c) =>
                 {
-                    _tryGitHubOptions = options;
                     return Task.CompletedTask;
                 },
                 pack: (options, console) =>
                 {
-                    _packOptions = options;
                     return Task.CompletedTask;
                 },
                 install: (options, console) =>
                 {
-                    _installOptions = options;
-                    _installPackageSource = options.AddSource;
                     return Task.CompletedTask;
                 },
                 verify: (options, console, startupOptions) =>
                 {
-                    _verifyOptions = options;
                     return Task.FromResult(1);
                 },
                 jupyter: (console, startServer, context) =>
@@ -87,17 +72,21 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task NoTelemetryIfCommandIsInvalid()
+        public async Task TelemetryCommandIsValid()
         {
-            await _parser.InvokeAsync("hosted --production", _console);
-            Assert.False(_fakeTelemetry.LogEntries.Any(x => x.EventName == "hosted"));
+            await _parser.InvokeAsync("jupyter", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "toplevelparser/command" &&
+                     x.Properties.Count == 1 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
         }
 
         [Fact]
-        public async Task TelemetryIfCommandIsValid()
+        public async Task TelemetryCommandIsNotValid()
         {
-            await _parser.InvokeAsync("jupyter csharp", _console);
-            Assert.True(_fakeTelemetry.LogEntries.Any(x => x.EventName == "jupyter csharp"));
+            await _parser.InvokeAsync("jupyter invalidargument", _console);
+            _fakeTelemetry.LogEntries.Should().NotContain(
+                x => x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
         }
 
         [Fact]

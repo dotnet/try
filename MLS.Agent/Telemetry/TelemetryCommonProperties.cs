@@ -34,7 +34,7 @@ namespace MLS.Agent.Telemetry
         private const string MachineId = "Machine ID";
         private const string KernelVersion = "Kernel Version";
 
-        private const string TelemetryProfileEnvironmentVariable = "DOTNET_CLI_TELEMETRY_PROFILE";
+        private const string TelemetryProfileEnvironmentVariable = "DOTNET_TRY_CLI_TELEMETRY_PROFILE";
 
         public Dictionary<string, string> GetTelemetryCommonProperties()
         {

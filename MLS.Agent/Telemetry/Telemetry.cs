@@ -20,7 +20,7 @@ namespace MLS.Agent.Telemetry
         private Task _trackEventTask = null;
 
         private const string InstrumentationKey = ""; // TODO: Add InstrumentationKey
-        private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
+        private const string TelemetryOptout = "DOTNET_TRY_CLI_TELEMETRY_OPTOUT";
 
         public bool Enabled { get; }
 
@@ -153,7 +153,7 @@ namespace MLS.Agent.Telemetry
 
         private static string PrependProducerNamespace(string eventName)
         {
-            return "dotnet/cli/" + eventName;
+            return "dotnet/try/cli/" + eventName;
         }
 
         private Dictionary<string, double> GetEventMeasures(IDictionary<string, double> measurements)
