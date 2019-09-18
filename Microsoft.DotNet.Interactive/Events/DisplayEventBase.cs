@@ -7,9 +7,9 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public abstract class ValueProducedEventBase : KernelEventBase
+    public abstract class DisplayEventBase : KernelEventBase
     {
-        protected ValueProducedEventBase(
+        protected DisplayEventBase(
             object value,
             IKernelCommand command,
             IReadOnlyCollection<FormattedValue> formattedValues = null,

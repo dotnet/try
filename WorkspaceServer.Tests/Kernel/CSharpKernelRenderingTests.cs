@@ -66,7 +66,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueProduced = await result
                                       .KernelEvents
-                                      .OfType<ReturnValueProduced>()
+                                      .OfType<DisplayEventBase>()
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
 

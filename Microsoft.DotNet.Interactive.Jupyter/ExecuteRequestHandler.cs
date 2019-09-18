@@ -44,8 +44,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case ValueProducedEventBase valueProduced:
-                    OnValueProduced(valueProduced, context.Request, context.IoPubChannel);
+                case DisplayEventBase displayEvent:
+                    OnDisplayEvent(displayEvent, context.Request, context.IoPubChannel);
                     break;
                 case CommandHandled commandHandled:
                     OnCommandHandled(commandHandled, context.Request, context.ServerChannel);
@@ -121,24 +121,24 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnValueProduced(
-            ValueProducedEventBase valueProduced, 
+        private void OnDisplayEvent(
+            DisplayEventBase displayEvent, 
             Message request, 
             IMessageSender ioPubChannel)
         {
-            var transient = CreateTransient(valueProduced.ValueId);
+            var transient = CreateTransient(displayEvent.ValueId);
 
-            var formattedValues = valueProduced
+            var formattedValues = displayEvent
                 .FormattedValues
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
-            var value = valueProduced.Value;
+            var value = displayEvent.Value;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             JupyterMessageContent executeResultData;
 
-            switch (valueProduced)
+            switch (displayEvent)
             {
                 case DisplayedValueProduced _:
                     executeResultData = new DisplayData(
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         data: formattedValues);
                     break;
                 default:
-                    throw new ArgumentException("Unsupported event type", nameof(valueProduced));
+                    throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
 
             SendDisplayData(executeResultData, request, ioPubChannel);
