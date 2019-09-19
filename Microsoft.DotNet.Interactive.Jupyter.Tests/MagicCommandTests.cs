@@ -3,6 +3,7 @@
 
 using System;
 using System.CommandLine;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -219,6 +220,70 @@ display(""done!"");
                   .SelectMany(e => e.FormattedValues)
                   .Should()
                   .Contain(v => v.Value.Equals("done!"));
+        }
+
+        [Fact]
+        public async Task WriteFile_magic_command_writes_the_code_in_a_file()
+        {
+          var kernel = new CompositeKernel
+                {
+                    new CSharpKernel().UseKernelHelpers()
+                }
+                .UseDefaultMagicCommands()
+                .LogEventsToPocketLogger();
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            var file = Path.GetTempFileName();
+            var text = "This text must be written to a file";
+            await kernel.SendAsync(new SubmitCode(
+                                       $@"
+%%writefile {file}
+{text}"));
+
+            File.ReadAllText(file).Should().Be(text);
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced)
+                  .Which
+                  .As<DisplayedValueProduced>()
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(v =>
+                                     v.MimeType == "text/plain" &&
+                                     v.Value.ToString().StartsWith($"Written text to file {file}"));
+
+        }
+
+        [Fact]
+        public async Task WriteFile_magic_command_shows_error_if_filename_is_invalid()
+        {
+            var kernel = new CompositeKernel
+                {
+                    new CSharpKernel().UseKernelHelpers()
+                }
+                  .UseDefaultMagicCommands()
+                  .LogEventsToPocketLogger();
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            var file = "INVALID_PATH";
+            var text = "This text must be not be written to a file";
+            await kernel.SendAsync(new SubmitCode(
+                                       $@"
+%%writefile {file}
+{text}"));
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced)
+                  .Which
+                  .As<DisplayedValueProduced>()
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(v =>
+                                     v.MimeType == "text/plain" &&
+                                     v.Value.ToString().StartsWith($"Could not write to file"));
+
         }
     }
 }

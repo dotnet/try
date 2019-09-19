@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Diagnostics;
@@ -14,6 +15,8 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Extensions;
 using Microsoft.DotNet.Interactive.Rendering;
+using MLS.Agent.Tools;
+using MLS.Agent.Tools.Roslyn;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
@@ -27,7 +30,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                   .UseHtml()
                   .UseJavaScript()
                   .UseMarkdown()
-                  .UseTime();
+                  .UseTime()
+                  .UseWriteFile();
 
             return kernel;
         }
@@ -37,25 +41,25 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             kernel.AddDirective(new Command("%%html")
             {
-                Handler =  CommandHandler.Create((KernelInvocationContext context) =>
-                {
-                    if (context.Command is SubmitCode submitCode)
-                    {
-                        var htmlContent = submitCode.Code
-                                                      .Replace("%%html", "")
-                                                      .Trim();
-                      
-                        context.Publish(new DisplayedValueProduced(
-                                           htmlContent,
-                                           context.Command,
-                                           formattedValues: new[]
-                                           {
-                                               new FormattedValue("text/html", htmlContent)
-                                           }));
+                Handler = CommandHandler.Create((KernelInvocationContext context) =>
+               {
+                   if (context.Command is SubmitCode submitCode)
+                   {
+                       var htmlContent = submitCode.Code
+                                                     .Replace("%%html", "")
+                                                     .Trim();
 
-                        context.Complete();
-                    }
-                })
+                       context.Publish(new DisplayedValueProduced(
+                                          htmlContent,
+                                          context.Command,
+                                          formattedValues: new[]
+                                          {
+                                               new FormattedValue("text/html", htmlContent)
+                                          }));
+
+                       context.Complete();
+                   }
+               })
             });
 
             return kernel;
@@ -122,6 +126,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             where T : KernelBase
         {
             kernel.AddDirective(time());
+
+            return kernel;
+        }
+
+        private static T UseWriteFile<T>(this T kernel)
+           where T : KernelBase
+        {
+            kernel.AddDirective(writefile());
 
             return kernel;
         }
@@ -236,7 +248,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                         context.Publish(
                             new DisplayedValueProduced(
-                                elapsed, 
+                                elapsed,
                                 context.Command,
                                 new[]
                                 {
@@ -247,6 +259,70 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     }
                 })
             };
+        }
+
+        private static Command writefile()
+        {
+            var command = new Command("%%writefile")
+            {
+                Handler = CommandHandler.Create(async (KernelInvocationContext context, WriteFileOptions options) =>
+                {
+                    if (context.Command is SubmitCode submitCode)
+                    {
+                        var code = submitCode.Code
+                                             .Replace("%%writefile", "")
+                                             .Replace(options.FileName.FullName, "")
+                                             .Trim();
+                        try
+                        {
+                            if (!options.FileName.Exists)
+                            {
+                                options.FileName.Create();
+                            }
+
+                            File.WriteAllText(options.FileName.FullName, code);
+                            var formattableString = $"Written text to file {options.FileName.FullName}";
+                            await context.HandlingKernel.SendAsync(new DisplayValue(formattableString, new FormattedValue(PlainTextFormatter.MimeType, formattableString)));
+                        }
+                        catch (Exception e)
+                        {
+                            var formattableString = $"Could not write to file {options.FileName.FullName} due to exception {e.Message}";
+                            await context.HandlingKernel.SendAsync(new DisplayValue(formattableString, new FormattedValue(PlainTextFormatter.MimeType, formattableString)));
+                        }
+
+                        context.Complete();
+                    }
+                })
+            };
+
+            var fileArgument = new Argument<FileInfo>()
+            {
+                Name = nameof(WriteFileOptions.FileName),
+                Description = "Specify the file path to write to"
+            };
+
+            fileArgument.AddValidator(symbolResult =>
+            {
+                var file = symbolResult.Tokens
+                               .Select(t => t.Value)
+                               .FirstOrDefault();
+                
+                if (!PathUtilities.IsAbsolute(file))
+                {
+                    return "Absolute file path expected";
+                }
+
+                if (!PathUtilities.IsValidFilePath(file))
+                {
+                    return "Invalid file path";
+                }
+
+                return null;
+            });
+
+            command.AddArgument(fileArgument);
+
+            return command;
         }
     }
 }
