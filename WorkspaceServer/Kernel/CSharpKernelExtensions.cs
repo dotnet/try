@@ -61,7 +61,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 var addPackage = new AddNugetPackage(package);
                 addPackage.Handler = async context =>
                 {
-                    var message = $"Attempting to install package {package.PackageName}";
+                    var message = $"Installing package {package.PackageName}";
                     if (!string.IsNullOrWhiteSpace(package.PackageVersion))
                     {
                         message += $", version {package.PackageVersion}";
