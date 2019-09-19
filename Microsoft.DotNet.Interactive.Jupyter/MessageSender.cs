@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             Send(Constants.DELIMITER, _socket);
             Send(hmac, _socket);
             Send(message.Header.ToJson(), _socket);
-            Send(message.ParentHeader.ToJson(), _socket);
+            Send((message.ParentHeader?? new object()).ToJson(), _socket);
             Send(message.MetaData.ToJson(), _socket);
             Send(message.Content.ToJson(), _socket, false);
 

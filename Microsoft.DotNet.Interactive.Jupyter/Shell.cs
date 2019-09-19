@@ -81,25 +81,25 @@ namespace Microsoft.DotNet.Interactive.Jupyter
           
             using (var activity = Log.OnEnterAndExit())
             {
-                SetStarting();
+                //SetStarting();
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var message = _shell.GetMessage();
 
                     activity.Info("Received: {message}", message.ToJson());
 
-                    SetBusy();
+                    SetBusy(message.Header);
 
                     switch (message.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
                             id = Encoding.Unicode.GetString(message.Identifiers[0].ToArray());
                             HandleKernelInfoRequest(message);
-                            SetIdle();
+                            SetIdle(message.Header);
                             break;
 
                         case JupyterMessageContentTypes.KernelShutdownRequest:
-                            SetIdle();
+                            SetIdle(message.Header);
                             break;
 
                         default:
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                             await context.Done();
 
-                            SetIdle();
+                            SetIdle(message.Header);
 
                             break;
                     }
@@ -120,11 +120,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Busy), identifiers:new []{Message.Topic("status", id)}));
+                void SetBusy(Header parentHeader) => _ioPubSender.Send(Message.Create(new Status(StatusValues.Busy), parentHeader: parentHeader, identifiers:new []{Message.Topic("status", id)}));
 
-                void SetIdle() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Idle), identifiers: new[] { Message.Topic("status", id) }));
+                void SetIdle(Header parentHeader) => _ioPubSender.Send(Message.Create(new Status(StatusValues.Idle), parentHeader: parentHeader, identifiers: new[] { Message.Topic("status", id) }));
 
-                void SetStarting() => _ioPubSender.Send(Message.Create(new Status(StatusValues.Starting), identifiers: new[] { Message.Topic("status", id) }));
+                
             }
 
         }
