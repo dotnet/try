@@ -12,11 +12,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request)
+        public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request, string kernelIdent)
         {
             ServerChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
             IoPubChannel = ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
             Request = request ?? throw new ArgumentNullException(nameof(request));
+            KernelIdent = kernelIdent;
         }
 
         public IMessageSender ServerChannel { get; }
@@ -24,6 +25,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public IMessageSender IoPubChannel { get; }
 
         public Message Request { get; }
+        public string KernelIdent { get; }
 
         public T GetRequestContent<T>() where T : JupyterMessageContent
         {

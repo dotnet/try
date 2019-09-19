@@ -20,20 +20,20 @@ namespace MLS.Agent.Tests
             _successfulInstall = successfulInstall;
         }
 
-        public Task<CommandLineResult> ExecuteCommand(string command, string args = "")
+        public Task<WorkspaceServer.CommandLineResult> ExecuteCommand(string command, string args = "")
         {
             throw new NotImplementedException();
         }
 
-        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
+        public Task<WorkspaceServer.CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
             if(_successfulInstall)
             {
                 var installPath = Path.Combine(Directory.GetCurrentDirectory(), sourceDirectory.Name.ToLower());
-                return Task.FromResult(new CommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" }));
+                return Task.FromResult(new WorkspaceServer.CommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" }));
             }
 
-            return Task.FromResult(new CommandLineResult(1));
+            return Task.FromResult(new WorkspaceServer.CommandLineResult(1));
         }
     }
 }

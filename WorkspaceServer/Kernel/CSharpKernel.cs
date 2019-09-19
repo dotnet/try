@@ -25,6 +25,7 @@ using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
+using System.IO;
 
 namespace WorkspaceServer.Kernel
 {
@@ -326,7 +327,7 @@ namespace WorkspaceServer.Kernel
         public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
         {
             var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context);
         }
         
         private bool HasReturnValue =>

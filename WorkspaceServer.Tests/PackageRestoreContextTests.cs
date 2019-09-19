@@ -50,5 +50,15 @@ namespace WorkspaceServer.Tests
             path.FullName.Should().EndWith("htmlagilitypack" + Path.DirectorySeparatorChar + "1.11.12");
             path.Exists.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task Can_get_path_to_nuget_package_which_doesnt_have_lib_folder()
+        {
+            var packageRestoreContext = new PackageRestoreContext();
+            await packageRestoreContext.AddPackage("roslyn.analyzers", "1.0.3.4");
+            var path = await packageRestoreContext.GetDirectoryForPackage("roslyn.analyzers");
+            path.FullName.Should().EndWith("roslyn.analyzers" + Path.DirectorySeparatorChar + "1.0.3.4");
+            path.Exists.Should().BeTrue();
+        }
     }
 }

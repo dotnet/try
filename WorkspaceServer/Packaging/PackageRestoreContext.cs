@@ -102,20 +102,20 @@ namespace WorkspaceServer.Packaging
 @"  <Target Name='ComputePackageRoots' BeforeTargets='CoreCompile;PrintNuGetPackagesPaths' DependsOnTargets='CollectPackageReferences'>
         <ItemGroup>
         <!-- Read the package path from the Pkg{PackageName} properties that are present in the nuget.g.props file -->
-            <AddedNuGetPackage Include='@(ResolvedCompileFileDefinitions)'>
-                <PackageRootProperty>Pkg$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NugetPackageId)').Replace('.','_'))</PackageRootProperty>
+            <AddedNuGetPackage Include='@(PackageReference)'>
+                <PackageRootProperty>Pkg$([System.String]::Copy('%(PackageReference.Identity)').Replace('.','_'))</PackageRootProperty>
                 <PackageRoot>$(%(AddedNuGetPackage.PackageRootProperty))</PackageRoot>
             </AddedNuGetPackage>
         </ItemGroup>
 
-        <Message Text=""Done: Read package root : %(AddedNuGetPackage.PackageRoot) for %(AddedNuGetPackage.NuGetPackageId)"" Condition=""%(AddedNuGetPackage.PackageRoot) != ''"" Importance=""high""/>
+        <Message Text=""Done: Read package root : %(AddedNuGetPackage.PackageRoot) for %(AddedNuGetPackage.Identity)"" Condition=""%(AddedNuGetPackage.PackageRoot) != ''"" Importance=""high""/>
     </Target>";
 
             const string writePackageRootsToDiskTarget =
 @"  <Target Name='PrintNuGetPackagesPaths' DependsOnTargets='ResolvePackageAssets;ComputePackageRoots' AfterTargets='PrepareForBuild'>
         <ItemGroup>
             <ReferenceLines Remove='@(ReferenceLines)' />
-            <ReferenceLines Include='%(AddedNuGetPackage.NuGetPackageId),%(AddedNuGetPackage.PackageRoot)' Condition=""%(AddedNuGetPackage.PackageRoot) != ''""/>
+            <ReferenceLines Include='%(AddedNuGetPackage.Identity),%(AddedNuGetPackage.PackageRoot)' Condition=""%(AddedNuGetPackage.PackageRoot) != ''""/>
         </ItemGroup>
 
         <WriteLinesToFile Lines='@(ReferenceLines)' File='$(MSBuildProjectFullPath).nuget.paths' Overwrite='True' WriteOnlyWhenDifferent='True' />

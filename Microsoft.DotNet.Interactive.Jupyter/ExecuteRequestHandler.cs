@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            var executeReply = Message.Create(executeInputPayload, context.Request.Header);
-            context.ServerChannel.Send(executeReply);
+            var executeReply = Message.Create(executeInputPayload, context.Request.Header, identifiers:new []{Message.Topic("execute_input", context.KernelIdent) });
+            context.IoPubChannel.Send(executeReply);
 
             var command = new SubmitCode(executeRequest.Code);
 

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace MLS.Agent.Tools
+namespace WorkspaceServer
 {
     public class CommandLineInvocationException : Exception
     {
