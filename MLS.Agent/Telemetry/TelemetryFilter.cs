@@ -7,6 +7,7 @@ using System.Linq;
 using System.CommandLine;
 using MLS.Agent.Telemetry.Utils;
 using System.Collections;
+using System.Collections.Immutable;
 
 namespace MLS.Agent.Telemetry
 {
@@ -32,11 +33,12 @@ namespace MLS.Agent.Telemetry
             if (objectToFilter is ParseResult parseResult)
             {
                 var isDotNetTryCommand = parseResult.RootCommandResult?.Token.Value == DotNetTryName;
-                var commandName = parseResult.Tokens?.Take(1).Select(x => x.Value).FirstOrDefault();
+                var tokens = parseResult?.Tokens.Where(x => x.Type != TokenType.Directive); // skip directives as we do not care right now
+                var commandName = tokens?.Take(1).Where(x => x.Type == TokenType.Command).Select(x => x.Value).FirstOrDefault();
 
-                if (isDotNetTryCommand && commandName == parseResult.CommandResult?.Command?.Name)
+                if (isDotNetTryCommand && !String.IsNullOrWhiteSpace(commandName))
                 {
-                    var arguments = parseResult.CommandResult.Tokens.Skip(1).Select(x => x.Value);
+                    var arguments = tokens.Skip(1);
                     if (TryFindSuccessfulRule(commandName, arguments, out var rule))
                     {
                         result.Add(CreateEntry(rule));
@@ -47,74 +49,112 @@ namespace MLS.Agent.Telemetry
             return result.Select(r => r.WithAppliedToPropertiesValue(_hash)).ToList();
         }
 
-        private bool TryFindSuccessfulRule(string commandName, IEnumerable<string> arguments, out SuccessfulRule outRule)
+        private bool TryFindSuccessfulRule(string commandName, IEnumerable<Token> arguments, out ParserFilterRule outRule)
         {
-            var rule = 
+            outRule = 
                 ParseResultMatchingRules
-                .FirstOrDefault(x => x.Command == commandName && x.Arguments.SequenceEqual(arguments));
+                .FirstOrDefault(x => x.Command == commandName &&
+                                     x.Items.Select(item => item.Tokens)
+                                      .Aggregate((item1, item2) => item1.AddRange(item2))
+                                      .SequenceEqual(arguments));
 
-            if (rule == null)
-            {
-                outRule = null;
-                return false;
-            }
-            else
-            {
-                outRule = new SuccessfulRule(rule.Command, rule.Arguments);
-                return true;
-            }
+            return outRule != null;
         }
 
-        // TODO: Handle arguments and options.
-        private ApplicationInsightsEntryFormat CreateEntry(SuccessfulRule rule)
+        private ApplicationInsightsEntryFormat CreateEntry(ParserFilterRule rule)
         {
-            if (rule.Arguments.Count() == 0)
+            var keyValues = new List<KeyValuePair<string, string>>();
+
+            keyValues.Add(new KeyValuePair<string, string>("verb", rule.Command));
+
+            foreach (var item in rule.Items)
             {
-                return new ApplicationInsightsEntryFormat(
-                    "toplevelparser/command",
-                    new Dictionary<string, string>
-                    {
-                        { "verb", rule.Command }
-                    });
+                switch(item)
+                {
+                    case ParserFilterOption opt:
+                        {
+                            keyValues.Add(new KeyValuePair<string, string>(opt.Key, opt.Argument));
+                            break;
+                        }
+                    case ParserFilterArgument arg:
+                        {
+                            keyValues.Add(new KeyValuePair<string, string>(arg.Key, arg.Token.Value));
+                            break;
+                        }
+                    default:
+                        break;
+                }
             }
-            else
-            {
-                return new ApplicationInsightsEntryFormat(
-                    "toplevelparser/command",
-                    new Dictionary<string, string>
-                    {
-                        { "verb", rule.Command },
-                    });
-            }
+
+            return new ApplicationInsightsEntryFormat("parser/command", new Dictionary<string, string>(keyValues));
         }
 
-        private class SuccessfulRule
+        private abstract class ParserFilterItem
         {
-            public SuccessfulRule(string command, IEnumerable<string> arguments)
+            public abstract ImmutableArray<Token> Tokens { get; }
+        }
+
+        private class ParserFilterOption : ParserFilterItem
+        {
+            public ParserFilterOption(string option, string argument, string key)
+            {
+                Tokens = ImmutableArray.CreateRange(
+                    new Token[] { new Token(option, TokenType.Option), new Token(argument, TokenType.Argument) });
+                Argument = argument;
+                Key = key;
+            }
+
+            public override ImmutableArray<Token> Tokens { get; }
+            public string Argument { get; }
+            public string Key { get; }
+        }
+
+        private class ParserFilterArgument : ParserFilterItem
+        {
+            public ParserFilterArgument(string value, TokenType type, string key)
+            {
+                Token = new Token(value, type);
+                Key = key;
+                Tokens = ImmutableArray.Create(Token);
+            }
+
+            public override ImmutableArray<Token> Tokens { get; }
+            public Token Token { get; }
+            public string Key { get; }
+        }
+
+        private class ParserFilterRule
+        {
+            public ParserFilterRule(string command, IEnumerable<ParserFilterItem> arguments)
             {
                 Command = command;
-                Arguments = arguments;
+                Items = ImmutableArray.CreateRange(arguments);
             }
 
             public string Command { get; }
-            public IEnumerable<string> Arguments { get; }
+            public ImmutableArray<ParserFilterItem> Items { get; }
         }
 
-        private class FilterRule
+        private static ParserFilterItem Opt(string option, string argument, string key)
         {
-            public FilterRule(string command, IEnumerable<string> arguments)
-            {
-                Command = command;
-                Arguments = arguments;
-            }
-
-            public string Command { get; }
-            public IEnumerable<string> Arguments { get; }
+            return new ParserFilterOption(option, argument, key);
         }
 
-        private static FilterRule[] ParseResultMatchingRules => new FilterRule[]
+        private static ParserFilterItem Arg(string value, TokenType type, string key)
         {
-            new FilterRule("jupyter", new string[]{})
+            return new ParserFilterArgument(value, type, key);
+        }
+
+        private static ParserFilterRule[] ParseResultMatchingRules => new ParserFilterRule[]
+        {
+            new ParserFilterRule("jupyter", 
+                new ParserFilterItem[]{}),
+            new ParserFilterRule("jupyter", 
+                new ParserFilterItem[]{  Arg("install", TokenType.Command, "subcommand") }),
+            new ParserFilterRule("jupyter", 
+                new ParserFilterItem[]{  Opt("--default-kernel", "csharp", "default-kernel") }),
+            new ParserFilterRule("jupyter", 
+                new ParserFilterItem[]{  Opt("--default-kernel", "fsharp", "default-kernel") }),
         };
     }
 }

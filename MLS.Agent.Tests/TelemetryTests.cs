@@ -76,17 +76,68 @@ namespace MLS.Agent.Tests
         {
             await _parser.InvokeAsync("jupyter", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
-                x => x.EventName == "toplevelparser/command" &&
+                x => x.EventName == "parser/command" &&
                      x.Properties.Count == 1 &&
                      x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsValid2()
+        {
+            await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "parser/command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsValid3()
+        {
+            await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "parser/command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("FSHARP"));
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsValid4()
+        {
+            await _parser.InvokeAsync("jupyter install", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "parser/command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["subcommand"] == Sha256Hasher.Hash("INSTALL"));
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsValid5()
+        {
+            // Do not capture connection file
+            await _parser.InvokeAsync("jupyter --default-kernel csharp secretconfiguration", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "parser/command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
         }
 
         [Fact]
         public async Task TelemetryCommandIsNotValid()
         {
             await _parser.InvokeAsync("jupyter invalidargument", _console);
-            _fakeTelemetry.LogEntries.Should().NotContain(
-                x => x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
+            _fakeTelemetry.LogEntries.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsNotValid2()
+        {
+            await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
+            _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
         [Fact]

@@ -16,6 +16,7 @@ using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.Markdown;
+using MLS.Agent.Telemetry;
 using MLS.Agent.Telemetry.Utils;
 using MLS.Agent.Tools;
 using MLS.Repositories;
@@ -109,6 +110,10 @@ namespace MLS.Agent.CommandLine
 
             startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
+
+            var telemetryClient = new Telemetry.Telemetry();
+            TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
+            TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
@@ -417,8 +422,9 @@ namespace MLS.Agent.CommandLine
                 });
 
                 var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
-                installCommand.Handler = CommandHandler.Create<IConsole>((console) =>
+                installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
+                    TelemetryEventEntry.SendFiltered(context.ParseResult);
                     return new JupyterCommandLine(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
                 });
 
