@@ -10,7 +10,8 @@ ENV HOME /home/${NB_USER}
 
 WORKDIR ${HOME}
 
-COPY ./NotebookExamples/* ${HOME}/
+COPY ./NotebookExamples/csharp/* ${HOME}/csharp
+COPY ./NotebookExamples/fsharp/* ${HOME}/fsharp
 
 USER root
 RUN apt-get update
