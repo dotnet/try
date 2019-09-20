@@ -255,7 +255,7 @@ display(""done!"");
 
         }
 
-        [Fact]
+        [Fact(Skip = "Needs https://github.com/dotnet/try/issues/469 to be resolved ")]
         public async Task WriteFile_magic_command_shows_error_if_filename_is_invalid()
         {
             var kernel = new CompositeKernel
