@@ -15,6 +15,7 @@ using MLS.Agent.CommandLine;
 using MLS.Agent.Telemetry;
 using MLS.Agent.Telemetry.Utils;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MLS.Agent.Tests
 {
@@ -117,13 +118,25 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task TelemetryCommandIsValid5()
         {
-            // Do not capture connection file
-            await _parser.InvokeAsync("jupyter --default-kernel csharp secretconfiguration", _console);
-            _fakeTelemetry.LogEntries.Should().Contain(
-                x => x.EventName == "parser/command" &&
-                     x.Properties.Count == 2 &&
-                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
-                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
+            var tmp = Path.GetTempFileName();
+            try
+            {
+                // Do not capture connection file
+                await _parser.InvokeAsync(String.Format("jupyter --default-kernel csharp {0}", tmp), _console);
+                _fakeTelemetry.LogEntries.Should().Contain(
+                    x => x.EventName == "parser/command" &&
+                         x.Properties.Count == 2 &&
+                         x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                         x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
+            }
+            finally
+            {
+                try
+                {
+                    File.Delete(tmp);
+                }
+                catch { }
+            }
         }
 
         [Fact]
