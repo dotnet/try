@@ -10,7 +10,13 @@ ENV HOME /home/${NB_USER}
 
 WORKDIR ${HOME}
 
+# Copy notebooks
+
 COPY ./NotebookExamples/ ${HOME}/
+
+# Copy package sources
+
+COPY ./NuGet.config ${HOME}/nuget.config
 
 USER root
 RUN apt-get update
