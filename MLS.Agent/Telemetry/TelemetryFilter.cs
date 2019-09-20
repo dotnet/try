@@ -55,8 +55,8 @@ namespace MLS.Agent.Telemetry
                 ParseResultMatchingRules
                 .FirstOrDefault(x => x.Command == commandName &&
                                      x.Items.Select(item => item.Tokens)
-                                      .Aggregate((item1, item2) => item1.AddRange(item2))
-                                      .SequenceEqual(arguments));
+                                            .Aggregate((item1, item2) => item1.AddRange(item2))
+                                            .SequenceEqual(arguments));
 
             return outRule != null;
         }

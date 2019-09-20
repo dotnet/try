@@ -154,6 +154,13 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
+        public void TelemetryCommonPropertiesShouldContainIfItIsInDockerOrNot()
+        {
+            var unitUnderTest = new TelemetryCommonProperties();
+            unitUnderTest.GetTelemetryCommonProperties().Should().ContainKey("Docker Container");
+        }
+
+        [Fact]
         public void TelemetryCommonPropertiesShouldReturnHashedPath()
         {
             var unitUnderTest = new TelemetryCommonProperties(() => "ADirectory");
