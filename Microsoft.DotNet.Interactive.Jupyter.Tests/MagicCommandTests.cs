@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             await kernel.SendAsync(new SubmitCode(
                                        $"%%markdown\n\n# Topic!\nContent"));
-            
+
 
             var formatted =
                 events
@@ -225,12 +225,12 @@ display(""done!"");
         [Fact]
         public async Task WriteFile_magic_command_writes_the_code_in_a_file()
         {
-          var kernel = new CompositeKernel
+            var kernel = new CompositeKernel
                 {
                     new CSharpKernel().UseKernelHelpers()
                 }
-                .UseDefaultMagicCommands()
-                .LogEventsToPocketLogger();
+                  .UseDefaultMagicCommands()
+                  .LogEventsToPocketLogger();
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -251,7 +251,43 @@ display(""done!"");
                   .Should()
                   .ContainSingle(v =>
                                      v.MimeType == "text/plain" &&
-                                     v.Value.ToString().StartsWith($"Written text to file {file}"));
+                                     v.Value.ToString().StartsWith($"Overwriting text to file {file}"));
+
+        }
+
+        [Fact]
+        public async Task WriteFile_magic_command_appends_the_code_to_file_when_option_is_set()
+        {
+            var kernel = new CompositeKernel
+                {
+                    new CSharpKernel().UseKernelHelpers()
+                }
+                  .UseDefaultMagicCommands()
+                  .LogEventsToPocketLogger();
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            var file = Path.GetTempFileName();
+            File.Create(file).Dispose();
+            var existingText = "This text is already there";
+            File.WriteAllText(file, existingText);
+
+            var appendedText = "This text must be written to a file";
+            await kernel.SendAsync(new SubmitCode(
+$@"%%writefile -a {file}
+{appendedText}"));
+
+            File.ReadAllText(file).Should().Be(existingText + "\n" + appendedText);
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced)
+                  .Which
+                  .As<DisplayedValueProduced>()
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(v =>
+                                     v.MimeType == "text/plain" &&
+                                     v.Value.ToString().StartsWith($"Appending text to file {file}"));
 
         }
 

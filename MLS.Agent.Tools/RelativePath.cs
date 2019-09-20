@@ -189,4 +189,9 @@ namespace MLS.Agent.Tools
         //     return !Equals(left, right);
         // }
     }
+
+    public static class ArrayExtensions
+    {
+
+    }
 }

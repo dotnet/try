@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Diagnostics;
@@ -269,20 +270,27 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 {
                     if (context.Command is SubmitCode submitCode)
                     {
-                        var code = submitCode.Code
-                                             .Replace("%%writefile", "")
-                                             .Replace(options.FileName.FullName, "")
-                                             .Trim();
+                        var code = string.Join("\n", submitCode.Code.Split('\n', '\r').Where(line => !line.Contains("%%writefile")));
+                                            
                         try
                         {
                             if (!options.FileName.Exists)
                             {
-                                options.FileName.Create();
+                                options.FileName.Create().Dispose();
                             }
 
-                            File.WriteAllText(options.FileName.FullName, code);
-                            var formattableString = $"Written text to file {options.FileName.FullName}";
-                            await context.HandlingKernel.SendAsync(new DisplayValue(formattableString, new FormattedValue(PlainTextFormatter.MimeType, formattableString)));
+                            string message;
+                            if (options.Append)
+                            {
+                                File.AppendAllText(options.FileName.FullName, code);
+                                message = $"Appending text to file {options.FileName.FullName}";
+                            }
+                            else
+                            {
+                                File.WriteAllText(options.FileName.FullName, code);
+                                message = $"Overwriting text to file {options.FileName.FullName}";
+                            }
+                            await context.HandlingKernel.SendAsync(new DisplayValue(message, new FormattedValue(PlainTextFormatter.MimeType, message)));
                         }
                         catch (Exception e)
                         {
@@ -321,6 +329,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             });
 
             command.AddArgument(fileArgument);
+            command.AddOption(new Option(new string[] { "-a", "--append" }, "Append to file")
+            {
+                Argument = new Argument<bool>(defaultValue: () => false)
+            });
 
             return command;
         }
