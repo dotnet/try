@@ -140,16 +140,22 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsNotValid()
+        public async Task TelemetryCommandIsValid6()
         {
-            await _parser.InvokeAsync("jupyter invalidargument", _console);
-            _fakeTelemetry.LogEntries.Should().BeEmpty();
+            // TODO: This should actually not have any log entries.
+            // Do not capture "oops"
+            await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "parser/command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash(String.Empty));
         }
 
         [Fact]
-        public async Task TelemetryCommandIsNotValid2()
+        public async Task TelemetryCommandIsNotValid()
         {
-            await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
+            await _parser.InvokeAsync("jupyter invalidargument", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
