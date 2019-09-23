@@ -12,7 +12,7 @@ WORKDIR ${HOME}
 
 # Copy notebooks
 
-COPY ./NotebookExamples/ ${HOME}/
+COPY ./NotebookExamples/ ${HOME}/Notebooks/
 
 # Copy package sources
 
@@ -66,3 +66,6 @@ RUN echo "$PATH"
 
 # Install kernel specs
 RUN dotnet try jupyter install
+
+# Set root to Notebooks
+WORKDIR ${HOME}/Notebooks/
