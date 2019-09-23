@@ -17,11 +17,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         internal readonly Dictionary<Type, ITypeFormatter> _formatters;
 
-        private static IReadOnlyCollection<T> FormattableSpanGeneric<T>(
-            ReadOnlyMemory<T> mem)
-        {
-            return mem.Span.ToArray();
-        }
+        private static readonly MethodInfo _formatReadOnlyMemoryMethod = typeof(DefaultPlainTextFormatterSet)
+                                                                         .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+                                                                         .Single(m => m.Name == nameof(FormatReadOnlyMemory));
 
         public DefaultPlainTextFormatterSet()
         {
@@ -35,14 +33,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
                         type,
                         (obj, writer) =>
                         {
-                            var genericMethodDefinition
-                                = typeof(DefaultPlainTextFormatterSet)
-                                  .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
-                                  .Single(m => m.Name == nameof(FormattableSpanGeneric));
+                            var toArray = _formatReadOnlyMemoryMethod.MakeGenericMethod(type.GetGenericArguments());
 
-                            var func = genericMethodDefinition.MakeGenericMethod(type.GetGenericArguments());
-
-                            var array = func.Invoke(null, new[]
+                            var array = toArray.Invoke(null, new[]
                             {
                                 obj
                             });
@@ -150,5 +143,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             return true;
         }
+
+        private static IReadOnlyCollection<T> FormatReadOnlyMemory<T>(ReadOnlyMemory<T> mem) => mem.Span.ToArray();
     }
 }

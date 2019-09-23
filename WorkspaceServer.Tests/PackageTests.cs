@@ -13,7 +13,6 @@ using Xunit;
 using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
-using WorkspaceServer.Tests.Packaging;
 using MLS.Agent.Tools.Tests;
 
 namespace WorkspaceServer.Tests
