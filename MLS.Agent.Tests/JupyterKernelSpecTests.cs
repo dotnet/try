@@ -49,6 +49,7 @@ namespace MLS.Agent.Tests
 
             var result = await kernelSpec.InstallKernel(kernelDir);
             result.ExitCode.Should().Be(1);
+            result.Error.Should().BeEquivalentTo("Could not find jupyter kernelspec module");
         }
 
 

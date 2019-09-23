@@ -15,7 +15,7 @@ namespace MLS.Agent
         {
             if (!CheckIfJupyterKernelSpecExists())
             {
-                return new CommandLineResult(1, new List<string> { "Could not find jupyter kernelspec module" });
+                return new CommandLineResult(1, error: new List<string> { "Could not find jupyter kernelspec module" });
             }
 
             return await WorkspaceServer.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
@@ -29,7 +29,7 @@ namespace MLS.Agent
         public static bool CheckIfJupyterKernelSpecExists()
         {
             var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which";
-            bool jupyterKernelSpecExists = false ;
+            var jupyterKernelSpecExists = false ;
 
             Task.Run(async ()=> {
                 var result = await WorkspaceServer.CommandLine.Execute(command, "jupyter-kernelspec");
