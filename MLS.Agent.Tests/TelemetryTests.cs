@@ -73,10 +73,9 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid()
+        public async Task Jupyter_standalone_command_is_valid()
         {
             await _parser.InvokeAsync("jupyter", _console);
-            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 1 &&
@@ -84,10 +83,16 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid2()
+        public async Task Jupyter_standalone_command_has_one_entry()
+        {
+            await _parser.InvokeAsync("jupyter", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Jupyter_default_kernel_csharp_is_valid()
         {
             await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
-            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 2 &&
@@ -96,10 +101,16 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid3()
+        public async Task Jupyter_default_kernel_csharp_has_one_entry()
+        {
+            await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Jupyter_default_kernel_fsharp_is_valid()
         {
             await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
-            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 2 &&
@@ -108,10 +119,16 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid4()
+        public async Task Jupyter_default_kernel_fsharp_has_one_entry()
+        {
+            await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Jupyter_install_is_valid()
         {
             await _parser.InvokeAsync("jupyter install", _console);
-            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 2 &&
@@ -120,14 +137,20 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid5()
+        public async Task Jupyter_install_has_one_entry()
+        {
+            await _parser.InvokeAsync("jupyter install", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Jupyter_default_kernel_csharp_ignore_connection_file_is_valid()
         {
             var tmp = Path.GetTempFileName();
             try
             {
                 // Do not capture connection file
                 await _parser.InvokeAsync(String.Format("jupyter --default-kernel csharp {0}", tmp), _console);
-                _fakeTelemetry.LogEntries.Should().HaveCount(1);
                 _fakeTelemetry.LogEntries.Should().Contain(
                     x => x.EventName == "parser/command" &&
                          x.Properties.Count == 2 &&
@@ -145,7 +168,27 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid6()
+        public async Task Jupyter_default_kernel_csharp_ignore_connection_file_has_one_entry()
+        {
+            var tmp = Path.GetTempFileName();
+            try
+            {
+                // Do not capture connection file
+                await _parser.InvokeAsync(String.Format("jupyter --default-kernel csharp {0}", tmp), _console);
+                _fakeTelemetry.LogEntries.Should().HaveCount(1);
+            }
+            finally
+            {
+                try
+                {
+                    File.Delete(tmp);
+                }
+                catch { }
+            }
+        }
+
+        [Fact]
+        public async Task Jupyter_ignore_connection_file_is_valid()
         {
             var tmp = Path.GetTempFileName();
             try
@@ -169,10 +212,28 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsValid7()
+        public async Task Jupyter_ignore_connection_file_has_one_entry()
+        {
+            var tmp = Path.GetTempFileName();
+            try
+            {
+                await _parser.InvokeAsync(String.Format("jupyter {0}", tmp), _console);
+                _fakeTelemetry.LogEntries.Should().HaveCount(1);
+            }
+            finally
+            {
+                try
+                {
+                    File.Delete(tmp);
+                }
+                catch { }
+            }
+        }
+
+        [Fact]
+        public async Task Jupyter_with_verbose_option_is_valid()
         {
             await _parser.InvokeAsync("--verbose jupyter", _console);
-            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 1 &&
@@ -180,14 +241,21 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsNotValid()
+        public async Task Jupyter_with_verbose_option_has_one_entry()
+        {
+            await _parser.InvokeAsync("--verbose jupyter", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Jupyter_with_invalid_argument_is_not_valid()
         {
             await _parser.InvokeAsync("jupyter invalidargument", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task TelemetryCommandIsNotValid2()
+        public async Task Jupyter_default_kernel_with_invalid_kernel_is_not_valid()
         {
             // Do not capture anything, especially "oops".
             await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
@@ -195,42 +263,42 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task TelemetryCommandIsNotValid3()
+        public async Task Hosted_is_not_valid()
         {
             await _parser.InvokeAsync("hosted", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task TelemetryCommandIsNotValid4()
+        public async Task Invalid_command_is_not_valid()
         {
             await _parser.InvokeAsync("invalidcommand", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
         [Fact]
-        public void TelemetryCommonPropertiesShouldContainIfItIsInDockerOrNot()
+        public void Telemetry_common_properties_should_contain_if_it_is_in_docker_or_not()
         {
             var unitUnderTest = new TelemetryCommonProperties();
             unitUnderTest.GetTelemetryCommonProperties().Should().ContainKey("Docker Container");
         }
 
         [Fact]
-        public void TelemetryCommonPropertiesShouldReturnHashedPath()
+        public void Telemetry_common_properties_should_return_hashed_path()
         {
             var unitUnderTest = new TelemetryCommonProperties(() => "ADirectory");
             unitUnderTest.GetTelemetryCommonProperties()["Current Path Hash"].Should().NotBe("ADirectory");
         }
 
         [Fact]
-        public void TelemetryCommonPropertiesShouldReturnHashedMachineId()
+        public void Telemetry_common_properties_should_return_hashed_machine_id()
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => "plaintext");
             unitUnderTest.GetTelemetryCommonProperties()["Machine ID"].Should().NotBe("plaintext");
         }
 
         [Fact]
-        public void TelemetryCommonPropertiesShouldReturnNewGuidWhenCannotGetMacAddress()
+        public void Telemetry_common_properties_should_return_new_guid_when_cannot_get_mac_address()
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null);
             var assignedMachineId = unitUnderTest.GetTelemetryCommonProperties()["Machine ID"];
@@ -239,7 +307,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public void TelemetryCommonPropertiesShouldContainKernelVersion()
+        public void Telemetry_common_properties_should_contain_kernel_version()
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null);
             unitUnderTest.GetTelemetryCommonProperties()["Kernel Version"].Should().Be(RuntimeInformation.OSDescription);

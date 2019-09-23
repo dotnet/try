@@ -51,7 +51,7 @@ namespace MLS.Agent.Telemetry
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
                 {ProductVersion, Product.Version},
-                {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
+                // {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, IsDockerContainer()},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
                 {MachineId, GetMachineId()},

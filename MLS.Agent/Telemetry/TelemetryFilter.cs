@@ -37,6 +37,7 @@ namespace MLS.Agent.Telemetry
                 if (parseResult.RootCommandResult?.Token.Value == DotNetTryName)
                 {
                     var mainCommand = 
+                        // The first command will in the tokens collection will be our main command.
                         parseResult.Tokens?.FirstOrDefault(x => x.Type == TokenType.Command);
                     var mainCommandName = mainCommand?.Value;
 
@@ -45,6 +46,7 @@ namespace MLS.Agent.Telemetry
                         // skip directives as we do not care right now
                         ?.Where(x => x.Type != TokenType.Directive)
                         .SkipWhile(x => x != mainCommand)
+                        // We skip one to not include the main command as part of the collection we want to filter.
                         .Skip(1);
                     
                     var entryItems = FilterCommand(mainCommandName, tokens);
@@ -79,6 +81,9 @@ namespace MLS.Agent.Telemetry
             }).Where(x => x != null).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Tries to see if the tokens follow or match the specified command rule.
+        /// </summary>
         Nullable<ImmutableArray<KeyValuePair<string, string>>> 
             TryMatchRule(CommandRule rule, IEnumerable<Token> tokens)
         {
@@ -114,8 +119,6 @@ namespace MLS.Agent.Telemetry
             var optionItems = rule.Items.Select(item => item as OptionItem).Where(item => item != null);
             var items = rule.Items.Except(optionItems);
 
-            // Try not to capture values directly from the tokens.
-            // Capture from the rule item.
             foreach (var item in items)
             {
                 // Stop checking items since our rule already failed.
@@ -133,6 +136,7 @@ namespace MLS.Agent.Telemetry
 
                     if (optionItem != null)
                     {
+                        // This is currently not capturing anything from the token, only the rule.
                         var value =
                             optionItem.Values.FirstOrDefault(x =>
                                 x == itemResult.secondToken?.Value);
@@ -294,7 +298,7 @@ namespace MLS.Agent.Telemetry
             new CommandRule("jupyter",
                 new CommandRuleItem[]{
                     Option("--default-kernel", new string[]{ "csharp", "fsharp" }, "default-kernel"),
-                    Ignore(TokenType.Argument, isOptional: true)
+                    Ignore(TokenType.Argument, isOptional: true) // connection file
                 })
         };
     }
