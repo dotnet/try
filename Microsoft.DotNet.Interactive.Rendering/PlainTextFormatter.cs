@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.Encodings.Web;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
@@ -161,69 +158,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
         }
 
-        private static readonly IPlainTextFormatter SingleLineFormatter = new SingleLinePlainTextFormatter();
-
-        internal static readonly Dictionary<Type, ITypeFormatter> SpecialDefaults = new Dictionary<Type, ITypeFormatter>
-        {
-            [typeof(ExpandoObject)] =
-                new PlainTextFormatter<ExpandoObject>((expando, writer) =>
-                {
-                    SingleLineFormatter.WriteStartObject(writer);
-                    var pairs = expando.ToArray();
-                    var length = pairs.Length;
-                    for (var i = 0; i < length; i++)
-                    {
-                        var pair = pairs[i];
-                        writer.Write(pair.Key);
-                        SingleLineFormatter.WriteNameValueDelimiter(writer);
-                        pair.Value.FormatTo(writer);
-
-                        if (i < length - 1)
-                        {
-                            SingleLineFormatter.WritePropertyDelimiter(writer);
-                        }
-                    }
-
-                    SingleLineFormatter.WriteEndObject(writer);
-                }),
-
-            [typeof(PocketView)] = new PlainTextFormatter<PocketView>((view, writer) => view.WriteTo(writer, HtmlEncoder.Default)),
-
-            [typeof(KeyValuePair<string, object>)] = new PlainTextFormatter<KeyValuePair<string, object>>((pair, writer) =>
-            {
-                writer.Write(pair.Key);
-                SingleLineFormatter.WriteNameValueDelimiter(writer);
-                pair.Value.FormatTo(writer);
-            }),
-
-            [typeof(Type)] = new PlainTextFormatter<Type>((type, writer) =>
-            {
-                var typeName = type.Name;
-                if (typeName.Contains("`") && !type.IsAnonymous())
-                {
-                    writer.Write(typeName.Remove(typeName.IndexOf('`')));
-                    writer.Write("<");
-                    var genericArguments = type.GetGenericArguments();
-
-                    for (var i = 0; i < genericArguments.Length; i++)
-                    {
-                        Formatter<Type>.FormatTo(genericArguments[i], writer);
-                        if (i < genericArguments.Length - 1)
-                        {
-                            writer.Write(",");
-                        }
-                    }
-
-                    writer.Write(">");
-                }
-                else
-                {
-                    writer.Write(typeName);
-                }
-            }),
-
-            [typeof(DateTime)] = new PlainTextFormatter<DateTime>((value, writer) => writer.Write(value.ToString("u"))),
-            [typeof(DateTimeOffset)] = new PlainTextFormatter<DateTimeOffset>((value, writer) => writer.Write(value.ToString("u"))),
-        };
+        internal static readonly DefaultPlainTextFormatterSet SpecialDefaults = new DefaultPlainTextFormatterSet();
     }
 }

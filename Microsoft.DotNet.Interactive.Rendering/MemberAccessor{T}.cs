@@ -14,14 +14,36 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             Member = member;
 
-            var targetParam = Expression.Parameter(typeof(T), "target");
+            try
+            {
+                var targetParam = Expression.Parameter(typeof(T), "target");
 
-            GetValue = (Func<T, object>)Expression.Lambda(
-                typeof(Func<T, object>),
-                Expression.TypeAs(
-                    Expression.PropertyOrField(targetParam, Member.Name),
-                    typeof(object)),
-                targetParam).Compile();
+                var propertyOrField = Expression.PropertyOrField(
+                    targetParam,
+                    Member.Name);
+
+                var unaryExpression = Expression.TypeAs(
+                    propertyOrField,
+                    typeof(object));
+
+                var lambdaExpression = Expression.Lambda<Func<T, object>>(
+                    unaryExpression,
+                    targetParam);
+
+                GetValue = lambdaExpression.Compile();
+            }
+            catch (InvalidProgramException)
+            {
+                GetValue = obj =>
+                {
+                    if (obj == null)
+                    {
+                        return Formatter.NullString;
+                    }
+
+                    return obj.ToString();
+                };
+            }
         }
 
         public MemberInfo Member { get; }

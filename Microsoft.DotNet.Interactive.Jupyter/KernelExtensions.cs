@@ -14,6 +14,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Extensions;
 using Microsoft.DotNet.Interactive.Rendering;
+using static Microsoft.DotNet.Interactive.Kernel;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Jupyter

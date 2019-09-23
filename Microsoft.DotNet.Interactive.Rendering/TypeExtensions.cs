@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public static MemberAccessor<T>[] GetMemberAccessors<T>(this IEnumerable<MemberInfo> forMembers) =>
             forMembers
-                .Select(m => new MemberAccessor<T>(m))
+                .Select(MemberAccessor.CreateMemberAccessor<T>)
                 .ToArray();
 
         public static IEnumerable<MemberInfo> GetAllMembers(this Type type, bool includeInternals = false)

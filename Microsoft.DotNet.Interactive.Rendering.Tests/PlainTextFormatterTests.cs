@@ -369,6 +369,26 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
                 formatted.Should().Be("[ { Widget: Name: widget x, Parts: <null> }, { Widget: Name: widget y, Parts: <null> }, { Widget: Name: widget z, Parts: <null> } ]");
             }
+
+            [Fact]
+            public void ReadOnlyMemory_of_string_is_formatted_like_a_string()
+            {
+                ReadOnlyMemory<char> readOnlyMemory = "Hi!".AsMemory();
+
+                var output = readOnlyMemory.ToDisplayString();
+
+                output.Should().Be("Hi!");
+            }
+
+            [Fact]
+            public void ReadOnlyMemory_of_int_is_formatted_like_a_int_array()
+            {
+                var readOnlyMemory = new ReadOnlyMemory<int>(new[] { 1, 2, 3 });
+
+                var output = readOnlyMemory.ToDisplayString();
+
+                output.Should().Be("[ 1, 2, 3 ]");
+            }
         }
     }
 }
