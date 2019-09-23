@@ -21,7 +21,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task When_a_chart_is_returned_the_value_produced_has_html_with_the_require_config_call()
+        public async Task When_a_plotlyChart_is_returned_the_value_produced_has_html_with_the_require_config_call()
         {
             var kernel = CreateKernel();
             kernel.UseXplot();
@@ -35,9 +35,30 @@ namespace MLS.Agent.Tests
                 ContainSingle(valueProduced =>
                     valueProduced.FormattedValues.Any(formattedValue =>
                     formattedValue.MimeType == "text/html"
-                        && formattedValue.Value.ToString().Contains("var xplotRequire = requirejs.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});")
+                        && formattedValue.Value.ToString().Contains("var xplotRequire = requirejs.config({context:'xplot-plotly-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});")
                        && formattedValue.Value.ToString().Contains("xplotRequire([\'plotly\'], function(Plotly)")
                  ));
+        }
+
+        [Fact]
+        public async Task When_a_googleChart_is_returned_the_value_produced_has_html_with_the_require_config_call()
+        {
+            var kernel = CreateKernel();
+            kernel.UseXplot();
+
+            await kernel.SendAsync(new SubmitCode("using XPlot.GoogleCharts;"));
+            await kernel.SendAsync(new SubmitCode("new GoogleChart()"));
+
+            KernelEvents
+                .ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Should().
+                ContainSingle(valueProduced =>
+                    valueProduced.FormattedValues.Any(formattedValue =>
+                        formattedValue.MimeType == "text/html"
+                        && formattedValue.Value.ToString().Contains("var googleRequire = requirejs.config({context:'xplot-googleChart-2.0.0',paths:{google:'https://www.gstatic.com/charts/loader.js'}});")
+                        && formattedValue.Value.ToString().Contains("googleRequire([\'google\'], function(google)")
+                    ));
         }
     }
 }

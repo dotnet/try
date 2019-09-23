@@ -21,7 +21,6 @@ using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.LanguageServices;
 using Microsoft.DotNet.Interactive.Rendering;
 using WorkspaceServer.Servers.Scripting;
-using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
@@ -60,7 +59,8 @@ namespace WorkspaceServer.Kernel
                              typeof(IKernel).Assembly,
                              typeof(CSharpKernel).Assembly,
                              typeof(PocketView).Assembly,
-                             typeof(PlotlyChart).Assembly);
+                             typeof(XPlot.Plotly.PlotlyChart).Assembly,
+                             typeof(XPlot.GoogleCharts.GoogleChart).Assembly);
 
         public CSharpKernel()
         {

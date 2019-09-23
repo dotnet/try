@@ -12,8 +12,11 @@ namespace MLS.Agent
         public static T UseXplot<T>(this T kernel)
             where T : KernelBase
         {
-            var extension = new XPlotKernelExtension();
-            Task.Run(() => extension.OnLoadAsync(kernel)).Wait();
+            var plotlyKernelExtension = new PlotlyKernelExtension();
+            Task.Run(() => plotlyKernelExtension.OnLoadAsync(kernel)).Wait();
+
+            var googleKernelExtension = new GoogleChartKernelExtension();
+            Task.Run(() => googleKernelExtension.OnLoadAsync(kernel)).Wait();
             return kernel;
         }
     }

@@ -12,12 +12,12 @@ namespace MLS.Agent.Tests
 {
     public partial class XplotKernelExtensionTests
     {
-        public class GetChartHtmlTests
+        public class GetPlotlyChartHtmlTests
         {
             [Fact]
             public void Returns_the_html_with_div()
             {
-                var extension = new XPlotKernelExtension();
+                var extension = new PlotlyKernelExtension();
                 var html = extension.GetChartHtml(new PlotlyChart());
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
@@ -27,9 +27,9 @@ namespace MLS.Agent.Tests
             }
 
             [Fact]
-            public void Returns_the_html_with_script_containing_require_config()
+            public void Returns_the_html_with_script_containing_require_config_for_plotly()
             {
-                var extension = new XPlotKernelExtension();
+                var extension = new PlotlyKernelExtension();
                 var html = extension.GetChartHtml(new PlotlyChart());
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
@@ -37,13 +37,13 @@ namespace MLS.Agent.Tests
                 document.DocumentNode.SelectSingleNode("//script")
                     .InnerHtml
                     .Should()
-                    .Contain("var xplotRequire = requirejs.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});");
+                    .Contain("var xplotRequire = requirejs.config({context:'xplot-plotly-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});");
             }
 
             [Fact]
             public void Returns_the_html_with_script_containing_require_plotly_and_call_to_new_plot_function()
             {
-                var extension = new XPlotKernelExtension();
+                var extension = new PlotlyKernelExtension();
                 var html = extension.GetChartHtml(new PlotlyChart());
                 var document = new HtmlDocument();
                 document.LoadHtml(html);

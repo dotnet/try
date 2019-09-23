@@ -1,30 +1,29 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Text;
+using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Rendering;
-using System.Text;
-using System.Threading.Tasks;
-using XPlot.Plotly;
+using XPlot.GoogleCharts;
+
 
 namespace XPlot.DotNet.Interactive.KernelExtensions
 {
-    public class XPlotKernelExtension : IKernelExtension
+    public class GoogleChartKernelExtension : IKernelExtension
     {
         public Task OnLoadAsync(IKernel kernel)
         {
-            Formatter<PlotlyChart>.Register(
-                (chart, writer) =>
-                {
-                    writer.Write(GetChartHtml(chart));
-                }, 
-                HtmlFormatter.MimeType);
+            Formatter<GoogleChart>.Register((chart, writer) =>
+            {
+                writer.Write(GetChartHtml(chart));
+            }, "text/html");
 
             return Task.CompletedTask;
         }
 
-        public string GetChartHtml(PlotlyChart chart)
+        public string GetChartHtml(GoogleChart chart)
         {
             var document = new HtmlDocument();
             document.LoadHtml(chart.GetInlineHtml());
@@ -46,9 +45,9 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
             var newScript = new StringBuilder();
             newScript.AppendLine("<script type=\"text/javascript\">");
             newScript.AppendLine(@"
-var renderPlotly = function() {
-    var xplotRequire = requirejs.config({context:'xplot-2.0.0',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});
-    xplotRequire(['plotly'], function(Plotly) {");
+var renderGoogle = function() {
+    var googleRequire = requirejs.config({context:'xplot-googleChart-2.0.0',paths:{google:'https://www.gstatic.com/charts/loader.js'}});
+    googleRequire(['google'], function(google) {");
 
             newScript.Append(scriptNode.InnerText);
             newScript.AppendLine(@"});
@@ -57,12 +56,12 @@ if ((typeof(requirejs) !==  typeof(Function)) || (typeof(requirejs.config) !== t
     var script = document.createElement(""script""); 
     script.setAttribute(""src"", ""https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js""); 
     script.onload = function(){
-        renderPlotly();
+        renderGoogle();
     };
     document.getElementsByTagName(""head"")[0].appendChild(script); 
 }
 else {
-    renderPlotly();
+    renderGoogle();
 }");
             newScript.AppendLine("</script>");
             return HtmlNode.CreateNode(newScript.ToString());
