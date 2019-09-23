@@ -462,7 +462,7 @@ namespace WorkspaceServer.Packaging
             {
                 try
                 {
-                    operation.Info("Attempting building package {name}", Name);
+                    operation.Info("Building package {name}", Name);
 
                     // When a build finishes, buildCount is reset to 0. If, when we increment
                     // the value, we get a value > 1, someone else has already started another
@@ -506,7 +506,7 @@ namespace WorkspaceServer.Packaging
         {
             using (var operation = _log.OnEnterAndConfirmOnExit())
             {
-                operation.Info("Attempting to publish package {name}", Name);
+                operation.Info("Publishing package {name}", Name);
                 var publishInProgress = Interlocked.Increment(ref publishCount) > 1;
                 await _publishSemaphore.WaitAsync();
 

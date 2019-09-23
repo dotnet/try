@@ -9,15 +9,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.AspNetCore.Html;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    public delegate void OnRenderingUnregisteredType(
-        Type type,
-        string mimeType,
-        out ITypeFormatter formatter);
-
     public static class Formatter
     {
         private static int _defaultListExpansionLimit;
@@ -37,6 +33,78 @@ namespace Microsoft.DotNet.Interactive.Rendering
         static Formatter()
         {
             ResetToDefault();
+        }
+
+        public static ITypeFormatter Create(
+            Type formatterType,
+            Action<object, TextWriter> format,
+            string mimeType)
+        {
+            var genericFormatDelegate = MakeGenericFormatDelegate(formatterType, format);
+
+            var genericCreateMethod = typeof(Formatter)
+                                      .GetMethods()
+                                      .Single(m => m. Name == nameof(Create) && m.IsGenericMethod) ;
+            ;
+            var formatter = genericCreateMethod
+                            .MakeGenericMethod(formatterType)
+                            .Invoke(null, new object[] { genericFormatDelegate , mimeType });
+
+            return (ITypeFormatter) formatter;
+        }
+
+        private static Delegate MakeGenericFormatDelegate(
+            Type formatterType,
+            Action<object, TextWriter> untypedFormatDelegate)
+        {
+            ConstantExpression constantExpression = null;
+            if (untypedFormatDelegate.Target != null)
+            {
+                constantExpression = Expression.Constant(untypedFormatDelegate.Target);
+            }
+
+            var textWriterParam = Expression.Parameter(typeof(TextWriter), "writer");
+
+            var parameterExpression = Expression.Parameter(formatterType, "v");
+
+            var arguments = new Expression[]
+            {
+               Expression.Convert (parameterExpression, typeof(object)),
+                textWriterParam
+            };
+
+            var body = Expression.Call(
+                constantExpression,
+                untypedFormatDelegate.GetMethodInfo(),
+                arguments);
+
+            var bodyCode = body.ToString();
+
+            var genericFormatDelegateType = typeof(Action<,>)
+                .MakeGenericType(new[]
+                {
+                    formatterType,
+                    typeof(TextWriter)
+                });
+
+            var expression = Expression.Lambda(genericFormatDelegateType,
+                                               body,
+                                               new[]
+                                               {
+                                                   parameterExpression,
+                                                   textWriterParam
+                                               });
+
+            var expressionCode = body.ToString();
+
+            return expression.Compile();
+        }
+
+        public static ITypeFormatter Create<T>(
+            Action<T, TextWriter> format,
+            string mimeType)
+        {
+            return new AnonymousTypeFormatter<T>(format, mimeType);
         }
 
         /// <summary>

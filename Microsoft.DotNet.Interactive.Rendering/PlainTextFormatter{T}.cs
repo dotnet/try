@@ -23,10 +23,10 @@ namespace Microsoft.DotNet.Interactive.Rendering
             _format = format;
         }
 
-        public static PlainTextFormatter<T> Create(bool includeInternals = false)
+        public static ITypeFormatter<T> Create(bool includeInternals = false)
         {
             if (PlainTextFormatter.SpecialDefaults.TryGetValue(typeof(T), out var formatter) &&
-                formatter is PlainTextFormatter<T> ft)
+                formatter is ITypeFormatter<T> ft)
             {
                 return ft;
             }

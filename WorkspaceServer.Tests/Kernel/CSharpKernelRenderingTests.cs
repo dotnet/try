@@ -7,7 +7,6 @@ using FluentAssertions;
 using FluentAssertions.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -55,6 +54,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData("div(123).ToString()", "<div>123</div>")]
+        [InlineData("display(div(123).ToString());", "<div>123</div>")]
         [InlineData("\"hi\"", "hi")]
         public async Task String_is_rendered_as_plain_text(
             string submission,
@@ -66,11 +66,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueProduced = await result
                                       .KernelEvents
-                                      .OfType<ReturnValueProduced>()
+                                      .OfType<DisplayEventBase>()
                                       .Timeout(5.Seconds())
                                       .FirstAsync();
-
-            Log.Info(valueProduced.ToDisplayString());
 
             valueProduced
                 .FormattedValues

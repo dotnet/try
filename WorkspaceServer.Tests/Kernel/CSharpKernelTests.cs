@@ -411,7 +411,7 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Attempting to install"));
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
@@ -450,7 +450,7 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Attempting to install"));
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
