@@ -1,13 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MLS.Agent.Tools;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Clockwise;
 using WorkspaceServer;
 
 namespace MLS.Agent
@@ -18,7 +15,7 @@ namespace MLS.Agent
         {
             if (!CheckIfJupyterKernelSpecExists())
             {
-                return new CommandLineResult(1, new List<string>() { "Could not find jupyter kernelspec module" });
+                return new CommandLineResult(1, error: new List<string> { "Could not find jupyter kernelspec module" });
             }
 
             return await WorkspaceServer.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
@@ -32,7 +29,7 @@ namespace MLS.Agent
         public static bool CheckIfJupyterKernelSpecExists()
         {
             var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which";
-            bool jupyterKernelSpecExists = false ;
+            var jupyterKernelSpecExists = false ;
 
             Task.Run(async ()=> {
                 var result = await WorkspaceServer.CommandLine.Execute(command, "jupyter-kernelspec");

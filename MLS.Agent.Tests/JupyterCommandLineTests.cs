@@ -14,16 +14,19 @@ namespace MLS.Agent.Tests
         public async Task Returns_error_when_jupyter_paths_could_not_be_obtained()
         {
             var console = new TestConsole();
-            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(false));
+            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(false, error:new []{ "Could not find jupyter kernelspec module" }));
             await jupyterCommandLine.InvokeAsync();
-            console.Error.ToString().Should().Contain(".NET kernel installation failed");
+            console.Error.ToString().Should()
+                .Contain(".NET kernel installation failed")
+                .And
+                .Contain("Could not find jupyter kernelspec module");
         }
 
         [Fact]
-        public async Task Prints_to_console_when_kernel_installation_succeded()
+        public async Task Prints_to_console_when_kernel_installation_succeeded()
         {
             var console = new TestConsole();
-            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(true));
+            var jupyterCommandLine = new JupyterCommandLine(console, new InMemoryJupyterKernelSpec(true, null));
             await jupyterCommandLine.InvokeAsync();
             var consoleOut = console.Out.ToString();
             consoleOut.Should().MatchEquivalentOf("*[InstallKernelSpec] Installed kernelspec .net-csharp in *.net-csharp*");

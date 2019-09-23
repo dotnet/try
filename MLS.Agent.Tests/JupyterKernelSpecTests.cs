@@ -4,11 +4,9 @@
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkspaceServer.Tests;
-using Xunit;
 
 namespace MLS.Agent.Tests
 {
@@ -16,15 +14,15 @@ namespace MLS.Agent.Tests
     {
         protected List<string> _installedKernels;
 
-        public JupyterKernelSpecTests()
+        protected JupyterKernelSpecTests()
         { 
             _installedKernels = new List<string>();
         }
 
-        public abstract IJupyterKernelSpec GetJupyterKernelSpec(bool success);
+        public abstract IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null);
 
         [FactDependsOnJupyterOnPath]
-        public async Task Returns_sucess_output_when_kernel_installation_succeded()
+        public async Task Returns_success_output_when_kernel_installation_succeeded()
         {
             //For the FileSystemJupyterKernelSpec, this fact needs jupyter to be on the path
             //To run this test for FileSystemJupyterKernelSpec open Visual Studio inside anaconda prompt or in a terminal with
@@ -44,11 +42,12 @@ namespace MLS.Agent.Tests
         [FactDependsOnJupyterNotOnPath]
         public async Task Returns_failure_when_kernel_installation_did_not_succeed()
         {
-            var kernelSpec = GetJupyterKernelSpec(false);
+            var kernelSpec = GetJupyterKernelSpec(false, error: new [] { "Could not find jupyter kernelspec module" });
             var kernelDir = Create.EmptyWorkspace().Directory;
 
             var result = await kernelSpec.InstallKernel(kernelDir);
             result.ExitCode.Should().Be(1);
+            result.Error.Should().BeEquivalentTo("Could not find jupyter kernelspec module");
         }
 
 
@@ -65,7 +64,7 @@ namespace MLS.Agent.Tests
     public class FileSystemJupyterKernelSpecIntegrationTests : JupyterKernelSpecTests
     {
 
-        public override IJupyterKernelSpec GetJupyterKernelSpec(bool success)
+        public override IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null)
         {
             return new FileSystemJupyterKernelSpec();
         }
@@ -73,9 +72,9 @@ namespace MLS.Agent.Tests
 
     public class InMemoryJupyterKernelSpecTests : JupyterKernelSpecTests
     {
-        public override IJupyterKernelSpec GetJupyterKernelSpec(bool success)
+        public override IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null)
         {
-            return new InMemoryJupyterKernelSpec(success);
+            return new InMemoryJupyterKernelSpec(success, error);
         }
     }
 }
