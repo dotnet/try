@@ -39,7 +39,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public static dynamic hgroup => _.hgroup;
         public static dynamic hr => _.hr;
         public static dynamic html => _.html;
-        public static IHtmlContent HTML(string content) => content.ToHtmlContent();
         public static dynamic i => _.i;
         public static dynamic iframe => _.iframe;
         public static dynamic img => _.img;

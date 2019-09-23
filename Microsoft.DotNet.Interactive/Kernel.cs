@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Rendering;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
@@ -16,6 +17,12 @@ namespace Microsoft.DotNet.Interactive
             string mimeType = HtmlFormatter.MimeType)
         {
             var displayId = Guid.NewGuid().ToString();
+
+            if (value is string)
+            {
+                mimeType = PlainTextFormatter.MimeType;
+            }
+
             var formatted = new FormattedValue(
                 mimeType,
                 value.ToDisplayString(mimeType));
@@ -27,6 +34,8 @@ namespace Microsoft.DotNet.Interactive
                 .Wait();
             return new DisplayedValue(displayId, mimeType);
         }
+
+        public static IHtmlContent HTML(string content) => content.ToHtmlContent();
 
         public static void Javascript(
             string scriptContent)
@@ -43,7 +52,7 @@ namespace Microsoft.DotNet.Interactive
             var kernel = KernelInvocationContext.Current.HandlingKernel;
 
             Task.Run(() =>
-                         kernel.SendAsync(new DisplayValue(value,formatted)))
+                         kernel.SendAsync(new DisplayValue(value, formatted)))
                 .Wait();
         }
     }
