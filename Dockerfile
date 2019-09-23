@@ -67,8 +67,5 @@ RUN echo "$PATH"
 # Install kernel specs
 RUN dotnet try jupyter install
 
-# Enable lab
-ENV JUPYTER_ENABLE_LAB=yes
-
 # Set root to Notebooks
 WORKDIR ${HOME}/Notebooks/
