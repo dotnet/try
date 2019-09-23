@@ -151,16 +151,16 @@ namespace MLS.Agent.Telemetry
 
                 switch (item)
                 {
-                    case ArgumentItem arg:
+                    case ArgumentItem argItem:
                         {
-                            if (arg.TokenType == itemResult.firstToken?.Type &&
-                                arg.Value == itemResult.firstToken?.Value &&
+                            if (argItem.TokenType == itemResult.firstToken?.Type &&
+                                argItem.Value == itemResult.firstToken?.Value &&
                                 itemResult.secondToken == null)
                             {
-                                entryItems.Add(new KeyValuePair<string, string>(arg.EntryKey, arg.Value));
+                                entryItems.Add(new KeyValuePair<string, string>(argItem.EntryKey, argItem.Value));
                                 itemResult = NextItem();
                             }
-                            else if (arg.IsOptional)
+                            else if (argItem.IsOptional)
                             {
                                 itemResult = NextItem();
                             }
@@ -170,14 +170,14 @@ namespace MLS.Agent.Telemetry
                             }
                             break;
                         }
-                    case IgnoreItem ignore:
+                    case IgnoreItem ignoreItem:
                         {
-                            if (ignore.TokenType == itemResult.firstToken?.Type && 
+                            if (ignoreItem.TokenType == itemResult.firstToken?.Type && 
                                 itemResult.secondToken != null)
                             {
                                 itemResult = NextItem();
                             }
-                            else if (ignore.IsOptional)
+                            else if (ignoreItem.IsOptional)
                             {
                                 itemResult = NextItem();
                             }
@@ -270,7 +270,7 @@ namespace MLS.Agent.Telemetry
             public ImmutableArray<CommandRuleItem> Items { get; }
         }
 
-        private static CommandRuleItem Opt(string option, string[] values, string entryKey)
+        private static CommandRuleItem Option(string option, string[] values, string entryKey)
         {
             return new OptionItem(option, values, entryKey);
         }
@@ -293,7 +293,7 @@ namespace MLS.Agent.Telemetry
 
             new CommandRule("jupyter",
                 new CommandRuleItem[]{
-                    Opt("--default-kernel", new string[]{ "csharp", "fsharp" }, "default-kernel"),
+                    Option("--default-kernel", new string[]{ "csharp", "fsharp" }, "default-kernel"),
                     Ignore(TokenType.Argument, isOptional: true)
                 })
         };
