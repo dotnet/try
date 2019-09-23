@@ -16,7 +16,7 @@ namespace MLS.Agent.Tests
     {
         protected List<string> _installedKernels;
 
-        public JupyterKernelSpecTests()
+        protected JupyterKernelSpecTests()
         { 
             _installedKernels = new List<string>();
         }
@@ -24,7 +24,7 @@ namespace MLS.Agent.Tests
         public abstract IJupyterKernelSpec GetJupyterKernelSpec(bool success);
 
         [FactDependsOnJupyterOnPath]
-        public async Task Returns_sucess_output_when_kernel_installation_succeded()
+        public async Task Returns_success_output_when_kernel_installation_succeeded()
         {
             //For the FileSystemJupyterKernelSpec, this fact needs jupyter to be on the path
             //To run this test for FileSystemJupyterKernelSpec open Visual Studio inside anaconda prompt or in a terminal with

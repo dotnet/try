@@ -1,18 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MLS.Agent.CommandLine;
-using MLS.Agent.Tools;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using WorkspaceServer;
 
 namespace MLS.Agent
 {
