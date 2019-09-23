@@ -33,15 +33,24 @@ namespace MLS.Agent.Telemetry
             if (objectToFilter is ParseResult parseResult)
             {
                 var isDotNetTryCommand = parseResult.RootCommandResult?.Token.Value == DotNetTryName;
-                var tokens = parseResult?.Tokens.Where(x => x.Type != TokenType.Directive); // skip directives as we do not care right now
-                var commandName = tokens?.Take(1).Where(x => x.Type == TokenType.Command).Select(x => x.Value).FirstOrDefault();
 
-                if (isDotNetTryCommand && !String.IsNullOrWhiteSpace(commandName))
+                if (parseResult.RootCommandResult?.Token.Value == DotNetTryName)
                 {
-                    var arguments = tokens.Skip(1);
-                    if (CheckCommand(commandName, arguments, out var ruleItems))
+                    var mainCommand = 
+                        parseResult.Tokens?.FirstOrDefault(x => x.Type == TokenType.Command);
+                    var mainCommandName = mainCommand?.Value;
+
+                    var tokens = 
+                        parseResult.Tokens
+                        // skip directives as we do not care right now
+                        ?.Where(x => x.Type != TokenType.Directive)
+                        .SkipWhile(x => x != mainCommand)
+                        .Skip(1);
+                    
+                    var entryItems = FilterCommand(mainCommandName, tokens);
+                    if (entryItems != null)
                     {
-                        result.Add(CreateEntry(commandName, ruleItems));
+                        result.Add(CreateEntry(entryItems));
                     }
                 }
             }
@@ -49,108 +58,42 @@ namespace MLS.Agent.Telemetry
             return result.Select(r => r.WithAppliedToPropertiesValue(_hash)).ToList();
         }
 
-        private bool CheckCommand(string commandName, IEnumerable<Token> arguments, out ImmutableArray<CommandRuleItem> outRuleItems)
+        private Nullable<ImmutableArray<KeyValuePair<string, string>>> 
+            FilterCommand(string commandName, IEnumerable<Token> tokens)
         {
-            var ruleItems = ImmutableArray.CreateBuilder<CommandRuleItem>();
-
-            var passed = false;
-
-            foreach (var rule in ParseResultMatchingRules)
+            if (commandName == null || tokens == null)
             {
-                // We have a rule that passed; we are done.
-                if (passed)
-                {
-                    break;
-                }
-
-                if (rule.CommandName == commandName)
-                {
-                    // We have a valid rule so far.
-                    passed = true;
-
-                    var tokens = new Queue<Token>(arguments);
-
-                    var matchResult = NextItemMatch(tokens);
-
-                    foreach (var item in rule.Items)
-                    {
-                        // Stop checking items since our rule already failed.
-                        if (!passed)
-                        {
-                            break;
-                        }
-
-                        switch (item)
-                        {
-                            case OptionItem opt:
-                                {
-                                    if (matchResult.firstToken?.Type == TokenType.Option &&
-                                        opt.Option == matchResult.firstToken?.Value && 
-                                        (matchResult.secondToken == null || matchResult.secondToken.Type == TokenType.Argument) &&
-                                        (String.IsNullOrEmpty(opt.Value) || opt.Value == matchResult.secondToken?.Value))
-                                    {
-                                        ruleItems.Add(item);
-                                        matchResult = NextItemMatch(tokens);
-                                    }
-                                    break;
-                                }
-                            case ArgumentItem arg:
-                                {
-                                    if (arg.TokenType == matchResult.firstToken?.Type && 
-                                        arg.Value == matchResult.firstToken?.Value &&
-                                        matchResult.secondToken == null)
-                                    {
-                                        ruleItems.Add(item);
-                                        matchResult = NextItemMatch(tokens);
-                                    }
-                                    else if (arg.IsOptional)
-                                    {
-                                        matchResult = NextItemMatch(tokens);
-                                    }
-                                    else
-                                    {
-                                        passed = false;
-                                    }
-                                    break;
-                                }
-                            case IgnoreItem ignore:
-                                {
-                                    if (ignore.TokenType == matchResult.firstToken?.Type && matchResult.secondToken != null)
-                                    {
-                                        matchResult = NextItemMatch(tokens);
-                                    } 
-                                    else if (ignore.IsOptional)
-                                    {
-                                        matchResult = NextItemMatch(tokens);
-                                    }
-                                    else
-                                    {
-                                        passed = false;
-                                    }
-                                    break;
-                                }
-                            default:
-                                break;
-                        }
-                    }
-
-                    // If the rule is passing at this state, check if there is no match result.
-                    // If there is a match result, the rule did not pass.
-                    passed = passed ? (matchResult.firstToken == null && matchResult.secondToken == null) : false;
-                }
+                return null;
             }
 
-            outRuleItems = ruleItems.ToImmutable();
-
-            return passed;
-
-            (Token firstToken, Token secondToken) NextItemMatch(Queue<Token> tokens)
+            return Rules.Select(rule => 
             {
-                if (tokens.TryDequeue(out var firstToken))
+                if (rule.CommandName == commandName)
                 {
-                    if (firstToken.Type == TokenType.Option && tokens.TryPeek(out var peek) && peek.Type == TokenType.Argument)
+                    return TryMatchRule(rule, tokens);
+                }
+                else
+                {
+                    return null;
+                }
+            }).Where(x => x != null).FirstOrDefault();
+        }
+
+        Nullable<ImmutableArray<KeyValuePair<string, string>>> 
+            TryMatchRule(CommandRule rule, IEnumerable<Token> tokens)
+        {
+            var entryItems = ImmutableArray.CreateBuilder<KeyValuePair<string, string>>();
+            entryItems.Add(new KeyValuePair<string, string>("verb", rule.CommandName));
+
+            var tokenQueue = new Queue<Token>(tokens);
+            (Token firstToken, Token secondToken) NextItem()
+            {
+                if (tokenQueue.TryDequeue(out var firstToken))
+                {
+                    if (firstToken.Type == TokenType.Option && 
+                        tokenQueue.TryPeek(out var peek) && peek.Type == TokenType.Argument)
                     {
-                        return (firstToken, tokens.Dequeue());
+                        return (firstToken, tokenQueue.Dequeue());
                     }
                     else
                     {
@@ -162,34 +105,111 @@ namespace MLS.Agent.Telemetry
                     return (null, null);
                 }
             }
-        }
 
-        private ApplicationInsightsEntryFormat CreateEntry(string commandName, IEnumerable<CommandRuleItem> ruleItems)
-        {
-            var keyValues = new List<KeyValuePair<string, string>>();
+            var itemResult = NextItem();
 
-            keyValues.Add(new KeyValuePair<string, string>("verb", commandName));
+            // We have a valid rule so far.
+            var passed = true;
 
-            foreach (var item in ruleItems)
+            var optionItems = rule.Items.Select(item => item as OptionItem).Where(item => item != null);
+            var items = rule.Items.Except(optionItems);
+
+            // Try not to capture values directly from the tokens.
+            // Capture from the rule item.
+            foreach (var item in items)
             {
-                switch(item)
+                // Stop checking items since our rule already failed.
+                if (!passed)
                 {
-                    case OptionItem opt:
+                    break;
+                }
+
+                // Skip until we do not have an option.
+                while (itemResult.firstToken?.Type == TokenType.Option)
+                {
+                    var optionItem =
+                        optionItems.FirstOrDefault(x =>
+                            x.Option == itemResult.firstToken.Value);
+
+                    if (optionItem != null)
+                    {
+                        var value =
+                            optionItem.Values.FirstOrDefault(x =>
+                                x == itemResult.secondToken?.Value);
+                        if (value != null)
                         {
-                            keyValues.Add(new KeyValuePair<string, string>(opt.EntryKey, opt.Value));
-                            break;
+                            entryItems.Add(new KeyValuePair<string, string>(optionItem.EntryKey, value));
+                            itemResult = NextItem();
                         }
+                        else
+                        {
+                            passed = false;
+                        }
+                    }
+                    itemResult = NextItem();
+                }
+
+                switch (item)
+                {
                     case ArgumentItem arg:
                         {
-                            keyValues.Add(new KeyValuePair<string, string>(arg.EntryKey, arg.Value));
+                            if (arg.TokenType == itemResult.firstToken?.Type &&
+                                arg.Value == itemResult.firstToken?.Value &&
+                                itemResult.secondToken == null)
+                            {
+                                entryItems.Add(new KeyValuePair<string, string>(arg.EntryKey, arg.Value));
+                                itemResult = NextItem();
+                            }
+                            else if (arg.IsOptional)
+                            {
+                                itemResult = NextItem();
+                            }
+                            else
+                            {
+                                passed = false;
+                            }
+                            break;
+                        }
+                    case IgnoreItem ignore:
+                        {
+                            if (ignore.TokenType == itemResult.firstToken?.Type && 
+                                itemResult.secondToken != null)
+                            {
+                                itemResult = NextItem();
+                            }
+                            else if (ignore.IsOptional)
+                            {
+                                itemResult = NextItem();
+                            }
+                            else
+                            {
+                                passed = false;
+                            }
                             break;
                         }
                     default:
+                        passed = false;
                         break;
                 }
             }
 
-            return new ApplicationInsightsEntryFormat("parser/command", new Dictionary<string, string>(keyValues));
+            // If the rule is passing at this state, check if there is no result.
+            // If there is a result, the rule did not pass.
+            passed = passed ? (itemResult.firstToken == null && itemResult.secondToken == null) : false;
+
+            if (passed)
+            {
+                return entryItems.ToImmutable();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private ApplicationInsightsEntryFormat CreateEntry(IEnumerable<KeyValuePair<string, string>> entryItems)
+        {
+            return new ApplicationInsightsEntryFormat("parser/command", new Dictionary<string, string>(entryItems));
         }
 
         private abstract class CommandRuleItem
@@ -198,15 +218,15 @@ namespace MLS.Agent.Telemetry
 
         private class OptionItem : CommandRuleItem
         {
-            public OptionItem(string option, string value, string entryKey)
+            public OptionItem(string option, string[] values, string entryKey)
             {
                 Option = option;
-                Value = value;
+                Values = values.ToImmutableArray();
                 EntryKey = entryKey;
             }
 
             public string Option { get; }
-            public string Value { get; }
+            public ImmutableArray<string> Values { get; }
             public string EntryKey { get; }
         }
 
@@ -250,9 +270,9 @@ namespace MLS.Agent.Telemetry
             public ImmutableArray<CommandRuleItem> Items { get; }
         }
 
-        private static CommandRuleItem Opt(string option, string argument, string entryKey)
+        private static CommandRuleItem Opt(string option, string[] values, string entryKey)
         {
-            return new OptionItem(option, argument, entryKey);
+            return new OptionItem(option, values, entryKey);
         }
 
         private static CommandRuleItem Arg(string value, TokenType type, string entryKey, bool isOptional)
@@ -265,16 +285,15 @@ namespace MLS.Agent.Telemetry
             return new IgnoreItem(type, isOptional);
         }
 
-        private static CommandRule[] ParseResultMatchingRules => new CommandRule[]
+        private static CommandRule[] Rules => new CommandRule[]
         {
             new CommandRule("jupyter",
-                new CommandRuleItem[]{  Arg("install", TokenType.Command, "subcommand", isOptional: false) }),
-
-            new CommandRule("jupyter", 
                 new CommandRuleItem[]{
-                    Opt("--default-kernel", "csharp", "default-kernel"),
-                    Opt("--default-kernel", "fsharp", "default-kernel"),
-                    Opt("--default-kernel", String.Empty, "default-kernel"),
+                    Arg("install", TokenType.Command, "subcommand", isOptional: false) }),
+
+            new CommandRule("jupyter",
+                new CommandRuleItem[]{
+                    Opt("--default-kernel", new string[]{ "csharp", "fsharp" }, "default-kernel"),
                     Ignore(TokenType.Argument, isOptional: true)
                 })
         };

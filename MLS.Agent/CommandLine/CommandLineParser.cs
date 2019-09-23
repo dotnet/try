@@ -64,6 +64,8 @@ namespace MLS.Agent.CommandLine
             IKernel kernel,
             IConsole console);
 
+        private static Telemetry.Telemetry telemetryClient;
+
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
@@ -111,9 +113,12 @@ namespace MLS.Agent.CommandLine
             startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
 
-            var telemetryClient = new Telemetry.Telemetry();
-            TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
-            TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+            if (telemetryClient == null)
+            {
+                var telemetryClient = new Telemetry.Telemetry();
+                TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
+                TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+            }
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
@@ -400,6 +405,8 @@ namespace MLS.Agent.CommandLine
 
                 jupyterCommand.Handler = CommandHandler.Create<JupyterOptions, IConsole, InvocationContext>((options, console, context) =>
                 {
+                    TelemetryEventEntry.SendFiltered(context.ParseResult);
+
                     services
                         .AddSingleton(c => ConnectionInformation.Load(options.ConnectionFile))
                         .AddSingleton(
@@ -415,8 +422,6 @@ namespace MLS.Agent.CommandLine
                                           .Trace())
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
-
-                    TelemetryEventEntry.SendFiltered(context.ParseResult);
 
                     return jupyter(console, startServer, context);
                 });

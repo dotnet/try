@@ -76,6 +76,7 @@ namespace MLS.Agent.Tests
         public async Task TelemetryCommandIsValid()
         {
             await _parser.InvokeAsync("jupyter", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 1 &&
@@ -86,6 +87,7 @@ namespace MLS.Agent.Tests
         public async Task TelemetryCommandIsValid2()
         {
             await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 2 &&
@@ -97,6 +99,7 @@ namespace MLS.Agent.Tests
         public async Task TelemetryCommandIsValid3()
         {
             await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 2 &&
@@ -108,6 +111,7 @@ namespace MLS.Agent.Tests
         public async Task TelemetryCommandIsValid4()
         {
             await _parser.InvokeAsync("jupyter install", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
                      x.Properties.Count == 2 &&
@@ -123,6 +127,7 @@ namespace MLS.Agent.Tests
             {
                 // Do not capture connection file
                 await _parser.InvokeAsync(String.Format("jupyter --default-kernel csharp {0}", tmp), _console);
+                _fakeTelemetry.LogEntries.Should().HaveCount(1);
                 _fakeTelemetry.LogEntries.Should().Contain(
                     x => x.EventName == "parser/command" &&
                          x.Properties.Count == 2 &&
@@ -142,20 +147,64 @@ namespace MLS.Agent.Tests
         [Fact]
         public async Task TelemetryCommandIsValid6()
         {
-            // TODO: This should actually not have any log entries.
-            // Do not capture "oops"
-            await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
+            var tmp = Path.GetTempFileName();
+            try
+            {
+                // Do not capture connection file
+                await _parser.InvokeAsync(String.Format("jupyter {0}", tmp), _console);
+                _fakeTelemetry.LogEntries.Should().HaveCount(1);
+                _fakeTelemetry.LogEntries.Should().Contain(
+                    x => x.EventName == "parser/command" &&
+                         x.Properties.Count == 1 &&
+                         x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
+            }
+            finally
+            {
+                try
+                {
+                    File.Delete(tmp);
+                }
+                catch { }
+            }
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsValid7()
+        {
+            await _parser.InvokeAsync("--verbose jupyter", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "parser/command" &&
-                     x.Properties.Count == 2 &&
-                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
-                     x.Properties["default-kernel"] == Sha256Hasher.Hash(String.Empty));
+                     x.Properties.Count == 1 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
         }
 
         [Fact]
         public async Task TelemetryCommandIsNotValid()
         {
             await _parser.InvokeAsync("jupyter invalidargument", _console);
+            _fakeTelemetry.LogEntries.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsNotValid2()
+        {
+            // Do not capture anything, especially "oops".
+            await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
+            _fakeTelemetry.LogEntries.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsNotValid3()
+        {
+            await _parser.InvokeAsync("hosted", _console);
+            _fakeTelemetry.LogEntries.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task TelemetryCommandIsNotValid4()
+        {
+            await _parser.InvokeAsync("invalidcommand", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
