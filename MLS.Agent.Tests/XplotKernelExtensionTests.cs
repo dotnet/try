@@ -47,7 +47,7 @@ namespace MLS.Agent.Tests
             kernel.UseXplot();
 
             await kernel.SendAsync(new SubmitCode("using XPlot.GoogleCharts;"));
-            await kernel.SendAsync(new SubmitCode("new GoogleChart()"));
+            await kernel.SendAsync(new SubmitCode("Chart.Line(Enumerable.Range(1, 10), Microsoft.FSharp.Core.FSharpOption<IEnumerable<string>>.None, Microsoft.FSharp.Core.FSharpOption<Configuration.Options>.None)"));
 
             KernelEvents
                 .ValuesOnly()
