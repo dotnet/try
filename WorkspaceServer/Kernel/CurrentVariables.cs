@@ -7,26 +7,24 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CurrentVariables : IEnumerable<CurrentVariable>
+    internal class CurrentVariables : IEnumerable<CurrentVariable>
     {
         private readonly Dictionary<string, CurrentVariable> _variables = new Dictionary<string, CurrentVariable>();
 
-        public CurrentVariables(IEnumerable<ScriptVariable> scriptVariables)
+        public CurrentVariables(IEnumerable<ScriptVariable> scriptVariables, bool detailed)
         {
+            Detailed = detailed;
+
             foreach (var variable in scriptVariables)
             {
                 _variables[variable.Name] = new CurrentVariable(variable);
             }
         }
 
-        public IEnumerator<CurrentVariable> GetEnumerator()
-        {
-            return _variables.Values.GetEnumerator();
-        }
+        public bool Detailed { get; }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        public IEnumerator<CurrentVariable> GetEnumerator() => _variables.Values.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

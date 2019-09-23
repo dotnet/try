@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace WorkspaceServer.Kernel
 {
-    public class CurrentVariable
+    internal class CurrentVariable
     {
         internal CurrentVariable(ScriptVariable variable)
         {

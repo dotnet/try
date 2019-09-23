@@ -129,21 +129,30 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
             Formatter<CurrentVariables>.Register((variables, writer) =>
             {
-                PocketView t = table(
-                    thead(
-                        tr(
-                            th("Variable"),
-                            th("Type"),
-                            th("Value"))),
-                    tbody(
-                        variables.Select(v =>
-                                             tr(
-                                                 td(v.Name),
-                                                 td(v.Type),
-                                                 td(v.Value.ToDisplayString())
-                                             ))));
+                PocketView output = null;
 
-                t.WriteTo(writer, HtmlEncoder.Default);
+                if (variables.Detailed)
+                {
+                    output = table(
+                        thead(
+                            tr(
+                                th("Variable"),
+                                th("Type"),
+                                th("Value"))),
+                        tbody(
+                            variables.Select(v =>
+                                 tr(
+                                     td(v.Name),
+                                     td(v.Type),
+                                     td(v.Value.ToDisplayString())
+                                 ))));
+                }
+                else
+                {
+                    output = div(variables.Select(v => span(v.Name)));
+                }
+
+                output.WriteTo(writer, HtmlEncoder.Default);
             }, "text/html");
 
             return kernel;
@@ -151,16 +160,24 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
         private static Command whos()
         {
-            return new Command("%whos")
+            var command = new Command("%whos")
             {
-                Handler = CommandHandler.Create(async (KernelInvocationContext context) =>
+                Handler = CommandHandler.Create(async (ParseResult parseResult, KernelInvocationContext context) =>
                 {
+                    var alias = parseResult.CommandResult.Token.Value;
+
+                    var detailed = alias == "%whos";
+
                     if (context.Command is SubmitCode &&
                         context.HandlingKernel is CSharpKernel kernel)
                     {
                         var variables = kernel.ScriptState.Variables;
 
-                        var html = new CurrentVariables(variables)
+                        var currentVariables = new CurrentVariables(
+                            variables, 
+                            detailed);
+
+                        var html = currentVariables
                             .ToDisplayString(HtmlFormatter.MimeType);
 
                         context.Publish(
@@ -178,6 +195,10 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     }
                 })
             };
+
+            command.AddAlias("%who");
+
+            return command;
         }
     }
 }
