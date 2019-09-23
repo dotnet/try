@@ -67,4 +67,4 @@ RUN echo "$PATH"
 # Install kernel specs
 RUN dotnet try jupyter install
 
-RUN cd ${HOME}/Notebooks/
+WORKDIR ${HOME}/Notebooks/
