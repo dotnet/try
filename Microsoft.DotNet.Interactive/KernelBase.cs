@@ -9,7 +9,6 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,24 +17,13 @@ using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class KernelIdleState
-    {
-        private readonly BehaviorSubject<bool> _idleState = new BehaviorSubject<bool>(true);
-
-        public IObservable<bool> IdleState => _idleState.DistinctUntilChanged();
-
-        public void SetAsBusy() => _idleState.OnNext(false);
-
-        public void SetAsIdle() => _idleState.OnNext(true);
-    }
-
     public abstract class KernelBase : IKernel
     {
         private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
         private readonly List<Command> _directiveCommands = new List<Command>();
         private Parser _directiveParser;
-        private readonly KernelIdleState _idleState =new KernelIdleState();
+        private readonly KernelIdleState _idleState = new KernelIdleState();
 
         protected KernelBase()
         {
@@ -337,8 +325,6 @@ namespace Microsoft.DotNet.Interactive
 
         private readonly ConcurrentQueue<KernelOperation> _commandQueue =
             new ConcurrentQueue<KernelOperation>();
-
-
 
         public Task<IKernelCommandResult> SendAsync(
             IKernelCommand command,

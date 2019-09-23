@@ -13,6 +13,17 @@ namespace Microsoft.DotNet.Interactive.Extensions
             Action<IKernel> onVisit,
             bool recursive = false)
         {
+            if (kernel == null)
+            {
+                throw new ArgumentNullException(nameof(kernel));
+            }
+
+            if (onVisit == null)
+            {
+                throw new ArgumentNullException(nameof(onVisit));
+            }
+
+
             if (kernel is ICompositeKernel compositeKernel)
             {
                 foreach (var subkernel in compositeKernel.ChildKernels)

@@ -516,6 +516,7 @@ namespace MLS.Agent.CommandLine
                                              .UseDefaultRendering()
                                              .UseNugetDirective(new NativeAssemblyLoadHelper())
                                              .UseKernelHelpers()
+                                             .UseWho()
                                              .UseXplot(),
                                          new FSharpKernel()
                                              .UseDefaultRendering()

@@ -87,6 +87,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 [typeof(Type)] = new PlainTextFormatter<Type>((type, writer) =>
                 {
                     var typeName = type.Name;
+
                     if (typeName.Contains("`") && !type.IsAnonymous())
                     {
                         writer.Write(typeName.Remove(typeName.IndexOf('`')));
