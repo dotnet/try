@@ -72,26 +72,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 eName: "Unhandled Exception",
                 eValue: commandFailed.Message
             );
-
-            var isSilent = ((ExecuteRequest)request.Content).Silent;
-
-            if (!isSilent)
-            {
-                // send on io
-                var error = Message.Create(
-                    errorContent,
-                    request.Header);
-                
-                ioPubChannel.Send(error);
-
-                // send on stderr
-                var stdErr = Stream.StdErr(errorContent.EValue);
-                var stream = Message.Create(
-                    stdErr,
-                    request.Header);
-
-                ioPubChannel.Send(stream);
-            }
+           
 
             //  reply Error
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
