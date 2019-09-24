@@ -2,25 +2,69 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using MLS.Agent.Telemetry.Utils;
+using MLS.Agent.Tools;
+using System;
+using System.IO;
+using WorkspaceServer;
 
 namespace MLS.Agent.Telemetry.Configurer
 {
-    // TODO: This isn't fully realized yet. Do we want to have this anyway?
     internal class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
-        public static readonly string SENTINEL = $"{Product.Version}.tryFirstUseSentinel";
+        public static readonly string SENTINEL = $"{Product.Version}.dotnetTryFirstUseSentinel";
 
-        public void CreateIfNotExists()
+        private readonly string _dotnetTryUserProfileFolderPath;
+        private readonly Func<string, bool> _fileExists;
+        private readonly Func<string, bool> _directoryExists;
+        private readonly Action<string> _createDirectory;
+        private readonly Action<string> _createEmptyFile;
+
+        private string SentinelPath => Path.Combine(_dotnetTryUserProfileFolderPath, SENTINEL);
+
+        public FirstTimeUseNoticeSentinel() :
+            this(
+                Paths.DotnetTryUserProfilePath,
+                path => File.Exists(path),
+                path => Directory.Exists(path),
+                path => Directory.CreateDirectory(path),
+                path => File.WriteAllBytes(path, new byte[] { }))
         {
         }
 
-        public void Dispose()
+        public FirstTimeUseNoticeSentinel(
+            string dotnetUserProfileFolderPath,
+            Func<string, bool> fileExists,
+            Func<string, bool> directoryExists,
+            Action<string> createDirectory,
+            Action<string> createEmptyFile)
         {
+            _dotnetTryUserProfileFolderPath = dotnetUserProfileFolderPath;
+            _fileExists = fileExists;
+            _directoryExists = directoryExists;
+            _createDirectory = createDirectory;
+            _createEmptyFile = createEmptyFile;
         }
 
         public bool Exists()
         {
-            return true;
+            return _fileExists(SentinelPath);
+        }
+
+        public void CreateIfNotExists()
+        {
+            if (!Exists())
+            {
+                if (!_directoryExists(_dotnetTryUserProfileFolderPath))
+                {
+                    _createDirectory(_dotnetTryUserProfileFolderPath);
+                }
+
+                _createEmptyFile(SentinelPath);
+            }
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -7,11 +7,14 @@ using System.Collections.Generic;
 
 namespace MLS.Agent.Tests
 {
-    public class FakeRecordEventNameTelemetry : ITelemetry
+    public sealed class FakeTelemetry : ITelemetry
     {
-        public bool Enabled { get; set; }
+        public FakeTelemetry()
+        {
+            Enabled = true;
+        }
 
-        public string EventName { get; set; }
+        public bool Enabled { get; set; }
 
         public void TrackEvent(string eventName,
             IDictionary<string, string> properties,

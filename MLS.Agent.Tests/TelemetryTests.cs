@@ -4,7 +4,6 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Xunit;
@@ -13,24 +12,21 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Telemetry;
-using MLS.Agent.Telemetry.Utils;
-using System.Collections.Generic;
 using System.IO;
+using MLS.Agent.Telemetry.Configurer;
 
 namespace MLS.Agent.Tests
 {
     public class TelemetryTests : IDisposable
     {
-        private readonly FakeRecordEventNameTelemetry _fakeTelemetry;
+        private readonly FakeTelemetry _fakeTelemetry;
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console = new TestConsole();
         private readonly Parser _parser;
 
         public TelemetryTests(ITestOutputHelper output)
         {
-            _fakeTelemetry = new FakeRecordEventNameTelemetry();
-            TelemetryEventEntry.Subscribe(_fakeTelemetry.TrackEvent);
-            TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+            _fakeTelemetry = new FakeTelemetry();
 
             _output = output;
 
@@ -64,7 +60,8 @@ namespace MLS.Agent.Tests
                 startKernelServer: (kernel, console) =>
                 {
                     return Task.FromResult(1);
-                });
+                },
+                telemetry: _fakeTelemetry);
         }
 
         public void Dispose()
@@ -73,7 +70,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_standalone_command_is_valid()
+        public async Task Jupyter_standalone_command_sends_telemetry()
         {
             await _parser.InvokeAsync("jupyter", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
@@ -90,7 +87,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_default_kernel_csharp_is_valid()
+        public async Task Jupyter_default_kernel_csharp_sends_telemetry()
         {
             await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
@@ -108,7 +105,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_default_kernel_fsharp_is_valid()
+        public async Task Jupyter_default_kernel_fsharp_sends_telemetry()
         {
             await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
@@ -126,7 +123,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_install_is_valid()
+        public async Task Jupyter_install_sends_telemetry()
         {
             await _parser.InvokeAsync("jupyter install", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
@@ -144,7 +141,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_default_kernel_csharp_ignore_connection_file_is_valid()
+        public async Task Jupyter_default_kernel_csharp_ignore_connection_file_sends_telemetry()
         {
             var tmp = Path.GetTempFileName();
             try
@@ -188,7 +185,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_ignore_connection_file_is_valid()
+        public async Task Jupyter_ignore_connection_file_sends_telemetry()
         {
             var tmp = Path.GetTempFileName();
             try
@@ -231,7 +228,7 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_with_verbose_option_is_valid()
+        public async Task Jupyter_with_verbose_option_sends_telemetry_just_for_juptyer_command()
         {
             await _parser.InvokeAsync("--verbose jupyter", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
@@ -248,14 +245,14 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Jupyter_with_invalid_argument_is_not_valid()
+        public async Task Jupyter_with_invalid_argument_does_not_send_any_telemetry()
         {
             await _parser.InvokeAsync("jupyter invalidargument", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task Jupyter_default_kernel_with_invalid_kernel_is_not_valid()
+        public async Task Jupyter_default_kernel_with_invalid_kernel_does_not_send_any_telemetry()
         {
             // Do not capture anything, especially "oops".
             await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
@@ -263,14 +260,14 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public async Task Hosted_is_not_valid()
+        public async Task Hosted_is_does_not_send_any_telemetry()
         {
             await _parser.InvokeAsync("hosted", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task Invalid_command_is_not_valid()
+        public async Task Invalid_command_is_does_not_send_any_telemetry()
         {
             await _parser.InvokeAsync("invalidcommand", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();

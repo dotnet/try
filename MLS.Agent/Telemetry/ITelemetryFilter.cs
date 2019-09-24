@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace MLS.Agent.Telemetry.Utils
+namespace MLS.Agent.Telemetry
 {
     public interface ITelemetryFilter
     {

@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.DotNet.PlatformAbstractions;
 using MLS.Agent.Telemetry.Configurer;
+using MLS.Agent.Telemetry.Utils;
 
 namespace MLS.Agent.Telemetry
 {
-    internal class Telemetry : ITelemetry
+    internal sealed class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
         private TelemetryClient _client = null;
@@ -98,7 +99,7 @@ namespace MLS.Agent.Telemetry
             );
         }
 
-        public void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
+        private void ThreadBlockingTrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
         {
             if (!Enabled)
             {

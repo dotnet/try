@@ -5,7 +5,7 @@ using System;
 
 namespace MLS.Agent.Telemetry.Configurer
 {
-    internal interface IFirstTimeUseNoticeSentinel : IDisposable
+    public interface IFirstTimeUseNoticeSentinel : IDisposable
     {
         bool Exists();
 

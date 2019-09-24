@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.Markdown;
 using MLS.Agent.Telemetry;
+using MLS.Agent.Telemetry.Configurer;
 using MLS.Agent.Telemetry.Utils;
 using MLS.Agent.Tools;
 using MLS.Repositories;
@@ -64,8 +65,6 @@ namespace MLS.Agent.CommandLine
             IKernel kernel,
             IConsole console);
 
-        private static Telemetry.Telemetry telemetryClient;
-
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
@@ -75,7 +74,8 @@ namespace MLS.Agent.CommandLine
             Install install = null,
             Verify verify = null,
             Jupyter jupyter = null,
-            StartKernelServer startKernelServer = null)
+            StartKernelServer startKernelServer = null,
+            ITelemetry telemetry = null)
         {
             if (services == null)
             {
@@ -113,12 +113,9 @@ namespace MLS.Agent.CommandLine
             startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
 
-            if (telemetryClient == null)
-            {
-                var telemetryClient = new Telemetry.Telemetry();
-                TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
-                TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
-            }
+            var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+            telemetry = telemetry ?? new Telemetry.Telemetry(new FirstTimeUseNoticeSentinel());
+            Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
@@ -405,7 +402,7 @@ namespace MLS.Agent.CommandLine
 
                 jupyterCommand.Handler = CommandHandler.Create<JupyterOptions, IConsole, InvocationContext>((options, console, context) =>
                 {
-                    TelemetryEventEntry.SendFiltered(context.ParseResult);
+                    track(context.ParseResult);
 
                     services
                         .AddSingleton(c => ConnectionInformation.Load(options.ConnectionFile))
@@ -429,7 +426,7 @@ namespace MLS.Agent.CommandLine
                 var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
                 installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
-                    TelemetryEventEntry.SendFiltered(context.ParseResult);
+                    track(context.ParseResult);
                     return new JupyterCommandLine(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
                 });
 

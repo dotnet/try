@@ -17,6 +17,8 @@ namespace WorkspaceServer
                     ? "USERPROFILE"
                     : "HOME");
 
+            DotnetTryUserProfilePath = Path.Combine(Environment.GetEnvironmentVariable("DOTNET_TRY_CLI_HOME"), ".dotnet");
+
             DotnetToolsPath = Path.Combine(UserProfile, ".dotnet", "tools");
 
             var nugetPackagesEnvironmentVariable = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
@@ -25,6 +27,8 @@ namespace WorkspaceServer
                              ? Path.Combine(UserProfile, ".nuget", "packages")
                              : nugetPackagesEnvironmentVariable;
         }
+
+        public static string DotnetTryUserProfilePath { get; }
 
         public static string DotnetToolsPath { get; }
 

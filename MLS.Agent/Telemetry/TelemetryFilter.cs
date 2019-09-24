@@ -1,17 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.CommandLine;
-using MLS.Agent.Telemetry.Utils;
-using System.Collections;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace MLS.Agent.Telemetry
 {
-    public class TelemetryFilter : ITelemetryFilter
+    public sealed class TelemetryFilter : ITelemetryFilter
     {
         private const string DotNetTryName = "dotnet-try";
         private readonly Func<string, string> _hash;
