@@ -67,10 +67,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 .Contain(message => message.Contains(JupyterMessageContentTypes.ExecuteReply))
                 .And
                 .Contain(message => message.Contains($"\"status\":\"{StatusValues.Error}\""));
-
-            IoRecordingSocket.DecodedMessages
-                .Should().Contain(message =>
-                    message.Contains(JupyterMessageContentTypes.Stream));
         }
 
         [Fact]
