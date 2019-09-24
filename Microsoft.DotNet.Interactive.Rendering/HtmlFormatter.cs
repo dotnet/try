@@ -50,7 +50,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             [typeof(string)] = new HtmlFormatter<string>((s, writer) => writer.Write(s)),
 
-            [typeof(Type)] = new HtmlFormatter<Type>(PlainTextFormatter<Type>.Default.Format),
+            [typeof(Type)] = new HtmlFormatter<Type>((type, writer) =>
+            {
+                PocketView view = span(
+                    a[href: $"https://docs.microsoft.com/dotnet/api/{type.FullName}?view=netcore-3.0"](
+                        type.ToDisplayString("text/plain")));
+
+                view.WriteTo(writer, HtmlEncoder.Default);
+            }),
 
             [typeof(DateTime)] = new HtmlFormatter<DateTime>((value, writer) => writer.Write(value.ToString("u"))),
             [typeof(DateTimeOffset)] = new HtmlFormatter<DateTimeOffset>((value, writer) => writer.Write(value.ToString("u"))),

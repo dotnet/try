@@ -194,7 +194,21 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
                 writer.ToString()
                       .Should()
-                      .Contain("<td>{ Exception:");
+                      .Contain("<td>{ System.Exception:");
+            }
+
+            [Fact]
+            public void Properies_of_System_Type_instances_are_not_expanded()
+            {
+                var formatter = HtmlFormatter.Create(typeof(Type));
+
+                var writer = new StringWriter();
+
+                formatter.Format(typeof(string), writer);
+
+                writer.ToString()
+                      .Should()
+                      .Be("<span><a href=\"https://docs.microsoft.com/dotnet/api/System.String?view=netcore-3.0\">System.String</a></span>");
             }
         }
 

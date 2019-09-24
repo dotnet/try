@@ -251,9 +251,9 @@ display(""done!"");
                   .As<string>()
                   .Should()
                   .ContainAll(
-                      "<td>x</td><td>Int32</td><td>2</td>",
-                      "<td>y</td><td>String</td><td>hi!</td>",
-                      "<td>z</td><td>Object[]</td><td>[ 2, hi! ]</td>");
+                      "<td>x</td><td>System.Int32</td><td>2</td>",
+                      "<td>y</td><td>System.String</td><td>hi!</td>",
+                      "<td>z</td><td>System.Object[]</td><td>[ 2, hi! ]</td>");
         }
 
         [Fact]
