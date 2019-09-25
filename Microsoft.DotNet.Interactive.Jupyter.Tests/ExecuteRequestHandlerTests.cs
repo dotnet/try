@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
-            await context.Done().Timeout(10.Seconds());
+            await context.Done().Timeout(20.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
             await scheduler.Schedule(context);
 
-            await context.Done().Timeout(5.Seconds());
+            await context.Done().Timeout(20.Seconds());
 
             ServerRecordingSocket.DecodedMessages
                 .Should().Contain(message =>

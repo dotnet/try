@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            var executeInputReply = Message.CreatePubSub(executeInputPayload, context.Request, "execute_input", context.KernelIdent);
+            var executeInputReply = Message.CreatePubSub(executeInputPayload, context.Request, context.KernelIdent);
             context.IoPubChannel.Send(executeInputReply);
 
             var command = new SubmitCode(executeRequest.Code);
@@ -45,13 +45,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case DisplayEventBase displayEvent:
-                    OnDisplayEvent(displayEvent, context.Request, context.IoPubChannel);
+                    OnDisplayEvent(displayEvent, context.Request, context.IoPubChannel, context.KernelIdent);
                     break;
-                case CommandHandled commandHandled:
-                    OnCommandHandled(commandHandled, context.Request, context.ServerChannel);
+                case CommandHandled _:
+                    OnCommandHandled(context.Request, context.ServerChannel);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed, context.Request, context.ServerChannel, context.IoPubChannel);
+                    OnCommandFailed(commandFailed, context.Request, context.ServerChannel);
                     break;
             }
         }
@@ -65,8 +65,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private void OnCommandFailed(
             CommandFailed commandFailed,
             Message request, 
-            IMessageSender serverChannel, 
-            IMessageSender ioPubChannel)
+            IMessageSender serverChannel)
         {
             var errorContent = new Error (
                 eName: "Unhandled Exception",
@@ -85,9 +84,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             serverChannel.Send(executeReply);
         }
 
-        private void SendDisplayData(
-            JupyterMessageContent messageContent, 
-            Message request, 
+        private void SendDisplayData(JupyterPubSubContent messageContent,
+            Message request,
             IMessageSender ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
@@ -95,17 +93,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             if (!isSilent)
             {
                 // send on io
-                var executeResultMessage = Message.Create(
+                var executeResultMessage = Message.CreatePubSub(
                     messageContent,
-                    request.Header);
+                    request);
                 ioPubChannel.Send(executeResultMessage);
             }
         }
 
-        private void OnDisplayEvent(
-            DisplayEventBase displayEvent, 
-            Message request, 
-            IMessageSender ioPubChannel)
+        private void OnDisplayEvent(DisplayEventBase displayEvent,
+            Message request,
+            IMessageSender ioPubChannel, string contextKernelIdent)
         {
             var transient = CreateTransient(displayEvent.ValueId);
 
@@ -117,8 +114,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            JupyterMessageContent executeResultData;
-
+            JupyterPubSubContent executeResultData;
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
@@ -126,14 +122,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         transient: transient,
                         data: formattedValues);
                     break;
-                case ReturnValueProduced _:
-                    executeResultData = new ExecuteResult(
-                        _executionCount,
+                case DisplayedValueUpdated _:
+                    executeResultData = new UpdateDisplayData(
                         transient: transient,
                         data: formattedValues);
                     break;
-                case DisplayedValueUpdated _:
-                    executeResultData = new UpdateDisplayData(
+                case ReturnValueProduced _:
+                    executeResultData = new ExecuteResult(
+                        _executionCount,
                         transient: transient,
                         data: formattedValues);
                     break;
@@ -154,13 +150,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(
-            CommandHandled commandHandled,
-            Message request, 
-            IMessageSender serverChannel)
+        private void OnCommandHandled(Message request, IMessageSender serverChannel)
         {
-           
-
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 

@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using Microsoft.CodeAnalysis.Operations;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
@@ -83,6 +85,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
+            if (!(request.Content is JupyterRequestContent))
+            {
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterReplyContent)}");
+            }
+
             var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
 
             return replyMessage;
@@ -90,7 +97,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         public static Message CreatePubSub<T>(
             T content,
-            Message request, string topic, string ident)
+            Message request, string ident = null)
             where T : JupyterPubSubContent
         {
             if (content == null)
@@ -103,16 +110,62 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var replyMessage = Create(content, request.Header, new [] {Topic(topic,ident)}, request.Signature);
+            if (!(request.Content is JupyterRequestContent))
+            {
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterReplyContent)}");
+            }
+
+            var replyMessage = Create(content, request.Header, new[] { Topic(content, ident) }, request.Signature);
 
             return replyMessage;
         }
 
-        public static byte[] Topic(string topic, string ident)
-        {
-            var fullTopic = $"kernel.{ident}.{topic}";
-            return Encoding.Unicode.GetBytes(fullTopic);
-        }
 
+        private static byte[] Topic<T>(T content, string ident) where T : JupyterPubSubContent
+        {
+            byte[] encodedTopic;
+            var name = content.GetType().Name;
+            switch (name)
+            {
+
+                case nameof(Status):
+                    {
+                        var fullTopic = GenerateFullTopic("status");
+                        encodedTopic = Encoding.Unicode.GetBytes(fullTopic);
+                    }
+                    break;
+
+                case nameof(ExecuteInput):
+                    {
+                        var fullTopic = GenerateFullTopic("execute_input");
+                        encodedTopic = Encoding.Unicode.GetBytes(fullTopic);
+                    }
+                    break;
+
+                case nameof(DisplayData):
+                case nameof(UpdateDisplayData):
+                    encodedTopic = Encoding.Unicode.GetBytes("display_data");
+                    break;
+
+                case nameof(ExecuteResult):
+                    encodedTopic = Encoding.Unicode.GetBytes("execute_result");
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException($"type {name} is not supported");
+
+            }
+
+            string GenerateFullTopic(string topic)
+            {
+                if (ident == null)
+                {
+                    throw new ArgumentNullException(nameof(ident));
+                }
+                return $"kernel.{ident}.{topic}";
+            }
+
+            return encodedTopic;
+        }
     }
 }

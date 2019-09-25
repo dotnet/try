@@ -84,35 +84,35 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 //SetStarting();
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var message = _shell.GetMessage();
+                    var request = _shell.GetMessage();
 
-                    activity.Info("Received: {message}", message.ToJson());
+                    activity.Info("Received: {message}", request.ToJson());
 
-                    SetBusy(message.Header);
+                    SetBusy(request);
 
-                    switch (message.Header.MessageType)
+                    switch (request.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
-                            id = Encoding.Unicode.GetString(message.Identifiers[0].ToArray());
-                            HandleKernelInfoRequest(message);
-                            SetIdle(message.Header);
+                            id = Encoding.Unicode.GetString(request.Identifiers[0].ToArray());
+                            HandleKernelInfoRequest(request);
+                            SetIdle(request);
                             break;
 
                         case JupyterMessageContentTypes.KernelShutdownRequest:
-                            SetIdle(message.Header);
+                            SetIdle(request);
                             break;
 
                         default:
                             var context = new JupyterRequestContext(
                                 _shellSender,
                                 _ioPubSender,
-                                message, id);
+                                request, id);
 
                             await _scheduler.Schedule(context);
 
                             await context.Done();
 
-                            SetIdle(message.Header);
+                            SetIdle(request);
 
                             break;
                     }
@@ -120,9 +120,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Header parentHeader) => _ioPubSender.Send(Message.Create(new Status(StatusValues.Busy), parentHeader: parentHeader, identifiers:new []{Message.Topic("status", id)}));
+                void SetBusy(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Busy), request));
 
-                void SetIdle(Header parentHeader) => _ioPubSender.Send(Message.Create(new Status(StatusValues.Idle), parentHeader: parentHeader, identifiers: new[] { Message.Topic("status", id) }));
+                void SetIdle(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Idle), request));
 
                 
             }

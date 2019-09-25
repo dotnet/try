@@ -29,9 +29,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
-        public bool Send(JupyterPubSubContent content, Message request, string topic, string ident)
+        public bool Send(JupyterPubSubContent content, Message request, string ident = null)
         {
-            var reply = Message.CreatePubSub(content, request, topic, ident);
+            var reply = Message.CreatePubSub(content, request, ident);
             return _sender.Send(reply);
         }
     }
