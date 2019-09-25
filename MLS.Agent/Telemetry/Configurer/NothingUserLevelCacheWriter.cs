@@ -1,17 +1,15 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace MLS.Agent.Telemetry.Configurer
 {
-    public sealed class NopFirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
+    public sealed class NothingUserLevelCacheWriter : IUserLevelCacheWriter
     {
-        public void CreateIfNotExists()
+        public string RunWithCache(string cacheKey, Func<string> getValueToCache)
         {
-        }
-
-        public bool Exists()
-        {
-            return true;
+            return getValueToCache();
         }
     }
 }

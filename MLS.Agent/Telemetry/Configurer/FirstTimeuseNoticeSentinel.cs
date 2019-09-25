@@ -9,7 +9,7 @@ using WorkspaceServer;
 
 namespace MLS.Agent.Telemetry.Configurer
 {
-    internal class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
+    internal sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
         public static readonly string SENTINEL = $"{Product.Version}.dotnetTryFirstUseSentinel";
 
@@ -32,13 +32,13 @@ namespace MLS.Agent.Telemetry.Configurer
         }
 
         public FirstTimeUseNoticeSentinel(
-            string dotnetUserProfileFolderPath,
+            string dotnetTryUserProfileFolderPath,
             Func<string, bool> fileExists,
             Func<string, bool> directoryExists,
             Action<string> createDirectory,
             Action<string> createEmptyFile)
         {
-            _dotnetTryUserProfileFolderPath = dotnetUserProfileFolderPath;
+            _dotnetTryUserProfileFolderPath = dotnetTryUserProfileFolderPath;
             _fileExists = fileExists;
             _directoryExists = directoryExists;
             _createDirectory = createDirectory;
@@ -61,10 +61,6 @@ namespace MLS.Agent.Telemetry.Configurer
 
                 _createEmptyFile(SentinelPath);
             }
-        }
-
-        public void Dispose()
-        {
         }
     }
 }
