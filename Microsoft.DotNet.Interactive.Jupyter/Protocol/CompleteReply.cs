@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.CompleteReply)]
-    public class CompleteReply : JupyterMessageContent
+    public class CompleteReply : JupyterReplyContent
     {
         [JsonProperty("matches")]
         public IReadOnlyList<string> Matches { get; }

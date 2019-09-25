@@ -4,7 +4,7 @@
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.KernelInfoRequest)]
-    public class KernelInfoRequest : JupyterMessageContent
+    public class KernelInfoRequest : JupyterRequestContent
     {
     }
 }

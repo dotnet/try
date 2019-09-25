@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            var interruptReply = Message.CreateResponse(
+            var interruptReply = Message.CreateReply(
                 interruptReplyPayload,
                 request);
 
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var command = new CancelCurrentCommand();
 
-            await SendTheThingAndWaitForTheStuff(context, command);
+            await SendAsync(context, command);
         }
     }
 }

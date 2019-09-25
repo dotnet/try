@@ -4,7 +4,7 @@
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.InterruptRequest)]
-    public class InterruptRequest : JupyterMessageContent
+    public class InterruptRequest : JupyterRequestContent
     {
         
     }

@@ -30,12 +30,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            var executeReply = Message.Create(executeInputPayload, context.Request.Header, identifiers:new []{Message.Topic("execute_input", context.KernelIdent) });
-            context.IoPubChannel.Send(executeReply);
+            var executeInputReply = Message.CreatePubSub(executeInputPayload, context.Request, "execute_input", context.KernelIdent);
+            context.IoPubChannel.Send(executeInputReply);
 
             var command = new SubmitCode(executeRequest.Code);
 
-            await SendTheThingAndWaitForTheStuff(context, command);
+            await SendAsync(context, command);
         }
 
         protected override void OnKernelEventReceived(
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            var executeReply = Message.CreateResponse(
+            var executeReply = Message.CreateReply(
                 executeReplyPayload,
                 request);
 
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-            var executeReply = Message.CreateResponse(
+            var executeReply = Message.CreateReply(
                 executeReplyPayload,
                 request);
 

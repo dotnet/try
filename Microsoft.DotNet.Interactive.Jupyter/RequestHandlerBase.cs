@@ -14,7 +14,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public abstract class RequestHandlerBase<T> : IDisposable
-        where T : JupyterMessageContent
+        where T : JupyterRequestContent
     {
 
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             KernelEvents = Kernel.KernelEvents.ObserveOn(scheduler ?? throw new ArgumentNullException(nameof(scheduler)));
         }
 
-        protected async Task SendTheThingAndWaitForTheStuff(
+        protected async Task SendAsync(
             JupyterRequestContext context,
             IKernelCommand command)
         {

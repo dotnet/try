@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var isCompleteRequest = GetJupyterRequest(context);
             var command = new SubmitCode(isCompleteRequest.Code, submissionType: SubmissionType.Diagnose);
 
-            await SendTheThingAndWaitForTheStuff(context, command);
+            await SendAsync(context, command);
         }
       
 
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                var executeReply = Message.CreateResponse(
+                var executeReply = Message.CreateReply(
                     isCompleteReplyPayload,
                     request);
 

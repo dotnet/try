@@ -10,6 +10,21 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
+    public abstract class JupyterRequestContent : JupyterMessageContent
+    {
+
+    }
+
+    public abstract class JupyterReplyContent : JupyterMessageContent
+    {
+
+    }
+
+    public abstract class JupyterPubSubContent : JupyterMessageContent
+    {
+
+    }
+
     public abstract class JupyterMessageContent
     {
         private static readonly IReadOnlyDictionary<string, Type> _messageTypeToClrType;

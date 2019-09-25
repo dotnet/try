@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.CommInfoReply)]
-    public class CommInfoReply : JupyterMessageContent
+    public class CommInfoReply : JupyterReplyContent
     {
         [JsonProperty("comms", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyDictionary<string, CommTarget> Comms { get; }
