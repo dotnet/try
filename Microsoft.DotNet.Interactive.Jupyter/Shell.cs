@@ -14,6 +14,7 @@ using NetMQ.Sockets;
 using Pocket;
 using Recipes;
 using static Pocket.Logger<Microsoft.DotNet.Interactive.Jupyter.Shell>;
+using InvalidOperationException = System.InvalidOperationException;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -137,8 +138,35 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void HandleKernelInfoRequest(Message request)
         {
-            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", new CSharpLanguageInfo());
+            var languageInfo = GetLanguageInfo();
+            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", languageInfo);
             _shellSender.Reply(kernelInfoReply, request);
+        }
+
+        private LanguageInfo GetLanguageInfo()
+        {
+            switch (_kernel)
+            {
+                case CompositeKernel composite:
+                    return GetLanguageInfo(composite.DefaultKernelName);
+                case IKernel kernel:
+                    return GetLanguageInfo(kernel.Name);
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        private LanguageInfo GetLanguageInfo(string kernelName)
+        {
+            switch (kernelName)
+            {
+                case "csharp":
+                    return new CSharpLanguageInfo();
+                case "fsharp":
+                    return new FSharpLanguageInfo();
+                default:
+                    throw new InvalidOperationException($"{kernelName} not supported");
+            }
         }
     }
 }
