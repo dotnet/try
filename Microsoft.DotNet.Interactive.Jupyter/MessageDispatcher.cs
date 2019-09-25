@@ -14,6 +14,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         public MessageDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdent)
         {
+            if (string.IsNullOrWhiteSpace(kernelIdent))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(kernelIdent));
+            }
+
             _pubSubChannel = pubSubChannel ?? throw new ArgumentNullException(nameof(pubSubChannel));
             _replyChannel = replyChannel ?? throw new ArgumentNullException(nameof(replyChannel));
             _kernelIdent = kernelIdent;

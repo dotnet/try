@@ -14,10 +14,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
-        public bool Reply(JupyterReplyMessageContent messageContent, Message request)
+        public void Reply(JupyterReplyMessageContent messageContent, Message request)
         {
             var reply = Message.CreateReply(messageContent, request);
-            return _sender.Send(reply);
+            _sender.Send(reply);
         }
     }
 }

@@ -7,6 +7,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public interface IReplyChannel
     {
-        bool Reply(JupyterReplyMessageContent messageContent, Message request);
+        void Reply(JupyterReplyMessageContent messageContent, Message request);
     }
 }

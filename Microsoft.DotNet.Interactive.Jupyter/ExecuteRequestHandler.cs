@@ -14,11 +14,6 @@ using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class KernelEventAdapter
-    {
-
-    }
-
     public class ExecuteRequestHandler : RequestHandlerBase<ExecuteRequest>
     {
         private int _executionCount;

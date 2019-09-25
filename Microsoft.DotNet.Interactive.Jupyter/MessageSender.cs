@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _signatureValidator = signatureValidator ?? throw new ArgumentNullException(nameof(signatureValidator));
         }
 
-        public bool Send(Message message)
+        public void Send(Message message)
         {
             var hmac = _signatureValidator.CreateSignature(message);
 
@@ -38,8 +38,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             Send((message.ParentHeader?? new object()).ToJson(), _socket);
             Send(message.MetaData.ToJson(), _socket);
             Send(message.Content.ToJson(), _socket, false);
-
-            return true;
         }
 
         private static void Send(string message, IOutgoingSocket socket, bool sendMore = true)
