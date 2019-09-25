@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
-using Microsoft.CodeAnalysis.Operations;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
@@ -85,9 +83,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.Content is JupyterRequestContent))
+            if (!(request.Content is JupyterRequestContent) && request.Content != JupyterMessageContent.Empty)
             {
-                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterReplyContent)}");
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is not a valid {nameof(JupyterRequestContent)}");
             }
 
             var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
@@ -110,9 +108,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.Content is JupyterRequestContent))
+            if (!(request.Content is JupyterRequestContent) && request.Content != JupyterMessageContent.Empty)
             {
-                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterReplyContent)}");
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterRequestContent)}");
             }
 
             var replyMessage = Create(content, request.Header, new[] { Topic(content, ident) }, request.Signature);

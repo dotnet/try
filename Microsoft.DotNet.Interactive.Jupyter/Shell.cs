@@ -120,9 +120,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Busy), request));
+                void SetBusy(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Busy), request, id));
 
-                void SetIdle(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Idle), request));
+                void SetIdle(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Idle), request, id));
 
                 
             }
