@@ -28,10 +28,10 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public override string MimeType => "text/html";
 
-        public static HtmlFormatter<T> Create(bool includeInternals = false)
+        public static ITypeFormatter<T> Create(bool includeInternals = false)
         {
-            if (HtmlFormatter.SpecialDefaults.TryGetValue(typeof(T), out var formatter) &&
-                formatter is HtmlFormatter<T> ft)
+            if (HtmlFormatter.DefaultFormatters.TryGetFormatterForType(typeof(T), out var formatter) &&
+                formatter is ITypeFormatter<T> ft)
             {
                 return ft;
             }

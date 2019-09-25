@@ -47,5 +47,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public void WriteStartSequenceItem(TextWriter writer)
         {
         }
+
+        public static IPlainTextFormatter Instance { get; } = new SingleLinePlainTextFormatter();
     }
 }

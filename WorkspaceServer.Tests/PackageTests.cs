@@ -159,7 +159,7 @@ namespace WorkspaceServer.Tests
                 buildEventsMessages.Add(e.Evaluate().Message);
                 if (e.Evaluate().Message.StartsWith("Building package "))
                 {
-                    barrier.SignalAndWait(10.Minutes());
+                    barrier.SignalAndWait(30.Seconds());
                 }
             }))
             {

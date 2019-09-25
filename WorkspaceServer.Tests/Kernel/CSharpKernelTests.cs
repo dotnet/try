@@ -235,7 +235,7 @@ Console.Write(""value three"");");
 Console.Write(""value one"");
 Console.Write(""value two"");
 Console.Write(""value three"");
-5", "csharp");
+5");
             await kernel.SendAsync(kernelCommand);
 
             KernelEvents.ValuesOnly()
@@ -260,7 +260,7 @@ Console.Write(""value three"");
 Console.Write(DateTime.Now);
 System.Threading.Thread.Sleep(1000);
 Console.Write(DateTime.Now);
-5", "csharp");
+5");
             await kernel.SendAsync(kernelCommand);
             var events = KernelEvents
                 .Where(e => e.Value is DisplayedValueProduced).ToArray();
@@ -388,7 +388,7 @@ json
                 new CSharpKernel().UseNugetDirective()
             };
 
-            var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();", "csharp");
+            var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();");
             await kernel.SendAsync(command);
 
             command.Code.Should().Be("var a = new List<int>();");
@@ -567,7 +567,7 @@ try
 catch (Exception e)
 {
     Console.WriteLine(e);
-}", "csharp");
+}");
 
             var result = await kernel.SendAsync(command);
 

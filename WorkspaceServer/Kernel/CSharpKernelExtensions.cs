@@ -1,8 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
@@ -11,6 +14,7 @@ using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
 using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;
+using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace WorkspaceServer.Kernel
 {
@@ -117,6 +121,84 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             kernel.AddDirective(r);
 
             return kernel;
+        }
+
+        public static CSharpKernel UseWho(this CSharpKernel kernel)
+        {
+            kernel.AddDirective(who_and_whos());
+
+            Formatter<CurrentVariables>.Register((variables, writer) =>
+            {
+                PocketView output = null;
+
+                if (variables.Detailed)
+                {
+                    output = table(
+                        thead(
+                            tr(
+                                th("Variable"),
+                                th("Type"),
+                                th("Value"))),
+                        tbody(
+                            variables.Select(v =>
+                                 tr(
+                                     td(v.Name),
+                                     td(v.Type),
+                                     td(v.Value.ToDisplayString())
+                                 ))));
+                }
+                else
+                {
+                    output = div(variables.Select(v => v.Name + "\t "));
+                }
+
+                output.WriteTo(writer, HtmlEncoder.Default);
+            }, "text/html");
+
+            return kernel;
+        }
+
+        private static Command who_and_whos()
+        {
+            var command = new Command("%whos")
+            {
+                Handler = CommandHandler.Create(async (ParseResult parseResult, KernelInvocationContext context) =>
+                {
+                    var alias = parseResult.CommandResult.Token.Value;
+
+                    var detailed = alias == "%whos";
+
+                    if (context.Command is SubmitCode &&
+                        context.HandlingKernel is CSharpKernel kernel)
+                    {
+                        var variables = kernel.ScriptState.Variables;
+
+                        var currentVariables = new CurrentVariables(
+                            variables, 
+                            detailed);
+
+                        var html = currentVariables
+                            .ToDisplayString(HtmlFormatter.MimeType);
+
+                        context.Publish(
+                            new DisplayedValueProduced(
+                                html,
+                                context.Command,
+                                new[]
+                                {
+                                    new FormattedValue(
+                                        HtmlFormatter.MimeType,
+                                        html)
+                                }));
+
+                        context.Complete();
+                    }
+                })
+            };
+
+            command.AddAlias("%who");
+
+            return command;
         }
     }
 }

@@ -6,26 +6,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Reflection;
 using System.Text.Encodings.Web;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    public class DefaultPlainTextFormatterSet
+    internal class DefaultPlainTextFormatterSet : FormatterSetBase
     {
-        internal readonly ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> _openGenericFormatterFactories;
+        public DefaultPlainTextFormatterSet() : base(DefaultOpenGenericFormatterFactories(),
+                                                     DefaultFormatters())
 
-        internal readonly Dictionary<Type, ITypeFormatter> _formatters;
-
-        private static readonly MethodInfo _formatReadOnlyMemoryMethod = typeof(DefaultPlainTextFormatterSet)
-                                                                         .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
-                                                                         .Single(m => m.Name == nameof(FormatReadOnlyMemory));
-
-        public DefaultPlainTextFormatterSet()
         {
-            var singleLineFormatter = new SingleLinePlainTextFormatter();
+        }
 
-            _openGenericFormatterFactories = new ConcurrentDictionary<Type, Func<Type, ITypeFormatter>>
+        private static ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> DefaultOpenGenericFormatterFactories()
+        {
+            return new ConcurrentDictionary<Type, Func<Type, ITypeFormatter>>
             {
                 [typeof(ReadOnlyMemory<>)] = type =>
                 {
@@ -33,7 +28,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
                         type,
                         (obj, writer) =>
                         {
-                            var toArray = _formatReadOnlyMemoryMethod.MakeGenericMethod(type.GetGenericArguments());
+                            var toArray = Formatter.FormatReadOnlyMemoryMethod.MakeGenericMethod
+                                (type.GetGenericArguments());
 
                             var array = toArray.Invoke(null, new[]
                             {
@@ -45,8 +41,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
                         PlainTextFormatter.MimeType);
                 }
             };
+        }
 
-            _formatters = new Dictionary<Type, ITypeFormatter>
+        private static ConcurrentDictionary<Type, ITypeFormatter> DefaultFormatters()
+        {
+            var singleLineFormatter = new SingleLinePlainTextFormatter();
+
+            return new ConcurrentDictionary<Type, ITypeFormatter>
             {
                 [typeof(ExpandoObject)] =
                     new PlainTextFormatter<ExpandoObject>((expando, writer) =>
@@ -86,7 +87,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
                 [typeof(Type)] = new PlainTextFormatter<Type>((type, writer) =>
                 {
-                    var typeName = type.Name;
+                    var typeName = type.FullName ?? type.Name;
+
                     if (typeName.Contains("`") && !type.IsAnonymous())
                     {
                         writer.Write(typeName.Remove(typeName.IndexOf('`')));
@@ -114,36 +116,5 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 [typeof(DateTimeOffset)] = new PlainTextFormatter<DateTimeOffset>((value, writer) => writer.Write(value.ToString("u")))
             };
         }
-
-        public void AddOpenGenericFormatterFactory(
-            Type type,
-            Func<Type, ITypeFormatter> getFormatter)
-        {
-            if (!type.IsGenericTypeDefinition)
-            {
-                throw new ArgumentException($"Type {type} is not an open generic type.");
-            }
-
-            _openGenericFormatterFactories[type] = getFormatter;
-        }
-
-        public bool TryGetValue(Type type, out ITypeFormatter formatter)
-        {
-            if (!_formatters.TryGetValue(type, out formatter))
-            {
-                if (type.IsGenericType &&
-                    _openGenericFormatterFactories.TryGetValue(
-                        type.GetGenericTypeDefinition(),
-                        out var factory))
-                {
-                    formatter = factory(type);
-                    _formatters[type] = formatter;
-                }
-            }
-
-            return true;
-        }
-
-        private static IReadOnlyCollection<T> FormatReadOnlyMemory<T>(ReadOnlyMemory<T> mem) => mem.Span.ToArray();
     }
 }
