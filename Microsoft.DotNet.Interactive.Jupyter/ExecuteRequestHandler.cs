@@ -30,8 +30,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            var executeInputReply = Message.CreatePubSub(executeInputPayload, context.Request, context.KernelIdent);
-            context.IoPubChannel.Send(executeInputReply);
+            context.IoPubChannel.Send(executeInputPayload, context.Request, context.KernelIdent);
 
             var command = new SubmitCode(executeRequest.Code);
 
@@ -65,7 +64,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private void OnCommandFailed(
             CommandFailed commandFailed,
             Message request, 
-            IMessageSender serverChannel)
+            IReplyChannel serverChannel)
         {
             var errorContent = new Error (
                 eName: "Unhandled Exception",
@@ -77,32 +76,26 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            var executeReply = Message.CreateReply(
-                executeReplyPayload,
-                request);
-
-            serverChannel.Send(executeReply);
+            serverChannel.Send(executeReplyPayload, request);
         }
 
-        private void SendDisplayData(JupyterPubSubContent messageContent,
+        private static void SendDisplayData(JupyterPubSubContent messageContent,
             Message request,
-            IMessageSender ioPubChannel)
+            IPubSubChannel ioPubChannel, string contextKernelIdent)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
 
             if (!isSilent)
             {
                 // send on io
-                var executeResultMessage = Message.CreatePubSub(
-                    messageContent,
-                    request);
-                ioPubChannel.Send(executeResultMessage);
+                ioPubChannel.Send(messageContent, request, contextKernelIdent);
             }
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
             Message request,
-            IMessageSender ioPubChannel, string contextKernelIdent)
+            IPubSubChannel ioPubChannel, 
+            string contextKernelIdent)
         {
             var transient = CreateTransient(displayEvent.ValueId);
 
@@ -137,7 +130,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
 
-            SendDisplayData(executeResultData, request, ioPubChannel);
+            SendDisplayData(executeResultData, request, ioPubChannel, contextKernelIdent);
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
@@ -150,17 +143,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(Message request, IMessageSender serverChannel)
+        private void OnCommandHandled(Message request, IReplyChannel serverChannel)
         {
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-            var executeReply = Message.CreateReply(
-                executeReplyPayload,
-                request);
-
-           serverChannel.Send(executeReply);
+           serverChannel.Send(executeReplyPayload, request);
         }
     }
 }

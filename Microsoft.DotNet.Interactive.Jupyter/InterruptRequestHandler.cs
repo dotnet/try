@@ -29,18 +29,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, IMessageSender serverChannel)
+        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, IReplyChannel serverChannel)
         {
 
             // reply 
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            var interruptReply = Message.CreateReply(
-                interruptReplyPayload,
-                request);
-
-            serverChannel.Send(interruptReply);
+            serverChannel.Send(interruptReplyPayload, request);
 
         }
 

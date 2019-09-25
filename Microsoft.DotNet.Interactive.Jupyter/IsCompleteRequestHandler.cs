@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void Reply(bool isComplete, Message request, IMessageSender serverChannel)
+        private void Reply(bool isComplete, Message request, IReplyChannel serverChannel)
         {
             
             
@@ -51,12 +51,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                var executeReply = Message.CreateReply(
-                    isCompleteReplyPayload,
-                    request);
-
-                serverChannel.Send(executeReply);
-            
+                serverChannel.Send(isCompleteReplyPayload,request);
         }
     }
 }

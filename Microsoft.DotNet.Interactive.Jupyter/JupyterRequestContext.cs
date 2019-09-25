@@ -12,17 +12,17 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request, string kernelIdent)
+        public JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdent)
         {
-            ServerChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
-            IoPubChannel = ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
+            ServerChannel =  serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
+            IoPubChannel =   ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
             Request = request ?? throw new ArgumentNullException(nameof(request));
             KernelIdent = kernelIdent;
         }
 
-        public IMessageSender ServerChannel { get; }
+        public IReplyChannel ServerChannel { get; }
 
-        public IMessageSender IoPubChannel { get; }
+        public IPubSubChannel IoPubChannel { get; }
 
         public Message Request { get; }
         public string KernelIdent { get; }

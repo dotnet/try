@@ -27,8 +27,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly string _ioPubAddress;
         private readonly SignatureValidator _signatureValidator;
         private readonly CompositeDisposable _disposables;
-        private readonly MessageSender _shellSender;
-        private readonly MessageSender _ioPubSender;
+        private readonly IReplyChannel _shellSender;
+        private readonly IPubSubChannel _ioPubSender;
         private readonly string _stdInAddress;
         private readonly string _controlAddress;
         private readonly RouterSocket _stdIn;
@@ -59,8 +59,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _stdIn = new RouterSocket();
             _control = new RouterSocket();
 
-            _shellSender = new MessageSender(_shell, _signatureValidator);
-            _ioPubSender = new MessageSender(_ioPubSocket, _signatureValidator);
+            _shellSender = new ReplyChannel( new MessageSender(_shell, _signatureValidator));
+            _ioPubSender = new PubSubChannel( new MessageSender(_ioPubSocket, _signatureValidator));
 
             _disposables = new CompositeDisposable
                            {
@@ -120,9 +120,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Busy), request, id));
+                void SetBusy(Message request) => _ioPubSender.Send(new Status(StatusValues.Busy), request, id);
 
-                void SetIdle(Message request) => _ioPubSender.Send(Message.CreatePubSub(new Status(StatusValues.Idle), request, id));
+                void SetIdle(Message request) => _ioPubSender.Send(new Status(StatusValues.Idle), request, id);
 
                 
             }
@@ -138,10 +138,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private void HandleKernelInfoRequest(Message request)
         {
             var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", new CSharpLanguageInfo());
-
-            var replyMessage = Message.CreateReply(kernelInfoReply, request);
-
-            _shellSender.Send(replyMessage);
+            _shellSender.Send(kernelInfoReply, request);
         }
     }
 }
