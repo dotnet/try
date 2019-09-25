@@ -41,19 +41,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnCompletionRequestCompleted(
                         completionRequestCompleted, 
                         context.Request, 
-                        context.ServerChannel);
+                        context.MessageDispatcher);
                     break;
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IReplyChannel serverChannel)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, MessageDispatcher messageDispatcher)
         {
             var command = completionRequestCompleted.Command as RequestCompletion;
 
             var pos = ComputeReplacementStartPosition(command.Code, command.CursorPosition);
             var reply = new CompleteReply(pos, command.CursorPosition, matches: completionRequestCompleted.CompletionList.Select(e => e.InsertText).ToList());
 
-            serverChannel.Reply(reply, request);
+            messageDispatcher.Dispatch(reply, request);
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

@@ -24,19 +24,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CurrentCommandCancelled kernelInterrupted:
-                    OnExecutionInterrupted(kernelInterrupted, context.Request, context.ServerChannel);
+                    OnExecutionInterrupted(kernelInterrupted, context.Request, context.MessageDispatcher);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, IReplyChannel serverChannel)
+        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, MessageDispatcher messageDispatcher)
         {
 
             // reply 
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            serverChannel.Reply(interruptReplyPayload, request);
+            messageDispatcher.Dispatch(interruptReplyPayload, request);
 
         }
 

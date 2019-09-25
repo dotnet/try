@@ -14,6 +14,11 @@ using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
+    public class KernelEventAdapter
+    {
+
+    }
+
     public class ExecuteRequestHandler : RequestHandlerBase<ExecuteRequest>
     {
         private int _executionCount;
@@ -30,7 +35,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            context.IoPubChannel.Publish(executeInputPayload, context.Request, context.KernelIdent);
+            context.MessageDispatcher.Dispatch(executeInputPayload, context.Request);
 
             var command = new SubmitCode(executeRequest.Code);
 
@@ -44,13 +49,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case DisplayEventBase displayEvent:
-                    OnDisplayEvent(displayEvent, context.Request, context.IoPubChannel, context.KernelIdent);
+                    OnDisplayEvent(displayEvent, context.Request, context.MessageDispatcher, context.KernelIdent);
                     break;
                 case CommandHandled _:
-                    OnCommandHandled(context.Request, context.ServerChannel);
+                    OnCommandHandled(context.Request, context.MessageDispatcher);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed, context.Request, context.ServerChannel);
+                    OnCommandFailed(commandFailed, context.Request, context.MessageDispatcher);
                     break;
             }
         }
@@ -64,7 +69,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private void OnCommandFailed(
             CommandFailed commandFailed,
             Message request, 
-            IReplyChannel serverChannel)
+            MessageDispatcher messageDispatcher)
         {
             var errorContent = new Error (
                 eName: "Unhandled Exception",
@@ -76,25 +81,25 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            serverChannel.Reply(executeReplyPayload, request);
+            messageDispatcher.Dispatch(executeReplyPayload, request);
         }
 
         private static void SendDisplayData(JupyterPubSubMessageContent messageMessageContent,
             Message request,
-            IPubSubChannel ioPubChannel, string contextKernelIdent)
+            MessageDispatcher ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
 
             if (!isSilent)
             {
                 // send on io
-                ioPubChannel.Publish(messageMessageContent, request, contextKernelIdent);
+                ioPubChannel.Dispatch(messageMessageContent, request);
             }
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
             Message request,
-            IPubSubChannel ioPubChannel, 
+            MessageDispatcher messageDispatcher, 
             string contextKernelIdent)
         {
             var transient = CreateTransient(displayEvent.ValueId);
@@ -130,7 +135,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
 
-            SendDisplayData(executeResultData, request, ioPubChannel, contextKernelIdent);
+            SendDisplayData(executeResultData, request, messageDispatcher);
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
@@ -143,13 +148,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(Message request, IReplyChannel serverChannel)
+        private void OnCommandHandled(Message request, MessageDispatcher messageDispatcher)
         {
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-           serverChannel.Reply(executeReplyPayload, request);
+           messageDispatcher.Dispatch(executeReplyPayload, request);
         }
     }
 }

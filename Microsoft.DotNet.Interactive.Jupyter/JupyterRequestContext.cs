@@ -14,15 +14,22 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         public JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdent)
         {
-            ServerChannel =  serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
-            IoPubChannel =   ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
+            if (serverChannel == null)
+            {
+                throw new ArgumentNullException(nameof(serverChannel));
+            }
+
+            if (ioPubChannel == null)
+            {
+                throw new ArgumentNullException(nameof(ioPubChannel));
+            }
+
+            MessageDispatcher = new MessageDispatcher(ioPubChannel, serverChannel, kernelIdent);
             Request = request ?? throw new ArgumentNullException(nameof(request));
             KernelIdent = kernelIdent;
         }
 
-        public IReplyChannel ServerChannel { get; }
-
-        public IPubSubChannel IoPubChannel { get; }
+        public MessageDispatcher MessageDispatcher { get; }
 
         public Message Request { get; }
         public string KernelIdent { get; }
