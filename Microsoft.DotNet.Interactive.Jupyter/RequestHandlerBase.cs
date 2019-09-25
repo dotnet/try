@@ -14,7 +14,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public abstract class RequestHandlerBase<T> : IDisposable
-        where T : JupyterRequestContent
+        where T : JupyterRequestMessageContent
     {
 
         private readonly CompositeDisposable _disposables = new CompositeDisposable();

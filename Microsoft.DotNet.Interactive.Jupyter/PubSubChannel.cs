@@ -6,17 +6,17 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class ReplyChannel : IReplyChannel
+    public class PubSubChannel : IPubSubChannel
     {
         private readonly IMessageSender _sender;
 
-        public ReplyChannel(IMessageSender sender)
+        public PubSubChannel(IMessageSender sender)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
-        public bool Reply(JupyterReplyMessageContent messageContent, Message request)
+        public bool Publish(JupyterPubSubMessageContent messageContent, Message request, string ident = null)
         {
-            var reply = Message.CreateReply(messageContent, request);
+            var reply = Message.CreatePubSub(messageContent, request, ident);
             return _sender.Send(reply);
         }
     }

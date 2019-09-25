@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.DisplayData)]
-    public class DisplayData : JupyterPubSubContent
+    public class DisplayData : JupyterPubSubMessageContent
     {
         [JsonProperty("source", NullValueHandling = NullValueHandling.Ignore)]
         public string Source { get;  }

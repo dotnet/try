@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.KernelShutdownReply)]
-    public class ShutdownReply : JupyterReplyContent
+    public class ShutdownReply : JupyterReplyMessageContent
     {
         [JsonProperty("restart")]
         public bool Restart { get;}

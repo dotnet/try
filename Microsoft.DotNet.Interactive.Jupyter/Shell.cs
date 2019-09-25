@@ -120,9 +120,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Message request) => _ioPubSender.Send(new Status(StatusValues.Busy), request, id);
+                void SetBusy(Message request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
 
-                void SetIdle(Message request) => _ioPubSender.Send(new Status(StatusValues.Idle), request, id);
+                void SetIdle(Message request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
 
                 
             }
@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private void HandleKernelInfoRequest(Message request)
         {
             var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", new CSharpLanguageInfo());
-            _shellSender.Send(kernelInfoReply, request);
+            _shellSender.Reply(kernelInfoReply, request);
         }
     }
 }

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.Error)]
-    public class Error : JupyterPubSubContent
+    public class Error : JupyterPubSubMessageContent
     {
         [JsonProperty("ename")]
         public string EName { get;  }

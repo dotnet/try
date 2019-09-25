@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            context.IoPubChannel.Send(executeInputPayload, context.Request, context.KernelIdent);
+            context.IoPubChannel.Publish(executeInputPayload, context.Request, context.KernelIdent);
 
             var command = new SubmitCode(executeRequest.Code);
 
@@ -76,10 +76,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            serverChannel.Send(executeReplyPayload, request);
+            serverChannel.Reply(executeReplyPayload, request);
         }
 
-        private static void SendDisplayData(JupyterPubSubContent messageContent,
+        private static void SendDisplayData(JupyterPubSubMessageContent messageMessageContent,
             Message request,
             IPubSubChannel ioPubChannel, string contextKernelIdent)
         {
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             if (!isSilent)
             {
                 // send on io
-                ioPubChannel.Send(messageContent, request, contextKernelIdent);
+                ioPubChannel.Publish(messageMessageContent, request, contextKernelIdent);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            JupyterPubSubContent executeResultData;
+            JupyterPubSubMessageContent executeResultData;
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
@@ -149,7 +149,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-           serverChannel.Send(executeReplyPayload, request);
+           serverChannel.Reply(executeReplyPayload, request);
         }
     }
 }

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.ExecuteReply)]
-    public class ExecuteReply : JupyterReplyContent
+    public class ExecuteReply : JupyterReplyMessageContent
     {
         [JsonProperty("status", NullValueHandling = NullValueHandling.Ignore)]
         public string Status { get; }

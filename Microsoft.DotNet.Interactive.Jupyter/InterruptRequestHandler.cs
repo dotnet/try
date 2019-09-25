@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            serverChannel.Send(interruptReplyPayload, request);
+            serverChannel.Reply(interruptReplyPayload, request);
 
         }
 

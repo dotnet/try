@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public Message Request { get; }
         public string KernelIdent { get; }
 
-        public T GetRequestContent<T>() where T : JupyterRequestContent
+        public T GetRequestContent<T>() where T : JupyterRequestMessageContent
         {
             return Request?.Content as T;
         }

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.HistoryRequest)]
-    public class HistoryRequest : JupyterRequestContent
+    public class HistoryRequest : JupyterRequestMessageContent
     {
         [JsonProperty("output")]
         public bool Output { get; }

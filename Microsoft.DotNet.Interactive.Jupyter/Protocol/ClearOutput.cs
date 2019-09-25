@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.ClearOutput)]
-    public class ClearOutput : JupyterPubSubContent
+    public class ClearOutput : JupyterPubSubMessageContent
     {
         [JsonProperty("wait ")]
         public bool Wait { get; }

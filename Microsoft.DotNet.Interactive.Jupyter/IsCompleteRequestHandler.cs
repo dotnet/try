@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                serverChannel.Send(isCompleteReplyPayload,request);
+                serverChannel.Reply(isCompleteReplyPayload,request);
         }
     }
 }

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.InputRequest)]
-    public class InputRequest : JupyterRequestContent
+    public class InputRequest : JupyterRequestMessageContent
     {
         [JsonProperty("prompt")]
         public string Prompt { get; }

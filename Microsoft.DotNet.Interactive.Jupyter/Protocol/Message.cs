@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         public static Message CreateReply<T>(
             T content,
             Message request)
-            where T : JupyterReplyContent
+            where T : JupyterReplyMessageContent
         {
             if (content == null)
             {
@@ -83,9 +83,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.Content is JupyterRequestContent) && request.Content != JupyterMessageContent.Empty)
+            if (!(request.Content is JupyterRequestMessageContent) && request.Content != JupyterMessageContent.Empty)
             {
-                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is not a valid {nameof(JupyterRequestContent)}");
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is not a valid {nameof(JupyterRequestMessageContent)}");
             }
 
             var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         public static Message CreatePubSub<T>(
             T content,
             Message request, string ident = null)
-            where T : JupyterPubSubContent
+            where T : JupyterPubSubMessageContent
         {
             if (content == null)
             {
@@ -108,9 +108,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.Content is JupyterRequestContent) && request.Content != JupyterMessageContent.Empty)
+            if (!(request.Content is JupyterRequestMessageContent) && request.Content != JupyterMessageContent.Empty)
             {
-                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterRequestContent)}");
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterRequestMessageContent)}");
             }
 
             var replyMessage = Create(content, request.Header, new[] { Topic(content, ident) }, request.Signature);
@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         }
 
 
-        private static byte[] Topic<T>(T content, string ident) where T : JupyterPubSubContent
+        private static byte[] Topic<T>(T content, string ident) where T : JupyterPubSubMessageContent
         {
             byte[] encodedTopic;
             var name = content.GetType().Name;

@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var pos = ComputeReplacementStartPosition(command.Code, command.CursorPosition);
             var reply = new CompleteReply(pos, command.CursorPosition, matches: completionRequestCompleted.CompletionList.Select(e => e.InsertText).ToList());
 
-            serverChannel.Send(reply, request);
+            serverChannel.Reply(reply, request);
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

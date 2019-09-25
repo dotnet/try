@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JsonConverter(typeof(HistoryReplyConverter))]
     [JupyterMessageType(JupyterMessageContentTypes.HistoryReply)]
-    public class HistoryReply : JupyterReplyContent
+    public class HistoryReply : JupyterReplyMessageContent
     {
         [JsonProperty("history")]
         public IReadOnlyList<HistoryElement> History { get; } 

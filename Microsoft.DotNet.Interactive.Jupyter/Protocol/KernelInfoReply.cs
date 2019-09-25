@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.KernelInfoReply)]
-    public class KernelInfoReply : JupyterReplyContent
+    public class KernelInfoReply : JupyterReplyMessageContent
     {
         [JsonProperty("protocol_version")]
         public string ProtocolVersion { get; }
