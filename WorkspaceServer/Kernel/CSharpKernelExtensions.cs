@@ -125,7 +125,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
         public static CSharpKernel UseWho(this CSharpKernel kernel)
         {
-            kernel.AddDirective(whos());
+            kernel.AddDirective(who_and_whos());
 
             Formatter<CurrentVariables>.Register((variables, writer) =>
             {
@@ -149,7 +149,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 }
                 else
                 {
-                    output = div(variables.Select(v => span(v.Name)));
+                    output = div(variables.Select(v => v.Name + "\t "));
                 }
 
                 output.WriteTo(writer, HtmlEncoder.Default);
@@ -158,7 +158,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             return kernel;
         }
 
-        private static Command whos()
+        private static Command who_and_whos()
         {
             var command = new Command("%whos")
             {

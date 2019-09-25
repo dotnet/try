@@ -277,17 +277,6 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         }
 
         [Fact]
-        public void It_does_not_expand_properties_for_strings()
-        {
-            var formatter = PlainTextFormatter.Create(typeof(string));
-
-            var log = "hello".ToDisplayString(formatter);
-
-            log.Should().Contain("hello");
-            log.Should().NotContain("Length");
-        }
-
-        [Fact]
         public void Formatting_can_be_chosen_based_on_mime_type()
         {
             Formatter.Register(

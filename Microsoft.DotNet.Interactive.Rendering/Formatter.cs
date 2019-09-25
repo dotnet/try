@@ -379,5 +379,11 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 Register(type, write);
             }
         }
+
+        private static IReadOnlyCollection<T> ReadOnlyMemoryToArray<T>(ReadOnlyMemory<T> mem) => mem.Span.ToArray();
+
+        internal static readonly MethodInfo FormatReadOnlyMemoryMethod = typeof(Formatter)
+                                                                          .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+                                                                          .Single(m => m.Name == nameof(ReadOnlyMemoryToArray));
     }
 }

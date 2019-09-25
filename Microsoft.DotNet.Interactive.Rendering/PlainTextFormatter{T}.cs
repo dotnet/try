@@ -20,12 +20,12 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         public PlainTextFormatter(Action<T, TextWriter> format)
         {
-            _format = format;
+            _format = format ?? throw new ArgumentNullException(nameof(format));
         }
 
         public static ITypeFormatter<T> Create(bool includeInternals = false)
         {
-            if (PlainTextFormatter.SpecialDefaults.TryGetValue(typeof(T), out var formatter) &&
+            if (PlainTextFormatter.DefaultFormatters.TryGetFormatterForType(typeof(T), out var formatter) &&
                 formatter is ITypeFormatter<T> ft)
             {
                 return ft;

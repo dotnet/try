@@ -385,23 +385,31 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void ReadOnlyMemory_of_string_is_formatted_like_a_string()
+            public void ReadOnlyMemory_of_char_is_formatted_like_a_string()
             {
+                var formatter = PlainTextFormatter.Create(typeof(ReadOnlyMemory<char>));
+
                 ReadOnlyMemory<char> readOnlyMemory = "Hi!".AsMemory();
 
-                var output = readOnlyMemory.ToDisplayString();
+                var writer = new StringWriter();
 
-                output.Should().Be("Hi!");
+                formatter.Format(readOnlyMemory, writer);
+
+                writer.ToString().Should().Be("Hi!");
             }
 
             [Fact]
             public void ReadOnlyMemory_of_int_is_formatted_like_a_int_array()
             {
+                var formatter = PlainTextFormatter.Create(typeof(ReadOnlyMemory<int>));
+
                 var readOnlyMemory = new ReadOnlyMemory<int>(new[] { 1, 2, 3 });
 
-                var output = readOnlyMemory.ToDisplayString();
+                var writer = new StringWriter();
 
-                output.Should().Be("[ 1, 2, 3 ]");
+                formatter.Format(readOnlyMemory, writer);
+
+                writer.ToString().Should().Be("[ 1, 2, 3 ]");
             }
         }
     }

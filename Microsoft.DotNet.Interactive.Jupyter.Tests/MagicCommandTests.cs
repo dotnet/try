@@ -285,7 +285,7 @@ display(""done!"");
                   .Value
                   .As<string>()
                   .Should()
-                  .ContainAll("<span>x</span>", "<span>y</span>", "<span>x</span>");
+                  .ContainAll("x", "y", "z");
         }
     }
 }

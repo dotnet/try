@@ -47,16 +47,6 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void Formatter_does_not_expand_Type()
-            {
-                var formatter = HtmlFormatter<Type>.Create();
-
-                var s = typeof(int).ToDisplayString(formatter);
-
-                s.Should().Be("System.Int32");
-            }
-
-            [Fact]
             public void Formatter_expands_properties_of_ExpandoObjects()
             {
                 dynamic expando = new ExpandoObject();
@@ -280,6 +270,38 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                        .Should()
                        .Be(
                            $"<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>{obj0}</td></tr><tr><td>1</td><td>{obj1}</td></tr><tr><td>2</td><td>{obj2}</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void ReadOnlyMemory_of_char_is_formatted_like_a_string()
+            {
+                var formatter = HtmlFormatter<ReadOnlyMemory<char>>.Create();
+
+                var writer = new StringWriter();
+
+                var readOnlyMemory = "Hi!".AsMemory();
+
+                formatter.Format(readOnlyMemory, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Be("<span>Hi!</span>");
+            }
+
+            [Fact]
+            public void ReadOnlyMemory_of_int_is_formatted_like_a_int_array()
+            {
+                var formatter = HtmlFormatter<ReadOnlyMemory<int>>.Create();
+
+                var writer = new StringWriter();
+
+                var readOnlyMemory = new ReadOnlyMemory<int>(new[] { 7, 8, 9 });
+
+                formatter.Format(readOnlyMemory, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Be("<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>7</td></tr><tr><td>1</td><td>8</td></tr><tr><td>2</td><td>9</td></tr></tbody></table>");
             }
         }
     }

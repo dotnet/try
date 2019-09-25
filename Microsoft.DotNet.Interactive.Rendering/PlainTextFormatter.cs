@@ -158,6 +158,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
         }
 
-        internal static readonly DefaultPlainTextFormatterSet SpecialDefaults = new DefaultPlainTextFormatterSet();
+        internal static readonly IFormatterSet DefaultFormatters = new DefaultPlainTextFormatterSet();
     }
 }
