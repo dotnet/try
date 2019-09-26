@@ -7,6 +7,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 {
     internal interface IReplyChannel
     {
-        void Reply(JupyterReplyMessageContent messageContent, Message request);
+        void Reply(JupyterReplyMessageContent messageContent, JupyterMessage request);
     }
 }

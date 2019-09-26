@@ -6,13 +6,13 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    internal class MessageDispatcher : IMessageDispatcher
+    internal class JupyterMessageContentDispatcher : IJupyterMessageContentDispatcher
     {
         private readonly IPubSubChannel _pubSubChannel;
         private readonly IReplyChannel _replyChannel;
         private readonly string _kernelIdentity;
 
-        public MessageDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdentity)
+        public JupyterMessageContentDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdentity)
         {
             if (string.IsNullOrWhiteSpace(kernelIdentity))
             {
@@ -24,11 +24,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _kernelIdentity = kernelIdentity;
         }
 
-        public void Dispatch(JupyterPubSubMessageContent messageContent, Message request)
+        public void Dispatch(JupyterPubSubMessageContent messageContent, JupyterMessage request)
         {
             _pubSubChannel.Publish(messageContent, request, _kernelIdentity);}
 
-        public void Dispatch(JupyterReplyMessageContent messageContent, Message request)
+        public void Dispatch(JupyterReplyMessageContent messageContent, JupyterMessage request)
         {
             _replyChannel.Reply(messageContent, request);
         }

@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         where T : JupyterMessageContent
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-      protected readonly  RecordingDispatcher Dispatcher= new RecordingDispatcher();
+      protected readonly  RecordingJupyterMessageContentDispatcher JupyterMessageContentDispatcher= new RecordingJupyterMessageContentDispatcher();
         protected readonly IKernel Kernel;
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)

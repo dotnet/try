@@ -24,19 +24,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CurrentCommandCancelled _:
-                    OnExecutionInterrupted(context.Request, context.MessageDispatcher);
+                    OnExecutionInterrupted(context.Request, context.JupyterMessageContentDispatcher);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(Message request, IMessageDispatcher messageDispatcher)
+        private void OnExecutionInterrupted(JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
         {
 
             // reply 
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            messageDispatcher.Dispatch(interruptReplyPayload, request);
+            jupyterMessageContentDispatcher.Dispatch(interruptReplyPayload, request);
 
         }
 

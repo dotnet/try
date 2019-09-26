@@ -33,15 +33,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
-                    Reply( true, context.Request, context.MessageDispatcher);
+                    Reply( true, context.Request, context.JupyterMessageContentDispatcher);
                     break;
                 case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
-                    Reply( false, context.Request, context.MessageDispatcher);
+                    Reply( false, context.Request, context.JupyterMessageContentDispatcher);
                     break;
             }
         }
 
-        private void Reply(bool isComplete, Message request, IMessageDispatcher messageDispatcher)
+        private void Reply(bool isComplete, JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
         {
             
             
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                messageDispatcher.Dispatch(isCompleteReplyPayload,request);
+                jupyterMessageContentDispatcher.Dispatch(isCompleteReplyPayload,request);
         }
     }
 }

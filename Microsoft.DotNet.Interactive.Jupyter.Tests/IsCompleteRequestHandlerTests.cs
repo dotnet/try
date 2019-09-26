@@ -24,26 +24,26 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_isCompleteReply_with_complete_if_the_code_is_a_complete_submission()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
-            var context = new JupyterRequestContext(Dispatcher, request, "id");
+            var request = JupyterMessage.Create(new IsCompleteRequest("var a = 12;"), null);
+            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            Dispatcher.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "complete");
+            JupyterMessageContentDispatcher.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "complete");
         }
 
         [Fact]
         public async Task sends_isCompleteReply_with_incomplete_and_indent_if_the_code_is_not_a_complete_submission()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
-            var context = new JupyterRequestContext(Dispatcher, request, "id");
+            var request = JupyterMessage.Create(new IsCompleteRequest("var a = 12"), null);
+            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            Dispatcher.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "incomplete" && r.Indent == "*");
+            JupyterMessageContentDispatcher.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "incomplete" && r.Indent == "*");
         }
     }
 }

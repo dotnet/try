@@ -121,9 +121,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Message request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
+                void SetBusy(JupyterMessage request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
 
-                void SetIdle(Message request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
+                void SetIdle(JupyterMessage request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
 
                 
             }
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Task.CompletedTask;
         }
 
-        private void HandleKernelInfoRequest(Message request)
+        private void HandleKernelInfoRequest(JupyterMessage request)
         {
             var languageInfo = GetLanguageInfo();
             var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", languageInfo);

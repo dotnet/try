@@ -23,14 +23,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task send_completeReply_on_CompleteRequest()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new CompleteRequest("System.Console.", 15), null);
-            var context = new JupyterRequestContext(Dispatcher, request, "id");
+            var request = JupyterMessage.Create(new CompleteRequest("System.Console.", 15), null);
+            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
 
             await scheduler.Schedule(context);
             
             await context.Done().Timeout(5.Seconds());
 
-            Dispatcher.ReplyMessages
+            JupyterMessageContentDispatcher.ReplyMessages
                 .Should()
                 .ContainSingle(r => r is CompleteReply);
         }

@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            context.MessageDispatcher.Dispatch(executeInputPayload, context.Request);
+            context.JupyterMessageContentDispatcher.Dispatch(executeInputPayload, context.Request);
 
             var command = new SubmitCode(executeRequest.Code);
 
@@ -44,13 +44,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case DisplayEventBase displayEvent:
-                    OnDisplayEvent(displayEvent, context.Request, context.MessageDispatcher);
+                    OnDisplayEvent(displayEvent, context.Request, context.JupyterMessageContentDispatcher);
                     break;
                 case CommandHandled _:
-                    OnCommandHandled(context.Request, context.MessageDispatcher);
+                    OnCommandHandled(context.Request, context.JupyterMessageContentDispatcher);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed, context.Request, context.MessageDispatcher);
+                    OnCommandFailed(commandFailed, context.Request, context.JupyterMessageContentDispatcher);
                     break;
             }
         }
@@ -63,8 +63,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCommandFailed(
             CommandFailed commandFailed,
-            Message request,
-            IMessageDispatcher messageDispatcher)
+            JupyterMessage request,
+            IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
         {
             var errorContent = new Error (
                 eName: "Unhandled Exception",
@@ -76,12 +76,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            messageDispatcher.Dispatch(executeReplyPayload, request);
+            jupyterMessageContentDispatcher.Dispatch(executeReplyPayload, request);
         }
 
         private static void SendDisplayData(JupyterPubSubMessageContent messageMessageContent,
-            Message request,
-            IMessageDispatcher ioPubChannel)
+            JupyterMessage request,
+            IJupyterMessageContentDispatcher ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
 
@@ -93,8 +93,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
-            Message request,
-            IMessageDispatcher messageDispatcher)
+            JupyterMessage request,
+            IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
         {
             var transient = CreateTransient(displayEvent.ValueId);
 
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
 
-            SendDisplayData(executeResultData, request, messageDispatcher);
+            SendDisplayData(executeResultData, request, jupyterMessageContentDispatcher);
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
@@ -142,13 +142,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(Message request, IMessageDispatcher messageDispatcher)
+        private void OnCommandHandled(JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
         {
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-           messageDispatcher.Dispatch(executeReplyPayload, request);
+           jupyterMessageContentDispatcher.Dispatch(executeReplyPayload, request);
         }
     }
 }

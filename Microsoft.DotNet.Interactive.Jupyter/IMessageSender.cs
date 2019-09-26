@@ -7,6 +7,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public interface IMessageSender
     {
-        void Send(Message message);
+        void Send(JupyterMessage jupyterMessage);
     }
 }

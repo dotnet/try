@@ -20,13 +20,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _signatureValidator = signatureValidator ?? throw new ArgumentNullException(nameof(signatureValidator));
         }
 
-        public void Send(Message message)
+        public void Send(JupyterMessage jupyterMessage)
         {
-            var hmac = _signatureValidator.CreateSignature(message);
+            var hmac = _signatureValidator.CreateSignature(jupyterMessage);
 
-            if (message.Identifiers != null)
+            if (jupyterMessage.Identifiers != null)
             {
-                foreach (var ident in message.Identifiers)
+                foreach (var ident in jupyterMessage.Identifiers)
                 {
                     _socket.TrySendFrame(ident.ToArray(), true);
                 }
@@ -34,10 +34,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             Send(Constants.DELIMITER, _socket);
             Send(hmac, _socket);
-            Send(message.Header.ToJson(), _socket);
-            Send((message.ParentHeader?? new object()).ToJson(), _socket);
-            Send(message.MetaData.ToJson(), _socket);
-            Send(message.Content.ToJson(), _socket, false);
+            Send(jupyterMessage.Header.ToJson(), _socket);
+            Send((jupyterMessage.ParentHeader?? new object()).ToJson(), _socket);
+            Send(jupyterMessage.MetaData.ToJson(), _socket);
+            Send(jupyterMessage.Content.ToJson(), _socket, false);
         }
 
         private static void Send(string message, IOutgoingSocket socket, bool sendMore = true)

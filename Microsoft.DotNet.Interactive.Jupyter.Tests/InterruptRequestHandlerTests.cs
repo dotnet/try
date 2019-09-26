@@ -22,14 +22,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_InterruptReply()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new InterruptRequest(), null);
-            var context = new JupyterRequestContext(Dispatcher, request, "id");
+            var request = JupyterMessage.Create(new InterruptRequest(), null);
+            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
 
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            Dispatcher.ReplyMessages
+            JupyterMessageContentDispatcher.ReplyMessages
                 .Should()
                 .ContainSingle(r => r is InterruptReply);
         }

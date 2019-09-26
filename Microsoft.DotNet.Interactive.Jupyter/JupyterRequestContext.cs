@@ -12,23 +12,23 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        internal JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdentity) : 
-            this(new MessageDispatcher(ioPubChannel, serverChannel, kernelIdentity),request,kernelIdentity)
+        internal JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, JupyterMessage request, string kernelIdentity) : 
+            this(new JupyterMessageContentDispatcher(ioPubChannel, serverChannel, kernelIdentity),request,kernelIdentity)
         {
         }
 
-        public JupyterRequestContext(IMessageDispatcher messageDispatcher, Message request, string kernelIdentity)
+        public JupyterRequestContext(IJupyterMessageContentDispatcher jupyterMessageContentDispatcher, JupyterMessage request, string kernelIdentity)
         {
 
 
-            MessageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
+            JupyterMessageContentDispatcher = jupyterMessageContentDispatcher ?? throw new ArgumentNullException(nameof(jupyterMessageContentDispatcher));
             Request = request ?? throw new ArgumentNullException(nameof(request));
             KernelIdentity = kernelIdentity;
         }
 
-        public IMessageDispatcher MessageDispatcher { get; }
+        public IJupyterMessageContentDispatcher JupyterMessageContentDispatcher { get; }
 
-        public Message Request { get; }
+        public JupyterMessage Request { get; }
         public string KernelIdentity { get; }
 
         public T GetRequestContent<T>() where T : JupyterRequestMessageContent

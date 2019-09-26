@@ -14,9 +14,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
-        public void Reply(JupyterReplyMessageContent messageContent, Message request)
+        public void Reply(JupyterReplyMessageContent messageContent, JupyterMessage request)
         {
-            var reply = Message.CreateReply(messageContent, request);
+            var reply = JupyterMessage.CreateReply(messageContent, request);
             _sender.Send(reply);
         }
     }

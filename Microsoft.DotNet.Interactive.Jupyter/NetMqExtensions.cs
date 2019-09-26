@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return ret;
         }
 
-        public static Message GetMessage(this NetMQSocket socket)
+        public static JupyterMessage GetMessage(this NetMQSocket socket)
         {
             // There may be additional ZMQ identities attached; read until the delimiter <IDS|MSG>"
             // and store them in message.identifiers
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return message;
         }
 
-        public static Message DeserializeMessage(string signature, string headerJson, string parentHeaderJson,
+        public static JupyterMessage DeserializeMessage(string signature, string headerJson, string parentHeaderJson,
             string metadataJson, string contentJson, IReadOnlyList<IReadOnlyList<byte>> identifiers)
         {
             var header = JsonConvert.DeserializeObject<Header>(headerJson);
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var metaData = DeserializeFromJsonString<Dictionary<string, object>>(metadataJson) ?? new Dictionary<string, object>();
             var content = DeserializeMessageContentFromJsonString(contentJson, header.MessageType);
 
-            var message = new Message(header, content, parentHeader, signature, metaData, identifiers);
+            var message = new JupyterMessage(header, content, parentHeader, signature, metaData, identifiers);
 
             return message;
         }

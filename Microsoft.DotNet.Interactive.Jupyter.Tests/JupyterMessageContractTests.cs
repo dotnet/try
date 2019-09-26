@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var header = new Header(messageType: JupyterMessageContentTypes.KernelInfoReply, messageId: Guid.Empty.ToString(),
                 version: Constants.MESSAGE_PROTOCOL_VERSION, username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-            var replyMessage = new Message(header, content: kernelInfoReply);
+            var replyMessage = new JupyterMessage(header, content: kernelInfoReply);
             sender.Send(replyMessage);
 
             var encoded = socket.GetEncodedMessage();
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
-            var replyMessage = new Message(header, content: executeResult);
+            var replyMessage = new JupyterMessage(header, content: executeResult);
 
             sender.Send(replyMessage);
 
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var header = new Header(messageType: JupyterMessageContentTypes.DisplayData, messageId: Guid.Empty.ToString(),
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
-            var replyMessage = new Message(header, content: displayData);
+            var replyMessage = new JupyterMessage(header, content: displayData);
 
             sender.Send(replyMessage);
 
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
-            var replyMessage = new Message(header, content: completeReply);
+            var replyMessage = new JupyterMessage(header, content: completeReply);
             sender.Send(replyMessage);
 
             var encoded = socket.GetEncodedMessage();
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 version: "5.3", username: Constants.USERNAME, session: "test session",
                 date: DateTime.MinValue.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
-            var replyMessage = new Message(header, content: displayData);
+            var replyMessage = new JupyterMessage(header, content: displayData);
             sender.Send(replyMessage);
 
             var encoded = socket.GetEncodedMessage();

@@ -22,9 +22,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _signatureGenerator.Key = _encoder.GetBytes(key);
         }
 
-        public string CreateSignature(Message message)
+        public string CreateSignature(JupyterMessage jupyterMessage)
         {
-            var messages = GetMessagesToAddForDigest(message);
+            var messages = GetMessagesToAddForDigest(jupyterMessage);
 
             // For all items update the signature
             foreach (var item in messages)
@@ -39,12 +39,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return BitConverter.ToString(_signatureGenerator.Hash).Replace("-", "").ToLower();
         }
 
-        private static IEnumerable<string> GetMessagesToAddForDigest(Message message)
+        private static IEnumerable<string> GetMessagesToAddForDigest(JupyterMessage jupyterMessage)
         {
-            yield return message.Header.ToJson();
-            yield return message.ParentHeader.ToJson();
-            yield return message.MetaData.ToJson();
-            yield return message.Content.ToJson();
+            yield return jupyterMessage.Header.ToJson();
+            yield return jupyterMessage.ParentHeader.ToJson();
+            yield return jupyterMessage.MetaData.ToJson();
+            yield return jupyterMessage.Content.ToJson();
         }
     }
 }

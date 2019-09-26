@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    public class Message
+    public class JupyterMessage
     {
         [JsonIgnore]
         public IReadOnlyList<IReadOnlyList<byte>> Identifiers { get; }
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         [JsonProperty("buffers")]
         public IReadOnlyList<IReadOnlyList<byte>> Buffers { get; }
 
-        public Message(Header header,
+        public JupyterMessage(Header header,
             JupyterMessageContent content = null,
             Header parentHeader = null,
             string signature = null,
@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             Signature = signature ?? string.Empty;
         }
 
-        public static Message Create<T>(
+        public static JupyterMessage Create<T>(
             T content,
             Header parentHeader = null,
             IReadOnlyList<IReadOnlyList<byte>> identifiers = null,
@@ -62,15 +62,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
             var session = parentHeader?.Session ?? Guid.NewGuid().ToString();
 
-            var message = new Message(Header.Create(content, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
+            var message = new JupyterMessage(Header.Create(content, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
 
 
             return message;
         }
 
-        public static Message CreateReply<T>(
+        public static JupyterMessage CreateReply<T>(
             T content,
-            Message request)
+            JupyterMessage request)
             where T : JupyterReplyMessageContent
         {
             if (content == null)
@@ -93,9 +93,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             return replyMessage;
         }
 
-        public static Message CreatePubSub<T>(
+        public static JupyterMessage CreatePubSub<T>(
             T content,
-            Message request, 
+            JupyterMessage request, 
             string kernelIdentity = null)
             where T : JupyterPubSubMessageContent
         {
