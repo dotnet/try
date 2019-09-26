@@ -23,13 +23,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case CurrentCommandCancelled kernelInterrupted:
-                    OnExecutionInterrupted(kernelInterrupted, context.Request, context.MessageDispatcher);
+                case CurrentCommandCancelled _:
+                    OnExecutionInterrupted(context.Request, context.MessageDispatcher);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, MessageDispatcher messageDispatcher)
+        private void OnExecutionInterrupted(Message request, IMessageDispatcher messageDispatcher)
         {
 
             // reply 

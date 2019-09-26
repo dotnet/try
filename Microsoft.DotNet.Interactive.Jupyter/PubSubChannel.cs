@@ -6,7 +6,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class PubSubChannel : IPubSubChannel
+    internal class PubSubChannel : IPubSubChannel
     {
         private readonly IMessageSender _sender;
 

@@ -6,7 +6,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class ReplyChannel : IReplyChannel
+    internal class ReplyChannel : IReplyChannel
     {
         private readonly IMessageSender _sender;
 

@@ -5,7 +5,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public interface IPubSubChannel
+    internal interface IPubSubChannel
     {
         void Publish(JupyterPubSubMessageContent messageContent, Message request, string kernelIdentity);
     }

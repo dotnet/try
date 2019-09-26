@@ -3,19 +3,31 @@
 
 using System;
 using System.Collections.Generic;
-using NetMQ;
+using System.Linq;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
-    public class RecordingSocket : IOutgoingSocket
+    public class RecordingDispatcher : IMessageDispatcher
     {
-        public List<string> DecodedMessages { get; } = new List<string>();
+        private readonly List<JupyterMessageContent> _messages;
+        public IReadOnlyList<JupyterMessageContent> Messages => _messages;
 
-        public bool TrySend(ref Msg msg, TimeSpan timeout, bool more)
+        public IEnumerable<JupyterReplyMessageContent> ReplyMessages => _messages.OfType<JupyterReplyMessageContent>();
+        public IEnumerable<JupyterPubSubMessageContent> PubSubMessages => _messages.OfType<JupyterPubSubMessageContent>();
+
+        public RecordingDispatcher()
         {
-            DecodedMessages.Add(SendReceiveConstants.DefaultEncoding.GetString(msg.Data));
-            return true;
+            _messages = new List<JupyterMessageContent>();
         }
-     
+        public void Dispatch(JupyterPubSubMessageContent messageContent, Message request)
+        {
+           _messages.Add(messageContent);
+        }
+
+        public void Dispatch(JupyterReplyMessageContent messageContent, Message request)
+        {
+            _messages.Add(messageContent);
+        }
     }
 }

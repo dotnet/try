@@ -63,8 +63,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCommandFailed(
             CommandFailed commandFailed,
-            Message request, 
-            MessageDispatcher messageDispatcher)
+            Message request,
+            IMessageDispatcher messageDispatcher)
         {
             var errorContent = new Error (
                 eName: "Unhandled Exception",
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private static void SendDisplayData(JupyterPubSubMessageContent messageMessageContent,
             Message request,
-            MessageDispatcher ioPubChannel)
+            IMessageDispatcher ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
 
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
             Message request,
-            MessageDispatcher messageDispatcher)
+            IMessageDispatcher messageDispatcher)
         {
             var transient = CreateTransient(displayEvent.ValueId);
 
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(Message request, MessageDispatcher messageDispatcher)
+        private void OnCommandHandled(Message request, IMessageDispatcher messageDispatcher)
         {
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);

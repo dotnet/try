@@ -12,24 +12,21 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        public JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdentity)
+        internal JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdentity) : 
+            this(new MessageDispatcher(ioPubChannel, serverChannel, kernelIdentity),request,kernelIdentity)
         {
-            if (serverChannel == null)
-            {
-                throw new ArgumentNullException(nameof(serverChannel));
-            }
+        }
 
-            if (ioPubChannel == null)
-            {
-                throw new ArgumentNullException(nameof(ioPubChannel));
-            }
+        public JupyterRequestContext(IMessageDispatcher messageDispatcher, Message request, string kernelIdentity)
+        {
 
-            MessageDispatcher = new MessageDispatcher(ioPubChannel, serverChannel, kernelIdentity);
+
+            MessageDispatcher = messageDispatcher ?? throw new ArgumentNullException(nameof(messageDispatcher));
             Request = request ?? throw new ArgumentNullException(nameof(request));
             KernelIdentity = kernelIdentity;
         }
 
-        public MessageDispatcher MessageDispatcher { get; }
+        public IMessageDispatcher MessageDispatcher { get; }
 
         public Message Request { get; }
         public string KernelIdentity { get; }

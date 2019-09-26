@@ -25,22 +25,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
+            var context = new JupyterRequestContext(Dispatcher, request, "id");
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            Logger.Log.Info("DecodedMessages: {messages}", ServerRecordingSocket.DecodedMessages);
-
-            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
-
-            ServerRecordingSocket.DecodedMessages
-                                  .SingleOrDefault(m => m == new IsCompleteReply(string.Empty, "complete").ToJson())
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
+            Dispatcher.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "complete");
         }
 
         [Fact]
@@ -48,20 +38,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
+            var context = new JupyterRequestContext(Dispatcher, request, "id");
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
-
-            ServerRecordingSocket.DecodedMessages
-                                  .SingleOrDefault(m => m == new IsCompleteReply("*", "incomplete").ToJson())
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
+            Dispatcher.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "incomplete" && r.Indent == "*");
         }
     }
 }

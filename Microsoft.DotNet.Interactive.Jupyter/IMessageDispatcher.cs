@@ -5,8 +5,9 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    internal interface IReplyChannel
+    public interface IMessageDispatcher     
     {
-        void Reply(JupyterReplyMessageContent messageContent, Message request);
+        void Dispatch(JupyterPubSubMessageContent messageContent, Message request);
+        void Dispatch(JupyterReplyMessageContent messageContent, Message request);
     }
 }

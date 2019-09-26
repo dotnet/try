@@ -14,10 +14,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         where T : JupyterMessageContent
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        protected readonly IPubSubChannel IoPubChannel;
-        protected readonly IReplyChannel ServerChannel;
-        protected readonly RecordingSocket ServerRecordingSocket;
-        protected readonly RecordingSocket IoRecordingSocket;
+      protected readonly  RecordingDispatcher Dispatcher= new RecordingDispatcher();
         protected readonly IKernel Kernel;
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
@@ -30,12 +27,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             }.UseDefaultMagicCommands();
 
             _disposables.Add(Kernel.LogEventsToPocketLogger());
-
-            var signatureValidator = new SignatureValidator("key", "HMACSHA256");
-            ServerRecordingSocket = new RecordingSocket();
-            ServerChannel = new ReplyChannel( new MessageSender(ServerRecordingSocket, signatureValidator));
-            IoRecordingSocket = new RecordingSocket();
-            IoPubChannel = new PubSubChannel( new MessageSender(IoRecordingSocket, signatureValidator));
         }
 
         public void Dispose() => _disposables.Dispose();

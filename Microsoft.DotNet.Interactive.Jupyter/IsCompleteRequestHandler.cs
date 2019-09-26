@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void Reply(bool isComplete, Message request, MessageDispatcher messageDispatcher)
+        private void Reply(bool isComplete, Message request, IMessageDispatcher messageDispatcher)
         {
             
             

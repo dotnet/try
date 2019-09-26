@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, MessageDispatcher messageDispatcher)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IMessageDispatcher messageDispatcher)
         {
             var command = completionRequestCompleted.Command as RequestCompletion;
 

@@ -6,7 +6,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public class MessageDispatcher
+    internal class MessageDispatcher : IMessageDispatcher
     {
         private readonly IPubSubChannel _pubSubChannel;
         private readonly IReplyChannel _replyChannel;
@@ -24,17 +24,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _kernelIdentity = kernelIdentity;
         }
 
-        public void Dispatch(JupyterMessageContent messageContent, Message request)
+        public void Dispatch(JupyterPubSubMessageContent messageContent, Message request)
         {
-            switch (messageContent)
-            {
-                case JupyterPubSubMessageContent pubSubMessageContent:
-                    _pubSubChannel.Publish(pubSubMessageContent, request, _kernelIdentity);
-                    break;
-                case JupyterReplyMessageContent replyMessageContent:
-                    _replyChannel.Reply(replyMessageContent, request);
-                    break;
-            }
+            _pubSubChannel.Publish(messageContent, request, _kernelIdentity);}
+
+        public void Dispatch(JupyterReplyMessageContent messageContent, Message request)
+        {
+            _replyChannel.Reply(messageContent, request);
         }
     }
 }

@@ -3,7 +3,6 @@
 
 using Clockwise;
 using FluentAssertions;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
@@ -24,17 +23,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Message.Create(new InterruptRequest(), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
+            var context = new JupyterRequestContext(Dispatcher, request, "id");
 
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            ServerRecordingSocket.DecodedMessages
-                                  .SingleOrDefault(message =>
-                                                       message.Contains(JupyterMessageContentTypes.InterruptReply))
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
+            Dispatcher.ReplyMessages
+                .Should()
+                .ContainSingle(r => r is InterruptReply);
         }
     }
 }
