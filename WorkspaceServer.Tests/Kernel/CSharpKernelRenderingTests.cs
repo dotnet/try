@@ -18,7 +18,7 @@ using static Pocket.Logger;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class CSharpKernelRenderingTests : CSharpKernelTestBase
+    public class CSharpKernelRenderingTests : LanguageKernelTestBase
     {
         public CSharpKernelRenderingTests(ITestOutputHelper output) : base(output)
         {

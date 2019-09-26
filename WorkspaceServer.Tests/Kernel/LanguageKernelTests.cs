@@ -24,16 +24,18 @@ using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class CSharpKernelTests : CSharpKernelTestBase
+    public class LanguageKernelTests : LanguageKernelTestBase
     {
-        public CSharpKernelTests(ITestOutputHelper output) : base(output)
+        public LanguageKernelTests(ITestOutputHelper output) : base(output)
         {
         }
 
-        [Fact]
-        public async Task it_returns_the_result_of_a_non_null_expression()
+        [Theory]
+        [InlineData(Language.FSharp)]
+        [InlineData(Language.CSharp)]
+        public async Task it_returns_the_result_of_a_non_null_expression(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
             await kernel.SendAsync(new SubmitCode("123"));
 
@@ -43,6 +45,62 @@ namespace WorkspaceServer.Tests.Kernel
                 .Value
                 .Should()
                 .Be(123);
+        }
+
+        [Theory]
+        [InlineData(Language.FSharp)]
+        [InlineData(Language.CSharp)]
+        public async Task it_remembers_state_between_submissions(Language language)
+        {
+            string[] source = null;
+            switch (language)
+            {
+                case Language.FSharp:
+                    string[] fsLines =
+                    {
+                        "let add x y = x + y",
+                        "add 2 3"
+                    };
+                    source = fsLines;
+                    break;
+
+                case Language.CSharp:
+                    string[] csLines =
+                    {
+                        "int Multiply(int x, int y) { return x + y; };",
+                        "Multiply(2, 3);"
+                    };
+                    source = csLines;
+                    break;
+            }
+
+            var kernel = CreateKernel(language);
+
+            await SubmitLines(kernel, source);
+
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be(5);
+        }
+
+        [Theory]
+        [InlineData(Language.FSharp)]
+        public async Task kernel_base_ignores_command_line_directives(Language language)
+        {
+            // The text `[1;2;3;4]` parses as a System.CommandLine directive; ensure it's not consumed and is passed on to the kernel.
+            var kernel = CreateKernel(language);
+            await kernel.SendAsync(new SubmitCode(@"
+[1;2;3;4]
+|> List.sum"));
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be(10);
         }
 
         [Fact]
