@@ -6,6 +6,7 @@ using FluentAssertions;
 using System.Threading.Tasks;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;

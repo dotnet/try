@@ -3,10 +3,10 @@
 
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
-    public interface IMessageSender
+    internal interface IPubSubChannel
     {
-        void Send(JupyterMessage jupyterMessage);
+        void Publish(JupyterPubSubMessageContent messageContent, JupyterMessage request, string kernelIdentity);
     }
 }

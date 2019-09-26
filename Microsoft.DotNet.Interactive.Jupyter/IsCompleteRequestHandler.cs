@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                jupyterMessageContentDispatcher.Dispatch(isCompleteReplyPayload,request);
+                jupyterMessageContentDispatcher.Dispatch(isCompleteReplyPayload);
         }
     }
 }

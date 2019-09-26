@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.DotNet.Interactive.Rendering;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
@@ -30,7 +31,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            context.JupyterMessageContentDispatcher.Dispatch(executeInputPayload, context.Request);
+            context.JupyterMessageContentDispatcher.Dispatch(executeInputPayload);
 
             var command = new SubmitCode(executeRequest.Code);
 
@@ -76,7 +77,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            jupyterMessageContentDispatcher.Dispatch(executeReplyPayload, request);
+            jupyterMessageContentDispatcher.Dispatch(executeReplyPayload);
         }
 
         private static void SendDisplayData(JupyterPubSubMessageContent messageMessageContent,
@@ -88,7 +89,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             if (!isSilent)
             {
                 // send on io
-                ioPubChannel.Dispatch(messageMessageContent, request);
+                ioPubChannel.Dispatch(messageMessageContent);
             }
         }
 
@@ -148,7 +149,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-           jupyterMessageContentDispatcher.Dispatch(executeReplyPayload, request);
+           jupyterMessageContentDispatcher.Dispatch(executeReplyPayload);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public interface IJupyterMessageContentDispatcher     
     {
-        void Dispatch(JupyterPubSubMessageContent messageContent, JupyterMessage request);
-        void Dispatch(JupyterReplyMessageContent messageContent, JupyterMessage request);
+        void Dispatch(JupyterPubSubMessageContent messageContent);
+        void Dispatch(JupyterReplyMessageContent messageContent);
     }
 }

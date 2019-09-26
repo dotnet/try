@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.Extensions.Hosting;
 using NetMQ.Sockets;
 using Pocket;

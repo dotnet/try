@@ -9,7 +9,7 @@ using NetMQ;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     internal static class NetMQExtensions
     {

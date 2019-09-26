@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            jupyterMessageContentDispatcher.Dispatch(interruptReplyPayload, request);
+            jupyterMessageContentDispatcher.Dispatch(interruptReplyPayload);
 
         }
 

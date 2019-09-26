@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Assent;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests

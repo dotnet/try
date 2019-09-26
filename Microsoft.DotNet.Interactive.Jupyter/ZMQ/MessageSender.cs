@@ -3,11 +3,10 @@
 
 using System;
 using System.Linq;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using NetMQ;
 using Recipes;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     public class MessageSender : IMessageSender
     {

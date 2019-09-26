@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -22,13 +23,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             _pubSubMessages = new List<JupyterPubSubMessageContent>();
             _replyMessages = new List<JupyterReplyMessageContent>();
         }
-        public void Dispatch(JupyterPubSubMessageContent messageContent, JupyterMessage request)
+
+        public void Dispatch(JupyterPubSubMessageContent messageContent)
         {
            _messages.Add(messageContent);
            _pubSubMessages.Add(messageContent);
         }
 
-        public void Dispatch(JupyterReplyMessageContent messageContent, JupyterMessage request)
+        public void Dispatch(JupyterReplyMessageContent messageContent)
         {
             _messages.Add(messageContent);
             _replyMessages.Add(messageContent);

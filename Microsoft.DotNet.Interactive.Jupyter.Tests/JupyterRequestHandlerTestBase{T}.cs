@@ -14,8 +14,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         where T : JupyterMessageContent
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-      protected readonly  RecordingJupyterMessageContentDispatcher JupyterMessageContentDispatcher= new RecordingJupyterMessageContentDispatcher();
-        protected readonly IKernel Kernel;
+
+        protected RecordingJupyterMessageContentDispatcher JupyterMessageContentDispatcher { get; }
+
+        protected IKernel Kernel { get; }
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
         {
@@ -25,6 +27,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             {
                 new CSharpKernel()
             }.UseDefaultMagicCommands();
+
+            JupyterMessageContentDispatcher = new RecordingJupyterMessageContentDispatcher();
 
             _disposables.Add(Kernel.LogEventsToPocketLogger());
         }

@@ -4,7 +4,7 @@
 using System;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     internal class PubSubChannel : IPubSubChannel
     {

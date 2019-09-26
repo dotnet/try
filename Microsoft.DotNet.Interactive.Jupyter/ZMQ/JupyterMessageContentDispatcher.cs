@@ -4,15 +4,16 @@
 using System;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     internal class JupyterMessageContentDispatcher : IJupyterMessageContentDispatcher
     {
         private readonly IPubSubChannel _pubSubChannel;
         private readonly IReplyChannel _replyChannel;
         private readonly string _kernelIdentity;
+        private readonly JupyterMessage _request;
 
-        public JupyterMessageContentDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdentity)
+        public JupyterMessageContentDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdentity, JupyterMessage request)
         {
             if (string.IsNullOrWhiteSpace(kernelIdentity))
             {
@@ -22,15 +23,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _pubSubChannel = pubSubChannel ?? throw new ArgumentNullException(nameof(pubSubChannel));
             _replyChannel = replyChannel ?? throw new ArgumentNullException(nameof(replyChannel));
             _kernelIdentity = kernelIdentity;
+            _request = request;
         }
 
-        public void Dispatch(JupyterPubSubMessageContent messageContent, JupyterMessage request)
+        public void Dispatch(JupyterPubSubMessageContent messageContent)
         {
-            _pubSubChannel.Publish(messageContent, request, _kernelIdentity);}
+            _pubSubChannel.Publish(messageContent, _request, _kernelIdentity);}
 
-        public void Dispatch(JupyterReplyMessageContent messageContent, JupyterMessage request)
+        public void Dispatch(JupyterReplyMessageContent messageContent)
         {
-            _replyChannel.Reply(messageContent, request);
+            _replyChannel.Reply(messageContent, _request);
         }
     }
 }

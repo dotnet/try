@@ -4,9 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Newtonsoft.Json;
 
-namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     public class JupyterMessage
     {
