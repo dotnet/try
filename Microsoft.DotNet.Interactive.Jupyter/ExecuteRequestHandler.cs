@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case DisplayEventBase displayEvent:
-                    OnDisplayEvent(displayEvent, context.Request, context.MessageDispatcher, context.KernelIdent);
+                    OnDisplayEvent(displayEvent, context.Request, context.MessageDispatcher);
                     break;
                 case CommandHandled _:
                     OnCommandHandled(context.Request, context.MessageDispatcher);
@@ -94,8 +94,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
             Message request,
-            MessageDispatcher messageDispatcher, 
-            string contextKernelIdent)
+            MessageDispatcher messageDispatcher)
         {
             var transient = CreateTransient(displayEvent.ValueId);
 

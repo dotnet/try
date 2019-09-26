@@ -95,7 +95,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         public static Message CreatePubSub<T>(
             T content,
-            Message request, string ident = null)
+            Message request, 
+            string kernelIdentity = null)
             where T : JupyterPubSubMessageContent
         {
             if (content == null)
@@ -113,13 +114,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
                 throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterRequestMessageContent)}");
             }
 
-            var replyMessage = Create(content, request.Header, new[] { Topic(content, ident) }, request.Signature);
+            var replyMessage = Create(content, request.Header, new[] { Topic(content, kernelIdentity) }, request.Signature);
 
             return replyMessage;
         }
 
 
-        private static byte[] Topic<T>(T content, string ident) where T : JupyterPubSubMessageContent
+        private static byte[] Topic<T>(T content, string kernelIdentity) where T : JupyterPubSubMessageContent
         {
             byte[] encodedTopic;
             var name = content.GetType().Name;
@@ -156,11 +157,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
             string GenerateFullTopic(string topic)
             {
-                if (ident == null)
+                if (kernelIdentity == null)
                 {
-                    throw new ArgumentNullException(nameof(ident));
+                    throw new ArgumentNullException(nameof(kernelIdentity));
                 }
-                return $"kernel.{ident}.{topic}";
+                return $"kernel.{kernelIdentity}.{topic}";
             }
 
             return encodedTopic;

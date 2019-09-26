@@ -7,6 +7,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public interface IPubSubChannel
     {
-        void Publish(JupyterPubSubMessageContent messageContent, Message request, string ident = null);
+        void Publish(JupyterPubSubMessageContent messageContent, Message request, string kernelIdentity);
     }
 }

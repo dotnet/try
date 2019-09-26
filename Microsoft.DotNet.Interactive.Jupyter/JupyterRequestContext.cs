@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        public JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdent)
+        public JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, Message request, string kernelIdentity)
         {
             if (serverChannel == null)
             {
@@ -24,15 +24,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 throw new ArgumentNullException(nameof(ioPubChannel));
             }
 
-            MessageDispatcher = new MessageDispatcher(ioPubChannel, serverChannel, kernelIdent);
+            MessageDispatcher = new MessageDispatcher(ioPubChannel, serverChannel, kernelIdentity);
             Request = request ?? throw new ArgumentNullException(nameof(request));
-            KernelIdent = kernelIdent;
+            KernelIdentity = kernelIdentity;
         }
 
         public MessageDispatcher MessageDispatcher { get; }
 
         public Message Request { get; }
-        public string KernelIdent { get; }
+        public string KernelIdentity { get; }
 
         public T GetRequestContent<T>() where T : JupyterRequestMessageContent
         {

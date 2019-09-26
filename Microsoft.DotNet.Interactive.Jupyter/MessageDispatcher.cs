@@ -10,18 +10,18 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly IPubSubChannel _pubSubChannel;
         private readonly IReplyChannel _replyChannel;
-        private readonly string _kernelIdent;
+        private readonly string _kernelIdentity;
 
-        public MessageDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdent)
+        public MessageDispatcher(IPubSubChannel pubSubChannel, IReplyChannel replyChannel, string kernelIdentity)
         {
-            if (string.IsNullOrWhiteSpace(kernelIdent))
+            if (string.IsNullOrWhiteSpace(kernelIdentity))
             {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(kernelIdent));
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(kernelIdentity));
             }
 
             _pubSubChannel = pubSubChannel ?? throw new ArgumentNullException(nameof(pubSubChannel));
             _replyChannel = replyChannel ?? throw new ArgumentNullException(nameof(replyChannel));
-            _kernelIdent = kernelIdent;
+            _kernelIdentity = kernelIdentity;
         }
 
         public void Dispatch(JupyterMessageContent messageContent, Message request)
@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (messageContent)
             {
                 case JupyterPubSubMessageContent pubSubMessageContent:
-                    _pubSubChannel.Publish(pubSubMessageContent, request, _kernelIdent);
+                    _pubSubChannel.Publish(pubSubMessageContent, request, _kernelIdentity);
                     break;
                 case JupyterReplyMessageContent replyMessageContent:
                     _replyChannel.Reply(replyMessageContent, request);
