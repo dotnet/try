@@ -60,12 +60,17 @@ namespace WorkspaceServer.Tests.Kernel
             return CreateKernel(Language.CSharp);
         }
 
-        public async Task SubmitLines(KernelBase kernel, string[] lines)
+        public async Task SubmitSource(KernelBase kernel, string[] lines)
         {
             foreach (string line in lines)
             {
-                await kernel.SendAsync(new SubmitCode(line));
+                await SubmitSource(kernel, line);
             }
+        }
+
+        public async Task SubmitSource(KernelBase kernel, string line)
+        {
+            await kernel.SendAsync(new SubmitCode(line));
         }
 
         /// IDispose

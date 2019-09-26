@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
@@ -47,36 +48,115 @@ namespace WorkspaceServer.Tests.Kernel
                 .Be(123);
         }
 
+        // Option 1: inline switch
         [Theory]
         [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_remembers_state_between_submissions(Language language)
         {
-            string[] source = null;
-            switch (language)
+            string[] source = language switch
             {
-                case Language.FSharp:
-                    string[] fsLines =
-                    {
-                        "let add x y = x + y",
-                        "add 2 3"
-                    };
-                    source = fsLines;
-                    break;
+                Language.FSharp => new[]
+                {
+                    "let add x y = x + y",
+                    "add 2 3"
+                },
 
-                case Language.CSharp:
-                    string[] csLines =
-                    {
-                        "int Multiply(int x, int y) { return x + y; };",
-                        "Multiply(2, 3);"
-                    };
-                    source = csLines;
-                    break;
-            }
+                Language.CSharp => new[]
+                {
+                    "int Add(int x, int y) { return x + y; }",
+                    "Add(2, 3)"
+                },
+                _ => throw new InvalidOperationException("Un supported Language for this test case")
+            };
 
             var kernel = CreateKernel(language);
 
-            await SubmitLines(kernel, source);
+            await SubmitSource(kernel, source);
+
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be(5);
+        }
+
+
+        // Option 2:  Use InlineData
+        [Theory]
+        [InlineData(Language.FSharp, "let add x y = x + y", 
+                                     "add 2 3")]
+        [InlineData(Language.CSharp, "int Add(int x, int y) { return x + y; }",
+                                     "Add(2, 3)")]
+        public async Task it_remembers_state_between_submissions_option2(Language language, string line1, string line2)
+        {
+            var kernel = CreateKernel(language);
+
+            await SubmitSource(kernel, line1);
+            await SubmitSource(kernel, line2);
+
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be(5);
+        }
+
+        public T GetElementForLanguage<T>(Language language, params (Language lang, T value)[] values)
+        {
+            // The use of `Single()` ensures that the test will fail if a value was not given for a specific language.
+            return values.Single(val => val.lang == language).value;
+        }
+        
+        //Option 3: GetElementForLanguage iter 1
+        [Theory]
+        [InlineData(Language.FSharp)]
+        [InlineData(Language.CSharp)]
+        public async Task it_remembers_state_between_submissions_option3(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var line1 = GetElementForLanguage(language, (Language.CSharp, "int Add(int x, int y) { return x + y; }"),
+                                                        (Language.FSharp, "let add x y = x + y"));
+
+            await SubmitSource(kernel, line1);
+
+            var line2 = GetElementForLanguage(language, (Language.CSharp, "Add(2, 3)"),
+                                                        (Language.FSharp, "add 2 3"));
+
+            await SubmitSource(kernel, line2);
+
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be(5);
+        }
+
+        //Option 4: GetElementForLanguage iter 2
+        [Theory]
+        [InlineData(Language.FSharp)]
+        [InlineData(Language.CSharp)]
+        public async Task it_remembers_state_between_submissions_option4(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var lines = GetElementForLanguage(language,
+                (Language.CSharp, new[]
+                    {
+                        "int Add(int x, int y) { return x + y; }",
+                        "Add(2, 3)"
+                    }),
+                (Language.FSharp, new[]
+                    {
+                        "let add x y = x + y",
+                        "add 2 3"
+                    }));
+
+            await SubmitSource(kernel, lines);
 
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
