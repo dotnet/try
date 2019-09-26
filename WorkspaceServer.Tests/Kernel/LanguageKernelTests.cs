@@ -23,6 +23,7 @@ using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable 8509
 namespace WorkspaceServer.Tests.Kernel
 {
     public class LanguageKernelTests : LanguageKernelTestBase
@@ -67,7 +68,6 @@ namespace WorkspaceServer.Tests.Kernel
                     "int Add(int x, int y) { return x + y; }",
                     "Add(2, 3)"
                 },
-                _ => throw new InvalidOperationException("Un supported Language for this test case")
             };
 
             var kernel = CreateKernel(language);
