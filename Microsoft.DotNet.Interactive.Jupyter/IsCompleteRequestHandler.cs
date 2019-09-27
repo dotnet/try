@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
-using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -43,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void Reply(bool isComplete, Message request, IJupyterMessageSender jupyterMessageSender)
+        private void Reply(bool isComplete, Envelope request, IJupyterMessageSender jupyterMessageSender)
         {
             
             

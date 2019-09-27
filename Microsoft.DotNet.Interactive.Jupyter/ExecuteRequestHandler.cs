@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.DotNet.Interactive.Rendering;
-using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -49,10 +48,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnDisplayEvent(displayEvent, context.Request, context.JupyterMessageSender);
                     break;
                 case CommandHandled _:
-                    OnCommandHandled(context.Request, context.JupyterMessageSender);
+                    OnCommandHandled(context.JupyterMessageSender);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed, context.Request, context.JupyterMessageSender);
+                    OnCommandFailed(commandFailed,  context.JupyterMessageSender);
                     break;
             }
         }
@@ -65,7 +64,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCommandFailed(
             CommandFailed commandFailed,
-            Message request,
             IJupyterMessageSender jupyterMessageSender)
         {
             var errorContent = new Error (
@@ -82,7 +80,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         private static void SendDisplayData(PubSubMessage messageMessage,
-            Message request,
+            Envelope request,
             IJupyterMessageSender ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
@@ -95,7 +93,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
-            Message request,
+            Envelope request,
             IJupyterMessageSender jupyterMessageSender)
         {
             var transient = CreateTransient(displayEvent.ValueId);
@@ -144,7 +142,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(Message request, IJupyterMessageSender jupyterMessageSender)
+        private void OnCommandHandled(IJupyterMessageSender jupyterMessageSender)
         {
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);

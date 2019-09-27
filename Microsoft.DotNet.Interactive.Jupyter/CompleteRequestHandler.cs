@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
-using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -42,13 +40,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case CompletionRequestCompleted completionRequestCompleted:
                     OnCompletionRequestCompleted(
                         completionRequestCompleted, 
-                        context.Request, 
                         context.JupyterMessageSender);
                     break;
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IJupyterMessageSender jupyterMessageSender)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted,IJupyterMessageSender jupyterMessageSender)
         {
             var command = completionRequestCompleted.Command as RequestCompletion;
 

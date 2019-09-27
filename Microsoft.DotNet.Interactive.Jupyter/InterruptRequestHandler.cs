@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
-using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -26,12 +24,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CurrentCommandCancelled _:
-                    OnExecutionInterrupted(context.Request, context.JupyterMessageSender);
+                    OnExecutionInterrupted(context.JupyterMessageSender);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(Message request, IJupyterMessageSender jupyterMessageSender)
+        private void OnExecutionInterrupted(IJupyterMessageSender jupyterMessageSender)
         {
 
             // reply 

@@ -16,7 +16,7 @@ using Pocket;
 using Recipes;
 using static Pocket.Logger<Microsoft.DotNet.Interactive.Jupyter.Shell>;
 using InvalidOperationException = System.InvalidOperationException;
-using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -123,9 +123,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Message request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
+                void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
 
-                void SetIdle(Message request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
+                void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
 
                 
             }
@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Task.CompletedTask;
         }
 
-        private void HandleKernelInfoRequest(Message request)
+        private void HandleKernelInfoRequest(Envelope request)
         {
             var languageInfo = GetLanguageInfo();
             var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", languageInfo);
