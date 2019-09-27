@@ -6,11 +6,10 @@ using FluentAssertions;
 using System.Threading.Tasks;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
-using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -24,7 +23,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_InterruptReply()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new InterruptRequest(), null);
+            var request = Envelope.Create(new InterruptRequest(), null);
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
 
             await scheduler.Schedule(context);
