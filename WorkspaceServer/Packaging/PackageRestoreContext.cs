@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
@@ -29,14 +30,13 @@ namespace WorkspaceServer.Packaging
             packageBuilder.CreateRebuildablePackage = true;
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
-            packageBuilder.AddPackageReference("Newtonsoft.Json");
             var package = (Package)packageBuilder.GetPackage();
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             AddDirectoryProps(package);
             return package;
         }
 
-        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion)
+        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion = null)
         {
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -72,7 +72,9 @@ namespace WorkspaceServer.Packaging
         {
             var package = await _lazyPackage.ValueAsync();
             var nugetPathsFile = package.Directory.GetFiles("*.nuget.paths").Single();
-            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',','\r', '\n').Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
+            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',','\r', '\n')
+                                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                                        .ToArray();
             var pathsDictionary = nugetPackagePaths
                                     .Select((v, i) => new { Index = i, Value = v })
                                     .GroupBy(p => p.Index / 2)
