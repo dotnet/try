@@ -7,10 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Pocket;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -24,44 +24,28 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_isCompleteReply_with_complete_if_the_code_is_a_complete_submission()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new IsCompleteRequest("var a = 12;"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
+            var request = Envelope
+.Create(new IsCompleteRequest("var a = 12;"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            Logger.Log.Info("DecodedMessages: {messages}", ServerRecordingSocket.DecodedMessages);
-
-            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
-
-            ServerRecordingSocket.DecodedMessages
-                                  .SingleOrDefault(m => m == new IsCompleteReply(string.Empty, "complete").ToJson())
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
+            JupyterMessageSender.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "complete");
         }
 
         [Fact]
         public async Task sends_isCompleteReply_with_incomplete_and_indent_if_the_code_is_not_a_complete_submission()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new IsCompleteRequest("var a = 12"), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request, "id");
+            var request = Envelope
+.Create(new IsCompleteRequest("var a = 12"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            ServerRecordingSocket.DecodedMessages.SingleOrDefault(message =>
-                                                                       message.Contains(JupyterMessageContentTypes.IsCompleteReply))
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
-
-            ServerRecordingSocket.DecodedMessages
-                                  .SingleOrDefault(m => m == new IsCompleteReply("*", "incomplete").ToJson())
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
+            JupyterMessageSender.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "incomplete" && r.Indent == "*");
         }
     }
 }

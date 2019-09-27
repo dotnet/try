@@ -9,11 +9,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.Extensions.Hosting;
 using NetMQ.Sockets;
 using Pocket;
 using Recipes;
 using static Pocket.Logger<Microsoft.DotNet.Interactive.Jupyter.Shell>;
+using InvalidOperationException = System.InvalidOperationException;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -27,8 +30,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly string _ioPubAddress;
         private readonly SignatureValidator _signatureValidator;
         private readonly CompositeDisposable _disposables;
-        private readonly MessageSender _shellSender;
-        private readonly MessageSender _ioPubSender;
+        private readonly ReplyChannel _shellSender;
+        private readonly PubSubChannel _ioPubSender;
         private readonly string _stdInAddress;
         private readonly string _controlAddress;
         private readonly RouterSocket _stdIn;
@@ -59,8 +62,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _stdIn = new RouterSocket();
             _control = new RouterSocket();
 
-            _shellSender = new MessageSender(_shell, _signatureValidator);
-            _ioPubSender = new MessageSender(_ioPubSocket, _signatureValidator);
+            _shellSender = new ReplyChannel( new MessageSender(_shell, _signatureValidator));
+            _ioPubSender = new PubSubChannel( new MessageSender(_ioPubSocket, _signatureValidator));
 
             _disposables = new CompositeDisposable
                            {
@@ -84,35 +87,35 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 //SetStarting();
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var message = _shell.GetMessage();
+                    var request = _shell.GetMessage();
 
-                    activity.Info("Received: {message}", message.ToJson());
+                    activity.Info("Received: {message}", request.ToJson());
 
-                    SetBusy(message.Header);
+                    SetBusy(request);
 
-                    switch (message.Header.MessageType)
+                    switch (request.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
-                            id = Encoding.Unicode.GetString(message.Identifiers[0].ToArray());
-                            HandleKernelInfoRequest(message);
-                            SetIdle(message.Header);
+                            id = Encoding.Unicode.GetString(request.Identifiers[0].ToArray());
+                            HandleKernelInfoRequest(request);
+                            SetIdle(request);
                             break;
 
                         case JupyterMessageContentTypes.KernelShutdownRequest:
-                            SetIdle(message.Header);
+                            SetIdle(request);
                             break;
 
                         default:
                             var context = new JupyterRequestContext(
                                 _shellSender,
                                 _ioPubSender,
-                                message, id);
+                                request, id);
 
                             await _scheduler.Schedule(context);
 
                             await context.Done();
 
-                            SetIdle(message.Header);
+                            SetIdle(request);
 
                             break;
                     }
@@ -120,9 +123,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(Header parentHeader) => _ioPubSender.Send(Message.Create(new Status(StatusValues.Busy), parentHeader: parentHeader, identifiers:new []{Message.Topic("status", id)}));
+                void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
 
-                void SetIdle(Header parentHeader) => _ioPubSender.Send(Message.Create(new Status(StatusValues.Idle), parentHeader: parentHeader, identifiers: new[] { Message.Topic("status", id) }));
+                void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
 
                 
             }
@@ -135,13 +138,37 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Task.CompletedTask;
         }
 
-        private void HandleKernelInfoRequest(Message request)
+        private void HandleKernelInfoRequest(Envelope request)
         {
-            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", new CSharpLanguageInfo());
+            var languageInfo = GetLanguageInfo();
+            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", languageInfo);
+            _shellSender.Reply(kernelInfoReply, request);
+        }
 
-            var replyMessage = Message.CreateResponse(kernelInfoReply, request);
+        private LanguageInfo GetLanguageInfo()
+        {
+            switch (_kernel)
+            {
+                case CompositeKernel composite:
+                    return GetLanguageInfo(composite.DefaultKernelName);
+                case IKernel kernel:
+                    return GetLanguageInfo(kernel.Name);
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
 
-            _shellSender.Send(replyMessage);
+        private LanguageInfo GetLanguageInfo(string kernelName)
+        {
+            switch (kernelName)
+            {
+                case "csharp":
+                    return new CSharpLanguageInfo();
+                case "fsharp":
+                    return new FSharpLanguageInfo();
+                default:
+                    throw new InvalidOperationException($"{kernelName} not supported");
+            }
         }
     }
 }

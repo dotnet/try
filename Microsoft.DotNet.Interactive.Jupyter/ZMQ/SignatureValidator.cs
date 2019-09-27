@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Recipes;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     public class SignatureValidator
     {

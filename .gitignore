@@ -374,3 +374,5 @@ docs/\.ionide/
 
 
 .ipynb_checkpoints/
+
+NotebookExamples/csharp/Samples/housing.csv

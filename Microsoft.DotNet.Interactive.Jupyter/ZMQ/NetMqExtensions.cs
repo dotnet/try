@@ -9,7 +9,7 @@ using NetMQ;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.DotNet.Interactive.Jupyter
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     internal static class NetMQExtensions
     {
@@ -27,15 +27,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return ret;
         }
 
-        private static JupyterMessageContent DeserializeMessageContentFromJsonString(string source, string messageType)
+        private static Protocol.Message DeserializeMessageContentFromJsonString(string source, string messageType)
         {
-            var ret = JupyterMessageContent.Empty;
+            var ret = Protocol.Message.Empty;
             if (!string.IsNullOrWhiteSpace(source))
             {
                 var sourceObject = JObject.Parse(source);
                 if (sourceObject.HasValues)
                 {
-                    ret = JupyterMessageContent.FromJsonString(source, messageType);
+                    ret = Protocol.Message.FromJsonString(source, messageType);
                 }
             }
             return ret;

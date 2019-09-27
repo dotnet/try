@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Newtonsoft.Json;
 
-namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
+namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
     public class Header
     {
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         }
 
         public static Header Create<T>(T messageContent, string session)
-            where T : JupyterMessageContent
+            where T : Protocol.Message
         {
             if (messageContent == null)
             {
@@ -62,9 +63,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         }
 
         public static Header Create<T>(string session)
-            where T : JupyterMessageContent
+            where T : Protocol.Message
         {
-            var messageType = JupyterMessageContent.GetMessageType(typeof(T));
+            var messageType = Protocol.Message.GetMessageType(typeof(T));
             return Create(messageType, session);
         }
 
