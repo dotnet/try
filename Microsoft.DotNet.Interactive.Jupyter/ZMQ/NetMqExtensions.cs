@@ -27,21 +27,21 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             return ret;
         }
 
-        private static JupyterMessageContent DeserializeMessageContentFromJsonString(string source, string messageType)
+        private static Protocol.Message DeserializeMessageContentFromJsonString(string source, string messageType)
         {
-            var ret = JupyterMessageContent.Empty;
+            var ret = Protocol.Message.Empty;
             if (!string.IsNullOrWhiteSpace(source))
             {
                 var sourceObject = JObject.Parse(source);
                 if (sourceObject.HasValues)
                 {
-                    ret = JupyterMessageContent.FromJsonString(source, messageType);
+                    ret = Protocol.Message.FromJsonString(source, messageType);
                 }
             }
             return ret;
         }
 
-        public static JupyterMessage GetMessage(this NetMQSocket socket)
+        public static Message GetMessage(this NetMQSocket socket)
         {
             // There may be additional ZMQ identities attached; read until the delimiter <IDS|MSG>"
             // and store them in message.identifiers
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             return message;
         }
 
-        public static JupyterMessage DeserializeMessage(string signature, string headerJson, string parentHeaderJson,
+        public static Message DeserializeMessage(string signature, string headerJson, string parentHeaderJson,
             string metadataJson, string contentJson, IReadOnlyList<IReadOnlyList<byte>> identifiers)
         {
             var header = JsonConvert.DeserializeObject<Header>(headerJson);
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             var metaData = DeserializeFromJsonString<Dictionary<string, object>>(metadataJson) ?? new Dictionary<string, object>();
             var content = DeserializeMessageContentFromJsonString(contentJson, header.MessageType);
 
-            var message = new JupyterMessage(header, content, parentHeader, signature, metaData, identifiers);
+            var message = new Message(header, content, parentHeader, signature, metaData, identifiers);
 
             return message;
         }

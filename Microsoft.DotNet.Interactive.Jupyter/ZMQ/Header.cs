@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
         }
 
         public static Header Create<T>(T messageContent, string session)
-            where T : JupyterMessageContent
+            where T : Protocol.Message
         {
             if (messageContent == null)
             {
@@ -63,9 +63,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
         }
 
         public static Header Create<T>(string session)
-            where T : JupyterMessageContent
+            where T : Protocol.Message
         {
-            var messageType = JupyterMessageContent.GetMessageType(typeof(T));
+            var messageType = Protocol.Message.GetMessageType(typeof(T));
             return Create(messageType, session);
         }
 

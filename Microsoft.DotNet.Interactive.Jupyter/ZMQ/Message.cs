@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
-    public class JupyterMessage
+    public class Message
     {
         [JsonIgnore]
         public IReadOnlyList<IReadOnlyList<byte>> Identifiers { get; }
@@ -27,13 +27,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
         public IReadOnlyDictionary<string, object> MetaData { get; }
 
         [JsonProperty("content", NullValueHandling = NullValueHandling.Ignore)]
-        public JupyterMessageContent Content { get; }
+        public Protocol.Message Content { get; }
 
         [JsonProperty("buffers")]
         public IReadOnlyList<IReadOnlyList<byte>> Buffers { get; }
 
-        public JupyterMessage(Header header,
-            JupyterMessageContent content = null,
+        public Message(Header header,
+            Protocol.Message content = null,
             Header parentHeader = null,
             string signature = null,
             IReadOnlyDictionary<string, object> metaData = null,
@@ -45,16 +45,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             Buffers = buffers ?? new List<IReadOnlyList<byte>>();
             Identifiers = identifiers ?? new List<IReadOnlyList<byte>>();
             MetaData = metaData ?? new Dictionary<string, object>();
-            Content = content ?? JupyterMessageContent.Empty;
+            Content = content ?? Protocol.Message.Empty;
             Signature = signature ?? string.Empty;
         }
 
-        public static JupyterMessage Create<T>(
+        public static Message Create<T>(
             T content,
             Header parentHeader = null,
             IReadOnlyList<IReadOnlyList<byte>> identifiers = null,
             string signature = null)
-            where T : JupyterMessageContent
+            where T : Protocol.Message
         {
             if (content == null)
             {
@@ -63,16 +63,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 
             var session = parentHeader?.Session ?? Guid.NewGuid().ToString();
 
-            var message = new JupyterMessage(Header.Create(content, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
+            var message = new Message(Header.Create(content, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
 
 
             return message;
         }
 
-        public static JupyterMessage CreateReply<T>(
+        public static Message CreateReply<T>(
             T content,
-            JupyterMessage request)
-            where T : JupyterReplyMessageContent
+            Message request)
+            where T : ReplyMessage
         {
             if (content == null)
             {
@@ -84,9 +84,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.Content is JupyterRequestMessageContent) && request.Content != JupyterMessageContent.Empty)
+            if (!(request.Content is RequestMessage) && request.Content != Protocol.Message.Empty)
             {
-                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is not a valid {nameof(JupyterRequestMessageContent)}");
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is not a valid {nameof(RequestMessage)}");
             }
 
             var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
@@ -94,11 +94,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             return replyMessage;
         }
 
-        public static JupyterMessage CreatePubSub<T>(
+        public static Message CreatePubSub<T>(
             T content,
-            JupyterMessage request, 
+            Message request, 
             string kernelIdentity = null)
-            where T : JupyterPubSubMessageContent
+            where T : PubSubMessage
         {
             if (content == null)
             {
@@ -110,9 +110,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.Content is JupyterRequestMessageContent) && request.Content != JupyterMessageContent.Empty)
+            if (!(request.Content is RequestMessage) && request.Content != Protocol.Message.Empty)
             {
-                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(JupyterRequestMessageContent)}");
+                throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(RequestMessage)}");
             }
 
             var replyMessage = Create(content, request.Header, new[] { Topic(content, kernelIdentity) }, request.Signature);
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
         }
 
 
-        private static byte[] Topic<T>(T content, string kernelIdentity) where T : JupyterPubSubMessageContent
+        private static byte[] Topic<T>(T content, string kernelIdentity) where T : PubSubMessage
         {
             byte[] encodedTopic;
             var name = content.GetType().Name;

@@ -11,6 +11,7 @@ using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -24,29 +25,29 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteInput_when_ExecuteRequest_is_handled()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new ExecuteRequest("var a =12;"), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new ExecuteRequest("var a =12;"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageContentDispatcher.PubSubMessages.Should()
+            JupyterMessageSender.PubSubMessages.Should()
                 .ContainItemsAssignableTo<ExecuteInput>();
 
-            JupyterMessageContentDispatcher.PubSubMessages.OfType<ExecuteInput>().Should().Contain(r => r.Code == "var a =12;");
+            JupyterMessageSender.PubSubMessages.OfType<ExecuteInput>().Should().Contain(r => r.Code == "var a =12;");
         }
 
         [Fact]
         public async Task sends_ExecuteReply_message_on_when_code_submission_is_handled()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new ExecuteRequest("var a =12;"), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new ExecuteRequest("var a =12;"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageContentDispatcher.ReplyMessages
+            JupyterMessageSender.ReplyMessages
                 .Should()
                 .ContainItemsAssignableTo<ExecuteReplyOk>();
         }
@@ -55,52 +56,52 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_with_error_message_on_when_code_submission_contains_errors()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new ExecuteRequest("asdes"), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new ExecuteRequest("asdes"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageContentDispatcher.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyError>();
+            JupyterMessageSender.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyError>();
         }
 
         [Fact]
         public async Task sends_DisplayData_message_on_ValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
 
-            JupyterMessageContentDispatcher.PubSubMessages.Should().Contain(r => r is DisplayData);
+            JupyterMessageSender.PubSubMessages.Should().Contain(r => r is DisplayData);
         }
 
         [Fact]
         public async Task sends_ExecuteReply_message_on_ReturnValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new ExecuteRequest("2+2"), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new ExecuteRequest("2+2"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
 
-            JupyterMessageContentDispatcher.PubSubMessages.Should().Contain(r => r is ExecuteResult);
+            JupyterMessageSender.PubSubMessages.Should().Contain(r => r is ExecuteResult);
         }
 
         [Fact]
         public async Task sends_ExecuteReply_message_when_submission_contains_only_a_directive()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new ExecuteRequest("%%csharp"), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new ExecuteRequest("%%csharp"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageContentDispatcher.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyOk>();
+            JupyterMessageSender.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyOk>();
         }
     }
 }

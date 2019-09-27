@@ -8,7 +8,7 @@ using Recipes;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
-    public class MessageSender : IMessageSender
+    public class MessageSender
     {
         private readonly IOutgoingSocket _socket;
         private readonly SignatureValidator _signatureValidator;
@@ -19,13 +19,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             _signatureValidator = signatureValidator ?? throw new ArgumentNullException(nameof(signatureValidator));
         }
 
-        public void Send(JupyterMessage jupyterMessage)
+        public void Send(Message message)
         {
-            var hmac = _signatureValidator.CreateSignature(jupyterMessage);
+            var hmac = _signatureValidator.CreateSignature(message);
 
-            if (jupyterMessage.Identifiers != null)
+            if (message.Identifiers != null)
             {
-                foreach (var ident in jupyterMessage.Identifiers)
+                foreach (var ident in message.Identifiers)
                 {
                     _socket.TrySendFrame(ident.ToArray(), true);
                 }
@@ -33,10 +33,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 
             Send(Constants.DELIMITER, _socket);
             Send(hmac, _socket);
-            Send(jupyterMessage.Header.ToJson(), _socket);
-            Send((jupyterMessage.ParentHeader?? new object()).ToJson(), _socket);
-            Send(jupyterMessage.MetaData.ToJson(), _socket);
-            Send(jupyterMessage.Content.ToJson(), _socket, false);
+            Send(message.Header.ToJson(), _socket);
+            Send((message.ParentHeader?? new object()).ToJson(), _socket);
+            Send(message.MetaData.ToJson(), _socket);
+            Send(message.Content.ToJson(), _socket, false);
         }
 
         private static void Send(string message, IOutgoingSocket socket, bool sendMore = true)

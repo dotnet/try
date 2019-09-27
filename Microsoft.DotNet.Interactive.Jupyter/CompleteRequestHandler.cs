@@ -10,6 +10,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -42,19 +43,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnCompletionRequestCompleted(
                         completionRequestCompleted, 
                         context.Request, 
-                        context.JupyterMessageContentDispatcher);
+                        context.JupyterMessageSender);
                     break;
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IJupyterMessageSender jupyterMessageSender)
         {
             var command = completionRequestCompleted.Command as RequestCompletion;
 
             var pos = ComputeReplacementStartPosition(command.Code, command.CursorPosition);
             var reply = new CompleteReply(pos, command.CursorPosition, matches: completionRequestCompleted.CompletionList.Select(e => e.InsertText).ToList());
 
-            jupyterMessageContentDispatcher.Dispatch(reply);
+            jupyterMessageSender.Send(reply);
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)

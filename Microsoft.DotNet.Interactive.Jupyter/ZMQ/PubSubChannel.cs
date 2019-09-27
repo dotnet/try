@@ -6,17 +6,17 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
-    internal class PubSubChannel : IPubSubChannel
+    internal class PubSubChannel 
     {
-        private readonly IMessageSender _sender;
+        private readonly MessageSender _sender;
 
-        public PubSubChannel(IMessageSender sender)
+        public PubSubChannel(MessageSender sender)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
-        public void Publish(JupyterPubSubMessageContent messageContent, JupyterMessage request, string kernelIdentity)
+        public void Publish(PubSubMessage message, Message request, string kernelIdentity)
         {
-            var reply = JupyterMessage.CreatePubSub(messageContent, request, kernelIdentity);
+            var reply = Message.CreatePubSub(message, request, kernelIdentity);
             _sender.Send(reply);
         }
     }

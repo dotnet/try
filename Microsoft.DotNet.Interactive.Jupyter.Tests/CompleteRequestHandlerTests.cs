@@ -11,6 +11,7 @@ using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -24,14 +25,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task send_completeReply_on_CompleteRequest()
         {
             var scheduler = CreateScheduler();
-            var request = JupyterMessage.Create(new CompleteRequest("System.Console.", 15), null);
-            var context = new JupyterRequestContext(JupyterMessageContentDispatcher, request, "id");
+            var request = Message.Create(new CompleteRequest("System.Console.", 15), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
 
             await scheduler.Schedule(context);
             
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageContentDispatcher.ReplyMessages
+            JupyterMessageSender.ReplyMessages
                 .Should()
                 .ContainSingle(r => r is CompleteReply);
         }

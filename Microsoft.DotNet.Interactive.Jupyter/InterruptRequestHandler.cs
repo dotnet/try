@@ -7,6 +7,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -25,19 +26,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CurrentCommandCancelled _:
-                    OnExecutionInterrupted(context.Request, context.JupyterMessageContentDispatcher);
+                    OnExecutionInterrupted(context.Request, context.JupyterMessageSender);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
+        private void OnExecutionInterrupted(Message request, IJupyterMessageSender jupyterMessageSender)
         {
 
             // reply 
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            jupyterMessageContentDispatcher.Dispatch(interruptReplyPayload);
+            jupyterMessageSender.Send(interruptReplyPayload);
 
         }
 

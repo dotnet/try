@@ -16,6 +16,7 @@ using Pocket;
 using Recipes;
 using static Pocket.Logger<Microsoft.DotNet.Interactive.Jupyter.Shell>;
 using InvalidOperationException = System.InvalidOperationException;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -29,8 +30,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly string _ioPubAddress;
         private readonly SignatureValidator _signatureValidator;
         private readonly CompositeDisposable _disposables;
-        private readonly IReplyChannel _shellSender;
-        private readonly IPubSubChannel _ioPubSender;
+        private readonly ReplyChannel _shellSender;
+        private readonly PubSubChannel _ioPubSender;
         private readonly string _stdInAddress;
         private readonly string _controlAddress;
         private readonly RouterSocket _stdIn;
@@ -122,9 +123,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     
                 }
 
-                void SetBusy(JupyterMessage request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
+                void SetBusy(Message request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
 
-                void SetIdle(JupyterMessage request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
+                void SetIdle(Message request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
 
                 
             }
@@ -137,7 +138,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Task.CompletedTask;
         }
 
-        private void HandleKernelInfoRequest(JupyterMessage request)
+        private void HandleKernelInfoRequest(Message request)
         {
             var languageInfo = GetLanguageInfo();
             var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", languageInfo);

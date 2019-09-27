@@ -8,6 +8,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -34,15 +35,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
-                    Reply( true, context.Request, context.JupyterMessageContentDispatcher);
+                    Reply( true, context.Request, context.JupyterMessageSender);
                     break;
                 case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
-                    Reply( false, context.Request, context.JupyterMessageContentDispatcher);
+                    Reply( false, context.Request, context.JupyterMessageSender);
                     break;
             }
         }
 
-        private void Reply(bool isComplete, JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
+        private void Reply(bool isComplete, Message request, IJupyterMessageSender jupyterMessageSender)
         {
             
             
@@ -52,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                jupyterMessageContentDispatcher.Dispatch(isCompleteReplyPayload);
+                jupyterMessageSender.Send(isCompleteReplyPayload);
         }
     }
 }

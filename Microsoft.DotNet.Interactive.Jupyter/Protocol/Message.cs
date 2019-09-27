@@ -10,17 +10,17 @@ using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    public abstract class JupyterMessageContent
+    public abstract class Message
     {
         private static readonly IReadOnlyDictionary<string, Type> _messageTypeToClrType;
         private static readonly IReadOnlyDictionary<Type, string> _clrTypeToMessageType;
 
         private string _messageType;
 
-        static JupyterMessageContent()
+        static Message()
         {
-            var messageImplementations = typeof(JupyterMessageContent).Assembly.GetExportedTypes().Where(t =>
-                t.IsAbstract == false && typeof(JupyterMessageContent).IsAssignableFrom(t)).ToList();
+            var messageImplementations = typeof(Message).Assembly.GetExportedTypes().Where(t =>
+                t.IsAbstract == false && typeof(Message).IsAssignableFrom(t)).ToList();
 
             var messageTypeToClrType = new Dictionary<string, Type>();
             var clrTypeToMessageType = new Dictionary<Type, string>();
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
         [JsonIgnore]
         public string MessageType => _messageType ?? (_messageType  = _clrTypeToMessageType[GetType()]);
 
-        public static JupyterMessageContent FromJsonString(string jsonString, string messageType)
+        public static Message FromJsonString(string jsonString, string messageType)
         {
             if (string.IsNullOrWhiteSpace(jsonString))
             {
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             return TryFromJsonString(jsonString,messageType);
         }
 
-        public static JupyterMessageContent TryFromJsonString(string jsonString, string messageType)
+        public static Message TryFromJsonString(string jsonString, string messageType)
         {
             if (string.IsNullOrWhiteSpace(jsonString))
             {
@@ -75,16 +75,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
             if (_messageTypeToClrType.TryGetValue(messageType, out var supportedType))
             {
-                return JsonConvert.DeserializeObject(jsonString, supportedType) as JupyterMessageContent;
+                return JsonConvert.DeserializeObject(jsonString, supportedType) as Message;
             }
 
             return Empty;
         }
 
 
-        public static JupyterMessageContent Empty { get; } = new EmptyMessageContent();
+        public static Message Empty { get; } = new EmptyMessage();
 
-        public static string GetMessageType(JupyterMessageContent source)
+        public static string GetMessageType(Message source)
         {
             if (source == null)
             {
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
             return attribute.Type;
         }
 
-        private class EmptyMessageContent : JupyterMessageContent
+        private class EmptyMessage : Message
         {
 
         }

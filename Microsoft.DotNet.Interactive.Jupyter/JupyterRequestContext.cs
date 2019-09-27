@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -13,24 +14,24 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        internal JupyterRequestContext(IReplyChannel serverChannel, IPubSubChannel ioPubChannel, JupyterMessage request, string kernelIdentity) : 
-            this(new JupyterMessageContentDispatcher(ioPubChannel, serverChannel, kernelIdentity, request),request,kernelIdentity)
+        internal JupyterRequestContext(ReplyChannel serverChannel, PubSubChannel ioPubChannel, Message request, string kernelIdentity) : 
+            this(new JupyterMessageSender(ioPubChannel, serverChannel, kernelIdentity, request),request,kernelIdentity)
         {
         }
 
-        public JupyterRequestContext(IJupyterMessageContentDispatcher jupyterMessageContentDispatcher, JupyterMessage request, string kernelIdentity)
+        public JupyterRequestContext(IJupyterMessageSender jupyterMessageSender, Message request, string kernelIdentity)
         {
-            JupyterMessageContentDispatcher = jupyterMessageContentDispatcher ?? throw new ArgumentNullException(nameof(jupyterMessageContentDispatcher));
+            JupyterMessageSender = jupyterMessageSender ?? throw new ArgumentNullException(nameof(jupyterMessageSender));
             Request = request ?? throw new ArgumentNullException(nameof(request));
             KernelIdentity = kernelIdentity;
         }
 
-        public IJupyterMessageContentDispatcher JupyterMessageContentDispatcher { get; }
+        public IJupyterMessageSender JupyterMessageSender { get; }
 
-        public JupyterMessage Request { get; }
+        public Message Request { get; }
         public string KernelIdentity { get; }
 
-        public T GetRequestContent<T>() where T : JupyterRequestMessageContent
+        public T GetRequestContent<T>() where T : RequestMessage
         {
             return Request?.Content as T;
         }

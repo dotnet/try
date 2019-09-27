@@ -6,17 +6,17 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
 {
-    internal class ReplyChannel : IReplyChannel
+    internal class ReplyChannel
     {
-        private readonly IMessageSender _sender;
+        private readonly MessageSender _sender;
 
-        public ReplyChannel(IMessageSender sender)
+        public ReplyChannel(MessageSender sender)
         {
             _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
-        public void Reply(JupyterReplyMessageContent messageContent, JupyterMessage request)
+        public void Reply(ReplyMessage message, Message request)
         {
-            var reply = JupyterMessage.CreateReply(messageContent, request);
+            var reply = Message.CreateReply(message, request);
             _sender.Send(reply);
         }
     }

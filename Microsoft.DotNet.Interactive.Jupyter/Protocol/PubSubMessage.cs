@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
-    public abstract class JupyterRequestMessageContent : JupyterMessageContent
+    public abstract class PubSubMessage : Message
     {
 
     }

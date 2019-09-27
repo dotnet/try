@@ -12,6 +12,7 @@ using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.DotNet.Interactive.Rendering;
+using Message = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _executionCount = executeRequest.Silent ? _executionCount : Interlocked.Increment(ref _executionCount);
 
             var executeInputPayload = new ExecuteInput(executeRequest.Code, _executionCount);
-            context.JupyterMessageContentDispatcher.Dispatch(executeInputPayload);
+            context.JupyterMessageSender.Send(executeInputPayload);
 
             var command = new SubmitCode(executeRequest.Code);
 
@@ -45,13 +46,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case DisplayEventBase displayEvent:
-                    OnDisplayEvent(displayEvent, context.Request, context.JupyterMessageContentDispatcher);
+                    OnDisplayEvent(displayEvent, context.Request, context.JupyterMessageSender);
                     break;
                 case CommandHandled _:
-                    OnCommandHandled(context.Request, context.JupyterMessageContentDispatcher);
+                    OnCommandHandled(context.Request, context.JupyterMessageSender);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed, context.Request, context.JupyterMessageContentDispatcher);
+                    OnCommandFailed(commandFailed, context.Request, context.JupyterMessageSender);
                     break;
             }
         }
@@ -64,8 +65,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void OnCommandFailed(
             CommandFailed commandFailed,
-            JupyterMessage request,
-            IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
+            Message request,
+            IJupyterMessageSender jupyterMessageSender)
         {
             var errorContent = new Error (
                 eName: "Unhandled Exception",
@@ -77,25 +78,25 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
 
             // send to server
-            jupyterMessageContentDispatcher.Dispatch(executeReplyPayload);
+            jupyterMessageSender.Send(executeReplyPayload);
         }
 
-        private static void SendDisplayData(JupyterPubSubMessageContent messageMessageContent,
-            JupyterMessage request,
-            IJupyterMessageContentDispatcher ioPubChannel)
+        private static void SendDisplayData(PubSubMessage messageMessage,
+            Message request,
+            IJupyterMessageSender ioPubChannel)
         {
             var isSilent = ((ExecuteRequest) request.Content).Silent;
 
             if (!isSilent)
             {
                 // send on io
-                ioPubChannel.Dispatch(messageMessageContent);
+                ioPubChannel.Send(messageMessage);
             }
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
-            JupyterMessage request,
-            IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
+            Message request,
+            IJupyterMessageSender jupyterMessageSender)
         {
             var transient = CreateTransient(displayEvent.ValueId);
 
@@ -107,7 +108,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            JupyterPubSubMessageContent executeResultData;
+            PubSubMessage executeResultData;
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
@@ -130,7 +131,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
 
-            SendDisplayData(executeResultData, request, jupyterMessageContentDispatcher);
+            SendDisplayData(executeResultData, request, jupyterMessageSender);
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)
@@ -143,13 +144,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private void OnCommandHandled(JupyterMessage request, IJupyterMessageContentDispatcher jupyterMessageContentDispatcher)
+        private void OnCommandHandled(Message request, IJupyterMessageSender jupyterMessageSender)
         {
             // reply ok
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-           jupyterMessageContentDispatcher.Dispatch(executeReplyPayload);
+           jupyterMessageSender.Send(executeReplyPayload);
         }
     }
 }
