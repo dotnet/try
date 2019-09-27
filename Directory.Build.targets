@@ -15,8 +15,8 @@
 
   <!-- Consolidate FSharp package versions -->
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0.0-beta.19463.12" />
-    <PackageReference Update="FSharp.Compiler.Private.Scripting" Version="11.0.0-beta.19463.12" />
+    <PackageReference Update="FSharp.Core" Version="5.0.0-beta.19475.3" />
+    <PackageReference Update="FSharp.Compiler.Private.Scripting" Version="11.0.0-beta.19475.3" />
     <PackageReference Update="FSharp.Compiler.Service" Version="31.0.0" />
   </ItemGroup>
 

@@ -1,16 +1,13 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
-    public interface IKernelStatus
+    public interface IJupyterMessageSender     
     {
-        void SetAsBusy();
-
-        void SetAsIdle();
-
-        Task Idle();
+        void Send(PubSubMessage message);
+        void Send(ReplyMessage message);
     }
 }

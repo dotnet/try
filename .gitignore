@@ -375,5 +375,9 @@ docs/\.ionide/
 
 .ipynb_checkpoints/
 
+<<<<<<< HEAD
 #Backup files
 *.bak
+=======
+NotebookExamples/csharp/Samples/housing.csv
+>>>>>>> 1fc6c9e43a28a59f37a55c9a95e3c3525ee7f17d

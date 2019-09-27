@@ -5,6 +5,8 @@ using System;
 using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -12,22 +14,27 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        public JupyterRequestContext(IMessageSender serverChannel, IMessageSender ioPubChannel, Message request, string kernelIdent)
+        internal JupyterRequestContext(ReplyChannel serverChannel, PubSubChannel ioPubChannel, Envelope
+ request, string kernelIdentity) : 
+            this(new JupyterMessageSender(ioPubChannel, serverChannel, kernelIdentity, request),request,kernelIdentity)
         {
-            ServerChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
-            IoPubChannel = ioPubChannel ?? throw new ArgumentNullException(nameof(ioPubChannel));
-            Request = request ?? throw new ArgumentNullException(nameof(request));
-            KernelIdent = kernelIdent;
         }
 
-        public IMessageSender ServerChannel { get; }
+        public JupyterRequestContext(IJupyterMessageSender jupyterMessageSender, Envelope
+ request, string kernelIdentity)
+        {
+            JupyterMessageSender = jupyterMessageSender ?? throw new ArgumentNullException(nameof(jupyterMessageSender));
+            Request = request ?? throw new ArgumentNullException(nameof(request));
+            KernelIdentity = kernelIdentity;
+        }
 
-        public IMessageSender IoPubChannel { get; }
+        public IJupyterMessageSender JupyterMessageSender { get; }
 
-        public Message Request { get; }
-        public string KernelIdent { get; }
+        public Envelope
+ Request { get; }
+        public string KernelIdentity { get; }
 
-        public T GetRequestContent<T>() where T : JupyterMessageContent
+        public T GetRequestContent<T>() where T : RequestMessage
         {
             return Request?.Content as T;
         }

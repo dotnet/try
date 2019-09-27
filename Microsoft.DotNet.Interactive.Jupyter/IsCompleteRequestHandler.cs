@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var isCompleteRequest = GetJupyterRequest(context);
             var command = new SubmitCode(isCompleteRequest.Code, submissionType: SubmissionType.Diagnose);
 
-            await SendTheThingAndWaitForTheStuff(context, command);
+            await SendAsync(context, command);
         }
       
 
@@ -33,15 +34,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
-                    Reply( true, context.Request, context.ServerChannel);
+                    Reply( true, context.Request, context.JupyterMessageSender);
                     break;
                 case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
-                    Reply( false, context.Request, context.ServerChannel);
+                    Reply( false, context.Request, context.JupyterMessageSender);
                     break;
             }
         }
 
-        private void Reply(bool isComplete, Message request, IMessageSender serverChannel)
+        private void Reply(bool isComplete, Envelope request, IJupyterMessageSender jupyterMessageSender)
         {
             
             
@@ -51,12 +52,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
 
                 // send to server
-                var executeReply = Message.CreateResponse(
-                    isCompleteReplyPayload,
-                    request);
-
-                serverChannel.Send(executeReply);
-            
+                jupyterMessageSender.Send(isCompleteReplyPayload);
         }
     }
 }

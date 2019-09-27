@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             var command = new RequestCompletion(completeRequest.Code, completeRequest.CursorPosition);
 
-            await SendTheThingAndWaitForTheStuff(context, command);
+            await SendAsync(context, command);
         }
 
         protected override void OnKernelEventReceived(
@@ -40,21 +40,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case CompletionRequestCompleted completionRequestCompleted:
                     OnCompletionRequestCompleted(
                         completionRequestCompleted, 
-                        context.Request, 
-                        context.ServerChannel);
+                        context.JupyterMessageSender);
                     break;
             }
         }
 
-        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted, Message request, IMessageSender serverChannel)
+        private static void OnCompletionRequestCompleted(CompletionRequestCompleted completionRequestCompleted,IJupyterMessageSender jupyterMessageSender)
         {
             var command = completionRequestCompleted.Command as RequestCompletion;
 
             var pos = ComputeReplacementStartPosition(command.Code, command.CursorPosition);
             var reply = new CompleteReply(pos, command.CursorPosition, matches: completionRequestCompleted.CompletionList.Select(e => e.InsertText).ToList());
 
-            var completeReply = Message.CreateResponse(reply, request);
-            serverChannel.Send(completeReply);
+            jupyterMessageSender.Send(reply);
         }
 
         private static int ComputeReplacementStartPosition(string code, int cursorPosition)
