@@ -39,7 +39,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("123"));
+            await SubmitSource(kernel, "123");
 
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
@@ -55,7 +55,7 @@ namespace WorkspaceServer.Tests.Kernel
         [InlineData(Language.CSharp)]
         public async Task it_remembers_state_between_submissions(Language language)
         {
-            string[] source = language switch
+            var source = language switch
             {
                 Language.FSharp => new[]
                 {
@@ -67,96 +67,12 @@ namespace WorkspaceServer.Tests.Kernel
                 {
                     "int Add(int x, int y) { return x + y; }",
                     "Add(2, 3)"
-                },
+                }
             };
 
             var kernel = CreateKernel(language);
 
             await SubmitSource(kernel, source);
-
-            KernelEvents.ValuesOnly()
-                .OfType<ReturnValueProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be(5);
-        }
-
-
-        // Option 2:  Use InlineData
-        [Theory]
-        [InlineData(Language.FSharp, "let add x y = x + y", 
-                                     "add 2 3")]
-        [InlineData(Language.CSharp, "int Add(int x, int y) { return x + y; }",
-                                     "Add(2, 3)")]
-        public async Task it_remembers_state_between_submissions_option2(Language language, string line1, string line2)
-        {
-            var kernel = CreateKernel(language);
-
-            await SubmitSource(kernel, line1);
-            await SubmitSource(kernel, line2);
-
-            KernelEvents.ValuesOnly()
-                .OfType<ReturnValueProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be(5);
-        }
-
-        public T GetElementForLanguage<T>(Language language, params (Language lang, T value)[] values)
-        {
-            // The use of `Single()` ensures that the test will fail if a value was not given for a specific language.
-            return values.Single(val => val.lang == language).value;
-        }
-        
-        //Option 3: GetElementForLanguage iter 1
-        [Theory]
-        [InlineData(Language.FSharp)]
-        [InlineData(Language.CSharp)]
-        public async Task it_remembers_state_between_submissions_option3(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            var line1 = GetElementForLanguage(language, (Language.CSharp, "int Add(int x, int y) { return x + y; }"),
-                                                        (Language.FSharp, "let add x y = x + y"));
-
-            await SubmitSource(kernel, line1);
-
-            var line2 = GetElementForLanguage(language, (Language.CSharp, "Add(2, 3)"),
-                                                        (Language.FSharp, "add 2 3"));
-
-            await SubmitSource(kernel, line2);
-
-            KernelEvents.ValuesOnly()
-                .OfType<ReturnValueProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be(5);
-        }
-
-        //Option 4: GetElementForLanguage iter 2
-        [Theory]
-        [InlineData(Language.FSharp)]
-        [InlineData(Language.CSharp)]
-        public async Task it_remembers_state_between_submissions_option4(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            var lines = GetElementForLanguage(language,
-                (Language.CSharp, new[]
-                    {
-                        "int Add(int x, int y) { return x + y; }",
-                        "Add(2, 3)"
-                    }),
-                (Language.FSharp, new[]
-                    {
-                        "let add x y = x + y",
-                        "add 2 3"
-                    }));
-
-            await SubmitSource(kernel, lines);
 
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
@@ -172,9 +88,13 @@ namespace WorkspaceServer.Tests.Kernel
         {
             // The text `[1;2;3;4]` parses as a System.CommandLine directive; ensure it's not consumed and is passed on to the kernel.
             var kernel = CreateKernel(language);
-            await kernel.SendAsync(new SubmitCode(@"
+
+            var source = @"
 [1;2;3;4]
-|> List.sum"));
+|> List.sum";
+
+            await SubmitSource(kernel, source);
+
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
                 .Last()
@@ -183,14 +103,31 @@ namespace WorkspaceServer.Tests.Kernel
                 .Be(10);
         }
 
-        [Fact]
-        public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("using System;"));
-            await kernel.SendAsync(new SubmitCode("2 + 2"));
-            await kernel.SendAsync(new SubmitCode("adddddddddd"));
+            var source = language switch
+            {
+                Language.FSharp => new[]
+                {
+                    "open System",
+                    "2 + 2",
+                    "adddddddddd"
+                },
+
+                Language.CSharp => new[]
+                {
+                    "using System;",
+                    "2 + 2",
+                    "adddddddddd"
+                }
+            };
+
+            await SubmitSource(kernel, source);
 
             var (failure, lastFailureIndex) = KernelEvents
                 .Select((t, pos) => (t.Value, pos))
@@ -214,13 +151,29 @@ namespace WorkspaceServer.Tests.Kernel
                 .BeLessThan(lastFailureIndex);
         }
 
-        [Fact]
-        public async Task it_returns_exceptions_thrown_in_user_code()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_returns_exceptions_thrown_in_user_code(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("using System;"));
-            await kernel.SendAsync(new SubmitCode("throw new NotImplementedException();"));
+            var source = language switch
+            {
+                Language.FSharp => new[]
+                {
+                    "open System",
+                    "raise (new NotImplementedException())"
+                },
+
+                Language.CSharp => new[]
+                {
+                    "using System;",
+                    "throw new NotImplementedException();"
+                }
+            };
+
+            await SubmitSource(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .Last()
@@ -232,13 +185,29 @@ namespace WorkspaceServer.Tests.Kernel
                 .BeOfType<NotImplementedException>();
         }
 
-        [Fact]
-        public async Task it_returns_diagnostics()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_returns_diagnostics(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("using System;"));
-            await kernel.SendAsync(new SubmitCode("aaaadd"));
+            var source = language switch
+            {
+                Language.FSharp => new[]
+                {
+                    "open System",
+                    "aaaadd"
+                },
+
+                Language.CSharp => new[]
+                {
+                    "using System;",
+                    "aaaadd"
+                }
+            };
+
+            await SubmitSource(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .Last()
@@ -250,12 +219,20 @@ namespace WorkspaceServer.Tests.Kernel
                 .Be("(1,1): error CS0103: The name 'aaaadd' does not exist in the current context");
         }
 
-        [Fact]
-        public async Task it_cannot_execute_incomplete_submissions()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_cannot_execute_incomplete_submissions(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("var a = 12"));
+            var source = language switch
+            {
+                Language.FSharp => "let a =",
+                Language.CSharp => "var a = 12"
+            };
+
+            await SubmitSource(kernel, source);
 
             KernelEvents.Should()
                 .NotContain(e => e.Value is DisplayedValueProduced);
@@ -265,24 +242,39 @@ namespace WorkspaceServer.Tests.Kernel
                 .Contain(e => e.Value is CommandFailed);
         }
 
-        [Fact]
-        public async Task it_can_analyze_code_submissions()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_can_analyze_code_submissions(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("var a = 12", submissionType:SubmissionType.Diagnose));
+            var source = language switch
+            {
+                Language.FSharp => "let a =",
+                Language.CSharp => "var a = 12"
+            };
+
+            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
 
             var analysisResult = KernelEvents.ValuesOnly()
                 .Single(e => e is IncompleteCodeSubmissionReceived);
         }
 
-
-        [Fact]
-        public async Task expression_evaluated_to_null_has_result_with_null_value()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task expression_evaluated_to_null_has_result_with_null_value(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("null"));
+            var source = language switch
+            {
+                Language.FSharp => "null",
+                Language.CSharp => "null"
+            };
+
+            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -292,26 +284,55 @@ namespace WorkspaceServer.Tests.Kernel
                         .BeNull();
         }
 
-        [Fact]
-        public async Task it_does_not_return_a_result_for_a_statement()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_does_not_return_a_result_for_a_statement(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("var x = 1;"));
+            var source = language switch
+            {
+                Language.FSharp => "let x = 1;",
+                Language.CSharp => "var x = 1;"
+            };
+
+            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
 
             KernelEvents
                 .Should()
                 .NotContain(e => e.Value is DisplayedValueProduced);
         }
 
-        [Fact]
-        public async Task it_aggregates_multiple_submissions()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_aggregates_multiple_submissions(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(new SubmitCode("var x = new List<int>{1,2};"));
-            await kernel.SendAsync(new SubmitCode("x.Add(3);"));
-            await kernel.SendAsync(new SubmitCode("x.Max()"));
+            var source = language switch
+            {
+                Language.FSharp => new[]
+                {
+                    "open System.Collections.Generic",
+                    "let x = new List([1,2])",
+                    "x.Add(3);",
+                    "x.Max()"
+                },
+
+                Language.CSharp => new[]
+                {
+                    //Todo:
+                    // I suppose csi pre-open's a bunch of namespaces including System.Generics
+                    // I think the Value of 3 is a bit suspect too.
+                    "var x = new List<int>{1,2};",
+                    "x.Add(3);",
+                    "x.Max()"
+                }
+            };
+
+            await SubmitSource(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -321,16 +342,30 @@ namespace WorkspaceServer.Tests.Kernel
                         .Be(3);
         }
 
-        [Fact]
-        public async Task it_produces_values_when_executing_Console_output()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_produces_values_when_executing_Console_output(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            var kernelCommand = new SubmitCode(@"
+            var source = language switch
+            {
+                Language.FSharp => @"
+open System
+Console.Write(""value one"")
+Console.Write(""value two"")
+Console.Write(""value three"")",
+
+                //Todo: dunno
+                // I suppose csi pre-open's a bunch of namespaces including System
+                Language.CSharp => @"
 Console.Write(""value one"");
 Console.Write(""value two"");
-Console.Write(""value three"");");
-            await kernel.SendAsync(kernelCommand);
+Console.Write(""value three"");",
+            };
+
+            var kernelCommand = await SubmitSource(kernel, source);
 
             KernelEvents
                 .ValuesOnly()
@@ -342,12 +377,20 @@ Console.Write(""value three"");");
                     new DisplayedValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
-        [Fact]
-        public async Task it_can_cancel_execution()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_can_cancel_execution(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            var submitCodeCommand = new SubmitCode(@"System.Threading.Thread.Sleep(90000000);");
+            var source = language switch
+            {
+                Language.FSharp => "System.Threading.Thread.Sleep(90000000)",
+                Language.CSharp => "System.Threading.Thread.Sleep(90000000);"
+            };
+
+            var submitCodeCommand = new SubmitCode(source);
             var codeSubmission = kernel.SendAsync(submitCodeCommand);
             var interruptionCommand = new CancelCurrentCommand();
             await kernel.SendAsync(interruptionCommand);
@@ -364,17 +407,30 @@ Console.Write(""value three"");");
                 .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Command cancelled"));
         }
 
-        [Fact]
-        public async Task it_produces_a_final_value_if_the_code_expression_evaluates()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            var kernelCommand = new SubmitCode(@"
+            var source = language switch
+            {
+                Language.FSharp => @"
+open System
+Console.Write(""value one"")
+Console.Write(""value two"")
+Console.Write(""value three"")",
+
+                //Todo: dunno
+                // I suppose csi pre-open's a bunch of namespaces including System
+                Language.CSharp => @"
 Console.Write(""value one"");
 Console.Write(""value two"");
-Console.Write(""value three"");
-5");
-            await kernel.SendAsync(kernelCommand);
+Console.Write(""value three"");",
+            };
+
+            await SubmitSource(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .OfType<DisplayedValueProduced>()
@@ -389,22 +445,37 @@ Console.Write(""value three"");
 
         }
 
-        [Fact]
-        public async Task the_output_is_asynchronous()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task the_output_is_asynchronous(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            var kernelCommand = new SubmitCode(@"
+            var source = language switch
+            {
+                Language.FSharp => @"
+open System
+Console.Write(DateTime.Now)
+System.Threading.Thread.Sleep(1000)
+Console.Write(DateTime.Now)
+5",
+
+                //Todo: dunno
+                // I suppose csi pre-open's a bunch of namespaces including System
+                Language.CSharp => @"
 Console.Write(DateTime.Now);
 System.Threading.Thread.Sleep(1000);
 Console.Write(DateTime.Now);
-5");
-            await kernel.SendAsync(kernelCommand);
+5",
+            };
+
+            await SubmitSource(kernel, source);
+
             var events = KernelEvents
                 .Where(e => e.Value is DisplayedValueProduced).ToArray();
             var diff = events[1].Timestamp - events[0].Timestamp;
             diff.Should().BeCloseTo(1.Seconds(), precision: 200);
-
         }
 
         [Fact(Skip = "requires support for cs8 in roslyn scripting")]
@@ -423,23 +494,37 @@ Console.Write(DateTime.Now);
                 .Be("meow!");
         }
 
-        [Fact]
-        public async Task it_can_load_assembly_references_using_r_directive()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_can_load_assembly_references_using_r_directive(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
             var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
 
-            await kernel.SendAsync(
-                new SubmitCode($"#r \"{dll}\""));
-            await kernel.SendAsync(
-                new SubmitCode(@"
+            var source = language switch
+            {
+                Language.FSharp => new[] {
+$"#r \"{dll}\"",
+@"
 using Newtonsoft.Json;
-
 var json = JsonConvert.SerializeObject(new { value = ""hello"" });
-
 json
-"));
+"},
+
+                //Todo: dunno
+                // I suppose csi pre-open's a bunch of namespaces including System
+                Language.CSharp => new[] {
+$"#r \"{dll}\"",
+@"
+using Newtonsoft.Json;
+var json = JsonConvert.SerializeObject(new { value = ""hello"" });
+json
+"}
+            };
+
+            await SubmitSource(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -453,17 +538,25 @@ json
                         .Be(new { value = "hello" }.ToJson());
         }
 
-        [Fact]
-        public async Task it_returns_completion_list_for_types()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_returns_completion_list_for_types(Language language)
         {
+            var kernel = CreateKernel(language);
 
-            var kernel = CreateKernel();
+            var source = language switch
+            {
+                Language.FSharp => @"System.Console.",
 
-            await kernel.SendAsync(new RequestCompletion("System.Console.", 15));
+                Language.CSharp => @"System.Console."
+            };
 
-           KernelEvents.ValuesOnly()
-                       .Should()
-                       .ContainSingle(e => e is CompletionRequestReceived);
+            await kernel.SendAsync(new RequestCompletion(source, 15));
+
+            KernelEvents.ValuesOnly()
+                .Should()
+                .ContainSingle(e => e is CompletionRequestReceived);
 
             KernelEvents.ValuesOnly()
                 .OfType<CompletionRequestCompleted>()
@@ -473,15 +566,22 @@ json
                 .Contain(i => i.DisplayText == "ReadLine");
         }
 
-        [Fact]
-        public async Task it_returns_completion_list_for_previously_declared_variables()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_returns_completion_list_for_previously_declared_variables(Language language)
         {
-            var kernel = CreateKernel();
+            var kernel = CreateKernel(language);
 
-            await kernel.SendAsync(
-                new SubmitCode("var alpha = new Random();"));
-            await kernel.SendAsync(
-                new RequestCompletion("al", 2));
+            var source = language switch
+            {
+                Language.FSharp => @"let alpha = new Random()",
+                Language.CSharp => @"var alpha = new Random();"
+            };
+
+            await SubmitSource(kernel, source);
+
+            await kernel.SendAsync(new RequestCompletion("al", 2));
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -495,8 +595,10 @@ json
                         .Contain(i => i.DisplayText == "alpha");
         }
 
-        [Fact]
-        public async Task it_returns_completion_list_for_types_imported_at_runtime()
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_returns_completion_list_for_types_imported_at_runtime(Language language)
         {
             var kernel = CreateKernel();
 
@@ -521,6 +623,7 @@ json
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
+            //????????????????????????????
             var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective()

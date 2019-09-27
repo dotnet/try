@@ -60,17 +60,23 @@ namespace WorkspaceServer.Tests.Kernel
             return CreateKernel(Language.CSharp);
         }
 
-        public async Task SubmitSource(KernelBase kernel, string[] lines)
+        public async Task<SubmitCode[]> SubmitSource(KernelBase kernel, string[] lines, string targetKernelName = null, SubmissionType submissionType = SubmissionType.Run)
         {
+            var cmds = new List<SubmitCode>();
             foreach (string line in lines)
             {
-                await SubmitSource(kernel, line);
+                var cmd = new SubmitCode(line, targetKernelName: targetKernelName, submissionType: submissionType);
+                await kernel.SendAsync(cmd);
+                cmds.Add(cmd);
             }
+            return cmds.ToArray();
         }
 
-        public async Task SubmitSource(KernelBase kernel, string line)
+        public async Task<SubmitCode> SubmitSource(KernelBase kernel, string line, string targetKernelName = null, SubmissionType submissionType = SubmissionType.Run)
         {
-            await kernel.SendAsync(new SubmitCode(line));
+            var cmd = new SubmitCode(line, targetKernelName: targetKernelName, submissionType: submissionType);
+            await kernel.SendAsync(cmd);
+            return cmd;
         }
 
         /// IDispose
