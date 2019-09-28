@@ -20,6 +20,7 @@ using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
+using WorkspaceServer.Tests.Instrumentation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -263,7 +264,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
+       [InlineData(Language.FSharp)]
         public async Task expression_evaluated_to_null_has_result_with_null_value(Language language)
         {
             var kernel = CreateKernel(language);
@@ -274,7 +275,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => "null"
             };
 
-            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
+            await SubmitSource(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -293,7 +294,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var source = language switch
             {
-                Language.FSharp => "let x = 1;",
+                Language.FSharp => "let x = 1",
                 Language.CSharp => "var x = 1;"
             };
 
@@ -386,8 +387,8 @@ Console.Write(""value three"");",
 
             var source = language switch
             {
-                Language.FSharp => "System.Threading.Thread.Sleep(90000000)",
-                Language.CSharp => "System.Threading.Thread.Sleep(90000000);"
+                Language.FSharp => "System.Threading.Thread.Sleep(9000)",
+                Language.CSharp => "System.Threading.Thread.Sleep(9000);"
             };
 
             var submitCodeCommand = new SubmitCode(source);
@@ -420,14 +421,16 @@ Console.Write(""value three"");",
 open System
 Console.Write(""value one"")
 Console.Write(""value two"")
-Console.Write(""value three"")",
+Console.Write(""value three"")
+5",
 
                 //Todo: dunno
                 // I suppose csi pre-open's a bunch of namespaces including System
                 Language.CSharp => @"
 Console.Write(""value one"");
 Console.Write(""value two"");
-Console.Write(""value three"");",
+Console.Write(""value three"");
+5",
             };
 
             await SubmitSource(kernel, source);
@@ -595,10 +598,8 @@ json
                         .Contain(i => i.DisplayText == "alpha");
         }
 
-        [Theory]
-        [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
-        public async Task it_returns_completion_list_for_types_imported_at_runtime(Language language)
+        [Fact]
+        public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
             var kernel = CreateKernel();
 
