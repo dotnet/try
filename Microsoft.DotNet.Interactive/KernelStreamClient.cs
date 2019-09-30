@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -19,23 +21,88 @@ namespace Microsoft.DotNet.Interactive
         private readonly TextWriter _output;
         private readonly CommandDeserializer _deserializer = new CommandDeserializer();
 
+        private readonly ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)> _commandQueue = new ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)>();
+
         private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
+
+        private readonly object _currentCommandLock = new object();
+        private StreamKernelCommand _currentCommand;
+        private CancellationTokenSource _cancellationSource;
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
         {
             _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _output = output ?? throw new ArgumentNullException(nameof(output));
+
+            _kernel.KernelEvents.Subscribe(async e =>
+            {
+                switch (e)
+                {
+                    case KernelIdle _:
+                        {
+                            lock (_currentCommandLock)
+                            {
+                                if (_currentCommand != null)
+                                {
+                                    Write(e, _currentCommand.Id);
+                                    _currentCommand = null;
+                                }
+                            }
+
+                            await ProcessCommandQueue();
+                        }
+                        break;
+                    default:
+                        lock (_currentCommandLock)
+                        {
+                            if (_currentCommand != null)
+                            {
+                                Write(e, _currentCommand.Id);
+                            }
+                        }
+
+                        break;
+                }
+
+            });
+        }
+
+        private async Task ProcessCommandQueue()
+        {
+            IKernelCommand kernelCommand = null;
+            lock (_currentCommandLock)
+            {
+                if (_currentCommand == null)
+                {
+                    if (_commandQueue.TryDequeue(out var commandToExecute))
+                    {
+                        _currentCommand = commandToExecute.streamingCommand;
+                        kernelCommand = commandToExecute.kernelCommand;
+                    }
+                }
+            }
+
+            if (_currentCommand?.CommandType == nameof(Quit))
+            {
+                _cancellationSource.Cancel();
+            }
+
+            if (kernelCommand != null)
+            {
+               await _kernel.SendAsync(kernelCommand);
+            }
         }
 
         public Task Start()
         {
+            _cancellationSource = new CancellationTokenSource();
             return Task.Run(async () =>
             {
-                while (true)
+                while (!_cancellationSource.IsCancellationRequested)
                 {
                     var line = await _input.ReadLineAsync();
                     if (line == null)
@@ -45,48 +112,49 @@ namespace Microsoft.DotNet.Interactive
                     }
 
                     StreamKernelCommand streamKernelCommand = null;
-                    JObject obj = null;
                     try
                     {
-                        obj = JObject.Parse(line);
+                        var obj = JObject.Parse(line);
                         streamKernelCommand = obj.ToObject<StreamKernelCommand>();
                         IKernelCommand command = null;
 
-                        if (obj.TryGetValue("command", StringComparison.InvariantCultureIgnoreCase ,out var commandValue))
+                        if (obj.TryGetValue("command", StringComparison.InvariantCultureIgnoreCase, out var commandValue))
                         {
                             command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
                         }
 
                         if (streamKernelCommand.CommandType == nameof(Quit))
                         {
-                            return;
+                            _commandQueue.Enqueue((streamKernelCommand, null));
                         }
-
-                        if (command == null)
+                        else if (command == null)
                         {
                             Write(new CommandNotRecognized
-                                {
-                                    Body = obj
-                                }, 
+                            {
+                                Body = obj
+                            },
                                 streamKernelCommand.Id);
                             continue;
                         }
-
-                        var result = await _kernel.SendAsync(command);
-                        result.KernelEvents.Subscribe(e =>
+                        else
                         {
-                            Write(e, streamKernelCommand.Id);
-                        });
+
+                            _commandQueue.Enqueue((streamKernelCommand, command));
+                        }
+
+                        await ProcessCommandQueue();
+
                     }
                     catch (JsonReaderException)
                     {
                         Write(new CommandParseFailure
-                            {
-                                Body = line
-                            }, 
+                        {
+                            Body = line
+                        },
                             streamKernelCommand?.Id ?? -1);
                     }
                 }
+                _cancellationSource.Dispose();
             });
         }
 
