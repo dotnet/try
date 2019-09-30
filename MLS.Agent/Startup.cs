@@ -136,7 +136,6 @@ namespace MLS.Agent
                     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
                     {
                         MediaTypeNames.Application.Octet,
-                        WasmMediaTypeNames.Application.Wasm
                     });
                 });
 

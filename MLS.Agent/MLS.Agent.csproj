@@ -60,6 +60,7 @@
     <PackageReference Include="Markdig" Version="0.17.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview7.19365.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.0.0-rc1.19457.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview7.19365.7" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.4" PrivateAssets="all" />
     <PackageReference Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
@@ -113,7 +114,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\MLS.PackageTool\MLS.PackageTool.csproj" />
-    <EmbeddedResource Include="..\MLS.PackageTool\Program.cs" />
+    <EmbeddedResource Include="..\MLS.PackageTool\Program.cs">
+      <LogicalName>MLS.Agent.Program.cs</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
       <LogicalName>demo.zip</LogicalName>
     </EmbeddedResource>

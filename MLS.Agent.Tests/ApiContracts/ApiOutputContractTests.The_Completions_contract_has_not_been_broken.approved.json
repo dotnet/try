@@ -425,7 +425,7 @@
       "sortText": "SetOut",
       "insertText": "SetOut",
       "documentation": {
-        "value": "Sets the System.Console.Out  property to the specified System.IO.TextWriter  object.",
+        "value": "Sets the System.Console.Out  property to target the System.IO.TextWriter  object.",
         "isTrusted": false
       }
     },
