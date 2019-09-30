@@ -128,10 +128,56 @@ namespace WorkspaceServer.Tests.Kernel
             var events = text.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries)
                 .Select(JObject.Parse).ToList();
 
+            
             events.Should()
                 .Contain(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived))
                 .And
                 .Contain(e => e["eventType"].Value<string>() == nameof(CommandFailed));
+        }
+
+        [Fact]
+        public async Task Kernel_client_surfaces_kernelBusy_and_kernelIdle_events_for_each_command()
+        {
+            var kernel = new CSharpKernel();
+
+            var input = new MemoryStream();
+            var writer = new StreamWriter(input, Encoding.UTF8);
+            writer.WriteMessage(new SubmitCode(@"var a = 12;"), 1);
+            writer.WriteMessage(new SubmitCode(@"var b = 12;"), 2);
+            writer.WriteMessage(new Quit(), 3);
+            writer.Flush();
+
+            input.Position = 0;
+
+            var output = new MemoryStream();
+
+            var streamKernel = new KernelStreamClient(kernel,
+                new StreamReader(input),
+                new StreamWriter(output));
+
+            var task = streamKernel.Start();
+            await task;
+
+            output.Position = 0;
+            var reader = new StreamReader(output, Encoding.UTF8);
+
+            var text = reader.ReadToEnd();
+            var events = text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(JObject.Parse).ToList();
+
+            var idOneEvents = events.Where(e => e["id"].Value<int>() == 1);
+
+            var idTwoEvents = events.Where(e => e["id"].Value<int>() == 2);
+
+            idOneEvents.Should()
+                .Contain(e => e["eventType"].Value<string>() == nameof(KernelBusy))
+                .And
+                .Contain(e => e["eventType"].Value<string>() == nameof(KernelIdle));
+
+            idTwoEvents.Should()
+                .Contain(e => e["eventType"].Value<string>() == nameof(KernelBusy))
+                .And
+                .Contain(e => e["eventType"].Value<string>() == nameof(KernelIdle));
         }
 
         [Fact]
