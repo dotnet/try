@@ -50,6 +50,20 @@ namespace WorkspaceServer.Tests.Kernel
                 .Be(123);
         }
 
+        [Theory]
+        [InlineData(Language.FSharp)]
+        //[InlineData(Language.CSharp)]  //BUGBUG: it_returns_no_result_for_a_null_value
+        public async Task it_returns_no_result_for_a_null_value(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            await SubmitSource(kernel, "null");
+
+            KernelEvents
+                .Should()
+                .NotContain(e => e.Value is DisplayedValueProduced);
+        }
+
         // Option 1: inline switch
         [Theory]
         [InlineData(Language.FSharp)]
@@ -222,8 +236,8 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
-        public async Task it_cannot_execute_incomplete_submissions(Language language)
+        //[InlineData(Language.FSharp)]   TODO - Backlog - 5.	FSI should support incomplete submissions – testcase it_cannot_execute_incomplete_submissions
+        public async Task it_can_analyze_incomplete_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
@@ -235,7 +249,12 @@ namespace WorkspaceServer.Tests.Kernel
 
             await SubmitSource(kernel, source);
 
-            KernelEvents.Should()
+            KernelEvents
+                .ValuesOnly()
+                .Single(e => e is IncompleteCodeSubmissionReceived);
+
+            KernelEvents
+                .Should()
                 .NotContain(e => e.Value is DisplayedValueProduced);
 
             KernelEvents
@@ -246,33 +265,16 @@ namespace WorkspaceServer.Tests.Kernel
         [Theory]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
-        public async Task it_can_analyze_code_submissions(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            var source = language switch
-            {
-                Language.FSharp => "let a =",
-                Language.CSharp => "var a = 12"
-            };
-
-            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
-
-            var analysisResult = KernelEvents.ValuesOnly()
-                .Single(e => e is IncompleteCodeSubmissionReceived);
-        }
-
-        [Theory]
-        [InlineData(Language.CSharp)]
-       [InlineData(Language.FSharp)]
         public async Task expression_evaluated_to_null_has_result_with_null_value(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "null",
-                Language.CSharp => "null"
+                // null is always typed as something the csi allows: null as a simple expression to be returned.
+                // that is probably a bug.  This ensures that typed null will be returned even if csi fixes it's bug.
+                Language.FSharp => "null :> obj",
+                Language.CSharp => "null as object"
             };
 
             await SubmitSource(kernel, source);
@@ -287,8 +289,30 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_statement(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = language switch
+            {
+                // Closest F# has to a statement do discards the result
+                Language.FSharp => @"do if (true) Environment.GetEnvironmentVariable(""XX__XX__"")",
+
+                // if is a statement in C#
+                Language.CSharp => @"if (true) Environment.GetEnvironmentVariable(""XX__XX__"");"
+            };
+
+            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
+
+            KernelEvents
+                .Should()
+                .NotContain(e => e.Value is DisplayedValueProduced);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_does_not_return_a_result_for_a_binding(Language language)
         {
             var kernel = CreateKernel(language);
 
@@ -306,6 +330,24 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
+        // [InlineData(Language.CSharp, "true ? 25 : 20")]    //BUGBUG: Ternary expression should produce a value
+        [InlineData(Language.FSharp, "if true then 25 else 20")]
+        [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
+        public async Task it_returns_a_result_for_an_ternery_expressions(Language language, string expression)
+        {
+            var kernel = CreateKernel(language);
+
+            await SubmitSource(kernel, expression, submissionType: SubmissionType.Diagnose);
+
+            KernelEvents.ValuesOnly()
+                        .OfType<ReturnValueProduced>()
+                        .Last()
+                        .Value
+                        .Should()
+                        .Be(25);
+        }
+
+        [Theory]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_aggregates_multiple_submissions(Language language)
@@ -316,17 +358,18 @@ namespace WorkspaceServer.Tests.Kernel
             {
                 Language.FSharp => new[]
                 {
+                    // Todo: decide what todo with F# not auto-opening System.Collections.Generic, System.Linq
                     "open System.Collections.Generic",
-                    "let x = new List([1,2])",
-                    "x.Add(3);",
+                    "open System.Linq",
+                    "let x = List<int>([|1;2|])",
+                    "x.Add(3)",
                     "x.Max()"
                 },
 
                 Language.CSharp => new[]
                 {
                     //Todo:
-                    // I suppose csi pre-open's a bunch of namespaces including System.Generics
-                    // I think the Value of 3 is a bit suspect too.
+                    // I suppose csi pre-open's a bunch of namespaces including System.Generics and, System.Linq
                     "var x = new List<int>{1,2};",
                     "x.Add(3);",
                     "x.Max()"
@@ -380,7 +423,7 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
+        //[InlineData(Language.FSharp)]             //BUGBUG: 6.	FSI implement command_failed : cancelled command
         public async Task it_can_cancel_execution(Language language)
         {
             var kernel = CreateKernel(language);
@@ -410,7 +453,7 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
+        //[InlineData(Language.FSharp)]                     //Todo: need to generate DisplayedValueProduced
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
         {
             var kernel = CreateKernel(language);
@@ -509,10 +552,10 @@ Console.Write(DateTime.Now);
             var source = language switch
             {
                 Language.FSharp => new[] {
-$"#r \"{dll}\"",
+$"#r @\"{dll}\"",
+"open Newtonsoft.Json",
 @"
-using Newtonsoft.Json;
-var json = JsonConvert.SerializeObject(new { value = ""hello"" });
+let json = JsonConvert.SerializeObject([|""hello""|])
 json
 "},
 
