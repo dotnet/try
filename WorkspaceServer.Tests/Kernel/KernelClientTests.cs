@@ -128,7 +128,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task Kernel_client_surfaces_json_errors()
         {
-           var streamKernel = CreateClient(new NullKernel("Fake"));
+           var streamKernel = CreateClient(new FakeKernel("Fake"));
             SendOnClient("{ hello"
                 , new Quit());
             var task = streamKernel.Start();

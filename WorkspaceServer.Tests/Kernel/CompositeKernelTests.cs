@@ -53,7 +53,7 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
-                new NullKernel("fake")
+                new FakeKernel("fake")
                 {
                     Handle = context =>
                     {
@@ -94,7 +94,7 @@ x"));
             var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
-                new NullKernel("fake")
+                new FakeKernel("fake")
                 {
                     Handle = context =>
                     {
@@ -135,7 +135,7 @@ x"));
             var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
-                new NullKernel("fake")
+                new FakeKernel("fake")
                 {
                     Handle = context =>
                     {
@@ -171,7 +171,7 @@ x"));
             var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
-                new NullKernel("fake")
+                new FakeKernel("fake")
                 {
                     Handle = context =>
                     {
