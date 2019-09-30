@@ -8,9 +8,9 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
-    public class FakeKernel : KernelBase
+    public class NullKernel : KernelBase
     {
-        public FakeKernel([CallerMemberName] string name = null)
+        public NullKernel([CallerMemberName] string name = null)
         {
             Name = name;
         }

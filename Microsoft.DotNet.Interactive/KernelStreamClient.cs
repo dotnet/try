@@ -28,8 +28,6 @@ namespace Microsoft.DotNet.Interactive
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
-        private readonly object _currentCommandLock = new object();
-        private StreamKernelCommand _currentCommand;
         private CancellationTokenSource _cancellationSource;
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
@@ -38,63 +36,16 @@ namespace Microsoft.DotNet.Interactive
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _output = output ?? throw new ArgumentNullException(nameof(output));
 
-            _kernel.KernelEvents.Subscribe(async e =>
-            {
-                switch (e)
-                {
-                    case KernelIdle _:
-                        {
-                            lock (_currentCommandLock)
-                            {
-                                if (_currentCommand != null)
-                                {
-                                    Write(e, _currentCommand.Id);
-                                    _currentCommand = null;
-                                }
-                            }
-
-                            await ProcessCommandQueue();
-                        }
-                        break;
-                    default:
-                        lock (_currentCommandLock)
-                        {
-                            if (_currentCommand != null)
-                            {
-                                Write(e, _currentCommand.Id);
-                            }
-                        }
-
-                        break;
-                }
-
-            });
-        }
-
-        private async Task ProcessCommandQueue()
-        {
-            IKernelCommand kernelCommand = null;
-            lock (_currentCommandLock)
-            {
-                if (_currentCommand == null)
-                {
-                    if (_commandQueue.TryDequeue(out var commandToExecute))
-                    {
-                        _currentCommand = commandToExecute.streamingCommand;
-                        kernelCommand = commandToExecute.kernelCommand;
-                    }
-                }
-            }
-
-            if (_currentCommand?.CommandType == nameof(Quit))
-            {
-                _cancellationSource.Cancel();
-            }
-
-            if (kernelCommand != null)
-            {
-               await _kernel.SendAsync(kernelCommand);
-            }
+            _kernel.KernelEvents.Subscribe(e =>
+           {
+               switch (e)
+               {
+                   case KernelBusy _:
+                   case KernelIdle _:
+                       Write(e, -1);
+                       break;
+               }
+           });
         }
 
         public Task Start()
@@ -125,9 +76,11 @@ namespace Microsoft.DotNet.Interactive
 
                         if (streamKernelCommand.CommandType == nameof(Quit))
                         {
-                            _commandQueue.Enqueue((streamKernelCommand, null));
+                            _cancellationSource.Cancel();
+                            continue;
                         }
-                        else if (command == null)
+
+                        if (command == null)
                         {
                             Write(new CommandNotRecognized
                             {
@@ -136,14 +89,20 @@ namespace Microsoft.DotNet.Interactive
                                 streamKernelCommand.Id);
                             continue;
                         }
-                        else
+
+                        var result = await _kernel.SendAsync(command);
+                        result.KernelEvents.Subscribe(e =>
                         {
-
-                            _commandQueue.Enqueue((streamKernelCommand, command));
-                        }
-
-                        await ProcessCommandQueue();
-
+                            switch (e)
+                            {
+                                case KernelBusy _:
+                                case KernelIdle _:
+                                    break;
+                                default:
+                                    Write(e, streamKernelCommand.Id);
+                                    break;
+                            }
+                        });
                     }
                     catch (JsonReaderException)
                     {
