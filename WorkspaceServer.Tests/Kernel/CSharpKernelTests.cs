@@ -435,7 +435,13 @@ json
 
             events
                 .Should()
-                .ContainSingle(e => e is CommandHandled);
+                .ContainSingle(e => e is CommandHandled &&
+                                    e.As<CommandHandled>().Command is AddNugetPackage);
+
+            events
+                .Should()
+                .ContainSingle(e => e is CommandHandled &&
+                                    e.As<CommandHandled>().Command is SubmitCode);
         }
 
         [Fact]

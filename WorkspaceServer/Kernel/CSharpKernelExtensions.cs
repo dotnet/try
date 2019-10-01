@@ -63,6 +63,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
                 var addPackage = new AddNugetPackage(package);
+
                 addPackage.Handler = async context =>
                 {
                     var message = $"Installing package {package.PackageName}";
@@ -77,9 +78,9 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                     var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
 
-                    while ((await Task.WhenAny(Task.Delay(1000), installTask)) != installTask)
+                    while (await Task.WhenAny(Task.Delay(1000), installTask) != installTask)
                     {
-                        message += "...";
+                        message += ".";
                         context.Publish(new DisplayedValueUpdated(message, key));
                     }
 
@@ -101,11 +102,13 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                         kernel.AddMetadataReferences(result.References);
 
-                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}", context.Command));
+                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
+                                                                   context.Command));
+
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
                         var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
-                        await pipelineContext.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
                     }
                     else
                     {
@@ -113,6 +116,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         context.Publish(new DisplayedValueProduced(result.DetailedErrors, context.Command));
                     }
 
+                    context.Complete();
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);

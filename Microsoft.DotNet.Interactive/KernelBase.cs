@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Interactive
                 submitCode.Code.Split(new[] { "\r\n", "\n" },
                                       StringSplitOptions.None));
 
-            var unhandledLines = new List<string>();
+            var nonDirectiveLines = new List<string>();
 
             while (lines.Count > 0 && !context.IsComplete)
             {
@@ -179,7 +179,7 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else 
                 {
-                    unhandledLines.Add(currentLine);
+                    nonDirectiveLines.Add(currentLine);
                 }
             }
 
@@ -187,9 +187,9 @@ namespace Microsoft.DotNet.Interactive
 
             void FlushSubmission()
             {
-                if (unhandledLines.Any())
+                if (nonDirectiveLines.Any())
                 {
-                    var code = string.Join(Environment.NewLine, unhandledLines);
+                    var code = string.Join(Environment.NewLine, nonDirectiveLines);
 
                     if (!string.IsNullOrWhiteSpace(code))
                     {
@@ -201,7 +201,7 @@ namespace Microsoft.DotNet.Interactive
                                 }));
                     }
 
-                    unhandledLines.Clear();
+                    nonDirectiveLines.Clear();
                 }
             }
 
@@ -209,7 +209,10 @@ namespace Microsoft.DotNet.Interactive
             {
                 foreach (var operation in operations)
                 {
-                    await operation.operation();
+                    if (!context.IsComplete)
+                    {
+                        await operation.operation();
+                    }
                 }
             }
             else
