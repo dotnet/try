@@ -61,7 +61,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e.Value is DisplayedValueProduced);
+                .NotContain(e => e.Value is ReturnValueProduced);
         }
 
         // Option 1: inline switch
@@ -259,7 +259,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => "var a ="
             };
 
-            await SubmitCode(kernel, source);
+            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
 
             KernelEvents
                 .ValuesOnly()
@@ -267,11 +267,55 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
+                .Contain(e => e.Value is IncompleteCodeSubmissionReceived);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        //[InlineData(Language.FSharp)]                     // Todo: FSI - returns a value
+        public async Task it_can_analyze_complete_submissions(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = language switch
+            {
+                Language.FSharp => "25",
+                Language.CSharp => "25"
+            };
+
+            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
+
+            KernelEvents
+                .Should()
+                .NotContain(e => e.Value is ReturnValueProduced);
+
+            KernelEvents
+                .Should()
+                .Contain(e => e.Value is CompleteCodeSubmissionReceived);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        //[InlineData(Language.FSharp)]                     // Todo: FSI - returns a value
+        public async Task it_can_analyze_complete_stdio_submissions(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = language switch
+            {
+                Language.FSharp => "Console.WriteLine(\"Hello\")",
+                Language.CSharp => "Console.WriteLine(\"Hello\")"
+            };
+
+            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
+
+            KernelEvents
+                .Should()
                 .NotContain(e => e.Value is DisplayedValueProduced);
 
             KernelEvents
                 .Should()
-                .Contain(e => e.Value is CommandFailed);
+                .Contain(e => e.Value is CompleteCodeSubmissionReceived);
         }
 
         [Theory]
@@ -313,7 +357,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => @"if (true) Environment.GetEnvironmentVariable(""XX__XX__"");"
             };
 
-            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
+            await SubmitCode(kernel, source, submissionType: SubmissionType.Run);
 
             KernelEvents
                 .Should()
@@ -333,7 +377,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => "var x = 1;"
             };
 
-            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
+            await SubmitCode(kernel, source);
 
             KernelEvents
                 .Should()
@@ -341,14 +385,16 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
-        //[InlineData(Language.CSharp, "true ? 25 : 20")]         // Todo: ternery expressions in C# do not raise ReturnValueProduced ??? 
+        [InlineData(Language.CSharp, "true ? 25 : 20")]                                   // Todo: ternery expressions in C# do not raise ReturnValueProduced ??? 
         [InlineData(Language.FSharp, "if true then 25 else 20")]
         [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
-        public async Task it_returns_a_result_for_an_ternery_expressions(Language language, string expression)
+        [InlineData(Language.CSharp, "true switch { true => 25, false => 20 }")]            // Todo: switch expressions in C# do not raise ReturnValueProduced ??? 
+        [InlineData(Language.FSharp, "match true with | true -> 25; | false -> 20")]
+        public async Task it_returns_a_result_for_a_if_expressions(Language language, string expression)
         {
             var kernel = CreateKernel(language);
 
-            await SubmitCode(kernel, expression, submissionType: SubmissionType.Diagnose);
+            await SubmitCode(kernel, expression);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -357,6 +403,7 @@ namespace WorkspaceServer.Tests.Kernel
                         .Should()
                         .Be(25);
         }
+
 
         [Theory]
         [InlineData(Language.CSharp)]
