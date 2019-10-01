@@ -133,7 +133,7 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode("display(x); display(x + 1); display(x + 2);"), 1);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds()))
+                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds()))
                 .ToEnumerable()
                 .Select(e => e.ToString(Formatting.None))
                 .ToList();
