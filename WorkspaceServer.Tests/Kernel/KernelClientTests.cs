@@ -125,9 +125,9 @@ namespace WorkspaceServer.Tests.Kernel
 
 
         [Fact]
-        public void Kernel_can_be_interacted_using_kernel_client()
+        public async Task Kernel_can_be_interacted_using_kernel_client()
         {
-            _kernelClient.Start();
+            await _kernelClient.Start();
 
             _io.WriteToInput(new SubmitCode(@"var x = 123;"), 0);
             _io.WriteToInput(new SubmitCode("display(x); display(x + 1); display(x + 2);"), 1);
@@ -151,7 +151,8 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task Kernel_produces_only_commandHandled_for_root_command()
         {
-            _kernelClient.Start();
+            await _kernelClient.Start();
+
             _io.WriteToInput(new SubmitCode("display(1543); display(4567);"), 0);
 
             var events = _events
@@ -164,9 +165,9 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public void Kernel_client_surfaces_json_errors()
+        public async Task Kernel_client_surfaces_json_errors()
         {
-            _kernelClient.Start();
+            await _kernelClient.Start();
 
             _io.WriteToInput("{ hello");
 
@@ -182,7 +183,7 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task Kernel_client_surfaces_code_submission_Errors()
         {
-            _kernelClient.Start();
+            await _kernelClient.Start();
 
             _io.WriteToInput(new SubmitCode(@"var a = 12"), 0);
 
@@ -199,7 +200,8 @@ namespace WorkspaceServer.Tests.Kernel
         [Fact]
         public async Task Kernel_can_pound_r_nuget_using_kernel_client()
         {
-            _kernelClient.Start();
+            await _kernelClient.Start();
+
             _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
             var events = _events
