@@ -138,8 +138,8 @@ namespace Microsoft.DotNet.Interactive
         {
             loadExtension.Handler = async context =>
             {
-                var kernelextensionLoader = new KernelExtensionLoader();
-                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, invocationContext);
+                var kernelExtensionLoader = new KernelExtensionLoader();
+                await kernelExtensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, invocationContext);
             };
 
             await next(loadExtension, invocationContext);
@@ -349,11 +349,11 @@ namespace Microsoft.DotNet.Interactive
 
             _commandQueue.Enqueue(operation);
 
-            DoTheThing(_commandQueue);
+            ProcessCommandQueue(_commandQueue);
 
             return tcs.Task;
 
-            void DoTheThing(ConcurrentQueue<KernelOperation> commandQueue)
+            void ProcessCommandQueue(ConcurrentQueue<KernelOperation> commandQueue)
             {
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
@@ -363,7 +363,7 @@ namespace Microsoft.DotNet.Interactive
                     {
                         await ExecuteCommand(currentOperation);
 
-                        DoTheThing(commandQueue);
+                        ProcessCommandQueue(commandQueue);
                     }, cancellationToken).ConfigureAwait(false);
                 }
                 else

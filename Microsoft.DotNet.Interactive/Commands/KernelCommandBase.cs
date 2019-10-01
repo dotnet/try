@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -15,9 +16,13 @@ namespace Microsoft.DotNet.Interactive.Commands
         [JsonIgnore]
         public IKernelCommand Parent { get; }
 
+        [JsonIgnore]
+        public IDictionary<string, object> Properties { get; }
+
         protected KernelCommandBase()
         {
             Parent = KernelInvocationContext.Current?.Command;
+            Properties = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         public async Task InvokeAsync(KernelInvocationContext context)
@@ -29,5 +34,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 
             await Handler(context);
         }
+
+     
     }
 }
