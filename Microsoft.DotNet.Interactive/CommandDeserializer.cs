@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive
                .ToDictionary(t => t.Name, t => t, StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public IKernelCommand Dispatch(string commandType, JToken body)
+        public IKernelCommand Deserialize(string commandType, JToken body)
         {
             if (_map.TryGetValue(commandType, out var mappedCommand))
             {

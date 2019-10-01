@@ -1,4 +1,4 @@
-﻿{"id":0,"eventType":"CodeSubmissionReceived","event":{"code":"var x = 123;","value":"var x = 123;","command":{"code":"var x = 123;","targetKernelName":null,"submissionType":0}}}
+{"id":0,"eventType":"CodeSubmissionReceived","event":{"code":"var x = 123;","value":"var x = 123;","command":{"code":"var x = 123;","targetKernelName":null,"submissionType":0}}}
 {"id":1,"eventType":"CodeSubmissionReceived","event":{"code":"display(x); display(x + 1); display(x + 2);","value":"display(x); display(x + 1); display(x + 2);","command":{"code":"display(x); display(x + 1); display(x + 2);","targetKernelName":null,"submissionType":0}}}
 {"id":0,"eventType":"CompleteCodeSubmissionReceived","event":{"code":"var x = 123;","command":{"code":"var x = 123;","targetKernelName":null,"submissionType":0}}}
 {"id":1,"eventType":"CompleteCodeSubmissionReceived","event":{"code":"display(x); display(x + 1); display(x + 2);","command":{"code":"display(x); display(x + 1); display(x + 2);","targetKernelName":null,"submissionType":0}}}

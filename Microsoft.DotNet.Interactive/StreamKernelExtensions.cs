@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -27,6 +28,20 @@ namespace Microsoft.DotNet.Interactive
             };
 
             writer.WriteLine(JsonConvert.SerializeObject(message, _jsonSerializerSettings));
+            writer.Flush();
+            return message.Id;
+        }
+
+        public static async Task<int> WriteMessageAsync(this StreamWriter writer, IKernelCommand command, int? correlationId = null)
+        {
+            var message = new StreamKernelCommand
+            {
+                Id = correlationId ?? Interlocked.Increment(ref _id),
+                CommandType = command.GetType().Name,
+                Command = command
+            };
+
+            await writer.WriteLineAsync(JsonConvert.SerializeObject(message, _jsonSerializerSettings));
             writer.Flush();
             return message.Id;
         }
