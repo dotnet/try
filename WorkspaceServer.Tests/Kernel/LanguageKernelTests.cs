@@ -52,7 +52,6 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.FSharp)]
-        //[InlineData(Language.CSharp)]                     // Todo: it_returns_no_result_for_a_null_value
         public async Task it_returns_no_result_for_a_null_value(Language language)
         {
             var kernel = CreateKernel(language);
@@ -344,6 +343,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_statement(Language language)
         {
             var kernel = CreateKernel(language);
@@ -351,10 +351,10 @@ namespace WorkspaceServer.Tests.Kernel
             var source = language switch
             {
                 // Closest F# has to a statement do discards the result
-                Language.FSharp => @"do if (true) Environment.GetEnvironmentVariable(""XX__XX__"")",
+                Language.FSharp => @"do 1",
 
                 // if is a statement in C#
-                Language.CSharp => @"if (true) Environment.GetEnvironmentVariable(""XX__XX__"");"
+                Language.CSharp => @"var x = 1;"
             };
 
             await SubmitCode(kernel, source, submissionType: SubmissionType.Run);
@@ -362,6 +362,10 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents
                 .Should()
                 .NotContain(e => e.Value is DisplayedValueProduced);
+
+            KernelEvents
+                .Should()
+                .NotContain(e => e.Value is ReturnValueProduced);
         }
 
         [Theory]
@@ -382,6 +386,10 @@ namespace WorkspaceServer.Tests.Kernel
             KernelEvents
                 .Should()
                 .NotContain(e => e.Value is DisplayedValueProduced);
+
+            KernelEvents
+                .Should()
+                .NotContain(e => e.Value is ReturnValueProduced);
         }
 
         [Theory]
@@ -477,15 +485,15 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI implement command_failed : cancelled command
+        //[InlineData(Language.FSharp)]                     // Todo: FSI interrupt command_failed : cancelled command
         public async Task it_can_cancel_execution(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "System.Threading.Thread.Sleep(9000)",
-                Language.CSharp => "System.Threading.Thread.Sleep(9000);"
+                Language.FSharp => "System.Threading.Thread.Sleep(3000)",
+                Language.CSharp => "System.Threading.Thread.Sleep(3000);"
             };
 
             var submitCodeCommand = new SubmitCode(source);
@@ -595,7 +603,7 @@ Console.Write(DateTime.Now);
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                   //Todo: F# fails no jsonified return value
+        // [InlineData(Language.FSharp)]                   //Todo: F# fails no jsonified return value
         public async Task it_can_load_assembly_references_using_r_directive_single_submission(Language language)
         {
             var kernel = CreateKernel(language);
@@ -607,7 +615,7 @@ Console.Write(DateTime.Now);
             {
                 Language.FSharp => string.Format(@"#r ""{0}""
 open Newtonsoft.Json
-let json = JsonConvert.SerializeObject([|""hello""|])
+let json = JsonConvert.SerializeObject( struct {{| value = ""hello"" |}} )
 json", dllPath),
 
                 Language.CSharp => string.Format(@"#r ""{0}""
@@ -644,19 +652,17 @@ json", dllPath)
             {
                 Language.FSharp => new[] {
 $"#r \"{dllPath}\"",
-@"
-open Newtonsoft.Json
-let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )",
+"open Newtonsoft.Json",
+@"let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )",
 "json"
 },
 
                 Language.CSharp => new[] {
 $"#r \"{dllPath}\"",
-@"
-using Newtonsoft.Json;
-var json = JsonConvert.SerializeObject(new { value = ""hello"" });
-json
-"}
+"using Newtonsoft.Json;",
+@"var json = JsonConvert.SerializeObject(new { value = ""hello"" });",
+"json"
+}
             };
 
             await SubmitCode(kernel, source);
