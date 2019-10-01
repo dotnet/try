@@ -30,7 +30,6 @@ namespace WorkspaceServer.Tests.Kernel
         private readonly KernelStreamClient _kernelClient;
         private readonly IObservable<JObject> _events;
         private readonly IOStreams _io;
-        private int _displayIdSeed;
 
         private class IOStreams : IInputTextStream, IOutputTextStream
         {
@@ -99,12 +98,12 @@ namespace WorkspaceServer.Tests.Kernel
 
         public KernelClientTests()
         {
-            _displayIdSeed = 0;
+            var displayIdSeed = 0;
                _configuration = new Configuration()
                 .UsingExtension("json");
             _configuration = _configuration.SetInteractive(Debugger.IsAttached);
             Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator =
-                () => Interlocked.Increment(ref _displayIdSeed).ToString();
+                () => Interlocked.Increment(ref displayIdSeed).ToString();
             var kernel = new CompositeKernel
             {
                 new CSharpKernel()
@@ -134,7 +133,7 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode("display(x); display(x + 1); display(x + 2);"), 1);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds()))
+                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds()))
                 .ToEnumerable()
                 .Select(e => e.ToString(Formatting.None))
                 .ToList();
@@ -156,7 +155,7 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode("display(1543); display(4567);"), 0);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds())) 
+                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds())) 
                 .ToEnumerable()
                 .ToList();
 
@@ -188,14 +187,13 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode(@"var a = 12"), 0);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds()))
+                .TakeWhile(e => e["eventType"].Value<string>() != nameof(CommandFailed))
+                .Timeout(DateTimeOffset.Now.Add(10.Seconds()))
                 .ToEnumerable()
                 .ToList();
 
             events.Should()
-                .Contain(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived))
-                .And
-                .Contain(e => e["eventType"].Value<string>() == nameof(CommandFailed));
+                .Contain(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived));
         }
 
         [Fact]
@@ -205,7 +203,8 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(30.Seconds()))
+                .TakeWhile(e => e["eventType"].Value<string>() != nameof(CommandHandled))
+                .Timeout(DateTimeOffset.Now.Add(1.Minutes()))
                 .ToEnumerable()
                 .ToList();
 
