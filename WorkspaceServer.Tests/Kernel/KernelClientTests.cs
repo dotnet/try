@@ -4,42 +4,108 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using Assent;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Tests;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using WorkspaceServer.Kernel;
 using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    public class KernelClientTests
+    
+    public class KernelClientTests : IDisposable
     {
-
         private readonly Configuration _configuration;
+        private readonly KernelStreamClient _kernelClient;
+        private readonly IObservable<JObject> _events;
+        private readonly IOStreams _io;
+        private int _displayIdSeed;
 
-        private MemoryStream _input;
-        private MemoryStream _output;
+        private class IOStreams : IInputTextStream, IOutputTextStream
+        {
+            private static readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            private readonly ReplaySubject<string> _input;
+            private readonly ReplaySubject<string> _output;
+
+            public IOStreams()
+            {
+                _input = new ReplaySubject<string>();
+                _output = new ReplaySubject<string>();
+            }
+
+            public IObservable<string> OutputStream => _output;
+
+            IDisposable IObservable<string>.Subscribe(IObserver<string> observer)
+            {
+                return _input.Subscribe(observer);
+            }
+
+            Task IInputTextStream.Start(CancellationToken token)
+            {
+                return Task.CompletedTask;
+            }
+
+            void IOutputTextStream.Write(string text)
+            {
+                Task.Run(() => _output.OnNext(text));
+            }
+
+            public void WriteToInput(IKernelCommand command, int correlationId)
+            {
+                var message = PackAsStreamKernelCommand(command, correlationId);
+                _input.OnNext(JsonConvert.SerializeObject(message, _jsonSerializerSettings));
+            }
+
+            public static StreamKernelCommand PackAsStreamKernelCommand(IKernelCommand kernelCommand, int correlationId)
+            {
+                return new StreamKernelCommand
+                {
+                    Id = correlationId,
+                    CommandType = kernelCommand.GetType().Name,
+                    Command = kernelCommand
+                };
+            }
+
+            public static StreamKernelEvent PasAsStreamKernelEvent(IKernelEvent kernelEvent, int correlationId)
+            {
+                return new StreamKernelEvent
+                {
+                    Id = correlationId,
+                    EventType = kernelEvent.GetType().Name,
+                    Event = kernelEvent
+                };
+            }
+
+            public void WriteToInput(string rawMessage)
+            {
+                Task.Run(() => _input.OnNext(rawMessage));
+            }
+        }
 
         public KernelClientTests()
         {
-            _configuration = new Configuration()
+            _displayIdSeed = 0;
+               _configuration = new Configuration()
                 .UsingExtension("json");
             _configuration = _configuration.SetInteractive(Debugger.IsAttached);
-
-
-        }
-
-        private KernelStreamClient CreateClient(IKernel kernel = null)
-        {
-            kernel ??= new CompositeKernel
+            Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator =
+                () => Interlocked.Increment(ref _displayIdSeed).ToString();
+            var kernel = new CompositeKernel
             {
                 new CSharpKernel()
                     .UseKernelHelpers()
@@ -47,107 +113,84 @@ namespace WorkspaceServer.Tests.Kernel
                     .UseDefaultRendering()
             };
 
-            _input = new MemoryStream();
-
-            _output = new MemoryStream();
-
-            return new KernelStreamClient(kernel,
-                new StreamReader(_input),
-                new StreamWriter(_output));
+          _io = new IOStreams();
+            _kernelClient = new KernelStreamClient(
+                kernel,
+                _io,
+                _io);
+            _events = _io.OutputStream
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(JObject.Parse);
         }
 
-        private void SendOnClient(params IKernelCommand[] commands)
-        {
-            var writer = new StreamWriter(_input, Encoding.UTF8);
-            for (var i = 0; i < commands.Length; i++)
-            {
-                writer.WriteMessage(commands[i], i);
-            }
 
-            writer.Flush();
-            _input.Position = 0;
-        }
-
-        private void SendOnClient(string rawMessage, params IKernelCommand[] commands)
-        {
-            var writer = new StreamWriter(_input, Encoding.UTF8);
-            writer.WriteLine(rawMessage);
-            for (var i = 0; i < commands.Length; i++)
-            {
-                writer.WriteMessage(commands[i], i);
-            }
-
-            writer.Flush();
-            _input.Position = 0;
-        }
-
-        private string ReadAllOutput()
-        {
-            _output.Position = 0;
-            var reader = new StreamReader(_output, Encoding.UTF8);
-            return reader.ReadToEnd();
-        }
-
-        private IEnumerable<JObject> ReadAllOutputAsJson()
-        {
-            var text = ReadAllOutput();
-            return text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(JObject.Parse).ToList();
-        }
 
         [Fact]
-        public async Task Kernel_can_be_interacted_using_kernel_client()
+        public void Kernel_can_be_interacted_using_kernel_client()
         {
-            var streamKernel = CreateClient();
-            SendOnClient(
-                new SubmitCode(@"var x = 123;"),
-                new SubmitCode("display(x); display(x + 1); display(x + 2);"),
-                new Quit());
+            _kernelClient.Start();
 
-            await streamKernel.Start();
+            _io.WriteToInput(new SubmitCode(@"var x = 123;"), 0);
+            _io.WriteToInput(new SubmitCode("display(x); display(x + 1); display(x + 2);"), 1);
 
-            this.Assent(ReadAllOutput(), _configuration);
+            var events = _events
+                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds()))
+                .ToEnumerable()
+                .Select(e => e.ToString(Formatting.None))
+                .ToList();
+
+            var expectedEvents = new List<string> {
+                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).ToJObject().ToString(Formatting.None),
+                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode("display(x); display(x + 1); display(x + 2);")), 1).ToJObject().ToString(Formatting.None)
+            };
+
+            events.Should()
+                .ContainInOrder(expectedEvents);
         }
 
 
         [Fact]
         public async Task Kernel_produces_only_commandHandled_for_root_command()
         {
-            var streamKernel = CreateClient();
-            SendOnClient(
-                new SubmitCode("display(1543); display(4567);"),
-                new Quit());
+            _kernelClient.Start();
+            _io.WriteToInput(new SubmitCode("display(1543); display(4567);"), 0);
 
-            await streamKernel.Start();
+            var events = _events
+                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds())) 
+                .ToEnumerable()
+                .ToList();
 
-            var events = ReadAllOutputAsJson();
             events.Should()
                 .ContainSingle(e => e["eventType"].Value<string>() == nameof(CommandHandled));
         }
 
         [Fact]
-        public async Task Kernel_client_surfaces_json_errors()
+        public void Kernel_client_surfaces_json_errors()
         {
-           var streamKernel = CreateClient(new FakeKernel("Fake"));
-            SendOnClient("{ hello"
-                , new Quit());
-            var task = streamKernel.Start();
-            await task;
+            _kernelClient.Start();
 
-            var text = ReadAllOutput();
-            this.Assent(text, _configuration);
+            _io.WriteToInput("{ hello");
+
+            var events = _events
+                .TakeUntil(e => e["eventType"].Value<string>() == nameof(CommandParseFailure))
+                .Timeout(DateTimeOffset.Now.Add(10.Seconds()))
+                .ToEnumerable()
+                .ToList();
+
+            this.Assent(string.Join("\n", events.Select(e => e.ToString(Formatting.None))), _configuration);
         }
 
         [Fact]
         public async Task Kernel_client_surfaces_code_submission_Errors()
         {
-            var streamKernel = CreateClient();
-            SendOnClient(new SubmitCode(@"var a = 12"),
-                new Quit());
+            _kernelClient.Start();
 
-            await streamKernel.Start();
+            _io.WriteToInput(new SubmitCode(@"var a = 12"), 0);
 
-            var events = ReadAllOutputAsJson();
+            var events = _events
+                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds()))
+                .ToEnumerable()
+                .ToList();
 
             events.Should()
                 .Contain(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived))
@@ -156,40 +199,22 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
-        public async Task Kernel_client_surfaces_kernelBusy_and_kernelIdle_events()
-        {
-            var streamKernel = CreateClient();
-            SendOnClient(
-                new SubmitCode(@"var a = 12;"),
-                new SubmitCode(@"var b = 12;"),
-            new Quit());
-
-            await streamKernel.Start();
-
-            var events = ReadAllOutputAsJson();
-
-            events.Select(e => e["eventType"].Value<string>())
-                .Should()
-                .ContainSingle(e => e == nameof(KernelBusy))
-                .And
-                .ContainSingle(e => e == nameof(KernelBusy))
-                .And
-                .StartWith(nameof(KernelBusy))
-                .And
-                .EndWith(nameof(KernelIdle));
-        }
-
-        [Fact]
         public async Task Kernel_can_pound_r_nuget_using_kernel_client()
         {
-            var streamKernel = CreateClient();
-            SendOnClient(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""),
-                new Quit());
+            _kernelClient.Start();
+            _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
-            await streamKernel.Start();
-            var events = ReadAllOutputAsJson();
+            var events = _events
+                .TakeUntil(DateTimeOffset.Now.Add(30.Seconds()))
+                .ToEnumerable()
+                .ToList();
 
             events.Should().Contain(e => e["eventType"].Value<string>() == nameof(NuGetPackageAdded));
+        }
+
+        public void Dispose()
+        {
+            _kernelClient.Dispose();
         }
     }
 }

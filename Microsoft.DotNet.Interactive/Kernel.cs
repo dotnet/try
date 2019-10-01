@@ -12,11 +12,13 @@ namespace Microsoft.DotNet.Interactive
 {
     public static class Kernel
     {
+        public static Func<string> DisplayIdGenerator { get; set; }
+
         public static DisplayedValue display(
             object value,
             string mimeType = HtmlFormatter.MimeType)
         {
-            var displayId = Guid.NewGuid().ToString();
+            var displayId = DisplayIdGenerator?.Invoke() ?? Guid.NewGuid().ToString();
 
             if (value is string)
             {
