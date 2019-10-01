@@ -40,7 +40,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel(language);
 
-            await SubmitSource(kernel, "123");
+            await SubmitCode(kernel, "123");
 
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
@@ -57,7 +57,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel(language);
 
-            await SubmitSource(kernel, "null");
+            await SubmitCode(kernel, "null");
 
             KernelEvents
                 .Should()
@@ -87,7 +87,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var kernel = CreateKernel(language);
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
@@ -108,7 +108,7 @@ namespace WorkspaceServer.Tests.Kernel
 [1;2;3;4]
 |> List.sum";
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .OfType<ReturnValueProduced>()
@@ -142,7 +142,7 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             var (failure, lastFailureIndex) = KernelEvents
                 .Select((t, pos) => (t.Value, pos))
@@ -198,7 +198,7 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .Where(x => x.GetType() != typeof(KernelIdle) && x.GetType() != typeof(KernelBusy))
@@ -233,7 +233,7 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .Where( x => x.GetType() != typeof(KernelIdle) && x.GetType() != typeof(KernelBusy) )
@@ -259,7 +259,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => "var a ="
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents
                 .ValuesOnly()
@@ -288,7 +288,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => "null as object"
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -313,7 +313,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => @"if (true) Environment.GetEnvironmentVariable(""XX__XX__"");"
             };
 
-            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
+            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
 
             KernelEvents
                 .Should()
@@ -333,7 +333,7 @@ namespace WorkspaceServer.Tests.Kernel
                 Language.CSharp => "var x = 1;"
             };
 
-            await SubmitSource(kernel, source, submissionType: SubmissionType.Diagnose);
+            await SubmitCode(kernel, source, submissionType: SubmissionType.Diagnose);
 
             KernelEvents
                 .Should()
@@ -348,7 +348,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateKernel(language);
 
-            await SubmitSource(kernel, expression, submissionType: SubmissionType.Diagnose);
+            await SubmitCode(kernel, expression, submissionType: SubmissionType.Diagnose);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -385,7 +385,7 @@ namespace WorkspaceServer.Tests.Kernel
                 }
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .OfType<ReturnValueProduced>()
@@ -416,7 +416,7 @@ Console.Write(""value two"");
 Console.Write(""value three"");",
             };
 
-            var kernelCommand = await SubmitSource(kernel, source);
+            var kernelCommand = await SubmitCode(kernel, source);
 
             KernelEvents
                 .ValuesOnly()
@@ -481,7 +481,7 @@ Console.Write(""value three"");
 5",
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                 .OfType<DisplayedValueProduced>()
@@ -519,7 +519,7 @@ Console.Write(DateTime.Now);
 5",
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             var events =
                 KernelEvents
@@ -569,7 +569,7 @@ var json = JsonConvert.SerializeObject(new {{ value = ""hello"" }});
 json", dllPath)
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -612,7 +612,7 @@ json
 "}
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -654,7 +654,7 @@ json
 "}
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -688,7 +688,7 @@ json
 "},
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
                         .Should()
@@ -744,7 +744,7 @@ json
                 Language.CSharp => @"var alpha = new Random();"
             };
 
-            await SubmitSource(kernel, source);
+            await SubmitCode(kernel, source);
 
             await kernel.SendAsync(new RequestCompletion("al", 2));
 

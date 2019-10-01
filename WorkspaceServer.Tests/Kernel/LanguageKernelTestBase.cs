@@ -60,21 +60,21 @@ namespace WorkspaceServer.Tests.Kernel
             return CreateKernel(Language.CSharp);
         }
 
-        public async Task<SubmitCode[]> SubmitSource(KernelBase kernel, string[] lines, string targetKernelName = null, SubmissionType submissionType = SubmissionType.Run)
+        public async Task<SubmitCode[]> SubmitCode(KernelBase kernel, string[] codeFragments, SubmissionType submissionType = SubmissionType.Run)
         {
             var cmds = new List<SubmitCode>();
-            foreach (string line in lines)
+            foreach (string codeFragment in codeFragments)
             {
-                var cmd = new SubmitCode(line, targetKernelName: targetKernelName, submissionType: submissionType);
+                var cmd = new SubmitCode(codeFragment, submissionType: submissionType);
                 await kernel.SendAsync(cmd);
                 cmds.Add(cmd);
             }
             return cmds.ToArray();
         }
 
-        public async Task<SubmitCode> SubmitSource(KernelBase kernel, string line, string targetKernelName = null, SubmissionType submissionType = SubmissionType.Run)
+        public async Task<SubmitCode> SubmitCode(KernelBase kernel, string codeFragment, SubmissionType submissionType = SubmissionType.Run)
         {
-            var cmd = new SubmitCode(line, targetKernelName: targetKernelName, submissionType: submissionType);
+            var cmd = new SubmitCode(codeFragment, submissionType: submissionType);
             await kernel.SendAsync(cmd);
             return cmd;
         }
