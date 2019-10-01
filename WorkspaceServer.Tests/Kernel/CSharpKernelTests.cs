@@ -383,15 +383,21 @@ json
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
+            var cSharpKernel = new CSharpKernel();
+            using var events = cSharpKernel.KernelEvents.ToSubscribedList();
+
             var kernel = new CompositeKernel
             {
-                new CSharpKernel().UseNugetDirective()
+                cSharpKernel.UseNugetDirective()
             };
 
             var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();");
             await kernel.SendAsync(command);
 
-            command.Code.Should().Be("var a = new List<int>();");
+            events
+                .OfType<CodeSubmissionReceived>()
+                .Should()
+                .NotContain(e => e.Code.Contains("#r"));
         }
 
         [Fact]
@@ -416,7 +422,6 @@ json
             events
                 .Should()
                 .Contain(e => e is DisplayedValueUpdated);
-
 
             events
                 .Should()
@@ -450,22 +455,22 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+                .Match(e => e is DisplayedValueProduced &&
+                            ((DisplayedValueProduced) e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
                 .Contain(e => e is DisplayedValueUpdated);
-
 
             events
                 .Should()
                 .ContainSingle(e => e is NuGetPackageAdded);
 
             events.OfType<NuGetPackageAdded>()
-                .Single()
-                .PackageReference
-                .Should()
-                .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+                  .Single()
+                  .PackageReference
+                  .Should()
+                  .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
 
             events
                 .Should()
