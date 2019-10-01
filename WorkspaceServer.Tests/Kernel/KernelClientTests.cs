@@ -23,7 +23,6 @@ using Xunit;
 
 namespace WorkspaceServer.Tests.Kernel
 {
-    
     public class KernelClientTests : IDisposable
     {
         private readonly Configuration _configuration;
@@ -99,8 +98,8 @@ namespace WorkspaceServer.Tests.Kernel
         public KernelClientTests()
         {
             var displayIdSeed = 0;
-               _configuration = new Configuration()
-                .UsingExtension("json");
+            _configuration = new Configuration()
+             .UsingExtension("json");
             _configuration = _configuration.SetInteractive(Debugger.IsAttached);
             Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator =
                 () => Interlocked.Increment(ref displayIdSeed).ToString();
@@ -112,7 +111,7 @@ namespace WorkspaceServer.Tests.Kernel
                     .UseDefaultRendering()
             };
 
-          _io = new IOStreams();
+            _io = new IOStreams();
             _kernelClient = new KernelStreamClient(
                 kernel,
                 _io,
@@ -156,7 +155,7 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode("display(1543); display(4567);"), 0);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds())) 
+                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds()))
                 .ToEnumerable()
                 .ToList();
 
