@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.DotNet.Interactive.Commands;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    internal class CommandParseFailure : IKernelEvent
+    public class CommandParseFailure : KernelEventBase
     {
-        public IKernelCommand Command => null;
         public string Body { get; set; }
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -14,11 +15,9 @@ using Newtonsoft.Json.Serialization;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class KernelStreamClient
+    public class KernelStreamClient : IDisposable
     {
         private readonly IKernel _kernel;
-        private readonly TextReader _input;
-        private readonly TextWriter _output;
         private readonly CommandDeserializer _deserializer = new CommandDeserializer();
 
         private readonly ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)> _commandQueue = new ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)>();
@@ -29,92 +28,71 @@ namespace Microsoft.DotNet.Interactive
         };
 
         private CancellationTokenSource _cancellationSource;
+        private readonly IInputTextStream _input;
+        private readonly IOutputTextStream _output;
+        private readonly CompositeDisposable _disposables;
 
-        public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output)
+        public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output) : this(kernel, new InputTextStream(input), new OutputTextStream(output))
         {
+
+        }
+
+        public KernelStreamClient(IKernel kernel, IInputTextStream input, IOutputTextStream output)
+        {
+            _disposables = new CompositeDisposable();
             _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
             _input = input ?? throw new ArgumentNullException(nameof(input));
             _output = output ?? throw new ArgumentNullException(nameof(output));
-
-            _kernel.KernelEvents.Subscribe(e =>
-           {
-               switch (e)
-               {
-                   case KernelBusy _:
-                   case KernelIdle _:
-                       Write(e, -1);
-                       break;
-               }
-           });
+            _disposables.Add(
+            _input.Subscribe(async line => { await ParseLine(line); }));
+            _disposables.Add(
+                _kernel.KernelEvents.Subscribe(e =>
+                {
+                    switch (e)
+                    {
+                        case KernelBusy _:
+                        case KernelIdle _:
+                            break;
+                        default:
+                            {
+                                var id = (int)e.GetRootCommand().Properties["id"];
+                                Write(e, id);
+                            }
+                            break;
+                    }
+                }));
         }
 
-        public Task Start()
+        public async Task Start()
         {
+            // todo : multiple start must be handled
             _cancellationSource = new CancellationTokenSource();
-            return Task.Run(async () =>
+            await _input.Start(_cancellationSource.Token);
+        }
+
+        private async Task ParseLine(string line)
+        {
+            StreamKernelCommand streamKernelCommand = null;
+            try
             {
-                while (!_cancellationSource.IsCancellationRequested)
+                streamKernelCommand = JsonConvert.DeserializeObject<StreamKernelCommand>(line, _jsonSerializerSettings);
+                
+                if (!_cancellationSource.IsCancellationRequested)
                 {
-                    var line = await _input.ReadLineAsync();
-                    if (line == null)
-                    {
-                        await Task.Delay(100);
-                        continue;
-                    }
-
-                    StreamKernelCommand streamKernelCommand = null;
-                    try
-                    {
-                        var obj = JObject.Parse(line);
-                        streamKernelCommand = obj.ToObject<StreamKernelCommand>();
-                        IKernelCommand command = null;
-
-                        if (obj.TryGetValue("command", StringComparison.InvariantCultureIgnoreCase, out var commandValue))
-                        {
-                            command = DeserializeCommand(streamKernelCommand.CommandType, commandValue);
-                        }
-
-                        if (streamKernelCommand.CommandType == nameof(Quit))
-                        {
-                            _cancellationSource.Cancel();
-                            continue;
-                        }
-
-                        if (command == null)
-                        {
-                            Write(new CommandNotRecognized
-                            {
-                                Body = obj
-                            },
-                                streamKernelCommand.Id);
-                            continue;
-                        }
-
-                        var result = await _kernel.SendAsync(command);
-                        result.KernelEvents.Subscribe(e =>
-                        {
-                            switch (e)
-                            {
-                                case KernelBusy _:
-                                case KernelIdle _:
-                                    break;
-                                default:
-                                    Write(e, streamKernelCommand.Id);
-                                    break;
-                            }
-                        });
-                    }
-                    catch (JsonReaderException)
-                    {
-                        Write(new CommandParseFailure
-                        {
-                            Body = line
-                        },
-                            streamKernelCommand?.Id ?? -1);
-                    }
+                    var command = streamKernelCommand.Command as IKernelCommand;
+                    command.Properties["id"] = streamKernelCommand.Id;
+                    await _kernel.SendAsync(command, _cancellationSource.Token);
                 }
-                _cancellationSource.Dispose();
-            });
+            }
+            catch (JsonReaderException)
+            {
+                Write(
+                    new CommandParseFailure
+                    {
+                        Body = line
+                    },
+                    streamKernelCommand?.Id ?? -1);
+            }
         }
 
         private void Write(IKernelEvent e, int id)
@@ -126,13 +104,18 @@ namespace Microsoft.DotNet.Interactive
                 EventType = e.GetType().Name
             };
             var serialized = JsonConvert.SerializeObject(wrapper, _jsonSerializerSettings);
-            _output.WriteLine(serialized);
-            _output.Flush();
+            _output.Write(serialized);
         }
 
         private IKernelCommand DeserializeCommand(string commandType, JToken command)
         {
-            return _deserializer.Dispatch(commandType, command);
+            return _deserializer.Deserialize(commandType, command);
+        }
+
+        public void Dispose()
+        {
+            _disposables.Dispose();
+            _cancellationSource.Cancel();
         }
     }
 }
