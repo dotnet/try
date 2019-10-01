@@ -143,7 +143,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             {
                 var log = new SomePropertyThrows().ToDisplayString();
 
-                log.Should().Contain("NotOk: { Exception: ");
+                log.Should().Contain("NotOk: { System.Exception: ");
             }
 
             [Fact]
@@ -367,7 +367,49 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
                 var formatted = list.ToDisplayString(formatter);
 
-                formatted.Should().Be("[ { Widget: Name: widget x, Parts: <null> }, { Widget: Name: widget y, Parts: <null> }, { Widget: Name: widget z, Parts: <null> } ]");
+                formatted.Should().Be("[ { Microsoft.DotNet.Interactive.Rendering.Tests.Widget: Name: widget x, Parts: <null> }, { Microsoft.DotNet.Interactive.Rendering.Tests.Widget: Name: widget y, Parts: <null> }, { Microsoft.DotNet.Interactive.Rendering.Tests.Widget: Name: widget z, Parts: <null> } ]");
+            }
+
+            [Fact]
+            public void Properies_of_System_Type_instances_are_not_expanded()
+            {
+                var formatter = PlainTextFormatter.Create(typeof(Type));
+
+                var writer = new StringWriter();
+
+                formatter.Format(typeof(string), writer);
+
+                writer.ToString()
+                      .Should()
+                      .Be("System.String");
+            }
+
+            [Fact]
+            public void ReadOnlyMemory_of_char_is_formatted_like_a_string()
+            {
+                var formatter = PlainTextFormatter.Create(typeof(ReadOnlyMemory<char>));
+
+                ReadOnlyMemory<char> readOnlyMemory = "Hi!".AsMemory();
+
+                var writer = new StringWriter();
+
+                formatter.Format(readOnlyMemory, writer);
+
+                writer.ToString().Should().Be("Hi!");
+            }
+
+            [Fact]
+            public void ReadOnlyMemory_of_int_is_formatted_like_a_int_array()
+            {
+                var formatter = PlainTextFormatter.Create(typeof(ReadOnlyMemory<int>));
+
+                var readOnlyMemory = new ReadOnlyMemory<int>(new[] { 1, 2, 3 });
+
+                var writer = new StringWriter();
+
+                formatter.Format(readOnlyMemory, writer);
+
+                writer.ToString().Should().Be("[ 1, 2, 3 ]");
             }
         }
     }

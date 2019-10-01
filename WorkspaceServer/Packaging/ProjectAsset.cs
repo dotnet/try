@@ -129,7 +129,7 @@ namespace WorkspaceServer.Packaging
                 {
                     try
                     {
-                        operation.Info("Attempting building package {name}", Name);
+                        operation.Info("Building package {name}", Name);
                         await DotnetBuild();
                         operation.Info("Workspace built");
                         operation.Succeed();

@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             void Initialize()
             {
                 _listExpansionLimit = null;
-                // Formatter.Register(CreatePlainTextFormatterOnDemand(PlainTextFormatter.MimeType));
             }
 
             Initialize();

@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
@@ -29,14 +30,13 @@ namespace WorkspaceServer.Packaging
             packageBuilder.CreateRebuildablePackage = true;
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
-            packageBuilder.AddPackageReference("Newtonsoft.Json");
             var package = (Package)packageBuilder.GetPackage();
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             AddDirectoryProps(package);
             return package;
         }
 
-        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion)
+        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion = null)
         {
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -72,7 +72,9 @@ namespace WorkspaceServer.Packaging
         {
             var package = await _lazyPackage.ValueAsync();
             var nugetPathsFile = package.Directory.GetFiles("*.nuget.paths").Single();
-            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',','\r', '\n').Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
+            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',','\r', '\n')
+                                        .Where(t => !string.IsNullOrWhiteSpace(t))
+                                        .ToArray();
             var pathsDictionary = nugetPackagePaths
                                     .Select((v, i) => new { Index = i, Value = v })
                                     .GroupBy(p => p.Index / 2)
@@ -102,20 +104,20 @@ namespace WorkspaceServer.Packaging
 @"  <Target Name='ComputePackageRoots' BeforeTargets='CoreCompile;PrintNuGetPackagesPaths' DependsOnTargets='CollectPackageReferences'>
         <ItemGroup>
         <!-- Read the package path from the Pkg{PackageName} properties that are present in the nuget.g.props file -->
-            <AddedNuGetPackage Include='@(ResolvedCompileFileDefinitions)'>
-                <PackageRootProperty>Pkg$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NugetPackageId)').Replace('.','_'))</PackageRootProperty>
+            <AddedNuGetPackage Include='@(PackageReference)'>
+                <PackageRootProperty>Pkg$([System.String]::Copy('%(PackageReference.Identity)').Replace('.','_'))</PackageRootProperty>
                 <PackageRoot>$(%(AddedNuGetPackage.PackageRootProperty))</PackageRoot>
             </AddedNuGetPackage>
         </ItemGroup>
 
-        <Message Text=""Done: Read package root : %(AddedNuGetPackage.PackageRoot) for %(AddedNuGetPackage.NuGetPackageId)"" Condition=""%(AddedNuGetPackage.PackageRoot) != ''"" Importance=""high""/>
+        <Message Text=""Done: Read package root : %(AddedNuGetPackage.PackageRoot) for %(AddedNuGetPackage.Identity)"" Condition=""%(AddedNuGetPackage.PackageRoot) != ''"" Importance=""high""/>
     </Target>";
 
             const string writePackageRootsToDiskTarget =
 @"  <Target Name='PrintNuGetPackagesPaths' DependsOnTargets='ResolvePackageAssets;ComputePackageRoots' AfterTargets='PrepareForBuild'>
         <ItemGroup>
             <ReferenceLines Remove='@(ReferenceLines)' />
-            <ReferenceLines Include='%(AddedNuGetPackage.NuGetPackageId),%(AddedNuGetPackage.PackageRoot)' Condition=""%(AddedNuGetPackage.PackageRoot) != ''""/>
+            <ReferenceLines Include='%(AddedNuGetPackage.Identity),%(AddedNuGetPackage.PackageRoot)' Condition=""%(AddedNuGetPackage.PackageRoot) != ''""/>
         </ItemGroup>
 
         <WriteLinesToFile Lines='@(ReferenceLines)' File='$(MSBuildProjectFullPath).nuget.paths' Overwrite='True' WriteOnlyWhenDifferent='True' />

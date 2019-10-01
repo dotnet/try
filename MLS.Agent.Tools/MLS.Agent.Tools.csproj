@@ -17,16 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Clockwise" Version="1.0.261-beta" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.02" />
-    <PackageReference Include="PocketLogger" Version="0.3.0">
+  <!-- Any new dependency added here must also be included in the Microsoft.DotNet.Try.Markdown nuspec file -->
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.2.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.2.1" />
-    <PackageReference Include="TaskExtensions" Version="0.1.8580001">
+    <PackageReference Include="System.Diagnostics.Process" Version="$(SystemDiagnosticsProcessVersion)" />
+    <PackageReference Include="System.Runtime.Extensions" Version="$(SystemRuntimeExtensionsVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisCommonVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(MicrosoftCodeAnalysisWorkspacesCommonVersion)" />
+    <PackageReference Include="TaskExtensions" Version="$(TaskExtensionsVersion)">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

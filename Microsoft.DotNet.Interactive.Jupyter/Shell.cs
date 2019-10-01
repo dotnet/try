@@ -2,16 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Reactive.Disposables;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.Extensions.Hosting;
 using NetMQ.Sockets;
 using Pocket;
 using Recipes;
 using static Pocket.Logger<Microsoft.DotNet.Interactive.Jupyter.Shell>;
+using InvalidOperationException = System.InvalidOperationException;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -25,8 +30,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         private readonly string _ioPubAddress;
         private readonly SignatureValidator _signatureValidator;
         private readonly CompositeDisposable _disposables;
-        private readonly MessageSender _shellSender;
-        private readonly MessageSender _ioPubSender;
+        private readonly ReplyChannel _shellSender;
+        private readonly PubSubChannel _ioPubSender;
         private readonly string _stdInAddress;
         private readonly string _controlAddress;
         private readonly RouterSocket _stdIn;
@@ -57,8 +62,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _stdIn = new RouterSocket();
             _control = new RouterSocket();
 
-            _shellSender = new MessageSender(_shell, _signatureValidator);
-            _ioPubSender = new MessageSender(_ioPubSocket, _signatureValidator);
+            _shellSender = new ReplyChannel( new MessageSender(_shell, _signatureValidator));
+            _ioPubSender = new PubSubChannel( new MessageSender(_ioPubSocket, _signatureValidator));
 
             _disposables = new CompositeDisposable
                            {
@@ -75,47 +80,54 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             _ioPubSocket.Bind(_ioPubAddress);
             _stdIn.Bind(_stdInAddress);
             _control.Bind(_controlAddress);
+            var id = Guid.NewGuid().ToString();
           
             using (var activity = Log.OnEnterAndExit())
             {
+                //SetStarting();
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var message = _shell.GetMessage();
+                    var request = _shell.GetMessage();
 
-                    activity.Info("Received: {message}", message.ToJson());
+                    activity.Info("Received: {message}", request.ToJson());
 
-                    SetBusy();
+                    SetBusy(request);
 
-                    switch (message.Header.MessageType)
+                    switch (request.Header.MessageType)
                     {
                         case JupyterMessageContentTypes.KernelInfoRequest:
-                            HandleKernelInfoRequest(message);
-                            SetIdle();
+                            id = Encoding.Unicode.GetString(request.Identifiers[0].ToArray());
+                            HandleKernelInfoRequest(request);
+                            SetIdle(request);
                             break;
 
                         case JupyterMessageContentTypes.KernelShutdownRequest:
-                            SetIdle();
+                            SetIdle(request);
                             break;
 
                         default:
                             var context = new JupyterRequestContext(
                                 _shellSender,
                                 _ioPubSender,
-                                message);
+                                request, id);
 
                             await _scheduler.Schedule(context);
 
                             await context.Done();
 
-                            SetIdle();
+                            SetIdle(request);
 
                             break;
                     }
 
-                    void SetBusy() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
-
-                    void SetIdle() => _shellSender.Send(Message.Create(new Status(StatusValues.Busy), message.Header));
+                    
                 }
+
+                void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
+
+                void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
+
+                
             }
 
         }
@@ -126,13 +138,37 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             return Task.CompletedTask;
         }
 
-        private void HandleKernelInfoRequest(Message request)
+        private void HandleKernelInfoRequest(Envelope request)
         {
-            var kernelInfoReply = new KernelInfoReply("5.1.0", ".NET", "5.1.0", new CSharpLanguageInfo());
+            var languageInfo = GetLanguageInfo();
+            var kernelInfoReply = new KernelInfoReply(Constants.MESSAGE_PROTOCOL_VERSION, ".NET", "5.1.0", languageInfo);
+            _shellSender.Reply(kernelInfoReply, request);
+        }
 
-            var replyMessage = Message.CreateResponse(kernelInfoReply, request);
+        private LanguageInfo GetLanguageInfo()
+        {
+            switch (_kernel)
+            {
+                case CompositeKernel composite:
+                    return GetLanguageInfo(composite.DefaultKernelName);
+                case IKernel kernel:
+                    return GetLanguageInfo(kernel.Name);
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
 
-            _shellSender.Send(replyMessage);
+        private LanguageInfo GetLanguageInfo(string kernelName)
+        {
+            switch (kernelName)
+            {
+                case "csharp":
+                    return new CSharpLanguageInfo();
+                case "fsharp":
+                    return new FSharpLanguageInfo();
+                default:
+                    throw new InvalidOperationException($"{kernelName} not supported");
+            }
         }
     }
 }

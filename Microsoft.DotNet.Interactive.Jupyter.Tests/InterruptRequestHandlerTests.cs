@@ -3,13 +3,13 @@
 
 using Clockwise;
 using FluentAssertions;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
+using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -23,18 +23,16 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_InterruptReply()
         {
             var scheduler = CreateScheduler();
-            var request = Message.Create(new InterruptRequest(), null);
-            var context = new JupyterRequestContext(ServerChannel, IoPubChannel, request);
+            var request = Envelope.Create(new InterruptRequest(), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
 
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
-            ServerRecordingSocket.DecodedMessages
-                                  .SingleOrDefault(message =>
-                                                       message.Contains(JupyterMessageContentTypes.InterruptReply))
-                                  .Should()
-                                  .NotBeNullOrWhiteSpace();
+            JupyterMessageSender.ReplyMessages
+                .Should()
+                .ContainSingle(r => r is InterruptReply);
         }
     }
 }

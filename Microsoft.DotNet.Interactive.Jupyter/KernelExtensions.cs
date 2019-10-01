@@ -9,11 +9,11 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using Markdig;
 using Markdig.Renderers;
-using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Extensions;
 using Microsoft.DotNet.Interactive.Rendering;
+using static Microsoft.DotNet.Interactive.Kernel;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
@@ -143,17 +143,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 PocketView t = div(
                     h6(directives.KernelName),
-                    pre(directives.Commands.Select(Describe)));
+                    pre(directives.Commands.Select(d => d.Name + "\t  ")));
 
                 t.WriteTo(writer, HtmlEncoder.Default);
             }, "text/html");
 
             return kernel;
-
-            IHtmlContent Describe(ICommand command)
-            {
-                return span(command.Name, " ");
-            }
         }
 
         private static Command lsmagic()

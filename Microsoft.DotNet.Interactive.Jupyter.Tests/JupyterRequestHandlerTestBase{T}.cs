@@ -11,14 +11,13 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public abstract class JupyterRequestHandlerTestBase<T> : IDisposable
-        where T : JupyterMessageContent
+        where T : Message
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        protected readonly MessageSender IoPubChannel;
-        protected readonly MessageSender ServerChannel;
-        protected readonly RecordingSocket ServerRecordingSocket;
-        protected readonly RecordingSocket IoRecordingSocket;
-        protected readonly IKernel Kernel;
+
+        protected RecordingJupyterMessageSender JupyterMessageSender { get; }
+
+        protected IKernel Kernel { get; }
 
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
         {
@@ -29,13 +28,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 new CSharpKernel()
             }.UseDefaultMagicCommands();
 
-            _disposables.Add(Kernel.LogEventsToPocketLogger());
+            JupyterMessageSender = new RecordingJupyterMessageSender();
 
-            var signatureValidator = new SignatureValidator("key", "HMACSHA256");
-            ServerRecordingSocket = new RecordingSocket();
-            ServerChannel = new MessageSender(ServerRecordingSocket, signatureValidator);
-            IoRecordingSocket = new RecordingSocket();
-            IoPubChannel = new MessageSender(IoRecordingSocket, signatureValidator);
+            _disposables.Add(Kernel.LogEventsToPocketLogger());
         }
 
         public void Dispose() => _disposables.Dispose();

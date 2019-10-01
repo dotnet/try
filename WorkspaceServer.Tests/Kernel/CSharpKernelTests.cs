@@ -235,7 +235,7 @@ Console.Write(""value three"");");
 Console.Write(""value one"");
 Console.Write(""value two"");
 Console.Write(""value three"");
-5", "csharp");
+5");
             await kernel.SendAsync(kernelCommand);
 
             KernelEvents.ValuesOnly()
@@ -260,7 +260,7 @@ Console.Write(""value three"");
 Console.Write(DateTime.Now);
 System.Threading.Thread.Sleep(1000);
 Console.Write(DateTime.Now);
-5", "csharp");
+5");
             await kernel.SendAsync(kernelCommand);
             var events = KernelEvents
                 .Where(e => e.Value is DisplayedValueProduced).ToArray();
@@ -388,7 +388,7 @@ json
                 new CSharpKernel().UseNugetDirective()
             };
 
-            var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();", "csharp");
+            var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();");
             await kernel.SendAsync(command);
 
             command.Code.Should().Be("var a = new List<int>();");
@@ -411,7 +411,7 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Attempting to install"));
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
@@ -427,6 +427,45 @@ json
                   .PackageReference
                   .Should()
                   .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+
+            events
+                .Should()
+                .ContainSingle(e => e is CommandHandled);
+        }
+
+        [Fact]
+        public async Task When_SubmitCode_command_only_adds_packages_to_csharp_kernel_then_CommandHandled_event_is_raised()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
+
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\"");
+
+            var result = await kernel.SendAsync(command);
+
+            using var events = result.KernelEvents.ToSubscribedList();
+
+            events
+                .First()
+                .Should()
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+
+            events
+                .Should()
+                .Contain(e => e is DisplayedValueUpdated);
+
+
+            events
+                .Should()
+                .ContainSingle(e => e is NuGetPackageAdded);
+
+            events.OfType<NuGetPackageAdded>()
+                .Single()
+                .PackageReference
+                .Should()
+                .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
 
             events
                 .Should()
@@ -454,6 +493,29 @@ json
                                              .As<SubmitCode>()
                                              .Code
                                              .Contains("using System.Reflection;"));
+
+            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
+                                                     e.Value.As<DisplayedValueProduced>()
+                                                     .Value
+                                                     .ToString()
+                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
+        }
+
+        [Fact]
+        public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load()
+        {
+            var extensionDir = Create.EmptyWorkspace()
+                                     .Directory;
+
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"throw new Exception();")).FullName;
+
+            var kernel = CreateKernel();
+
+            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
+
+            KernelEvents.Should()
+                      .ContainSingle(e => e.Value is KernelExtensionLoadException);
+
         }
 
         [Fact]
@@ -505,7 +567,7 @@ try
 catch (Exception e)
 {
     Console.WriteLine(e);
-}", "csharp");
+}");
 
             var result = await kernel.SendAsync(command);
 
@@ -588,6 +650,12 @@ catch (Exception e)
                                              .As<SubmitCode>()
                                              .Code
                                              .Contains("using System.Reflection;"));
+
+            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
+                                                    e.Value.As<DisplayedValueProduced>()
+                                                    .Value
+                                                    .ToString()
+                                                    .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
         }
     }
 }

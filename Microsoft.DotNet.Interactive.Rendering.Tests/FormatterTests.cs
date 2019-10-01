@@ -39,37 +39,28 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void Default_formatter_for_Type_displays_only_the_name()
-            {
-                GetType().ToDisplayString()
-                         .Should().Be(GetType().Name);
-                typeof(FormatterTests).ToDisplayString()
-                                      .Should().Be(typeof(FormatterTests).Name);
-            }
-
-            [Fact]
             public void Default_formatter_for_Type_displays_generic_parameter_name_for_single_parameter_generic_type()
             {
                 typeof(List<string>).ToDisplayString()
-                                    .Should().Be("List<String>");
+                                    .Should().Be("System.Collections.Generic.List<System.String>");
                 new List<string>().GetType().ToDisplayString()
-                                  .Should().Be("List<String>");
+                                  .Should().Be("System.Collections.Generic.List<System.String>");
             }
 
             [Fact]
             public void Default_formatter_for_Type_displays_generic_parameter_name_for_multiple_parameter_generic_type()
             {
                 typeof(Dictionary<string, IEnumerable<int>>).ToDisplayString()
-                                                            .Should().Be("Dictionary<String,IEnumerable<Int32>>");
+                                                            .Should().Be("System.Collections.Generic.Dictionary<System.String,System.Collections.Generic.IEnumerable<System.Int32>>");
             }
 
             [Fact]
             public void Default_formatter_for_Type_displays_generic_parameter_names_for_open_generic_types()
             {
                 typeof(IList<>).ToDisplayString()
-                               .Should().Be("IList<T>");
+                               .Should().Be("System.Collections.Generic.IList<T>");
                 typeof(IDictionary<,>).ToDisplayString()
-                                      .Should().Be("IDictionary<TKey,TValue>");
+                                      .Should().Be("System.Collections.Generic.IDictionary<TKey,TValue>");
             }
 
             [Fact]
@@ -283,17 +274,6 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             output.Should().Contain("0");
             output.Should().Contain("ninety-nine");
             output.Should().Contain("99");
-        }
-
-        [Fact]
-        public void It_does_not_expand_properties_for_strings()
-        {
-            var formatter = PlainTextFormatter.Create(typeof(string));
-
-            var log = "hello".ToDisplayString(formatter);
-
-            log.Should().Contain("hello");
-            log.Should().NotContain("Length");
         }
 
         [Fact]

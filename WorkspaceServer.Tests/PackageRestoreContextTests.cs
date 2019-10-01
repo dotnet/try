@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using FluentAssertions;
 using System.IO;
 using System.Threading.Tasks;
@@ -20,6 +21,16 @@ namespace WorkspaceServer.Tests
             refs.Should().Contain(r => r.Display.Contains("FluentAssertions.dll"));
             refs.Should().Contain(r => r.Display.Contains("System.Configuration.ConfigurationManager"));
             result.InstalledVersion.Should().Be("5.7.0");
+        }
+
+        [Fact]
+        public async Task Returns_references_when_package_version_is_not_specified()
+        {
+            var result = await new PackageRestoreContext().AddPackage("NewtonSoft.Json");
+            result.Succeeded.Should().BeTrue();
+            var refs = result.References;
+            refs.Should().Contain(r => r.Display.Contains("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
+            result.InstalledVersion.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
@@ -48,6 +59,16 @@ namespace WorkspaceServer.Tests
             await packageRestoreContext.AddPackage("htmlagilitypack", "1.11.12");
             var path = await packageRestoreContext.GetDirectoryForPackage("htmlagilitypack");
             path.FullName.Should().EndWith("htmlagilitypack" + Path.DirectorySeparatorChar + "1.11.12");
+            path.Exists.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Can_get_path_to_nuget_package_which_doesnt_have_lib_folder()
+        {
+            var packageRestoreContext = new PackageRestoreContext();
+            await packageRestoreContext.AddPackage("roslyn.analyzers", "1.0.3.4");
+            var path = await packageRestoreContext.GetDirectoryForPackage("roslyn.analyzers");
+            path.FullName.Should().EndWith("roslyn.analyzers" + Path.DirectorySeparatorChar + "1.0.3.4");
             path.Exists.Should().BeTrue();
         }
     }

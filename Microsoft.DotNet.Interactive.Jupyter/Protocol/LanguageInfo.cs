@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
     public class CSharpLanguageInfo : LanguageInfo
     {
-        public CSharpLanguageInfo(string version = "7.3") : base("C#", version, "text/x-csharp", ".cs", pygmentsLexer: "csharp")
+        public CSharpLanguageInfo(string version = "8.0") : base("C#", version, "text/x-csharp", ".cs", pygmentsLexer: "csharp")
         {
         }
     }

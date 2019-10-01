@@ -13,7 +13,6 @@ using Xunit;
 using Xunit.Abstractions;
 using WorkspaceServer.Packaging;
 using System.Threading;
-using WorkspaceServer.Tests.Packaging;
 using MLS.Agent.Tools.Tests;
 
 namespace WorkspaceServer.Tests
@@ -158,9 +157,9 @@ namespace WorkspaceServer.Tests
             {
                 buildEvents.Add(e);
                 buildEventsMessages.Add(e.Evaluate().Message);
-                if (e.Evaluate().Message.StartsWith("Attempting building package "))
+                if (e.Evaluate().Message.StartsWith("Building package "))
                 {
-                    barrier.SignalAndWait(10.Minutes());
+                    barrier.SignalAndWait(30.Seconds());
                 }
             }))
             {

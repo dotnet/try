@@ -9,7 +9,6 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,24 +17,13 @@ using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class KernelIdleState
-    {
-        private readonly BehaviorSubject<bool> _idleState = new BehaviorSubject<bool>(true);
-
-        public IObservable<bool> IdleState => _idleState.DistinctUntilChanged();
-
-        public void SetAsBusy() => _idleState.OnNext(false);
-
-        public void SetAsIdle() => _idleState.OnNext(true);
-    }
-
     public abstract class KernelBase : IKernel
     {
         private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
         private readonly List<Command> _directiveCommands = new List<Command>();
         private Parser _directiveParser;
-        private readonly KernelIdleState _idleState =new KernelIdleState();
+        private readonly KernelIdleState _idleState = new KernelIdleState();
 
         protected KernelBase()
         {
@@ -150,8 +138,8 @@ namespace Microsoft.DotNet.Interactive
         {
             loadExtension.Handler = async context =>
             {
-                var kernelextensionLoader = new KernelExtensionLoader();
-                await kernelextensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, (kernelEvent) => context.Publish(kernelEvent));
+                var kernelExtensionLoader = new KernelExtensionLoader();
+                await kernelExtensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, invocationContext);
             };
 
             await next(loadExtension, invocationContext);
@@ -199,6 +187,7 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
+                    context.Complete();
                     return;
                 }
             }
@@ -337,8 +326,6 @@ namespace Microsoft.DotNet.Interactive
         private readonly ConcurrentQueue<KernelOperation> _commandQueue =
             new ConcurrentQueue<KernelOperation>();
 
-
-
         public Task<IKernelCommandResult> SendAsync(
             IKernelCommand command,
             CancellationToken cancellationToken)
@@ -362,11 +349,11 @@ namespace Microsoft.DotNet.Interactive
 
             _commandQueue.Enqueue(operation);
 
-            DoTheThing(_commandQueue);
+            ProcessCommandQueue(_commandQueue);
 
             return tcs.Task;
 
-            void DoTheThing(ConcurrentQueue<KernelOperation> commandQueue)
+            void ProcessCommandQueue(ConcurrentQueue<KernelOperation> commandQueue)
             {
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
@@ -376,7 +363,7 @@ namespace Microsoft.DotNet.Interactive
                     {
                         await ExecuteCommand(currentOperation);
 
-                        DoTheThing(commandQueue);
+                        ProcessCommandQueue(commandQueue);
                     }, cancellationToken).ConfigureAwait(false);
                 }
                 else

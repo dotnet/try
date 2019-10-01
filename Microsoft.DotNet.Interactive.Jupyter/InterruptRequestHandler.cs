@@ -23,24 +23,20 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             switch (@event)
             {
-                case CurrentCommandCancelled kernelInterrupted:
-                    OnExecutionInterrupted(kernelInterrupted, context.Request, context.ServerChannel);
+                case CurrentCommandCancelled _:
+                    OnExecutionInterrupted(context.JupyterMessageSender);
                     break;
             }
         }
 
-        private void OnExecutionInterrupted(CurrentCommandCancelled currentCommandCancelled, Message request, IMessageSender serverChannel)
+        private void OnExecutionInterrupted(IJupyterMessageSender jupyterMessageSender)
         {
 
             // reply 
             var interruptReplyPayload = new InterruptReply();
 
             // send to server
-            var interruptReply = Message.CreateResponse(
-                interruptReplyPayload,
-                request);
-
-            serverChannel.Send(interruptReply);
+            jupyterMessageSender.Send(interruptReplyPayload);
 
         }
 
@@ -48,7 +44,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             var command = new CancelCurrentCommand();
 
-            await SendTheThingAndWaitForTheStuff(context, command);
+            await SendAsync(context, command);
         }
     }
 }

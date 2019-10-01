@@ -3,20 +3,35 @@
 
 namespace Microsoft.DotNet.Interactive.FSharp
 
+open System.Collections.Generic
+open System.IO
 open System.Threading.Tasks
 open FSharp.Compiler.Scripting
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
 
-type FSharpKernel() =
+type FSharpKernel() as this =
     inherit KernelBase(Name = "fsharp")
-    let script = new FSharpScript()
+    let resolvedAssemblies = List<string>()
+    let script = new FSharpScript(additionalArgs=[|"/langversion:preview"|])
+
+    do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
     do base.AddDisposable(script)
+
+    let handleAssemblyReferenceAdded path context =
+        async {
+            let loader = KernelExtensionLoader()
+            let fileInfo = FileInfo(path)
+            let! success = loader.LoadFromAssembly(fileInfo, this, context) |> Async.AwaitTask
+            return success
+        }
+
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
             context.Publish(codeSubmissionReceived)
+            resolvedAssemblies.Clear()
             let result, errors =
                 try
                     script.Eval(codeSubmission.Code)
@@ -25,6 +40,9 @@ type FSharpKernel() =
             if errors.Length > 0 then
                 let aggregateErrorMessage = System.String.Join("\n", errors)
                 context.Publish(CommandFailed(aggregateErrorMessage, codeSubmission))
+            for asm in resolvedAssemblies do
+                let! _success = handleAssemblyReferenceAdded asm context
+                () // don't care
             match result with
             | Ok(Some(value)) ->
                 let value = value.ReflectionValue

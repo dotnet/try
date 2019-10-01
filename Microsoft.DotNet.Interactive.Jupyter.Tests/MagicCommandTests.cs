@@ -167,6 +167,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             await kernel.SendAsync(new SubmitCode(
                                        $"%%markdown\n\n# Topic!\nContent"));
+            
 
             var formatted =
                 events
@@ -218,6 +219,73 @@ display(""done!"");
                   .SelectMany(e => e.FormattedValues)
                   .Should()
                   .Contain(v => v.Value.Equals("done!"));
+        }
+
+        [Fact]
+        public async Task whos_lists_the_names_and_values_of_variables_in_scope()
+        {
+            var kernel = new CompositeKernel
+                         {
+                             new CSharpKernel().UseWho()
+                         }
+                         .LogEventsToPocketLogger();
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(new SubmitCode(@"using Microsoft.DotNet.Interactive;"));
+            await kernel.SendAsync(new SubmitCode(@"var x = 1;"));
+            await kernel.SendAsync(new SubmitCode(@"x = 2;"));
+            await kernel.SendAsync(new SubmitCode(@"var y = ""hi!"";"));
+            await kernel.SendAsync(new SubmitCode(@"var z = new object[] { x, y };"));
+            await kernel.SendAsync(new SubmitCode(@"%whos"));
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced)
+                  .Which
+                  .As<DisplayedValueProduced>()
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(v => v.MimeType == "text/html")
+                  .Which
+                  .Value
+                  .As<string>()
+                  .Should()
+                  .ContainAll(
+                      "<td>x</td><td>System.Int32</td><td>2</td>",
+                      "<td>y</td><td>System.String</td><td>hi!</td>",
+                      "<td>z</td><td>System.Object[]</td><td>[ 2, hi! ]</td>");
+        }
+
+        [Fact]
+        public async Task who_lists_the_names_of_variables_in_scope()
+        {
+            var kernel = new CompositeKernel
+                         {
+                             new CSharpKernel().UseWho()
+                         }
+                         .LogEventsToPocketLogger();
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(new SubmitCode(@"using Microsoft.DotNet.Interactive;"));
+            await kernel.SendAsync(new SubmitCode(@"var x = 1;"));
+            await kernel.SendAsync(new SubmitCode(@"x = 2;"));
+            await kernel.SendAsync(new SubmitCode(@"var y = ""hi!"";"));
+            await kernel.SendAsync(new SubmitCode(@"var z = new object[] { x, y };"));
+            await kernel.SendAsync(new SubmitCode(@"%who"));
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced)
+                  .Which
+                  .As<DisplayedValueProduced>()
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(v => v.MimeType == "text/html")
+                  .Which
+                  .Value
+                  .As<string>()
+                  .Should()
+                  .ContainAll("x", "y", "z");
         }
     }
 }

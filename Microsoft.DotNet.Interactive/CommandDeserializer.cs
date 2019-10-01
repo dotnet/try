@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.DotNet.Interactive.Commands;
-using MLS.Agent.Tools;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
@@ -24,7 +23,7 @@ namespace Microsoft.DotNet.Interactive
                .ToDictionary(t => t.Name, t => t, StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public IKernelCommand Dispatch(string commandType, JToken body)
+        public IKernelCommand Deserialize(string commandType, JToken body)
         {
             if (_map.TryGetValue(commandType, out var mappedCommand))
             {
