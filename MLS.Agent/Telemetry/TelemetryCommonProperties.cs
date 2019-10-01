@@ -32,13 +32,10 @@ namespace MLS.Agent.Telemetry
         private const string OSPlatform = "OS Platform";
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
-        private const string TelemetryProfile = "Telemetry Profile";
         private const string DockerContainer = "Docker Container";
         private const string CurrentPathHash = "Current Path Hash";
         private const string MachineId = "Machine ID";
         private const string KernelVersion = "Kernel Version";
-
-        private const string TelemetryProfileEnvironmentVariable = "DOTNET_TRY_CLI_TELEMETRY_PROFILE";
 
         private const string MachineIdCacheKey = "MachineId";
         private const string IsDockerContainerCacheKey = "IsDockerContainer";
@@ -51,7 +48,6 @@ namespace MLS.Agent.Telemetry
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
                 {ProductVersion, Product.Version},
-                // {TelemetryProfile, Environment.GetEnvironmentVariable(TelemetryProfileEnvironmentVariable)},
                 {DockerContainer, IsDockerContainer()},
                 {CurrentPathHash, _hasher(_getCurrentDirectory())},
                 {MachineId, GetMachineId()},
