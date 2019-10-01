@@ -341,7 +341,7 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
-        // [InlineData(Language.CSharp, "true ? 25 : 20")]    //BUGBUG: Ternary expression should produce a value
+        //[InlineData(Language.CSharp, "true ? 25 : 20")]         // Todo: ternery expressions in C# do not raise ReturnValueProduced ??? 
         [InlineData(Language.FSharp, "if true then 25 else 20")]
         [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
         public async Task it_returns_a_result_for_an_ternery_expressions(Language language, string expression)
