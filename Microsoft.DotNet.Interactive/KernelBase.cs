@@ -372,7 +372,7 @@ namespace Microsoft.DotNet.Interactive
             var tcs = new TaskCompletionSource<IKernelCommandResult>();
 
             var operation = new KernelOperation(command, tcs);
-
+           
             _commandQueue.Enqueue(operation);
 
             ProcessCommandQueue(_commandQueue);
