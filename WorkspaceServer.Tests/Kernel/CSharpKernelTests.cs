@@ -196,12 +196,12 @@ Console.Write(""value three"");");
 
             KernelEvents
                 .ValuesOnly()
-                .OfType<DisplayedValueProduced>()
+                .OfType<StandardOutputValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new DisplayedValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
-                    new DisplayedValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
-                    new DisplayedValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
+                    new StandardOutputValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
+                    new StandardOutputValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
+                    new StandardOutputValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
         [Fact]
@@ -239,7 +239,7 @@ Console.Write(""value three"");
             await kernel.SendAsync(kernelCommand);
 
             KernelEvents.ValuesOnly()
-                .OfType<DisplayedValueProduced>()
+                .OfType<StandardOutputValueProduced>()
                 .Should()
                 .HaveCount(3);
 
@@ -579,8 +579,8 @@ catch (Exception e)
 
             events
                 .Should()
-                .Contain(e => e is DisplayedValueProduced &&
-                              (((DisplayedValueProduced) e).Value as string).Contains("success"));
+                .Contain(e => e is StandardOutputValueProduced &&
+                              (((StandardOutputValueProduced) e).Value as string).Contains("success"));
         }
 
         [Fact]

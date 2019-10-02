@@ -25,7 +25,6 @@ using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
-using System.IO;
 
 namespace WorkspaceServer.Kernel
 {
@@ -242,12 +241,6 @@ namespace WorkspaceServer.Kernel
                             new FormattedValue(
                                 PlainTextFormatter.MimeType, output)
                         };
-
-            context.Publish(
-                new DisplayedValueProduced(
-                    output,
-                    command,
-                    formattedValues));
 
             context.Publish(
                 new StandardOutputValueProduced(
