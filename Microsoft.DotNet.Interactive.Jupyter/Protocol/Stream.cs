@@ -7,8 +7,14 @@ using Newtonsoft.Json;
 namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 {
     [JupyterMessageType(JupyterMessageContentTypes.Stream)]
-    public class Stream : Message
+    public class Stream : PubSubMessage
     {
+        [JsonIgnore]
+        public static string StandardError { get; } = "stderr";
+
+        [JsonIgnore]
+        public static string StandardOutput { get; } = "stdout";
+
         [JsonProperty("name")]
         public string Name { get; }
         [JsonProperty("text")]
@@ -26,12 +32,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         public static Stream StdErr(string text)
         {
-            return new Stream("stderr", text);
+            return new Stream(StandardError, text);
         }
 
         public static Stream StdOut(string text)
         {
-            return new Stream("stdout", text);
+            return new Stream(StandardOutput, text);
         }
     }
 }

@@ -79,18 +79,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             jupyterMessageSender.Send(executeReplyPayload);
         }
 
-        private static void SendDisplayData(PubSubMessage messageMessage,
-            Envelope request,
-            IJupyterMessageSender ioPubChannel)
-        {
-            var isSilent = ((ExecuteRequest) request.Content).Silent;
-
-            if (!isSilent)
-            {
-                // send on io
-                ioPubChannel.Send(messageMessage);
-            }
-        }
+      
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
             Envelope request,
@@ -106,30 +95,65 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            PubSubMessage executeResultData;
+            Queue<PubSubMessage> dataMessage = new Queue<PubSubMessage>();
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
-                    executeResultData = new DisplayData(
+                    dataMessage.Enqueue(new DisplayData(
                         transient: transient,
-                        data: formattedValues);
+                        data: formattedValues));
                     break;
                 case DisplayedValueUpdated _:
-                    executeResultData = new UpdateDisplayData(
+                    dataMessage.Enqueue(new UpdateDisplayData(
                         transient: transient,
-                        data: formattedValues);
+                        data: formattedValues));
                     break;
                 case ReturnValueProduced _:
-                    executeResultData = new ExecuteResult(
+                    dataMessage.Enqueue(new ExecuteResult(
                         _executionCount,
                         transient: transient,
-                        data: formattedValues);
+                        data: formattedValues));
+                    break;
+                case StandardOutputValueProduced _:
+                    dataMessage.Enqueue(new DisplayData(
+                        transient: transient,
+                        data: formattedValues));
+                    dataMessage.Enqueue(Stream.StdOut(
+                        GetPlainTextValueOrDefault(formattedValues, value?.ToString()))
+                    );
+                    break;
+
+                case StandardErrorValueProduced _:
+                    dataMessage.Enqueue(Stream.StdErr(
+                        GetPlainTextValueOrDefault(formattedValues, value?.ToString()))
+                    );
                     break;
                 default:
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
+            
 
-            SendDisplayData(executeResultData, request, jupyterMessageSender);
+            var isSilent = ((ExecuteRequest)request.Content).Silent;
+
+            if (!isSilent)
+            {
+                while (dataMessage.Count > 0)
+                {
+                    
+                }
+                // send on io
+                jupyterMessageSender.Send(dataMessage.Dequeue());
+            }
+        }
+
+        private string GetPlainTextValueOrDefault(Dictionary<string, object> formattedValues, string defaultText)
+        {
+            if (formattedValues.TryGetValue(PlainTextFormatter.MimeType, out var text))
+            {
+                return text as string;
+            }
+
+            return defaultText;
         }
 
         private static void CreateDefaultFormattedValueIfEmpty(Dictionary<string, object> formattedValues, object value)

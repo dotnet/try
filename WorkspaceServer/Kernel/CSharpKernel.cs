@@ -160,37 +160,39 @@ namespace WorkspaceServer.Kernel
 
             Exception exception = null;
             using var console = await ConsoleOutput.Capture();
-            using var _ = console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode));
-
-            if (!cancellationSource.IsCancellationRequested)
+            using (console.SubscribeToStandardOutput(std => PublishOutput(std, context, submitCode)))
+            using (console.SubscribeToStandardError(std => PublishError(std, context, submitCode)))
             {
-                try
+                if (!cancellationSource.IsCancellationRequested)
                 {
-                    if (ScriptState == null)
+                    try
                     {
-                        ScriptState = await CSharpScript.RunAsync(
-                                code,
-                                ScriptOptions,
-                                cancellationToken: cancellationSource.Token)
-                            .UntilCancelled(cancellationSource.Token);
+                        if (ScriptState == null)
+                        {
+                            ScriptState = await CSharpScript.RunAsync(
+                                    code,
+                                    ScriptOptions,
+                                    cancellationToken: cancellationSource.Token)
+                                .UntilCancelled(cancellationSource.Token);
+                        }
+                        else
+                        {
+                            ScriptState = await ScriptState.ContinueWithAsync(
+                                    code,
+                                    ScriptOptions,
+                                    e =>
+                                    {
+                                        exception = e;
+                                        return true;
+                                    },
+                                    cancellationToken: cancellationSource.Token)
+                                .UntilCancelled(cancellationSource.Token);
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        ScriptState = await ScriptState.ContinueWithAsync(
-                                code,
-                                ScriptOptions,
-                                e =>
-                                {
-                                    exception = e;
-                                    return true;
-                                },
-                                cancellationToken: cancellationSource.Token)
-                            .UntilCancelled(cancellationSource.Token);
+                        exception = e;
                     }
-                }
-                catch (Exception e)
-                {
-                    exception = e;
                 }
             }
 
@@ -244,6 +246,30 @@ namespace WorkspaceServer.Kernel
             context.Publish(
                 new DisplayedValueProduced(
                     output,
+                    command,
+                    formattedValues));
+
+            context.Publish(
+                new StandardOutputValueProduced(
+                    output,
+                    command,
+                    formattedValues));
+        }
+
+        private void PublishError(
+            string error,
+            KernelInvocationContext context,
+            IKernelCommand command)
+        {
+            var formattedValues = new List<FormattedValue>
+            {
+                new FormattedValue(
+                    PlainTextFormatter.MimeType, error)
+            };
+            
+            context.Publish(
+                new StandardErrorValueProduced(
+                    error,
                     command,
                     formattedValues));
         }
