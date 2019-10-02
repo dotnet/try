@@ -2,25 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.DotNet.Interactive.Commands;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
-    [JsonConverter(typeof(StreamKernelCommandConverter))]
-    public class StreamKernelCommand
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("commandType")]
-        public string CommandType { get; set; }
-
-        [JsonProperty("command")]
-        public IKernelCommand Command { get; set; }
-    }
-
     public class StreamKernelCommandConverter : JsonConverter<StreamKernelCommand>
     {
         private static  readonly CommandDeserializer _deserializer = new CommandDeserializer();
@@ -54,7 +40,7 @@ namespace Microsoft.DotNet.Interactive
 
             if (jObject.TryGetValue("command", StringComparison.InvariantCultureIgnoreCase, out var commandValue))
             {
-               var  command = _deserializer.Deserialize(ret.CommandType, commandValue);
+                var  command = _deserializer.Deserialize(ret.CommandType, commandValue);
                 ret.Command = command ?? throw new JsonReaderException($"Cannot deserialize {ret.CommandType}");
             }
 

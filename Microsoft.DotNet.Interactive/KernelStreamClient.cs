@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Interactive
                 
                 if (!_cancellationSource.IsCancellationRequested)
                 {
-                    var command = streamKernelCommand.Command as IKernelCommand;
+                    var command = streamKernelCommand.Command;
                     command.Properties["id"] = streamKernelCommand.Id;
                     await _kernel.SendAsync(command, _cancellationSource.Token);
                 }
