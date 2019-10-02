@@ -10,6 +10,7 @@ open FSharp.Compiler.Scripting
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
+open MLS.Agent.Tools
 
 type FSharpKernel() as this =
     inherit KernelBase(Name = "fsharp")
@@ -31,6 +32,9 @@ type FSharpKernel() as this =
         async {
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
             context.Publish(codeSubmissionReceived)
+            use! console = ConsoleOutput.Capture() |> Async.AwaitTask
+            use _ = console.SubscribeToStandardOutput(fun msg -> context.Publish(StandardOutputValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))
+            use _ = console.SubscribeToStandardError(fun msg -> context.Publish(StandardErrorValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))
             resolvedAssemblies.Clear()
             let result, errors =
                 try
