@@ -263,7 +263,7 @@ Console.Write(DateTime.Now);
 5");
             await kernel.SendAsync(kernelCommand);
             var events = KernelEvents
-                .Where(e => e.Value is DisplayedValueProduced).ToArray();
+                .Where(e => e.Value is StandardOutputValueProduced).ToArray();
             var diff = events[1].Timestamp - events[0].Timestamp;
             diff.Should().BeCloseTo(1.Seconds(), precision: 200);
 
