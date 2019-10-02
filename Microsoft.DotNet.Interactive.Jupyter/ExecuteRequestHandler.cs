@@ -139,10 +139,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 while (dataMessage.Count > 0)
                 {
-                    
+                    // send on io
+                    jupyterMessageSender.Send(dataMessage.Dequeue());
                 }
-                // send on io
-                jupyterMessageSender.Send(dataMessage.Dequeue());
             }
         }
 
