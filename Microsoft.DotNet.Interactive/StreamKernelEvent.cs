@@ -2,11 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Microsoft.DotNet.Interactive
 {
-    internal class StreamKernelEvent
+    public class StreamKernelEvent
     {
+        private static readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Formatting = Formatting.None
+        };
+
         [JsonProperty("id")]
         public int Id { get; set; }
 
@@ -15,5 +22,12 @@ namespace Microsoft.DotNet.Interactive
 
         [JsonProperty("event")]
         public object Event { get; set; }
+
+        public string Serialize()
+        {
+            return JsonConvert.SerializeObject(this, _jsonSerializerSettings);
+        }
     }
+
+    
 }
