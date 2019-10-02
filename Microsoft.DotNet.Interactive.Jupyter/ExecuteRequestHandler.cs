@@ -92,10 +92,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
             var value = displayEvent.Value;
+            var dataMessage = new Queue<PubSubMessage>();
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
-            Queue<PubSubMessage> dataMessage = new Queue<PubSubMessage>();
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
