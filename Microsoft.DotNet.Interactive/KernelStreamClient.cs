@@ -10,23 +10,13 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 namespace Microsoft.DotNet.Interactive
 {
     public class KernelStreamClient : IDisposable
     {
         private readonly IKernel _kernel;
-        private readonly CommandDeserializer _deserializer = new CommandDeserializer();
-
         private readonly ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)> _commandQueue = new ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)>();
-
-        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
-
         private CancellationTokenSource _cancellationSource;
         private readonly IInputTextStream _input;
         private readonly IOutputTextStream _output;
@@ -65,7 +55,6 @@ namespace Microsoft.DotNet.Interactive
 
         public async Task Start()
         {
-            // todo : multiple start must be handled
             _cancellationSource = new CancellationTokenSource();
             await _input.Start(_cancellationSource.Token);
         }
@@ -75,7 +64,7 @@ namespace Microsoft.DotNet.Interactive
             StreamKernelCommand streamKernelCommand = null;
             try
             {
-                streamKernelCommand = JsonConvert.DeserializeObject<StreamKernelCommand>(line, _jsonSerializerSettings);
+                streamKernelCommand = StreamKernelCommand.Deserialize(line);
                 
                 if (!_cancellationSource.IsCancellationRequested)
                 {
@@ -103,15 +92,10 @@ namespace Microsoft.DotNet.Interactive
                 Event = e,
                 EventType = e.GetType().Name
             };
-            var serialized = JsonConvert.SerializeObject(wrapper, _jsonSerializerSettings);
+            var serialized = wrapper.Serialize();
             _output.Write(serialized);
         }
-
-        private IKernelCommand DeserializeCommand(string commandType, JToken command)
-        {
-            return _deserializer.Deserialize(commandType, command);
-        }
-
+      
         public void Dispose()
         {
             _disposables.Dispose();

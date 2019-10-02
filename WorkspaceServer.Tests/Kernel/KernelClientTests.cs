@@ -17,7 +17,6 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using WorkspaceServer.Kernel;
 using Xunit;
 
@@ -32,11 +31,6 @@ namespace WorkspaceServer.Tests.Kernel
 
         private class IOStreams : IInputTextStream, IOutputTextStream
         {
-            private static readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-
             private readonly ReplaySubject<string> _input;
             private readonly ReplaySubject<string> _output;
 
@@ -66,7 +60,7 @@ namespace WorkspaceServer.Tests.Kernel
             public void WriteToInput(IKernelCommand command, int correlationId)
             {
                 var message = PackAsStreamKernelCommand(command, correlationId);
-                _input.OnNext(JsonConvert.SerializeObject(message, _jsonSerializerSettings));
+                _input.OnNext(message.Serialize());
             }
 
             public static StreamKernelCommand PackAsStreamKernelCommand(IKernelCommand kernelCommand, int correlationId)
@@ -100,9 +94,12 @@ namespace WorkspaceServer.Tests.Kernel
             var displayIdSeed = 0;
             _configuration = new Configuration()
              .UsingExtension("json");
+
             _configuration = _configuration.SetInteractive(Debugger.IsAttached);
+
             Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator =
                 () => Interlocked.Increment(ref displayIdSeed).ToString();
+
             var kernel = new CompositeKernel
             {
                 new CSharpKernel()
@@ -112,10 +109,12 @@ namespace WorkspaceServer.Tests.Kernel
             };
 
             _io = new IOStreams();
+
             _kernelClient = new KernelStreamClient(
                 kernel,
                 _io,
                 _io);
+
             _events = _io.OutputStream
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Select(JObject.Parse);
@@ -138,8 +137,8 @@ namespace WorkspaceServer.Tests.Kernel
                 .ToList();
 
             var expectedEvents = new List<string> {
-                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).ToJObject().ToString(Formatting.None),
-                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode("display(x); display(x + 1); display(x + 2);")), 1).ToJObject().ToString(Formatting.None)
+                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).Serialize(),
+                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode("display(x); display(x + 1); display(x + 2);")), 1).Serialize()
             };
 
             events.Should()
