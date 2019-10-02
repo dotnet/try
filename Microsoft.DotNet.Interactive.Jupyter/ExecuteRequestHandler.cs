@@ -119,13 +119,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         transient: transient,
                         data: formattedValues));
                     dataMessage.Enqueue(Stream.StdOut(
-                        GetPlainTextValueOrDefault(formattedValues, value?.ToString()))
+                        GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
                     );
                     break;
 
                 case StandardErrorValueProduced _:
                     dataMessage.Enqueue(Stream.StdErr(
-                        GetPlainTextValueOrDefault(formattedValues, value?.ToString()))
+                        GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
                     );
                     break;
                 default:
