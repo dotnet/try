@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Interactive
 
         public KernelStreamClient(IKernel kernel, TextReader input, TextWriter output) : this(kernel, new InputTextStream(input), new OutputTextStream(output))
         {
-
         }
 
         public KernelStreamClient(IKernel kernel, IInputTextStream input, IOutputTextStream output)

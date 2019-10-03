@@ -15,10 +15,15 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using Pocket;
+using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -28,6 +33,8 @@ namespace WorkspaceServer.Tests.Kernel
         private readonly KernelStreamClient _kernelClient;
         private readonly IObservable<JObject> _events;
         private readonly IOStreams _io;
+        private readonly ITestOutputHelper _output;
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         private class IOStreams : IInputTextStream, IOutputTextStream
         {
@@ -59,11 +66,11 @@ namespace WorkspaceServer.Tests.Kernel
 
             public void WriteToInput(IKernelCommand command, int correlationId)
             {
-                var message = PackAsStreamKernelCommand(command, correlationId);
+                var message = ToStreamKernelCommand(command, correlationId);
                 _input.OnNext(message.Serialize());
             }
 
-            public static StreamKernelCommand PackAsStreamKernelCommand(IKernelCommand kernelCommand, int correlationId)
+            public static StreamKernelCommand ToStreamKernelCommand(IKernelCommand kernelCommand, int correlationId)
             {
                 return new StreamKernelCommand
                 {
@@ -73,7 +80,7 @@ namespace WorkspaceServer.Tests.Kernel
                 };
             }
 
-            public static StreamKernelEvent PasAsStreamKernelEvent(IKernelEvent kernelEvent, int correlationId)
+            public static StreamKernelEvent ToStreamKernelEvent(IKernelEvent kernelEvent, int correlationId)
             {
                 return new StreamKernelEvent
                 {
@@ -89,8 +96,9 @@ namespace WorkspaceServer.Tests.Kernel
             }
         }
 
-        public KernelClientTests()
+        public KernelClientTests(ITestOutputHelper output)
         {
+            _output = output;
             var displayIdSeed = 0;
             _configuration = new Configuration()
              .UsingExtension("json");
@@ -116,11 +124,15 @@ namespace WorkspaceServer.Tests.Kernel
                 _io);
 
             _events = _io.OutputStream
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(JObject.Parse);
+                         .Where(s => !string.IsNullOrWhiteSpace(s))
+                         .Select(JObject.Parse);
+
+            _disposables.Add(_kernelClient);
+            _disposables.Add(_output.SubscribeToPocketLogger());
+            _disposables.Add(kernel.LogEventsToPocketLogger());
+            _disposables.Add(kernel);
+            _disposables.Add(() => Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator = null);
         }
-
-
 
         [Fact]
         public async Task Kernel_can_be_interacted_using_kernel_client()
@@ -128,17 +140,17 @@ namespace WorkspaceServer.Tests.Kernel
             await _kernelClient.Start();
 
             _io.WriteToInput(new SubmitCode(@"var x = 123;"), 0);
-            _io.WriteToInput(new SubmitCode("display(x); display(x + 1); display(x + 2);"), 1);
 
             var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(10.Seconds()))
-                .ToEnumerable()
-                .Select(e => e.ToString(Formatting.None))
-                .ToList();
+                         .Where(e => e["eventType"].Value<string>() == nameof(CommandHandled))
+                         .Take(1)
+                         .Timeout(20.Seconds())
+                         .Select(e => e.ToString(Formatting.None))
+                         .ToEnumerable()
+                         .ToList();
 
             var expectedEvents = new List<string> {
-                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).Serialize(),
-                IOStreams.PasAsStreamKernelEvent(new CommandHandled(new SubmitCode("display(x); display(x + 1); display(x + 2);")), 1).Serialize()
+                IOStreams.ToStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).Serialize(),
             };
 
             events.Should()
@@ -213,7 +225,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         public void Dispose()
         {
-            _kernelClient.Dispose();
+            _disposables.Dispose();
         }
     }
 }
