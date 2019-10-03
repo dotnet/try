@@ -45,6 +45,7 @@ namespace WorkspaceServer.Tests
             await initializer.Initialize(dir);
 
             var rootFiles = dir.GetFiles();
+            rootFiles.Should().Contain(f => f.Name == "App.razor");
             rootFiles.Should().Contain(f => f.Name == "Program.cs");
             rootFiles.Should().Contain(f => f.Name == "Startup.cs");
             rootFiles.Should().Contain(f => f.Name == "Linker.xml");

@@ -123,6 +123,7 @@
     <EmbeddedResource Include="..\MLS.Blazor\wwwroot\interop.js" />
     <!--<EmbeddedResource Include="..\MLS.Blazor\Pages\_Imports.razor" />-->
     <EmbeddedResource Include="..\MLS.Blazor\_Imports.razor" />
+    <EmbeddedResource Include="..\MLS.Blazor\App.razor" />
     <EmbeddedResource Include="..\MLS.Blazor\Pages\Index.razor" />
 
     <EmbeddedResource Include="..\WasmCodeRunner\CodeRunner.cs" />

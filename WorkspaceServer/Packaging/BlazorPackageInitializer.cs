@@ -17,7 +17,7 @@ namespace WorkspaceServer.Packaging
         private readonly List<(string packageName, string packageVersion)> _addPackages;
 
         public BlazorPackageInitializer(string name, List<(string packageName, string packageVersion)> addPackages) :
-            base("blazor", "MLS.Blazor")
+            base("blazorwasm", "MLS.Blazor")
         {
             _name = name;
             var packages = addPackages ?? throw new ArgumentNullException(nameof(addPackages));
@@ -84,7 +84,7 @@ namespace WorkspaceServer.Packaging
         {
             var wwwRootFiles = new[] { "index.html", "interop.js" };
             var pagesFiles = new[] { "Index.razor" };
-            var rootFiles = new[] { "Program.cs", "Startup.cs", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs", "_Imports.razor", "Linker.xml" };
+            var rootFiles = new[] {"App.razor", "Program.cs", "Startup.cs", "CodeRunner.cs", "InteropMessage.cs", "SerializableDiagnostic.cs", "WasmCodeRunnerRequest.cs", "WasmCodeRunnerResponse.cs", "CommandLineBuilderExtensions.cs", "EntryPointDiscoverer.cs", "PreserveConsoleState.cs", "_Imports.razor", "Linker.xml" };
 
             WriteResourcesToLocation(wwwRootFiles, Path.Combine(root, "wwwroot"));
             WriteResourcesToLocation(pagesFiles, Path.Combine(root, "Pages"));
