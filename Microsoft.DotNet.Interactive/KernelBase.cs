@@ -150,49 +150,75 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
-            var modified = false;
+            var operations = new List<(string comment, Func<Task> operation)>();
+            var commandWasSplit = false;
+            var directiveParser = GetDirectiveParser();
 
             var lines = new Queue<string>(
                 submitCode.Code.Split(new[] { "\r\n", "\n" },
                                       StringSplitOptions.None));
 
-            var unhandledLines = new List<string>();
+            var nonDirectiveLines = new List<string>();
 
             while (lines.Count > 0 && !context.IsComplete)
             {
                 var currentLine = lines.Dequeue();
 
-                var parseResult = GetDirectiveParser().Parse(currentLine);
+                var parseResult = directiveParser.Parse(currentLine);
 
                 if (parseResult.Errors.Count == 0 &&
                     !parseResult.Directives.Any() && // System.CommandLine directives should not be considered as valid
                     !parseResult.Tokens.Any(t => t.Type == TokenType.Directive))
                 {
-                    modified = true;
-                    await _directiveParser.InvokeAsync(parseResult);
+                    commandWasSplit = true;
+
+                    FlushSubmission();
+
+                    operations.Add(
+                        (currentLine, () => _directiveParser.InvokeAsync(parseResult)));
                 }
-                else
+                else 
                 {
-                    unhandledLines.Add(currentLine);
+                    nonDirectiveLines.Add(currentLine);
                 }
             }
 
-            var code = string.Join("\n", unhandledLines);
+            FlushSubmission();
 
-            if (modified)
+            void FlushSubmission()
             {
-                if (!string.IsNullOrWhiteSpace(code))
+                if (nonDirectiveLines.Any())
                 {
-                    submitCode.Code = code;
-                }
-                else
-                {
-                    context.Complete();
-                    return;
+                    var code = string.Join(Environment.NewLine, nonDirectiveLines);
+
+                    if (!string.IsNullOrWhiteSpace(code))
+                    {
+                        operations.Add(
+                            (code,
+                                () =>
+                                {
+                                    return context.HandlingKernel.SendAsync(new SubmitCode(code));
+                                }));
+                    }
+
+                    nonDirectiveLines.Clear();
                 }
             }
 
-            await next(submitCode, context);
+            if (commandWasSplit)
+            {
+                foreach (var operation in operations)
+                {
+                    if (!context.IsComplete)
+                    {
+                        await operation.operation();
+                    }
+                }
+            }
+            else
+            {
+                await next(submitCode, context);
+            }
         }
 
         private async Task HandleDisplayValue(
@@ -346,7 +372,7 @@ namespace Microsoft.DotNet.Interactive
             var tcs = new TaskCompletionSource<IKernelCommandResult>();
 
             var operation = new KernelOperation(command, tcs);
-
+           
             _commandQueue.Enqueue(operation);
 
             ProcessCommandQueue(_commandQueue);

@@ -16,17 +16,20 @@ namespace WorkspaceServer.Packaging
     {
         private readonly AsyncLazy<Package> _lazyPackage;
 
-        public PackageRestoreContext()
+        public PackageRestoreContext(string name = null)
         {
-            _lazyPackage = new AsyncLazy<Package>(CreatePackage);
+            _lazyPackage = new AsyncLazy<Package>(
+                () =>
+                    CreatePackage(name
+                                  ?? Guid.NewGuid().ToString("N")));
         }
 
         public async Task<string> OutputPath()
             => (await _lazyPackage.ValueAsync()).EntryPointAssemblyPath.FullName;
 
-        private async Task<Package> CreatePackage()
+        private async Task<Package> CreatePackage(string name)
         {
-            var packageBuilder = new PackageBuilder(Guid.NewGuid().ToString("N"));
+            var packageBuilder = new PackageBuilder(name);
             packageBuilder.CreateRebuildablePackage = true;
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
@@ -36,7 +39,9 @@ namespace WorkspaceServer.Packaging
             return package;
         }
 
-        public async Task<AddReferenceResult> AddPackage(string packageName, string packageVersion = null)
+        public async Task<AddReferenceResult> AddPackage(
+            string packageName, 
+            string packageVersion = null)
         {
             var package = await _lazyPackage.ValueAsync();
             var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());

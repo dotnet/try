@@ -29,6 +29,18 @@ namespace Microsoft.DotNet.Interactive
             return kernel.SendAsync(command, CancellationToken.None);
         }
 
+        public static Task<IKernelCommandResult> SubmitCodeAsync(
+            this IKernel kernel, 
+            string code)
+        {
+            if (kernel == null)
+            {
+                throw new ArgumentNullException(nameof(kernel));
+            }
+
+            return kernel.SendAsync(new SubmitCode(code), CancellationToken.None);
+        }
+
         public static T UseExtendDirective<T>(this T kernel)
             where T : KernelBase
         {
