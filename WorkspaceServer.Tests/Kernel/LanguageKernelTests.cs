@@ -873,7 +873,7 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is StandardOutputValueProduced && ((StandardOutputValueProduced)e).Value.ToString().Contains("Installing"));
+                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
@@ -918,7 +918,8 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is StandardOutputValueProduced && ((StandardOutputValueProduced)e).Value.ToString().Contains("Installing"));
+                .Match(e => e is DisplayedValueProduced &&
+                            ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
@@ -962,8 +963,8 @@ json
                                              .Code
                                              .Contains("using System.Reflection;"));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is StandardOutputValueProduced &&
-                                                     e.Value.As<StandardOutputValueProduced>()
+            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
+                                                     e.Value.As<DisplayedValueProduced>()
                                                      .Value
                                                      .ToString()
                                                      .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
@@ -1119,8 +1120,8 @@ catch (Exception e)
                                              .Code
                                              .Contains("using System.Reflection;"));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is StandardOutputValueProduced &&
-                                                    e.Value.As<StandardOutputValueProduced>()
+            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
+                                                    e.Value.As<DisplayedValueProduced>()
                                                     .Value
                                                     .ToString()
                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
