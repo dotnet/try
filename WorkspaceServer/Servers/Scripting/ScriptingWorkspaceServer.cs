@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
+using MLS.Agent.Tools;
 using Pocket;
 using WorkspaceServer.Transformations;
 using static Pocket.Logger<WorkspaceServer.Servers.Scripting.ScriptingWorkspaceServer>;

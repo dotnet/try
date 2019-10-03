@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Servers.Roslyn
+namespace MLS.Agent.Tools
 {
     public class ConsoleOutput : IDisposable
     {

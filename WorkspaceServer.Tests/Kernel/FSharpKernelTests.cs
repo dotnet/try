@@ -54,6 +54,32 @@ namespace WorkspaceServer.Tests.Kernel
             AssertLastValue(10);
         }
 
+        [Fact]
+        public async Task kernel_captures_stdout()
+        {
+            var kernel = CreateKernel();
+            await kernel.SendAsync(new SubmitCode("printf \"hello from F#\""));
+            KernelEvents.ValuesOnly()
+                .OfType<StandardOutputValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be("hello from F#");
+        }
+
+        [Fact]
+        public async Task kernel_captures_stderr()
+        {
+            var kernel = CreateKernel();
+            await kernel.SendAsync(new SubmitCode("eprintf \"hello from F#\""));
+            KernelEvents.ValuesOnly()
+                .OfType<StandardErrorValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be("hello from F#");
+        }
+
         private void AssertLastValue(object value)
         {
             KernelEvents.ValuesOnly()

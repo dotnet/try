@@ -14,6 +14,7 @@
                 <dependency id="Newtonsoft.Json" version="$NewtonsoftJsonVersion$" />
                 <dependency id="PocketLogger" version="$PocketLoggerVersion$" />
                 <dependency id="System.Diagnostics.Process" version="$SystemDiagnosticsProcessVersion$" />
+                <dependency id="System.Reactive" version="$SystemReactiveVersion$" />
                 <dependency id="System.Runtime.Extensions" version="$SystemRuntimeExtensionsVersion$" />
                 <dependency id="Microsoft.CodeAnalysis.Common" version="$MicrosoftCodeAnalysisCommonVersion$" />
                 <dependency id="Microsoft.CodeAnalysis.Workspaces.Common" version="$MicrosoftCodeAnalysisWorkspacesCommonVersion$" />

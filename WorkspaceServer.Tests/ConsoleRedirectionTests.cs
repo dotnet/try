@@ -6,10 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Clockwise;
 using FluentAssertions;
-using FluentAssertions.Extensions;
-using WorkspaceServer.Servers.Roslyn;
+using MLS.Agent.Tools;
 using Xunit;
 
 namespace WorkspaceServer.Tests
