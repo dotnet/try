@@ -310,7 +310,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e.Value is DisplayedValueProduced);
+                .NotContain(e => e.Value is StandardOutputValueProduced);
 
             KernelEvents
                 .Should()
@@ -361,7 +361,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e.Value is DisplayedValueProduced);
+                .NotContain(e => e.Value is StandardOutputValueProduced);
 
             KernelEvents
                 .Should()
@@ -385,7 +385,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             KernelEvents
                 .Should()
-                .NotContain(e => e.Value is DisplayedValueProduced);
+                .NotContain(e => e.Value is StandardOutputValueProduced);
 
             KernelEvents
                 .Should()
@@ -452,7 +452,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                 // Todo: work through DisplayedValueProduced scenarios
+        //[InlineData(Language.FSharp)]                 // Todo: work through StandardOutputValueProduced scenarios
         public async Task it_produces_values_when_executing_Console_output(Language language)
         {
             var kernel = CreateKernel(language);
@@ -475,12 +475,12 @@ Console.Write(""value three"");",
 
             KernelEvents
                 .ValuesOnly()
-                .OfType<DisplayedValueProduced>()
+                .OfType<StandardOutputValueProduced>()
                 .Should()
                 .BeEquivalentTo(
-                    new DisplayedValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
-                    new DisplayedValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
-                    new DisplayedValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
+                    new StandardOutputValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
+                    new StandardOutputValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
+                    new StandardOutputValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
         [Theory]
@@ -515,7 +515,7 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: need to generate DisplayedValueProduced
+        //[InlineData(Language.FSharp)]                     // Todo: need to generate StandardOutputValueProduced
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
         {
             var kernel = CreateKernel(language);
@@ -539,7 +539,7 @@ Console.Write(""value three"");
             await SubmitCode(kernel, source);
 
             KernelEvents.ValuesOnly()
-                .OfType<DisplayedValueProduced>()
+                .OfType<StandardOutputValueProduced>()
                 .Should()
                 .HaveCount(3);
 
@@ -553,7 +553,7 @@ Console.Write(""value three"");
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                         // Todo:  FSharp not producing DisplayedValueProduced
+        //[InlineData(Language.FSharp)]                         // Todo:  FSharp not producing StandardOutputValueProduced
         public async Task the_output_is_asynchronous(Language language)
         {
             var kernel = CreateKernel(language);
@@ -578,7 +578,7 @@ Console.Write(DateTime.Now);
 
             var events =
                 KernelEvents
-                    .Where(e => e.Value is DisplayedValueProduced).ToArray();
+                    .Where(e => e.Value is StandardOutputValueProduced).ToArray();
 
             var diff = events[1].Timestamp - events[0].Timestamp;
 
@@ -594,7 +594,7 @@ Console.Write(DateTime.Now);
             await kernel.SendAsync(new SubmitCode("text[^5..^0]"));
 
             KernelEvents.ValuesOnly()
-                .OfType<DisplayedValueProduced>()
+                .OfType<StandardOutputValueProduced>()
                 .Last()
                 .Value
                 .Should()
@@ -839,15 +839,21 @@ json
         [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
+            var cSharpKernel = new CSharpKernel();
+            using var events = cSharpKernel.KernelEvents.ToSubscribedList();
+
             var kernel = new CompositeKernel
             {
-                new CSharpKernel().UseNugetDirective()
+                cSharpKernel.UseNugetDirective()
             };
 
             var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();");
             await kernel.SendAsync(command);
 
-            command.Code.Should().Be("var a = new List<int>();");
+            events
+                .OfType<CodeSubmissionReceived>()
+                .Should()
+                .NotContain(e => e.Code.Contains("#r"));
         }
 
         [Fact]
@@ -867,7 +873,7 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+                .Match(e => e is StandardOutputValueProduced && ((StandardOutputValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
@@ -886,7 +892,13 @@ json
 
             events
                 .Should()
-                .ContainSingle(e => e is CommandHandled);
+                .ContainSingle(e => e is CommandHandled &&
+                                    e.As<CommandHandled>().Command is AddNugetPackage);
+
+            events
+                .Should()
+                .ContainSingle(e => e is CommandHandled &&
+                                    e.As<CommandHandled>().Command is SubmitCode);
         }
 
         [Fact]
@@ -906,7 +918,7 @@ json
             events
                 .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+                .Match(e => e is StandardOutputValueProduced && ((StandardOutputValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
@@ -950,8 +962,8 @@ json
                                              .Code
                                              .Contains("using System.Reflection;"));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
-                                                     e.Value.As<DisplayedValueProduced>()
+            KernelEvents.Should().ContainSingle(e => e.Value is StandardOutputValueProduced &&
+                                                     e.Value.As<StandardOutputValueProduced>()
                                                      .Value
                                                      .ToString()
                                                      .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
@@ -1035,8 +1047,8 @@ catch (Exception e)
 
             events
                 .Should()
-                .Contain(e => e is DisplayedValueProduced &&
-                              (((DisplayedValueProduced) e).Value as string).Contains("success"));
+                .Contain(e => e is StandardOutputValueProduced &&
+                              (((StandardOutputValueProduced) e).Value as string).Contains("success"));
         }
 
         [Fact]
@@ -1107,8 +1119,8 @@ catch (Exception e)
                                              .Code
                                              .Contains("using System.Reflection;"));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
-                                                    e.Value.As<DisplayedValueProduced>()
+            KernelEvents.Should().ContainSingle(e => e.Value is StandardOutputValueProduced &&
+                                                    e.Value.As<StandardOutputValueProduced>()
                                                     .Value
                                                     .ToString()
                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));

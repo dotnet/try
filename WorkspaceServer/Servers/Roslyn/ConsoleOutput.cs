@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,17 +10,17 @@ namespace WorkspaceServer.Servers.Roslyn
 {
     public class ConsoleOutput : IDisposable
     {
-        private TextWriter originalOutputWriter;
-        private TextWriter originalErrorWriter;
-        private readonly TrackingStringWriter outputWriter = new TrackingStringWriter();
-        private readonly TrackingStringWriter errorWriter = new TrackingStringWriter();
+        private TextWriter _originalOutputWriter;
+        private TextWriter _originalErrorWriter;
+        private readonly TrackingStringWriter _outputWriter = new TrackingStringWriter();
+        private readonly TrackingStringWriter _errorWriter = new TrackingStringWriter();
 
         private const int NOT_DISPOSED = 0;
         private const int DISPOSED = 1;
 
-        private int alreadyDisposed = NOT_DISPOSED;
+        private int _alreadyDisposed = NOT_DISPOSED;
 
-        private static readonly SemaphoreSlim consoleLock = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim _consoleLock = new SemaphoreSlim(1, 1);
 
         private ConsoleOutput()
         {
@@ -30,19 +29,19 @@ namespace WorkspaceServer.Servers.Roslyn
         public static async Task<ConsoleOutput> Capture()
         {
             var redirector = new ConsoleOutput();
-            await consoleLock.WaitAsync();
+            await _consoleLock.WaitAsync();
 
             try
             {
-                redirector.originalOutputWriter = Console.Out;
-                redirector.originalErrorWriter = Console.Error;
+                redirector._originalOutputWriter = Console.Out;
+                redirector._originalErrorWriter = Console.Error;
 
-                Console.SetOut(redirector.outputWriter);
-                Console.SetError(redirector.errorWriter);
+                Console.SetOut(redirector._outputWriter);
+                Console.SetError(redirector._errorWriter);
             }
             catch
             {
-                consoleLock.Release();
+                _consoleLock.Release();
                 throw;
             }
 
@@ -51,41 +50,42 @@ namespace WorkspaceServer.Servers.Roslyn
 
         public IDisposable SubscribeToStandardOutput(Action<string> action)
         {
-            return outputWriter.Subscribe(action);
+            return _outputWriter.Subscribe(action);
+        }
+
+        public IDisposable SubscribeToStandardError(Action<string> action)
+        {
+            return _errorWriter.Subscribe(action);
         }
 
         public void Dispose()
         {
-            if (Interlocked.CompareExchange(ref alreadyDisposed, DISPOSED, NOT_DISPOSED) == NOT_DISPOSED)
+            if (Interlocked.CompareExchange(ref _alreadyDisposed, DISPOSED, NOT_DISPOSED) == NOT_DISPOSED)
             {
-                if (originalOutputWriter != null)
+                if (_originalOutputWriter != null)
                 {
-                    Console.SetOut(originalOutputWriter);
+                    Console.SetOut(_originalOutputWriter);
                 }
-                if (originalErrorWriter != null)
+                if (_originalErrorWriter != null)
                 {
-                    Console.SetError(originalErrorWriter);
+                    Console.SetError(_originalErrorWriter);
                 }
 
-                consoleLock.Release();
+                _consoleLock.Release();
             }
         }
        
-        public string StandardOutput => outputWriter.ToString();
+        public string StandardOutput => _outputWriter.ToString();
 
-        public string StandardError => errorWriter.ToString();
+        public string StandardError => _errorWriter.ToString();
 
         public void Clear()
         {
-            outputWriter.GetStringBuilder().Clear();
-            errorWriter.GetStringBuilder().Clear();
+            _outputWriter.GetStringBuilder().Clear();
+            _errorWriter.GetStringBuilder().Clear();
         }
 
-        public bool IsEmpty() => outputWriter.ToString().Length == 0 && errorWriter.ToString().Length == 0;
-
-        public IEnumerable<string> GetStandardOutputWrites()
-        {
-            return outputWriter.Writes();
-        }
+        public bool IsEmpty() => _outputWriter.ToString().Length == 0 && _errorWriter.ToString().Length == 0;
+     
     }
 }

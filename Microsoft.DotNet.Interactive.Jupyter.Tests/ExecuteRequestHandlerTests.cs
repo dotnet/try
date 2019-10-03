@@ -78,6 +78,32 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
+        public async Task sends_Stream_message_on_StandardOutputValueProduced()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should().Contain(r => r is Stream && r.As<Stream>().Name == Stream.StandardOutput);
+        }
+
+        [Fact]
+        public async Task sends_Stream_message_on_StandardErrorValueProduced()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should().Contain(r => r is Stream && r.As<Stream>().Name == Stream.StandardError);
+        }
+
+        [Fact]
         public async Task sends_ExecuteReply_message_on_ReturnValueProduced()
         {
             var scheduler = CreateScheduler();
