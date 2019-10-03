@@ -8,7 +8,7 @@ using WorkspaceServer;
 
 namespace MLS.Agent.Telemetry.Configurer
 {
-    internal sealed class UserLevelCacheWriter : IUserLevelCacheWriter
+    public sealed class UserLevelCacheWriter : IUserLevelCacheWriter
     {
         private string _dotnetTryUserProfileFolderPath;
         private readonly Func<string, bool> _fileExists;
@@ -19,7 +19,7 @@ namespace MLS.Agent.Telemetry.Configurer
 
         public UserLevelCacheWriter() :
             this(
-                Paths.DotnetTryUserProfilePath,
+                Paths.DotnetUserProfileFolderPath,
                 path => File.Exists(path),
                 path => Directory.Exists(path),
                 path => Directory.CreateDirectory(path),

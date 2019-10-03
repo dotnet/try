@@ -23,7 +23,7 @@ namespace MLS.Agent.Telemetry.Configurer
 
         public FirstTimeUseNoticeSentinel() :
             this(
-                Paths.DotnetTryUserProfilePath,
+                Paths.DotnetUserProfileFolderPath,
                 path => File.Exists(path),
                 path => Directory.Exists(path),
                 path => Directory.CreateDirectory(path),

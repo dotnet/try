@@ -7,25 +7,26 @@ using System.IO;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using RuntimeInformation = System.Runtime.InteropServices.RuntimeInformation;
 using MLS.Agent.Telemetry.Utils;
+using MLS.Agent.Telemetry.Configurer;
 
 namespace MLS.Agent.Telemetry
 {
     public class TelemetryCommonProperties
     {
         public TelemetryCommonProperties(
-            Func<string> getCurrentDirectory = null,
             Func<string, string> hasher = null,
             Func<string> getMACAddress = null,
-            IDockerContainerDetector dockerContainerDetector = null)
+            IDockerContainerDetector dockerContainerDetector = null,
+            IUserLevelCacheWriter userLevelCacheWriter = null)
         {
-            _getCurrentDirectory = getCurrentDirectory ?? Directory.GetCurrentDirectory;
             _hasher = hasher ?? Sha256Hasher.Hash;
             _getMACAddress = getMACAddress ?? MacAddressGetter.GetMacAddress;
             _dockerContainerDetector = dockerContainerDetector ?? new DockerContainerDetectorForTelemetry();
+            _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter();
         }
 
+        private readonly IUserLevelCacheWriter _userLevelCacheWriter;
         private readonly IDockerContainerDetector _dockerContainerDetector;
-        private Func<string> _getCurrentDirectory;
         private Func<string, string> _hasher;
         private Func<string> _getMACAddress;
         private const string OSVersion = "OS Version";
@@ -33,7 +34,6 @@ namespace MLS.Agent.Telemetry
         private const string RuntimeId = "Runtime Id";
         private const string ProductVersion = "Product Version";
         private const string DockerContainer = "Docker Container";
-        private const string CurrentPathHash = "Current Path Hash";
         private const string MachineId = "Machine ID";
         private const string KernelVersion = "Kernel Version";
 
@@ -49,7 +49,6 @@ namespace MLS.Agent.Telemetry
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
                 {ProductVersion, Product.Version},
                 {DockerContainer, IsDockerContainer()},
-                {CurrentPathHash, _hasher(_getCurrentDirectory())},
                 {MachineId, GetMachineId()},
                 {KernelVersion, GetKernelVersion()}
             };
@@ -57,22 +56,26 @@ namespace MLS.Agent.Telemetry
 
         private string GetMachineId()
         {
-            var macAddress = _getMACAddress();
-            if (macAddress != null)
+            return _userLevelCacheWriter.RunWithCache(MachineIdCacheKey, () =>
             {
-                return _hasher(macAddress);
-            }
-            else
-            {
-                // TODO We might want to cache this?
-                return Guid.NewGuid().ToString();
-            }
+                var macAddress = _getMACAddress();
+                if (macAddress != null)
+                {
+                    return _hasher(macAddress);
+                }
+                else
+                {
+                    return Guid.NewGuid().ToString();
+                }
+            });
         }
 
         private string IsDockerContainer()
         {
-            // TODO: should we cache this?
-            return _dockerContainerDetector.IsDockerContainer().ToString("G");
+            return _userLevelCacheWriter.RunWithCache(IsDockerContainerCacheKey, () =>
+            {
+                return _dockerContainerDetector.IsDockerContainer().ToString("G");
+            });
         }
 
         /// <summary>

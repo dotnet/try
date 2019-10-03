@@ -281,13 +281,6 @@ namespace MLS.Agent.Tests
         }
 
         [Fact]
-        public void Telemetry_common_properties_should_return_hashed_path()
-        {
-            var unitUnderTest = new TelemetryCommonProperties(() => "ADirectory");
-            unitUnderTest.GetTelemetryCommonProperties()["Current Path Hash"].Should().NotBe("ADirectory");
-        }
-
-        [Fact]
         public void Telemetry_common_properties_should_return_hashed_machine_id()
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => "plaintext");
