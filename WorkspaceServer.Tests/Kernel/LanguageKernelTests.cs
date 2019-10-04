@@ -393,10 +393,10 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Theory]
-        [InlineData(Language.CSharp, "true ? 25 : 20")]                                   // Todo: ternery expressions in C# do not raise ReturnValueProduced ??? 
+        [InlineData(Language.CSharp, "true ? 25 : 20")]
         [InlineData(Language.FSharp, "if true then 25 else 20")]
         [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
-        [InlineData(Language.CSharp, "true switch { true => 25, false => 20 }")]            // Todo: switch expressions in C# do not raise ReturnValueProduced ??? 
+        [InlineData(Language.CSharp, "true switch { true => 25, false => 20 }")]
         [InlineData(Language.FSharp, "match true with | true -> 25; | false -> 20")]
         public async Task it_returns_a_result_for_a_if_expressions(Language language, string expression)
         {
@@ -452,7 +452,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                 // Todo: work through StandardOutputValueProduced scenarios
+        [InlineData(Language.FSharp)]
         public async Task it_produces_values_when_executing_Console_output(Language language)
         {
             var kernel = CreateKernel(language);
@@ -481,6 +481,42 @@ Console.Write(""value three"");",
                     new StandardOutputValueProduced("value one", kernelCommand,  new[] { new FormattedValue("text/plain", "value one"), }),
                     new StandardOutputValueProduced("value two", kernelCommand,  new[] { new FormattedValue("text/plain", "value two"), }),
                     new StandardOutputValueProduced("value three", kernelCommand,  new[] { new FormattedValue("text/plain", "value three"), }));
+        }
+
+        [Theory]
+        [InlineData(Language.FSharp)]
+        public async Task kernel_captures_stdout(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = "printf \"hello from F#\"";
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents.ValuesOnly()
+                .OfType<StandardOutputValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be("hello from F#");
+        }
+
+        [Theory]
+        [InlineData(Language.FSharp)]
+        public async Task kernel_captures_stderr(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = "eprintf \"hello from F#\"";
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents.ValuesOnly()
+                .OfType<StandardErrorValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be("hello from F#");
         }
 
         [Theory]
@@ -515,7 +551,7 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: need to generate StandardOutputValueProduced
+        [InlineData(Language.FSharp)]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
         {
             var kernel = CreateKernel(language);
@@ -553,7 +589,7 @@ Console.Write(""value three"");
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                         // Todo:  FSharp not producing StandardOutputValueProduced
+        [InlineData(Language.FSharp)]
         public async Task the_output_is_asynchronous(Language language)
         {
             var kernel = CreateKernel(language);
@@ -699,7 +735,7 @@ let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )
 json
 "},
                 Language.CSharp => new[] {
-$"#r @\"{dllPath}\"",
+$"#r \"{dllPath}\"",
 @"
 using Newtonsoft.Json;
 var json = JsonConvert.SerializeObject(new { value = ""hello"" });
