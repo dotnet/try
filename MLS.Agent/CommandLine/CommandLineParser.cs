@@ -75,7 +75,8 @@ namespace MLS.Agent.CommandLine
             Verify verify = null,
             Jupyter jupyter = null,
             StartKernelServer startKernelServer = null,
-            ITelemetry telemetry = null)
+            ITelemetry telemetry = null,
+            IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = null)
         {
             if (services == null)
             {
@@ -113,8 +114,12 @@ namespace MLS.Agent.CommandLine
             startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
 
+            // Setup first time use notice sentinel.
+            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
+
+            // Setup telemetry.
+            telemetry = telemetry ?? new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
-            telemetry = telemetry ?? new Telemetry.Telemetry(new FirstTimeUseNoticeSentinel());
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
@@ -154,6 +159,15 @@ namespace MLS.Agent.CommandLine
                    .UseDefaults()
                    .UseMiddleware(async (context, next) =>
                    {
+                       // If sentinel does not exist, print the welcome message showing the telemetry notification.
+                       if (!firstTimeUseNoticeSentinel.Exists())
+                       {
+                           context.Console.Out.WriteLine();
+                           context.Console.Out.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
+
+                           firstTimeUseNoticeSentinel.CreateIfNotExists();
+                       }
+
                        if (context.ParseResult.Directives.Contains("debug") &&
                            !(Clock.Current is VirtualClock))
                        {

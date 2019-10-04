@@ -3,7 +3,7 @@
 
 using System;
 
-namespace MLS.Agent.Telemetry.Configurer
+namespace MLS.Agent
 {
     public interface IFirstTimeUseNoticeSentinel
     {

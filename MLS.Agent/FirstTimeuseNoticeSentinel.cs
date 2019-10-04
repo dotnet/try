@@ -7,9 +7,9 @@ using System;
 using System.IO;
 using WorkspaceServer;
 
-namespace MLS.Agent.Telemetry.Configurer
+namespace MLS.Agent
 {
-    internal sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
+    public sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
         public static readonly string SENTINEL = $"{Product.Version}.dotnetTryFirstUseSentinel";
 

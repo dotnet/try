@@ -21,7 +21,7 @@ namespace MLS.Agent.Telemetry
         private Task _trackEventTask = null;
 
         private const string InstrumentationKey = "a47da720-6803-4aec-8fca-3e0315fec27f";
-        private const string TelemetryOptout = "DOTNET_TRY_CLI_TELEMETRY_OPTOUT";
+        public const string TelemetryOptout = "DOTNET_TRY_CLI_TELEMETRY_OPTOUT";
 
         public bool Enabled { get; }
 
@@ -52,7 +52,7 @@ namespace MLS.Agent.Telemetry
             }
         }
 
-        private static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
+        public static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
         {
             var str = Environment.GetEnvironmentVariable(name);
             if (string.IsNullOrEmpty(str))

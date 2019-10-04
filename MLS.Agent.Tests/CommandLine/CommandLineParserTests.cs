@@ -69,7 +69,8 @@ namespace MLS.Agent.Tests.CommandLine
                 {
                     return Task.FromResult(1);
                 },
-                telemetry: new FakeTelemetry());
+                telemetry: new FakeTelemetry(),
+                firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
         }
 
         public void Dispose()

@@ -15,7 +15,7 @@ using MLS.Agent.Telemetry;
 using System.IO;
 using MLS.Agent.Telemetry.Configurer;
 
-namespace MLS.Agent.Tests
+namespace MLS.Agent.Tests.CommandLine
 {
     public class TelemetryTests : IDisposable
     {
@@ -61,7 +61,8 @@ namespace MLS.Agent.Tests
                 {
                     return Task.FromResult(1);
                 },
-                telemetry: _fakeTelemetry);
+                telemetry: _fakeTelemetry,
+                firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
         }
 
         public void Dispose()
@@ -276,21 +277,21 @@ namespace MLS.Agent.Tests
         [Fact]
         public void Telemetry_common_properties_should_contain_if_it_is_in_docker_or_not()
         {
-            var unitUnderTest = new TelemetryCommonProperties();
+            var unitUnderTest = new TelemetryCommonProperties(userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties().Should().ContainKey("Docker Container");
         }
 
         [Fact]
         public void Telemetry_common_properties_should_return_hashed_machine_id()
         {
-            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => "plaintext");
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => "plaintext", userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties()["Machine ID"].Should().NotBe("plaintext");
         }
 
         [Fact]
         public void Telemetry_common_properties_should_return_new_guid_when_cannot_get_mac_address()
         {
-            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null);
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
             var assignedMachineId = unitUnderTest.GetTelemetryCommonProperties()["Machine ID"];
 
             Guid.TryParse(assignedMachineId, out var _).Should().BeTrue("it should be a guid");
@@ -299,7 +300,7 @@ namespace MLS.Agent.Tests
         [Fact]
         public void Telemetry_common_properties_should_contain_kernel_version()
         {
-            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null);
+            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties()["Kernel Version"].Should().Be(RuntimeInformation.OSDescription);
         }
     }
