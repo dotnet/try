@@ -70,7 +70,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 eName: "Unhandled Exception",
                 eValue: commandFailed.Message
             );
-           
+
+            // on iopub
+
+            jupyterMessageSender.Send(errorContent);
+
 
             //  reply Error
             var executeReplyPayload = new ExecuteReplyError(errorContent, executionCount: _executionCount);
