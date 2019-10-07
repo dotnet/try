@@ -16,14 +16,14 @@ namespace MLS.Agent.Tests.ApiContracts
 {
     public class ApiOutputContractTests : ApiViaHttpTestsBase
     {
-        private readonly Configuration configuration;
+        private readonly Configuration _configuration;
 
         public ApiOutputContractTests(ITestOutputHelper output) : base(output)
         {
-            configuration = new Configuration()
+            _configuration = new Configuration()
                 .UsingExtension("json");
 
-            configuration = configuration.SetInteractive(true);
+            _configuration = _configuration.SetInteractive(true);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(result.FormatJson(), configuration);
+            this.Assent(result.FormatJson(), _configuration);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), configuration);
+            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), _configuration);
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             result = compileResult.ToJson().FormatJson();
 
-            this.Assent(result, configuration);
+            this.Assent(result, _configuration);
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), configuration);
+            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), _configuration);
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(result.FormatJson(), configuration);
+            this.Assent(result.FormatJson(), _configuration);
         }
 
         [Fact]
@@ -176,7 +176,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(result.FormatJson(), configuration);
+            this.Assent(result.FormatJson(), _configuration);
         }
 
         [Fact(Skip = "Needs moved onto Package2")]
@@ -197,7 +197,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), configuration);
+            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), _configuration);
         }
 
         [Fact]
@@ -218,7 +218,7 @@ namespace MLS.Agent.Tests.ApiContracts
 
             var result = await response.Content.ReadAsStringAsync();
 
-            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), configuration);
+            this.Assent(RemoveMachineSpecificPaths(result).FormatJson(), _configuration);
         }
 
         private static Buffer EntrypointCode(string mainContent = @"Console.WriteLine(Sample.Method());$$")

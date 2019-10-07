@@ -74,7 +74,7 @@
           "name": "index",
           "label": "int index",
           "documentation": {
-            "value": "**index**: The starting position in buffer .",
+            "value": "**index**: The starting position in buffer.",
             "isTrusted": false
           }
         },
@@ -234,7 +234,7 @@
           "name": "arg0",
           "label": "object arg0",
           "documentation": {
-            "value": "**arg0**: An object to write using format .",
+            "value": "**arg0**: An object to write using format.",
             "isTrusted": false
           }
         }
@@ -260,7 +260,7 @@
           "name": "arg0",
           "label": "object arg0",
           "documentation": {
-            "value": "**arg0**: The first object to write using format .",
+            "value": "**arg0**: The first object to write using format.",
             "isTrusted": false
           }
         },
@@ -268,7 +268,7 @@
           "name": "arg1",
           "label": "object arg1",
           "documentation": {
-            "value": "**arg1**: The second object to write using format .",
+            "value": "**arg1**: The second object to write using format.",
             "isTrusted": false
           }
         }
@@ -294,7 +294,7 @@
           "name": "arg0",
           "label": "object arg0",
           "documentation": {
-            "value": "**arg0**: The first object to write using format .",
+            "value": "**arg0**: The first object to write using format.",
             "isTrusted": false
           }
         },
@@ -302,7 +302,7 @@
           "name": "arg1",
           "label": "object arg1",
           "documentation": {
-            "value": "**arg1**: The second object to write using format .",
+            "value": "**arg1**: The second object to write using format.",
             "isTrusted": false
           }
         },
@@ -310,7 +310,7 @@
           "name": "arg2",
           "label": "object arg2",
           "documentation": {
-            "value": "**arg2**: The third object to write using format .",
+            "value": "**arg2**: The third object to write using format.",
             "isTrusted": false
           }
         }
@@ -336,7 +336,7 @@
           "name": "arg",
           "label": "params object[] arg",
           "documentation": {
-            "value": "**arg**: An array of objects to write using format .",
+            "value": "**arg**: An array of objects to write using format.",
             "isTrusted": false
           }
         }
