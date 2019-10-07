@@ -30,14 +30,6 @@
     <None Remove="node_modules\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="LocalizableStrings.resx">
-      <SubType>Designer</SubType>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">
@@ -129,13 +121,6 @@
     <EmbeddedResource Include="$(IntermediateOutputPath)/dotnetKernel.zip">
       <LogicalName>dotnetKernel.zip</LogicalName>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="LocalizableStrings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>LocalizableStrings.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">

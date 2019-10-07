@@ -163,7 +163,7 @@ namespace MLS.Agent.CommandLine
                        if (!firstTimeUseNoticeSentinel.Exists())
                        {
                            context.Console.Out.WriteLine();
-                           context.Console.Out.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
+                           context.Console.Out.WriteLine(Telemetry.Telemetry.WelcomeMessage);
 
                            firstTimeUseNoticeSentinel.CreateIfNotExists();
                        }
