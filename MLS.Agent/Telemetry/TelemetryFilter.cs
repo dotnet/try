@@ -47,7 +47,7 @@ namespace MLS.Agent.Telemetry
                         // We skip one to not include the main command as part of the collection we want to filter.
                         .Skip(1);
                     
-                    var entryItems = FilterCommand(mainCommandName, tokens);
+                    var entryItems = FilterCommand(mainCommandName, tokens, parseResult.CommandResult);
                     if (entryItems != null)
                     {
                         result.Add(CreateEntry(entryItems));
@@ -59,7 +59,7 @@ namespace MLS.Agent.Telemetry
         }
 
         private Nullable<ImmutableArray<KeyValuePair<string, string>>> 
-            FilterCommand(string commandName, IEnumerable<Token> tokens)
+            FilterCommand(string commandName, IEnumerable<Token> tokens, CommandResult commandResult)
         {
             if (commandName == null || tokens == null)
             {
@@ -70,7 +70,7 @@ namespace MLS.Agent.Telemetry
             {
                 if (rule.CommandName == commandName)
                 {
-                    return TryMatchRule(rule, tokens);
+                    return TryMatchRule(rule, tokens, commandResult);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace MLS.Agent.Telemetry
         /// Tries to see if the tokens follow or match the specified command rule.
         /// </summary>
         Nullable<ImmutableArray<KeyValuePair<string, string>>> 
-            TryMatchRule(CommandRule rule, IEnumerable<Token> tokens)
+            TryMatchRule(CommandRule rule, IEnumerable<Token> tokens, CommandResult commandResult)
         {
             var entryItems = ImmutableArray.CreateBuilder<KeyValuePair<string, string>>();
             entryItems.Add(new KeyValuePair<string, string>("verb", rule.CommandName));
@@ -128,6 +128,7 @@ namespace MLS.Agent.Telemetry
                 // Skip until we do not have an option.
                 while (itemResult.firstToken?.Type == TokenType.Option)
                 {
+                    // TODO: Use command result to find option value.
                     var optionItem =
                         optionItems.FirstOrDefault(x =>
                             x.Option == itemResult.firstToken.Value);
@@ -211,7 +212,7 @@ namespace MLS.Agent.Telemetry
 
         private ApplicationInsightsEntryFormat CreateEntry(IEnumerable<KeyValuePair<string, string>> entryItems)
         {
-            return new ApplicationInsightsEntryFormat("parser/command", new Dictionary<string, string>(entryItems));
+            return new ApplicationInsightsEntryFormat("command", new Dictionary<string, string>(entryItems));
         }
 
         private abstract class CommandRuleItem
