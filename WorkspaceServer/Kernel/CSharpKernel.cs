@@ -19,7 +19,6 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using WorkspaceServer.LanguageServices;
 using Microsoft.DotNet.Interactive.Rendering;
-using WorkspaceServer.Servers.Roslyn;
 using WorkspaceServer.Servers.Scripting;
 using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;

@@ -62,6 +62,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await context.Done().Timeout(5.Seconds());
 
             JupyterMessageSender.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyError>();
+            JupyterMessageSender.PubSubMessages.Should().Contain(e=> e is Error);
         }
 
         [Fact]

@@ -119,17 +119,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
                             break;
                     }
-
-                    
                 }
 
                 void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
-
                 void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
-
-                
             }
-
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
