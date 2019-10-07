@@ -24,10 +24,11 @@ namespace MLS.Agent.Telemetry
         public const string TelemetryOptout = "DOTNET_TRY_CLI_TELEMETRY_OPTOUT";
 
         public const string WelcomeMessage = @"Welcome to Try .NET!
--------------------- -
+---------------------
 Telemetry
--------- -
-The.NET Core tools collect usage data in order to help us improve your experience.The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_TRY_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.";
+---------
+The.NET Core tools collect usage data in order to help us improve your experience.The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_TRY_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+";
 
         public bool Enabled { get; }
 
