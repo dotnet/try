@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 namespace MLS.Agent.Tools
 {
@@ -11,6 +12,11 @@ namespace MLS.Agent.Tools
         public static string ReadManifestResource(this Type type, string resourceName)
         {
             var assembly = type.Assembly;
+            if (!assembly.GetManifestResourceNames().Contains(resourceName))
+            {
+                throw new ArgumentException(assembly + " " + resourceName);
+            }
+
             using (var reader = new StreamReader(assembly.GetManifestResourceStream(resourceName)))
             {
                 return reader.ReadToEnd();

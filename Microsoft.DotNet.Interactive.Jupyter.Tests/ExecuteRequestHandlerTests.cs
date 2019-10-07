@@ -62,6 +62,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await context.Done().Timeout(5.Seconds());
 
             JupyterMessageSender.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyError>();
+            JupyterMessageSender.PubSubMessages.Should().Contain(e=> e is Error);
         }
 
         [Fact]
@@ -75,6 +76,32 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await context.Done().Timeout(20.Seconds());
 
             JupyterMessageSender.PubSubMessages.Should().Contain(r => r is DisplayData);
+        }
+
+        [Fact]
+        public async Task sends_Stream_message_on_StandardOutputValueProduced()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should().Contain(r => r is Stream && r.As<Stream>().Name == Stream.StandardOutput);
+        }
+
+        [Fact]
+        public async Task sends_Stream_message_on_StandardErrorValueProduced()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"), null);
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should().Contain(r => r is Stream && r.As<Stream>().Name == Stream.StandardError);
         }
 
         [Fact]

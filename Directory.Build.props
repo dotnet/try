@@ -5,8 +5,7 @@
   <Import Project="eng\targets\NuGet.targets" />
 
   <PropertyGroup>
-    <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
-    
+    <PackageIcon>icon.png</PackageIcon>
     <!-- private repo, don't do source-link -->
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <EnableSourceLink>false</EnableSourceLink>
@@ -15,14 +14,19 @@
     <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
   <PropertyGroup>
    <!-- These properties are needed so that version number can be same for MLS.Agent.Tools and the libraries that depend on it -->  
     <NewtonsoftJsonVersion>12.0.02</NewtonsoftJsonVersion>
     <PocketLoggerVersion>0.3.0</PocketLoggerVersion>
     <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
+    <SystemReactiveVersion>4.1.6</SystemReactiveVersion>
     <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
     <MicrosoftCodeAnalysisCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisCommonVersion>
-     <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisWorkspacesCommonVersion>
     <TaskExtensionsVersion>0.1.8580001</TaskExtensionsVersion>
   </PropertyGroup>
 </Project>

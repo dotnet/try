@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace MLS.Agent.Tests
 {
-    public partial class XplotKernelExtensionTests : CSharpKernelTestBase
+    public partial class XplotKernelExtensionTests : LanguageKernelTestBase
     {
      
         public XplotKernelExtensionTests(ITestOutputHelper output) : base(output)

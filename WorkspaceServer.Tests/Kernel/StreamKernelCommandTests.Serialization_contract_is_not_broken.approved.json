@@ -1,0 +1,1 @@
+{"id":123,"commandType":"SubmitCode","command":{"code":"display(x); display(x + 1); display(x + 2);","targetKernelName":null,"submissionType":0}}

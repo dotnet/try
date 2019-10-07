@@ -29,6 +29,7 @@
     <NuspecProperty Include="MicrosoftAspNetCoreHtmlAbstractionsVersion=$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
     <NuspecProperty Include="MarkdigVersion=$(MarkdigVersion)" />
     <NuspecProperty Include="SystemCommandLineExperimentalVersion=$(SystemCommandLineExperimentalVersion)" />
+    <NuspecProperty Include="SystemReactiveVersion=$(SystemReactiveVersion)" />
   </ItemGroup>
 
   <ItemGroup>

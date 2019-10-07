@@ -16,9 +16,11 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: BlazorTemplateVersion
-    value: 3.0.0-preview7.19365.7
+    value: 3.0.0-preview9.19465.2
+  - name: DotNetSdkVersion2
+    value: '2.1.509'
   - name: DotNetSdkVersion
-    value: 3.0.100-preview7-012821
+    value: '3.0.100'
   - name: NodeJSVersion
     value: '>=12'
   - name: TryDotNetPackagesPath
@@ -78,7 +80,13 @@ stages:
             versionSpec: $(NodeJSVersion)
 
         - task: UseDotNet@2
-          displayName: Add dotnet
+          displayName: Add dotnet 2.2
+          inputs:
+            packageType: sdk
+            version: $(DotNetSdkVersion2)
+
+        - task: UseDotNet@2
+          displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
@@ -170,7 +178,13 @@ stages:
             versionSpec: $(NodeJSVersion)
 
         - task: UseDotNet@2
-          displayName: Add dotnet
+          displayName: Add dotnet 2.2
+          inputs:
+            packageType: sdk
+            version: $(DotNetSdkVersion2)
+
+        - task: UseDotNet@2
+          displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
@@ -213,7 +227,12 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
         - task: UseDotNet@2
-          displayName: Add dotnet
+          displayName: Add dotnet 2.2
+          inputs:
+            packageType: sdk
+            version: $(DotNetSdkVersion2)
+        - task: UseDotNet@2
+          displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
@@ -247,7 +266,12 @@ stages:
         steps:
         - checkout: none #skip checking out the default repository resource
         - task: UseDotNet@2
-          displayName: Add dotnet
+          displayName: Add dotnet 2.2
+          inputs:
+            packageType: sdk
+            version: $(DotNetSdkVersion2)
+        - task: UseDotNet@2
+          displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)

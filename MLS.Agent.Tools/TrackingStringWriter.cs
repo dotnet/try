@@ -10,7 +10,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WorkspaceServer.Servers.Roslyn
+namespace MLS.Agent.Tools
 {
     internal class TrackingStringWriter : StringWriter, IObservable<string>
     {

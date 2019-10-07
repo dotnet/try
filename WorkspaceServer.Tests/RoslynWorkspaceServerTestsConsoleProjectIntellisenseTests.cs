@@ -718,7 +718,7 @@ namespace FibonacciTest
 
             sample.Parameters.ElementAt(1).Name.Should().Be("arg");
             sample.Parameters.ElementAt(1).Label.Should().Be("params object[] arg");
-            sample.Parameters.ElementAt(1).Documentation.Value.Should().Contain("An array of objects to write using format.");
+            sample.Parameters.ElementAt(1).Documentation.Value.Should().Contain("An array of objects to write using format .");
         }
     }
 }

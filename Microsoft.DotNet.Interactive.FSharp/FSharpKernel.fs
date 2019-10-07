@@ -10,6 +10,7 @@ open FSharp.Compiler.Scripting
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
+open MLS.Agent.Tools
 
 type FSharpKernel() as this =
     inherit KernelBase(Name = "fsharp")
@@ -31,15 +32,15 @@ type FSharpKernel() as this =
         async {
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
             context.Publish(codeSubmissionReceived)
+            use! console = ConsoleOutput.Capture() |> Async.AwaitTask
+            use _ = console.SubscribeToStandardOutput(fun msg -> context.Publish(StandardOutputValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))
+            use _ = console.SubscribeToStandardError(fun msg -> context.Publish(StandardErrorValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))
             resolvedAssemblies.Clear()
             let result, errors =
                 try
                     script.Eval(codeSubmission.Code)
                 with
                 | ex -> Error(ex), [||]
-            if errors.Length > 0 then
-                let aggregateErrorMessage = System.String.Join("\n", errors)
-                context.Publish(CommandFailed(aggregateErrorMessage, codeSubmission))
             for asm in resolvedAssemblies do
                 let! _success = handleAssemblyReferenceAdded asm context
                 () // don't care
@@ -49,8 +50,10 @@ type FSharpKernel() as this =
                 let formattedValues = FormattedValue.FromObject(value)
                 context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
             | Ok(None) -> ()
-            | Error(ex) -> context.OnError(ex)
-            context.Publish(CommandHandled(codeSubmission))
+            | Error(ex) ->
+                let aggregateError = System.String.Join("\n", errors)
+                context.Publish(CommandFailed(ex, codeSubmission, aggregateError))
+            context.Complete()
         }
 
     let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =

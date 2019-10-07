@@ -151,6 +151,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                     encodedTopic = Encoding.Unicode.GetBytes("execute_result");
                     break;
 
+                case nameof(Error):
+                    encodedTopic = Encoding.Unicode.GetBytes("execute_result");
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException($"type {name} is not supported");
 
