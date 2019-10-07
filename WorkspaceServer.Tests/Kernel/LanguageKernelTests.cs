@@ -552,6 +552,30 @@ Console.Write(""value three"");",
         [Theory]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
+        public async Task it_returns_a_similarly_shaped_error(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var (source, error) = language switch
+            {
+                Language.CSharp => ("using Not.A.Namespace;", "(1,7): error CS0246: The type or namespace name 'Not' could not be found (are you missing a using directive or an assembly reference?)"),
+                Language.FSharp => ("open Not.A.Namespace", "input.fsx (1,6)-(1,9) typecheck error The namespace or module 'Not' is not defined.")
+            };
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents
+                .ValuesOnly()
+                .OfType<CommandFailed>()
+                .Last()
+                .Message
+                .Should()
+                .Be(error);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
         {
             var kernel = CreateKernel(language);
