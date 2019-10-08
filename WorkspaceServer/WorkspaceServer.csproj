@@ -8,6 +8,10 @@
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise and Buildalyzer* aren't strongly signed -->
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="PackageRestore\**" />
     <Compile Remove="TestResults\**" />

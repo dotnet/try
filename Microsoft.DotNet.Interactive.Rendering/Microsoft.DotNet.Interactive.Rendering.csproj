@@ -5,7 +5,7 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
-   <PropertyGroup>
+  <PropertyGroup>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 

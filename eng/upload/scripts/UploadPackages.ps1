@@ -14,7 +14,8 @@ try {
         "Microsoft.DotNet.Interactive.*.nupkg", # note that this also matches Microsoft.DotNet.Interactive.Rendering
         "Microsoft.DotNet.Try.ProjectTemplate.Tutorial.*.nupkg",
         "MLS.Blazor.*.nupkg",
-        "MLS.WasmCodeRunner.*.nupkg"
+        "MLS.WasmCodeRunner.*.nupkg",
+        "WorkspaceServer.*.nupkg"
     )
 
     $errors = 0
