@@ -66,18 +66,26 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             CommandFailed commandFailed,
             IJupyterMessageSender jupyterMessageSender)
         {
-            var traceBack = new List<string>{
-                "Unhandled Exception",
-                commandFailed.Message};
+            var traceBack = new List<string>();
 
-            traceBack.AddRange(commandFailed.Exception?.StackTrace?.Split(new[] { Environment.NewLine }, StringSplitOptions.None)?? Enumerable.Empty<string>());
+            switch (commandFailed.Exception)
+            {
+                case CodeSubmissionCompilationErrorException e:
+                    traceBack.Add("Compiler Error");
+                    traceBack.Add(e.Message);
+                    break;
+                default:
+                    traceBack.Add("Unhandled Exception");
+                    traceBack.Add(commandFailed.Message);
+                    traceBack.AddRange(commandFailed.Exception?.StackTrace?.Split(new[] { Environment.NewLine }, StringSplitOptions.None) ?? Enumerable.Empty<string>());
+                    break;
+            }
+
             var errorContent = new Error (
                 eName: "Unhandled Exception",
                 eValue: commandFailed.Message,
                 traceback: traceBack
             );
-
-            
 
             // send on iopub
             jupyterMessageSender.Send(errorContent);

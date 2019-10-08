@@ -62,7 +62,25 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await context.Done().Timeout(5.Seconds());
 
             JupyterMessageSender.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyError>();
-            JupyterMessageSender.PubSubMessages.Should().Contain(e=> e is Error);
+            JupyterMessageSender.PubSubMessages.Should().Contain(e => e is Error);
+        }
+
+        [Fact]
+        public async Task does_not_expose_stacktrace_when_code_submission_contains_errors()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(new ExecuteRequest("asdes asdasd"));
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(5.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should()
+                .ContainSingle(e => e is Error)
+                .Which.As<Error>()
+                .Traceback
+                .Should()
+                .BeEquivalentTo("Compiler Error", "(1,13): error CS1002: ; expected");
         }
 
         [Fact]

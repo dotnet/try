@@ -187,6 +187,10 @@ namespace WorkspaceServer.Kernel
                                 .UntilCancelled(cancellationSource.Token);
                         }
                     }
+                    catch (CompilationErrorException cpe)
+                    {
+                        exception = new CodeSubmissionCompilationErrorException(cpe);
+                    }
                     catch (Exception e)
                     {
                         exception = e;
