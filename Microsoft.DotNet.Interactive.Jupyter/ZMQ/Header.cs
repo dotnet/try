@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
@@ -49,7 +48,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             Version = version;
             Session = session;
             Username = username;
-            Date = date;
+            Date = date ?? DateTime.UtcNow.ToString("o");
         }
 
         public static Header Create<T>(T messageContent, string session)
@@ -76,8 +75,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                 messageId: Guid.NewGuid().ToString(),
                 version: Constants.MESSAGE_PROTOCOL_VERSION,
                 username: Constants.USERNAME,
-                session: session,
-                date: DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                session: session);
 
             return newHeader;
         }

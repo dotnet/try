@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             Send(hmac, _socket);
             Send(message.Header.ToJson(), _socket);
             Send((message.ParentHeader?? new object()).ToJson(), _socket);
-            Send(message.MetaData.ToJson(), _socket);
+            Send((message.MetaData?? new object()).ToJson(), _socket);
             Send(message.Content.ToJson(), _socket, false);
         }
 

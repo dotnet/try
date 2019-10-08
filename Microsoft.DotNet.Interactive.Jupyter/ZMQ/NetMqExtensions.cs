@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using NetMQ;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
