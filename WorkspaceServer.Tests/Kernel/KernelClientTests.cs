@@ -15,12 +15,9 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Pocket;
-using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
@@ -230,7 +227,7 @@ namespace WorkspaceServer.Tests.Kernel
                     }
                 })
                 .TakeWhile(_ => commandHandled < 3)
-                .TakeUntil(DateTimeOffset.Now.Add(50.Minutes()))
+                .TakeUntil(DateTimeOffset.Now.Add(1.Minutes()))
                 .ToEnumerable()
                 .ToList();
 
