@@ -66,13 +66,20 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             CommandFailed commandFailed,
             IJupyterMessageSender jupyterMessageSender)
         {
+            var traceBack = new List<string>{
+                "Unhandled Exception",
+                commandFailed.Message};
+
+            traceBack.AddRange(commandFailed.Exception?.StackTrace?.Split(new[] { Environment.NewLine }, StringSplitOptions.None)?? Enumerable.Empty<string>());
             var errorContent = new Error (
                 eName: "Unhandled Exception",
-                eValue: commandFailed.Message
+                eValue: commandFailed.Message,
+                traceback: traceBack
             );
 
-            // on iopub
+            
 
+            // send on iopub
             jupyterMessageSender.Send(errorContent);
 
 
