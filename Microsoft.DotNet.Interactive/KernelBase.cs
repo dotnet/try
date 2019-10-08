@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public abstract class KernelBase : IKernel
     {
-        private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
+        private readonly Subject<IKernelEvent> _kernelEvents = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
         private readonly List<Command> _directiveCommands = new List<Command>();
         private Parser _directiveParser;
@@ -46,11 +46,6 @@ namespace Microsoft.DotNet.Interactive
                     PublishEvent(new KernelBusy());
                 }
             }));
-        }
-
-        public void WhenIdle(Func<object> p)
-        {
-            throw new NotImplementedException();
         }
 
         public KernelCommandPipeline Pipeline { get; }
@@ -285,7 +280,7 @@ namespace Microsoft.DotNet.Interactive
             return _directiveParser;
         }
 
-        public IObservable<IKernelEvent> KernelEvents => _channel;
+        public IObservable<IKernelEvent> KernelEvents => _kernelEvents;
 
         public string Name { get; set; }
 
@@ -384,7 +379,7 @@ namespace Microsoft.DotNet.Interactive
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
                     _idleState.SetAsBusy();
-                    
+                        
                     Task.Run(async () =>
                     {
                         await ExecuteCommand(currentOperation);
@@ -407,7 +402,7 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(kernelEvent));
             }
 
-            _channel.OnNext(kernelEvent);
+            _kernelEvents.OnNext(kernelEvent);
         }
 
         protected void AddDisposable(IDisposable disposable)

@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
 
@@ -16,7 +14,6 @@ namespace Microsoft.DotNet.Interactive
     public class KernelStreamClient : IDisposable
     {
         private readonly IKernel _kernel;
-        private readonly ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)> _commandQueue = new ConcurrentQueue<(StreamKernelCommand streamingCommand, IKernelCommand kernelCommand)>();
         private CancellationTokenSource _cancellationSource;
         private readonly IInputTextStream _input;
         private readonly IOutputTextStream _output;
