@@ -673,15 +673,15 @@ Console.Write(DateTime.Now);
 
             var source = language switch
             {
-                Language.FSharp => string.Format(@"#r ""{0}""
+                Language.FSharp => $@"#r ""{dllPath}""
 open Newtonsoft.Json
 let json = JsonConvert.SerializeObject( struct {{| value = ""hello"" |}} )
-json", dllPath),
+json",
 
-                Language.CSharp => string.Format(@"#r ""{0}""
+                Language.CSharp => $@"#r ""{dllPath}""
 using Newtonsoft.Json;
 var json = JsonConvert.SerializeObject(new {{ value = ""hello"" }});
-json", dllPath)
+json"
             };
 
             await SubmitCode(kernel, source);
@@ -701,7 +701,7 @@ json", dllPath)
         [Theory]
         [InlineData(Language.CSharp)]
         //[InlineData(Language.FSharp)]             Todo:  let binding returns a value"
-        public async Task it_can_load_assembly_references_using_r_directive_seperate_submissions(Language language)
+        public async Task it_can_load_assembly_references_using_r_directive_separate_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
@@ -813,6 +813,43 @@ json
                         .Value
                         .Should()
                         .Be(new { value = "hello" }.ToJson());
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_formats_func_instances(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = language switch
+            {
+                Language.CSharp => new[] {
+                    "Func<int> func = () => 1;",
+                    "func()",
+                    "func"
+                },
+
+                Language.FSharp => new[] {
+                    "let func () = 1",
+                    "func()",
+                    "func"
+                },
+            };
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents.ValuesOnly()
+                .Count(e => e is CommandHandled)
+                .Should()
+                .Be(3);
+
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Should()
+                .Contain(e => ((SubmitCode) e.Command).Code == source[1])
+                .And
+                .Contain(e => ((SubmitCode)e.Command).Code == source[2]);
         }
 
 
