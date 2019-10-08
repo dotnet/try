@@ -147,7 +147,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .Select((t, pos) => (t.Value, pos))
                 .Single(t => t.Value is CommandFailed);
 
-            ((CommandFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
+            ((CommandFailed)failure).Exception.Should().BeOfType<CodeSubmissionCompilationErrorException>();
 
             var lastCodeSubmissionPosition = KernelEvents
                 .Select((e, pos) => (e.Value, pos))

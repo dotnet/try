@@ -211,7 +211,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             _io.WriteToInput(new SubmitCode(@"Func<int> func = () => 1;"), 0);
             
-            await Task.Delay(1.Seconds());
+            await Task.Delay(2.Seconds());
 
             _io.WriteToInput(new SubmitCode(@"func()"), 1);
             _io.WriteToInput(new SubmitCode(@"func"), 2);

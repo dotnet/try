@@ -204,11 +204,11 @@ namespace WorkspaceServer.Kernel
                 {
                     string message = null;
 
-                    if (exception is CompilationErrorException compilationError)
+                    if (exception is CodeSubmissionCompilationErrorException compilationError)
                     {
                         message =
                             string.Join(Environment.NewLine,
-                                compilationError.Diagnostics.Select(d => d.ToString()));
+                                (compilationError.InnerException as CompilationErrorException)?.Diagnostics.Select(d => d.ToString())?? Enumerable.Empty<string>());
                     }
 
                     context.Publish(new CommandFailed(exception, submitCode, message));

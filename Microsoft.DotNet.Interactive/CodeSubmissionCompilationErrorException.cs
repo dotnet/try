@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public class CodeSubmissionCompilationErrorException : Exception
     {
-        public CodeSubmissionCompilationErrorException(Exception innerException): base(innerException.Message, innerException)
+        public CodeSubmissionCompilationErrorException(Exception innerException): base(innerException.Message,innerException)
         {
             
         }
