@@ -208,6 +208,37 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task Kernel_client_eval_function_instances()
+        {
+            await _kernelClient.Start();
+
+            _io.WriteToInput(new SubmitCode(@"Func<int> func = () => 1;"), 0);
+            
+            await Task.Delay(1.Seconds());
+
+            _io.WriteToInput(new SubmitCode(@"func()"), 1);
+            _io.WriteToInput(new SubmitCode(@"func"), 2);
+            
+
+            var commandHandled = 0;
+            var events = _events
+                .Do(e =>
+                {
+                    if (e["eventType"].Value<string>() == nameof(CommandHandled))
+                    {
+                        commandHandled++;
+                    }
+                })
+                .TakeWhile(_ => commandHandled < 3)
+                .TakeUntil(DateTimeOffset.Now.Add(50.Minutes()))
+                .ToEnumerable()
+                .ToList();
+
+            events.Where(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced)).Should()
+                .HaveCount(2);
+        }
+
+        [Fact]
         public async Task Kernel_can_pound_r_nuget_using_kernel_client()
         {
             await _kernelClient.Start();
