@@ -10,6 +10,10 @@ namespace WorkspaceServer
 {
     public static class Paths
     {
+        private const string DotnetHomeVariableName = "DOTNET_CLI_HOME";
+        private const string DotnetProfileDirectoryName = ".dotnet";
+        private const string ToolsShimFolderName = "tools";
+
         static Paths()
         {
             UserProfile = Environment.GetEnvironmentVariable(
@@ -17,13 +21,34 @@ namespace WorkspaceServer
                     ? "USERPROFILE"
                     : "HOME");
 
-            DotnetToolsPath = Path.Combine(UserProfile, ".dotnet", "tools");
+            DotnetToolsPath = Path.Combine(UserProfile, DotnetProfileDirectoryName, ToolsShimFolderName);
 
             var nugetPackagesEnvironmentVariable = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
 
             NugetCache = String.IsNullOrWhiteSpace(nugetPackagesEnvironmentVariable)
                              ? Path.Combine(UserProfile, ".nuget", "packages")
                              : nugetPackagesEnvironmentVariable;
+        }
+
+        public static string DotnetUserProfileFolderPath =>
+            Path.Combine(DotnetHomePath, DotnetProfileDirectoryName);
+
+        public static string DotnetHomePath
+        {
+            get
+            {
+                var home = Environment.GetEnvironmentVariable(DotnetHomeVariableName);
+                if (string.IsNullOrEmpty(home))
+                {
+                    home = UserProfile;
+                    if (string.IsNullOrEmpty(home))
+                    {
+                        throw new DirectoryNotFoundException();
+                    }
+                }
+
+                return home;
+            }
         }
 
         public static string DotnetToolsPath { get; }

@@ -16,6 +16,9 @@ using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.Markdown;
+using MLS.Agent.Telemetry;
+using MLS.Agent.Telemetry.Configurer;
+using MLS.Agent.Telemetry.Utils;
 using MLS.Agent.Tools;
 using MLS.Repositories;
 using WorkspaceServer;
@@ -71,7 +74,9 @@ namespace MLS.Agent.CommandLine
             Install install = null,
             Verify verify = null,
             Jupyter jupyter = null,
-            StartKernelServer startKernelServer = null)
+            StartKernelServer startKernelServer = null,
+            ITelemetry telemetry = null,
+            IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = null)
         {
             if (services == null)
             {
@@ -108,6 +113,14 @@ namespace MLS.Agent.CommandLine
 
             startKernelServer = startKernelServer ??
                            KernelServerCommand.Do;
+
+            // Setup first time use notice sentinel.
+            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
+
+            // Setup telemetry.
+            telemetry = telemetry ?? new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
+            var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+            Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
             {
@@ -146,6 +159,15 @@ namespace MLS.Agent.CommandLine
                    .UseDefaults()
                    .UseMiddleware(async (context, next) =>
                    {
+                       // If sentinel does not exist, print the welcome message showing the telemetry notification.
+                       if (!firstTimeUseNoticeSentinel.Exists())
+                       {
+                           context.Console.Out.WriteLine();
+                           context.Console.Out.WriteLine(Telemetry.Telemetry.WelcomeMessage);
+
+                           firstTimeUseNoticeSentinel.CreateIfNotExists();
+                       }
+
                        if (context.ParseResult.Directives.Contains("debug") &&
                            !(Clock.Current is VirtualClock))
                        {
@@ -394,6 +416,8 @@ namespace MLS.Agent.CommandLine
 
                 jupyterCommand.Handler = CommandHandler.Create<JupyterOptions, IConsole, InvocationContext>((options, console, context) =>
                 {
+                    track(context.ParseResult);
+
                     services
                         .AddSingleton(c => ConnectionInformation.Load(options.ConnectionFile))
                         .AddSingleton(
@@ -414,8 +438,9 @@ namespace MLS.Agent.CommandLine
                 });
 
                 var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
-                installCommand.Handler = CommandHandler.Create<IConsole>((console) =>
+                installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
+                    track(context.ParseResult);
                     return new JupyterCommandLine(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
                 });
 

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
+using MLS.Agent.Telemetry.Configurer;
 using MLS.Agent.Tools;
 using WorkspaceServer;
 using Xunit;
@@ -67,7 +68,9 @@ namespace MLS.Agent.Tests.CommandLine
                 jupyter: (console, startServer, context) =>
                 {
                     return Task.FromResult(1);
-                });
+                },
+                telemetry: new FakeTelemetry(),
+                firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
         }
 
         public void Dispose()
