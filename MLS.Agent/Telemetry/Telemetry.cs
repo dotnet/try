@@ -20,7 +20,7 @@ namespace MLS.Agent.Telemetry
         private Dictionary<string, double> _commonMeasurements = null;
         private Task _trackEventTask = null;
 
-        private const string InstrumentationKey = "a47da720-6803-4aec-8fca-3e0315fec27f";
+        private const string InstrumentationKey = "b0dafad5-1430-4852-bc61-95c836b3e612";
         public const string TelemetryOptout = "DOTNET_TRY_CLI_TELEMETRY_OPTOUT";
 
         public const string WelcomeMessage = @"Welcome to Try .NET!

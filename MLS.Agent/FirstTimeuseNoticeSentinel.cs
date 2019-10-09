@@ -11,7 +11,7 @@ namespace MLS.Agent
 {
     public sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
-        public static readonly string SENTINEL = $"{Product.Version}.dotnetTryFirstUseSentinel";
+        public static readonly string SENTINEL = $"{Recipes.VersionSensor.Version().AssemblyInformationalVersion}.dotnetTryFirstUseSentinel";
 
         private readonly string _dotnetTryUserProfileFolderPath;
         private readonly Func<string, bool> _fileExists;

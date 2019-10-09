@@ -47,7 +47,7 @@ namespace MLS.Agent.Telemetry
                 {OSVersion, RuntimeEnvironment.OperatingSystemVersion},
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
-                {ProductVersion, Product.Version},
+                {ProductVersion, Recipes.VersionSensor.Version().AssemblyInformationalVersion},
                 {DockerContainer, IsDockerContainer()},
                 {MachineId, GetMachineId()},
                 {KernelVersion, GetKernelVersion()}

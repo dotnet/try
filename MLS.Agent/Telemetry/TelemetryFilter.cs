@@ -88,36 +88,26 @@ namespace MLS.Agent.Telemetry
             var entryItems = ImmutableArray.CreateBuilder<KeyValuePair<string, string>>();
             entryItems.Add(new KeyValuePair<string, string>("verb", rule.CommandName));
 
-            var tokenQueue = new Queue<Token>(tokens);
-            (Token firstToken, Token secondToken) NextItem()
+            // Filter out option tokens as we query the command result for them when processing a rule.
+            var tokenQueue = new Queue<Token>(tokens.Where(x => x.Type != TokenType.Option));
+            Token NextToken()
             {
                 if (tokenQueue.TryDequeue(out var firstToken))
                 {
-                    if (firstToken.Type == TokenType.Option && 
-                        tokenQueue.TryPeek(out var peek) && peek.Type == TokenType.Argument)
-                    {
-                        return (firstToken, tokenQueue.Dequeue());
-                    }
-                    else
-                    {
-                        return (firstToken, null);
-                    }
+                    return firstToken;
                 }
                 else
                 {
-                    return (null, null);
+                    return null;
                 }
             }
 
-            var itemResult = NextItem();
+            var currentToken = NextToken();
 
             // We have a valid rule so far.
             var passed = true;
 
-            var optionItems = rule.Items.Select(item => item as OptionItem).Where(item => item != null);
-            var items = rule.Items.Except(optionItems);
-
-            foreach (var item in items)
+            foreach (var item in rule.Items)
             {
                 // Stop checking items since our rule already failed.
                 if (!passed)
@@ -125,47 +115,32 @@ namespace MLS.Agent.Telemetry
                     break;
                 }
 
-                // Skip until we do not have an option.
-                while (itemResult.firstToken?.Type == TokenType.Option)
-                {
-                    // TODO: Use command result to find option value.
-                    var optionItem =
-                        optionItems.FirstOrDefault(x =>
-                            x.Option == itemResult.firstToken.Value);
-
-                    if (optionItem != null)
-                    {
-                        // This is currently not capturing anything from the token, only the rule.
-                        var value =
-                            optionItem.Values.FirstOrDefault(x =>
-                                x == itemResult.secondToken?.Value);
-                        if (value != null)
-                        {
-                            entryItems.Add(new KeyValuePair<string, string>(optionItem.EntryKey, value));
-                            itemResult = NextItem();
-                        }
-                        else
-                        {
-                            passed = false;
-                        }
-                    }
-                    itemResult = NextItem();
-                }
-
                 switch (item)
                 {
+                    case OptionItem optItem:
+                        {
+                            var optionValue = commandResult.OptionResult(optItem.Option)?.Tokens?.FirstOrDefault()?.Value;
+                            if (optionValue != null && optItem.Values.Contains(optionValue))
+                            {
+                                entryItems.Add(new KeyValuePair<string, string>(optItem.EntryKey, optionValue));
+                            }
+                            else
+                            {
+                                passed = false;
+                            }
+                            break;
+                        }
                     case ArgumentItem argItem:
                         {
-                            if (argItem.TokenType == itemResult.firstToken?.Type &&
-                                argItem.Value == itemResult.firstToken?.Value &&
-                                itemResult.secondToken == null)
+                            if (argItem.TokenType == currentToken?.Type &&
+                                argItem.Value == currentToken?.Value)
                             {
                                 entryItems.Add(new KeyValuePair<string, string>(argItem.EntryKey, argItem.Value));
-                                itemResult = NextItem();
+                                currentToken = NextToken();
                             }
                             else if (argItem.IsOptional)
                             {
-                                itemResult = NextItem();
+                                currentToken = NextToken();
                             }
                             else
                             {
@@ -175,14 +150,13 @@ namespace MLS.Agent.Telemetry
                         }
                     case IgnoreItem ignoreItem:
                         {
-                            if (ignoreItem.TokenType == itemResult.firstToken?.Type && 
-                                itemResult.secondToken != null)
+                            if (ignoreItem.TokenType == currentToken?.Type)
                             {
-                                itemResult = NextItem();
+                                currentToken = NextToken();
                             }
                             else if (ignoreItem.IsOptional)
                             {
-                                itemResult = NextItem();
+                                currentToken = NextToken();
                             }
                             else
                             {
@@ -195,10 +169,6 @@ namespace MLS.Agent.Telemetry
                         break;
                 }
             }
-
-            // If the rule is passing at this state, check if there is no result.
-            // If there is a result, the rule did not pass.
-            passed = passed ? (itemResult.firstToken == null && itemResult.secondToken == null) : false;
 
             if (passed)
             {
