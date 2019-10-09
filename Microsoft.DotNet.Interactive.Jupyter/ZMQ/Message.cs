@@ -157,13 +157,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                     break;
 
                 case nameof(Stream):
-                {
-                    if (!(content is Stream stream))
                     {
-                        throw new ArgumentNullException(nameof(stream));
+                        if (!(content is Stream stream))
+                        {
+                            throw new ArgumentNullException(nameof(stream));
+                        }
+                        encodedTopic = Encoding.Unicode.GetBytes($"stream.{stream.Name}");
                     }
-                    encodedTopic = Encoding.Unicode.GetBytes($"stream.{stream.Name}");
-                }
                     break;
 
                 default:
