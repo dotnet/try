@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             Kernel = new CompositeKernel
             {
                 new CSharpKernel()
+                    .UseKernelHelpers()
+                    .UseDefaultRendering()
             }.UseDefaultMagicCommands();
 
             JupyterMessageSender = new RecordingJupyterMessageSender();

@@ -1,16 +1,18 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Rendering;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Rendering;
+
 using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
@@ -70,9 +72,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             switch (commandFailed.Exception)
             {
-                case CodeSubmissionCompilationErrorException e:
-                    traceBack.Add("Compiler Error");
-                    traceBack.Add(e.Message);
+                case CodeSubmissionCompilationErrorException _:
+                    traceBack.Add(commandFailed.Message);
                     break;
                 default:
                     traceBack.Add("Unhandled Exception");
@@ -111,41 +112,35 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
             var value = displayEvent.Value;
-            var dataMessage = new Queue<PubSubMessage>();
+            PubSubMessage dataMessage = null;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
-                    dataMessage.Enqueue(new DisplayData(
+                    dataMessage = new DisplayData(
                         transient: transient,
-                        data: formattedValues));
+                        data: formattedValues);
                     break;
                 case DisplayedValueUpdated _:
-                    dataMessage.Enqueue(new UpdateDisplayData(
+                    dataMessage = new UpdateDisplayData(
                         transient: transient,
-                        data: formattedValues));
+                        data: formattedValues);
                     break;
                 case ReturnValueProduced _:
-                    dataMessage.Enqueue(new ExecuteResult(
+                    dataMessage = new ExecuteResult(
                         _executionCount,
                         transient: transient,
-                        data: formattedValues));
+                        data: formattedValues);
                     break;
                 case StandardOutputValueProduced _:
-                    dataMessage.Enqueue(new DisplayData(
-                        transient: transient,
-                        data: formattedValues));
-                    dataMessage.Enqueue(Stream.StdOut(
-                        GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
-                    );
+                    dataMessage = Stream.StdOut(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
+                    
                     break;
 
                 case StandardErrorValueProduced _:
-                    dataMessage.Enqueue(Stream.StdErr(
-                        GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
-                    );
+                    dataMessage = Stream.StdErr(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
                     break;
                 default:
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
@@ -156,11 +151,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             if (!isSilent)
             {
-                while (dataMessage.Count > 0)
-                {
-                    // send on io
-                    jupyterMessageSender.Send(dataMessage.Dequeue());
-                }
+                // send on io
+                jupyterMessageSender.Send(dataMessage);
             }
         }
 

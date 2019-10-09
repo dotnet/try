@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive.Events
         {
             Exception = exception;
 
-            Message = string.IsNullOrWhiteSpace(message) ? exception.ToString() : message;
+            Message = string.IsNullOrWhiteSpace(message) ? exception.Message : message;
         }
 
         public CommandFailed(
