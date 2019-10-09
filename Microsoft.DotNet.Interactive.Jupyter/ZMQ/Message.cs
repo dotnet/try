@@ -144,12 +144,17 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                     break;
 
                 case nameof(DisplayData):
+
                 case nameof(UpdateDisplayData):
                     encodedTopic = Encoding.Unicode.GetBytes("display_data");
                     break;
 
                 case nameof(ExecuteResult):
                     encodedTopic = Encoding.Unicode.GetBytes("execute_result");
+                    break;
+
+                case nameof(Stream):
+                    encodedTopic = Encoding.Unicode.GetBytes("stream");
                     break;
 
                 case nameof(Error):

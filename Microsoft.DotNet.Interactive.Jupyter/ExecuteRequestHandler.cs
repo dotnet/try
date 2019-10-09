@@ -134,9 +134,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         data: formattedValues));
                     break;
                 case StandardOutputValueProduced _:
-                    dataMessage.Enqueue(new DisplayData(
-                        transient: transient,
-                        data: formattedValues));
                     dataMessage.Enqueue(Stream.StdOut(
                         GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
                     );

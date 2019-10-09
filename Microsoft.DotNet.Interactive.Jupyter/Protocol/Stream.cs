@@ -17,6 +17,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Protocol
 
         [JsonProperty("name")]
         public string Name { get; }
+
         [JsonProperty("text")]
         public string Text { get; }
 
