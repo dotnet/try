@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         protected override void OnKernelEventReceived(
-            IKernelEvent @event, 
+            IKernelEvent @event,
             JupyterRequestContext context)
         {
             switch (@event)
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnCommandHandled(context.JupyterMessageSender);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed,  context.JupyterMessageSender);
+                    OnCommandFailed(commandFailed, context.JupyterMessageSender);
                     break;
             }
         }
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     break;
             }
 
-            var errorContent = new Error (
+            var errorContent = new Error(
                 eName: "Unhandled Exception",
                 eValue: commandFailed.Message,
                 traceback: traceBack
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
             var value = displayEvent.Value;
-            PubSubMessage dataMessage = null;
+            PubSubMessage dataMessage;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
@@ -143,7 +143,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case StandardOutputValueProduced _:
                     dataMessage = Stream.StdOut(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
                     break;
-
                 case StandardErrorValueProduced _:
                 case ErrorProduced _:
                     dataMessage = Stream.StdErr(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
@@ -152,6 +151,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 default:
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
+
 
             var isSilent = ((ExecuteRequest)request.Content).Silent;
 
@@ -162,7 +162,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             }
         }
 
-        private string GetPlainTextValueOrDefault(Dictionary<string, object> formattedValues, string defaultText)
+        private static string GetPlainTextValueOrDefault(IReadOnlyDictionary<string, object> formattedValues, string defaultText)
         {
             if (formattedValues.TryGetValue(PlainTextFormatter.MimeType, out var text))
             {
@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             var executeReplyPayload = new ExecuteReplyOk(executionCount: _executionCount);
 
             // send to server
-           jupyterMessageSender.Send(executeReplyPayload);
+            jupyterMessageSender.Send(executeReplyPayload);
         }
     }
 }
