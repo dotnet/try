@@ -112,41 +112,35 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
             var value = displayEvent.Value;
-            var dataMessage = new Queue<PubSubMessage>();
+            PubSubMessage dataMessage = null;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 
             switch (displayEvent)
             {
                 case DisplayedValueProduced _:
-                    dataMessage.Enqueue(new DisplayData(
+                    dataMessage = new DisplayData(
                         transient: transient,
-                        data: formattedValues));
+                        data: formattedValues);
                     break;
                 case DisplayedValueUpdated _:
-                    dataMessage.Enqueue(new UpdateDisplayData(
+                    dataMessage = new UpdateDisplayData(
                         transient: transient,
-                        data: formattedValues));
+                        data: formattedValues);
                     break;
                 case ReturnValueProduced _:
-                    dataMessage.Enqueue(new ExecuteResult(
+                    dataMessage = new ExecuteResult(
                         _executionCount,
                         transient: transient,
-                        data: formattedValues));
+                        data: formattedValues);
                     break;
                 case StandardOutputValueProduced _:
-                    dataMessage.Enqueue(new DisplayData(
-                        transient: transient,
-                        data: formattedValues));
-                    dataMessage.Enqueue(Stream.StdOut(
-                        GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
-                    );
+                    dataMessage = Stream.StdOut(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
+                    
                     break;
 
                 case StandardErrorValueProduced _:
-                    dataMessage.Enqueue(Stream.StdErr(
-                        GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty))
-                    );
+                    dataMessage = Stream.StdErr(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
                     break;
                 default:
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
@@ -157,11 +151,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             if (!isSilent)
             {
-                while (dataMessage.Count > 0)
-                {
-                    // send on io
-                    jupyterMessageSender.Send(dataMessage.Dequeue());
-                }
+                // send on io
+                jupyterMessageSender.Send(dataMessage);
             }
         }
 

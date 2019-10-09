@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_DisplayData_message_on_ValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"));
+            var request = Envelope.Create(new ExecuteRequest("display(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
