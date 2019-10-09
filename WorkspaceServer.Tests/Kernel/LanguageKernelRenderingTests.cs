@@ -63,7 +63,7 @@ namespace WorkspaceServer.Tests.Kernel
         [InlineData(Language.CSharp, "div(123).ToString()", "<div>123</div>")]
         [InlineData(Language.FSharp, "div.innerHTML(123).ToString()", "<div>123</div>")]
         [InlineData(Language.CSharp, "display(div(123).ToString());", "<div>123</div>")]
-        //[InlineData(Language.FSharp, "display(div.innerHTML(123).ToString());", "<div>123</div>")]
+        [InlineData(Language.FSharp, "display(div.innerHTML(123).ToString())", "<div>123</div>")]
         [InlineData(Language.CSharp, "\"hi\"", "hi")]
         [InlineData(Language.FSharp, "\"hi\"", "hi")]
         public async Task String_is_rendered_as_plain_text(
@@ -91,7 +91,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]
+        [InlineData(Language.FSharp)]
         public async Task Display_helper_can_be_called_without_specifying_class_name(Language language)
         {
             var kernel = CreateKernel(language);
@@ -119,7 +119,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]
+        [InlineData(Language.FSharp)]
         public async Task Displayed_value_can_be_updated(Language language)
         {
             var kernel = CreateKernel(language);
@@ -156,7 +156,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]
+        [InlineData(Language.FSharp)]
         public async Task Value_display_and_update_are_in_right_order(Language language)
         {
             var kernel = CreateKernel(language);
@@ -182,7 +182,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]
+        [InlineData(Language.FSharp)]
         public async Task Javascript_helper_emits_string_as_content_within_a_script_element(Language language)
         {
             var kernel = CreateKernel(language);

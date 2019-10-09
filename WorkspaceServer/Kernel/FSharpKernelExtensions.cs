@@ -29,6 +29,17 @@ open {typeof(PlotlyChart).Namespace}
             return kernel;
         }
 
+        public static FSharpKernel UseKernelHelpers(
+            this FSharpKernel kernel)
+        {
+            Task.Run(() =>
+                kernel.SendAsync(new SubmitCode($@"
+open {typeof(FSharpKernelHelpers).FullName}
+"))).Wait();
+
+            return kernel;
+        }
+
         private static string ReferenceFromType(Type type)
         {
             return $@"#r ""{type.Assembly.Location.Replace("\\", "\\\\")}""";
