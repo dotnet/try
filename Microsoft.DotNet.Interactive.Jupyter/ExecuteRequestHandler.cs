@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 default:
                     traceBack.Add("Unhandled Exception");
                     traceBack.Add(commandFailed.Message);
-                    traceBack.AddRange(commandFailed.Exception?.StackTrace?.Split(new[] { Environment.NewLine }, StringSplitOptions.None) ?? Enumerable.Empty<string>());
+                    traceBack.Add(commandFailed.Exception?.StackTrace);
                     break;
             }
 
