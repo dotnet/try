@@ -50,17 +50,21 @@ stages:
         variables:
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          - group: DotNet-Symbol-Server-Pats
           - name: _SignType
             value: Real
           - name: _BuildArgs
             value: /p:SignType=$(_SignType)
-              /p:DotNetSignType=$(_SignType)
-              /p:MicroBuild_SigningEnabled=true
-              /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-              /p:TeamName=$(_TeamName)
-              /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
-              /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
-              /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+                   /p:DotNetSignType=$(_SignType)
+                   /p:MicroBuild_SigningEnabled=true
+                   /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                   /p:TeamName=$(_TeamName)
+                   /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+                   /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+                   /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+                   /p:PublishToSymbolServer=true
+                   /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                   /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
         # else
         - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
