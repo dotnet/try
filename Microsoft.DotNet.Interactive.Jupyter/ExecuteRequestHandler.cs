@@ -1,16 +1,18 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Rendering;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Rendering;
+
 using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
@@ -70,9 +72,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             switch (commandFailed.Exception)
             {
-                case CodeSubmissionCompilationErrorException e:
-                    traceBack.Add("Compiler Error");
-                    traceBack.Add(e.Message);
+                case CodeSubmissionCompilationErrorException _:
+                    traceBack.Add(commandFailed.Message);
                     break;
                 default:
                     traceBack.Add("Unhandled Exception");

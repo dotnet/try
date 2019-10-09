@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                 .Which.As<Error>()
                 .Traceback
                 .Should()
-                .BeEquivalentTo("Compiler Error", "(1,13): error CS1002: ; expected");
+                .BeEquivalentTo("(1,13): error CS1002: ; expected");
         }
 
         [Fact]
