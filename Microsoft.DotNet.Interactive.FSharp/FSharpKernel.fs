@@ -6,6 +6,7 @@ namespace Microsoft.DotNet.Interactive.FSharp
 open System.Collections.Generic
 open System.IO
 open System.Threading.Tasks
+open FSharp.Compiler.Interactive.Shell
 open FSharp.Compiler.Scripting
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
@@ -45,15 +46,21 @@ type FSharpKernel() as this =
                 let! _success = handleAssemblyReferenceAdded asm context
                 () // don't care
             match result with
-            | Ok(Some(value)) ->
-                let value = value.ReflectionValue
-                let formattedValues = FormattedValue.FromObject(value)
-                context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
-            | Ok(None) -> ()
+            | Ok(result) ->
+                match result with
+                | Some(value) ->
+                    let value = value.ReflectionValue
+                    let formattedValues = FormattedValue.FromObject(value)
+                    context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
+                | None -> ()
+                context.Complete()
             | Error(ex) ->
                 let aggregateError = System.String.Join("\n", errors)
-                context.Publish(CommandFailed(ex, codeSubmission, aggregateError))
-            context.Complete()
+                let reportedException =
+                    match ex with
+                    | :? FsiCompilationException -> CodeSubmissionCompilationErrorException(ex) :> System.Exception
+                    | _ -> ex
+                context.Publish(CommandFailed(reportedException, codeSubmission, aggregateError))
         }
 
     let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =

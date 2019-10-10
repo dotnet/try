@@ -119,7 +119,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        // [InlineData(Language.FSharp)]  Todo teach FSharp about exceptions
+        [InlineData(Language.FSharp)]
         public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned(Language language)
         {
             var kernel = CreateKernel(language);
@@ -212,7 +212,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        // [InlineData(Language.FSharp)]                        //Todo: : 'Operation could not be completed due to earlier error'
+        [InlineData(Language.FSharp)]
         public async Task it_returns_diagnostics(Language language)
         {
             var kernel = CreateKernel(language);
@@ -234,6 +234,12 @@ namespace WorkspaceServer.Tests.Kernel
 
             await SubmitCode(kernel, source);
 
+            var error = language switch
+            {
+                Language.FSharp => "input.fsx (1,1)-(1,7) typecheck error The value or constructor 'aaaadd' is not defined.",
+                Language.CSharp => "(1,1): error CS0103: The name 'aaaadd' does not exist in the current context",
+            };
+
             KernelEvents.ValuesOnly()
                 .Where( x => x.GetType() != typeof(KernelIdle) && x.GetType() != typeof(KernelBusy) )
                 .Last()
@@ -242,19 +248,18 @@ namespace WorkspaceServer.Tests.Kernel
                 .Which
                 .Message
                 .Should()
-                .Be("(1,1): error CS0103: The name 'aaaadd' does not exist in the current context");
+                .Be(error);
         }
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI should support incomplete submissions – testcase it_cannot_execute_incomplete_submissions
+        // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_incomplete_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "let a =",
                 Language.CSharp => "var a ="
             };
 
@@ -271,14 +276,13 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI - returns a value
+        // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "25",
                 Language.CSharp => "25"
             };
 
@@ -295,14 +299,13 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI - returns a value
+        // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_stdio_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "Console.WriteLine(\"Hello\")",
                 Language.CSharp => "Console.WriteLine(\"Hello\")"
             };
 
