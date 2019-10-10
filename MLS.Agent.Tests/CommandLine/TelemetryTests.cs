@@ -76,8 +76,9 @@ namespace MLS.Agent.Tests.CommandLine
             await _parser.InvokeAsync("jupyter", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
-                     x.Properties.Count == 1 &&
-                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
         }
 
         [Fact]
@@ -193,11 +194,11 @@ namespace MLS.Agent.Tests.CommandLine
             {
                 // Do not capture connection file
                 await _parser.InvokeAsync(String.Format("jupyter {0}", tmp), _console);
-                _fakeTelemetry.LogEntries.Should().HaveCount(1);
                 _fakeTelemetry.LogEntries.Should().Contain(
                     x => x.EventName == "command" &&
-                         x.Properties.Count == 1 &&
-                         x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
+                         x.Properties.Count == 2 &&
+                         x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                         x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
             }
             finally
             {
@@ -234,8 +235,9 @@ namespace MLS.Agent.Tests.CommandLine
             await _parser.InvokeAsync("--verbose jupyter", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
-                     x.Properties.Count == 1 &&
-                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER"));
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
         }
 
         [Fact]

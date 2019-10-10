@@ -81,7 +81,7 @@ namespace MLS.Agent.Telemetry.Configurer
 
         private string GetCacheFilePath(string cacheKey)
         {
-            return Path.Combine(_dotnetTryUserProfileFolderPath, $"{Product.Version}_{cacheKey}.dotnetTryUserLevelCache");
+            return Path.Combine(_dotnetTryUserProfileFolderPath, $"{Recipes.VersionSensor.Version().AssemblyInformationalVersion}_{cacheKey}.dotnetTryUserLevelCache");
         }
     }
 }
