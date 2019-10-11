@@ -546,6 +546,7 @@ namespace MLS.Agent.CommandLine
                                          new FSharpKernel()
                                              .UseDefaultRendering()
                                              .UseKernelHelpers()
+                                             .UseDefaultNamespaces()
                                              .UseXplot()
                                      }
                                      .UseDefaultMagicCommands()
