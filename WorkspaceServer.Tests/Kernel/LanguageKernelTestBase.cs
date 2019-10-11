@@ -27,8 +27,14 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernelBase = language switch
             {
-                Language.FSharp => (KernelBase) new FSharpKernel().UseDefaultRendering().UseKernelHelpers(),
-                Language.CSharp => new CSharpKernel().UseDefaultRendering().UseExtendDirective().UseKernelHelpers(),
+                Language.FSharp => new FSharpKernel()
+                                        .UseDefaultRendering()
+                                        .UseKernelHelpers()
+                                        .UseDefaultNamespaces() as KernelBase,
+                Language.CSharp => new CSharpKernel()
+                                        .UseDefaultRendering()
+                                        .UseExtendDirective()
+                                        .UseKernelHelpers(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
             return kernelBase;

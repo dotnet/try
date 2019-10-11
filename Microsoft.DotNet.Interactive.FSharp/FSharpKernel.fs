@@ -15,6 +15,7 @@ open MLS.Agent.Tools
 
 type FSharpKernel() as this =
     inherit KernelBase(Name = "fsharp")
+
     let resolvedAssemblies = List<string>()
     let script = new FSharpScript(additionalArgs=[|"/langversion:preview"|])
 
