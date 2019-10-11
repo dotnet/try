@@ -742,9 +742,8 @@ $"#r \"{dllPath}\"",
                         .Be(new { value = "hello" }.ToJson());
         }
 
-        [Theory(Skip = "CommandBuilder does not support directives with quoted paths")]
-        [InlineData(Language.CSharp)]             // Todo: Consider allowinf C# #r work with @"" strings
-        [InlineData(Language.FSharp)]             // Todo: make CommandLineParser deal with @quoted strings so that F# strings work 
+        [Theory]
+        [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_quotedpaths(Language language)
         {
             var kernel = CreateKernel(language);
@@ -759,13 +758,6 @@ $"#r @\"{dllPath}\"",
 @"
 open Newtonsoft.Json
 let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )
-json
-"},
-                Language.CSharp => new[] {
-$"#r \"{dllPath}\"",
-@"
-using Newtonsoft.Json;
-var json = JsonConvert.SerializeObject(new { value = ""hello"" });
 json
 "}
             };
@@ -785,8 +777,8 @@ json
         }
 
 
-        [Theory(Skip = "CommandBuilder does not support directives with quoted paths")]
-        [InlineData(Language.FSharp)]             // Todo: make CommandLineParser deal with triplequoted F# strings so that F# triple quoted strings work 
+        [Theory]
+        [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_triplequotedpaths(Language language)
         {
             var kernel = CreateKernel(language);

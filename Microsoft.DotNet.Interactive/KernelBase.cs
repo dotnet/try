@@ -269,6 +269,7 @@ namespace Microsoft.DotNet.Interactive
                 }
 
                 _directiveParser = new CommandLineBuilder(root)
+                                   .ParseResponseFileAs(ResponseFileHandling.Disabled)
                                    .UseMiddleware(
                                        context => context.BindingContext
                                                          .AddService(
