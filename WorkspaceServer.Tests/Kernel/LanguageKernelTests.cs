@@ -562,7 +562,8 @@ Console.Write(""value three"");",
             var (source, error) = language switch
             {
                 Language.CSharp => ("using Not.A.Namespace;", "(1,7): error CS0246: The type or namespace name 'Not' could not be found (are you missing a using directive or an assembly reference?)"),
-                Language.FSharp => ("open Not.A.Namespace", "input.fsx (1,6)-(1,9) typecheck error The namespace or module 'Not' is not defined.")
+                Language.FSharp => ("open Not.A.Namespace", @"input.fsx (1,6)-(1,9) typecheck error The namespace or module 'Not' is not defined. Maybe you want one of the following:
+   Net")
             };
 
             await SubmitCode(kernel, source);
