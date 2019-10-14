@@ -98,6 +98,7 @@ module FSharpPocketViewTags =
     let strong = f "strong"
     let sub = f "sub"
     let sup = f "sup"
+    let svg = f "svg"
     let table = f "table"
     let tbody = f "tbody"
     let td = f "td"
