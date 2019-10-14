@@ -53,11 +53,11 @@ namespace MLS.Agent.Tests.CommandLine
                 {
                     return Task.FromResult(1);
                 },
-                jupyter: (console, startServer, context) =>
+                jupyter: (startupOptions, console, startServer, context) =>
                 {
                     return Task.FromResult(1);
                 },
-                startKernelServer: (kernel, console) =>
+                startKernelServer: (startupOptions, kernel, console) =>
                 {
                     return Task.FromResult(1);
                 },

@@ -65,7 +65,7 @@ namespace MLS.Agent.Tests.CommandLine
                     _verifyOptions = options;
                     return Task.FromResult(1);
                 },
-                jupyter: (console, startServer, context) =>
+                jupyter: (startupOptions, console, startServer, context) =>
                 {
                     return Task.FromResult(1);
                 },
