@@ -47,6 +47,17 @@ Once you have successfully installed `dotnet try` global tool, enter the command
 |----------------|----------------------------------------|
 | `demo`         | Learn how to create Try .NET content with an interactive demo |
 | `verify`       | Verify Markdown files in the target directory and its children.            |
+
+## Installing preview builds from `master`
+
+To install the latest preview build from master, first uninstall the existing version of the tool:
+
+`dotnet tool uninstall -g dotnet-try`
+
+Then install from the preview package feed:
+
+`dotnet tool install -g --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json" dotnet-try`
+
 ## Getting Started
 
 You can get started using either one of the options below. 
