@@ -42,8 +42,6 @@ open {typeof(Formatter).Namespace}
                          new SubmitCode($@"
 open System
 open System.Text
-open System.Collections
-open System.Collections.Generic
 open System.Threading.Tasks
 open System.Linq
 "))).Wait();
