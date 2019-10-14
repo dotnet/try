@@ -156,7 +156,7 @@ namespace MLS.Agent
                           .UseStartup<Startup>()
                           .ConfigureUrl(options.Mode, options.Port)
                           .Build();
-
+            
             return webHost;
         }
     }

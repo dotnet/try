@@ -10,11 +10,16 @@ namespace MLS.Agent.CommandLine
     public static class JupyterCommand
     {
         public static Task<int> Do(
+            StartupOptions startupOptions, 
             IConsole console,
             CommandLineParser.StartServer startServer = null,
             InvocationContext context = null)
         {
-            startServer?.Invoke(new StartupOptions(isJupyter: true), context);
+            startupOptions.IsJupyter = true;
+
+            Program.StartToolLogging(startupOptions);
+
+            startServer?.Invoke(startupOptions, context);
 
             return Task.FromResult(0);
         }

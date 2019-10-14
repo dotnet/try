@@ -37,21 +37,21 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             kernel.AddDirective(new Command("%%html")
             {
-                Handler =  CommandHandler.Create((KernelInvocationContext context) =>
+                Handler = CommandHandler.Create((KernelInvocationContext context) =>
                 {
                     if (context.Command is SubmitCode submitCode)
                     {
                         var htmlContent = submitCode.Code
-                                                      .Replace("%%html", "")
-                                                      .Trim();
-                      
+                                                    .Replace("%%html", "")
+                                                    .Trim();
+
                         context.Publish(new DisplayedValueProduced(
-                                           htmlContent,
-                                           context.Command,
-                                           formattedValues: new[]
-                                           {
-                                               new FormattedValue("text/html", htmlContent)
-                                           }));
+                                            htmlContent,
+                                            context.Command,
+                                            formattedValues: new[]
+                                            {
+                                                new FormattedValue("text/html", htmlContent)
+                                            }));
 
                         context.Complete();
                     }
