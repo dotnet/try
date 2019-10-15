@@ -11,11 +11,16 @@ namespace MLS.Agent.CommandLine
     public static class KernelServerCommand
     {
         public static async Task<int> Do(
+            StartupOptions startupOptions, 
             IKernel kernel,
             IConsole console)
         {
+            Program.StartToolLogging(startupOptions);
+
             var client = new KernelStreamClient(kernel, Console.In, Console.Out);
+            
             await client.Start();
+            
             return 0;
         }
     }
