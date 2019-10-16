@@ -10,14 +10,6 @@ ENV HOME /home/${NB_USER}
 
 WORKDIR ${HOME}
 
-# Copy notebooks
-
-COPY ./NotebookExamples/ ${HOME}/Notebooks/
-
-# Copy package sources
-
-COPY ./NuGet.config ${HOME}/nuget.config
-
 USER root
 RUN apt-get update
 RUN apt-get install -y curl
@@ -54,6 +46,14 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true \
 
 # Trigger first run experience by running arbitrary cmd
 RUN dotnet help
+
+# Copy notebooks
+
+COPY ./NotebookExamples/ ${HOME}/Notebooks/
+
+# Copy package sources
+
+COPY ./NuGet.config ${HOME}/nuget.config
 
 RUN chown -R ${NB_UID} ${HOME}
 USER ${USER}
