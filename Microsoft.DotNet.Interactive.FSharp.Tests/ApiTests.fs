@@ -27,3 +27,11 @@ type ApiTests() =
     [<Fact>]
     member __.``inner HTML from another tag``() =
         Assert.Equal("<div><a>foo</a></div>", div.innerHTML(a.innerHTML("foo")).ToString())
+
+    [<Fact>]
+    member __.``inner HTML varargs 0``() =
+        Assert.Equal("<div></div>", div.innerHTML().ToString())
+
+    [<Fact>]
+    member __.``inner HTML varargs 2``() =
+        Assert.Equal("<div>ab</div>", div.innerHTML("a", "b").ToString())
