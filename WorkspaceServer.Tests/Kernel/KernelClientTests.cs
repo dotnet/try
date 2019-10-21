@@ -244,7 +244,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var events = _events
                 .TakeWhile(e => e["eventType"].Value<string>() != nameof(CommandHandled))
-                .Timeout(DateTimeOffset.Now.Add(1.Minutes()))
+                .Timeout(1.Minutes())
                 .ToEnumerable()
                 .ToList();
 

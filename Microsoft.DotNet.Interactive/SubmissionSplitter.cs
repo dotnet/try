@@ -11,7 +11,7 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class SubmissionSplitter
+    internal class SubmissionSplitter
     {
         private Parser _directiveParser;
 
@@ -52,7 +52,18 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
-                    nonDirectiveLines.Add(currentLine);
+                    var command = parseResult.CommandResult.Command;
+
+                    if (command == parseResult.Parser.Configuration.RootCommand)
+                    {
+                        nonDirectiveLines.Add(currentLine);
+                    }
+                    else
+                    {
+                        var message = parseResult.Errors.First().ToString();
+
+                        yield return new DisplayError(message);
+                    }
                 }
             }
 
@@ -128,6 +139,7 @@ namespace Microsoft.DotNet.Interactive
             }
 
             _directiveCommands.Add(command);
+            _directiveParser = null;
         }
     }
 }

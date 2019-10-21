@@ -157,13 +157,15 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 Handler = CommandHandler.Create(async (KernelInvocationContext context) =>
                 {
-                    var supportedDirectives = new SupportedDirectives(context.CurrentKernel.Name);
+                    var currentKernel = context.CurrentKernel;
 
-                    supportedDirectives.Commands.AddRange(context.CurrentKernel.Directives);
+                    var supportedDirectives = new SupportedDirectives(currentKernel.Name);
+
+                    supportedDirectives.Commands.AddRange(currentKernel.Directives);
 
                     context.Publish(new DisplayedValueProduced(supportedDirectives, context.Command));
 
-                    await context.CurrentKernel.VisitSubkernelsAsync(async k =>
+                    await currentKernel.VisitSubkernelsAsync(async k =>
                     {
                         if (k.Directives.Any(d => d.Name == "%lsmagic"))
                         {

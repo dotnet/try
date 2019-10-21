@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         public static AndWhichConstraint<ObjectAssertions, T> ContainSingle<T>(
             this GenericCollectionAssertions<IKernelEvent> should)
         {
-            var p = should.ContainSingle(e => e is T);
+            should.ContainSingle(e => e is T);
 
             var t = should.Subject
                           .OfType<T>()

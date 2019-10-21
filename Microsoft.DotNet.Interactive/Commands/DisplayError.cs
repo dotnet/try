@@ -27,7 +27,5 @@ namespace Microsoft.DotNet.Interactive.Commands
         }
 
         public string Message { get; }
-
-
     }
 }

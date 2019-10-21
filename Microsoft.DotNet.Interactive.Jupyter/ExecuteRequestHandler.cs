@@ -99,8 +99,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             jupyterMessageSender.Send(executeReplyPayload);
         }
 
-      
-
         private void OnDisplayEvent(DisplayEventBase displayEvent,
             Envelope request,
             IJupyterMessageSender jupyterMessageSender)
@@ -123,29 +121,32 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                         transient: transient,
                         data: formattedValues);
                     break;
+
                 case DisplayedValueUpdated _:
                     dataMessage = new UpdateDisplayData(
                         transient: transient,
                         data: formattedValues);
                     break;
+
                 case ReturnValueProduced _:
                     dataMessage = new ExecuteResult(
                         _executionCount,
                         transient: transient,
                         data: formattedValues);
                     break;
+
                 case StandardOutputValueProduced _:
                     dataMessage = Stream.StdOut(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
-                    
                     break;
 
                 case StandardErrorValueProduced _:
+                case ErrorProduced _:
                     dataMessage = Stream.StdErr(GetPlainTextValueOrDefault(formattedValues, value?.ToString() ?? string.Empty));
                     break;
+
                 default:
                     throw new ArgumentException("Unsupported event type", nameof(displayEvent));
             }
-            
 
             var isSilent = ((ExecuteRequest)request.Content).Silent;
 
