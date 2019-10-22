@@ -167,17 +167,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]
-        // Todo: teach fsi about returning exceptions
-        // > open System;;
-        // > raise(new NotImplementedException());;
-        //    raise(new NotImplementedException());;
-        //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-        //  stdin(7,1) : error FS0030: Value restriction.The value 'it' has been inferred to have generic type
-        //       val it : '_a
-        //  Either define 'it' as a simple data term, make it a function with explicit arguments or, if you do not intend for it to be generic, add a type annotation.
-        // >
+        [InlineData(Language.FSharp)]
         public async Task it_returns_exceptions_thrown_in_user_code(Language language)
         {
             var kernel = CreateKernel(language);
@@ -186,8 +176,12 @@ namespace WorkspaceServer.Tests.Kernel
             {
                 Language.FSharp => new[]
                 {
+                    // F# syntax doesn't allow a bare `raise ...` expression at the root due to type inference being
+                    // ambiguous, but the same effect can be achieved by wrapping the exception in a strongly-typed
+                    // function call.
                     "open System",
-                    "raise (new NotImplementedException())"
+                    "let f (): unit = raise (new NotImplementedException())",
+                    "f ()"
                 },
 
                 Language.CSharp => new[]
@@ -346,18 +340,15 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        // [InlineData(Language.FSharp)]                         // Todo: do 1 returns a value it shouldn't
+        // F# doesn't have the concept of a statement
         public async Task it_does_not_return_a_result_for_a_statement(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                // Closest F# has to a statement do discards the result
-                Language.FSharp => "do 1",
-
                 // if is a statement in C#
-                Language.CSharp => "var x = 1;"
+                Language.CSharp => "if (true) { }"
             };
 
             await SubmitCode(kernel, source, submissionType: SubmissionType.Run);
@@ -373,7 +364,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                         // Todo: let x = 2 returns a value it shouldn't
+        [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_binding(Language language)
         {
             var kernel = CreateKernel(language);
@@ -713,7 +704,7 @@ json"
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]             Todo:  let binding returns a value"
+        [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_separate_submissions(Language language)
         {
             var kernel = CreateKernel(language);
