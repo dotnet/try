@@ -524,15 +524,15 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI interrupt command_failed : cancelled command
+        [InlineData(Language.FSharp)]
         public async Task it_can_cancel_execution(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "System.Threading.Thread.Sleep(3000)",
-                Language.CSharp => "System.Threading.Thread.Sleep(3000);"
+                Language.FSharp => "System.Threading.Thread.Sleep(3000)\r\n2",
+                Language.CSharp => "System.Threading.Thread.Sleep(3000);2"
             };
 
             var submitCodeCommand = new SubmitCode(source);
@@ -541,15 +541,24 @@ Console.Write(""value three"");",
             await kernel.SendAsync(interruptionCommand);
             await codeSubmission;
 
+            // verify cancel command
             KernelEvents
                 .ValuesOnly()
                 .Single(e => e is CurrentCommandCancelled);
 
+            // verify failure
             KernelEvents
                 .ValuesOnly()
                 .OfType<CommandFailed>()
                 .Should()
                 .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Command cancelled"));
+
+            // verify `2` isn't evaluated and returned
+            KernelEvents
+                .ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Should()
+                .BeEmpty();
         }
 
         [Theory]
