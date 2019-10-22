@@ -8,6 +8,6 @@ namespace Microsoft.DotNet.Interactive
 {
     public interface IExtensibleKernel
     {
-        Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext invocationContext);
+        Task LoadExtensionsFromDirectory(IDirectoryAccessor directory, KernelInvocationContext invocationContext);
     }
 }

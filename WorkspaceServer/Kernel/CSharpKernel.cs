@@ -346,7 +346,7 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        public async Task LoadExtensionsFromDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
         {
             var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context);
