@@ -5,6 +5,7 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -98,6 +99,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             {
                                 helper?.Handle(peRef.FilePath);
                             }
+
+                            AssemblyLoadContext.Default.LoadFromAssemblyPath(reference.Display);
                         }
 
                         kernel.AddMetadataReferences(result.References);
