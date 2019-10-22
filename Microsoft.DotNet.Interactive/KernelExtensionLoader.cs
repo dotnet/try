@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using System;
 using System.IO;
@@ -28,6 +27,7 @@ namespace Microsoft.DotNet.Interactive
             }
 
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
+           
             var extensionTypes = assembly
                                    .ExportedTypes
                                    .Where(t => t.CanBeInstantiated() && typeof(IKernelExtension).IsAssignableFrom(t))
