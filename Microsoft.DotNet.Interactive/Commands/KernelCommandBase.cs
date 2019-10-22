@@ -34,7 +34,5 @@ namespace Microsoft.DotNet.Interactive.Commands
 
             await Handler(context);
         }
-
-     
     }
 }

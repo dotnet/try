@@ -2,14 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -20,7 +17,6 @@ using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
-using WorkspaceServer.Tests.Instrumentation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -1049,27 +1045,33 @@ json
             var extensionDir = Create.EmptyWorkspace()
                                      .Directory;
 
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));")).FullName;
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));"))
+                .FullName;
 
             var kernel = CreateKernel();
 
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded &&
-                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
-            KernelEvents.Should()
-                        .ContainSingle(e => e.Value is CommandHandled &&
-                                            e.Value.As<CommandHandled>()
-                                             .Command
-                                             .As<SubmitCode>()
-                                             .Code
-                                             .Contains("using System.Reflection;"));
+            events.Should()
+                  .ContainSingle(e => e is ExtensionLoaded &&
+                                      e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
-                                                     e.Value.As<DisplayedValueProduced>()
-                                                     .Value
-                                                     .ToString()
-                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
+            events.Should()
+                  .ContainSingle(e => e is CommandHandled &&
+                                      e.As<CommandHandled>()
+                                       .Command
+                                       .As<SubmitCode>()
+                                       .Code
+                                       .Contains("using System.Reflection;"));
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced &&
+                                      e.As<DisplayedValueProduced>()
+                                       .Value
+                                       .ToString()
+                                       .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
         }
 
         [Fact]
@@ -1082,11 +1084,12 @@ json
 
             var kernel = CreateKernel();
 
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
-            KernelEvents.Should()
-                      .ContainSingle(e => e.Value is KernelExtensionLoadException);
-
+            events.Should()
+                  .ContainSingle(e => e is KernelExtensionLoadException);
         }
 
         [Fact]

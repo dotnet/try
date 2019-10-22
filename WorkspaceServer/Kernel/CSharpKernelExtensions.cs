@@ -194,8 +194,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                                         HtmlFormatter.MimeType,
                                         html)
                                 }));
-
-                        context.Complete();
                     }
                 })
             };

@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
-    <PackageReference Include="System.CommandLine.Experimental" Version="$(SystemCommandLineExperimentalVersion)" />
+    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19508.1" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
   </ItemGroup>
 
