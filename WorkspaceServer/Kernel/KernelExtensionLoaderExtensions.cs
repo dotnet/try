@@ -11,7 +11,7 @@ namespace WorkspaceServer.Kernel
 {
     public static class KernelExtensionLoaderExtensions
     {
-         public static async Task LoadFromAssembliesInDirectory(this KernelExtensionLoader loader, IDirectoryAccessor directory, IKernel kernel, KernelInvocationContext context)
+        public static async Task LoadFromAssembliesInDirectory(this KernelExtensionLoader loader, IDirectoryAccessor directory, IKernel kernel, KernelInvocationContext context)
         {
             if (directory.RootDirectoryExists())
             {
