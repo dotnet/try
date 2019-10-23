@@ -132,6 +132,7 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode(submission));
 
             KernelEvents
+                
                 .OfType<DisplayedValueProduced>()
                 .SelectMany(v => v.FormattedValues)
                 .Should()
