@@ -99,8 +99,11 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             {
                                 helper?.Handle(peRef.FilePath);
                             }
+                        }
 
-                            AssemblyLoadContext.Default.LoadFromAssemblyPath(reference.Display);
+                        foreach (var reference in result.References)
+                        {
+                           AssemblyLoadContext.Default.LoadFromAssemblyPath(reference.Display);
                         }
 
                         kernel.AddMetadataReferences(result.References);
