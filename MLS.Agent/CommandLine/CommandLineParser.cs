@@ -160,7 +160,7 @@ namespace MLS.Agent.CommandLine
                    .UseMiddleware(async (context, next) =>
                    {
                        // If sentinel does not exist, print the welcome message showing the telemetry notification.
-                       if (!firstTimeUseNoticeSentinel.Exists())
+                       if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.Telemetry.SkipFirstTimeExperience)
                        {
                            context.Console.Out.WriteLine();
                            context.Console.Out.WriteLine(Telemetry.Telemetry.WelcomeMessage);

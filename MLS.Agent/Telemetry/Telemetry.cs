@@ -59,7 +59,9 @@ The.NET Core tools collect usage data in order to help us improve your experienc
             }
         }
 
-        public static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
+        public static bool SkipFirstTimeExperience => GetEnvironmentVariableAsBool("DOTNET_TRY_SKIP_FIRST_TIME_EXPERIENCE", false);
+
+        private static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
         {
             var str = Environment.GetEnvironmentVariable(name);
             if (string.IsNullOrEmpty(str))
