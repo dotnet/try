@@ -5,6 +5,7 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -108,7 +109,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
                         var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
-                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory, result.References.Select(r => r.Display)));
                     }
                     else
                     {

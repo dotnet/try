@@ -26,13 +26,13 @@ namespace MLS.Agent
 
         public void Handle(string assembly)
         {
-            AppDomain currentDomain = AppDomain.CurrentDomain;
+            var currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyLoad += AssemblyLoaded(assembly);
         }
 
         private AssemblyLoadEventHandler AssemblyLoaded(string assembly)
         {
-            return (object sender, AssemblyLoadEventArgs args) =>
+            return (sender, args) =>
             {
                 if (args.LoadedAssembly.Location == assembly)
                 {
