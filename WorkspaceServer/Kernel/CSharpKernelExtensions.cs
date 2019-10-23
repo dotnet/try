@@ -101,11 +101,6 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             }
                         }
 
-                        foreach (var reference in result.References)
-                        {
-                           AssemblyLoadContext.Default.LoadFromAssemblyPath(reference.Display);
-                        }
-
                         kernel.AddMetadataReferences(result.References);
 
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
@@ -114,7 +109,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
                         var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
-                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory, result.References.Select(r => r.Display)));
                     }
                     else
                     {
