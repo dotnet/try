@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reactive;
-using System.Reactive.Linq;
 using Pocket;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Events;
@@ -45,7 +43,7 @@ namespace WorkspaceServer.Tests.Kernel
             var kernel = CreateLanguageKernel(language).LogEventsToPocketLogger();
 
             DisposeAfterTest(
-                kernel.KernelEvents.Timestamp().Subscribe(KernelEvents.Add));
+                kernel.KernelEvents.Subscribe(KernelEvents.Add));
 
             return kernel;
         }
@@ -77,7 +75,7 @@ namespace WorkspaceServer.Tests.Kernel
         /// IDispose
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
-        protected IList<Timestamped<IKernelEvent>> KernelEvents { get; } = new List<Timestamped<IKernelEvent>>();
+        protected IList<IKernelEvent> KernelEvents { get; } = new List<IKernelEvent>();
 
         protected void DisposeAfterTest(IDisposable disposable)
         {

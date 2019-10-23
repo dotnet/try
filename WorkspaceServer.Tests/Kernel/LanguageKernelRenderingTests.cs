@@ -106,7 +106,6 @@ namespace WorkspaceServer.Tests.Kernel
 
             var formatted =
                 KernelEvents
-                    .ValuesOnly()
                     .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues);
 
@@ -133,8 +132,6 @@ namespace WorkspaceServer.Tests.Kernel
             await kernel.SendAsync(new SubmitCode(submission));
 
             KernelEvents
-                .OrderBy(e => e.Timestamp)
-                .ValuesOnly()
                 .OfType<DisplayedValueProduced>()
                 .SelectMany(v => v.FormattedValues)
                 .Should()
@@ -144,8 +141,6 @@ namespace WorkspaceServer.Tests.Kernel
 
 
             KernelEvents
-                .OrderBy(e => e.Timestamp)
-                .ValuesOnly()
                 .OfType<DisplayedValueUpdated>()
                 .SelectMany(v => v.FormattedValues)
                 .Should()
@@ -171,9 +166,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             var valueEvents =
                 KernelEvents
-                    .OrderBy(e => e.Timestamp)
-                    .Where(e => e.Value is DisplayedValueProduced || e.Value is DisplayedValueUpdated)
-                    .Select(e => e.Value)
+                    .Where(e => e is DisplayedValueProduced || e is DisplayedValueUpdated)
+                    .Select(e => e)
                    .ToList();
 
             valueEvents.First().Should().BeOfType<DisplayedValueProduced>();
@@ -199,7 +193,6 @@ namespace WorkspaceServer.Tests.Kernel
 
             var formatted =
                 KernelEvents
-                    .ValuesOnly()
                     .OfType<DisplayedValueProduced>()
                     .SelectMany(v => v.FormattedValues)
                     .ToArray();
