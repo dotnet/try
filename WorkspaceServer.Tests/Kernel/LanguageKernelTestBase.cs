@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reactive;
-using System.Reactive.Linq;
 using Pocket;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Events;
@@ -13,6 +11,7 @@ using WorkspaceServer.Kernel;
 using Xunit.Abstractions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Tests;
 
 namespace WorkspaceServer.Tests.Kernel
 {
@@ -44,8 +43,9 @@ namespace WorkspaceServer.Tests.Kernel
         {
             var kernel = CreateLanguageKernel(language).LogEventsToPocketLogger();
 
-            DisposeAfterTest(
-                kernel.KernelEvents.Timestamp().Subscribe(KernelEvents.Add));
+            KernelEvents = kernel.KernelEvents.ToSubscribedList();
+
+            DisposeAfterTest(KernelEvents);
 
             return kernel;
         }
@@ -77,7 +77,7 @@ namespace WorkspaceServer.Tests.Kernel
         /// IDispose
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
-        protected IList<Timestamped<IKernelEvent>> KernelEvents { get; } = new List<Timestamped<IKernelEvent>>();
+        protected SubscribedList<IKernelEvent> KernelEvents { get; private set; }
 
         protected void DisposeAfterTest(IDisposable disposable)
         {

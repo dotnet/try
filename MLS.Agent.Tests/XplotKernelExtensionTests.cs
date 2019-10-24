@@ -30,7 +30,6 @@ namespace MLS.Agent.Tests
             await kernel.SendAsync(new SubmitCode("new PlotlyChart()"));
 
             KernelEvents
-                .ValuesOnly()
                 .OfType<ReturnValueProduced>()
                 .Should().
                 ContainSingle(valueProduced =>
