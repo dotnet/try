@@ -9,16 +9,18 @@ namespace WorkspaceServer.Packaging
     {
         public class AddReferenceResult
         {
-            public AddReferenceResult(bool succeeded, MetadataReference[] references = null, string installedVersion = null, IEnumerable<string> detailedErrors = null)
+            public AddReferenceResult(bool succeeded, MetadataReference[] newReferences = null, MetadataReference[] references = null, string installedVersion = null, IEnumerable<string> detailedErrors = null)
             {
                 Succeeded = succeeded;
-                References = references ?? Array.Empty<MetadataReference>();
+                References = references;
+                NewReferences = newReferences ?? Array.Empty<MetadataReference>();
                 InstalledVersion = installedVersion;
                 DetailedErrors = detailedErrors;
             }
 
             public bool Succeeded { get; }
             public MetadataReference[] References { get; }
+            public MetadataReference[] NewReferences { get; }
             public string InstalledVersion { get; }
             public IEnumerable<string> DetailedErrors { get; }
         }

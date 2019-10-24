@@ -93,7 +93,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                     if (result.Succeeded)
                     {
-                        foreach (var reference in result.References)
+                        foreach (var reference in result.NewReferences)
                         {
                             if (reference is PortableExecutableReference peRef)
                             {
@@ -101,7 +101,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             }
                         }
 
-                        kernel.AddMetadataReferences(result.References);
+                        kernel.AddMetadataReferences(result.NewReferences);
 
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
                                                                    context.Command));
