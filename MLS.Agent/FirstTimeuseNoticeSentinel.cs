@@ -11,6 +11,7 @@ namespace MLS.Agent
 {
     public sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
+        public const string SkipFirstTimeExperienceEnvironmentVariableName = "DOTNET_TRY_SKIP_FIRST_TIME_EXPERIENCE";
         public static readonly string SENTINEL = $"{Recipes.VersionSensor.Version().AssemblyInformationalVersion}.dotnetTryFirstUseSentinel";
 
         private readonly string _dotnetTryUserProfileFolderPath;

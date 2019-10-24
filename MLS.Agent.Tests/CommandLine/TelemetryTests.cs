@@ -305,5 +305,40 @@ namespace MLS.Agent.Tests.CommandLine
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties()["Kernel Version"].Should().Be(RuntimeInformation.OSDescription);
         }
+
+        [Fact]
+        public async Task Show_first_time_message_if_environment_variable_is_not_set()
+        {
+            var environmentVariableName = FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName;
+            var currentState = Environment.GetEnvironmentVariable(environmentVariableName);
+            Environment.SetEnvironmentVariable(environmentVariableName, null);
+            try
+            {
+                await _parser.InvokeAsync(String.Empty, _console);
+                _console.Out.ToString().Should().Contain(Telemetry.Telemetry.WelcomeMessage);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(environmentVariableName, currentState);
+            }
+        }
+
+        [Fact]
+        public async Task Do_not_show_first_time_message_if_environment_variable_is_set()
+        {
+            var environmentVariableName = FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName;
+            var currentState = Environment.GetEnvironmentVariable(environmentVariableName);
+            Environment.SetEnvironmentVariable(environmentVariableName, null);
+            Environment.SetEnvironmentVariable(environmentVariableName, "1");
+            try
+            {
+                await _parser.InvokeAsync(String.Empty, _console);
+                _console.Out.ToString().Should().NotContain(Telemetry.Telemetry.WelcomeMessage);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(environmentVariableName, currentState);
+            }
+        }
     }
 }
