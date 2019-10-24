@@ -163,7 +163,7 @@ namespace MLS.Agent.CommandLine
                    .UseMiddleware(async (context, next) =>
                    {
                        // If sentinel does not exist, print the welcome message showing the telemetry notification.
-                       if (!firstTimeUseNoticeSentinel.Exists())
+                       if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.Telemetry.SkipFirstTimeExperience)
                        {
                            context.Console.Out.WriteLine();
                            context.Console.Out.WriteLine(Telemetry.Telemetry.WelcomeMessage);
@@ -464,9 +464,10 @@ namespace MLS.Agent.CommandLine
                 };
                 startKernelServerCommand.AddOption(defaultKernelOption);
 
-                startKernelServerCommand.Handler = CommandHandler.Create<StartupOptions, KernelServerOptions, IConsole>(
-                    (startupOptions, options, console) =>
+                startKernelServerCommand.Handler = CommandHandler.Create<StartupOptions, KernelServerOptions, IConsole, InvocationContext>(
+                    (startupOptions, options, console, context) =>
                 {
+                    track(context.ParseResult);
                     return startKernelServer(startupOptions, CreateKernel(options.DefaultKernel), console);
                 });
 

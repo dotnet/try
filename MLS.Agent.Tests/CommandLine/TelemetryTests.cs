@@ -277,6 +277,60 @@ namespace MLS.Agent.Tests.CommandLine
         }
 
         [Fact]
+        public async Task Kernel_server_standalone_command_sends_telemetry()
+        {
+            await _parser.InvokeAsync("kernel-server", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("KERNEL-SERVER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
+        }
+
+        [Fact]
+        public async Task Kernel_server_standalone_command_has_one_entry()
+        {
+            await _parser.InvokeAsync("kernel-server", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Kernel_server_default_kernel_csharp_sends_telemetry()
+        {
+            await _parser.InvokeAsync("kernel-server --default-kernel csharp", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("KERNEL-SERVER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
+        }
+
+        [Fact]
+        public async Task Kernel_server_default_kernel_csharp_has_one_entry()
+        {
+            await _parser.InvokeAsync("kernel-server --default-kernel csharp", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
+        public async Task Kernel_server_default_kernel_fsharp_sends_telemetry()
+        {
+            await _parser.InvokeAsync("kernel-server --default-kernel fsharp", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("KERNEL-SERVER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("FSHARP"));
+        }
+
+        [Fact]
+        public async Task Kernel_server_default_kernel_fsharp_has_one_entry()
+        {
+            await _parser.InvokeAsync("kernel-server --default-kernel fsharp", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
+        }
+
+        [Fact]
         public void Telemetry_common_properties_should_contain_if_it_is_in_docker_or_not()
         {
             var unitUnderTest = new TelemetryCommonProperties(userLevelCacheWriter: new NothingUserLevelCacheWriter());
@@ -304,6 +358,41 @@ namespace MLS.Agent.Tests.CommandLine
         {
             var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties()["Kernel Version"].Should().Be(RuntimeInformation.OSDescription);
+        }
+
+        [Fact]
+        public async Task Show_first_time_message_if_environment_variable_is_not_set()
+        {
+            var environmentVariableName = FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName;
+            var currentState = Environment.GetEnvironmentVariable(environmentVariableName);
+            Environment.SetEnvironmentVariable(environmentVariableName, null);
+            try
+            {
+                await _parser.InvokeAsync(String.Empty, _console);
+                _console.Out.ToString().Should().Contain(Telemetry.Telemetry.WelcomeMessage);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(environmentVariableName, currentState);
+            }
+        }
+
+        [Fact]
+        public async Task Do_not_show_first_time_message_if_environment_variable_is_set()
+        {
+            var environmentVariableName = FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName;
+            var currentState = Environment.GetEnvironmentVariable(environmentVariableName);
+            Environment.SetEnvironmentVariable(environmentVariableName, null);
+            Environment.SetEnvironmentVariable(environmentVariableName, "1");
+            try
+            {
+                await _parser.InvokeAsync(String.Empty, _console);
+                _console.Out.ToString().Should().NotContain(Telemetry.Telemetry.WelcomeMessage);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(environmentVariableName, currentState);
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ using MLS.Agent.Telemetry.Utils;
 
 namespace MLS.Agent.Telemetry
 {
-    internal sealed class Telemetry : ITelemetry
+    public sealed class Telemetry : ITelemetry
     {
         internal static string CurrentSessionId = null;
         private TelemetryClient _client = null;
@@ -59,7 +59,9 @@ The.NET Core tools collect usage data in order to help us improve your experienc
             }
         }
 
-        public static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
+        public static bool SkipFirstTimeExperience => GetEnvironmentVariableAsBool(FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName, false);
+
+        private static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
         {
             var str = Environment.GetEnvironmentVariable(name);
             if (string.IsNullOrEmpty(str))

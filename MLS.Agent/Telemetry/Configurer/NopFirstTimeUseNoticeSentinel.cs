@@ -11,7 +11,7 @@ namespace MLS.Agent.Telemetry.Configurer
 
         public bool Exists()
         {
-            return true;
+            return false;
         }
     }
 }
