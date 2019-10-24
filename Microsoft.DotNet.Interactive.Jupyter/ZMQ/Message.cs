@@ -49,10 +49,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             Signature = signature ?? string.Empty;
         }
 
-        public static Message Create<T>(
-            T content,
+        public static Message Create<T>(T content,
             Header parentHeader = null,
             IReadOnlyList<IReadOnlyList<byte>> identifiers = null,
+            IReadOnlyDictionary<string, object> metaData = null,
             string signature = null)
             where T : Protocol.Message
         {
@@ -62,9 +62,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
             }
 
             var session = parentHeader?.Session ?? Guid.NewGuid().ToString();
-
-            var message = new Message(Header.Create(content, session), parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature);
-
+            var header = Header.Create(content, session);
+            var message = new Message(header, parentHeader: parentHeader, content: content, identifiers: identifiers, signature: signature, metaData: metaData);
 
             return message;
         }
@@ -89,14 +88,14 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                 throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is not a valid {nameof(RequestMessage)}");
             }
 
-            var replyMessage = Create(content, request.Header, request.Identifiers, request.Signature);
+            var replyMessage = Create(content, request.Header, request.Identifiers, request.MetaData, request.Signature);
 
             return replyMessage;
         }
 
         public static Message CreatePubSub<T>(
             T content,
-            Message request, 
+            Message request,
             string kernelIdentity = null)
             where T : PubSubMessage
         {
@@ -115,7 +114,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                 throw new ArgumentOutOfRangeException($"{request.Content.GetType()} is nor a valid {nameof(RequestMessage)}");
             }
 
-            var replyMessage = Create(content, request.Header, new[] { Topic(content, kernelIdentity) }, request.Signature);
+            var topic = Topic(content, kernelIdentity);
+            var identifiers = topic == null ? null : new[] { Topic(content, kernelIdentity) };
+            var replyMessage = Create(content, request.Header, identifiers: identifiers, metaData: request.MetaData, signature: request.Signature);
 
             return replyMessage;
         }
@@ -152,7 +153,17 @@ namespace Microsoft.DotNet.Interactive.Jupyter.ZMQ
                     break;
 
                 case nameof(Error):
-                    encodedTopic = Encoding.Unicode.GetBytes("execute_result");
+                    encodedTopic = null;
+                    break;
+
+                case nameof(Stream):
+                    {
+                        if (!(content is Stream stream))
+                        {
+                            throw new ArgumentNullException(nameof(stream));
+                        }
+                        encodedTopic = Encoding.Unicode.GetBytes($"stream.{stream.Name}");
+                    }
                     break;
 
                 default:

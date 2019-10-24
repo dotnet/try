@@ -76,7 +76,7 @@ namespace MLS.Agent.CommandLine
         public PackageSource AddPackageSource { get; }
         public Uri Uri { get; set; }
         public bool Production { get; }
-        public bool IsJupyter { get; }
+        internal bool IsJupyter { get; set; }
         public bool IsLanguageService { get; set; }
         public string Key { get; }
         public string ApplicationInsightsKey { get; }

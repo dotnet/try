@@ -57,11 +57,13 @@ namespace MLS.Agent.CommandLine
             StartupOptions startupOptions);
 
         public delegate Task<int> Jupyter(
+            StartupOptions options, 
             IConsole console,
             StartServer startServer = null,
             InvocationContext context = null);
 
         public delegate Task<int> StartKernelServer(
+            StartupOptions options, 
             IKernel kernel,
             IConsole console);
 
@@ -84,11 +86,12 @@ namespace MLS.Agent.CommandLine
             }
 
             startServer = startServer ??
-                          ((options, invocationContext) =>
-                                  Program.ConstructWebHost(options).Run());
+                          ((startupOptions, invocationContext) =>
+                                  Program.ConstructWebHost(startupOptions).Run());
 
             jupyter = jupyter ??
-                      JupyterCommand.Do;
+                      ((startupOptions, console, server, context) => 
+                              JupyterCommand.Do(startupOptions, console, server, context));
 
             demo = demo ??
                    DemoCommand.Do;
@@ -112,7 +115,8 @@ namespace MLS.Agent.CommandLine
                       InstallCommand.Do;
 
             startKernelServer = startKernelServer ??
-                           KernelServerCommand.Do;
+                                ((startupOptions, kernel, console) =>
+                           KernelServerCommand.Do(startupOptions, kernel, console));
 
             // Setup first time use notice sentinel.
             firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
@@ -142,7 +146,6 @@ namespace MLS.Agent.CommandLine
 
                 return null;
             });
-
 
             var rootCommand = StartInTryMode();
 
@@ -414,7 +417,7 @@ namespace MLS.Agent.CommandLine
                 }.ExistingOnly();
                 jupyterCommand.AddArgument(connectionFileArgument);
 
-                jupyterCommand.Handler = CommandHandler.Create<JupyterOptions, IConsole, InvocationContext>((options, console, context) =>
+                jupyterCommand.Handler = CommandHandler.Create<StartupOptions, JupyterOptions, IConsole, InvocationContext>((startupOptions, options, console, context) =>
                 {
                     track(context.ParseResult);
 
@@ -434,7 +437,7 @@ namespace MLS.Agent.CommandLine
                         .AddSingleton<IHostedService, Shell>()
                         .AddSingleton<IHostedService, Heartbeat>();
 
-                    return jupyter(console, startServer, context);
+                    return jupyter(startupOptions, console, startServer, context);
                 });
 
                 var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
@@ -461,10 +464,11 @@ namespace MLS.Agent.CommandLine
                 };
                 startKernelServerCommand.AddOption(defaultKernelOption);
 
-                startKernelServerCommand.Handler = CommandHandler.Create<KernelServerOptions, IConsole, InvocationContext>((options, console, context) =>
+                startKernelServerCommand.Handler = CommandHandler.Create<StartupOptions, KernelServerOptions, IConsole, InvocationContext>(
+                    (startupOptions, options, console, context) =>
                 {
                     track(context.ParseResult);
-                    return startKernelServer(CreateKernel(options.DefaultKernel), console);
+                    return startKernelServer(startupOptions, CreateKernel(options.DefaultKernel), console);
                 });
 
                 return startKernelServerCommand;
@@ -546,6 +550,8 @@ namespace MLS.Agent.CommandLine
                                              .UseXplot(),
                                          new FSharpKernel()
                                              .UseDefaultRendering()
+                                             .UseKernelHelpers()
+                                             .UseDefaultNamespaces()
                                              .UseXplot()
                                      }
                                      .UseDefaultMagicCommands()

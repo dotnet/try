@@ -14,10 +14,12 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
     {
         public Task OnLoadAsync(IKernel kernel)
         {
-            Formatter<PlotlyChart>.Register((chart, writer) =>
-           {
-               writer.Write(GetChartHtml(chart));
-           }, "text/html");
+            Formatter<PlotlyChart>.Register(
+                (chart, writer) =>
+                {
+                    writer.Write(GetChartHtml(chart));
+                }, 
+                HtmlFormatter.MimeType);
 
             return Task.CompletedTask;
         }
@@ -31,13 +33,13 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
             var scriptNode = document.DocumentNode.SelectSingleNode("//script");
 
             var newHtmlDocument = new HtmlDocument();
-           
+
             newHtmlDocument.DocumentNode.ChildNodes.Add(divNode);
             newHtmlDocument.DocumentNode.ChildNodes.Add(GetScriptNodeWithRequire(scriptNode));
 
             return newHtmlDocument.DocumentNode.WriteContentTo();
         }
-      
+
 
         private static HtmlNode GetScriptNodeWithRequire(HtmlNode scriptNode)
         {

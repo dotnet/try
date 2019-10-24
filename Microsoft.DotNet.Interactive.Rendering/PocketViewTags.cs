@@ -70,6 +70,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
         public static dynamic strong => _.strong;
         public static dynamic sub => _.sub;
         public static dynamic sup => _.sup;
+        public static dynamic svg => _.svg;
         public static dynamic table => _.table;
         public static dynamic tbody => _.tbody;
         public static dynamic td => _.td;

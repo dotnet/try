@@ -3,9 +3,12 @@
 
 namespace Microsoft.DotNet.Interactive.FSharp
 
+open System
 open System.Collections.Generic
 open System.IO
+open System.Threading
 open System.Threading.Tasks
+open FSharp.Compiler.Interactive.Shell
 open FSharp.Compiler.Scripting
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
@@ -14,8 +17,10 @@ open MLS.Agent.Tools
 
 type FSharpKernel() as this =
     inherit KernelBase(Name = "fsharp")
+
     let resolvedAssemblies = List<string>()
     let script = new FSharpScript(additionalArgs=[|"/langversion:preview"|])
+    let mutable cancellationTokenSource = new CancellationTokenSource()
 
     do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
     do base.AddDisposable(script)
@@ -36,30 +41,42 @@ type FSharpKernel() as this =
             use _ = console.SubscribeToStandardOutput(fun msg -> context.Publish(StandardOutputValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))
             use _ = console.SubscribeToStandardError(fun msg -> context.Publish(StandardErrorValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))
             resolvedAssemblies.Clear()
+            let tokenSource = cancellationTokenSource
             let result, errors =
                 try
-                    script.Eval(codeSubmission.Code)
+                    script.Eval(codeSubmission.Code, tokenSource.Token)
                 with
                 | ex -> Error(ex), [||]
             for asm in resolvedAssemblies do
                 let! _success = handleAssemblyReferenceAdded asm context
                 () // don't care
             match result with
-            | Ok(Some(value)) ->
-                let value = value.ReflectionValue
-                let formattedValues = FormattedValue.FromObject(value)
-                context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
-            | Ok(None) -> ()
+            | Ok(result) ->
+                match result with
+                | Some(value) ->
+                    let value = value.ReflectionValue
+                    let formattedValues = FormattedValue.FromObject(value)
+                    context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
+                | None -> ()
+                context.Complete()
             | Error(ex) ->
-                let aggregateError = System.String.Join("\n", errors)
-                context.Publish(CommandFailed(ex, codeSubmission, aggregateError))
-            context.Complete()
+                if not (tokenSource.IsCancellationRequested) then
+                    let aggregateError = String.Join("\n", errors)
+                    let reportedException =
+                        match ex with
+                        | :? FsiCompilationException -> CodeSubmissionCompilationErrorException(ex) :> Exception
+                        | _ -> ex
+                    context.Publish(CommandFailed(reportedException, codeSubmission, aggregateError))
+                else
+                    context.Publish(new CommandFailed(null, codeSubmission, "Command cancelled"))
         }
 
     let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =
         async {
-            let reply = CurrentCommandCancelled(cancelCurrentCommand)
-            context.Publish(reply)
+            cancellationTokenSource.Cancel()
+            cancellationTokenSource.Dispose()
+            cancellationTokenSource <- new CancellationTokenSource()
+            context.Publish(CurrentCommandCancelled(cancelCurrentCommand))
         }
 
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =

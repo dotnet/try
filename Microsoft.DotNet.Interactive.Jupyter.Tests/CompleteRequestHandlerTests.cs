@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task send_completeReply_on_CompleteRequest()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new CompleteRequest("System.Console.", 15), null);
+            var request = Envelope.Create(new CompleteRequest("System.Console.", 15));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
 
             await scheduler.Schedule(context);

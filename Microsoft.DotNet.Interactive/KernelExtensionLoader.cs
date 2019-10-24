@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
@@ -15,7 +15,8 @@ namespace Microsoft.DotNet.Interactive
     {
         public delegate void PublishEvent(IKernelEvent kernelEvent);
 
-        public async Task<bool> LoadFromAssembly(FileInfo assemblyFile, IKernel kernel, KernelInvocationContext context)
+        public async Task<bool> LoadFromAssembly(FileInfo assemblyFile, IKernel kernel, KernelInvocationContext context,
+            IEnumerable<string> additionalDependencies = null)
         {
             if (assemblyFile == null)
             {
@@ -27,7 +28,16 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(kernel));
             }
 
+            if (additionalDependencies != null)
+            {
+                foreach (var additionalDependency in additionalDependencies.Where(File.Exists))
+                {
+                    AssemblyLoadContext.Default.LoadFromAssemblyPath(additionalDependency);
+                }
+            }
+
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
+           
             var extensionTypes = assembly
                                    .ExportedTypes
                                    .Where(t => t.CanBeInstantiated() && typeof(IKernelExtension).IsAssignableFrom(t))
@@ -39,6 +49,8 @@ namespace Microsoft.DotNet.Interactive
 
                 try
                 {
+
+
                     context.Publish(new DisplayedValueProduced($"Loading kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command));
                     await extension.OnLoadAsync(kernel);
                     context.Publish(new DisplayedValueProduced($"Loaded kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command));

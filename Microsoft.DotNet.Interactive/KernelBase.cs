@@ -5,8 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -19,11 +17,10 @@ namespace Microsoft.DotNet.Interactive
 {
     public abstract class KernelBase : IKernel
     {
-        private readonly Subject<IKernelEvent> _channel = new Subject<IKernelEvent>();
+        private readonly Subject<IKernelEvent> _kernelEvents = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
-        private readonly List<Command> _directiveCommands = new List<Command>();
-        private Parser _directiveParser;
         private readonly KernelIdleState _idleState = new KernelIdleState();
+        private readonly SubmissionSplitter _submissionSplitter = new SubmissionSplitter();
 
         protected KernelBase()
         {
@@ -46,11 +43,6 @@ namespace Microsoft.DotNet.Interactive
                     PublishEvent(new KernelBusy());
                 }
             }));
-        }
-
-        public void WhenIdle(Func<object> p)
-        {
-            throw new NotImplementedException();
         }
 
         public KernelCommandPipeline Pipeline { get; }
@@ -120,7 +112,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
-                    await extensibleKernel.LoadExtensionsInDirectory(loadExtensionsInDirectory.Directory, context);
+                    await extensibleKernel.LoadExtensionsFromDirectory(loadExtensionsInDirectory.Directory, context, loadExtensionsInDirectory.AdditionalDependencies);
                 }
                 else
                 {
@@ -150,74 +142,33 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
-            var operations = new List<(string comment, Func<Task> operation)>();
-            var commandWasSplit = false;
-            var directiveParser = GetDirectiveParser();
+            var commands = _submissionSplitter
+                           .SplitSubmission(submitCode)
+                           .ToArray();
 
-            var lines = new Queue<string>(
-                submitCode.Code.Split(new[] { "\r\n", "\n" },
-                                      StringSplitOptions.None));
-
-            var nonDirectiveLines = new List<string>();
-
-            while (lines.Count > 0 && !context.IsComplete)
+            foreach (var command in commands)
             {
-                var currentLine = lines.Dequeue();
-
-                var parseResult = directiveParser.Parse(currentLine);
-
-                if (parseResult.Errors.Count == 0 &&
-                    !parseResult.Directives.Any() && // System.CommandLine directives should not be considered as valid
-                    !parseResult.Tokens.Any(t => t.Type == TokenType.Directive))
+                if (context.IsComplete)
                 {
-                    commandWasSplit = true;
+                    break;
+                }
 
-                    FlushSubmission();
-
-                    operations.Add(
-                        (currentLine, () => _directiveParser.InvokeAsync(parseResult)));
+                if (command == submitCode)
+                {
+                    await next(submitCode, context);
                 }
                 else 
                 {
-                    nonDirectiveLines.Add(currentLine);
-                }
-            }
-
-            FlushSubmission();
-
-            void FlushSubmission()
-            {
-                if (nonDirectiveLines.Any())
-                {
-                    var code = string.Join(Environment.NewLine, nonDirectiveLines);
-
-                    if (!string.IsNullOrWhiteSpace(code))
+                    if (command is RunDirective runDirective)
                     {
-                        operations.Add(
-                            (code,
-                                () =>
-                                {
-                                    return context.HandlingKernel.SendAsync(new SubmitCode(code));
-                                }));
+                        await runDirective.InvokeAsync(context);
                     }
-
-                    nonDirectiveLines.Clear();
-                }
-            }
-
-            if (commandWasSplit)
-            {
-                foreach (var operation in operations)
-                {
-                    if (!context.IsComplete)
+                    else
                     {
-                        await operation.operation();
+                        // each SubmitCode needs a new context
+                        await context.HandlingKernel.SendAsync(command);
                     }
                 }
-            }
-            else
-            {
-                await next(submitCode, context);
             }
         }
 
@@ -262,46 +213,13 @@ namespace Microsoft.DotNet.Interactive
             await next(displayedValue, pipelineContext);
         }
 
-        private Parser GetDirectiveParser()
-        {
-            if (_directiveParser == null)
-            {
-                var root = new RootCommand();
-
-                foreach (var c in _directiveCommands)
-                {
-                    root.Add(c);
-                }
-
-                _directiveParser = new CommandLineBuilder(root)
-                                   .UseMiddleware(
-                                       context => context.BindingContext
-                                                         .AddService(
-                                                             typeof(KernelInvocationContext),
-                                                             () => KernelInvocationContext.Current))
-                                   .Build();
-            }
-
-            return _directiveParser;
-        }
-
-        public IObservable<IKernelEvent> KernelEvents => _channel;
+        public IObservable<IKernelEvent> KernelEvents => _kernelEvents;
 
         public string Name { get; set; }
 
-        public IReadOnlyCollection<ICommand> Directives => _directiveCommands;
+        public IReadOnlyCollection<ICommand> Directives => _submissionSplitter.Directives;
 
-        public void AddDirective(Command command)
-        {
-            if (!command.Name.StartsWith("#") &&
-                !command.Name.StartsWith("%"))
-            {
-                throw new ArgumentException("Directives must begin with # or %");
-            }
-
-            _directiveCommands.Add(command);
-            _directiveParser = null;
-        }
+        public void AddDirective(Command command) => _submissionSplitter.AddDirective(command);
 
         private class KernelOperation
         {
@@ -384,7 +302,7 @@ namespace Microsoft.DotNet.Interactive
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
                     _idleState.SetAsBusy();
-                    
+                        
                     Task.Run(async () =>
                     {
                         await ExecuteCommand(currentOperation);
@@ -407,7 +325,7 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(kernelEvent));
             }
 
-            _channel.OnNext(kernelEvent);
+            _kernelEvents.OnNext(kernelEvent);
         }
 
         protected void AddDisposable(IDisposable disposable)

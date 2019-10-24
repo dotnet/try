@@ -2,14 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -20,7 +17,6 @@ using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
 using WorkspaceServer.Kernel;
-using WorkspaceServer.Tests.Instrumentation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -119,7 +115,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        // [InlineData(Language.FSharp)]  Todo teach FSharp about exceptions
+        [InlineData(Language.FSharp)]
         public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned(Language language)
         {
             var kernel = CreateKernel(language);
@@ -147,7 +143,7 @@ namespace WorkspaceServer.Tests.Kernel
                 .Select((t, pos) => (t.Value, pos))
                 .Single(t => t.Value is CommandFailed);
 
-            ((CommandFailed)failure).Exception.Should().BeOfType<CompilationErrorException>();
+            ((CommandFailed)failure).Exception.Should().BeOfType<CodeSubmissionCompilationErrorException>();
 
             var lastCodeSubmissionPosition = KernelEvents
                 .Select((e, pos) => (e.Value, pos))
@@ -167,17 +163,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]
-        // Todo: teach fsi about returning exceptions
-        // > open System;;
-        // > raise(new NotImplementedException());;
-        //    raise(new NotImplementedException());;
-        //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-        //  stdin(7,1) : error FS0030: Value restriction.The value 'it' has been inferred to have generic type
-        //       val it : '_a
-        //  Either define 'it' as a simple data term, make it a function with explicit arguments or, if you do not intend for it to be generic, add a type annotation.
-        // >
+        [InlineData(Language.FSharp)]
         public async Task it_returns_exceptions_thrown_in_user_code(Language language)
         {
             var kernel = CreateKernel(language);
@@ -186,8 +172,12 @@ namespace WorkspaceServer.Tests.Kernel
             {
                 Language.FSharp => new[]
                 {
+                    // F# syntax doesn't allow a bare `raise ...` expression at the root due to type inference being
+                    // ambiguous, but the same effect can be achieved by wrapping the exception in a strongly-typed
+                    // function call.
                     "open System",
-                    "raise (new NotImplementedException())"
+                    "let f (): unit = raise (new NotImplementedException())",
+                    "f ()"
                 },
 
                 Language.CSharp => new[]
@@ -212,7 +202,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        // [InlineData(Language.FSharp)]                        //Todo: : 'Operation could not be completed due to earlier error'
+        [InlineData(Language.FSharp)]
         public async Task it_returns_diagnostics(Language language)
         {
             var kernel = CreateKernel(language);
@@ -234,6 +224,12 @@ namespace WorkspaceServer.Tests.Kernel
 
             await SubmitCode(kernel, source);
 
+            var error = language switch
+            {
+                Language.FSharp => "input.fsx (1,1)-(1,7) typecheck error The value or constructor 'aaaadd' is not defined.",
+                Language.CSharp => "(1,1): error CS0103: The name 'aaaadd' does not exist in the current context",
+            };
+
             KernelEvents.ValuesOnly()
                 .Where( x => x.GetType() != typeof(KernelIdle) && x.GetType() != typeof(KernelBusy) )
                 .Last()
@@ -242,19 +238,18 @@ namespace WorkspaceServer.Tests.Kernel
                 .Which
                 .Message
                 .Should()
-                .Be("(1,1): error CS0103: The name 'aaaadd' does not exist in the current context");
+                .Be(error);
         }
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI should support incomplete submissions – testcase it_cannot_execute_incomplete_submissions
+        // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_incomplete_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "let a =",
                 Language.CSharp => "var a ="
             };
 
@@ -271,14 +266,13 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI - returns a value
+        // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "25",
                 Language.CSharp => "25"
             };
 
@@ -295,14 +289,13 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI - returns a value
+        // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_stdio_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "Console.WriteLine(\"Hello\")",
                 Language.CSharp => "Console.WriteLine(\"Hello\")"
             };
 
@@ -343,18 +336,15 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        // [InlineData(Language.FSharp)]                         // Todo: do 1 returns a value it shouldn't
+        // F# doesn't have the concept of a statement
         public async Task it_does_not_return_a_result_for_a_statement(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                // Closest F# has to a statement do discards the result
-                Language.FSharp => "do 1",
-
                 // if is a statement in C#
-                Language.CSharp => "var x = 1;"
+                Language.CSharp => "if (true) { }"
             };
 
             await SubmitCode(kernel, source, submissionType: SubmissionType.Run);
@@ -370,7 +360,7 @@ namespace WorkspaceServer.Tests.Kernel
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                         // Todo: let x = 2 returns a value it shouldn't
+        [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_binding(Language language)
         {
             var kernel = CreateKernel(language);
@@ -521,15 +511,15 @@ Console.Write(""value three"");",
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]                     // Todo: FSI interrupt command_failed : cancelled command
+        [InlineData(Language.FSharp)]
         public async Task it_can_cancel_execution(Language language)
         {
             var kernel = CreateKernel(language);
 
             var source = language switch
             {
-                Language.FSharp => "System.Threading.Thread.Sleep(3000)",
-                Language.CSharp => "System.Threading.Thread.Sleep(3000);"
+                Language.FSharp => "System.Threading.Thread.Sleep(3000)\r\n2",
+                Language.CSharp => "System.Threading.Thread.Sleep(3000);2"
             };
 
             var submitCodeCommand = new SubmitCode(source);
@@ -538,15 +528,24 @@ Console.Write(""value three"");",
             await kernel.SendAsync(interruptionCommand);
             await codeSubmission;
 
+            // verify cancel command
             KernelEvents
                 .ValuesOnly()
                 .Single(e => e is CurrentCommandCancelled);
 
+            // verify failure
             KernelEvents
                 .ValuesOnly()
                 .OfType<CommandFailed>()
                 .Should()
                 .BeEquivalentTo(new CommandFailed(null, interruptionCommand, "Command cancelled"));
+
+            // verify `2` isn't evaluated and returned
+            KernelEvents
+                .ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Should()
+                .BeEmpty();
         }
 
         [Theory]
@@ -559,7 +558,8 @@ Console.Write(""value three"");",
             var (source, error) = language switch
             {
                 Language.CSharp => ("using Not.A.Namespace;", "(1,7): error CS0246: The type or namespace name 'Not' could not be found (are you missing a using directive or an assembly reference?)"),
-                Language.FSharp => ("open Not.A.Namespace", "input.fsx (1,6)-(1,9) typecheck error The namespace or module 'Not' is not defined.")
+                Language.FSharp => ("open Not.A.Namespace", @"input.fsx (1,6)-(1,9) typecheck error The namespace or module 'Not' is not defined. Maybe you want one of the following:
+   Net")
             };
 
             await SubmitCode(kernel, source);
@@ -673,15 +673,15 @@ Console.Write(DateTime.Now);
 
             var source = language switch
             {
-                Language.FSharp => string.Format(@"#r ""{0}""
+                Language.FSharp => $@"#r ""{dllPath}""
 open Newtonsoft.Json
 let json = JsonConvert.SerializeObject( struct {{| value = ""hello"" |}} )
-json", dllPath),
+json",
 
-                Language.CSharp => string.Format(@"#r ""{0}""
+                Language.CSharp => $@"#r ""{dllPath}""
 using Newtonsoft.Json;
 var json = JsonConvert.SerializeObject(new {{ value = ""hello"" }});
-json", dllPath)
+json"
             };
 
             await SubmitCode(kernel, source);
@@ -700,8 +700,8 @@ json", dllPath)
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]             Todo:  let binding returns a value"
-        public async Task it_can_load_assembly_references_using_r_directive_seperate_submissions(Language language)
+        [InlineData(Language.FSharp)]
+        public async Task it_can_load_assembly_references_using_r_directive_separate_submissions(Language language)
         {
             var kernel = CreateKernel(language);
 
@@ -739,9 +739,8 @@ $"#r \"{dllPath}\"",
                         .Be(new { value = "hello" }.ToJson());
         }
 
-        [Theory(Skip = "CommandBuilder does not support directives with quoted paths")]
-        [InlineData(Language.CSharp)]             // Todo: Consider allowinf C# #r work with @"" strings
-        [InlineData(Language.FSharp)]             // Todo: make CommandLineParser deal with @quoted strings so that F# strings work 
+        [Theory]
+        [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_quotedpaths(Language language)
         {
             var kernel = CreateKernel(language);
@@ -756,13 +755,6 @@ $"#r @\"{dllPath}\"",
 @"
 open Newtonsoft.Json
 let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )
-json
-"},
-                Language.CSharp => new[] {
-$"#r \"{dllPath}\"",
-@"
-using Newtonsoft.Json;
-var json = JsonConvert.SerializeObject(new { value = ""hello"" });
 json
 "}
             };
@@ -782,8 +774,8 @@ json
         }
 
 
-        [Theory(Skip = "CommandBuilder does not support directives with quoted paths")]
-        [InlineData(Language.FSharp)]             // Todo: make CommandLineParser deal with triplequoted F# strings so that F# triple quoted strings work 
+        [Theory]
+        [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_triplequotedpaths(Language language)
         {
             var kernel = CreateKernel(language);
@@ -813,6 +805,43 @@ json
                         .Value
                         .Should()
                         .Be(new { value = "hello" }.ToJson());
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_formats_func_instances(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = language switch
+            {
+                Language.CSharp => new[] {
+                    "Func<int> func = () => 1;",
+                    "func()",
+                    "func"
+                },
+
+                Language.FSharp => new[] {
+                    "let func () = 1",
+                    "func()",
+                    "func"
+                },
+            };
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents.ValuesOnly()
+                .Count(e => e is CommandHandled)
+                .Should()
+                .Be(3);
+
+            KernelEvents.ValuesOnly()
+                .OfType<ReturnValueProduced>()
+                .Should()
+                .Contain(e => ((SubmitCode) e.Command).Code == source[1])
+                .And
+                .Contain(e => ((SubmitCode)e.Command).Code == source[2]);
         }
 
 
@@ -1007,27 +1036,33 @@ json
             var extensionDir = Create.EmptyWorkspace()
                                      .Directory;
 
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));")).FullName;
+            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));"))
+                .FullName;
 
             var kernel = CreateKernel();
 
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is ExtensionLoaded &&
-                                                     e.Value.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
-            KernelEvents.Should()
-                        .ContainSingle(e => e.Value is CommandHandled &&
-                                            e.Value.As<CommandHandled>()
-                                             .Command
-                                             .As<SubmitCode>()
-                                             .Code
-                                             .Contains("using System.Reflection;"));
+            events.Should()
+                  .ContainSingle(e => e is ExtensionLoaded &&
+                                      e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
 
-            KernelEvents.Should().ContainSingle(e => e.Value is DisplayedValueProduced &&
-                                                     e.Value.As<DisplayedValueProduced>()
-                                                     .Value
-                                                     .ToString()
-                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
+            events.Should()
+                  .ContainSingle(e => e is CommandHandled &&
+                                      e.As<CommandHandled>()
+                                       .Command
+                                       .As<SubmitCode>()
+                                       .Code
+                                       .Contains("using System.Reflection;"));
+
+            events.Should()
+                  .ContainSingle(e => e is DisplayedValueProduced &&
+                                      e.As<DisplayedValueProduced>()
+                                       .Value
+                                       .ToString()
+                                       .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
         }
 
         [Fact]
@@ -1040,11 +1075,12 @@ json
 
             var kernel = CreateKernel();
 
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
-            KernelEvents.Should()
-                      .ContainSingle(e => e.Value is KernelExtensionLoadException);
-
+            events.Should()
+                  .ContainSingle(e => e is KernelExtensionLoadException);
         }
 
         [Fact]

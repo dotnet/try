@@ -3,15 +3,16 @@
 
 namespace Microsoft.DotNet.Interactive.FSharp
 
+open System
 open Microsoft.AspNetCore.Html
 open Microsoft.DotNet.Interactive.Rendering
 
 type FSharpPocketViewTags(p: PocketView) as this =
     override __.ToString() = p.ToString()
-    abstract member innerHTML: obj -> FSharpPocketViewTags
+    abstract member innerHTML: [<ParamArray>] content: obj[] -> FSharpPocketViewTags
     abstract member Item: string * obj -> FSharpPocketViewTags with get
     default __.innerHTML content =
-        p.SetContent([|content|])
+        p.SetContent(content)
         this
     default __.Item
         with get (attribute: string, value: obj) =
@@ -98,6 +99,7 @@ module FSharpPocketViewTags =
     let strong = f "strong"
     let sub = f "sub"
     let sup = f "sup"
+    let svg = f "svg"
     let table = f "table"
     let tbody = f "tbody"
     let td = f "td"

@@ -1,17 +1,16 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-
 using Pocket;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
 using WorkspaceServer.Kernel;
 using Xunit.Abstractions;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 
@@ -19,29 +18,25 @@ namespace WorkspaceServer.Tests.Kernel
 {
     public abstract class LanguageKernelTestBase : IDisposable
     {
-        public LanguageKernelTestBase(ITestOutputHelper output)
+        protected LanguageKernelTestBase(ITestOutputHelper output)
         {
             DisposeAfterTest(output.SubscribeToPocketLogger());
         }
 
         private KernelBase CreateLanguageKernel(Language language)
         {
-            KernelBase kernelBase;
-            switch (language)
+            var kernelBase = language switch
             {
-                case Language.FSharp:
-                    kernelBase = new FSharpKernel().UseDefaultRendering();
-                    break;
-
-                case Language.CSharp:
-                    kernelBase = new CSharpKernel().UseDefaultRendering()
-                                                   .UseExtendDirective()
-                                                   .UseKernelHelpers();
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Unknown language specified");
-            }
+                Language.FSharp => new FSharpKernel()
+                                        .UseDefaultRendering()
+                                        .UseKernelHelpers()
+                                        .UseDefaultNamespaces() as KernelBase,
+                Language.CSharp => new CSharpKernel()
+                                        .UseDefaultRendering()
+                                        .UseExtendDirective()
+                                        .UseKernelHelpers(),
+                _ => throw new InvalidOperationException("Unknown language specified")
+            };
             return kernelBase;
         }
 
@@ -62,21 +57,21 @@ namespace WorkspaceServer.Tests.Kernel
 
         public async Task<SubmitCode[]> SubmitCode(KernelBase kernel, string[] codeFragments, SubmissionType submissionType = SubmissionType.Run)
         {
-            var cmds = new List<SubmitCode>();
-            foreach (string codeFragment in codeFragments)
+            var commands = new List<SubmitCode>();
+            foreach (var codeFragment in codeFragments)
             {
                 var cmd = new SubmitCode(codeFragment, submissionType: submissionType);
                 await kernel.SendAsync(cmd);
-                cmds.Add(cmd);
+                commands.Add(cmd);
             }
-            return cmds.ToArray();
+            return commands.ToArray();
         }
 
         public async Task<SubmitCode> SubmitCode(KernelBase kernel, string codeFragment, SubmissionType submissionType = SubmissionType.Run)
         {
-            var cmd = new SubmitCode(codeFragment, submissionType: submissionType);
-            await kernel.SendAsync(cmd);
-            return cmd;
+            var command = new SubmitCode(codeFragment, submissionType: submissionType);
+            await kernel.SendAsync(command);
+            return command;
         }
 
         /// IDispose

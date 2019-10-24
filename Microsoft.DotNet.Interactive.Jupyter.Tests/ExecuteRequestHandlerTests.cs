@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteInput_when_ExecuteRequest_is_handled()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("var a =12;"), null);
+            var request = Envelope.Create(new ExecuteRequest("var a =12;"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_message_on_when_code_submission_is_handled()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("var a =12;"), null);
+            var request = Envelope.Create(new ExecuteRequest("var a =12;"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
@@ -55,21 +55,39 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_with_error_message_on_when_code_submission_contains_errors()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("asdes"), null);
+            var request = Envelope.Create(new ExecuteRequest("asdes"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
 
             JupyterMessageSender.ReplyMessages.Should().ContainItemsAssignableTo<ExecuteReplyError>();
-            JupyterMessageSender.PubSubMessages.Should().Contain(e=> e is Error);
+            JupyterMessageSender.PubSubMessages.Should().Contain(e => e is Error);
+        }
+
+        [Fact]
+        public async Task does_not_expose_stacktrace_when_code_submission_contains_errors()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(new ExecuteRequest("asdes asdasd"));
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(5.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should()
+                .ContainSingle(e => e is Error)
+                .Which.As<Error>()
+                .Traceback
+                .Should()
+                .BeEquivalentTo("(1,13): error CS1002: ; expected");
         }
 
         [Fact]
         public async Task sends_DisplayData_message_on_ValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
+            var request = Envelope.Create(new ExecuteRequest("display(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
@@ -82,7 +100,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_Stream_message_on_StandardOutputValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"), null);
+            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
@@ -95,7 +113,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_Stream_message_on_StandardErrorValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"), null);
+            var request = Envelope.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
@@ -108,7 +126,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_message_on_ReturnValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("2+2"), null);
+            var request = Envelope.Create(new ExecuteRequest("2+2"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 
@@ -121,7 +139,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_message_when_submission_contains_only_a_directive()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("%%csharp"), null);
+            var request = Envelope.Create(new ExecuteRequest("%%csharp"));
             var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
             await scheduler.Schedule(context);
 

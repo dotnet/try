@@ -187,6 +187,10 @@ namespace WorkspaceServer.Kernel
                                 .UntilCancelled(cancellationSource.Token);
                         }
                     }
+                    catch (CompilationErrorException cpe)
+                    {
+                        exception = new CodeSubmissionCompilationErrorException(cpe);
+                    }
                     catch (Exception e)
                     {
                         exception = e;
@@ -200,11 +204,11 @@ namespace WorkspaceServer.Kernel
                 {
                     string message = null;
 
-                    if (exception is CompilationErrorException compilationError)
+                    if (exception is CodeSubmissionCompilationErrorException compilationError)
                     {
                         message =
                             string.Join(Environment.NewLine,
-                                compilationError.Diagnostics.Select(d => d.ToString()));
+                                (compilationError.InnerException as CompilationErrorException)?.Diagnostics.Select(d => d.ToString())?? Enumerable.Empty<string>());
                     }
 
                     context.Publish(new CommandFailed(exception, submitCode, message));
@@ -342,10 +346,11 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public async Task LoadExtensionsInDirectory(IDirectoryAccessor directory, KernelInvocationContext context)
+        public async Task LoadExtensionsFromDirectory(IDirectoryAccessor directory, KernelInvocationContext context,
+            IEnumerable<string> additionalDependencies = null)
         {
             var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context);
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context, additionalDependencies);
         }
         
         private bool HasReturnValue =>

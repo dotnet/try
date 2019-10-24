@@ -15,12 +15,9 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Pocket;
-using Recipes;
 using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
@@ -208,6 +205,37 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task Kernel_client_eval_function_instances()
+        {
+            await _kernelClient.Start();
+
+            _io.WriteToInput(new SubmitCode(@"Func<int> func = () => 1;"), 0);
+            
+            await Task.Delay(2.Seconds());
+
+            _io.WriteToInput(new SubmitCode(@"func()"), 1);
+            _io.WriteToInput(new SubmitCode(@"func"), 2);
+            
+
+            var commandHandled = 0;
+            var events = _events
+                .Do(e =>
+                {
+                    if (e["eventType"].Value<string>() == nameof(CommandHandled))
+                    {
+                        commandHandled++;
+                    }
+                })
+                .TakeWhile(_ => commandHandled < 3)
+                .TakeUntil(DateTimeOffset.Now.Add(1.Minutes()))
+                .ToEnumerable()
+                .ToList();
+
+            events.Where(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced)).Should()
+                .HaveCount(2);
+        }
+
+        [Fact]
         public async Task Kernel_can_pound_r_nuget_using_kernel_client()
         {
             await _kernelClient.Start();
@@ -216,7 +244,7 @@ namespace WorkspaceServer.Tests.Kernel
 
             var events = _events
                 .TakeWhile(e => e["eventType"].Value<string>() != nameof(CommandHandled))
-                .Timeout(DateTimeOffset.Now.Add(1.Minutes()))
+                .Timeout(1.Minutes())
                 .ToEnumerable()
                 .ToList();
 
