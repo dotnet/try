@@ -139,8 +139,8 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode(@"var x = 123;"), 0);
 
             var events = _events
-                         .Where(e => e["eventType"].Value<string>() == nameof(CommandHandled))
-                         .Take(1)
+                         .TakeUntilCommandHandled()
+                         .LastAsync()
                          .Timeout(20.Seconds())
                          .Select(e => e.ToString(Formatting.None))
                          .ToEnumerable()
@@ -194,8 +194,9 @@ namespace WorkspaceServer.Tests.Kernel
 
             _io.WriteToInput(new SubmitCode(@"var a = 12"), 0);
 
+            var termination = new Subject<int>();
             var events = _events
-                .TakeWhile(e => e["eventType"].Value<string>() != nameof(CommandFailed))
+                .TakeUntilCommandFailed()
                 .Timeout(DateTimeOffset.Now.Add(10.Seconds()))
                 .ToEnumerable()
                 .ToList();
@@ -243,7 +244,7 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
             var events = _events
-                .TakeWhile(e => e["eventType"].Value<string>() != nameof(CommandHandled))
+                .TakeUntilCommandHandled()
                 .Timeout(1.Minutes())
                 .ToEnumerable()
                 .ToList();
