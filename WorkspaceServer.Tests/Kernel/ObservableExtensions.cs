@@ -37,5 +37,18 @@ namespace WorkspaceServer.Tests.Kernel
                     }
                 });
         }
+
+        public static IObservable<JObject> TakeUntilCommandParseFailure(this IObservable<JObject> source)
+        {
+            var termination = new Subject<Unit>();
+            return source.TakeUntil(termination)
+                .Do(e =>
+                {
+                    if (e["eventType"].Value<string>() == nameof(CommandParseFailure))
+                    {
+                        termination.OnNext(Unit.Default);
+                    }
+                });
+        }
     }
 }

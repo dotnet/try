@@ -179,7 +179,7 @@ namespace WorkspaceServer.Tests.Kernel
             _io.WriteToInput("{ hello");
 
             var events = _events
-                .TakeUntil(e => e["eventType"].Value<string>() == nameof(CommandParseFailure))
+                .TakeUntilCommandParseFailure()
                 .Timeout(DateTimeOffset.Now.Add(10.Seconds()))
                 .ToEnumerable()
                 .ToList();
