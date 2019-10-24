@@ -40,7 +40,7 @@ namespace WorkspaceServer.Packaging
         }
 
         public async Task<AddReferenceResult> AddPackage(
-            string packageName, 
+            string packageName,
             string packageVersion = null)
         {
             var package = await _lazyPackage.ValueAsync();
@@ -63,6 +63,7 @@ namespace WorkspaceServer.Packaging
             return new AddReferenceResult(succeeded: true, newRefs
                 .Where(n => !currentRefs.Contains(n.Display))
                 .ToArray(),
+                references: newRefs.ToArray(),
                  installedVersion: result.InstalledVersion);
         }
 
@@ -77,7 +78,7 @@ namespace WorkspaceServer.Packaging
         {
             var package = await _lazyPackage.ValueAsync();
             var nugetPathsFile = package.Directory.GetFiles("*.nuget.paths").Single();
-            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',','\r', '\n')
+            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',', '\r', '\n')
                                         .Where(t => !string.IsNullOrWhiteSpace(t))
                                         .ToArray();
             var pathsDictionary = nugetPackagePaths

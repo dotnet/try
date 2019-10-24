@@ -17,7 +17,7 @@ namespace WorkspaceServer.Tests
         {
             var result = await new PackageRestoreContext().AddPackage("FluentAssertions", "5.7.0");
             result.Succeeded.Should().BeTrue();
-            var refs = result.References;
+            var refs = result.NewReferences;
             refs.Should().Contain(r => r.Display.Contains("FluentAssertions.dll"));
             refs.Should().Contain(r => r.Display.Contains("System.Configuration.ConfigurationManager"));
             result.InstalledVersion.Should().Be("5.7.0");
@@ -28,7 +28,7 @@ namespace WorkspaceServer.Tests
         {
             var result = await new PackageRestoreContext().AddPackage("NewtonSoft.Json");
             result.Succeeded.Should().BeTrue();
-            var refs = result.References;
+            var refs = result.NewReferences;
             refs.Should().Contain(r => r.Display.Contains("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
             result.InstalledVersion.Should().NotBeNullOrWhiteSpace();
         }
