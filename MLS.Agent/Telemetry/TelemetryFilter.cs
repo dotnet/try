@@ -268,6 +268,11 @@ namespace MLS.Agent.Telemetry
                 new CommandRuleItem[]{
                     Option("--default-kernel", new string[]{ "csharp", "fsharp" }, "default-kernel"),
                     Ignore(TokenType.Argument, isOptional: true) // connection file
+                }),
+
+            new CommandRule("kernel-server",
+                new CommandRuleItem[]{
+                    Option("--default-kernel", new string[]{ "csharp", "fsharp" }, "default-kernel")
                 })
         };
     }

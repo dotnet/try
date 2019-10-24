@@ -461,8 +461,9 @@ namespace MLS.Agent.CommandLine
                 };
                 startKernelServerCommand.AddOption(defaultKernelOption);
 
-                startKernelServerCommand.Handler = CommandHandler.Create<KernelServerOptions, IConsole>((options, console) =>
+                startKernelServerCommand.Handler = CommandHandler.Create<KernelServerOptions, IConsole, InvocationContext>((options, console, context) =>
                 {
+                    track(context.ParseResult);
                     return startKernelServer(CreateKernel(options.DefaultKernel), console);
                 });
 
