@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
-using FluentAssertions;
 using System.Linq;
+using FluentAssertions;
 using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
@@ -226,11 +227,32 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void It_formats_dictionaries_as_tables_with_the_key_on_the_y_axis()
+            public void It_formats_generic_dictionaries_that_arent_non_generic_as_tables_with_the_key_on_the_y_axis()
             {
                 var writer = new StringWriter();
 
-                var instance = new Dictionary<string, EntityId>
+                IDictionary<string, EntityId> instance = new GenericDictionary<string, EntityId>
+                {
+                    { "first", new EntityId("entity one", "123") },
+                    { "second", new EntityId("entity two", "456") }
+                };
+
+                var formatter = HtmlFormatter.Create(instance.GetType());
+
+                formatter.Format(instance, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Be(
+                          "<table><thead><tr><th><i>key</i></th><th>TypeName</th><th>Id</th></tr></thead><tbody><tr><td>first</td><td>entity one</td><td>123</td></tr><tr><td>second</td><td>entity two</td><td>456</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void It_formats_non_generic_dictionaries_that_arent_generic_as_tables_with_the_key_on_the_y_axis()
+            {
+                var writer = new StringWriter();
+
+                IDictionary instance = new NonGenericDictionary
                 {
                     { "first", new EntityId("entity one", "123") },
                     { "second", new EntityId("entity two", "456") }

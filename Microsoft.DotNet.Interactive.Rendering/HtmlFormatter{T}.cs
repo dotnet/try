@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -77,66 +78,68 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         private static HtmlFormatter<T> CreateForSequence(bool includeInternals)
         {
-            IDestructurer destructurer = null;
+            Type valueType = null;
+            Func<T, IEnumerable> getKeys = null;
+            Func<T, IEnumerable> getValues = instance => (IEnumerable)instance;
 
-            if (typeof(T).IsConstructedGenericType)
+            var dictionaryGenericType = typeof(T).GetInterfaces()
+                                                 .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+            var dictionaryObjectType = typeof(T).GetInterfaces()
+                                                .FirstOrDefault(i => i == typeof(IDictionary));
+            var enumerableGenericType = typeof(T).GetInterfaces()
+                                                 .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+
+            if (dictionaryGenericType != null || dictionaryObjectType != null)
             {
-                var dictionaryType = typeof(T).GetInterfaces()
-                                              .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+                var keysProperty = typeof(T).GetProperty("Keys");
+                getKeys = instance => (IEnumerable)keysProperty.GetValue(instance, null);
 
-                if (dictionaryType != null)
+                var valuesProperty = typeof(T).GetProperty("Values");
+                getValues = instance => (IEnumerable)valuesProperty.GetValue(instance, null);
+
+                if (dictionaryGenericType != null)
                 {
-                    var itemType = dictionaryType.GenericTypeArguments.ElementAt(1);
-                    destructurer = Destructurer.Create(itemType);
-                }
-
-                if (destructurer == null)
-                {
-                    var ienumerableType = typeof(T).GetInterfaces()
-                                                   .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-
-                    if (ienumerableType != null)
-                    {
-                        var itemType = ienumerableType.GenericTypeArguments.Single();
-
-                        destructurer = Destructurer.Create(itemType);
-                    }
+                    valueType = typeof(T).GenericTypeArguments[1];
                 }
             }
+            else if (enumerableGenericType != null)
+            {
+                valueType = typeof(T).GenericTypeArguments.Single();
+            }
+
+            var destructurer = valueType != null
+                ? Destructurer.Create(valueType)
+                : null;
 
             return new HtmlFormatter<T>((instance, writer) =>
             {
                 var index = 0;
 
-                IEnumerable sequence = instance switch {
-                                           IDictionary d => d.Values,
-                                           IEnumerable s => s,
-                                           _ => throw new ArgumentException($"{instance.GetType()} is not IEnumerable")
-                                           };
-
                 IHtmlContent indexHeader = null;
 
                 Func<string> getIndex;
 
-                switch (instance)
+                if (getKeys != null)
                 {
-                    case IDictionary dict:
-                        var keys = new string[dict.Keys.Count];
-                        dict.Keys.CopyTo(keys, 0);
-                        getIndex = () => keys[index];
-                        indexHeader = th(i("key"));
-                        break;
+                    var keys = new List<string>();
+                    foreach (var key in getKeys(instance))
+                    {
+                        keys.Add(key.ToString());
+                    }
 
-                    default:
-                        getIndex = () => index.ToString();
-                        indexHeader = th(i("index"));
-                        break;
+                    getIndex = () => keys[index];
+                    indexHeader = th(i("key"));
+                }
+                else
+                {
+                    getIndex = () => index.ToString();
+                    indexHeader = th(i("index"));
                 }
 
                 var rows = new List<IHtmlContent>();
                 List<IHtmlContent> headers = null;
 
-                foreach (var item in sequence)
+                foreach (var item in getValues(instance))
                 {
                     var dictionary = (destructurer ?? Destructurer.Create(item.GetType())).Destructure(item);
 
