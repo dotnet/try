@@ -96,6 +96,23 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             JupyterMessageSender.PubSubMessages.Should().Contain(r => r is DisplayData);
         }
 
+
+        [Theory]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task _does_not_send_ExecuteResult_message_when_evaluating_display_value(Language language)
+        {
+            var scheduler = CreateScheduler();
+            SetKernelLanguage(language);
+            var request = Envelope.Create(new ExecuteRequest("display(2+2)"));
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages.Should().NotContain(r => r is ExecuteResult);
+        }
+
         [Fact]
         public async Task sends_Stream_message_on_StandardOutputValueProduced()
         {

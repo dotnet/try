@@ -80,13 +80,17 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        private void Write(IKernelEvent e, int id)
+        private void Write(IKernelEvent kernelEvent, int correlationId)
         {
+            if (kernelEvent is ReturnValueProduced rvp && rvp.Value is DisplayedValue)
+            {
+                return;
+            }
             var wrapper = new StreamKernelEvent
             {
-                Id = id,
-                Event = e,
-                EventType = e.GetType().Name
+                Id = correlationId,
+                Event = kernelEvent,
+                EventType = kernelEvent.GetType().Name
             };
             var serialized = wrapper.Serialize();
             _output.Write(serialized);

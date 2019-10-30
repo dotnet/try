@@ -103,6 +103,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             Envelope request,
             IJupyterMessageSender jupyterMessageSender)
         {
+            if (displayEvent is ReturnValueProduced && displayEvent.Value is DisplayedValue)
+            {
+                return;
+            }
+
             var transient = CreateTransient(displayEvent.ValueId);
 
             var formattedValues = displayEvent

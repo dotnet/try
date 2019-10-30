@@ -15,6 +15,7 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pocket;
@@ -28,7 +29,7 @@ namespace WorkspaceServer.Tests.Kernel
     {
         private readonly Configuration _configuration;
         private readonly KernelStreamClient _kernelClient;
-        private readonly IObservable<JObject> _events;
+        private readonly SubscribedList<JObject> _events;
         private readonly IOStreams _io;
         private readonly ITestOutputHelper _output;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
@@ -122,7 +123,8 @@ namespace WorkspaceServer.Tests.Kernel
 
             _events = _io.OutputStream
                          .Where(s => !string.IsNullOrWhiteSpace(s))
-                         .Select(JObject.Parse);
+                         .Select(JObject.Parse)
+                         .ToSubscribedList();
 
             _disposables.Add(_kernelClient);
             _disposables.Add(_output.SubscribeToPocketLogger());
@@ -136,15 +138,15 @@ namespace WorkspaceServer.Tests.Kernel
         {
             await _kernelClient.Start();
 
+            var gate = _io.OutputStream
+                .TakeUntilCommandHandled();
+
             _io.WriteToInput(new SubmitCode(@"var x = 123;"), 0);
 
+            await gate;
+
             var events = _events
-                         .TakeUntilCommandHandled()
-                         .LastAsync()
-                         .Timeout(20.Seconds())
-                         .Select(e => e.ToString(Formatting.None))
-                         .ToEnumerable()
-                         .ToList();
+                         .Select(e => e.ToString(Formatting.None));
 
             var expectedEvents = new List<string> {
                 IOStreams.ToStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).Serialize(),
@@ -159,49 +161,56 @@ namespace WorkspaceServer.Tests.Kernel
         public async Task Kernel_produces_only_commandHandled_for_root_command()
         {
             await _kernelClient.Start();
+            var gate = _io.OutputStream
+                .TakeUntilCommandHandled();
 
             _io.WriteToInput(new SubmitCode("display(1543); display(4567);"), 0);
 
-            var events = _events
-                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds()))
-                .ToEnumerable()
-                .ToList();
+            await gate;
 
-            events.Should()
+            _events.Should()
                 .ContainSingle(e => e["eventType"].Value<string>() == nameof(CommandHandled));
+        }
+
+        [Fact]
+        public async Task Client_does_not_stream_ReturnValueProduced_events_if_the_value_is_DisplayedValue()
+        {
+            await _kernelClient.Start();
+            var gate = _io.OutputStream
+                .TakeUntilCommandHandled();
+            _io.WriteToInput(new SubmitCode("display(1543)"), 0);
+
+            await gate;
+
+            _events.Should()
+                .NotContain(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced));
         }
 
         [Fact]
         public async Task Kernel_client_surfaces_json_errors()
         {
             await _kernelClient.Start();
-
+            var gate = _io.OutputStream
+                .TakeUntilCommandParseFailure();
             _io.WriteToInput("{ hello");
+            
+            await gate;
 
-            var events = _events
-                .TakeUntilCommandParseFailure()
-                .Timeout(DateTimeOffset.Now.Add(10.Seconds()))
-                .ToEnumerable()
-                .ToList();
-
-            this.Assent(string.Join("\n", events.Select(e => e.ToString(Formatting.None))), _configuration);
+            this.Assent(string.Join("\n", _events.Select(e => e.ToString(Formatting.None))), _configuration);
         }
 
         [Fact]
         public async Task Kernel_client_surfaces_code_submission_Errors()
         {
             await _kernelClient.Start();
+            var gate = _io.OutputStream
+                .TakeUntilCommandFailed();
 
             _io.WriteToInput(new SubmitCode(@"var a = 12"), 0);
 
-            var termination = new Subject<int>();
-            var events = _events
-                .TakeUntilCommandFailed()
-                .Timeout(DateTimeOffset.Now.Add(10.Seconds()))
-                .ToEnumerable()
-                .ToList();
+            await gate;
 
-            events.Should()
+            _events.Should()
                 .Contain(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived));
         }
 
@@ -209,31 +218,27 @@ namespace WorkspaceServer.Tests.Kernel
         public async Task Kernel_client_eval_function_instances()
         {
             await _kernelClient.Start();
-
+            var gate = _io.OutputStream
+                .TakeUntilCommandHandled();
             _io.WriteToInput(new SubmitCode(@"Func<int> func = () => 1;"), 0);
-            
-            await Task.Delay(2.Seconds());
+            await gate;
 
+            gate = _io.OutputStream
+                .TakeUntilEvent<ReturnValueProduced>();
             _io.WriteToInput(new SubmitCode(@"func()"), 1);
+            await gate;
+
+            gate = _io.OutputStream
+                .TakeUntilEvent<ReturnValueProduced>();
             _io.WriteToInput(new SubmitCode(@"func"), 2);
+            await gate;
+
+            await Task.Delay(2.Seconds());
             
-
-            var commandHandled = 0;
-            var events = _events
-                .Do(e =>
-                {
-                    if (e["eventType"].Value<string>() == nameof(CommandHandled))
-                    {
-                        commandHandled++;
-                    }
-                })
-                .TakeWhile(_ => commandHandled < 3)
-                .TakeUntil(DateTimeOffset.Now.Add(1.Minutes()))
-                .ToEnumerable()
-                .ToList();
-
-            events.Where(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced)).Should()
-                .HaveCount(2);
+            _events
+                .Count(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced))
+                .Should()
+                .Be(2);
         }
 
         [Fact]
@@ -241,15 +246,14 @@ namespace WorkspaceServer.Tests.Kernel
         {
             await _kernelClient.Start();
 
+            var gate = _io.OutputStream
+                .TakeUntilCommandHandled(10.Minutes());
+
             _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
-            var events = _events
-                .TakeUntilCommandHandled()
-                .Timeout(1.Minutes())
-                .ToEnumerable()
-                .ToList();
+            await gate;
 
-            events.Should().Contain(e => e["eventType"].Value<string>() == nameof(NuGetPackageAdded));
+            _events.Should().Contain(e => e["eventType"].Value<string>() == nameof(NuGetPackageAdded));
         }
 
         public void Dispose()
