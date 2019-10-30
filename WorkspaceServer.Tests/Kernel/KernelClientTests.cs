@@ -172,6 +172,22 @@ namespace WorkspaceServer.Tests.Kernel
         }
 
         [Fact]
+        public async Task Client_does_not_stream_ReturnValueProduced_events_if_the_value_is_DisplayedValue()
+        {
+            await _kernelClient.Start();
+
+            _io.WriteToInput(new SubmitCode("display(1543)"), 0);
+
+            var events = _events
+                .TakeUntil(DateTimeOffset.Now.Add(2.Seconds()))
+                .ToEnumerable()
+                .ToList();
+
+            events.Should()
+                .NotContain(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced));
+        }
+
+        [Fact]
         public async Task Kernel_client_surfaces_json_errors()
         {
             await _kernelClient.Start();
