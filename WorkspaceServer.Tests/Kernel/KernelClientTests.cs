@@ -219,21 +219,21 @@ namespace WorkspaceServer.Tests.Kernel
         {
             await _kernelClient.Start();
             var gate = _io.OutputStream
-                .TakeUntilCommandHandled(2.Seconds());
+                .TakeUntilCommandHandled();
             _io.WriteToInput(new SubmitCode(@"Func<int> func = () => 1;"), 0);
             await gate;
 
             gate = _io.OutputStream
-                .TakeUntilEvent<ReturnValueProduced>(2.Seconds());
+                .TakeUntilEvent<ReturnValueProduced>();
             _io.WriteToInput(new SubmitCode(@"func()"), 1);
             await gate;
 
             gate = _io.OutputStream
-                .TakeUntilEvent<ReturnValueProduced>(2.Seconds());
+                .TakeUntilEvent<ReturnValueProduced>();
             _io.WriteToInput(new SubmitCode(@"func"), 2);
             await gate;
 
-            await Task.Delay(1.Seconds());
+            await Task.Delay(2.Seconds());
             
             _events
                 .Count(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced))

@@ -54,7 +54,7 @@ namespace WorkspaceServer.Tests.Kernel
                         termination.OnNext(Unit.Default);
                     }
                 })
-                .Timeout(timeout ?? 1.Seconds());
+                .Timeout(timeout ?? 10.Seconds());
         }
 
         public static IObservable<JObject> TakeUntilCommandHandled(this IObservable<JObject> source, TimeSpan? timeout = null)
