@@ -139,7 +139,7 @@ namespace WorkspaceServer.Tests.Kernel
             await _kernelClient.Start();
 
             var gate = _io.OutputStream
-                .TakeUntilCommandHandled(1.Seconds());
+                .TakeUntilCommandHandled();
 
             _io.WriteToInput(new SubmitCode(@"var x = 123;"), 0);
 
@@ -162,7 +162,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             await _kernelClient.Start();
             var gate = _io.OutputStream
-                .TakeUntilCommandHandled(1.Seconds());
+                .TakeUntilCommandHandled();
 
             _io.WriteToInput(new SubmitCode("display(1543); display(4567);"), 0);
 
@@ -177,7 +177,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             await _kernelClient.Start();
             var gate = _io.OutputStream
-                .TakeUntilCommandHandled(1.Seconds());
+                .TakeUntilCommandHandled();
             _io.WriteToInput(new SubmitCode("display(1543)"), 0);
 
             await gate;
@@ -190,10 +190,11 @@ namespace WorkspaceServer.Tests.Kernel
         public async Task Kernel_client_surfaces_json_errors()
         {
             await _kernelClient.Start();
-
+            var gate = _io.OutputStream
+                .TakeUntilCommandParseFailure();
             _io.WriteToInput("{ hello");
             
-            await Task.Delay(1.Seconds());
+            await gate;
 
             this.Assent(string.Join("\n", _events.Select(e => e.ToString(Formatting.None))), _configuration);
         }
@@ -203,7 +204,7 @@ namespace WorkspaceServer.Tests.Kernel
         {
             await _kernelClient.Start();
             var gate = _io.OutputStream
-                .TakeUntilCommandFailed(1.Seconds());
+                .TakeUntilCommandFailed();
 
             _io.WriteToInput(new SubmitCode(@"var a = 12"), 0);
 
@@ -246,7 +247,7 @@ namespace WorkspaceServer.Tests.Kernel
             await _kernelClient.Start();
 
             var gate = _io.OutputStream
-                .TakeUntilCommandHandled(1.Minutes());
+                .TakeUntilCommandHandled(10.Minutes());
 
             _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
