@@ -5,6 +5,7 @@ using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json.Linq;
 
@@ -45,19 +46,15 @@ namespace WorkspaceServer.Tests.Kernel
         public static IObservable<JObject> TakeUntilEvent<T>(this IObservable<JObject> source, TimeSpan? timeout = null) where T : IKernelEvent
         {
             var termination = new Subject<Unit>();
-            var stream =  source.TakeUntil(termination)
+            return source.TakeUntil(termination)
                 .Do(e =>
                 {
                     if (e["eventType"].Value<string>() == typeof(T).Name)
                     {
                         termination.OnNext(Unit.Default);
                     }
-                });
-            if (timeout != null)
-            {
-                stream = stream.Timeout(timeout.Value);
-            }
-            return stream;
+                })
+                .Timeout(timeout ?? 10.Minutes());
         }
 
         public static IObservable<JObject> TakeUntilCommandHandled(this IObservable<JObject> source, TimeSpan? timeout = null)
