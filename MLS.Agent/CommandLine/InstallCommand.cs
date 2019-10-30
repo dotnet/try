@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
-using System.IO;
 using System.Threading.Tasks;
 using MLS.Agent.Tools;
 using WorkspaceServer;
-using WorkspaceServer.WorkspaceFeatures;
 
 namespace MLS.Agent.CommandLine
 {
