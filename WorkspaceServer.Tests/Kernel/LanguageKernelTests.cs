@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -609,32 +610,38 @@ Console.Write(""value three"");
         public async Task the_output_is_asynchronous(Language language)
         {
             var kernel = CreateKernel(language);
+            var timeStampedEvents = kernel.KernelEvents.Timestamp().ToSubscribedList();
 
             var source = language switch
             {
                 Language.FSharp => @"
 open System
-Console.Write(DateTime.Now)
+Console.Write(1)
 System.Threading.Thread.Sleep(1000)
-Console.Write(DateTime.Now)
+Console.Write(2)
 5",
 
                 Language.CSharp => @"
-Console.Write(DateTime.Now);
+Console.Write(1);
 System.Threading.Thread.Sleep(1000);
-Console.Write(DateTime.Now);
+Console.Write(2);
 5",
             };
 
             await SubmitCode(kernel, source);
 
             var events =
-                KernelEvents
-                    .Where(e => e is StandardOutputValueProduced).OfType<StandardOutputValueProduced>().ToArray();
+                timeStampedEvents
+                    .Where(e => e.Value is StandardOutputValueProduced)
+                    .ToArray();
 
-            var diff = DateTime.Parse((string)(events[1].Value)) -DateTime.Parse((string)(events[0].Value));
+            var diff = events[1].Timestamp - events[0].Timestamp;
 
-            diff.Should().BeCloseTo(1.Seconds(), precision: 200);
+            diff.Should().BeCloseTo(1.Seconds(), precision: 500);
+            events.Select(e => ((StandardOutputValueProduced) e.Value).Value)
+                .Should()
+                .BeEquivalentTo(new [] {"1", "2"});
+
         }
 
         [Fact(Skip = "requires support for cs8 in roslyn scripting")]
