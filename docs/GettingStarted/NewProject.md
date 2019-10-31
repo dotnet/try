@@ -25,7 +25,7 @@ Let's walk through how to create some `dotnet try`-powered documentation from sc
 3. Inside the `MyDocProject` folder, create a subfolder called `MyConsoleApp`, navigate into that folder in your terminal, and run the following command:
 
     ```console
-    > dotnet new console`
+    > dotnet new console
     ```
 
     This will create a console app with the files `MyDocProject.csproj` and `Program.cs`.
