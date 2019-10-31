@@ -21,9 +21,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         where T : Message
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-        private CSharpKernel _cSharpKernel;
-        private FSharpKernel _fSharpKernel;
-        private CompositeKernel _compositeKernel;
+        private readonly CSharpKernel _cSharpKernel;
+        private readonly FSharpKernel _fSharpKernel;
+        private readonly CompositeKernel _compositeKernel;
 
         protected RecordingJupyterMessageSender JupyterMessageSender { get; }
 
@@ -35,8 +35,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             _cSharpKernel = new CSharpKernel()
                 .UseDefaultRendering()
-                .UseKernelHelpers()
-                .UseWho();
+                .UseExtendDirective()
+                .UseKernelHelpers();
+
             _fSharpKernel = new FSharpKernel()
                 .UseDefaultRendering()
                 .UseKernelHelpers()
@@ -57,6 +58,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             JupyterMessageSender = new RecordingJupyterMessageSender();
 
+            _disposables.Add(_cSharpKernel);
+            _disposables.Add(_fSharpKernel);
             _disposables.Add(Kernel.LogEventsToPocketLogger());
         }
 
