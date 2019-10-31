@@ -12,12 +12,15 @@ namespace MLS.Agent.Tools
         public static string ReadManifestResource(this Type type, string resourceName)
         {
             var assembly = type.Assembly;
-            if (!assembly.GetManifestResourceNames().Contains(resourceName))
+
+            var assemblyResourceName = assembly.GetManifestResourceNames().First(s => s.EndsWith(resourceName, StringComparison.CurrentCultureIgnoreCase));
+
+            if (string.IsNullOrWhiteSpace(assemblyResourceName))
             {
                 throw new ArgumentException(assembly + " " + resourceName);
             }
 
-            using (var reader = new StreamReader(assembly.GetManifestResourceStream(resourceName)))
+            using (var reader = new StreamReader(assembly.GetManifestResourceStream(assemblyResourceName)))
             {
                 return reader.ReadToEnd();
             }
