@@ -11,13 +11,23 @@ namespace MLS.Agent.Tools
     {
         public static string ReadManifestResource(this Type type, string resourceName)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(resourceName));
+            }
+
             var assembly = type.Assembly;
 
             var assemblyResourceName = assembly.GetManifestResourceNames().First(s => s.EndsWith(resourceName, StringComparison.CurrentCultureIgnoreCase));
 
             if (string.IsNullOrWhiteSpace(assemblyResourceName))
             {
-                throw new ArgumentException(assembly + " " + resourceName);
+                throw new InvalidOperationException($"Cannot locate resource {resourceName} in {assembly}");
             }
 
             using (var reader = new StreamReader(assembly.GetManifestResourceStream(assemblyResourceName)))
