@@ -506,7 +506,8 @@ namespace MLS.Agent.CommandLine
                 {
                     new Argument<string>
                     {
-                        Name = nameof(InstallOptions.PackageName)
+                        Name = nameof(InstallOptions.PackageName),
+                        Arity = ArgumentArity.ExactlyOne
                     },
                     new Option("--add-source")
                     {

@@ -116,7 +116,7 @@ namespace WorkspaceServer.Tests
         {
             var (packageName, addSource) = await NupkgWithBlazorEnabled(testName);
             var destination = Package.DefaultPackagesDirectory;
-            await InstallCommand.Do(new InstallOptions(new PackageSource(addSource.FullName), packageName, destination), new TestConsole());
+            await InstallCommand.Do(new InstallOptions(packageName, new PackageSource(addSource.FullName), destination), new TestConsole());
 
             var strategy = new WebAssemblyAssetFinder(new FileSystemDirectoryAccessor(destination));
             return await strategy.Find<IPackage>(packageName);
