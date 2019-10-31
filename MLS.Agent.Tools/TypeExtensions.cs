@@ -23,7 +23,7 @@ namespace MLS.Agent.Tools
 
             var assembly = type.Assembly;
 
-            var assemblyResourceName = assembly.GetManifestResourceNames().First(s => s.EndsWith(resourceName, StringComparison.CurrentCultureIgnoreCase));
+            var assemblyResourceName = assembly.GetManifestResourceNames().First(s => s.Contains(resourceName));
 
             if (string.IsNullOrWhiteSpace(assemblyResourceName))
             {
