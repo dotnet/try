@@ -37,7 +37,7 @@ Before you get can start creating interactive documentation, you will need to in
 
 `dotnet tool install --global dotnet-try --version 1.0.19264.11`
 
-Updating to the latest version of the tool is easy just run the command below 
+Updating to the latest version of the tool is easy just run the command below: 
 
 `dotnet tool update -g dotnet-try`
 
