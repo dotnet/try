@@ -15,7 +15,7 @@ open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
 open MLS.Agent.Tools
 
-type FSharpKernel() as this =
+type FSharpKernel() =
     inherit KernelBase(Name = "fsharp")
 
     let resolvedAssemblies = List<string>()
@@ -24,14 +24,6 @@ type FSharpKernel() as this =
 
     do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
     do base.AddDisposable(script)
-
-    let handleAssemblyReferenceAdded path context =
-        async {
-            let loader = KernelExtensionLoader()
-            let fileInfo = FileInfo(path)
-            let! success = loader.LoadFromAssembly(fileInfo, this, context) |> Async.AwaitTask
-            return success
-        }
 
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
@@ -47,9 +39,7 @@ type FSharpKernel() as this =
                     script.Eval(codeSubmission.Code, tokenSource.Token)
                 with
                 | ex -> Error(ex), [||]
-            for asm in resolvedAssemblies do
-                let! _success = handleAssemblyReferenceAdded asm context
-                () // don't care
+
             match result with
             | Ok(result) ->
                 match result with
