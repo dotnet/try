@@ -10,6 +10,7 @@ open System.Threading
 open System.Threading.Tasks
 open FSharp.Compiler.Interactive.Shell
 open FSharp.Compiler.Scripting
+open FSharp.DependencyManager
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
@@ -25,8 +26,53 @@ type FSharpKernel() =
     do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
     do base.AddDisposable(script)
 
+    let messageMap = Dictionary<string, string>()
+
+    let parseReference text =
+        FSharpDependencyManager.parsePackageReference [text]
+        |> fst
+        |> List.head
+
+    let packageMessage dependency =
+        let versionText = match dependency.Version with
+                          | "*" -> ""
+                          | _ -> ", version " + dependency.Version
+        "Installing package " + dependency.Include + versionText + "."
+
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
+
+            script.DependencyAdding
+            |> Event.add (fun (key, referenceText) ->
+                if key = "nuget" then
+                    let reference = parseReference referenceText
+                    let message = packageMessage reference
+                    let key = message
+                    messageMap.[key] <- message
+                    context.Publish(DisplayedValueProduced(message, context.Command, valueId=key))
+                ())
+
+            script.DependencyAdded
+            |> Event.add (fun (key, referenceText) ->
+                if key = "nuget" then
+                    let reference = parseReference referenceText
+                    let key = packageMessage reference
+                    let message = messageMap.[key] + "done!"
+                    context.Publish(DisplayedValueUpdated(message, key))
+                    let packageRef = if reference.Version = "*" then NugetPackageReference(reference.Include)
+                                     else NugetPackageReference(reference.Include, packageVersion=reference.Version)
+                    context.Publish(NuGetPackageAdded(AddNugetPackage(packageRef), packageRef))
+                ())
+
+            script.DependencyFailed
+            |> Event.add (fun (key, referenceText) ->
+                if key = "nuget" then
+                    let reference = parseReference referenceText
+                    let key = packageMessage reference
+                    let message = messageMap.[key] + "failed!"
+                    context.Publish(DisplayedValueUpdated(message, key))
+                ())
+
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
             context.Publish(codeSubmissionReceived)
             use! console = ConsoleOutput.Capture() |> Async.AwaitTask

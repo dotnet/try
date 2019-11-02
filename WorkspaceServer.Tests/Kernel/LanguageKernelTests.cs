@@ -11,6 +11,7 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Tests;
 using MLS.Agent;
 using MLS.Agent.Tools;
@@ -943,28 +944,33 @@ json
                 .NotContain(e => e.Code.Contains("#r"));
         }
 
-        [Fact]
-        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_PackageAdded_event_is_raised()
+        [Theory]
+        [InlineData(Language.CSharp, "Microsoft.Extensions.Logging.ILogger logger = null;")]
+        [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
+        public async Task When_SubmitCode_command_adds_packages_to_kernel_then_PackageAdded_event_is_raised(Language language, string expression)
         {
-            var kernel = new CompositeKernel
+            IKernel kernel = language switch
             {
-                new CSharpKernel().UseNugetDirective()
+                Language.CSharp => new CompositeKernel { new CSharpKernel().UseNugetDirective() },
+                Language.FSharp => new FSharpKernel(),
             };
 
-            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
+            var code = $@"
+#r ""nuget:Microsoft.Extensions.Logging, 2.2.0""
+{expression}".Trim();
+            var command = new SubmitCode(code);
 
             var result = await kernel.SendAsync(command);
 
             using var events = result.KernelEvents.ToSubscribedList();
 
             events
-                .First()
                 .Should()
-                .Match(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+                .Contain(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
 
             events
                 .Should()
-                .Contain(e => e is DisplayedValueUpdated);
+                .Contain(e => e is DisplayedValueUpdated && ((DisplayedValueUpdated)e).Value.ToString().Contains("done!"));
 
 
             events
@@ -977,10 +983,14 @@ json
                   .Should()
                   .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
 
-            events
-                .Should()
-                .ContainSingle(e => e is CommandHandled &&
-                                    e.As<CommandHandled>().Command is AddNugetPackage);
+            if (language == Language.CSharp)
+            {
+                // only the C# kernel produces this event, since the F# kernel handles it all natively
+                events
+                    .Should()
+                    .ContainSingle(e => e is CommandHandled &&
+                                        e.As<CommandHandled>().Command is AddNugetPackage);
+            }
 
             events
                 .Should()
