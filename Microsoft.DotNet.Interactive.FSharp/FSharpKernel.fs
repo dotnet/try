@@ -59,6 +59,9 @@ type FSharpKernel() =
                     let key = packageMessage reference
                     let message = messageMap.[key] + "done!"
                     context.Publish(DisplayedValueUpdated(message, key))
+                    let packageRef = if reference.Version = "*" then NugetPackageReference(reference.Include)
+                                     else NugetPackageReference(reference.Include, packageVersion=reference.Version)
+                    context.Publish(NuGetPackageAdded(AddNugetPackage(packageRef), packageRef))
                 ())
 
             script.DependencyFailed
