@@ -1,96 +1,46 @@
 # Try .NET <img src ="https://user-images.githubusercontent.com/2546640/56708992-deee8780-66ec-11e9-9991-eb85abb1d10a.png" width="80px" alt="dotnet bot in space" align ="right">
-|| [**Basics**](#basics) • [**Contribution Guidelines**](#contribution) • [**Experiences**](#experiences) || [**Setup**](#setup) • [**Getting Started**](#getting-started) || [**Samples**](https://github.com/dotnet/try-samples) ||
+|| [**Contribution Guidelines**](#contribution) || [**Table of content**](#table-of-content) || [**Customers & Partners**](#customers--partners) ||
 
 ![Try_.NET Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
+
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/try/try-ci?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=495&branchName=master)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dotnet/try/master)
+**Welcome to the Try .NET repo.**
 
-## Basics
-**What is Try .NET**: Try .NET is an interactive documentation generator for .NET Core.
+Try .NET provides developers and content with tools to create interactive experiences.
 
-**Please Note**: At the moment Try .NET only works with C# documentation. 
+There are different flavors of  Try .NET interactive experiences from the web with blazor(as seen on [Microsoft docs](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world)),  interactive documentation generator for .NET core with [dotnet try global tool](DotNetTry.md), and [.NET Jupyter Notebooks](Notebook.md). 
+
+### Flavors of Try .NET 
+**Try .NET Online**
+
+<img src="https://user-images.githubusercontent.com/2546640/57144765-c850cc00-6d8f-11e9-982d-50d2b6dc3591.gif" width="60%">
+
+**Interactive .NET Core documentation with `dotnet try global tool`**
+
+<img src="https://user-images.githubusercontent.com/2546640/57158389-47a2c780-6db1-11e9-96ad-8c6e9ab52853.png" width="52%">
+
+**Jupyter Notebooks with .NET**
+
+<img src="https://user-images.githubusercontent.com/2546640/67889988-3b13e780-fb26-11e9-91a1-48d5972b5df2.png" width="60%">
+<img src="https://user-images.githubusercontent.com/2546640/67912370-1b99b080-fb60-11e9-9839-0058d02488cf.png" width="52%">
+
+Our interactive experience powers the online interactive .NET documentation, [dotnet try global tool](DotNetTry.md) and [Notebooks](Notebook.md).
+
+## Table of Content
+- [Getting Started with Try .NET](DotNetTry.md): Interactive documentation generator for .NET Core.
+- [Getting started with .NET Jupyter Notebooks](Notebook.md) : Write and run .NET code in Jupyter Notebooks
 
 ## Contribution Guidelines
+
 As we are still in the early stages of our development, we are unable to take any feature PRs at the moment but, we do intend to do this in the future.
 Please feel free to file any bugs reports under our issues. And if you have any feature suggestion, please submit them under our issues using the community suggestions label.
 
-## Experiences 
- Use Try .NET to create executable C# snippets for your websites or,  interactive markdown files that users can run on their machine. 
+## Customers & Partners
+| Microsoft Docs   |    Azure Synapse    |Azure HDInsight (HDI)  |
+|----------|:-------------:|:-------------:|
+|Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to create interactive documentation. Users can run and edit .NET code in the browser. | Azure Synapse uses the .NET kernel to write and run quick ad-hoc queries in addition to developing complete, end-to-end big data scenarios, such as reading in data, transforming it, and visualizing it|You can launch Jupyter notebooks from your HDInsight cluster to run big data queries against the compute resources in that cluster. |
 
-**Websites** 
 
-Microsoft Docs uses Try .NET to create interactive documentation. Users can run and edit code all in the browser.
-![Try NET_online](https://user-images.githubusercontent.com/2546640/57144765-c850cc00-6d8f-11e9-982d-50d2b6dc3591.gif)
 
-**Interactive .NET documentation**
-
-Try .NET enables .NET developers to create interactive markdown files.
-To make your markdown files interactive, you will need to [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0), the dotnet try global tool(*coming soon*) and [Visual Studio](https://visualstudio.microsoft.com/) / [VS Code](https://code.visualstudio.com/)(or any other editor of your choice). 
-![interactive_doc](https://user-images.githubusercontent.com/2546640/57158389-47a2c780-6db1-11e9-96ad-8c6e9ab52853.png)
-
-## Setup
-Before you get can start creating interactive documentation, you will need to install the following: 
-- [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0) and [2.1](https://dotnet.microsoft.com/download/dotnet-core/2.1) currently `dotnet try` global tool targets 2.1.
-- [dotnet try global tool](https://www.nuget.org/packages/dotnet-try/)
-
-`dotnet tool install --global dotnet-try --version 1.0.19264.11`
-
-Updating to the latest version of the tool is easy just run the command below: 
-
-`dotnet tool update -g dotnet-try`
-
-Once you have successfully installed `dotnet try` global tool, enter the command `dotnet try -h` you will see a list of commands:
-
-| Command        | Purpose                                |
-|----------------|----------------------------------------|
-| `demo`         | Learn how to create Try .NET content with an interactive demo |
-| `verify`       | Verify Markdown files in the target directory and its children.            |
-
-## Installing preview builds from `master`
-
-To install the latest preview build from master, first uninstall the existing version of the tool:
-
-`dotnet tool uninstall -g dotnet-try`
-
-Then install from the preview package feed:
-
-`dotnet tool install -g --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json" dotnet-try`
-
-## Getting Started
-
-You can get started using either one of the options below. 
-
-**Option1**: `dotnet try demo` 
-- Create a new folder.
-- `cd` to your new folder.
-- Run command `dotnet try demo` 
-
-**Option 2**: Starting from scratch.
-1. Go to the terminal and create a folder called `mydoc`.
-2. `cd` to the `mydoc` folder and create a new console app with the following command
- ```console
-    > dotnet new console -o myApp
-```
-This will create a console app with the files `myApp.csproj` and `Program.cs`.
-
-3. Open `mydoc`folder in Visual Studio Code. 
-
-4. Create a file called `doc.md`. Inside that file, add some text and a code fence:
-
-````markdown
-# My Interactive Document:
-
-```cs --source-file ./myApp/Program.cs --project ./myApp/myApp.csproj
-```
-````
-5. Now, navigate back to the `mydoc` folder and run the following command:
-```console
-     > dotnet try
-```
-You have created your first C# interactive developer experience. You should now be able to run your console app and see the result in the browser. 
-
-**Option 3**: Explore our [samples Repo](https://github.com/dotnet/try-samples). 
-- Clone the [dotnet/try-samples](https://github.com/dotnet/try-samples) repo.
-- Follow the quick steps listed [here](https://github.com/dotnet/try-samples#basics) to get started.
