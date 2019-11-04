@@ -11,6 +11,7 @@ using WorkspaceServer.Kernel;
 using Xunit.Abstractions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.DotNet.Interactive.Tests;
 
 namespace WorkspaceServer.Tests.Kernel
@@ -32,7 +33,9 @@ namespace WorkspaceServer.Tests.Kernel
                                         .UseDefaultNamespaces() as KernelBase,
                 Language.CSharp => new CSharpKernel()
                                         .UseDefaultRendering()
+                                        .UseNugetDirective()
                                         .UseExtendDirective()
+                                        .UseDefaultMagicCommands()
                                         .UseKernelHelpers(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };

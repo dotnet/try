@@ -50,8 +50,6 @@ namespace Microsoft.DotNet.Interactive
 
                 try
                 {
-
-
                     context.Publish(new DisplayedValueProduced($"Loading kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command));
                     await extension.OnLoadAsync(kernel);
                     context.Publish(new DisplayedValueProduced($"Loaded kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command));

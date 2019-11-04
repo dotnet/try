@@ -9,19 +9,23 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
+using WorkspaceServer.Kernel;
 using WorkspaceServer.Servers.Roslyn;
 
 namespace WorkspaceServer.Packaging
 {
     public class PackageRestoreContext  : IHaveADirectory
     {
+        private readonly CSharpKernel _kernel;
         private readonly ScriptState _scriptState;
         private readonly List<NugetPackageReference> _requestedNugetPackageReferences = new List<NugetPackageReference>();
         private readonly List<ResolvedNugetPackageReference> _resolvedNugetPackageReferences = new List<ResolvedNugetPackageReference>();
 
-        public PackageRestoreContext(ScriptState scriptState = null)
+        public PackageRestoreContext(CSharpKernel kernel)
         {
-            _scriptState = scriptState;
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+
+            _scriptState = kernel.ScriptState;
 
             Name = Guid.NewGuid().ToString("N");
 
@@ -72,22 +76,19 @@ namespace WorkspaceServer.Packaging
                     errors: result.Output.Concat(result.Error).ToArray());
             }
 
-            var preexistingReferences =
-                _scriptState?.Script
-                            .GetCompilation()
-                            .DirectiveReferences
-                            .Select(r => new FileInfo(r.Display))
-                            .ToArray()
-                ??
-                Array.Empty<FileInfo>();
+            var currentScriptStateReferences = GetScriptStateReferences();
 
-            var allReferences = GetResolvedNugetReferences();
+            var calculatedNugetReferences = GetResolvedNugetReferences();
 
             var addedReferences =
-                allReferences
+                calculatedNugetReferences
                     .Values
-                    .Where(r =>
-                               preexistingReferences.All(pre => !r.PackageRoot.FullName.Contains(pre.FullName)))
+                    .Where(calc =>
+                               !calc.AssemblyPaths.Select(a => a.Name)
+                                    .Any(n => currentScriptStateReferences.Any(
+                                             pre => pre.Name.Equals(
+                                                 n,
+                                                 StringComparison.InvariantCultureIgnoreCase))))
                     .ToArray();
 
             _resolvedNugetPackageReferences.AddRange(addedReferences);
@@ -97,6 +98,21 @@ namespace WorkspaceServer.Packaging
                 requestedPackage: requestedPackage,
                 addedReferences: addedReferences,
                 references: addedReferences);
+        }
+
+        private FileInfo[] GetScriptStateReferences()
+        {
+            var compilation = _scriptState?.Script.GetCompilation();
+
+            if (compilation == null)
+            {
+                return Array.Empty<FileInfo>();
+            }
+
+            return compilation.References
+                              .Concat(_kernel.ScriptOptions.MetadataReferences)
+                              .Select(r => new FileInfo(r.Display))
+                              .ToArray();
         }
 
         private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()

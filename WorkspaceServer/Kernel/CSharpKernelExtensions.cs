@@ -59,7 +59,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 packageRefArg
             };
 
-            var restoreContext = new PackageRestoreContext(kernel.ScriptState);
+            var restoreContext = new PackageRestoreContext(kernel);
             
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
@@ -106,12 +106,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             helper?.Handle(assemblyPath);
                         }
 
-                        foreach (var assemblyPath in addedAssemblyPaths)
-                        {
-                            
-                                await context.HandlingKernel
-                                             .SubmitCodeAsync($"#r \"{assemblyPath}\"");
-                        }
+                        kernel.AddScriptReferences(addedAssemblyPaths);
 
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
                                                                    context.Command));

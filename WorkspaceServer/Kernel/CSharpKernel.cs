@@ -43,7 +43,7 @@ namespace WorkspaceServer.Kernel
         private readonly object _cancellationSourceLock = new object();
         private readonly RelativeDirectoryPath _assemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
 
-        private ScriptOptions _scriptOptions =
+        internal ScriptOptions ScriptOptions =
             ScriptOptions.Default
                          .AddImports(
                              "System",
@@ -68,6 +68,11 @@ namespace WorkspaceServer.Kernel
         }
 
         public ScriptState ScriptState { get; private set; }
+
+        internal void AddScriptReferences(IEnumerable<FileInfo> assemblyPaths)
+        {
+            ScriptOptions = ScriptOptions.AddReferences(assemblyPaths.Select(r => r.FullName));
+        }
 
         protected override async Task HandleAsync(
             IKernelCommand command,
@@ -169,7 +174,7 @@ namespace WorkspaceServer.Kernel
                         {
                             ScriptState = await CSharpScript.RunAsync(
                                     code,
-                                    _scriptOptions,
+                                    ScriptOptions,
                                     cancellationToken: cancellationSource.Token)
                                 .UntilCancelled(cancellationSource.Token);
                         }
@@ -177,7 +182,7 @@ namespace WorkspaceServer.Kernel
                         {
                             ScriptState = await ScriptState.ContinueWithAsync(
                                     code,
-                                    _scriptOptions,
+                                    ScriptOptions,
                                     catchException:  e =>
                                     {
                                         exception = e;
@@ -292,7 +297,7 @@ namespace WorkspaceServer.Kernel
         {
             if (ScriptState == null)
             {
-                ScriptState = await CSharpScript.RunAsync(string.Empty, _scriptOptions);
+                ScriptState = await CSharpScript.RunAsync(string.Empty, ScriptOptions);
             }
 
             var compilation = ScriptState.Script.GetCompilation();

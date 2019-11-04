@@ -15,7 +15,7 @@ namespace MLS.Agent
         {
             if (_resolver != null)
             {
-                return;
+                // return;
             }
 
             _resolver = new AssemblyDependencyResolver(componentAssemblyPath.FullName);

@@ -27,8 +27,11 @@ namespace WorkspaceServer.Tests.Kernel
 {
     public class LanguageKernelTests : LanguageKernelTestBase
     {
+        private readonly ITestOutputHelper _output;
+
         public LanguageKernelTests(ITestOutputHelper output) : base(output)
         {
+            _output = output;
         }
 
         [Theory]
@@ -1229,6 +1232,94 @@ catch (Exception e)
                                                     .Value
                                                     .ToString()
                                                     .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
+        }
+
+        [Fact]
+        public async Task bug()
+        {
+            var kernel =  CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            _output.WriteLine("INITIAL REFERENCES");
+
+            LogScriptReferences();
+
+            await kernel.SubmitCodeAsync(@"%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+#r ""nuget:Microsoft.Data.DataFrame,0.1.1-e190920-1""
+");
+
+            _output.WriteLine("REFERENCES AFTER #R NUGET");
+
+            LogScriptReferences();
+
+            await kernel.SubmitCodeAsync(@"
+using Microsoft.Data;
+using XPlot.Plotly;");
+
+            await kernel.SubmitCodeAsync(@"
+using Microsoft.AspNetCore.Html;
+Formatter<DataFrame>.Register((df, writer) =>
+{
+    var headers = new List<IHtmlContent>();
+    headers.Add(th(i(""index"")));
+    headers.AddRange(df.Columns.Select(c => (IHtmlContent) th(c)));
+    var rows = new List<List<IHtmlContent>>();
+    var take = 20;
+    for (var i = 0; i < Math.Min(take, df.RowCount); i++)
+    {
+        var cells = new List<IHtmlContent>();
+        cells.Add(td(i));
+        foreach (var obj in df[i])
+        {
+            cells.Add(td(obj));
+        }
+        rows.Add(cells);
+    }
+    
+    var t = table(
+        thead(
+            headers),
+        tbody(
+            rows.Select(
+                r => tr(r))));
+    
+    writer.Write(t);
+}, ""text/html"");");
+
+            foreach (var code in events.OfType<CommandHandled>()
+                                       .Select(e => e.Command)
+                                       .OfType<SubmitCode>()
+                                       .Select(c => c.Code))
+            {
+                _output.WriteLine(code);
+            }
+
+            events.Should().NotContain(e => e is ErrorProduced ||
+                                            e is CommandFailed);
+
+            throw new NotImplementedException("test not written");
+
+            void LogScriptReferences()
+            {
+                _output.WriteLine("COMPILATION");
+                var compilationMetadataReferences = kernel.ScriptState.Script.GetCompilation().References
+                                                          .ToArray();
+
+                foreach (var r in compilationMetadataReferences)
+                {
+                    _output.WriteLine(r.Display);
+                }
+
+                _output.WriteLine("OPTIONS");
+                var optionsMetadataReferences = kernel.ScriptState.Script.Options.MetadataReferences  .ToArray();
+
+                foreach (var r in optionsMetadataReferences)
+                {
+                    _output.WriteLine(r.Display);
+                }
+            }
         }
     }
 }
