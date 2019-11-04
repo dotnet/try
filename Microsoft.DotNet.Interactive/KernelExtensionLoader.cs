@@ -13,10 +13,11 @@ namespace Microsoft.DotNet.Interactive
 {
     public class KernelExtensionLoader
     {
-        public delegate void PublishEvent(IKernelEvent kernelEvent);
-
-        public async Task<bool> LoadFromAssembly(FileInfo assemblyFile, IKernel kernel, KernelInvocationContext context,
-            IEnumerable<string> additionalDependencies = null)
+        public async Task<bool> LoadFromAssembly(
+            FileInfo assemblyFile, 
+            IKernel kernel, 
+            KernelInvocationContext context,
+            IEnumerable<FileInfo> additionalDependencies = null)
         {
             if (assemblyFile == null)
             {
@@ -30,9 +31,9 @@ namespace Microsoft.DotNet.Interactive
 
             if (additionalDependencies != null)
             {
-                foreach (var additionalDependency in additionalDependencies.Where(File.Exists))
+                foreach (var additionalDependency in additionalDependencies.Where(file => file.Exists))
                 {
-                    AssemblyLoadContext.Default.LoadFromAssemblyPath(additionalDependency);
+                    AssemblyLoadContext.Default.LoadFromAssemblyPath(additionalDependency.FullName);
                 }
             }
 

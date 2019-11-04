@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 [typeof(Type).GetType()] = _formatterForSystemType,
             };
 
-        private static HtmlFormatter<Type> _formatterForSystemType  = new HtmlFormatter<Type>((type, writer) =>
+        private static readonly HtmlFormatter<Type> _formatterForSystemType  = new HtmlFormatter<Type>((type, writer) =>
         {
             PocketView view = PocketViewTags.span(
                 PocketViewTags.a[href: $"https://docs.microsoft.com/dotnet/api/{type.FullName}?view=netcore-3.0"](

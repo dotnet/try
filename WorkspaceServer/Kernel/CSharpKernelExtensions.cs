@@ -5,10 +5,8 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
-using System.Runtime.Loader;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -46,7 +44,9 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             return kernel;
         }
 
-        public static CSharpKernel UseNugetDirective(this CSharpKernel kernel, INativeAssemblyLoadHelper helper = null)
+        public static CSharpKernel UseNugetDirective(
+            this CSharpKernel kernel, 
+            INativeAssemblyLoadHelper helper = null)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
                                                                         NugetPackageReference.TryParse(result.Token.Value, out reference))
@@ -59,8 +59,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 packageRefArg
             };
 
-            var restoreContext = new PackageRestoreContext();
-
+            var restoreContext = new PackageRestoreContext(kernel.ScriptState);
+            
             r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
                 var addPackage = new AddNugetPackage(package);
@@ -73,13 +73,15 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         message += $", version {package.PackageVersion}";
                     }
 
+                    message += "...";
+
                     var key = message;
                     var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
                     context.Publish(displayed);
 
-                    var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    var addPackageTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
 
-                    while (await Task.WhenAny(Task.Delay(1000), installTask) != installTask)
+                    while (await Task.WhenAny(Task.Delay(750), addPackageTask) != addPackageTask)
                     {
                         message += ".";
                         context.Publish(new DisplayedValueUpdated(message, key));
@@ -88,33 +90,48 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     message += "done!";
                     context.Publish(new DisplayedValueUpdated(message, key));
 
-                    var result = await installTask;
-                    helper?.Configure(await restoreContext.OutputPath());
+                    var result = await addPackageTask;
+
+                    helper?.Configure(restoreContext.EntryPointAssemblyPath());
 
                     if (result.Succeeded)
                     {
-                        foreach (var reference in result.NewReferences)
+                        var addedAssemblyPaths =
+                            result
+                                .AddedReferences.SelectMany(added => added.AssemblyPaths)
+                                .ToArray();
+
+                        foreach (var assemblyPath in addedAssemblyPaths)
                         {
-                            if (reference is PortableExecutableReference peRef)
-                            {
-                                helper?.Handle(peRef.FilePath);
-                            }
+                            helper?.Handle(assemblyPath);
                         }
 
-                        kernel.AddMetadataReferences(result.NewReferences);
+                        foreach (var assemblyPath in addedAssemblyPaths)
+                        {
+                            
+                                await context.HandlingKernel
+                                             .SubmitCodeAsync($"#r \"{assemblyPath}\"");
+                        }
 
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
                                                                    context.Command));
 
                         context.Publish(new NuGetPackageAdded(addPackage, package));
 
-                        var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
-                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory, result.References.Select(r => r.Display)));
+                        var resolvedNugetPackageReference = await restoreContext.GetResolvedNugetPackageReference(package.PackageName);
+
+                        var nugetPackageDirectory = new FileSystemDirectoryAccessor(resolvedNugetPackageReference.PackageRoot);
+                        
+                        await context.HandlingKernel.SendAsync(
+                            new LoadExtensionsInDirectory(
+                                nugetPackageDirectory,
+                                addedAssemblyPaths));
                     }
                     else
                     {
-                        context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
-                        context.Publish(new DisplayedValueProduced(result.DetailedErrors, context.Command));
+                        context.Publish(
+                            new ErrorProduced(
+                                $"Failed to add reference to package {package.PackageName}{Environment.NewLine}{string.Join(Environment.NewLine, result.Errors)}"));
                     }
 
                     context.Complete();

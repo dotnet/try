@@ -31,20 +31,6 @@ namespace WorkspaceServer.Tests.Kernel
             _disposables.Dispose();
         }
 
-        [Fact(Skip = "WIP")]
-        public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_the_submission_is_passed_to_fsi()
-        {
-            // FIX: move to FSharpKernelTests
-            throw new NotImplementedException();
-        }
-
-        [Fact(Skip = "WIP")]
-        public void When_SubmitCode_command_adds_packages_to_fsharp_kernel_then_PackageAdded_event_is_raised()
-        {
-            // FIX: move to FSharpKernelTests
-            throw new NotImplementedException();
-        }
-
         [Fact]
         public async Task Handling_kernel_can_be_specified_using_kernel_name_as_a_magic_command()
         {

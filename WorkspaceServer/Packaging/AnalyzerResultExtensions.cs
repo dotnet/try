@@ -1,12 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Buildalyzer;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.IO;
+using Buildalyzer.Workspaces;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Buildalyzer;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using WorkspaceServer.Servers.Roslyn;
 
 //adpated from https://github.com/daveaglick/Buildalyzer/blob/master/src/Buildalyzer.Workspaces/AnalyzerResultExtensions.cs
 
@@ -15,6 +18,7 @@ namespace WorkspaceServer.Packaging
     public static class AnalyzerResultExtensions
     {
         private static readonly ConditionalWeakTable<AnalyzerResult, string[]> CompilerInputs = new ConditionalWeakTable<AnalyzerResult, string[]>();
+
         public static CSharpParseOptions GetCSharpParseOptions(this AnalyzerResult analyzerResult)
         {
             var parseOptions = new CSharpParseOptions();
@@ -47,12 +51,20 @@ namespace WorkspaceServer.Packaging
                 {
                     var projectDirectory = Path.GetDirectoryName(analyzerResult.ProjectFilePath);
                     var found = analyzerResult.Items.TryGetValue("Compile", out var inputFiles);
-                    files = found? inputFiles.Select(pi => Path.Combine(projectDirectory, pi.ItemSpec)).ToArray() : Array.Empty<string>();
-                    CompilerInputs.Add(analyzerResult,files);
+                    files = found ? inputFiles.Select(pi => Path.Combine(projectDirectory, pi.ItemSpec)).ToArray() : Array.Empty<string>();
+                    CompilerInputs.Add(analyzerResult, files);
                 }
             }
 
             return files;
+        }
+
+        internal static bool TryGetWorkspace(
+            this AnalyzerResult analyzerResult,
+            out Workspace ws)
+        {
+            ws = analyzerResult.GetWorkspace();
+            return ws.CanBeUsedToGenerateCompilation();
         }
     }
 }

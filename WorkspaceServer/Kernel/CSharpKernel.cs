@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -42,14 +43,7 @@ namespace WorkspaceServer.Kernel
         private readonly object _cancellationSourceLock = new object();
         private readonly RelativeDirectoryPath _assemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
 
-
-        public CSharpKernel()
-        {
-            _cancellationSource = new CancellationTokenSource();
-            Name = DefaultKernelName;
-        }
-
-        public ScriptOptions ScriptOptions { get; private set; } =
+        private ScriptOptions _scriptOptions =
             ScriptOptions.Default
                          .AddImports(
                              "System",
@@ -66,6 +60,12 @@ namespace WorkspaceServer.Kernel
                              typeof(CSharpKernel).Assembly,
                              typeof(PocketView).Assembly,
                              typeof(PlotlyChart).Assembly);
+
+        public CSharpKernel()
+        {
+            _cancellationSource = new CancellationTokenSource();
+            Name = DefaultKernelName;
+        }
 
         public ScriptState ScriptState { get; private set; }
 
@@ -169,7 +169,7 @@ namespace WorkspaceServer.Kernel
                         {
                             ScriptState = await CSharpScript.RunAsync(
                                     code,
-                                    ScriptOptions,
+                                    _scriptOptions,
                                     cancellationToken: cancellationSource.Token)
                                 .UntilCancelled(cancellationSource.Token);
                         }
@@ -177,8 +177,8 @@ namespace WorkspaceServer.Kernel
                         {
                             ScriptState = await ScriptState.ContinueWithAsync(
                                     code,
-                                    ScriptOptions,
-                                    e =>
+                                    _scriptOptions,
+                                    catchException:  e =>
                                     {
                                         exception = e;
                                         return true;
@@ -286,18 +286,13 @@ namespace WorkspaceServer.Kernel
             context.Publish(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
-        public void AddMetadataReferences(IReadOnlyCollection<MetadataReference> references)
-        {
-            ScriptOptions = ScriptOptions.AddReferences(references);
-        }
-
         private async Task<IEnumerable<CompletionItem>> GetCompletionList(
             string code,
             int cursorPosition)
         {
             if (ScriptState == null)
             {
-                ScriptState = await CSharpScript.RunAsync(string.Empty, ScriptOptions);
+                ScriptState = await CSharpScript.RunAsync(string.Empty, _scriptOptions);
             }
 
             var compilation = ScriptState.Script.GetCompilation();
@@ -346,15 +341,22 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public async Task LoadExtensionsFromDirectory(IDirectoryAccessor directory, KernelInvocationContext context,
-            IEnumerable<string> additionalDependencies = null)
+        public async Task LoadExtensionsFromDirectory(
+            IDirectoryAccessor directory,
+            KernelInvocationContext context,
+            IReadOnlyList<FileInfo> additionalDependencies = null)
         {
             var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context, additionalDependencies);
+
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
+                extensionsDirectory, 
+                context.HandlingKernel, 
+                context, 
+                additionalDependencies);
         }
-        
+
         private bool HasReturnValue =>
             ScriptState != null &&
-            (bool)_hasReturnValueMethod.Invoke(ScriptState.Script, null);
+            (bool) _hasReturnValueMethod.Invoke(ScriptState.Script, null);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -10,31 +11,32 @@ namespace MLS.Agent
     {
         private AssemblyDependencyResolver _resolver;
 
-        public NativeAssemblyLoadHelper()
-        {
-        }
-
-        public void Configure(string path)
+        public void Configure(FileInfo componentAssemblyPath)
         {
             if (_resolver != null)
             {
                 return;
             }
 
-            _resolver = new AssemblyDependencyResolver(path);
+            _resolver = new AssemblyDependencyResolver(componentAssemblyPath.FullName);
         }
 
-        public void Handle(string assembly)
+        public void Handle(FileInfo assembly)
         {
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             var currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyLoad += AssemblyLoaded(assembly);
         }
 
-        private AssemblyLoadEventHandler AssemblyLoaded(string assembly)
+        private AssemblyLoadEventHandler AssemblyLoaded(FileInfo assembly)
         {
             return (sender, args) =>
             {
-                if (args.LoadedAssembly.Location == assembly)
+                if (args.LoadedAssembly.Location == assembly.FullName)
                 {
                     NativeLibrary.SetDllImportResolver(args.LoadedAssembly, Resolve);
                 }
@@ -44,6 +46,7 @@ namespace MLS.Agent
         private IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
             var path = _resolver.ResolveUnmanagedDllToPath(libraryName);
+
             return NativeLibrary.Load(path);
         }
     }

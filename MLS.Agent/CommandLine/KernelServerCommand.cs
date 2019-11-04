@@ -15,8 +15,6 @@ namespace MLS.Agent.CommandLine
             IKernel kernel,
             IConsole console)
         {
-            Program.StartToolLogging(startupOptions);
-
             var client = new KernelStreamClient(kernel, Console.In, Console.Out);
             
             await client.Start();
