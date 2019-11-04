@@ -38,9 +38,9 @@ As we are still in the early stages of our development, we are unable to take an
 Please feel free to file any bugs reports under our issues. And if you have any feature suggestion, please submit them under our issues using the community suggestions label.
 
 ## Customers & Partners
-| Microsoft Docs   |    Azure Synapse    |Azure HDInsight (HDI)  |
+| Microsoft Docs   |    [Azure Synapse Analytics ](https://azure.microsoft.com/en-us/services/synapse-analytics/)   |Azure HDInsight (HDI)  |
 |----------|:-------------:|:-------------:|
-|Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to create interactive documentation. Users can run and edit .NET code in the browser. | Azure Synapse uses the .NET kernel to write and run quick ad-hoc queries in addition to developing complete, end-to-end big data scenarios, such as reading in data, transforming it, and visualizing it|You can launch Jupyter notebooks from your HDInsight cluster to run big data queries against the compute resources in that cluster. |
+|Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to create interactive documentation. Users can run and edit .NET code in the browser. | Azure Synapse Analytics uses the .NET kernel to write and run quick ad-hoc queries in addition to developing complete, end-to-end big data scenarios, such as reading in data, transforming it, and visualizing it|You can launch Jupyter notebooks from your HDInsight cluster to run big data queries against the compute resources in that cluster. |
 
 
 
