@@ -5,6 +5,8 @@
   <Import Project="eng\targets\NuGet.targets" />
 
   <PropertyGroup>
+    <!-- Always use shipping version instead of dummy version -->
+    <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- private repo, don't do source-link -->
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <EnableSourceLink>false</EnableSourceLink>
