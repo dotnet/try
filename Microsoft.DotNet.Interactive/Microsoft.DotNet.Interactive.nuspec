@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>	
-        $CommonMetadataElements$	
+        $CommonMetadataElements$
         <language>en-US</language>
         <dependencies>
             <group targetFramework=".NETStandard2.0">
@@ -23,7 +23,8 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="MLS.Agent.Tools\$Configuration$\$TargetFramework$\MLS.Agent.Tools.dll" target="lib\netstandard2.0" />
+        $CommonFileElements$
+        <file src="Microsoft.DotNet.Interactive\$Configuration$\$TargetFramework$\MLS.Agent.Tools.dll" target="lib\netstandard2.0" />
         <file src="Microsoft.DotNet.Interactive\$Configuration$\$TargetFramework$\Microsoft.DotNet.Interactive.dll" target="lib\netstandard2.0" />
     </files>
 </package>
