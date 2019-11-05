@@ -29,5 +29,10 @@ namespace WorkspaceServer.Packaging
         public IReadOnlyList<FileInfo> AssemblyPaths { get; }
 
         public DirectoryInfo PackageRoot { get; }
+
+        public override string ToString()
+        {
+            return $"{PackageName},{PackageVersion}";
+        }
     }
 }

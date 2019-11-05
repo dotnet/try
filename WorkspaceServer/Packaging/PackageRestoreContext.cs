@@ -18,8 +18,7 @@ namespace WorkspaceServer.Packaging
     {
         private readonly CSharpKernel _kernel;
         private readonly ScriptState _scriptState;
-        private readonly List<NugetPackageReference> _requestedNugetPackageReferences = new List<NugetPackageReference>();
-        private readonly List<ResolvedNugetPackageReference> _resolvedNugetPackageReferences = new List<ResolvedNugetPackageReference>();
+        private readonly Dictionary<NugetPackageReference, ResolvedNugetPackageReference> _nugetPackageReferences = new Dictionary<NugetPackageReference, ResolvedNugetPackageReference>();
 
         public PackageRestoreContext(CSharpKernel kernel)
         {
@@ -60,13 +59,18 @@ namespace WorkspaceServer.Packaging
         {
             var requestedPackage = new NugetPackageReference(packageName, packageVersion);
 
-            _requestedNugetPackageReferences.Add(requestedPackage);
+            if (_nugetPackageReferences.TryGetValue(requestedPackage, out var already))
+            {
+                return new AddNugetPackageResult(false, requestedPackage);
+            }
+
+            _nugetPackageReferences.Add(requestedPackage, null);
 
             WriteProjectFile();
 
             var dotnet = new Dotnet(Directory);
 
-            var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths");
+            var result = await dotnet.Build();
 
             if (result.ExitCode != 0)
             {
@@ -76,28 +80,37 @@ namespace WorkspaceServer.Packaging
                     errors: result.Output.Concat(result.Error).ToArray());
             }
 
-            var currentScriptStateReferences = GetScriptStateReferences();
+            FileInfo[] currentScriptStateReferences = GetScriptStateReferences();
 
-            var calculatedNugetReferences = GetResolvedNugetReferences();
+            Dictionary<string, ResolvedNugetPackageReference> calculatedNugetReferences = GetResolvedNugetReferences();
 
-            var addedReferences =
+            ResolvedNugetPackageReference[] addedReferences =
                 calculatedNugetReferences
                     .Values
-                    .Where(calc =>
-                               !calc.AssemblyPaths.Select(a => a.Name)
-                                    .Any(n => currentScriptStateReferences.Any(
-                                             pre => pre.Name.Equals(
-                                                 n,
-                                                 StringComparison.InvariantCultureIgnoreCase))))
+                    // .Where(calc =>
+                    // {
+                    //     if (!calc.AssemblyPaths.Select(a => a.Name)
+                    //              .Any(n => currentScriptStateReferences.Any(
+                    //                       pre => pre.Name.Equals(
+                    //                           n,
+                    //                           StringComparison.InvariantCultureIgnoreCase))))
+                    //     {
+                    //         return true;
+                    //     }
+                    //
+                    //     return false;
+                    // })
                     .ToArray();
 
-            _resolvedNugetPackageReferences.AddRange(addedReferences);
+            foreach (var addedReference in addedReferences)
+            {
+                _nugetPackageReferences[requestedPackage] = addedReference;
+            }
 
             return new AddNugetPackageResult(
                 succeeded: true,
                 requestedPackage: requestedPackage,
-                addedReferences: addedReferences,
-                references: addedReferences);
+                addedReferences: addedReferences);
         }
 
         private FileInfo[] GetScriptStateReferences()
@@ -163,27 +176,42 @@ namespace WorkspaceServer.Packaging
             var nugetPackageLines = File.ReadAllText(Path.Combine(Directory.FullName, nugetPathsFile.FullName))
                                         .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            return nugetPackageLines
-                   .Select(line => line.Split(','))
-                   .Select(s =>
-                               (
-                                   packageName: s[0].Trim(),
-                                   packageVersion: s[1].Trim(),
-                                   assemblyPath: new FileInfo(s[2].Trim()),
-                                   packageRoot: !string.IsNullOrWhiteSpace(s[3])
-                                                    ? new DirectoryInfo(s[3].Trim())
-                                                    : null))
-                   .GroupBy(x =>
-                                (
-                                    x.packageName,
-                                    x.packageVersion,
-                                    x.packageRoot))
-                   .Select(xs => new ResolvedNugetPackageReference(
-                               xs.Key.packageName,
-                               xs.Key.packageVersion,
-                               xs.Select(x => x.assemblyPath).ToArray(),
-                               xs.Key.packageRoot))
-                   .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
+            var probingPaths = new List<string>();
+
+            var dict = nugetPackageLines
+                       .Select(line => line.Split(','))
+                       .Where(line =>
+                       {
+                           if (string.IsNullOrWhiteSpace(line[0]))
+                           {
+                               probingPaths.Add(line[3]);
+
+                               return false;
+                           }
+
+                           return true;
+                       }) // <- native dependency 
+                       .Select(line =>
+                                   (
+                                       packageName: line[0].Trim(),
+                                       packageVersion: line[1].Trim(),
+                                       assemblyPath: new FileInfo(line[2].Trim()),
+                                       packageRoot: !string.IsNullOrWhiteSpace(line[3])
+                                                        ? new DirectoryInfo(line[3].Trim())
+                                                        : null))
+                       .GroupBy(x =>
+                                    (
+                                        x.packageName,
+                                        x.packageVersion,
+                                        x.packageRoot))
+                       .Select(xs => new ResolvedNugetPackageReference(
+                                   xs.Key.packageName,
+                                   xs.Key.packageVersion,
+                                   xs.Select(x => x.assemblyPath).ToArray(),
+                                   xs.Key.packageRoot))
+                       .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
+
+            return dict;
         }
 
         private void WriteProjectFile()
@@ -232,7 +260,7 @@ namespace s
 
                 sb.Append("<ItemGroup>");
 
-                foreach (var reference in _requestedNugetPackageReferences)
+                foreach (var reference in _nugetPackageReferences.Keys)
                 {
                     sb.Append($"<PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>");
                 }

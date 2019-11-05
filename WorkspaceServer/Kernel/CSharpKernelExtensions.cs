@@ -98,7 +98,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     {
                         var addedAssemblyPaths =
                             result
-                                .AddedReferences.SelectMany(added => added.AssemblyPaths)
+                                .AddedReferences
+                                .SelectMany(added => added.AssemblyPaths)
                                 .ToArray();
 
                         foreach (var assemblyPath in addedAssemblyPaths)
@@ -106,7 +107,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                             helper?.Handle(assemblyPath);
                         }
 
-                        kernel.AddScriptReferences(addedAssemblyPaths);
+                        kernel.AddScriptReferences(result.AddedReferences);
 
                         context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
                                                                    context.Command));

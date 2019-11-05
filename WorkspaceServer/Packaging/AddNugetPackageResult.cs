@@ -14,7 +14,6 @@ namespace WorkspaceServer.Packaging
             bool succeeded,
             NugetPackageReference requestedPackage,
             IReadOnlyList<ResolvedNugetPackageReference> addedReferences = null,
-            IReadOnlyList<ResolvedNugetPackageReference> references = null,
             IReadOnlyCollection<string> errors = null)
         {
             if (requestedPackage == null)
@@ -30,7 +29,6 @@ namespace WorkspaceServer.Packaging
                 throw new ArgumentException("Must provide errors when succeeded is false.");
             }
 
-            References = references ?? Array.Empty<ResolvedNugetPackageReference>();
             AddedReferences = addedReferences ?? Array.Empty<ResolvedNugetPackageReference>();
             Errors = errors ?? Array.Empty<string>();
 
@@ -43,7 +41,6 @@ namespace WorkspaceServer.Packaging
         }
 
         public bool Succeeded { get; }
-        public IReadOnlyList<ResolvedNugetPackageReference> References { get; }
         public IReadOnlyList<ResolvedNugetPackageReference> AddedReferences { get; }
         public string InstalledVersion { get; }
         public IReadOnlyCollection<string> Errors { get; }

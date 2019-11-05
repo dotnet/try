@@ -25,6 +25,7 @@ using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
+using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Kernel
 {
@@ -69,9 +70,13 @@ namespace WorkspaceServer.Kernel
 
         public ScriptState ScriptState { get; private set; }
 
-        internal void AddScriptReferences(IEnumerable<FileInfo> assemblyPaths)
+        internal void AddScriptReferences(IReadOnlyList<ResolvedNugetPackageReference> assemblyPaths)
         {
-            ScriptOptions = ScriptOptions.AddReferences(assemblyPaths.Select(r => r.FullName));
+            var references = assemblyPaths
+                             .SelectMany(r => r.AssemblyPaths)
+                             .Select(r => MetadataReference.CreateFromFile(r.FullName));
+
+            ScriptOptions = ScriptOptions.AddReferences(references);
         }
 
         protected override async Task HandleAsync(

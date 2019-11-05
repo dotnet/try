@@ -1202,7 +1202,7 @@ catch (Exception e)
                 .CreateFiles();
 
             var extensionsDir =
-                (FileSystemDirectoryAccessor)nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
+                (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
 
             var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(
                                    directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));",
@@ -1212,7 +1212,6 @@ catch (Exception e)
 
             await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
 
-
             KernelEvents.Should()
                         .ContainSingle(e => e is ExtensionLoaded &&
                                             e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDll.FullName));
@@ -1220,24 +1219,25 @@ catch (Exception e)
             KernelEvents.Should()
                         .ContainSingle(e => e is CommandHandled &&
                                             e
-                                             .As<CommandHandled>()
-                                             .Command
-                                             .As<SubmitCode>()
-                                             .Code
-                                             .Contains("using System.Reflection;"));
+                                                .As<CommandHandled>()
+                                                .Command
+                                                .As<SubmitCode>()
+                                                .Code
+                                                .Contains("using System.Reflection;"));
 
-            KernelEvents.Should().ContainSingle(e => e is DisplayedValueProduced &&
-                                                    e
-                                                    .As<DisplayedValueProduced>()
-                                                    .Value
-                                                    .ToString()
-                                                    .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
+            KernelEvents.Should()
+                        .ContainSingle(e => e is DisplayedValueProduced &&
+                                            e
+                                                .As<DisplayedValueProduced>()
+                                                .Value
+                                                .ToString()
+                                                .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
         }
 
         [Fact]
         public async Task bug()
         {
-            var kernel =  CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1298,8 +1298,6 @@ Formatter<DataFrame>.Register((df, writer) =>
 
             events.Should().NotContain(e => e is ErrorProduced ||
                                             e is CommandFailed);
-
-            throw new NotImplementedException("test not written");
 
             void LogScriptReferences()
             {
