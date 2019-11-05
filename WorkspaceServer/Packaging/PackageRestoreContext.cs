@@ -66,7 +66,7 @@ namespace WorkspaceServer.Packaging
 
             var dotnet = new Dotnet(Directory);
 
-            var result = await dotnet.Build();
+            var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths /bl");
 
             if (result.ExitCode != 0)
             {
@@ -225,7 +225,7 @@ namespace s
   </Target>
 
   <Target Name='WriteNugetAssemblyPaths' 
-          DependsOnTargets='ResolvePackageAssets' 
+          DependsOnTargets='ResolvePackageAssets; ResolveReferences' 
           AfterTargets='PrepareForBuild'>
     <ItemGroup>
       <ReferenceLines Remove='@(ReferenceLines)' />
@@ -234,6 +234,15 @@ namespace s
     </ItemGroup>
     <WriteLinesToFile Lines='@(ReferenceLines)' 
                       File='$(MSBuildProjectFullPath).nuget.paths' 
+                      Overwrite='True' WriteOnlyWhenDifferent='True' />
+
+    <ItemGroup>
+      <ResolvedReferenceLines Remove='*' />
+      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec)' />
+    </ItemGroup>
+
+    <WriteLinesToFile Lines='@(ResolvedReferenceLines)' 
+                      File='$(MSBuildProjectFullPath).resolvedReferences.paths' 
                       Overwrite='True' WriteOnlyWhenDifferent='True' />
   </Target>
 ";
