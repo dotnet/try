@@ -1,50 +1,57 @@
 # Create .NET Jupyter Notebooks
-##### Getting started locally on your machine 
 
-### Installation 
+## Installing the .NET kernel for Jupyter 
 
-Requirements
-- [.NET 3.0 SDK](https://dotnet.microsoft.com/download) (follow the setup for your OS)
-- [Jupyter](https://jupyter.org/install) : JupyterLab can be installed using [Anaconda](https://www.anaconda.com/distribution) or  `conda` or `pip`. For more details on how to do this please checkout the [offical Jupyter installation](https://jupyter.org/install) guide.
+First, make sure you have the following installed:
 
-### Install the .NET Kernel
-- Open Command Prompt or if you have Anaconda installed use Anaconda Prompt
-- Install the dotnet try global tool
+- The [.NET 3.0 SDK](https://dotnet.microsoft.com/download).
+- **Jupyter**. Jupyter can be installed using [Anaconda](https://www.anaconda.com/distribution).
 
-    `dotnet tool install -g dotnet-try --add-source https://dotnet.myget.org/F/dotnet-try/api/v3/index.json`
+- Open the Anaconda Prompt and verify that Jupyter is installed:
 
-*Please note: If you have the `dotnet try` global tool already installed, you will need to uninstall before grabbing the kernel enabled version of the dotnet try global tool.*
-- Check to see if jupyter is installed 
+```console
+> jupyter kernelspec list
+  python3        ~\jupyter\kernels\python3
+```
 
-    `jupyter kernelspec list`
+- Next, in an ordinary console, install the `dotnet try` global tool:
+
+```console
+> dotnet tool install -g dotnet-try
+```
+
+- Install the .NET kernel by running the following within your Anaconda Prompt:
+
+```console
+> dotnet try jupyter install
+[InstallKernelSpec] Installed kernelspec .net-csharp in ~\jupyter\kernels\.net-csharp
+.NET kernel installation succeeded
+
+[InstallKernelSpec] Installed kernelspec .net-fsharp in ~\jupyter\kernels\.net-fsharp
+.NET kernel installation succeeded
+```
     
-- Install the kernel 
+- You can verify the installation by running the following again in the Anaconda Prompt:
 
-    `dotnet try jupyter install`
+```console
+> jupyter kernelspec list
+  .net-csharp    ~\jupyter\kernels\.net-csharp
+  .net-fsharp    ~\jupyter\kernels\.net-fsharp
+  python3        ~\jupyter\kernels\python3
+```
 
-    <img src ="https://user-images.githubusercontent.com/2546640/63954737-93106e00-ca51-11e9-8c72-939f3f558d05.png" width = "50%">
-    
-- Test installation 
+## Using Jupyter with .NET
 
-    `jupyter kernelspec list`
+To launch JupyterLab, you can either type `jupyter lab` in the Anaconda Prompt or launch a notebook using the Anaconda Navigator.
 
-    You should see the `.net-csharp`  and `.net-fsharp` listed.
-    
-    <img src ="https://user-images.githubusercontent.com/2546640/67889556-76fa7d00-fb25-11e9-9d23-e4178642b721.png" width ="70%">
+Once Jupyter Lab has launched in your browser, you have the option to create a notebook for C# or F#.
 
-* To start a new notebook, you can either type `jupyter lab`  Anaconda prompt or launch a notebook using the Anaconda Navigator.
-* Once Jupyter Lab has launched in your preferred browser, you have the option to create a **C# and F# notebook**.
+<img src = "https://user-images.githubusercontent.com/2546640/67889988-3b13e780-fb26-11e9-91a1-48d5972b5df2.png" width = "70%">
 
-    <img src = "https://user-images.githubusercontent.com/2546640/67889988-3b13e780-fb26-11e9-91a1-48d5972b5df2.png" width = "70%">
+Once the notebook opens, you can start working with .NET in the language you chose.
 
--  Now you can write .NET 
+<img src = "https://user-images.githubusercontent.com/2546640/67981834-db860c80-fbf7-11e9-89b5-29d2480ed1fa.png" width = "70%">
 
-    <img src = "https://user-images.githubusercontent.com/2546640/67981834-db860c80-fbf7-11e9-89b5-29d2480ed1fa.png" width = "70%">
+For more information on the .NET notebook experience, please check out our samples and documentation on [Binder](https://mybinder.org/v2/gh/dotnet/try/master?urlpath=lab).
 
-For more information on our APIs via C# and F#, please check out our documentation on [binder](https://mybinder.org/v2/gh/dotnet/try/master?urlpath=lab) or in dotnet/try repo in the NotebookExamples folder.
-
-<img src = "https://user-images.githubusercontent.com/2546640/67980555-120e5800-fbf5-11e9-9c00-0d021b1ed21c.png" width = "40%">
-
- Now that you have created your .NET notebook, you probably want to share it with others. In the [next document](CreateBinder.md), you will learn how to share your .NET notebook with others using binder. 
-
- Happy sharing! 
+ Once you've created a .NET notebook, you might want to share it with others. In the [next document](CreateBinder.md), you will learn how to share your .NET notebook with others using binder. 
