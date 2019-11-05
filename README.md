@@ -5,7 +5,7 @@
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/try/try-ci?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=495&branchName=master)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dotnet/try/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/dotnet/try/featuretelemetryfix)
 
 ## Basics
 **What is Try .NET**: Try .NET is an interactive documentation generator for .NET Core.
