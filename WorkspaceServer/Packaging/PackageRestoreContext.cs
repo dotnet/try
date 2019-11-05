@@ -66,7 +66,7 @@ namespace WorkspaceServer.Packaging
 
             var dotnet = new Dotnet(Directory);
 
-            var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths /bl");
+            var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths");
 
             if (result.ExitCode != 0)
             {
@@ -153,7 +153,7 @@ namespace WorkspaceServer.Packaging
 
         private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()
         {
-            var nugetPathsFile = Directory.GetFiles("*.nuget.paths").SingleOrDefault();
+            var nugetPathsFile = Directory.GetFiles("*.resolvedReferences.paths").SingleOrDefault();
 
             if (nugetPathsFile == null)
             {
@@ -274,7 +274,7 @@ namespace s
 
     <ItemGroup>
       <ResolvedReferenceLines Remove='*' />
-      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec)' />
+      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec),%(NativeIncludeRoots.Path)' />
     </ItemGroup>
 
     <WriteLinesToFile Lines='@(ResolvedReferenceLines)' 
