@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Interactive;
 
@@ -41,8 +42,17 @@ namespace WorkspaceServer.Packaging
         }
 
         public bool Succeeded { get; }
+
         public IReadOnlyList<ResolvedNugetPackageReference> AddedReferences { get; }
+
         public string InstalledVersion { get; }
+
         public IReadOnlyCollection<string> Errors { get; }
+
+        public IReadOnlyList<DirectoryInfo> NativeDllProbingPaths =>
+            AddedReferences
+                .SelectMany(path => path.ProbingPaths)
+                .Distinct()
+                .ToArray();
     }
 }

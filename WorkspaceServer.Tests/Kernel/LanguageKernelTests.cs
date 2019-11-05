@@ -1097,10 +1097,9 @@ json
         [Fact]
         public async Task Loads_native_dependencies_from_nugets()
         {
-            using var kernel = new CompositeKernel
-            {
-                new CSharpKernel().UseNugetDirective(new NativeAssemblyLoadHelper())
-            };
+            using var kernel = CreateKernel(
+                Language.CSharp, 
+                () => new NativeAssemblyLoadHelper());
 
             var command = new SubmitCode(@"
 #r ""nuget:Microsoft.ML, 1.3.1""

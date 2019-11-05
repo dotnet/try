@@ -15,7 +15,8 @@ namespace WorkspaceServer.Packaging
             string packageName,
             string packageVersion,
             IReadOnlyList<FileInfo> assemblyPaths,
-            DirectoryInfo packageRoot = null) : base(packageName, packageVersion)
+            DirectoryInfo packageRoot = null,
+            IReadOnlyList<DirectoryInfo> probingPaths = null) : base(packageName, packageVersion)
         {
             if (string.IsNullOrWhiteSpace(packageVersion))
             {
@@ -23,16 +24,16 @@ namespace WorkspaceServer.Packaging
             }
 
             AssemblyPaths = assemblyPaths ?? throw new ArgumentNullException(nameof(assemblyPaths));
+            ProbingPaths = probingPaths ?? Array.Empty<DirectoryInfo>();
             PackageRoot = packageRoot ?? AssemblyPaths.FirstOrDefault()?.Directory.Parent.Parent;
         }
 
         public IReadOnlyList<FileInfo> AssemblyPaths { get; }
 
+        public IReadOnlyList<DirectoryInfo> ProbingPaths { get; }
+
         public DirectoryInfo PackageRoot { get; }
 
-        public override string ToString()
-        {
-            return $"{PackageName},{PackageVersion}";
-        }
+        public override string ToString() => $"{PackageName},{PackageVersion}";
     }
 }

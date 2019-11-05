@@ -59,7 +59,7 @@ namespace WorkspaceServer.Packaging
         {
             var requestedPackage = new NugetPackageReference(packageName, packageVersion);
 
-            if (_nugetPackageReferences.TryGetValue(requestedPackage, out var already))
+            if (_nugetPackageReferences.TryGetValue(requestedPackage, out var _))
             {
                 return new AddNugetPackageResult(false, requestedPackage);
             }
@@ -104,7 +104,7 @@ namespace WorkspaceServer.Packaging
 
             foreach (var addedReference in addedReferences)
             {
-                _nugetPackageReferences[requestedPackage] = addedReference;
+              //  _nugetPackageReferences.Add[requestedPackage] = addedReference;
             }
 
             return new AddNugetPackageResult(
@@ -128,42 +128,6 @@ namespace WorkspaceServer.Packaging
                               .ToArray();
         }
 
-        private Dictionary<string, List<ResolvedNugetPackageReference>> ResolvedReferences()
-        {
-            var nugetPathsFile = Directory.GetFiles("*.resolvedReferences.paths").SingleOrDefault();
-
-            if (nugetPathsFile == null)
-            {
-                return new Dictionary<string, List<ResolvedNugetPackageReference>>();
-            }
-
-            var nugetPackageLines = File.ReadAllText(Path.Combine(Directory.FullName, nugetPathsFile.FullName))
-                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-            return nugetPackageLines
-                .Select(line => line.Split(','))
-                .Select(s =>
-                (
-                    packageName: s[0].Trim(),
-                    packageVersion: s[1].Trim(),
-                    assemblyPath: new FileInfo(s[2].Trim()),
-                    packageRoot: !string.IsNullOrWhiteSpace(s[3])
-                        ? new DirectoryInfo(s[3].Trim())
-                        : null))
-                .GroupBy(x =>
-                (
-                    x.packageName,
-                    x.packageVersion,
-                    x.packageRoot))
-                .Select(xs => new ResolvedNugetPackageReference(
-                    xs.Key.packageName,
-                    xs.Key.packageVersion,
-                    xs.Select(x => x.assemblyPath).ToArray(),
-                    xs.Key.packageRoot))
-                .GroupBy(r => r.PackageName)
-                .ToDictionary(r => r.Key, r => r.ToList(), StringComparer.OrdinalIgnoreCase);
-        }
-
         private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()
         {
             var nugetPathsFile = Directory.GetFiles("*.resolvedReferences.paths").SingleOrDefault();
@@ -176,7 +140,7 @@ namespace WorkspaceServer.Packaging
             var nugetPackageLines = File.ReadAllText(Path.Combine(Directory.FullName, nugetPathsFile.FullName))
                                         .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-            var probingPaths = new List<string>();
+            var probingPaths = new List<DirectoryInfo>();
 
             var dict = nugetPackageLines
                        .Select(line => line.Split(','))
@@ -184,13 +148,13 @@ namespace WorkspaceServer.Packaging
                        {
                            if (string.IsNullOrWhiteSpace(line[0]))
                            {
-                               probingPaths.Add(line[3]);
+                               probingPaths.Add(new DirectoryInfo(line[3]));
 
                                return false;
                            }
 
                            return true;
-                       }) // <- native dependency 
+                       }) 
                        .Select(line =>
                                    (
                                        packageName: line[0].Trim(),
@@ -208,7 +172,8 @@ namespace WorkspaceServer.Packaging
                                    xs.Key.packageName,
                                    xs.Key.packageVersion,
                                    xs.Select(x => x.assemblyPath).ToArray(),
-                                   xs.Key.packageRoot))
+                                   xs.Key.packageRoot,
+                                   probingPaths))
                        .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
 
             return dict;

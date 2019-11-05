@@ -23,28 +23,28 @@ namespace WorkspaceServer.Tests.Kernel
             DisposeAfterTest(output.SubscribeToPocketLogger());
         }
 
-        private KernelBase CreateLanguageKernel(Language language)
+        private KernelBase CreateLanguageKernel(Language language, Func<INativeAssemblyLoadHelper> getHelper = null)
         {
             var kernelBase = language switch
             {
                 Language.FSharp => new FSharpKernel()
-                                        .UseDefaultRendering()
-                                        .UseKernelHelpers()
-                                        .UseDefaultNamespaces() as KernelBase,
+                                   .UseDefaultRendering()
+                                   .UseKernelHelpers()
+                                   .UseDefaultNamespaces() as KernelBase,
                 Language.CSharp => new CSharpKernel()
-                                        .UseDefaultRendering()
-                                        .UseNugetDirective()
-                                        .UseExtendDirective()
-                                        .UseDefaultMagicCommands()
-                                        .UseKernelHelpers(),
+                                   .UseDefaultRendering()
+                                   .UseNugetDirective(getHelper)
+                                   .UseExtendDirective()
+                                   .UseDefaultMagicCommands()
+                                   .UseKernelHelpers(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
             return kernelBase;
         }
 
-        protected KernelBase CreateKernel(Language language)
+        protected KernelBase CreateKernel(Language language, Func<INativeAssemblyLoadHelper> getHelper = null)
         {
-            var kernel = CreateLanguageKernel(language).LogEventsToPocketLogger();
+            var kernel = CreateLanguageKernel(language, getHelper).LogEventsToPocketLogger();
 
             KernelEvents = kernel.KernelEvents.ToSubscribedList();
 

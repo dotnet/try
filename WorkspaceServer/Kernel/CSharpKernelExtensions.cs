@@ -12,6 +12,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
 using MLS.Agent.Tools;
+using Pocket;
 using WorkspaceServer.Packaging;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
@@ -46,7 +47,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
         public static CSharpKernel UseNugetDirective(
             this CSharpKernel kernel, 
-            INativeAssemblyLoadHelper helper = null)
+            Func<INativeAssemblyLoadHelper> getHelper = null)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
                                                                         NugetPackageReference.TryParse(result.Token.Value, out reference))
@@ -54,14 +55,14 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 Name = "package"
             };
 
-            var r = new Command("#r")
+            var command = new Command("#r")
             {
                 packageRefArg
             };
 
             var restoreContext = new PackageRestoreContext(kernel);
             
-            r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
+            command.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
                 var addPackage = new AddNugetPackage(package);
 
@@ -79,9 +80,11 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
                     context.Publish(displayed);
 
-                    var addPackageTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    var addPackageTask = restoreContext.AddPackage(
+                        package.PackageName, 
+                        package.PackageVersion);
 
-                    while (await Task.WhenAny(Task.Delay(750), addPackageTask) != addPackageTask)
+                    while (await Task.WhenAny(Task.Delay(500), addPackageTask) != addPackageTask)
                     {
                         message += ".";
                         context.Publish(new DisplayedValueUpdated(message, key));
@@ -92,7 +95,20 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                     var result = await addPackageTask;
 
-                    helper?.Configure(restoreContext.EntryPointAssemblyPath());
+                    var helper = getHelper?.Invoke();
+
+                    if (helper != null)
+                    {
+                        kernel.RegisterForDisposal(helper);
+                    }
+
+                    var fileInfo = result.AddedReferences.First().AssemblyPaths.First();
+
+                    var nativeDllProbingPaths = result.NativeDllProbingPaths;
+
+                    helper?.SetNativeDllProbingPaths(
+                        fileInfo,
+                        nativeDllProbingPaths);
 
                     if (result.Succeeded)
                     {
@@ -136,7 +152,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });
 
-            kernel.AddDirective(r);
+            kernel.AddDirective(command);
 
             return kernel;
         }

@@ -330,7 +330,7 @@ namespace Microsoft.DotNet.Interactive
             _kernelEvents.OnNext(kernelEvent);
         }
 
-        protected void AddDisposable(IDisposable disposable)
+        public void RegisterForDisposal(IDisposable disposable)
         {
             if (disposable == null)
             {
