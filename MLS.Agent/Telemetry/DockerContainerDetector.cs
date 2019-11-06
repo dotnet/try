@@ -43,9 +43,7 @@ namespace MLS.Agent.Telemetry
 
         private static bool ReadProcToDetectDockerInLinux()
         {
-            return File
-                .ReadAllText("/proc/1/cgroup")
-                .Contains("/docker/");
+            return Telemetry.IsRunningInDockerContainer || File.ReadAllText("/proc/1/cgroup").Contains("/docker/");
         }
     }
 }

@@ -61,6 +61,8 @@ The.NET Core tools collect usage data in order to help us improve your experienc
 
         public static bool SkipFirstTimeExperience => GetEnvironmentVariableAsBool(FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName, false);
 
+        public static bool IsRunningInDockerContainer => GetEnvironmentVariableAsBool("DOTNET_RUNNING_IN_CONTAINER", false);
+
         private static bool GetEnvironmentVariableAsBool(string name, bool defaultValue=false)
         {
             var str = Environment.GetEnvironmentVariable(name);
