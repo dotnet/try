@@ -1101,6 +1101,8 @@ json
                 Language.CSharp, 
                 () => new NativeAssemblyLoadHelper());
 
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
             var command = new SubmitCode(@"
 #r ""nuget:Microsoft.ML, 1.3.1""
 
@@ -1146,9 +1148,7 @@ catch (Exception e)
     Console.WriteLine(e);
 }");
 
-            var result = await kernel.SendAsync(command);
-
-            using var events = result.KernelEvents.ToSubscribedList();
+            await kernel.SendAsync(command);
 
             events
                 .Should()
@@ -1234,24 +1234,16 @@ catch (Exception e)
         }
 
         [Fact]
-        public async Task bug()
+        public async Task When_package_depends_on_lower_level_package_then_()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
-            _output.WriteLine("INITIAL REFERENCES");
-
-            LogScriptReferences();
-
             await kernel.SubmitCodeAsync(@"%%time
 #r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
 #r ""nuget:Microsoft.Data.DataFrame,0.1.1-e190920-1""
 ");
-
-            _output.WriteLine("REFERENCES AFTER #R NUGET");
-
-            LogScriptReferences();
 
             await kernel.SubmitCodeAsync(@"
 using Microsoft.Data;
@@ -1287,36 +1279,9 @@ Formatter<DataFrame>.Register((df, writer) =>
     writer.Write(t);
 }, ""text/html"");");
 
-            foreach (var code in events.OfType<CommandHandled>()
-                                       .Select(e => e.Command)
-                                       .OfType<SubmitCode>()
-                                       .Select(c => c.Code))
-            {
-                _output.WriteLine(code);
-            }
-
-            events.Should().NotContain(e => e is ErrorProduced ||
-                                            e is CommandFailed);
-
-            void LogScriptReferences()
-            {
-                _output.WriteLine("COMPILATION");
-                var compilationMetadataReferences = kernel.ScriptState.Script.GetCompilation().References
-                                                          .ToArray();
-
-                foreach (var r in compilationMetadataReferences)
-                {
-                    _output.WriteLine(r.Display);
-                }
-
-                _output.WriteLine("OPTIONS");
-                var optionsMetadataReferences = kernel.ScriptState.Script.Options.MetadataReferences  .ToArray();
-
-                foreach (var r in optionsMetadataReferences)
-                {
-                    _output.WriteLine(r.Display);
-                }
-            }
+            events.Should()
+                  .NotContain(e => e is ErrorProduced ||
+                                   e is CommandFailed);
         }
     }
 }

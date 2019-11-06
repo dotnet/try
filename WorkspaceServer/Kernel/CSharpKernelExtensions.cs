@@ -102,13 +102,9 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         kernel.RegisterForDisposal(helper);
                     }
 
-                    var fileInfo = result.AddedReferences.First().AssemblyPaths.First();
-
                     var nativeDllProbingPaths = result.NativeDllProbingPaths;
 
-                    helper?.SetNativeDllProbingPaths(
-                        fileInfo,
-                        nativeDllProbingPaths);
+                    helper?.SetNativeDllProbingPaths(nativeDllProbingPaths);
 
                     if (result.Succeeded)
                     {
@@ -118,9 +114,12 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                                 .SelectMany(added => added.AssemblyPaths)
                                 .ToArray();
 
-                        foreach (var assemblyPath in addedAssemblyPaths)
+                        if (helper != null)
                         {
-                            helper?.Handle(assemblyPath);
+                            foreach (var addedReference in result.AddedReferences)
+                            {
+                                helper.Handle(addedReference);
+                            }
                         }
 
                         kernel.AddScriptReferences(result.AddedReferences);

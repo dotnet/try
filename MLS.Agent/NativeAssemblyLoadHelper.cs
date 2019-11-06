@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using MLS.Agent.Tools;
 using Pocket;
 using WorkspaceServer.Kernel;
+using WorkspaceServer.Packaging;
 
 namespace MLS.Agent
 {
@@ -17,34 +17,30 @@ namespace MLS.Agent
     {
         private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
 
-        private readonly Dictionary<string, AssemblyDependencyResolver> _resolvers =
-            new Dictionary<string, AssemblyDependencyResolver>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, ResolvedNugetPackageReference> _resolvers =
+            new Dictionary<string, ResolvedNugetPackageReference>(StringComparer.OrdinalIgnoreCase);
 
         public NativeAssemblyLoadHelper()
         {
-            // var currentDomain = AppDomain.CurrentDomain;
-            // currentDomain.AssemblyLoad += DoTheThing;
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
-        public void SetNativeDllProbingPaths(
-            FileInfo assemblyPath,
-            IReadOnlyList<DirectoryInfo> probingPaths)
+        public void SetNativeDllProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
         {
             _probingPaths.UnionWith(probingPaths);
         }
 
-        public void Handle(FileInfo assemblyFile)
+        public void Handle(ResolvedNugetPackageReference reference)
         {
+            var assemblyFile = reference.AssemblyPaths.First();
+
             foreach (var dir in _probingPaths)
             {
-                Logger.Log.Info($"Probing: {dir}");
+                Logger.Log.Info("Probing: {dir}", dir);
 
                 if (assemblyFile.FullName.Contains(dir.FullName))
                 {
-                    var resolver = new AssemblyDependencyResolver(assemblyFile.FullName);
-
-                    _resolvers.Add(assemblyFile.FullName, resolver);
+                    _resolvers.Add(assemblyFile.FullName, reference);
                 }
             }
         }
@@ -58,7 +54,6 @@ namespace MLS.Agent
             }
 
             Logger.Log.Info("OnAssemblyLoad: {location}", args.LoadedAssembly.Location);
-            Console.WriteLine($"OnAssemblyLoad: {args.LoadedAssembly.Location}");
 
             NativeLibrary.SetDllImportResolver(
                 args.LoadedAssembly,
@@ -66,13 +61,13 @@ namespace MLS.Agent
                 {
                     if (_resolvers.TryGetValue(
                         args.LoadedAssembly.Location,
-                        out var resolver))
+                        out var reference))
                     {
                         foreach (var path in _probingPaths)
                         {
                             var dll =
                                 path.Subdirectory("runtimes")
-                                    .Subdirectory("win-x64")
+                                    .Subdirectory(reference.RuntimeIdentifier)
                                     .GetFiles($"{libraryName}.dll", SearchOption.AllDirectories);
 
                             if (dll.Length == 1)
@@ -88,30 +83,9 @@ namespace MLS.Agent
                 });
         }
 
-        //
-        // private AssemblyLoadEventHandler AssemblyLoaded(FileInfo assembly)
-        // {
-        //     return (_, args) =>
-        //     {
-        //         if (args.LoadedAssembly.Location == assembly.FullName)
-        //         {
-        //             NativeLibrary.SetDllImportResolver(args.LoadedAssembly, Resolve);
-        //         }
-        //     };
-        // }
-        //
-        // private IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-        // {
-        //     var path = _resolver.ResolveUnmanagedDllToPath(libraryName);
-        //
-        //     return NativeLibrary.Load(path);
-        // }
-
         public void Dispose()
         {
             AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-            //
-            // _resolvers.Clear();
         }
     }
 }

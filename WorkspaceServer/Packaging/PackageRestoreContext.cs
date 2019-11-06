@@ -70,7 +70,7 @@ namespace WorkspaceServer.Packaging
 
             var dotnet = new Dotnet(Directory);
 
-            var result = await dotnet.Build();
+            var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths");
 
             if (result.ExitCode != 0)
             {
@@ -80,52 +80,15 @@ namespace WorkspaceServer.Packaging
                     errors: result.Output.Concat(result.Error).ToArray());
             }
 
-            FileInfo[] currentScriptStateReferences = GetScriptStateReferences();
-
-            Dictionary<string, ResolvedNugetPackageReference> calculatedNugetReferences = GetResolvedNugetReferences();
-
-            ResolvedNugetPackageReference[] addedReferences =
-                calculatedNugetReferences
+            var addedReferences =
+                GetResolvedNugetReferences()
                     .Values
-                    // .Where(calc =>
-                    // {
-                    //     if (!calc.AssemblyPaths.Select(a => a.Name)
-                    //              .Any(n => currentScriptStateReferences.Any(
-                    //                       pre => pre.Name.Equals(
-                    //                           n,
-                    //                           StringComparison.InvariantCultureIgnoreCase))))
-                    //     {
-                    //         return true;
-                    //     }
-                    //
-                    //     return false;
-                    // })
                     .ToArray();
-
-            foreach (var addedReference in addedReferences)
-            {
-              //  _nugetPackageReferences.Add[requestedPackage] = addedReference;
-            }
 
             return new AddNugetPackageResult(
                 succeeded: true,
                 requestedPackage: requestedPackage,
                 addedReferences: addedReferences);
-        }
-
-        private FileInfo[] GetScriptStateReferences()
-        {
-            var compilation = _scriptState?.Script.GetCompilation();
-
-            if (compilation == null)
-            {
-                return Array.Empty<FileInfo>();
-            }
-
-            return compilation.References
-                              .Concat(_kernel.ScriptOptions.MetadataReferences)
-                              .Select(r => new FileInfo(r.Display))
-                              .ToArray();
         }
 
         private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()
@@ -162,7 +125,8 @@ namespace WorkspaceServer.Packaging
                                        assemblyPath: new FileInfo(line[2].Trim()),
                                        packageRoot: !string.IsNullOrWhiteSpace(line[3])
                                                         ? new DirectoryInfo(line[3].Trim())
-                                                        : null))
+                                                        : null, 
+                                       runtimeIdentifier: line[4].Trim()))
                        .GroupBy(x =>
                                     (
                                         x.packageName,
@@ -173,7 +137,8 @@ namespace WorkspaceServer.Packaging
                                    xs.Key.packageVersion,
                                    xs.Select(x => x.assemblyPath).ToArray(),
                                    xs.Key.packageRoot,
-                                   probingPaths))
+                                   probingPaths,
+                                   xs.Select(x => x.runtimeIdentifier).First()))
                        .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
 
             return dict;
@@ -254,20 +219,12 @@ namespace s
   </Target>
 
   <Target Name='WriteNugetAssemblyPaths' 
-          DependsOnTargets='ResolvePackageAssets; ResolveReferences' 
+          DependsOnTargets='ResolvePackageAssets; ResolveReferences; ProcessFrameworkReferences' 
           AfterTargets='PrepareForBuild'>
-    <ItemGroup>
-      <ReferenceLines Remove='@(ReferenceLines)' />
-      <ReferenceLines Include='%(ResolvedFile.NugetPackageId),%(ResolvedFile.NugetPackageVersion),%(ResolvedFile.HintPath),%(NativeIncludeRoots.Path)'
-                      Condition = ""%(ResolvedFile.NugetPackageId) != 'Microsoft.NETCore.App' and Exists('%(ResolvedFile.HintPath)')"" />
-    </ItemGroup>
-    <WriteLinesToFile Lines='@(ReferenceLines)' 
-                      File='$(MSBuildProjectFullPath).nuget.paths' 
-                      Overwrite='True' WriteOnlyWhenDifferent='True' />
 
     <ItemGroup>
       <ResolvedReferenceLines Remove='*' />
-      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec),%(NativeIncludeRoots.Path)' />
+      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec),%(NativeIncludeRoots.Path),$(AppHostRuntimeIdentifier)' />
     </ItemGroup>
 
     <WriteLinesToFile Lines='@(ResolvedReferenceLines)' 
