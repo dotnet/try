@@ -1234,7 +1234,7 @@ catch (Exception e)
         }
 
         [Fact]
-        public async Task When_package_depends_on_lower_level_package_then_()
+        public async Task Dependency_version_conflicts_are_resolved_correctly()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
