@@ -42,9 +42,9 @@ Enter your repository URL and branch.
 
 <img src = "https://user-images.githubusercontent.com/375556/67016633-66dbaa00-f0f0-11e9-8a6d-c7191de3142e.png" width="70%">
 
-Press **launch** to test your binder.
+Press **launch** to test your Binder.
 
-During development it is useful to use a commit hash so that you can  test different commits at the same time.
+During development it is useful to use a commit hash so that you can test different commits at the same time.
 
 When you're happy with the result, expand the section to reveal the badge code, which you can embed in your blogs and posts.
 

@@ -26,7 +26,7 @@ To get you started, we created a set of samples (C# and F#).  These samples have
     <img src = "https://user-images.githubusercontent.com/2546640/67979951-be4f3f00-fbf3-11e9-90c2-16df089bafd9.png" width = "50%">
 
     - Select the *Samples Folder*, pick a .ipynb file that looks interesting, and start running the cells. You can just click Run to run the first cell. Each time you click Run it will run the next cell. 
-    - Once the notebook has loaded make sure you trust it by clicking on the  **Not Trusted** button then **Trust** 
+    - Once the notebook has loaded make sure you trust it by clicking on the  **Not Trusted** button, then on **Trust**. 
     
       <img src ="https://user-images.githubusercontent.com/2546640/67038545-9d63f580-f0ed-11e9-95d9-8df56a4c7b21.png" width ="60%">
 
