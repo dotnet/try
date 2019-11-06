@@ -15,6 +15,7 @@ namespace MLS.Agent
 {
     public class NativeAssemblyLoadHelper : INativeAssemblyLoadHelper
     {
+        private static readonly HashSet<DirectoryInfo> globalProbingPaths = new HashSet<DirectoryInfo>();
         private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
 
         private readonly Dictionary<string, ResolvedNugetPackageReference> _resolvers =
@@ -28,6 +29,10 @@ namespace MLS.Agent
         public void SetNativeDllProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
         {
             _probingPaths.UnionWith(probingPaths);
+            lock (globalProbingPaths)
+            {
+                globalProbingPaths.UnionWith(probingPaths);
+            }
         }
 
         public void Handle(ResolvedNugetPackageReference reference)
@@ -45,6 +50,119 @@ namespace MLS.Agent
             }
         }
 
+        private IEnumerable<string> ProbingFilenames(string name)
+        {
+            yield return name;                                                  // we can always try the name provided to pinvoke
+
+            if( !(Path.IsPathRooted(name)) )
+            {
+                var usePrefix = ProbingUsePrefix(name);
+                // Path is not rooted so we must try to add a prefix and suffix
+                foreach (var suffix in ProbingSuffixes())
+                {
+                    if (ProbingUseSuffix(name, suffix))
+                    {
+                        yield return ($"{name}{suffix}");
+                        if (usePrefix)
+                        {
+                            yield return ($"lib{name}{suffix}");
+                        }
+                    }
+                    else
+                    {
+                        yield return ($"lib{name}");
+                    }
+                }
+            }
+
+            // Probe for necessary suffixes --- these suffix' are platform specific
+            IEnumerable<string> ProbingSuffixes()
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    yield return ".dll";
+                    yield return ".exe";
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    yield return ".dylib";
+                }
+                else
+                {
+                    yield return ".so";
+                }
+            }
+
+            // linux devs often append version # to libraries I.e mydll.so.5.3.2
+            bool ProbingUseSuffix(string name, string s)
+            {
+                return !(name.Contains(s + ".") || name.EndsWith(s));
+            }
+
+            // If the name looks like a path or a volume name then dont prefix 'lib'
+            bool ProbingUsePrefix(string name)
+            {
+                return name.IndexOf(Path.DirectorySeparatorChar) == -1              // If name has directory information no add no prefix
+                        && name.IndexOf(Path.AltDirectorySeparatorChar) == -1       // Alternate Directory seperator
+                        && name.IndexOf(Path.PathSeparator) == -1                   // Path seperator
+                        && name.IndexOf(Path.VolumeSeparatorChar) == -1;            // Volume seperator
+            }
+        }
+
+        private IEnumerable<string> ProbingPaths(string probingPath, string name)
+        {
+            // if name is rooted then it's an absolute path to the dll
+            if (Path.IsPathRooted(name))
+            {
+                if (File.Exists(name))
+                    yield return name;
+            }
+            else
+            {
+                // Check it the dll exists in the probepath root
+                foreach(var pname in ProbingFilenames(name))
+                {
+                    var path = Path.Combine(probingPath, pname);
+                    if (File.Exists(path))
+                        yield return path;
+                }
+                // Grovel tha platform specific subdirectory
+                foreach(var rid in ProbingRids())
+                {
+                    var path = Path.Combine(probingPath, "runtimes", rid, "native");
+
+                    // Check it the dll exists in the rid specific native directory
+                    foreach (var pname in ProbingFilenames(name))
+                    {
+                        var p = Path.Combine(path, pname);
+                        if (File.Exists(p))
+                            yield return p;
+                    }
+                }
+            }
+
+            // Computer valid dotnet-rids for this environment: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+            // Where rid is: win, win-x64, win-x86, osx-x64, linux-x64 etc ...
+            IEnumerable<string> ProbingRids()
+            {
+                var processArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture;
+                var baseRid =
+                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win" :
+                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" :
+                    "linux";
+
+                var platformRid =
+                    processArchitecture == Architecture.X64 ? "-x64" :
+                    processArchitecture == Architecture.X86 ? "-x86" :
+                    processArchitecture == Architecture.Arm64 ? "-arm64" :
+                    "arm";
+
+                yield return baseRid + platformRid;
+                yield return baseRid;
+                yield return "any";
+            }
+        }
+
         private void OnAssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
             if (args.LoadedAssembly.IsDynamic ||
@@ -59,28 +177,37 @@ namespace MLS.Agent
                 args.LoadedAssembly,
                 (libraryName, assembly, searchPath) =>
                 {
+                    var ptr = IntPtr.Zero;
                     if (_resolvers.TryGetValue(
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
-                        foreach (var path in _probingPaths)
+                        ptr = _probingPaths.SelectMany(di => ProbingPaths(di.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                    }
+                    if (ptr == IntPtr.Zero)
+                    {
+                        lock (globalProbingPaths)
                         {
-                            var dll =
-                                path.Subdirectory("runtimes")
-                                    .Subdirectory(reference.RuntimeIdentifier)
-                                    .GetFiles($"{libraryName}.dll", SearchOption.AllDirectories);
-
-                            if (dll.Length == 1)
-                            {
-                                var ptr = NativeLibrary.Load(dll[0].FullName);
-
-                                return ptr;
-                            }
+                            ptr = globalProbingPaths.SelectMany(di => ProbingPaths(di.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
                         }
                     }
-
-                    return IntPtr.Zero;
+                    return ptr;
                 });
+
+            IntPtr nativeLoader(string dll)
+            {
+                var ptr = IntPtr.Zero;
+                try
+                {
+                    ptr = NativeLibrary.Load(dll);
+                    Logger.Log.Info("NativeLibrary.Load({dll})", args.LoadedAssembly.Location);
+                    Console.WriteLine($"NativeLibrary.Load({dll})");
+                }
+                catch (Exception)
+                {
+                }
+                return ptr;
+            }
         }
 
         public void Dispose()
