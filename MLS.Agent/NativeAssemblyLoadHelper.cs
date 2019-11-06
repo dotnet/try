@@ -52,12 +52,14 @@ namespace MLS.Agent
 
         private IEnumerable<string> ProbingFilenames(string name)
         {
-            yield return name;                                                  // we can always try the name provided to pinvoke
+            // Try the name supplied by the pinvoke
+            yield return name;
 
             if( !(Path.IsPathRooted(name)) )
             {
                 var usePrefix = ProbingUsePrefix(name);
-                // Path is not rooted so we must try to add a prefix and suffix
+
+                // Name is not rooted so we can try with prefix and suffix
                 foreach (var suffix in ProbingSuffixes())
                 {
                     if (ProbingUseSuffix(name, suffix))
@@ -93,7 +95,7 @@ namespace MLS.Agent
                 }
             }
 
-            // linux devs often append version # to libraries I.e mydll.so.5.3.2
+            // linux developers often append a version number to libraries I.e mydll.so.5.3.2
             bool ProbingUseSuffix(string name, string s)
             {
                 return !(name.Contains(s + ".") || name.EndsWith(s));
@@ -102,10 +104,10 @@ namespace MLS.Agent
             // If the name looks like a path or a volume name then dont prefix 'lib'
             bool ProbingUsePrefix(string name)
             {
-                return name.IndexOf(Path.DirectorySeparatorChar) == -1              // If name has directory information no add no prefix
-                        && name.IndexOf(Path.AltDirectorySeparatorChar) == -1       // Alternate Directory seperator
-                        && name.IndexOf(Path.PathSeparator) == -1                   // Path seperator
-                        && name.IndexOf(Path.VolumeSeparatorChar) == -1;            // Volume seperator
+                return name.IndexOf(Path.DirectorySeparatorChar) == -1
+                       && name.IndexOf(Path.AltDirectorySeparatorChar) == -1
+                       && name.IndexOf(Path.PathSeparator) == -1
+                       && name.IndexOf(Path.VolumeSeparatorChar) == -1;
             }
         }
 
@@ -119,19 +121,19 @@ namespace MLS.Agent
             }
             else
             {
-                // Check it the dll exists in the probepath root
+                // Check if the dll exists in the probe path root
                 foreach(var pname in ProbingFilenames(name))
                 {
                     var path = Path.Combine(probingPath, pname);
                     if (File.Exists(path))
                         yield return path;
                 }
-                // Grovel tha platform specific subdirectory
+                // Grovel through the platform specific subdirectory
                 foreach(var rid in ProbingRids())
                 {
                     var path = Path.Combine(probingPath, "runtimes", rid, "native");
 
-                    // Check it the dll exists in the rid specific native directory
+                    // Check if the dll exists in the rid specific native directory
                     foreach (var pname in ProbingFilenames(name))
                     {
                         var p = Path.Combine(path, pname);
