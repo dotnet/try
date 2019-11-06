@@ -1,10 +1,10 @@
 # Use our latest version on [Binder](https://mybinder.org/)
 
-## Zero install - try our .NET Jupyter Notebook. 
+## Zero install. Try .NET with Jupyter. 
 
-**Requirement :**  A browser
+**Requirement :**  All you need is your browser.
 
-To get you started, we created a set of samples (C# and F#).  These samples have been designed to provide a **zero-install** experience, allowing you to try the .NET kernel setup free.
+To get you started, we created a set of samples in C# and F#.  These samples have been designed to provide a **zero-install** experience, allowing you to try the .NET kernel setup free.
 
 ## Steps
 
@@ -17,8 +17,10 @@ To get you started, we created a set of samples (C# and F#).  These samples have
 
     <img src ="https://user-images.githubusercontent.com/2546640/68036481-25c0c980-fc9c-11e9-97bd-1aeab5037453.gif" width ="70%" >
 
--  Select one of the .NET folder options, "csharp" or "fsharp" (C# or F#)
--  In the C# or F# folder you will find a *Docs* and a *Samples* folder.
+-  Select one of the .NET folder options, `csharp` (C#) or `fsharp` (F#).
+
+-  In the folder you will find a `Docs` folder and a `Samples` folder.
+
     - Docs folder - A how to guide that goes over formatting, plotting, magic commands etc. 
    <img src = "https://user-images.githubusercontent.com/2546640/67980555-120e5800-fbf5-11e9-9c00-0d021b1ed21c.png" width = "40%">
 
