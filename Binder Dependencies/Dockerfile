@@ -42,7 +42,9 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true \
     # Enable correct mode for dotnet watch (only mode supported in a container)
     DOTNET_USE_POLLING_FILE_WATCHER=true \
     # Skip extraction of XML docs - generally not useful within an image/container - helps performance
-    NUGET_XMLDOC_MODE=skip
+    NUGET_XMLDOC_MODE=skip \
+    # Opt out of telemetry until after we install jupyter when building the image, this prevents caching of machine id
+    DOTNET_TRY_CLI_TELEMETRY_OPTOUT=true
 
 # Trigger first run experience by running arbitrary cmd
 RUN dotnet help
@@ -70,6 +72,9 @@ RUN echo "$PATH"
 
 # Install kernel specs
 RUN dotnet try jupyter install
+
+# Enable telemetry once we install jupyter for the image
+ENV DOTNET_TRY_CLI_TELEMETRY_OPTOUT=false
 
 # Set root to notebooks
 WORKDIR ${HOME}/notebooks/
