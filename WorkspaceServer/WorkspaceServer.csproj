@@ -34,8 +34,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>   
-    <PackageReference Include="Buildalyzer" Version="2.3.0" />
-    <PackageReference Include="Buildalyzer.Workspaces" Version="2.3.0" />
+    <PackageReference Include="Buildalyzer" Version="2.4.0" />
+    <PackageReference Include="Buildalyzer.Workspaces" Version="2.4.0" />
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
     <PackageReference Include="DictionaryExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
@@ -46,15 +46,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Runtime" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0-beta2-19467-02" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0-beta2-19467-02" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="3.4.0-beta2-19467-02" />
@@ -63,7 +54,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="3.4.0-beta2-19467-02" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="3.4.0-beta2-19467-02" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
     <PackageReference Include="NewtonSoft.Json" Version="12.0.2" />
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19508.1" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
@@ -82,7 +73,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="TaskExtensions" Version="0.1.5650001">
       <PrivateAssets>all</PrivateAssets>

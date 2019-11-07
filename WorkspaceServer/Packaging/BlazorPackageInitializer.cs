@@ -118,7 +118,7 @@ namespace WorkspaceServer.Packaging
 
         private void WriteResource(string resourceName, string targetDirectory)
         {
-            var text = GetType().ReadManifestResource($"WorkspaceServer.{resourceName}");
+            var text = GetType().ReadManifestResource(resourceName);
             Directory.CreateDirectory(targetDirectory);
             var path = Path.Combine(targetDirectory, resourceName);
             File.WriteAllText(path, text);
