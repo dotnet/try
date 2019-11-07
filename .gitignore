@@ -377,4 +377,4 @@ docs/\.ionide/
 
 #Backup files
 *.bak
-NotebookExamples/csharp/Samples/housing.csv
+NotebookExamples/*/Samples/housing.csv
