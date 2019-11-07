@@ -1242,7 +1242,7 @@ catch (Exception e)
 
             await kernel.SubmitCodeAsync(@"%%time
 #r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-#r ""nuget:Microsoft.Data.DataFrame,0.1.1-e190920-1""
+#r ""nuget:Microsoft.Data.DataFrame,1.0.0-e190910-1""
 ");
 
             await kernel.SubmitCodeAsync(@"
