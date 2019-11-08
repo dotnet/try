@@ -112,7 +112,10 @@ namespace Microsoft.DotNet.Interactive
             {
                 if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
-                    await extensibleKernel.LoadExtensionsFromDirectory(loadExtensionsInDirectory.Directory, context, loadExtensionsInDirectory.AdditionalDependencies);
+                    await extensibleKernel.LoadExtensionsFromDirectory(
+                        loadExtensionsInDirectory.Directory, 
+                        context, 
+                        loadExtensionsInDirectory.AdditionalDependencies);
                 }
                 else
                 {
@@ -165,7 +168,6 @@ namespace Microsoft.DotNet.Interactive
                     }
                     else
                     {
-                        // each SubmitCode needs a new context
                         await context.HandlingKernel.SendAsync(command);
                     }
                 }
@@ -328,7 +330,7 @@ namespace Microsoft.DotNet.Interactive
             _kernelEvents.OnNext(kernelEvent);
         }
 
-        protected void AddDisposable(IDisposable disposable)
+        public void RegisterForDisposal(IDisposable disposable)
         {
             if (disposable == null)
             {

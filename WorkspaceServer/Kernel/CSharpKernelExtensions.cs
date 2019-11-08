@@ -5,15 +5,14 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
-using System.Runtime.Loader;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
 using MLS.Agent.Tools;
+using Pocket;
 using WorkspaceServer.Packaging;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
@@ -46,7 +45,9 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
             return kernel;
         }
 
-        public static CSharpKernel UseNugetDirective(this CSharpKernel kernel, INativeAssemblyLoadHelper helper = null)
+        public static CSharpKernel UseNugetDirective(
+            this CSharpKernel kernel, 
+            Func<INativeAssemblyLoadHelper> getHelper = null)
         {
             var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
                                                                         NugetPackageReference.TryParse(result.Token.Value, out reference))
@@ -54,14 +55,14 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 Name = "package"
             };
 
-            var r = new Command("#r")
+            var command = new Command("#r")
             {
                 packageRefArg
             };
 
-            var restoreContext = new PackageRestoreContext();
-
-            r.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
+            var restoreContext = new PackageRestoreContext(kernel);
+            
+            command.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
                 var addPackage = new AddNugetPackage(package);
 
@@ -73,13 +74,18 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         message += $", version {package.PackageVersion}";
                     }
 
+                    message += "...";
+
                     var key = message;
                     var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
                     context.Publish(displayed);
 
-                    var installTask = restoreContext.AddPackage(package.PackageName, package.PackageVersion);
+                    var addPackageTask = restoreContext.AddPackage(
+                        package.PackageName, 
+                        package.PackageVersion,
+                        package.RestoreSources);
 
-                    while (await Task.WhenAny(Task.Delay(1000), installTask) != installTask)
+                    while (await Task.WhenAny(Task.Delay(500), addPackageTask) != addPackageTask)
                     {
                         message += ".";
                         context.Publish(new DisplayedValueUpdated(message, key));
@@ -88,33 +94,79 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                     message += "done!";
                     context.Publish(new DisplayedValueUpdated(message, key));
 
-                    var result = await installTask;
-                    helper?.Configure(await restoreContext.OutputPath());
+                    var result = await addPackageTask;
+
+                    var helper = getHelper?.Invoke();
+
+                    if (helper != null)
+                    {
+                        kernel.RegisterForDisposal(helper);
+                    }
 
                     if (result.Succeeded)
                     {
-                        foreach (var reference in result.NewReferences)
+                        switch (result)
                         {
-                            if (reference is PortableExecutableReference peRef)
-                            {
-                                helper?.Handle(peRef.FilePath);
-                            }
+                            case AddNugetPackageResult packageResult:
+
+                                var nativeLibraryProbingPaths = packageResult.NativeLibraryProbingPaths;
+                                helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
+
+                                var addedAssemblyPaths =
+                                    packageResult
+                                        .AddedReferences
+                                        .SelectMany(added => added.AssemblyPaths)
+                                        .ToArray();
+
+                                if (helper != null)
+                                {
+                                    foreach (var addedReference in packageResult.AddedReferences)
+                                    {
+                                        helper.Handle(addedReference);
+                                    }
+                                }
+
+                                kernel.AddScriptReferences(packageResult.AddedReferences);
+
+                                context.Publish(
+                                    new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {packageResult.InstalledVersion}",
+                                                               context.Command));
+
+                                context.Publish(new NuGetPackageAdded(addPackage, package));
+
+                                var resolvedNugetPackageReference = await restoreContext.GetResolvedNugetPackageReference(package.PackageName);
+
+                                var nugetPackageDirectory = new FileSystemDirectoryAccessor(resolvedNugetPackageReference.PackageRoot);
+                                await context.HandlingKernel.SendAsync(
+                                    new LoadExtensionsInDirectory(
+                                        nugetPackageDirectory,
+                                        addedAssemblyPaths));
+                                break;
+
+                            default:
+                                break;
+
                         }
-
-                        kernel.AddMetadataReferences(result.NewReferences);
-
-                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
-                                                                   context.Command));
-
-                        context.Publish(new NuGetPackageAdded(addPackage, package));
-
-                        var nugetPackageDirectory = new FileSystemDirectoryAccessor(await restoreContext.GetDirectoryForPackage(package.PackageName));
-                        await context.HandlingKernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory, result.References.Select(r => r.Display)));
                     }
                     else
                     {
-                        context.Publish(new DisplayedValueProduced($"Failed to add reference to package {package.PackageName}", context.Command));
-                        context.Publish(new DisplayedValueProduced(result.DetailedErrors, context.Command));
+                        var errors = $"{string.Join(Environment.NewLine, result.Errors)}";
+
+                        switch (result)
+                        {
+                            case AddNugetPackageResult _:
+                                context.Publish(
+                                    new ErrorProduced(
+                                        $"Failed to add reference to package {package.PackageName}{Environment.NewLine}{errors}"));
+                                break;
+                            case AddNugetRestoreSourcesResult _:
+                                context.Publish(
+                                    new ErrorProduced(
+                                        $"Failed to apply RestoreSources {package.RestoreSources}{Environment.NewLine}{errors}"));
+                                break;
+                            default:
+                                break;
+                        }
                     }
 
                     context.Complete();
@@ -123,7 +175,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });
 
-            kernel.AddDirective(r);
+            kernel.AddDirective(command);
 
             return kernel;
         }

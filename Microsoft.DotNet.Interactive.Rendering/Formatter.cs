@@ -78,8 +78,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 untypedFormatDelegate.GetMethodInfo(),
                 arguments);
 
-            var bodyCode = body.ToString();
-
             var genericFormatDelegateType = typeof(Action<,>)
                 .MakeGenericType(new[]
                 {
@@ -94,8 +92,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
                                                    parameterExpression,
                                                    textWriterParam
                                                });
-
-            var expressionCode = body.ToString();
 
             return expression.Compile();
         }

@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Buildalyzer.Workspaces;
 using System.Linq;
 using System.Threading.Tasks;
-using Buildalyzer;
 using Microsoft.CodeAnalysis;
 using WorkspaceServer.Packaging;
 
@@ -15,19 +13,9 @@ namespace WorkspaceServer.Servers.Roslyn
 {
     internal static class CompilationUtility
     {
-        // FIX: (CompilationUtility)  organize
-
         internal static bool CanBeUsedToGenerateCompilation(this Workspace workspace)
         {
             return workspace?.CurrentSolution?.Projects?.Count() > 0;
-        }
-
-        internal static bool TryGetWorkspace(
-            this AnalyzerResult analyzerResult,
-            out Workspace ws)
-        {
-            ws = analyzerResult.GetWorkspace();
-            return ws.CanBeUsedToGenerateCompilation();
         }
 
         public static IEnumerable<FileInfo> FindBinLogs(this IHaveADirectory package) =>

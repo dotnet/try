@@ -22,7 +22,7 @@ namespace WorkspaceServer.Tests
 
             var initializer = new BlazorPackageInitializer(
                 "blazor-test",
-                new List<(string,string)>());
+                new List<(string,string,string)>());
 
             Func<Task> initialize = async () =>
                 await initializer.Initialize(empty.Directory);
@@ -40,7 +40,7 @@ namespace WorkspaceServer.Tests
             var name = "blazor-test";
             var initializer = new BlazorPackageInitializer(
                 name,
-                new List<(string, string)>());
+                new List<(string, string, string)>());
 
             await initializer.Initialize(dir);
 
@@ -74,9 +74,9 @@ namespace WorkspaceServer.Tests
             var name = "blazor-test";
             var initializer = new BlazorPackageInitializer(
                 name,
-                new List<(string, string)>
+                new List<(string, string, string)>
                 {
-                    ("HtmlAgilityPack", "1.11.12")
+                    ("HtmlAgilityPack", "1.11.12", "")
                 });
 
             await initializer.Initialize(dir);

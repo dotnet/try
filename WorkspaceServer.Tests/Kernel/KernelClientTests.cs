@@ -156,7 +156,6 @@ namespace WorkspaceServer.Tests.Kernel
                 .ContainInOrder(expectedEvents);
         }
 
-
         [Fact]
         public async Task Kernel_produces_only_commandHandled_for_root_command()
         {
@@ -247,13 +246,16 @@ namespace WorkspaceServer.Tests.Kernel
             await _kernelClient.Start();
 
             var gate = _io.OutputStream
-                .TakeUntilCommandHandled(10.Minutes());
+                .TakeUntilEvent<NuGetPackageAdded>(1.Minutes());
 
             _io.WriteToInput(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""), 0);
 
             await gate;
 
-            _events.Should().Contain(e => e["eventType"].Value<string>() == nameof(NuGetPackageAdded));
+            _events
+                .Select(e => e["eventType"].Value<string>())
+                .Should()
+                .Contain(nameof(NuGetPackageAdded));
         }
 
         public void Dispose()

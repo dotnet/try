@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,6 +25,7 @@ using XPlot.Plotly;
 using CompletionItem = Microsoft.DotNet.Interactive.CompletionItem;
 using Task = System.Threading.Tasks.Task;
 using MLS.Agent.Tools;
+using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Kernel
 {
@@ -42,14 +44,7 @@ namespace WorkspaceServer.Kernel
         private readonly object _cancellationSourceLock = new object();
         private readonly RelativeDirectoryPath _assemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
 
-
-        public CSharpKernel()
-        {
-            _cancellationSource = new CancellationTokenSource();
-            Name = DefaultKernelName;
-        }
-
-        public ScriptOptions ScriptOptions { get; private set; } =
+        internal ScriptOptions ScriptOptions =
             ScriptOptions.Default
                          .AddImports(
                              "System",
@@ -67,7 +62,22 @@ namespace WorkspaceServer.Kernel
                              typeof(PocketView).Assembly,
                              typeof(PlotlyChart).Assembly);
 
+        public CSharpKernel()
+        {
+            _cancellationSource = new CancellationTokenSource();
+            Name = DefaultKernelName;
+        }
+
         public ScriptState ScriptState { get; private set; }
+
+        internal void AddScriptReferences(IReadOnlyList<ResolvedNugetPackageReference> assemblyPaths)
+        {
+            var references = assemblyPaths
+                             .SelectMany(r => r.AssemblyPaths)
+                             .Select(r => MetadataReference.CreateFromFile(r.FullName));
+
+            ScriptOptions = ScriptOptions.AddReferences(references);
+        }
 
         protected override async Task HandleAsync(
             IKernelCommand command,
@@ -178,7 +188,7 @@ namespace WorkspaceServer.Kernel
                             ScriptState = await ScriptState.ContinueWithAsync(
                                     code,
                                     ScriptOptions,
-                                    e =>
+                                    catchException:  e =>
                                     {
                                         exception = e;
                                         return true;
@@ -286,11 +296,6 @@ namespace WorkspaceServer.Kernel
             context.Publish(new CompletionRequestCompleted(completionList, requestCompletion));
         }
 
-        public void AddMetadataReferences(IReadOnlyCollection<MetadataReference> references)
-        {
-            ScriptOptions = ScriptOptions.AddReferences(references);
-        }
-
         private async Task<IEnumerable<CompletionItem>> GetCompletionList(
             string code,
             int cursorPosition)
@@ -346,15 +351,22 @@ namespace WorkspaceServer.Kernel
             }
         }
 
-        public async Task LoadExtensionsFromDirectory(IDirectoryAccessor directory, KernelInvocationContext context,
-            IEnumerable<string> additionalDependencies = null)
+        public async Task LoadExtensionsFromDirectory(
+            IDirectoryAccessor directory,
+            KernelInvocationContext context,
+            IReadOnlyList<FileInfo> additionalDependencies = null)
         {
             var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(extensionsDirectory, context.HandlingKernel, context, additionalDependencies);
+
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
+                extensionsDirectory, 
+                context.HandlingKernel, 
+                context, 
+                additionalDependencies);
         }
-        
+
         private bool HasReturnValue =>
             ScriptState != null &&
-            (bool)_hasReturnValueMethod.Invoke(ScriptState.Script, null);
+            (bool) _hasReturnValueMethod.Invoke(ScriptState.Script, null);
     }
 }

@@ -54,13 +54,17 @@ namespace Microsoft.DotNet.Interactive
                 {
                     var command = parseResult.CommandResult.Command;
 
-                    if (command == parseResult.Parser.Configuration.RootCommand)
+                    if (command == parseResult.Parser.Configuration.RootCommand || 
+                        command.Name == "#r")
                     {
                         nonDirectiveLines.Add(currentLine);
                     }
                     else
                     {
-                        var message = parseResult.Errors.First().ToString();
+                        var message =
+                            string.Join(Environment.NewLine,
+                                        parseResult.Errors
+                                                   .Select(e => e.ToString()));
 
                         yield return new DisplayError(message);
                     }

@@ -5,138 +5,264 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Clockwise;
-using Microsoft.CodeAnalysis;
-using MLS.Agent.Tools;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.DotNet.Interactive;
+using WorkspaceServer.Kernel;
+using WorkspaceServer.Servers.Roslyn;
 
 namespace WorkspaceServer.Packaging
 {
-    public partial class PackageRestoreContext
+    public class PackageRestoreContext  : IHaveADirectory
     {
-        private readonly AsyncLazy<Package> _lazyPackage;
+        private readonly CSharpKernel _kernel;
+        private readonly ScriptState _scriptState;
+        private readonly Dictionary<NugetPackageReference, ResolvedNugetPackageReference> _nugetPackageReferences = new Dictionary<NugetPackageReference, ResolvedNugetPackageReference>();
 
-        public PackageRestoreContext(string name = null)
+        public PackageRestoreContext(CSharpKernel kernel)
         {
-            _lazyPackage = new AsyncLazy<Package>(
-                () =>
-                    CreatePackage(name
-                                  ?? Guid.NewGuid().ToString("N")));
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
+
+            _scriptState = kernel.ScriptState;
+
+            Name = Guid.NewGuid().ToString("N");
+
+            Directory = new DirectoryInfo(
+                Path.Combine(
+                    Paths.UserProfile,
+                    ".net-interactive-csharp",
+                    Name));
+
+            if (!Directory.Exists)
+            {
+                Directory.Create();
+            }
         }
 
-        public async Task<string> OutputPath()
-            => (await _lazyPackage.ValueAsync()).EntryPointAssemblyPath.FullName;
+        public DirectoryInfo Directory { get; }
+        
+        public string Name { get; }
 
-        private async Task<Package> CreatePackage(string name)
+        public FileInfo EntryPointAssemblyPath() => this.GetEntryPointAssemblyPath(false);
+
+        public async Task<ResolvedNugetPackageReference> GetResolvedNugetPackageReference(string packageName)
         {
-            var packageBuilder = new PackageBuilder(name);
-            packageBuilder.CreateRebuildablePackage = true;
-            packageBuilder.CreateUsingDotnet("console");
-            packageBuilder.TrySetLanguageVersion("8.0");
-            var package = (Package)packageBuilder.GetPackage();
-            await package.CreateRoslynWorkspaceForRunAsync(new Budget());
-            AddDirectoryProps(package);
-            return package;
+            var references = GetResolvedNugetReferences();
+
+            return references[packageName];
         }
 
-        public async Task<AddReferenceResult> AddPackage(
+        public async Task<AddNugetResult> AddPackage(
             string packageName,
-            string packageVersion = null)
+            string packageVersion = null,
+            string restoreSources = null)
         {
-            var package = await _lazyPackage.ValueAsync();
-            var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
-            var currentRefs = new HashSet<string>(
-                currentWorkspace.CurrentSolution.Projects.First().MetadataReferences
-                .Select(m => m.Display));
+            var requestedPackage = new NugetPackageReference(packageName, packageVersion, restoreSources);
 
-            var dotnet = new Dotnet(package.Directory);
-            var result = await dotnet.AddPackage(packageName, packageVersion);
+            if (!String.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out var _))
+            {
+                return new AddNugetPackageResult(false, requestedPackage);
+            }
+
+            _nugetPackageReferences.Add(requestedPackage, null);
+
+            WriteProjectFile();
+
+            var dotnet = new Dotnet(Directory);
+
+            var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths");
 
             if (result.ExitCode != 0)
             {
-                return new AddReferenceResult(succeeded: false, detailedErrors: result.DetailedErrors);
+                if (String.IsNullOrEmpty(packageName) && String.IsNullOrEmpty(restoreSources))
+                {
+                    return new AddNugetRestoreSourcesResult(
+                        succeeded: false,
+                        requestedPackage,
+                        errors: result.Output.Concat(result.Error).ToArray());
+                }
+                else
+                {
+                    return new AddNugetPackageResult(
+                        succeeded: false,
+                        requestedPackage,
+                        errors: result.Output.Concat(result.Error).ToArray());
+                }
             }
 
-            var newWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
-            var newRefs = new HashSet<MetadataReference>(newWorkspace.CurrentSolution.Projects.First().MetadataReferences);
+            var addedReferences =
+                GetResolvedNugetReferences()
+                    .Values
+                    .ToArray();
 
-            return new AddReferenceResult(succeeded: true, newRefs
-                .Where(n => !currentRefs.Contains(n.Display))
-                .ToArray(),
-                references: newRefs.ToArray(),
-                 installedVersion: result.InstalledVersion);
+            if (String.IsNullOrEmpty(packageName) && !String.IsNullOrEmpty(restoreSources))
+            {
+                return new AddNugetRestoreSourcesResult(
+                    succeeded: true,
+                    requestedPackage: requestedPackage,
+                    addedReferences: addedReferences);
+            }
+            else
+            {
+                return new AddNugetPackageResult(
+                    succeeded: true,
+                    requestedPackage: requestedPackage,
+                    addedReferences: addedReferences);
+            }
         }
 
-        public async Task<IEnumerable<MetadataReference>> GetAllReferences()
+        private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()
         {
-            var package = await _lazyPackage.ValueAsync();
-            var currentWorkspace = await package.CreateRoslynWorkspaceForRunAsync(new Budget());
-            return currentWorkspace.CurrentSolution.Projects.First().MetadataReferences;
+            var nugetPathsFile = Directory.GetFiles("*.resolvedReferences.paths").SingleOrDefault();
+
+            if (nugetPathsFile == null)
+            {
+                return new Dictionary<string, ResolvedNugetPackageReference>();
+            }
+
+            var nugetPackageLines = File.ReadAllText(Path.Combine(Directory.FullName, nugetPathsFile.FullName))
+                                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var probingPaths = new List<DirectoryInfo>();
+
+            var dict = nugetPackageLines
+                       .Select(line => line.Split(','))
+                       .Where(line =>
+                       {
+                           if (string.IsNullOrWhiteSpace(line[0]))
+                           {
+                               probingPaths.Add(new DirectoryInfo(line[3]));
+
+                               return false;
+                           }
+
+                           return true;
+                       }) 
+                       .Select(line =>
+                                   (
+                                       packageName: line[0].Trim(),
+                                       packageVersion: line[1].Trim(),
+                                       assemblyPath: new FileInfo(line[2].Trim()),
+                                       packageRoot: !string.IsNullOrWhiteSpace(line[3])
+                                                        ? new DirectoryInfo(line[3].Trim())
+                                                        : null, 
+                                       runtimeIdentifier: line[4].Trim()))
+                       .GroupBy(x =>
+                                    (
+                                        x.packageName,
+                                        x.packageVersion,
+                                        x.packageRoot))
+                       .Select(xs => new ResolvedNugetPackageReference(
+                                   xs.Key.packageName,
+                                   xs.Key.packageVersion,
+                                   xs.Select(x => x.assemblyPath).ToArray(),
+                                   xs.Key.packageRoot,
+                                   probingPaths,
+                                   xs.Select(x => x.runtimeIdentifier).First()))
+                       .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
+
+            return dict;
         }
 
-        public async Task<DirectoryInfo> GetDirectoryForPackage(string packageName)
+        private void WriteProjectFile()
         {
-            var package = await _lazyPackage.ValueAsync();
-            var nugetPathsFile = package.Directory.GetFiles("*.nuget.paths").Single();
-            var nugetPackagePaths = File.ReadAllText(Path.Combine(package.Directory.FullName, nugetPathsFile.FullName)).Split(',', '\r', '\n')
-                                        .Where(t => !string.IsNullOrWhiteSpace(t))
-                                        .ToArray();
-            var pathsDictionary = nugetPackagePaths
-                                    .Select((v, i) => new { Index = i, Value = v })
-                                    .GroupBy(p => p.Index / 2)
-                                    .ToDictionary(g => g.First().Value, g => g.Last().Value, StringComparer.OrdinalIgnoreCase);
+            var directoryPropsContent =
+                $@"
+<Project Sdk='Microsoft.NET.Sdk'>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
 
-            return new DirectoryInfo(pathsDictionary[packageName.ToLower()]);
-        }
-
-        private void AddDirectoryProps(Package package)
-        {
-            const string generatePathsPropertyTarget =
-@"  <Target Name=""AddGeneratePathsProperty"" BeforeTargets=""CollectPackageReferences"">
-    <!--Show the properties-->
-        <Message Text = ""Starting: Add GeneratePathProperty=true for package %(PackageReference.Identity)"" Importance = ""high"" />
-       
-       <ItemGroup>
-         <PackageReference Condition = ""'%(PackageReference.GeneratePathProperty)' != 'true'"">
-            <GeneratePathProperty>true </GeneratePathProperty>
-          </PackageReference>
-        </ItemGroup>
-
-        <!--Show the changes -->
-        <Message Text = ""Done:  GeneratePathProperty:%(PackageReference.GeneratePathProperty) for package %(PackageReference.Identity)"" Importance = ""high"" />
-    </Target> ";
-
-            const string computePackageRootsTarget =
-@"  <Target Name='ComputePackageRoots' BeforeTargets='CoreCompile;PrintNuGetPackagesPaths' DependsOnTargets='CollectPackageReferences'>
-        <ItemGroup>
-        <!-- Read the package path from the Pkg{PackageName} properties that are present in the nuget.g.props file -->
-            <AddedNuGetPackage Include='@(PackageReference)'>
-                <PackageRootProperty>Pkg$([System.String]::Copy('%(PackageReference.Identity)').Replace('.','_'))</PackageRootProperty>
-                <PackageRoot>$(%(AddedNuGetPackage.PackageRootProperty))</PackageRoot>
-            </AddedNuGetPackage>
-        </ItemGroup>
-
-        <Message Text=""Done: Read package root : %(AddedNuGetPackage.PackageRoot) for %(AddedNuGetPackage.Identity)"" Condition=""%(AddedNuGetPackage.PackageRoot) != ''"" Importance=""high""/>
-    </Target>";
-
-            const string writePackageRootsToDiskTarget =
-@"  <Target Name='PrintNuGetPackagesPaths' DependsOnTargets='ResolvePackageAssets;ComputePackageRoots' AfterTargets='PrepareForBuild'>
-        <ItemGroup>
-            <ReferenceLines Remove='@(ReferenceLines)' />
-            <ReferenceLines Include='%(AddedNuGetPackage.Identity),%(AddedNuGetPackage.PackageRoot)' Condition=""%(AddedNuGetPackage.PackageRoot) != ''""/>
-        </ItemGroup>
-
-        <WriteLinesToFile Lines='@(ReferenceLines)' File='$(MSBuildProjectFullPath).nuget.paths' Overwrite='True' WriteOnlyWhenDifferent='True' />
-    </Target>";
-
-            string directoryPropsContent =
-$@"<Project>
-{generatePathsPropertyTarget}
-{computePackageRootsTarget}
-{writePackageRootsToDiskTarget}
+    {PackageReferences()}
+    {Targets()}
+    
 </Project>";
 
-            File.WriteAllText(Path.Combine(package.Directory.FullName, "Directory.Build.props"), directoryPropsContent);
+            File.WriteAllText(
+                Path.Combine(
+                    Directory.FullName,
+                    "r.csproj"),
+                directoryPropsContent);
+            
+            File.WriteAllText(
+                Path.Combine(
+                    Directory.FullName,
+                    "Program.cs"),
+                @"
+using System;
+
+namespace s
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+        }
+    }
+}
+");
+
+            string PackageReferences()
+            {
+                var sb = new StringBuilder();
+
+                sb.Append("  <ItemGroup>\n");
+
+                _nugetPackageReferences
+                    .Keys
+                    .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
+                    .ToList()
+                    .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>\n"));
+
+                sb.Append("  </ItemGroup>\n");
+
+                sb.Append("  <PropertyGroup>\n");
+
+                _nugetPackageReferences
+                    .Keys
+                    .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
+                    .ToList()
+                    .ForEach(reference => sb.Append($"    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources){reference.RestoreSources}</RestoreAdditionalProjectSources>\n"));
+                sb.Append("  </PropertyGroup>\n");
+
+                return sb.ToString();
+            }
+
+            string Targets() => @"
+  <Target Name='ComputePackageRoots'
+          BeforeTargets='CoreCompile;WriteNugetAssemblyPaths'
+          DependsOnTargets='CollectPackageReferences'>
+      <ItemGroup>
+        <ResolvedFile Include='@(ResolvedCompileFileDefinitions)'>
+           <PackageRootProperty>Pkg$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NugetPackageId)').Replace('.','_'))</PackageRootProperty>
+           <PackageRoot>$(%(ResolvedFile.PackageRootProperty))</PackageRoot>
+           <InitializeSourcePath>$(%(ResolvedFile.PackageRootProperty))\content\%(ResolvedCompileFileDefinitions.FileName)%(ResolvedCompileFileDefinitions.Extension).fsx</InitializeSourcePath>
+        </ResolvedFile>
+        <NativeIncludeRoots
+            Include='@(RuntimeTargetsCopyLocalItems)'
+            Condition=""'%(RuntimeTargetsCopyLocalItems.AssetType)' == 'native'"">
+           <Path>$([System.String]::Copy('%(FullPath)').Substring(0, $([System.String]::Copy('%(FullPath)').LastIndexOf('runtimes'))))</Path>
+        </NativeIncludeRoots>
+      </ItemGroup>
+  </Target>
+
+  <Target Name='WriteNugetAssemblyPaths' 
+          DependsOnTargets='ResolvePackageAssets; ResolveReferences; ProcessFrameworkReferences' 
+          AfterTargets='PrepareForBuild'>
+
+    <ItemGroup>
+      <ResolvedReferenceLines Remove='*' />
+      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec),%(NativeIncludeRoots.Path),$(AppHostRuntimeIdentifier)' />
+    </ItemGroup>
+
+    <WriteLinesToFile Lines='@(ResolvedReferenceLines)' 
+                      File='$(MSBuildProjectFullPath).resolvedReferences.paths' 
+                      Overwrite='True' WriteOnlyWhenDifferent='True' />
+  </Target>
+";
         }
     }
 }

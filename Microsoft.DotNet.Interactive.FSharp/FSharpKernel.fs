@@ -24,7 +24,7 @@ type FSharpKernel() =
     let mutable cancellationTokenSource = new CancellationTokenSource()
 
     do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
-    do base.AddDisposable(script)
+    do base.RegisterForDisposal(script)
 
     let messageMap = Dictionary<string, string>()
 

@@ -27,8 +27,11 @@ namespace WorkspaceServer.Tests.Kernel
 {
     public class LanguageKernelTests : LanguageKernelTestBase
     {
+        private readonly ITestOutputHelper _output;
+
         public LanguageKernelTests(ITestOutputHelper output) : base(output)
         {
+            _output = output;
         }
 
         [Theory]
@@ -972,7 +975,6 @@ json
                 .Should()
                 .Contain(e => e is DisplayedValueUpdated && ((DisplayedValueUpdated)e).Value.ToString().Contains("done!"));
 
-
             events
                 .Should()
                 .ContainSingle(e => e is NuGetPackageAdded);
@@ -988,54 +990,55 @@ json
                 // only the C# kernel produces this event, since the F# kernel handles it all natively
                 events
                     .Should()
-                    .ContainSingle(e => e is CommandHandled &&
-                                        e.As<CommandHandled>().Command is AddNugetPackage);
+                    .ContainSingle<CommandHandled>(
+                        where: e => e.Command is AddNugetPackage);
             }
 
-            events
-                .Should()
-                .ContainSingle(e => e is CommandHandled &&
-                                    e.As<CommandHandled>().Command is SubmitCode);
+
         }
 
-        [Fact]
-        public async Task When_SubmitCode_command_only_adds_packages_to_csharp_kernel_then_CommandHandled_event_is_raised()
+        [Fact(Skip = "Should pass after #577 is resolved")]
+        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_CodeSubmissionReceived_is_published()
         {
             var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseNugetDirective()
             };
 
-            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\"");
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
 
             var result = await kernel.SendAsync(command);
 
             using var events = result.KernelEvents.ToSubscribedList();
 
-            events
-                .First()
-                .Should()
-                .Match(e => e is DisplayedValueProduced &&
-                            ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+            events.OfType<CodeSubmissionReceived>()
+                  .First()
+                  .Code
+                  .Should()
+                  .Be(command.Code);
+        }
 
-            events
-                .Should()
-                .Contain(e => e is DisplayedValueUpdated);
+        [Fact(Skip = "Should pass after #577 is resolved")]
+        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_last_CommandHandled_is_for_that_submission()
+        {
+            var kernel = new CompositeKernel
+            {
+                new CSharpKernel().UseNugetDirective()
+            };
 
+            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
 
-            events
-                .Should()
-                .ContainSingle(e => e is NuGetPackageAdded);
+            var result = await kernel.SendAsync(command);
 
-            events.OfType<NuGetPackageAdded>()
-                .Single()
-                .PackageReference
-                .Should()
-                .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+            using var events = result.KernelEvents.ToSubscribedList();
 
-            events
-                .Should()
-                .ContainSingle(e => e is CommandHandled);
+            events.OfType<CommandHandled>()
+                  .Last()
+                  .Command
+                  .As<SubmitCode>()
+                  .Code
+                  .Should()
+                  .Be(command.Code);
         }
 
         [Fact]
@@ -1094,43 +1097,46 @@ json
         [Fact]
         public async Task Loads_native_dependencies_from_nugets()
         {
-            using var kernel = new CompositeKernel
-            {
-                new CSharpKernel().UseNugetDirective(new NativeAssemblyLoadHelper())
-            };
+            using var kernel = CreateKernel(
+                Language.CSharp, 
+                () => new NativeAssemblyLoadHelper());
 
-            var command = new SubmitCode(@"#r ""nuget:Microsoft.ML, 1.3.1""
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            var command = new SubmitCode(@"
+#r ""nuget:Microsoft.ML, 1.3.1""
+
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using System;
 
 class IrisData
-        {
-            public IrisData(float sepalLength, float sepalWidth, float petalLength, float petalWidth)
-            {
-                SepalLength = sepalLength;
-                SepalWidth = sepalWidth;
-                PetalLength = petalLength;
-                PetalWidth = petalWidth;
-            }
-            public float SepalLength;
-            public float SepalWidth;
-            public float PetalLength;
-            public float PetalWidth;
-        }
+{
+    public IrisData(float sepalLength, float sepalWidth, float petalLength, float petalWidth)
+    {
+        SepalLength = sepalLength;
+        SepalWidth = sepalWidth;
+        PetalLength = petalLength;
+        PetalWidth = petalWidth;
+    }
+    public float SepalLength;
+    public float SepalWidth;
+    public float PetalLength;
+    public float PetalWidth;
+}
 
-        var data = new[]
-        {
-            new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
-            new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
-            new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
-            new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
-        };
+var data = new[]
+{
+    new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
+    new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
+    new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
+    new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
+};
 
-        MLContext mlContext = new MLContext();
-        var pipeline = mlContext.Transforms
-            .Concatenate(""Features"", ""SepalLength"", ""SepalWidth"", ""PetalLength"", ""PetalWidth"")
-            .Append(mlContext.Clustering.Trainers.KMeans(""Features"", numberOfClusters: 2));
+MLContext mlContext = new MLContext();
+var pipeline = mlContext.Transforms
+    .Concatenate(""Features"", ""SepalLength"", ""SepalWidth"", ""PetalLength"", ""PetalWidth"")
+    .Append(mlContext.Clustering.Trainers.KMeans(""Features"", numberOfClusters: 2));
 
 try
 {
@@ -1142,18 +1148,15 @@ catch (Exception e)
     Console.WriteLine(e);
 }");
 
-            var result = await kernel.SendAsync(command);
-
-            using var events = result.KernelEvents.ToSubscribedList();
+            await kernel.SendAsync(command);
 
             events
                 .Should()
-                .ContainSingle(e => e is NuGetPackageAdded);
+                .ContainSingle<NuGetPackageAdded>();
 
             events
                 .Should()
-                .Contain(e => e is StandardOutputValueProduced &&
-                              (((StandardOutputValueProduced)e).Value as string).Contains("success"));
+                .ContainSingle<StandardOutputValueProduced>(e => e.Value.As<string>().Contains("success"));
         }
 
         [Fact]
@@ -1168,8 +1171,6 @@ catch (Exception e)
             {
                 var k = context.HandlingKernel as CSharpKernel;
 
-                // variableCountBeforeEvaluation = k.ScriptState.Variables.Length;
-
                 await next(command, context);
 
                 variableCountAfterEvaluation = k.ScriptState.Variables.Length;
@@ -1181,7 +1182,7 @@ catch (Exception e)
             variableCountAfterEvaluation.Should().Be(1);
         }
 
-        [Fact(Skip = "wip")]
+        [Fact(Skip = "Should pass after #577 is resolved")]
         public void ScriptState_is_not_null_prior_to_receiving_code_submissions()
         {
             using var kernel = new CSharpKernel();
@@ -1200,7 +1201,7 @@ catch (Exception e)
                 .CreateFiles();
 
             var extensionsDir =
-                (FileSystemDirectoryAccessor)nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
+                (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
 
             var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(
                                    directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));",
@@ -1210,7 +1211,6 @@ catch (Exception e)
 
             await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
 
-
             KernelEvents.Should()
                         .ContainSingle(e => e is ExtensionLoaded &&
                                             e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDll.FullName));
@@ -1218,18 +1218,71 @@ catch (Exception e)
             KernelEvents.Should()
                         .ContainSingle(e => e is CommandHandled &&
                                             e
-                                             .As<CommandHandled>()
-                                             .Command
-                                             .As<SubmitCode>()
-                                             .Code
-                                             .Contains("using System.Reflection;"));
+                                                .As<CommandHandled>()
+                                                .Command
+                                                .As<SubmitCode>()
+                                                .Code
+                                                .Contains("using System.Reflection;"));
 
-            KernelEvents.Should().ContainSingle(e => e is DisplayedValueProduced &&
-                                                    e
-                                                    .As<DisplayedValueProduced>()
-                                                    .Value
-                                                    .ToString()
-                                                    .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
+            KernelEvents.Should()
+                        .ContainSingle(e => e is DisplayedValueProduced &&
+                                            e
+                                                .As<DisplayedValueProduced>()
+                                                .Value
+                                                .ToString()
+                                                .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
+        }
+
+        [Fact]
+        public async Task Dependency_version_conflicts_are_resolved_correctly()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(@"%%time
+#r ""nuget:RestoreSources=https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json""
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+#r ""nuget:Microsoft.Data.DataFrame,1.0.0-e190910-1""
+");
+
+            await kernel.SubmitCodeAsync(@"
+using Microsoft.Data;
+using XPlot.Plotly;");
+
+            await kernel.SubmitCodeAsync(@"
+using Microsoft.AspNetCore.Html;
+Formatter<DataFrame>.Register((df, writer) =>
+{
+    var headers = new List<IHtmlContent>();
+    headers.Add(th(i(""index"")));
+    headers.AddRange(df.Columns.Select(c => (IHtmlContent) th(c)));
+    var rows = new List<List<IHtmlContent>>();
+    var take = 20;
+    for (var i = 0; i < Math.Min(take, df.RowCount); i++)
+    {
+        var cells = new List<IHtmlContent>();
+        cells.Add(td(i));
+        foreach (var obj in df[i])
+        {
+            cells.Add(td(obj));
+        }
+        rows.Add(cells);
+    }
+    
+    var t = table(
+        thead(
+            headers),
+        tbody(
+            rows.Select(
+                r => tr(r))));
+    
+    writer.Write(t);
+}, ""text/html"");");
+
+            events.Should()
+                  .NotContain(e => e is ErrorProduced ||
+                                   e is CommandFailed);
         }
     }
 }

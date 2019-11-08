@@ -17,8 +17,6 @@ namespace MLS.Agent.CommandLine
         {
             startupOptions.IsJupyter = true;
 
-            Program.StartToolLogging(startupOptions);
-
             startServer?.Invoke(startupOptions, context);
 
             return Task.FromResult(0);

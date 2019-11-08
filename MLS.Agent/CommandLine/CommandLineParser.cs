@@ -537,7 +537,7 @@ namespace MLS.Agent.CommandLine
                                      {
                                          new CSharpKernel()
                                              .UseDefaultRendering()
-                                             .UseNugetDirective(new NativeAssemblyLoadHelper())
+                                             .UseNugetDirective(() => new NativeAssemblyLoadHelper())
                                              .UseKernelHelpers()
                                              .UseWho()
                                              .UseXplot(),

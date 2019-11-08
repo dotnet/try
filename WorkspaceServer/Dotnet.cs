@@ -68,7 +68,7 @@ namespace WorkspaceServer
                 output,
                 error);
 
-        public Task<CommandLineResult> Publish(string args, Budget budget = null) =>
+        public Task<CommandLineResult> Publish(string args = null, Budget budget = null) =>
             Execute("publish".AppendArgs(args), budget);
 
         public Task<CommandLineResult> VSTest(string args, Budget budget = null) =>
