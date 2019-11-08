@@ -82,7 +82,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
 
                     var addPackageTask = restoreContext.AddPackage(
                         package.PackageName, 
-                        package.PackageVersion);
+                        package.PackageVersion,
+                        package.RestoreSources);
 
                     while (await Task.WhenAny(Task.Delay(500), addPackageTask) != addPackageTask)
                     {
@@ -102,47 +103,70 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         kernel.RegisterForDisposal(helper);
                     }
 
-                    var nativeDllProbingPaths = result.NativeDllProbingPaths;
-
-                    helper?.SetNativeDllProbingPaths(nativeDllProbingPaths);
-
                     if (result.Succeeded)
                     {
-                        var addedAssemblyPaths =
-                            result
-                                .AddedReferences
-                                .SelectMany(added => added.AssemblyPaths)
-                                .ToArray();
-
-                        if (helper != null)
+                        switch (result)
                         {
-                            foreach (var addedReference in result.AddedReferences)
-                            {
-                                helper.Handle(addedReference);
-                            }
+                            case AddNugetPackageResult packageResult:
+
+                                var nativeDllProbingPaths = packageResult.NativeDllProbingPaths;
+                                helper?.SetNativeDllProbingPaths(nativeDllProbingPaths);
+
+                                var addedAssemblyPaths =
+                                    packageResult
+                                        .AddedReferences
+                                        .SelectMany(added => added.AssemblyPaths)
+                                        .ToArray();
+
+                                if (helper != null)
+                                {
+                                    foreach (var addedReference in packageResult.AddedReferences)
+                                    {
+                                        helper.Handle(addedReference);
+                                    }
+                                }
+
+                                kernel.AddScriptReferences(packageResult.AddedReferences);
+
+                                context.Publish(
+                                    new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {packageResult.InstalledVersion}",
+                                                               context.Command));
+
+                                context.Publish(new NuGetPackageAdded(addPackage, package));
+
+                                var resolvedNugetPackageReference = await restoreContext.GetResolvedNugetPackageReference(package.PackageName);
+
+                                var nugetPackageDirectory = new FileSystemDirectoryAccessor(resolvedNugetPackageReference.PackageRoot);
+                                await context.HandlingKernel.SendAsync(
+                                    new LoadExtensionsInDirectory(
+                                        nugetPackageDirectory,
+                                        addedAssemblyPaths));
+                                break;
+
+                            default:
+                                break;
+
                         }
-
-                        kernel.AddScriptReferences(result.AddedReferences);
-
-                        context.Publish(new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {result.InstalledVersion}",
-                                                                   context.Command));
-
-                        context.Publish(new NuGetPackageAdded(addPackage, package));
-
-                        var resolvedNugetPackageReference = await restoreContext.GetResolvedNugetPackageReference(package.PackageName);
-
-                        var nugetPackageDirectory = new FileSystemDirectoryAccessor(resolvedNugetPackageReference.PackageRoot);
-                        
-                        await context.HandlingKernel.SendAsync(
-                            new LoadExtensionsInDirectory(
-                                nugetPackageDirectory,
-                                addedAssemblyPaths));
                     }
                     else
                     {
-                        context.Publish(
-                            new ErrorProduced(
-                                $"Failed to add reference to package {package.PackageName}{Environment.NewLine}{string.Join(Environment.NewLine, result.Errors)}"));
+                        var errors = $"{string.Join(Environment.NewLine, result.Errors)}";
+
+                        switch (result)
+                        {
+                            case AddNugetPackageResult _:
+                                context.Publish(
+                                    new ErrorProduced(
+                                        $"Failed to add reference to package {package.PackageName}{Environment.NewLine}{errors}"));
+                                break;
+                            case AddNugetRestoreSourcesResult _:
+                                context.Publish(
+                                    new ErrorProduced(
+                                        $"Failed to apply RestoreSources {package.RestoreSources}{Environment.NewLine}{errors}"));
+                                break;
+                            default:
+                                break;
+                        }
                     }
 
                     context.Complete();

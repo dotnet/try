@@ -53,13 +53,14 @@ namespace WorkspaceServer.Packaging
             return references[packageName];
         }
 
-        public async Task<AddNugetPackageResult> AddPackage(
+        public async Task<AddNugetResult> AddPackage(
             string packageName,
-            string packageVersion = null)
+            string packageVersion = null,
+            string restoreSources = null)
         {
-            var requestedPackage = new NugetPackageReference(packageName, packageVersion);
+            var requestedPackage = new NugetPackageReference(packageName, packageVersion, restoreSources);
 
-            if (_nugetPackageReferences.TryGetValue(requestedPackage, out var _))
+            if (!String.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out var _))
             {
                 return new AddNugetPackageResult(false, requestedPackage);
             }
@@ -74,10 +75,20 @@ namespace WorkspaceServer.Packaging
 
             if (result.ExitCode != 0)
             {
-                return new AddNugetPackageResult(
-                    succeeded: false,
-                    requestedPackage,
-                    errors: result.Output.Concat(result.Error).ToArray());
+                if (String.IsNullOrEmpty(packageName) && String.IsNullOrEmpty(restoreSources))
+                {
+                    return new AddNugetRestoreSourcesResult(
+                        succeeded: false,
+                        requestedPackage,
+                        errors: result.Output.Concat(result.Error).ToArray());
+                }
+                else
+                {
+                    return new AddNugetPackageResult(
+                        succeeded: false,
+                        requestedPackage,
+                        errors: result.Output.Concat(result.Error).ToArray());
+                }
             }
 
             var addedReferences =
@@ -85,10 +96,20 @@ namespace WorkspaceServer.Packaging
                     .Values
                     .ToArray();
 
-            return new AddNugetPackageResult(
-                succeeded: true,
-                requestedPackage: requestedPackage,
-                addedReferences: addedReferences);
+            if (String.IsNullOrEmpty(packageName) && !String.IsNullOrEmpty(restoreSources))
+            {
+                return new AddNugetRestoreSourcesResult(
+                    succeeded: true,
+                    requestedPackage: requestedPackage,
+                    addedReferences: addedReferences);
+            }
+            else
+            {
+                return new AddNugetPackageResult(
+                    succeeded: true,
+                    requestedPackage: requestedPackage,
+                    addedReferences: addedReferences);
+            }
         }
 
         private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()
@@ -188,14 +209,25 @@ namespace s
             {
                 var sb = new StringBuilder();
 
-                sb.Append("<ItemGroup>");
+                sb.Append("<ItemGroup>\n");
 
-                foreach (var reference in _nugetPackageReferences.Keys)
-                {
-                    sb.Append($"<PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>");
-                }
+                _nugetPackageReferences
+                    .Keys
+                    .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
+                    .ToList()
+                    .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>\n"));
 
-                sb.Append("</ItemGroup>");
+                sb.Append("</ItemGroup>\n");
+
+                sb.Append("<PropertyGroup>\n");
+
+                _nugetPackageReferences
+                    .Keys
+                    .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
+                    .ToList()
+                    .ForEach(reference => sb.Append($"    <RestoreSources>{reference.RestoreSources}</RestoreSources>\n"));
+
+                sb.Append("</PropertyGroup>\n");
 
                 return sb.ToString();
             }

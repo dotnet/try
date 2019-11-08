@@ -1241,6 +1241,7 @@ catch (Exception e)
             using var events = kernel.KernelEvents.ToSubscribedList();
 
             await kernel.SubmitCodeAsync(@"%%time
+#r ""nuget:RestoreSources=https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json""
 #r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
 #r ""nuget:Microsoft.Data.DataFrame,1.0.0-e190910-1""
 ");

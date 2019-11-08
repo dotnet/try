@@ -17,7 +17,8 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Returns_new_references_if_they_are_added()
         {
-            var result = await new PackageRestoreContext(new CSharpKernel()).AddPackage("FluentAssertions", "5.7.0");
+            var result = await new PackageRestoreContext(new CSharpKernel()).AddPackage("FluentAssertions", "5.7.0") as AddNugetPackageResult;
+
             result.Errors.Should().BeEmpty();
             var assemblyPaths = result.AddedReferences.SelectMany(r => r.AssemblyPaths);
             assemblyPaths.Should().Contain(r => r.Name.Equals("FluentAssertions.dll"));
@@ -28,7 +29,8 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Returns_references_when_package_version_is_not_specified()
         {
-            var result = await new PackageRestoreContext(new CSharpKernel()).AddPackage("NewtonSoft.Json");
+            var result = await new PackageRestoreContext(new CSharpKernel()).AddPackage("NewtonSoft.Json") as AddNugetPackageResult;
+
             result.Succeeded.Should().BeTrue();
             var assemblyPaths = result.AddedReferences.SelectMany(r => r.AssemblyPaths);
             assemblyPaths.Should().Contain(r => r.Name.Equals("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
@@ -38,7 +40,8 @@ namespace WorkspaceServer.Tests
         [Fact]
         public async Task Returns_failure_if_package_installation_fails()
         {
-            var result = await new PackageRestoreContext(new CSharpKernel()).AddPackage("not-a-real-package-definitely-not", "5.7.0");
+            var result = await new PackageRestoreContext(new CSharpKernel()).AddPackage("not-a-real-package-definitely-not", "5.7.0") as AddNugetPackageResult;
+
             result.Succeeded.Should().BeFalse();
             result.Errors.Should().NotBeEmpty();
         }

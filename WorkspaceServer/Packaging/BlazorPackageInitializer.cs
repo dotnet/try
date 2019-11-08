@@ -14,18 +14,18 @@ namespace WorkspaceServer.Packaging
     public class BlazorPackageInitializer : PackageInitializer
     {
         private readonly string _name;
-        private readonly List<(string packageName, string packageVersion)> _addPackages;
+        private readonly List<(string packageName, string packageVersion, string restoreSources)> _addPackages;
 
-        public BlazorPackageInitializer(string name, List<(string packageName, string packageVersion)> addPackages) :
+        public BlazorPackageInitializer(string name, List<(string packageName, string packageVersion, string restoreSources)> addPackages) :
             base("blazorwasm", "MLS.Blazor")
         {
             _name = name;
             var packages = addPackages ?? throw new ArgumentNullException(nameof(addPackages));
 
-            var requiredPackages = new List<(string packageName, string packageVersion)>
+            var requiredPackages = new List<(string packageName, string packageVersion, string restoreSources)>
             {
-                ("Newtonsoft.Json", "12.0.02"),
-                ("system.commandline.experimental", "0.3.0-alpha.19317.1")               
+                ("Newtonsoft.Json", "12.0.02", ""),
+                ("system.commandline.experimental", "0.3.0-alpha.19317.1", "")
             };
 
             _addPackages = packages.Concat(requiredPackages).Distinct().ToList();

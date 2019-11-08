@@ -14,7 +14,7 @@ namespace WorkspaceServer.Packaging
     {
         private PackageBase _packageBase;
         private readonly List<Func<PackageBase, Budget, Task>> _afterCreateActions = new List<Func<PackageBase, Budget, Task>>();
-        private readonly List<(string packageName, string packageVersion)> _addPackages = new List<(string packageName, string packageVersion)>();
+       private readonly List<(string packageName, string packageVersion, string restoreSources)> _addPackages = new List<(string packageName, string packageVersion, string restoreSources)>();
         private string _languageVersion = "8.0";
 
         public PackageBuilder(string packageName, IPackageInitializer packageInitializer = null)
@@ -47,9 +47,9 @@ namespace WorkspaceServer.Packaging
                AfterCreate);
         }
 
-        public void AddPackageReference(string packageId, string version = null)
+        public void AddPackageReference(string packageId, string version = null, string restoreSources = null)
         {
-            _addPackages.Add((packageId, version));
+            _addPackages.Add((packageId, version, restoreSources));
             _afterCreateActions.Add(async (package, budget) =>
             {
                 Func<Task> action = async () =>

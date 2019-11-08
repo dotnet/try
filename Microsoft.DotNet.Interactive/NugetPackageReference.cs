@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Interactive
@@ -9,25 +10,23 @@ namespace Microsoft.DotNet.Interactive
     public class NugetPackageReference
     {
         private static readonly Regex _regex = new Regex(
-            @"nuget:\s*(?<packageName>[\w\.]+)(\s*,\s*(?<packageVersion>[\w\.\-]+))?",
+            @"(?<moniker>nuget)(?<colon>\s*:\s*)(?<packageName>(?!RestoreSources\s*=\s*)[^,]+)*(\s*,\s*(?<packageVersion>(?!RestoreSources\s*=\s*)[^,]+))*(?<comma>\s*,\s*)*(RestoreSources\s*=\s*(?<restoreSources>[^,]+)*)*",
             RegexOptions.Compiled |
             RegexOptions.CultureInvariant |
             RegexOptions.Singleline);
 
-        public NugetPackageReference(string packageName, string packageVersion = null)
+        public NugetPackageReference(string packageName, string packageVersion = null, string restoreSources = null)
         {
-            if (string.IsNullOrWhiteSpace(packageName))
-            {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(packageName));
-            }
-
-            PackageName = packageName;
+            PackageName = packageName ?? string.Empty;
             PackageVersion = packageVersion ?? string.Empty;
+            RestoreSources = restoreSources ?? string.Empty;
         }
 
         public string PackageName { get; }
 
         public string PackageVersion { get; }
+
+        public string RestoreSources { get; }
 
         public static bool TryParse(string value, out NugetPackageReference reference)
         {
@@ -41,8 +40,9 @@ namespace Microsoft.DotNet.Interactive
 
             var packageName = result.Groups["packageName"].Value;
             var packageVersion = result.Groups["packageVersion"].Value;
+            var restoreSources = result.Groups["restoreSources"].Value;
 
-            reference = new NugetPackageReference(packageName, packageVersion);
+            reference = new NugetPackageReference(packageName, packageVersion, restoreSources);
 
             return true;
         }

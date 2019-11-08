@@ -9,45 +9,27 @@ using Microsoft.DotNet.Interactive;
 
 namespace WorkspaceServer.Packaging
 {
-    public class AddNugetPackageResult
+    public class AddNugetPackageResult : AddNugetResult
     {
         public AddNugetPackageResult(
             bool succeeded,
             NugetPackageReference requestedPackage,
             IReadOnlyList<ResolvedNugetPackageReference> addedReferences = null,
-            IReadOnlyCollection<string> errors = null)
+            IReadOnlyCollection<string> errors = null) : base(succeeded, requestedPackage, errors)
         {
-            if (requestedPackage == null)
-            {
-                throw new ArgumentNullException(nameof(requestedPackage));
-            }
-
-            Succeeded = succeeded;
-
-            if (!succeeded &&
-                errors?.Count == 0)
-            {
-                throw new ArgumentException("Must provide errors when succeeded is false.");
-            }
-
             AddedReferences = addedReferences ?? Array.Empty<ResolvedNugetPackageReference>();
-            Errors = errors ?? Array.Empty<string>();
 
-            if (succeeded)
+            if (Succeeded)
             {
-                 InstalledVersion = AddedReferences
+                InstalledVersion = AddedReferences
                                    .Single(r => r.PackageName.Equals(requestedPackage.PackageName, StringComparison.OrdinalIgnoreCase))
                                    .PackageVersion;
             }
         }
 
-        public bool Succeeded { get; }
-
         public IReadOnlyList<ResolvedNugetPackageReference> AddedReferences { get; }
 
         public string InstalledVersion { get; }
-
-        public IReadOnlyCollection<string> Errors { get; }
 
         public IReadOnlyList<DirectoryInfo> NativeDllProbingPaths =>
             AddedReferences
