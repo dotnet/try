@@ -349,8 +349,6 @@ namespace MLS.Agent.CommandLine
                 {
                     services.AddSingleton(_ => PackageRegistry.CreateForHostedMode());
                     services.AddSingleton(c => new MarkdownProject(c.GetRequiredService<PackageRegistry>()));
-                    services.AddSingleton<IHostedService, Warmup>();
-
                     startServer(options, context);
                 });
 
