@@ -20,13 +20,12 @@ namespace MLS.Agent.Telemetry
         private const string ZeroRegex = @"(?:00[:\-]){5}00";
         private const int ErrorFileNotFound = 0x2;
 
-
         public static string GetMacAddress()
         {
             try
             {
                 var macAddress = GetMacAddressCore();
-                if (macAddress == null || macAddress.Equals(InvalidMacAddress, StringComparison.OrdinalIgnoreCase))
+                if (String.IsNullOrWhiteSpace(macAddress) || macAddress.Equals(InvalidMacAddress, StringComparison.OrdinalIgnoreCase))
                 {
                     return GetMacAddressByNetworkInterface();
                 }
@@ -46,7 +45,7 @@ namespace MLS.Agent.Telemetry
             try
             {
                 var shelloutput = GetShellOutMacAddressOutput();
-                if (shelloutput == null)
+                if (String.IsNullOrWhiteSpace(shelloutput))
                 {
                     return null;
                 }
