@@ -26,7 +26,8 @@ If you shut down this project and type the command `dotnet try -h` you will see 
 
 `dotnet try` extends Markdown using set of options that are added after langauage keyword in the code fence (*see below*).
 
-| Option      | Purpose                                                                    |
-|-------------|----------------------------------------------------------------------------|
-| `--project` | enables you to point to a specific file.                                   |
-| `--region`  | lets you specify the block of code that you want to display in the editor. |
+| Option          | Purpose                                                                    |
+|-----------------|----------------------------------------------------------------------------|
+| `--source-file` | enables you to point to a specific file.                                   |
+| `--project`     | enables you to point to a specific project.                                |
+| `--region`      | lets you specify the block of code that you want to display in the editor. |
