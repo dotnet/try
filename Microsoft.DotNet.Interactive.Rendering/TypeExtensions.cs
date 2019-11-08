@@ -12,6 +12,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     internal static class TypeExtensions
     {
+        internal static bool CanBeInstantiated(this Type type)
+        {
+            return !type.IsAbstract
+                   && !type.IsGenericTypeDefinition
+                   && !type.IsInterface;
+        }
+
         public static string MemberName<T, TValue>(this Expression<Func<T, TValue>> expression)
         {
             if (expression == null)

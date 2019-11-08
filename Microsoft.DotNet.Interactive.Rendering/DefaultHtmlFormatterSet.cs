@@ -13,12 +13,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     internal class DefaultHtmlFormatterSet : FormatterSetBase
     {
-        public DefaultHtmlFormatterSet() : base(DefaultOpenGenericFormatterFactories(),
-                                                DefaultFormatters())
+        public DefaultHtmlFormatterSet() :
+            base(DefaultFormatterFactories(),
+                 DefaultFormatters())
         {
         }
 
-        private static ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> DefaultOpenGenericFormatterFactories() =>
+        private static ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> DefaultFormatterFactories() =>
             new ConcurrentDictionary<Type, Func<Type, ITypeFormatter>>
             {
                 [typeof(ReadOnlyMemory<>)] = type =>

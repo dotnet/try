@@ -5,13 +5,13 @@ using System;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         internal static bool CanBeInstantiated(this Type type)
         {
             return !type.IsAbstract
-                    && !type.IsGenericTypeDefinition
-                    && !type.IsInterface;
+                   && !type.IsGenericTypeDefinition
+                   && !type.IsInterface;
         }
     }
-}
+}   

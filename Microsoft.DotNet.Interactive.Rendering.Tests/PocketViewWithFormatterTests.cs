@@ -36,16 +36,5 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
 
             output.Should().Be("<div>&lt;hello&gt;</div>");
         }
-
-        [Fact]
-        public void When_a_view_is_registered_then_ToDisplayString_returns_the_HTML()
-        {
-            Formatter<DateTime>.Register((time, writer) => writer.Write("hello"), "text/html");
-
-            DateTime.Now
-                    .ToDisplayString("text/html")
-                    .Should()
-                    .Be("<div>hello</div>");
-        }
     }
 }

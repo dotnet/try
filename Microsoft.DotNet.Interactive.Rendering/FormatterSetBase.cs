@@ -8,12 +8,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     internal class FormatterSetBase : IFormatterSet
     {
+        private Func<Type, ITypeFormatter> _factory = type => null;
+
         protected FormatterSetBase(
-            ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> openGenericFormatterFactories = null,
+            ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> formatterFactories = null,
             ConcurrentDictionary<Type, ITypeFormatter> formatters = null)
         {
-            FormatterFactories = openGenericFormatterFactories ??
-                                            new ConcurrentDictionary<Type, Func<Type, ITypeFormatter>>();
+            FormatterFactories = formatterFactories ??
+                                 new ConcurrentDictionary<Type, Func<Type, ITypeFormatter>>();
             Formatters = formatters ??
                          new ConcurrentDictionary<Type, ITypeFormatter>();
         }
@@ -22,33 +24,41 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
         protected ConcurrentDictionary<Type, ITypeFormatter> Formatters { get; }
 
-        public void AddFormatterFactory(
-            Type type,
-            Func<Type, ITypeFormatter> getFormatter)
+        public void AddFormatterFactory(Func<Type, ITypeFormatter> factory)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            FormatterFactories[type] = getFormatter;
+            var previousFactory = _factory;
+            _factory = t => factory(t) ?? previousFactory(t);
         }
+
+        internal void Clear() => FormatterFactories.Clear();
 
         public bool TryGetFormatterForType(Type type, out ITypeFormatter formatter)
         {
-            if (!Formatters.TryGetValue(type, out formatter))
+            formatter = _factory(type);
+
+            // return formatter != null;
+
+            if (formatter != null)
             {
-                if (type.IsGenericType &&
-                    FormatterFactories.TryGetValue(
-                        type.GetGenericTypeDefinition(),
-                        out var factory))
-                {
-                    formatter = factory(type);
-                    Formatters[type] = formatter;
-                }
+                return true;
             }
 
-            return true;
+            if (Formatters.TryGetValue(type, out formatter))
+            {
+                return true;
+            }
+
+            if (type.IsGenericType &&
+                FormatterFactories.TryGetValue(
+                    type.GetGenericTypeDefinition(),
+                    out var factory))
+            {
+                formatter = factory(type);
+                Formatters[type] = formatter;
+                return true;
+            }
+
+            return false;
         }
     }
 }

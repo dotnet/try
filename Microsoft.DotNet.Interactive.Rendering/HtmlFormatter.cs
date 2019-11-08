@@ -10,6 +10,11 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     public static class HtmlFormatter
     {
+        static HtmlFormatter()
+        {
+            Formatter.Clearing += (sender, args) => DefaultFormatters = new DefaultHtmlFormatterSet();
+        }
+
         public static ITypeFormatter Create(
             Type type,
             bool includeInternals = false)
@@ -39,6 +44,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 tbody(
                     rows));
 
-        internal static readonly IFormatterSet DefaultFormatters = new DefaultHtmlFormatterSet();
+        internal static IFormatterSet DefaultFormatters { get; private set; } = new DefaultHtmlFormatterSet();
     }
 }
