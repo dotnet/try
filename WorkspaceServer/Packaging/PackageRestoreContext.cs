@@ -209,7 +209,7 @@ namespace s
             {
                 var sb = new StringBuilder();
 
-                sb.Append("<ItemGroup>\n");
+                sb.Append("  <ItemGroup>\n");
 
                 _nugetPackageReferences
                     .Keys
@@ -217,17 +217,16 @@ namespace s
                     .ToList()
                     .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>\n"));
 
-                sb.Append("</ItemGroup>\n");
+                sb.Append("  </ItemGroup>\n");
 
-                sb.Append("<PropertyGroup>\n");
+                sb.Append("  <PropertyGroup>\n");
 
                 _nugetPackageReferences
                     .Keys
                     .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
                     .ToList()
-                    .ForEach(reference => sb.Append($"    <RestoreSources>{reference.RestoreSources}</RestoreSources>\n"));
-
-                sb.Append("</PropertyGroup>\n");
+                    .ForEach(reference => sb.Append($"    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources){reference.RestoreSources}</RestoreAdditionalProjectSources>\n"));
+                sb.Append("  </PropertyGroup>\n");
 
                 return sb.ToString();
             }

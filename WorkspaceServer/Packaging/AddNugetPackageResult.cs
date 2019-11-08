@@ -31,7 +31,7 @@ namespace WorkspaceServer.Packaging
 
         public string InstalledVersion { get; }
 
-        public IReadOnlyList<DirectoryInfo> NativeDllProbingPaths =>
+        public IReadOnlyList<DirectoryInfo> NativeLibraryProbingPaths =>
             AddedReferences
                 .SelectMany(path => path.ProbingPaths)
                 .Distinct()

@@ -12,6 +12,6 @@ namespace WorkspaceServer.Kernel
     {
         void Handle(ResolvedNugetPackageReference reference);
 
-        void SetNativeDllProbingPaths(IReadOnlyList<DirectoryInfo> nativeDllProbingPaths);
+        void SetNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> nativeLibraryProbingPaths);
     }
 }

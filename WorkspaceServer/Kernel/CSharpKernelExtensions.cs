@@ -109,8 +109,8 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                         {
                             case AddNugetPackageResult packageResult:
 
-                                var nativeDllProbingPaths = packageResult.NativeDllProbingPaths;
-                                helper?.SetNativeDllProbingPaths(nativeDllProbingPaths);
+                                var nativeLibraryProbingPaths = packageResult.NativeLibraryProbingPaths;
+                                helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
 
                                 var addedAssemblyPaths =
                                     packageResult

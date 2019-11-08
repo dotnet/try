@@ -26,7 +26,7 @@ namespace MLS.Agent
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
-        public void SetNativeDllProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
+        public void SetNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
         {
             _probingPaths.UnionWith(probingPaths);
             lock (globalProbingPaths)
