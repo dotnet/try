@@ -401,10 +401,7 @@ namespace MLS.Agent.CommandLine
 
             Command Jupyter()
             {
-                var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel")
-                {
-                    IsHidden = true
-                };
+                var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel");
                 var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
                     Argument = new Argument<string>(defaultValue: () => "csharp")
@@ -454,10 +451,7 @@ namespace MLS.Agent.CommandLine
 
             Command KernelServer()
             {
-                var startKernelServerCommand = new Command("kernel-server", "Starts dotnet try with kernel functionality exposed over standard i/o")
-                {
-                    IsHidden = true
-                };
+                var startKernelServerCommand = new Command("kernel-server", "Starts dotnet-try with kernel functionality exposed over standard I/O");
                 var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
                     Argument = new Argument<string>(defaultValue: () => "csharp")
