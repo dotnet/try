@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -14,15 +15,37 @@ namespace MLS.Agent.Telemetry
 {
     internal static class MacAddressGetter
     {
+        private const string InvalidMacAddress = "00-00-00-00-00-00";
         private const string MacRegex = @"(?:[a-z0-9]{2}[:\-]){5}[a-z0-9]{2}";
         private const string ZeroRegex = @"(?:00[:\-]){5}00";
         private const int ErrorFileNotFound = 0x2;
+
         public static string GetMacAddress()
         {
             try
             {
+                var macAddress = GetMacAddressCore();
+                if (String.IsNullOrWhiteSpace(macAddress) || macAddress.Equals(InvalidMacAddress, StringComparison.OrdinalIgnoreCase))
+                {
+                    return GetMacAddressByNetworkInterface();
+                }
+                else
+                {
+                    return macAddress;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string GetMacAddressCore()
+        {
+            try
+            {
                 var shelloutput = GetShellOutMacAddressOutput();
-                if (shelloutput == null)
+                if (String.IsNullOrWhiteSpace(shelloutput))
                 {
                     return null;
                 }
@@ -135,7 +158,7 @@ namespace MLS.Agent.Telemetry
 
         private static string GetMacAddressByNetworkInterface()
         {
-            return GetMacAddressesByNetworkInterface().FirstOrDefault();
+            return GetMacAddressesByNetworkInterface().Where(x => !x.Equals(InvalidMacAddress, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
 
         private static List<string> GetMacAddressesByNetworkInterface()
