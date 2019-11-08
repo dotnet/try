@@ -20,12 +20,12 @@ Let's make this a little more interesting. Your project probably has more than o
     {
         class Cat
         {
-    #region what_the_cat_says
+            #region what_the_cat_says
             public string Say() 
             {
                 return "meow!";
             }
-    #endregion
+            #endregion
         }
     }
     ```
@@ -40,9 +40,9 @@ Let's make this a little more interesting. Your project probably has more than o
 
     ````markdown
     # My code sample:
-    ```cs --project .\MyConsoleApp\MyConsoleApp.csproj --source-file .\MyConsoleApp\Program.cs --region say_hello
+    ```cs --source-file .\MyConsoleApp\Program.cs --project .\MyConsoleApp\MyConsoleApp.csproj --region say_hello
     ```
-    ```cs --project .\MyConsoleApp\MyConsoleApp.csproj --source-file .\MyConsoleApp\Cat.cs --region what_the_cat_says
+    ```cs --source-file .\MyConsoleApp\Cat.cs --project .\MyConsoleApp\MyConsoleApp.csproj --region what_the_cat_says
     ```
     ````
     
