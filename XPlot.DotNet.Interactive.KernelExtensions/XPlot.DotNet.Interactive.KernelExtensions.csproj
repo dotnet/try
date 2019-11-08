@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="FSharp.Core" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
-    <PackageReference Include="XPlot.Plotly" Version="3.0.0" />
+    <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
