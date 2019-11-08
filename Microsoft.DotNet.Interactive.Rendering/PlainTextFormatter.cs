@@ -26,21 +26,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return (ITypeFormatter) genericCreateForAllMembers.Invoke(null, new object[] { includeInternals });
         }
 
-        internal static ITypeFormatter CreateForAllMembers(
-            Type type,
-            bool includeInternals = false)
-        {
-            var genericCreateForAllMembers = typeof(PlainTextFormatter<>)
-                                             .MakeGenericType(type)
-                                             .GetMethod(nameof(PlainTextFormatter<object>.Create),
-                                                        new[]
-                                                        {
-                                                            typeof(bool)
-                                                        });
-
-            return (ITypeFormatter) genericCreateForAllMembers.Invoke(null, new object[] { includeInternals });
-        }
-
         public const string MimeType = "text/plain";
 
         internal static Action<T, TextWriter> CreateFormatDelegate<T>(MemberInfo[] forMembers)

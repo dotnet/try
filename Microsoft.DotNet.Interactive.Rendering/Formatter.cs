@@ -44,8 +44,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             var genericCreateMethod = typeof(Formatter)
                                       .GetMethods()
-                                      .Single(m => m. Name == nameof(Create) && m.IsGenericMethod) ;
-            ;
+                                      .Single(m => m. Name == nameof(Create) && m.IsGenericMethod);
+
             var formatter = genericCreateMethod
                             .MakeGenericMethod(formatterType)
                             .Invoke(null, new object[] { genericFormatDelegate , mimeType });

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Html;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 

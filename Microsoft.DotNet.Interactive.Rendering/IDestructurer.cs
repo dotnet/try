@@ -1,16 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    internal interface IFormatterSet
+    internal interface IDestructurer
     {
-        void AddFormatterFactory(
-            Type type,
-            Func<Type, ITypeFormatter> getFormatter);
-
-        bool TryGetFormatterForType(Type type, out ITypeFormatter formatter);
+        IDictionary<string, object> Destructure(object instance);
     }
 }

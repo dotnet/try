@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
         [Fact]
         public void When_a_view_is_registered_then_ToDisplayString_returns_the_HTML()
         {
-            Formatter<DateTime>.RegisterHtml(w => div("hello"));
+            Formatter<DateTime>.Register((time, writer) => writer.Write("hello"), "text/html");
 
             DateTime.Now
                     .ToDisplayString("text/html")

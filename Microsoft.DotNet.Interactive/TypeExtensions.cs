@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public static class TypeExtensions
     {
-        public static bool CanBeInstantiated(this Type type)
+        internal static bool CanBeInstantiated(this Type type)
         {
             return !type.IsAbstract
                     && !type.IsGenericTypeDefinition
