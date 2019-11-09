@@ -30,7 +30,7 @@ Let's make this a little more interesting. Your project probably has more than o
     }
     ```
 
-2. Update your `Program.cs`, replacing the contents of the `hello` region with this:
+2. Update your `Program.cs`, replacing the contents of the `say_hello` region with this:
 
     ```cs
     Console.WriteLine(new Cat().Say());
