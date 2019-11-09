@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             var dictionaryObjectType = typeof(T).GetInterfaces()
                                                 .FirstOrDefault(i => i == typeof(IDictionary));
             var enumerableGenericType = typeof(T).GetInterfaces()
-                                                 .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+                                                 .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
 
             if (dictionaryGenericType != null || dictionaryObjectType != null)
             {
@@ -103,7 +103,14 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
             else if (enumerableGenericType != null)
             {
-                valueType = typeof(T).GenericTypeArguments.Single();
+                if (enumerableGenericType.IsArray)
+                {
+                    
+                }
+                else
+                {
+                    valueType = typeof(T).GenericTypeArguments.SingleOrDefault();
+                }
             }
 
             var destructurer = valueType != null

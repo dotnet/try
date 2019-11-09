@@ -9,24 +9,14 @@ using System.Reflection;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
-    public class PlainTextFormatter
+    public static class PlainTextFormatter
     {
-        public static ITypeFormatter Create(
-            Type type,
-            bool includeInternals = false)
+        static PlainTextFormatter()
         {
-            var genericCreateForAllMembers = typeof(PlainTextFormatter<>)
-                                             .MakeGenericType(type)
-                                             .GetMethod(nameof(PlainTextFormatter<object>.Create),
-                                                        new[]
-                                                        {
-                                                            typeof(bool)
-                                                        });
-
-            return (ITypeFormatter) genericCreateForAllMembers.Invoke(null, new object[] { includeInternals });
+            Formatter.Clearing += (sender, args) => DefaultFormatters = new DefaultPlainTextFormatterSet();
         }
 
-        internal static ITypeFormatter CreateForAllMembers(
+        public static ITypeFormatter Create(
             Type type,
             bool includeInternals = false)
         {
@@ -81,12 +71,12 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             void FormatObject(T target, TextWriter writer)
             {
-                Formatter.PlainTextFormatter.WriteStartObject(writer);
+                Formatter.SingleLinePlainTextFormatter.WriteStartObject(writer);
 
                 if (!Formatter<T>.TypeIsAnonymous)
                 {
                     Formatter<Type>.FormatTo(typeof(T), writer);
-                    Formatter.PlainTextFormatter.WriteEndHeader(writer);
+                    Formatter.SingleLinePlainTextFormatter.WriteEndHeader(writer);
                 }
 
                 for (var i = 0; i < accessors.Length; i++)
@@ -108,24 +98,24 @@ namespace Microsoft.DotNet.Interactive.Rendering
                         value = exception;
                     }
 
-                    Formatter.PlainTextFormatter.WriteStartProperty(writer);
+                    Formatter.SingleLinePlainTextFormatter.WriteStartProperty(writer);
                     writer.Write(accessor.Member.Name);
-                    Formatter.PlainTextFormatter.WriteNameValueDelimiter(writer);
+                    Formatter.SingleLinePlainTextFormatter.WriteNameValueDelimiter(writer);
                     value.FormatTo(writer);
-                    Formatter.PlainTextFormatter.WriteEndProperty(writer);
+                    Formatter.SingleLinePlainTextFormatter.WriteEndProperty(writer);
 
                     if (i < accessors.Length - 1)
                     {
-                        Formatter.PlainTextFormatter.WritePropertyDelimiter(writer);
+                        Formatter.SingleLinePlainTextFormatter.WritePropertyDelimiter(writer);
                     }
                 }
 
-                Formatter.PlainTextFormatter.WriteEndObject(writer);
+                Formatter.SingleLinePlainTextFormatter.WriteEndObject(writer);
             }
 
             void FormatValueTuple(T target, TextWriter writer)
             {
-                Formatter.PlainTextFormatter.WriteStartTuple(writer);
+                Formatter.SingleLinePlainTextFormatter.WriteStartTuple(writer);
 
                 for (var i = 0; i < accessors.Length; i++)
                 {
@@ -142,11 +132,11 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
                         value.FormatTo(writer);
 
-                        Formatter.PlainTextFormatter.WriteEndProperty(writer);
+                        Formatter.SingleLinePlainTextFormatter.WriteEndProperty(writer);
 
                         if (i < accessors.Length - 1)
                         {
-                            Formatter.PlainTextFormatter.WritePropertyDelimiter(writer);
+                            Formatter.SingleLinePlainTextFormatter.WritePropertyDelimiter(writer);
                         }
                     }
                     catch (Exception)
@@ -154,10 +144,10 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     }
                 }
 
-                Formatter.PlainTextFormatter.WriteEndTuple(writer);
+                Formatter.SingleLinePlainTextFormatter.WriteEndTuple(writer);
             }
         }
 
-        internal static readonly IFormatterSet DefaultFormatters = new DefaultPlainTextFormatterSet();
+        internal static IFormatterSet DefaultFormatters { get; private set; } = new DefaultPlainTextFormatterSet();
     }
 }

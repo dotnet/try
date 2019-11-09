@@ -6,7 +6,6 @@ using System.IO;
 using FluentAssertions;
 using HtmlAgilityPack;
 using Markdig;
-using Microsoft.DotNet.Try.Markdown;
 using Xunit;
 using Xunit.Abstractions;
 

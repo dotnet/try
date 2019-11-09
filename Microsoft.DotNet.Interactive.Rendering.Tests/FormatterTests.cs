@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Pocket;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
 {
@@ -223,15 +225,94 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             inheritedWidgetFormatterCalled.Should().BeTrue();
         }
 
-        [Fact]
-        public void Custom_formatters_can_be_registered_for_types_not_known_until_runtime()
+        [Theory]
+        [InlineData("text/plain")]
+        [InlineData("text/html")]
+        public void Custom_formatters_can_be_registered_for_types_not_known_until_runtime(string mimeType)
         {
             Formatter.Register(
                 type: typeof(FileInfo),
-                formatter: (filInfo, writer) => writer.Write("hello"));
+                formatter: (filInfo, writer) => writer.Write("hello"),
+                mimeType);
 
-            new FileInfo(@"c:\temp\foo.txt").ToDisplayString()
-                                            .Should().Be("hello");
+            new FileInfo(@"c:\temp\foo.txt").ToDisplayString(mimeType)
+                                            .Should()
+                                            .Be("hello");
+        }
+
+        [Theory]
+        [InlineData("text/plain")]
+        [InlineData("text/html")]
+        public void Custom_formatters_can_be_registered_for_interfaces(string mimeType)
+        {
+            Formatter.Register(
+                type: typeof(IEnumerable),
+                formatter: (obj, writer) =>
+                {
+                    var i = 0;
+                    foreach (var item in (IEnumerable) obj)
+                    {
+                        i++;
+                    }
+
+                    writer.Write(i);
+                }, mimeType);
+
+            var list = new ArrayList { 1, 2, 3, 4, 5 };
+
+            list.ToDisplayString(mimeType)
+                .Should()
+                .Be(list.Count.ToString());
+        }
+
+        [Theory]
+        [InlineData("text/plain")]
+        [InlineData("text/html")]
+        public void Custom_formatters_can_be_registered_for_open_generic_classes(string mimeType)
+        {
+            Formatter.Register(
+                type: typeof(List<>),
+                formatter: (obj, writer) =>
+                {
+                    var i = 0;
+                    foreach (var item in (IEnumerable) obj)
+                    {
+                        i++;
+                    }
+
+                    writer.Write(i);
+                }, mimeType);
+
+            var list = new List<int> { 1, 2, 3, 4, 5 };
+
+            list.ToDisplayString(mimeType)
+                .Should()
+                .Be(list.Count.ToString());
+        }
+        
+        [Theory]
+        [InlineData("text/plain")]
+        [InlineData("text/html")]
+        public void Custom_formatters_can_be_registered_for_open_generic_interfaces(string mimeType)
+        {
+            Formatter.Register(
+                type: typeof(IList<>),
+                formatter: (obj, writer) =>
+                {
+                    var i = 0;
+                    foreach (var item in (IEnumerable) obj)
+                    {
+                        i++;
+                    }
+
+                    writer.Write(i);
+                }, mimeType);
+
+            var list = new List<int> { 1, 2, 3, 4, 5 };
+
+            list.ToDisplayString(mimeType)
+                .Should()
+                .Be(list.Count.ToString());
         }
 
         [Fact]

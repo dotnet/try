@@ -3,23 +3,21 @@
 
 using System;
 using System.Diagnostics;
+using Pocket;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
     [DebuggerStepThrough]
-    public class RecursionCounter : IDisposable
+    internal class RecursionCounter
     {
-        [ThreadStatic]
-        private static int depth = 0;
+        private int _depth = 0;
 
-        public int Depth => depth;
+        public int Depth => _depth;
 
         public IDisposable Enter()
         {
-            depth += 1;
-            return this;
+            _depth += 1;
+            return Disposable.Create(() => _depth -= 1);
         }
-
-        public void Dispose() => depth -= 1;
     }
 }

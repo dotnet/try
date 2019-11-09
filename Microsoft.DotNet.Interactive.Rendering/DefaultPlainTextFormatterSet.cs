@@ -12,13 +12,13 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     internal class DefaultPlainTextFormatterSet : FormatterSetBase
     {
-        public DefaultPlainTextFormatterSet() : base(DefaultOpenGenericFormatterFactories(),
-                                                     DefaultFormatters())
-
+        public DefaultPlainTextFormatterSet() :
+            base(DefaultFormatterFactories(),
+                 DefaultFormatters())
         {
         }
 
-        private static ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> DefaultOpenGenericFormatterFactories()
+        private static ConcurrentDictionary<Type, Func<Type, ITypeFormatter>> DefaultFormatterFactories()
         {
             return new ConcurrentDictionary<Type, Func<Type, ITypeFormatter>>
             {

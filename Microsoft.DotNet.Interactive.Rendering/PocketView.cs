@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
@@ -180,63 +179,48 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 return;
             }
 
-            _tag.Content =
-                writer =>
+            _tag.Content = writer => Write(args, writer);
+        }
+
+        private void Write(IReadOnlyList<object> args, TextWriter writer)
+        {
+            for (var i = 0; i < args.Count; i++)
+            {
+                var arg = args[i];
+
+                switch (arg)
                 {
-                    for (var i = 0; i < args.Length; i++)
-                    {
-                        var arg = args[i];
+                    case string s:
+                        writer.Write(s.HtmlEncode());
+                        break;
 
-                        switch (arg)
+                    case IHtmlContent html:
+                        html.WriteTo(writer, HtmlEncoder.Default);
+                        break;
+
+                    case IEnumerable<IHtmlContent> htmls:
+                        Write(htmls.ToArray(), writer);
+                        break;
+
+                    default:
+
+                        if (arg is IEnumerable<object> seq &&
+                            seq.All(s => s is IHtmlContent))
                         {
-                            case string s:
-                                writer.Write(s.HtmlEncode());
-                                break;
-
-                            case IHtmlContent html:
-                                html.WriteTo(writer, HtmlEncoder.Default);
-                                break;
-
-                            case IEnumerable seq:
-                                foreach (var item in seq)
-                                {
-                                    switch (item)
-                                    {
-                                        case string s:
-                                            writer.Write(s.HtmlEncode());
-                                            break;
-
-                                        case IHtmlContent html:
-                                            writer.Write(html.ToString());
-                                            break;
-
-                                        default:
-                                            var formatted = item
-                                                            .ToDisplayString()
-                                                            .HtmlEncode();
-
-                                            formatted.FormatTo(
-                                                writer,
-                                                HtmlFormatter.MimeType);
-
-                                            break;
-                                    }
-                                }
-
-                                break;
-
-                            default:
-
-                                var encoded = arg
-                                              .ToDisplayString()
-                                              .HtmlEncode();
-
-                                encoded.WriteTo(writer, HtmlEncoder.Default);
-
-                                break;
+                            Write(seq.OfType<IHtmlContent>().ToArray(), writer);
                         }
-                    }
-                };
+                        else
+                        {
+                            var e = arg
+                                    .ToDisplayString()
+                                    .HtmlEncode();
+
+                            e.WriteTo(writer, HtmlEncoder.Default);
+                        }
+
+                        break;
+                }
+            }
         }
 
         /// <summary>

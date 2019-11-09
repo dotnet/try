@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Html;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
@@ -68,16 +66,6 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 (obj, writer) => writer.Write(formatter(obj)),
                 mimeType);
 
-        public static void RegisterHtml(Func<T, IHtmlContent> formatter)
-        {
-            Register((obj, writer) =>
-            {
-                var htmlContent = formatter(obj);
-
-                htmlContent.WriteTo(writer, HtmlEncoder.Default);
-            }, "text/html");
-        }
-
         /// <summary>
         /// Formats an object and writes it to a writer.
         /// </summary>
@@ -102,7 +90,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
                 var formatter = Formatter.TypeFormatters
                                          .GetOrAdd(
                                              (typeof(T), mimeType),
-                                             tuple => CreateFormatterOnDemand(tuple.mimeType));
+                                             tuple => Create(tuple.mimeType));
 
                 formatter.Format(obj, writer);
             }
@@ -112,14 +100,27 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
         }
 
-        private static ITypeFormatter CreateFormatterOnDemand(string mimeType)
+        private static ITypeFormatter Create(string mimeType)
         {
             switch (mimeType)
             {
                 case "text/html":
+                    if (HtmlFormatter.DefaultFormatters
+                                     .TryGetFormatterForType(typeof(T), out var htmlFormatter))
+                    {
+                        return htmlFormatter;
+                    }
+
                     return HtmlFormatter<T>.Create();
 
                 default:
+
+                    if (PlainTextFormatter.DefaultFormatters
+                                          .TryGetFormatterForType(typeof(T), out var plainTextFormatter))
+                    {
+                        return plainTextFormatter;
+                    }
+
                     return PlainTextFormatter<T>.Create();
             }
         }
