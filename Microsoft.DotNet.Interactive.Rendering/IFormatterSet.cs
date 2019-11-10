@@ -7,9 +7,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
 {
     internal interface IFormatterSet
     {
-        void AddFormatterFactoryForOpenGenericType(
-            Type type,
-            Func<Type, ITypeFormatter> getFormatter);
+        void AddFormatterFactory(Func<Type, ITypeFormatter> getFormatter);
 
         bool TryGetFormatterForType(Type type, out ITypeFormatter formatter);
     }

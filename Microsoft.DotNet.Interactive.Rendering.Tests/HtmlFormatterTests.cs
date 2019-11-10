@@ -227,6 +227,30 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
+            public void It_formats_sequence_properties_using_plain_text_formatting()
+            {
+                var formatter = HtmlFormatter.Create(typeof(List<float[]>));
+
+                var writer = new StringWriter();
+
+                var listOfArrays = new List<float[]>
+                {
+                    new[]
+                    {
+                        1.1f,
+                        2.2f,
+                        3.3f
+                    }
+                };
+
+                formatter.Format(listOfArrays, writer);
+
+                writer.ToString()
+                      .Should()
+                      .Contain($"<td>{listOfArrays.First().ToDisplayString("text/plain")}</td>");
+            }
+            
+            [Fact]
             public void It_formats_generic_dictionaries_that_arent_non_generic_as_tables_with_the_key_on_the_y_axis()
             {
                 var writer = new StringWriter();
