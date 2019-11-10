@@ -50,7 +50,6 @@ namespace MLS.Agent.Tests
             await kernel.SendAsync(new SubmitCode("Chart.Line(Enumerable.Range(1, 10), Microsoft.FSharp.Core.FSharpOption<IEnumerable<string>>.None, Microsoft.FSharp.Core.FSharpOption<Configuration.Options>.None)"));
 
             KernelEvents
-                .ValuesOnly()
                 .OfType<ReturnValueProduced>()
                 .Should().
                 ContainSingle(valueProduced =>
