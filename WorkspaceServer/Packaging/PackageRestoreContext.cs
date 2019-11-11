@@ -7,25 +7,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.Interactive;
-using WorkspaceServer.Kernel;
-using WorkspaceServer.Servers.Roslyn;
 
 namespace WorkspaceServer.Packaging
 {
     public class PackageRestoreContext  : IHaveADirectory
     {
-        private readonly CSharpKernel _kernel;
-        private readonly ScriptState _scriptState;
         private readonly Dictionary<NugetPackageReference, ResolvedNugetPackageReference> _nugetPackageReferences = new Dictionary<NugetPackageReference, ResolvedNugetPackageReference>();
 
-        public PackageRestoreContext(CSharpKernel kernel)
+        public PackageRestoreContext()
         {
-            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
-
-            _scriptState = kernel.ScriptState;
-
             Name = Guid.NewGuid().ToString("N");
 
             Directory = new DirectoryInfo(
@@ -43,8 +34,6 @@ namespace WorkspaceServer.Packaging
         public DirectoryInfo Directory { get; }
         
         public string Name { get; }
-
-        public FileInfo EntryPointAssemblyPath() => this.GetEntryPointAssemblyPath(false);
 
         public async Task<ResolvedNugetPackageReference> GetResolvedNugetPackageReference(string packageName)
         {
@@ -75,7 +64,7 @@ namespace WorkspaceServer.Packaging
 
             if (result.ExitCode != 0)
             {
-                if (String.IsNullOrEmpty(packageName) && String.IsNullOrEmpty(restoreSources))
+                if (string.IsNullOrEmpty(packageName) && string.IsNullOrEmpty(restoreSources))
                 {
                     return new AddNugetRestoreSourcesResult(
                         succeeded: false,
@@ -96,7 +85,7 @@ namespace WorkspaceServer.Packaging
                     .Values
                     .ToArray();
 
-            if (String.IsNullOrEmpty(packageName) && !String.IsNullOrEmpty(restoreSources))
+            if (string.IsNullOrEmpty(packageName) && !string.IsNullOrEmpty(restoreSources))
             {
                 return new AddNugetRestoreSourcesResult(
                     succeeded: true,
@@ -158,8 +147,7 @@ namespace WorkspaceServer.Packaging
                                    xs.Key.packageVersion,
                                    xs.Select(x => x.assemblyPath).ToArray(),
                                    xs.Key.packageRoot,
-                                   probingPaths,
-                                   xs.Select(x => x.runtimeIdentifier).First()))
+                                   probingPaths))
                        .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
 
             return dict;
