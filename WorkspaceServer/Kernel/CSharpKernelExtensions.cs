@@ -12,7 +12,6 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
 using MLS.Agent.Tools;
-using Pocket;
 using WorkspaceServer.Packaging;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
@@ -60,7 +59,7 @@ using static {typeof(Microsoft.DotNet.Interactive.Kernel).FullName};
                 packageRefArg
             };
 
-            var restoreContext = new PackageRestoreContext(kernel);
+            var restoreContext = new PackageRestoreContext();
             
             command.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
