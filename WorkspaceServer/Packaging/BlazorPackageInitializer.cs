@@ -24,7 +24,7 @@ namespace WorkspaceServer.Packaging
 
             var requiredPackages = new List<(string packageName, string packageVersion, string restoreSources)>
             {
-                ("Newtonsoft.Json", "12.0.02", ""),
+                ("Newtonsoft.Json", "12.0.3", ""),
                 ("system.commandline.experimental", "0.3.0-alpha.19317.1", "")
             };
 
