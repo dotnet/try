@@ -29,15 +29,30 @@ type FSharpKernel() =
     let messageMap = Dictionary<string, string>()
 
     let parseReference text =
-        FSharpDependencyManager.parsePackageReference [text]
-        |> fst
-        |> List.head
+        let reference, binLogging = FSharpDependencyManager.parsePackageReference [text]
+        (reference |> List.tryHead), binLogging
 
-    let packageMessage dependency =
-        let versionText = match dependency.Version with
-                          | "*" -> ""
-                          | _ -> ", version " + dependency.Version
-        "Installing package " + dependency.Include + versionText + "."
+    let packageInstallingMessages (refSpec:PackageReference option * bool) =
+        let ref, binLogging = refSpec
+        let versionText =
+            match ref with
+            | Some ref when ref.Version <> "*" -> ", version " + ref.Version
+            | _ -> ""
+
+        let installingMessage ref = "Installing package " + ref.Include + versionText + "."
+        let loggingMessage = "Binary Logging enabled"
+        [|
+            match ref, binLogging with
+            | Some reference, true ->
+                yield installingMessage reference
+                yield loggingMessage
+            | Some reference, false ->
+                yield installingMessage reference
+            | None, true ->
+                yield loggingMessage
+            | None, false ->
+                ()
+        |]
 
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
@@ -46,32 +61,39 @@ type FSharpKernel() =
             |> Event.add (fun (key, referenceText) ->
                 if key = "nuget" then
                     let reference = parseReference referenceText
-                    let message = packageMessage reference
-                    let key = message
-                    messageMap.[key] <- message
-                    context.Publish(DisplayedValueProduced(message, context.Command, valueId=key))
+                    for message in packageInstallingMessages reference do
+                        let key = message
+                        messageMap.[key] <- message
+                        context.Publish(DisplayedValueProduced(message, context.Command, valueId=key))
                 ())
 
             script.DependencyAdded
             |> Event.add (fun (key, referenceText) ->
                 if key = "nuget" then
                     let reference = parseReference referenceText
-                    let key = packageMessage reference
-                    let message = messageMap.[key] + "done!"
-                    context.Publish(DisplayedValueUpdated(message, key))
-                    let packageRef = if reference.Version = "*" then NugetPackageReference(reference.Include)
-                                     else NugetPackageReference(reference.Include, packageVersion=reference.Version)
-                    context.Publish(NuGetPackageAdded(AddNugetPackage(packageRef), packageRef))
-                ())
+                    match reference with
+                    | Some ref, _ ->
+                        let packageRef =
+                            if ref.Version = "*" then
+                                NugetPackageReference(ref.Include)
+                            else
+                                NugetPackageReference(ref.Include, packageVersion=ref.Version)
+                        context.Publish(NuGetPackageAdded(AddNugetPackage(packageRef), packageRef))
+                    | _ -> ()
+
+                    for key in packageInstallingMessages reference do
+                        let message = messageMap.[key] + "done!"
+                        context.Publish(DisplayedValueUpdated(message, key))
+                    ())
 
             script.DependencyFailed
             |> Event.add (fun (key, referenceText) ->
                 if key = "nuget" then
                     let reference = parseReference referenceText
-                    let key = packageMessage reference
-                    let message = messageMap.[key] + "failed!"
-                    context.Publish(DisplayedValueUpdated(message, key))
-                ())
+                    for key in packageInstallingMessages reference do
+                        let message = messageMap.[key] + "failed!"
+                        context.Publish(DisplayedValueUpdated(message, key))
+                    ())
 
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
             context.Publish(codeSubmissionReceived)
