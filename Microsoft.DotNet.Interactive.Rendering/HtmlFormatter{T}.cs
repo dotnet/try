@@ -103,11 +103,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             }
             else if (enumerableGenericType != null)
             {
-                if (enumerableGenericType.IsArray)
-                {
-                    
-                }
-                else
+                if (!enumerableGenericType.IsArray)
                 {
                     valueType = typeof(T).GenericTypeArguments.SingleOrDefault();
                 }
