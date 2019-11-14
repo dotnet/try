@@ -49,7 +49,7 @@ namespace WorkspaceServer.Packaging
         {
             var requestedPackage = new NugetPackageReference(packageName, packageVersion, restoreSources);
 
-            if (!String.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out var _))
+            if (!string.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out var _))
             {
                 return new AddNugetPackageResult(false, requestedPackage);
             }

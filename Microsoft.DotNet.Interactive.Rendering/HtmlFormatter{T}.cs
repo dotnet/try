@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             _format(instance, writer);
         }
 
-        public override string MimeType => "text/html";
+        public override string MimeType => HtmlFormatter.MimeType;
 
         public static ITypeFormatter<T> Create(bool includeInternals = false)
         {
