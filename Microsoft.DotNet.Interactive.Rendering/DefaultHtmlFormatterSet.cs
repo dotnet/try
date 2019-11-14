@@ -72,9 +72,9 @@ namespace Microsoft.DotNet.Interactive.Rendering
                     t.WriteTo(writer, HtmlEncoder.Default);
                 }),
 
-                [typeof(HtmlString)] = new HtmlFormatter<PocketView>((view, writer) => view.WriteTo(writer, HtmlEncoder.Default)),
+                [typeof(HtmlString)] = new HtmlFormatter<HtmlString>((view, writer) => view.WriteTo(writer, HtmlEncoder.Default)),
 
-                [typeof(JsonString)] = new HtmlFormatter<PocketView>((view, writer) => view.WriteTo(writer, HtmlEncoder.Default)),
+                [typeof(JsonString)] = new HtmlFormatter<JsonString>((view, writer) => view.WriteTo(writer, HtmlEncoder.Default)),
 
                 [typeof(PocketView)] = new HtmlFormatter<PocketView>((view, writer) => view.WriteTo(writer, HtmlEncoder.Default)),
 

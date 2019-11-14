@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
             return Default;
         }
 
-        public override string MimeType => "text/plain";
+        public override string MimeType => PlainTextFormatter.MimeType;
 
         public override void Format(T instance, TextWriter writer)
         {

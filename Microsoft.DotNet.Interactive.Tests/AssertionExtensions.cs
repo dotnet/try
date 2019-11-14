@@ -38,5 +38,14 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             return new AndWhichConstraint<ObjectAssertions, T>(subject.Should(), subject);
         }
+
+        public static AndConstraint<GenericCollectionAssertions<IKernelEvent>> NotContainErrors(
+            this GenericCollectionAssertions<IKernelEvent> should) =>
+            should
+                .NotContain(e => e is ErrorProduced)
+                .And
+                .NotContain(e => e is CommandParseFailure)
+                .And
+                .NotContain(e => e is CommandFailed);
     }
 }

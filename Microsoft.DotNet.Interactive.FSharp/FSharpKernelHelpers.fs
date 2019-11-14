@@ -4,9 +4,12 @@
 namespace Microsoft.DotNet.Interactive.FSharp
 
 open Microsoft.DotNet.Interactive
+open Microsoft.AspNetCore.Html
 
 module FSharpKernelHelpers =
     let display (value: obj) =
         Kernel.display value
+    let HTML (value: string) =
+        HtmlString value
     let Javascript (content: string) =
         Kernel.Javascript content

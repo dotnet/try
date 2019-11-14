@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
+using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
@@ -173,6 +175,30 @@ namespace WorkspaceServer.Tests.Kernel
 
             valueEvents.First().Should().BeOfType<DisplayedValueProduced>();
             valueEvents.Last().Should().BeOfType<DisplayedValueUpdated>();
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp, "display(HTML(\"<b>hi!</b>\"));")]
+        [InlineData(Language.FSharp, "display(HTML(\"<b>hi!</b>\"))")]
+        public async Task HTML_helper_emits_HTML_which_is_not_encoded_and_has_the_text_html_mime_type(
+            Language language, 
+            string code)
+        {
+            var kernel = CreateKernel(language);
+
+            var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(code);
+
+            events.Should().NotContainErrors();
+
+            events.Should()
+                  .ContainSingle<DisplayedValueProduced>()
+                  .Which
+                  .FormattedValues
+                  .Should()
+                  .ContainSingle(f => f.Value.Equals("<b>hi!</b>") &&
+                                      f.MimeType == "text/html");
         }
 
         [Theory]
