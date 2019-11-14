@@ -75,15 +75,22 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 case CodeSubmissionCompilationErrorException _:
                     traceBack.Add(commandFailed.Message);
                     break;
-                default:
-                    traceBack.Add("Unhandled Exception");
+
+                case null:
                     traceBack.Add(commandFailed.Message);
-                    traceBack.AddRange(commandFailed.Exception?.StackTrace?.Split(new[] { Environment.NewLine }, StringSplitOptions.None) ?? Enumerable.Empty<string>());
+                    break;
+
+                default:
+                    traceBack.Add(
+                        commandFailed.Exception.GetType().FullName);
+
+                    traceBack.AddRange(
+                        commandFailed.Exception.StackTrace.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
                     break;
             }
 
-            var errorContent = new Error (
-                eName: "Unhandled Exception",
+            var errorContent = new Error(
+                eName: "Unhandled exception",
                 eValue: commandFailed.Message,
                 traceback: traceBack
             );

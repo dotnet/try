@@ -66,6 +66,34 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         }
 
         [Fact]
+        public async Task Shows_informative_exception_information()
+        {
+            var scheduler = CreateScheduler();
+            var request = Envelope.Create(
+                new ExecuteRequest(@"
+void ThrowTheException() => throw new ArgumentException();
+ThrowTheException();
+"));
+            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(5.Seconds());
+
+            JupyterMessageSender
+                .PubSubMessages
+                .Should()
+                .ContainSingle(e => e is Error)
+                .Which
+                .As<Error>()
+                .Traceback
+                .Should()
+                .StartWith("System.ArgumentException")
+                .And
+                .Contain(s => s.Contains("ThrowTheException"), because: "the stack trace should also be present");
+        }
+
+        [Fact]
         public async Task does_not_expose_stacktrace_when_code_submission_contains_errors()
         {
             var scheduler = CreateScheduler();
