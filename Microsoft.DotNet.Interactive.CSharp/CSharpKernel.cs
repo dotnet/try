@@ -19,7 +19,6 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
 using MLS.Agent.Tools;
-using WorkspaceServer.Kernel;
 using WorkspaceServer.Packaging;
 using XPlot.Plotly;
 using Task = System.Threading.Tasks.Task;

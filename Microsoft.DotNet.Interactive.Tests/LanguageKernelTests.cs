@@ -8,24 +8,19 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Recipes;
-using Microsoft.DotNet.Interactive.Tests;
-using MLS.Agent;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
 using Newtonsoft.Json;
 using Recipes;
-using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
 #pragma warning disable 8509
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class LanguageKernelTests : LanguageKernelTestBase
     {

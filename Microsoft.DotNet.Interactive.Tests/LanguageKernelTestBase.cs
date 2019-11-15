@@ -3,18 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using Pocket;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.FSharp;
-using WorkspaceServer.Kernel;
-using Xunit.Abstractions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
-using Microsoft.DotNet.Interactive.Tests;
+using Microsoft.DotNet.Interactive.Events;
+using Pocket;
+using Xunit.Abstractions;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public abstract class LanguageKernelTestBase : IDisposable
     {

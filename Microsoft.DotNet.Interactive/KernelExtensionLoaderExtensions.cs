@@ -4,18 +4,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Interactive;
-using Task = System.Threading.Tasks.Task;
-using MLS.Agent.Tools;
 using Microsoft.DotNet.Interactive.Events;
+using Task = System.Threading.Tasks.Task;
 
-namespace WorkspaceServer.Kernel
+namespace Microsoft.DotNet.Interactive
 {
     public static class KernelExtensionLoaderExtensions
     {
         public static async Task LoadFromAssembliesInDirectory(
             this KernelExtensionLoader loader,
-            IDirectoryAccessor directory, 
+            DirectoryInfo directory, 
             IKernel kernel, 
             KernelInvocationContext context,
             IReadOnlyList<FileInfo> additionalDependencies = null)

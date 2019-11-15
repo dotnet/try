@@ -3,20 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
+using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
-using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class CompositeKernelTests : IDisposable
     {

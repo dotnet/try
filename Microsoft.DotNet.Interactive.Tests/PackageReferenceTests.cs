@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Interactive;
 using Xunit;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class PackageReferenceTests
     {

@@ -14,7 +14,6 @@ using Microsoft.DotNet.Interactive.Rendering;
 using Microsoft.DotNet.Interactive.Rendering.Tests;
 using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
-using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 using static Pocket.Logger;

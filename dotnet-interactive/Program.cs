@@ -15,7 +15,6 @@ using Microsoft.DotNet.Interactive.App.CommandLine;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
-using MLS.Agent.Tools;
 using Pocket;
 using Pocket.For.ApplicationInsights;
 using Recipes;
@@ -38,43 +37,8 @@ namespace Microsoft.DotNet.Interactive.App
 
         private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs = {
             typeof(Startup).Assembly,
-            typeof(AsyncLazy<>).Assembly,
             typeof(Shell).Assembly
         };
-
-        private static IDisposable StartAppInsightsLogging(StartupOptions options)
-        {
-
-            var disposables = new CompositeDisposable();
-
-            if (options.Production)
-            {
-                var applicationVersion = VersionSensor.Version().AssemblyInformationalVersion;
-                var websiteSiteName = Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME") ?? "UNKNOWN-AGENT";
-                var regionId = options.RegionId ?? "undefined";
-                disposables.Add(
-                    LogEvents.Enrich(a =>
-                    {
-                        a(("regionId", regionId));
-                        a(("applicationVersion", applicationVersion));
-                        a(("websiteSiteName", websiteSiteName));
-                        a(("id", options.Id));
-                    }));
-            }
-
-            if (options.ApplicationInsightsKey != null)
-            {
-                var telemetryClient = new TelemetryClient(new TelemetryConfiguration(options.ApplicationInsightsKey))
-                {
-                    InstrumentationKey = options.ApplicationInsightsKey
-                };
-                disposables.Add(telemetryClient.SubscribeToPocketLogger(_assembliesEmittingPocketLoggerLogs));
-            }
-
-            Log.Event("AgentStarting");
-
-            return disposables;
-        }
 
         internal static IDisposable StartToolLogging(StartupOptions options)
         {
@@ -115,37 +79,12 @@ namespace Microsoft.DotNet.Interactive.App
         {
             var disposables = new CompositeDisposable
             {
-                StartAppInsightsLogging(options),
                 StartToolLogging(options)
             };
-
-            if (options.Key is null)
-            {
-                Log.Trace("No Key Provided");
-            }
-            else
-            {
-                Log.Trace("Received Key: {key}", options.Key);
-            }
 
             var webHost = new WebHostBuilder()
                           .UseKestrel()
                           .UseContentRoot(Path.GetDirectoryName(typeof(Program).Assembly.Location))
-                          .ConfigureServices(c =>
-                          {
-                              if (!string.IsNullOrEmpty(options.ApplicationInsightsKey))
-                              {
-                                  c.AddApplicationInsightsTelemetry(options.ApplicationInsightsKey);
-                              }
-
-                              c.AddSingleton(options);
-
-                              foreach (var serviceDescriptor in _serviceCollection)
-                              {
-                                  c.Add(serviceDescriptor);
-                              }
-                          })
-                          .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
                           .Build();
             

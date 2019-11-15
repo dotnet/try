@@ -1,21 +1,19 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using FluentAssertions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
+using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
 using MLS.Agent.Tools.Tests;
-using WorkspaceServer.Kernel;
 using Xunit;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class KernelInvocationContextTests
     {

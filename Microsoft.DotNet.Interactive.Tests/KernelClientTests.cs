@@ -12,19 +12,16 @@ using System.Threading.Tasks;
 using Assent;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pocket;
-using WorkspaceServer.Kernel;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class KernelClientTests : IDisposable
     {

@@ -7,18 +7,16 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
-using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
 using static Pocket.Logger;
 
 #pragma warning disable 8509
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class LanguageKernelRenderingTests : LanguageKernelTestBase
     {

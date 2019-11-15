@@ -6,11 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
 
-namespace WorkspaceServer.Tests.Kernel
+namespace Microsoft.DotNet.Interactive.Tests
 {
     internal static class KernelExtensionTestHelper
     {

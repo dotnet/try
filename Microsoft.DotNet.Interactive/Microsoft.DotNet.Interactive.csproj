@@ -41,7 +41,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
-    <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
   </ItemGroup>
 
    <ItemGroup>	

@@ -88,7 +88,10 @@ namespace MLS.Agent.CommandLine
                                          new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
 
             // Setup telemetry.
-            telemetry = telemetry ?? new Telemetry(firstTimeUseNoticeSentinel);
+            telemetry = telemetry ?? 
+                        new Telemetry(
+                            VersionSensor.Version().AssemblyInformationalVersion, 
+                            firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
@@ -96,7 +99,7 @@ namespace MLS.Agent.CommandLine
             {
                 Name = nameof(StartupOptions.RootDirectory),
                 Arity = ArgumentArity.ZeroOrOne,
-                Description = "Specify the path to the root directory for your documentation",
+                Description = "Specify the path to the root directory for your documentation"
             };
 
             dirArgument.AddValidator(symbolResult =>
