@@ -38,7 +38,6 @@ namespace Microsoft.DotNet.Interactive.CSharp
         private WorkspaceFixture _fixture;
         private CancellationTokenSource _cancellationSource;
         private readonly object _cancellationSourceLock = new object();
-        private readonly RelativeDirectoryPath _assemblyExtensionsPath = new RelativeDirectoryPath("interactive-extensions/dotnet/cs");
 
         internal ScriptOptions ScriptOptions =
             ScriptOptions.Default
@@ -350,16 +349,22 @@ namespace Microsoft.DotNet.Interactive.CSharp
         }
 
         public async Task LoadExtensionsFromDirectory(
-            IDirectoryAccessor directory,
+            DirectoryInfo directory,
             KernelInvocationContext context,
             IReadOnlyList<FileInfo> additionalDependencies = null)
         {
-            var extensionsDirectory = directory.GetDirectoryAccessorForRelativePath(_assemblyExtensionsPath);
+            var extensionsDirectory =
+                new DirectoryInfo(
+                    Path.Combine(
+                        directory.FullName,
+                        "interactive-extensions",
+                        "dotnet",
+                        "cs"));
 
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
-                extensionsDirectory, 
-                context.HandlingKernel, 
-                context, 
+                extensionsDirectory,
+                context.HandlingKernel,
+                context,
                 additionalDependencies);
         }
 

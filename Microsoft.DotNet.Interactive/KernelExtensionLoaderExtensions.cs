@@ -18,15 +18,12 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext context,
             IReadOnlyList<FileInfo> additionalDependencies = null)
         {
-            if (directory.RootDirectoryExists())
+            if (directory.Exists)
             {
-                context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.GetFullyQualifiedRoot().FullName}", context.Command));
+                context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.FullName}", context.Command));
 
-                var extensionDlls = directory.GetAllFiles()
-                                             .Where(file => file.Extension == ".dll")
-                                             .Select(directory.GetFullyQualifiedFilePath);
+                var extensionDlls = directory.GetFiles(".dll", SearchOption.AllDirectories);
 
-                
                 foreach (var extensionDll in extensionDlls)
                 {
                     await loader.LoadFromAssembly(
@@ -36,7 +33,7 @@ namespace Microsoft.DotNet.Interactive
                         additionalDependencies);
                 }
 
-                context.Publish(new DisplayedValueProduced($"Loaded kernel extensions in directory {directory.GetFullyQualifiedRoot().FullName}", context.Command));
+                context.Publish(new DisplayedValueProduced($"Loaded kernel extensions in directory {directory.FullName}", context.Command));
             }
         }
     }

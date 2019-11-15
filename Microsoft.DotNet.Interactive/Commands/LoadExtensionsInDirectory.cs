@@ -5,21 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
     public class LoadExtensionsInDirectory : KernelCommandBase
     {
         public LoadExtensionsInDirectory(
-            IDirectoryAccessor directory, 
+            DirectoryInfo directory, 
             IReadOnlyList<FileInfo> additionalDependencies = null)
         {
             Directory = directory;
             AdditionalDependencies = additionalDependencies ?? Array.Empty<FileInfo>();
         }
 
-        public IDirectoryAccessor Directory { get; }
+        public DirectoryInfo Directory { get; }
 
         public IReadOnlyList<FileInfo> AdditionalDependencies { get; }
     }
