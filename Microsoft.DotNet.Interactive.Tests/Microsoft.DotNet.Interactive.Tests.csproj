@@ -11,8 +11,19 @@
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
+
   <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\DirectoryUtility.cs" Link="%28Recipes%29\DirectoryUtility.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\FileNameUtilities.cs" Link="%28Recipes%29\FileNameUtilities.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\PathUtilities.cs" Link="%28Recipes%29\PathUtilities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Assent" Version="1.3.1" />
     <PackageReference Include="FluentAssertions" Version="5.9.0" />
+    <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,10 +41,17 @@
     <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.CSharp\Microsoft.DotNet.Interactive.CSharp.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.FSharp\Microsoft.DotNet.Interactive.FSharp.fsproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Interactive\Microsoft.DotNet.Interactive.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools.Tests\MLS.Agent.Tools.Tests.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Kernel\" />
+    <Folder Include="Utility\" />
   </ItemGroup>
 </Project>

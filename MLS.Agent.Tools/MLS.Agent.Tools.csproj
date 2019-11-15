@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\FileNameUtilities.cs" Link="%28Recipes%29\FileNameUtilities.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\PathUtilities.cs" Link="%28Recipes%29\PathUtilities.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
   <!-- Any new dependency added here must also be included in the Microsoft.DotNet.Try.Markdown nuspec file -->
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">

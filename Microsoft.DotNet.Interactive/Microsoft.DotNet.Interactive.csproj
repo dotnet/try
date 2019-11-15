@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <PackageId>Microsoft.DotNet.Interactive</PackageId>
     <NoWarn>$(NoWarn);8002</NoWarn>
     <LangVersion>preview</LangVersion>
@@ -21,16 +21,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisAnalyzersVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLine.cs" Link="%28Recipes%29\CommandLine.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLineInvocationException.cs" Link="%28Recipes%29\CommandLineInvocationException.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLineResult.cs" Link="%28Recipes%29\CommandLineResult.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Dotnet.cs" Link="%28Recipes%29\Dotnet.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\FileNameUtilities.cs" Link="%28Recipes%29\FileNameUtilities.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Paths.cs" Link="%28Recipes%29\Paths.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Runtime.Loader" Version="$(SystemRuntimeLoaderVersion)" />
     <PackageReference Include="System.Reactive" Version="$(SystemReactiveVersion)" />
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19508.1" />
         <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>

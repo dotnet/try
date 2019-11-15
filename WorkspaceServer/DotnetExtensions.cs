@@ -5,13 +5,13 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.DotNet.Interactive.Recipes;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer
 {
-    public static class DotnetExtensions
+    internal static class DotnetExtensions
     {
-
         public static Task<CommandLineResult> ToolInstall(
             this Dotnet dotnet,
             string packageName,
@@ -31,7 +31,7 @@ namespace WorkspaceServer
                 args += $@" --add-source ""{addSource}""";
             }
 
-            return dotnet.Execute("tool install".AppendArgs(args), budget);
+            return dotnet.Execute("tool install".AppendArgs(args));
         }
     }
 }

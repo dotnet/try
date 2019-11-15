@@ -5,6 +5,7 @@ using MLS.Agent.Telemetry.Utils;
 using MLS.Agent.Tools;
 using System;
 using System.IO;
+using Microsoft.DotNet.Interactive.Recipes;
 using WorkspaceServer;
 
 namespace MLS.Agent

@@ -7,6 +7,7 @@ open Microsoft.DotNet.Interactive
 open Microsoft.AspNetCore.Html
 
 module FSharpKernelHelpers =
+    type internal IMarker = interface end
     let display (value: obj) =
         Kernel.display value
     let HTML (value: string) =

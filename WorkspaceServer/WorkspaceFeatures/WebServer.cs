@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Recipes;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Tools;
 using Pocket;

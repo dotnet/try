@@ -3,6 +3,7 @@
 
 using System;
 using Clockwise;
+using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Pocket;
@@ -11,12 +12,6 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
-    public enum Language
-    {
-        CSharp = 0,
-        FSharp = 1
-    }
-
     public abstract class JupyterRequestHandlerTestBase<T> : IDisposable
         where T : Message
     {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WorkspaceServer.Packaging;
 using Xunit;
+using Microsoft.DotNet.Interactive;
 
 namespace WorkspaceServer.Tests
 {

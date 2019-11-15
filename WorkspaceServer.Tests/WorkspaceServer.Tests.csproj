@@ -65,7 +65,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Tests\Microsoft.DotNet.Interactive.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.Tests\Microsoft.DotNet.Try.Protocol.Tests.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools.Tests\MLS.Agent.Tools.Tests.csproj" />
     <ProjectReference Include="..\MLS.Agent\MLS.Agent.csproj" />

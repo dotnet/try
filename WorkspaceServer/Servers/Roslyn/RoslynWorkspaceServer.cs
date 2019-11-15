@@ -11,6 +11,7 @@ using Clockwise;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Recommendations;
+using Microsoft.DotNet.Interactive.Recipes;
 using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Tools;
@@ -316,8 +317,7 @@ namespace WorkspaceServer.Servers.Roslyn
 
             var commandName = $@"""{package.EntryPointAssemblyPath.FullName}""";
             var commandLineResult = await dotnet.Execute(
-                                        commandName.AppendArgs(commandLineArgs),
-                                        budget);
+                                        commandName.AppendArgs(commandLineArgs));
 
             budget.RecordEntry(UserCodeCompleted);
 
@@ -360,8 +360,7 @@ namespace WorkspaceServer.Servers.Roslyn
             var dotnet = new Dotnet(package.Directory);
 
             var commandLineResult = await dotnet.VSTest(
-                                        $@"--logger:trx ""{package.EntryPointAssemblyPath}""",
-                                        budget);
+                                        $@"--logger:trx ""{package.EntryPointAssemblyPath}""");
 
             budget.RecordEntry(UserCodeCompleted);
 
@@ -383,8 +382,7 @@ namespace WorkspaceServer.Servers.Roslyn
             var tRexResult = await CommandLine.Execute(
                                  trex,
                                  "",
-                                 workingDir: package.Directory,
-                                 budget: budget);
+                                 workingDir: package.Directory);
 
             var result = new RunResult(
                 commandLineResult.ExitCode == 0,
