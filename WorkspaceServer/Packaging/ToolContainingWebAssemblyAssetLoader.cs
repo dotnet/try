@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Tools;
 using WorkspaceServer.WorkspaceFeatures;
 

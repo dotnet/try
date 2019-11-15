@@ -10,9 +10,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
-    internal class ConsoleOutput : IDisposable
+    public class ConsoleOutput : IDisposable
     {
         private TextWriter _originalOutputWriter;
         private TextWriter _originalErrorWriter;
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Interactive.Recipes
 
         public bool IsEmpty() => _outputWriter.ToString().Length == 0 && _errorWriter.ToString().Length == 0;
 
-        internal class TrackingStringWriter : StringWriter, IObservable<string>
+        private class TrackingStringWriter : StringWriter, IObservable<string>
         {
             private class Region
             {

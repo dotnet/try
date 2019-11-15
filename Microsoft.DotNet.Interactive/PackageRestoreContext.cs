@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 using WorkspaceServer.Packaging;
 
 namespace Microsoft.DotNet.Interactive

@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;

@@ -1,15 +1,15 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
 
-namespace WorkspaceServer
+namespace WorkspaceServer.Packaging
 {
     public class PackageSource
     {
-        readonly DirectoryInfo _directory;
-        readonly Uri _uri;
+        private readonly DirectoryInfo _directory;
+        private readonly Uri _uri;
 
         public PackageSource(string value)
         {
@@ -20,7 +20,7 @@ namespace WorkspaceServer
 
             // Uri.IsWellFormed will return false for path-like strings:
             // (https://docs.microsoft.com/en-us/dotnet/api/system.uri.iswellformeduristring?view=netcore-2.2)
-            if (Uri.IsWellFormedUriString(value, UriKind.Absolute) && 
+            if (Uri.IsWellFormedUriString(value, UriKind.Absolute) &&
                 Uri.TryCreate(value, UriKind.Absolute, out var uri)
                 && uri?.Scheme != null)
             {

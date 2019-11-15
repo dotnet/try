@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using HtmlAgilityPack;
 using Markdig;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.Controllers;

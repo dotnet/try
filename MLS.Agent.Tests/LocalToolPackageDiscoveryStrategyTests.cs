@@ -12,6 +12,8 @@ using Xunit.Abstractions;
 using WorkspaceServer;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Interactive.Utility;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {

@@ -11,9 +11,8 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Recipes;
-using MLS.Agent.Tools;
-using MLS.Agent.Tools.Tests;
+using Microsoft.DotNet.Interactive.FSharp;
+using Microsoft.DotNet.Interactive.Utility;
 using Newtonsoft.Json;
 using Recipes;
 using Xunit;
@@ -951,7 +950,7 @@ json
             IKernel kernel = language switch
             {
                 Language.CSharp => new CompositeKernel { new CSharpKernel().UseNugetDirective() },
-                Language.FSharp => new FSharpKernel(),
+                Language.FSharp => new CompositeKernel { new FSharpKernel() }
             };
 
             var code = $@"
@@ -1091,9 +1090,7 @@ json
         [Fact]
         public async Task Loads_native_dependencies_from_nugets()
         {
-            using var kernel = CreateKernel(
-                Language.CSharp, 
-                () => new NativeAssemblyLoadHelper());
+            using var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1187,18 +1184,24 @@ catch (Exception e)
         [Fact]
         public async Task Should_load_extension_in_directory()
         {
-            var directory = Create.EmptyWorkspace().Directory;
+            var directory = DirectoryUtility.CreateDirectory();
 
             const string nugetPackageName = "myNugetPackage";
-            var nugetPackageDirectory = new InMemoryDirectoryAccessor(
-                    directory.Subdirectory($"{nugetPackageName}/2.0.0"))
-                .CreateFiles();
+            var nugetPackageDirectory = new DirectoryInfo(
+                Path.Combine(
+                    directory.FullName,
+                    nugetPackageName,
+                    "2.0.0"));
 
             var extensionsDir =
-                (FileSystemDirectoryAccessor) nugetPackageDirectory.GetDirectoryAccessorForRelativePath(new RelativeDirectoryPath("interactive-extensions/dotnet/cs"));
+                new DirectoryInfo(
+                    Path.Combine(
+                    nugetPackageDirectory.FullName,
+                    "interactive-extensions","dotnet","cs"));
 
             var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(
-                                   directory, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));",
+                                   directory, 
+                                   @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));",
                                    extensionsDir);
 
             var kernel = CreateKernel();

@@ -10,6 +10,7 @@ using Clockwise;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using HtmlAgilityPack;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
@@ -143,7 +144,7 @@ namespace MLS.Agent.Tests
 
             var startupOptions = new StartupOptions(
                 rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
-                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
+                addPackageSource: new PackageSource(addSource.FullName),
                 package: name);
 
             using (var agent = new AgentService(startupOptions))
@@ -185,7 +186,7 @@ namespace MLS.Agent.Tests
 
                 var startupOptions = new StartupOptions(
                     rootDirectory: new FileSystemDirectoryAccessor(dir.Directory),
-                    addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName));
+                    addPackageSource: new PackageSource(addSource.FullName));
 
                 using (var agent = new AgentService(startupOptions))
                 {

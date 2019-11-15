@@ -2,7 +2,6 @@
 
 open System
 open System.Runtime.CompilerServices
-open System.Threading.Tasks
 open Microsoft.AspNetCore.Html
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
@@ -10,15 +9,14 @@ open Microsoft.DotNet.Interactive.FSharp
 open Microsoft.DotNet.Interactive.Rendering
 open XPlot.Plotly
 
-[<Extension>]
-[<AbstractClass; Sealed>]
+[<AbstractClass; Extension; Sealed>]
 type FSharpKernelExtensions private () =
     
     static let referenceFromType = fun (typ: Type) -> sprintf "#r \"%s\"" (typ.Assembly.Location.Replace("\\", "/"))
     static let openNamespaceOrType = fun (whatToOpen: String) -> sprintf "open %s" whatToOpen
 
     [<Extension>]
-    static member inline UseDefaultRendering(kernel: FSharpKernel) = 
+    static member UseDefaultRendering(kernel: FSharpKernel) = 
         let t = 
             async {
                 let code = 
@@ -41,7 +39,7 @@ type FSharpKernelExtensions private () =
         kernel
 
     [<Extension>]
-    static member inline UseDefaultNamespaces(kernel: FSharpKernel) =
+    static member UseDefaultNamespaces(kernel: FSharpKernel) =
         let t = 
             async {
                 let code = @"
@@ -56,7 +54,7 @@ open System.Linq
         kernel
 
     [<Extension>]
-    static member inline UseKernelHelpers(kernel: FSharpKernel) =
+    static member UseKernelHelpers(kernel: FSharpKernel) =
         let t = 
             async {
                 let code = openNamespaceOrType (typeof<FSharpKernelHelpers.IMarker>.DeclaringType.Namespace + "." + nameof(FSharpKernelHelpers))

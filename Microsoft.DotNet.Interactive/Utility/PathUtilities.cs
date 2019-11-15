@@ -12,12 +12,12 @@ using System.Text;
 
 // adapted from http://source.roslyn.io/#System.Reflection.Metadata/System/Reflection/Internal/Utilities/PathUtilities.cs,36b27d7696df4d1e
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
     // Contains path parsing utilities.
     // We need our own because System.IO.Path is insufficient for our purposes
     // For example we need to be able to work with invalid paths or paths containing wildcards
-    internal static class PathUtilities
+    public static class PathUtilities
     {
         // We consider '/' a directory separator on Unix like systems. 
         // On Windows both / and \ are equally accepted.
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Interactive.Recipes
         /// This will trim the root directory separator:
         /// "C:\" maps to "C:", and "/" maps to ""
         /// </remarks>
-        public static string TrimTrailingSeparators(string s)
+        public static string TrimTrailingSeparators(this string s)
         {
             int lastSeparator = s.Length;
             while (lastSeparator > 0 && IsDirectorySeparator(s[lastSeparator - 1]))

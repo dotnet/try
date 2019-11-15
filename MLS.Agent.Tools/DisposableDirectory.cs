@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace MLS.Agent
+namespace MLS.Agent.Tools
 {
     public class DisposableDirectory : IDisposable
     {

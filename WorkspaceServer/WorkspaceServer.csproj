@@ -22,13 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLine.cs" Link="%28Recipes%29\CommandLine.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLineInvocationException.cs" Link="%28Recipes%29\CommandLineInvocationException.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLineResult.cs" Link="%28Recipes%29\CommandLineResult.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Dotnet.cs" Link="%28Recipes%29\Dotnet.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\FileNameUtilities.cs" Link="%28Recipes%29\FileNameUtilities.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Paths.cs" Link="%28Recipes%29\Paths.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\PathUtilities.cs" Link="%28Recipes%29\PathUtilities.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\AddPackageResult.cs" Link="%28Recipes%29\AddPackageResult.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\CommandLine.cs" Link="%28Recipes%29\CommandLine.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\CommandLineInvocationException.cs" Link="%28Recipes%29\CommandLineInvocationException.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\CommandLineResult.cs" Link="%28Recipes%29\CommandLineResult.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\ConsoleOutput.cs" Link="%28Recipes%29\ConsoleOutput.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DirectoryUtility.cs" Link="%28Recipes%29\DirectoryUtility.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\Dotnet.cs" Link="%28Recipes%29\Dotnet.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\Paths.cs" Link="%28Recipes%29\Paths.cs" />
     <Compile Include="..\MLS.PackageTool\Program.cs" Link="WorkspaceFeatures\Program.cs" />
   </ItemGroup>
 

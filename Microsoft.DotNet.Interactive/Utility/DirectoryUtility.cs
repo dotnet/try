@@ -2,9 +2,9 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
-    internal static class DirectoryUtility
+    public static class DirectoryUtility
     {
         private static readonly object CreateDirectoryLock = new object();
 
@@ -39,6 +39,22 @@ namespace Microsoft.DotNet.Interactive.Recipes
             }
 
             return created;
+        }
+
+        public static void DeleteFileSystemObject(this string path)
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, recursive: true);
+            }
+            else if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            else
+            {
+                throw new ArgumentException($"Couldn't find a file or directory called {path}");
+            }
         }
     }
 }

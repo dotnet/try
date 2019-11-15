@@ -7,6 +7,7 @@ using Clockwise;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Tests;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;

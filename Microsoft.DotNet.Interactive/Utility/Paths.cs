@@ -5,9 +5,9 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
-    internal static class Paths
+    public static class Paths
     {
         private const string DotnetHomeVariableName = "DOTNET_CLI_HOME";
         private const string DotnetProfileDirectoryName = ".dotnet";

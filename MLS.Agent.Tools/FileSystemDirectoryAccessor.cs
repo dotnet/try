@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace MLS.Agent.Tools
 {

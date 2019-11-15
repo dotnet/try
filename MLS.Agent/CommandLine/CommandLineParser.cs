@@ -17,6 +17,7 @@ using MLS.Agent.Tools;
 using MLS.Repositories;
 using Recipes;
 using WorkspaceServer;
+using WorkspaceServer.Packaging;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
 
 namespace MLS.Agent.CommandLine
@@ -26,6 +27,10 @@ namespace MLS.Agent.CommandLine
         public delegate void StartServer(
             StartupOptions options,
             InvocationContext context);
+
+        public delegate Task Install(
+            InstallOptions options,
+            IConsole console);
 
         public delegate Task Demo(
             DemoOptions options,
@@ -49,6 +54,7 @@ namespace MLS.Agent.CommandLine
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
+            Install install = null,
             Demo demo = null,
             TryGitHub tryGithub = null,
             Pack pack = null,
@@ -363,6 +369,28 @@ namespace MLS.Agent.CommandLine
                 return github;
             }
 
+            Command Install()
+            {
+                var installCommand = new Command("install", "Install a Try .NET package")
+                {
+                    new Argument<string>
+                    {
+                        Name = nameof(InstallOptions.PackageName),
+                        Arity = ArgumentArity.ExactlyOne
+                    },
+                    new Option("--add-source")
+                    {
+                        Argument = new Argument<PackageSource>()
+                    }
+                };
+
+                installCommand.IsHidden = true;
+
+                installCommand.Handler = CommandHandler.Create<InstallOptions, IConsole>((options, console) => install(options, console));
+
+                return installCommand;
+            }
+            
             Command Pack()
             {
                 var packCommand = new Command("pack", "Create a Try .NET package")

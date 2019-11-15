@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
 using FluentAssertions.Extensions;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;

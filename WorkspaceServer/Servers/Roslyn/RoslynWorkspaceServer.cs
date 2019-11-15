@@ -11,20 +11,19 @@ using Clockwise;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Recommendations;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
-using MLS.Agent.Tools;
 using Pocket;
 using Recipes;
 using WorkspaceServer.Models.Execution;
 using WorkspaceServer.Servers.Roslyn.Instrumentation;
 using WorkspaceServer.Transformations;
-using WorkspaceServer.Features;
 using static Pocket.Logger<WorkspaceServer.Servers.Roslyn.RoslynWorkspaceServer>;
 using Workspace = Microsoft.DotNet.Try.Protocol.Workspace;
 using WorkspaceServer.LanguageServices;
 using WorkspaceServer.Packaging;
+using WorkspaceServer.WorkspaceFeatures;
 using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Servers.Roslyn

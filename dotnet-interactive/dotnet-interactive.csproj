@@ -19,15 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLine.cs" Link="%28Recipes%29\CommandLine.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLineInvocationException.cs" Link="%28Recipes%29\CommandLineInvocationException.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\CommandLineResult.cs" Link="%28Recipes%29\CommandLineResult.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Dotnet.cs" Link="%28Recipes%29\Dotnet.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\IFirstTimeUseNoticeSentinel.cs" Link="%28Recipes%29\IFirstTimeUseNoticeSentinel.cs" />
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Sha256Hasher.cs" Link="%28Recipes%29\Sha256Hasher.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
     <PackageReference Include="EnvironmentExtensions" Version="0.1.9120003">
       <PrivateAssets>all</PrivateAssets>

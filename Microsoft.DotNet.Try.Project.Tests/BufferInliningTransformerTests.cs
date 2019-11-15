@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent;
+using MLS.Agent.Tools;
 using Xunit;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 using File = System.IO.File;

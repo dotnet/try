@@ -5,12 +5,12 @@ using System;
 using System.Linq;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Rendering;
-using MLS.Agent.Tools;
 using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.CSharp
@@ -127,10 +127,9 @@ using static {typeof(Kernel).FullName};
 
                                 var resolvedNugetPackageReference = await restoreContext.GetResolvedNugetPackageReference(package.PackageName);
 
-                                var nugetPackageDirectory = new FileSystemDirectoryAccessor(resolvedNugetPackageReference.PackageRoot);
                                 await context.HandlingKernel.SendAsync(
                                     new LoadExtensionsInDirectory(
-                                        nugetPackageDirectory,
+                                        resolvedNugetPackageReference.PackageRoot,
                                         addedAssemblyPaths));
                                 break;
 

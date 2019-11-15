@@ -6,18 +6,26 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using MLS.Agent.Tools;
-using MLS.Agent.Tools.Tests;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
     internal static class KernelExtensionTestHelper
     {
-        internal static async Task<FileInfo> CreateExtensionInDirectory(DirectoryInfo extensionDir, string body, FileSystemDirectoryAccessor outputDir, [CallerMemberName] string testName = null)
+        internal static async Task<FileInfo> CreateExtensionInDirectory(
+            DirectoryInfo extensionDir, 
+            string body, 
+            DirectoryInfo outputDir, 
+            [CallerMemberName] string testName = null)
         {
             var extensionDll = await CreateExtension(extensionDir, body, testName);
-            outputDir.EnsureRootDirectoryExists();
-            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.GetFullyQualifiedRoot().FullName, extensionDll.Name));
+
+            if (!outputDir.Exists)
+            {
+                outputDir.Create();
+            }
+
+            var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, extensionDll.Name));
             File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
 
             return finalExtensionDll;

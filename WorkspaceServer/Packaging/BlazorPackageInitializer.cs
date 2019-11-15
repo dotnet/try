@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging

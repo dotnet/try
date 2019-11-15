@@ -9,9 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
-    internal class Dotnet
+    public class Dotnet
     {
         protected readonly DirectoryInfo _workingDirectory;
 
@@ -71,8 +71,28 @@ namespace Microsoft.DotNet.Interactive.Recipes
         public Task<CommandLineResult> VSTest(string args) =>
             Execute("vstest".AppendArgs(args));
 
-        public Task<CommandLineResult> ToolInstall(string args = null) =>
-            Execute("tool install".AppendArgs(args));
+        public Task<CommandLineResult> ToolInstall(
+            string packageName,
+            DirectoryInfo toolPath,
+            string addSource = null,
+            string version = null)
+        {
+            if (string.IsNullOrWhiteSpace(packageName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(packageName));
+            }
+
+            var versionArg = version != null ? $"--version {version}" : "";
+            
+            var args = $@"{packageName} --tool-path ""{toolPath.FullName.TrimTrailingSeparators()}"" {versionArg}";
+            
+            if (addSource != null)
+            {
+                args += $@" --add-source ""{addSource}""";
+            }
+
+            return Execute("tool install".AppendArgs(args));
+        }
 
         public async Task<IEnumerable<string>> ToolList(DirectoryInfo directory)
         {

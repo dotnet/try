@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
 using Package = WorkspaceServer.Packaging.Package;
 

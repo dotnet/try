@@ -10,9 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Pocket;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
-    internal static class CommandLine
+    public static class CommandLine
     {
         public static Task<CommandLineResult> Execute(
             FileInfo exePath,

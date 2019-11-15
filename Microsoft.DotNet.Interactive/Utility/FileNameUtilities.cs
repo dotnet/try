@@ -2,7 +2,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
     /// <summary>
     /// Implements a few file name utilities that are needed by the compiler.
@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive.Recipes
     /// (embedded resources, netmodules, output name).
     /// The APIs are intentionally limited to cover just these rare cases. Do not add more APIs.
     /// </summary>
-    internal static class FileNameUtilities
+    public static class FileNameUtilities
     {
         private const string DirectorySeparatorStr = "\\";
         internal const char DirectorySeparatorChar = '\\';

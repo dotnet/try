@@ -6,6 +6,7 @@ using Clockwise;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
+using Microsoft.DotNet.Interactive.Tests;
 using Pocket;
 using Xunit.Abstractions;
 

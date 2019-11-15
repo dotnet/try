@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using WorkspaceServer;

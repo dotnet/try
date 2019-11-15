@@ -3,9 +3,9 @@
 
 using System;
 
-namespace Microsoft.DotNet.Interactive.Recipes
+namespace Microsoft.DotNet.Interactive.Utility
 {
-    internal class CommandLineInvocationException : Exception
+    public class CommandLineInvocationException : Exception
     {
         public CommandLineInvocationException(CommandLineResult result, string message = null) : base(
             $"{message}{Environment.NewLine}Exit code {result.ExitCode}: {string.Join("\n", result.Error)}".Trim())

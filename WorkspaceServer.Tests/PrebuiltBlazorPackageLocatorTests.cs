@@ -5,6 +5,7 @@ using System;
 using System.CommandLine;
 using FluentAssertions;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.CommandLine;
 using Pocket;
 using Xunit;

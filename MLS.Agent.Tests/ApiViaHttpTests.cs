@@ -25,6 +25,7 @@ using Microsoft.DotNet.Try.Protocol.Tests;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 using HtmlAgilityPack;
 using System.Web;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Controllers;
 using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
@@ -812,7 +813,7 @@ namespace FibonacciTest
         public async Task Can_serve_from_webassembly_controller()
         {
             var (name, addSource) = await Create.NupkgWithBlazorEnabled();
-            using (var agent = new AgentService(new StartupOptions(addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName))))
+            using (var agent = new AgentService(new StartupOptions(addPackageSource: new PackageSource(addSource.FullName))))
             {
                 var response = await agent.GetAsync($@"/LocalCodeRunner/{name}");
 
@@ -996,7 +997,7 @@ namespace FibonacciTest
 
             var startupOptions = new StartupOptions(
                  rootDirectory: new FileSystemDirectoryAccessor(TestAssets.SampleConsole),
-                addPackageSource: new WorkspaceServer.PackageSource(addSource.FullName),
+                addPackageSource: new PackageSource(addSource.FullName),
                 package: name);
 
             using (var agent = new AgentService(startupOptions))

@@ -35,10 +35,6 @@
     <None Remove="obj\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Paths.cs" Link="%28Recipes%29\Paths.cs" />
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">
@@ -126,6 +122,11 @@
     <EmbeddedResource Include="..\MLS.PackageTool\Program.cs">
       <LogicalName>MLS.Agent.Program.cs</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\api\" />
+    <Folder Include="wwwroot\client\" />
+    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">

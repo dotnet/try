@@ -16,4 +16,8 @@
     <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.DotNet.Interactive.FSharp" />
+  </ItemGroup>
+
 </Project>

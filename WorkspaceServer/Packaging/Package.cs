@@ -21,7 +21,7 @@ using Microsoft.CodeAnalysis.Text;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 using WorkspaceServer.Servers.Roslyn;
 using static Pocket.Logger<WorkspaceServer.Packaging.Package>;

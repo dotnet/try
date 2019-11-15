@@ -11,14 +11,14 @@ using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.DotNet.Interactive.CSharp;
+using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.CommandLine;
-using MLS.Agent.Tools;
+using Recipes;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
-using ITelemetry = Microsoft.ApplicationInsights.Channel.ITelemetry;
 
 namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
@@ -27,11 +27,6 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
         public delegate void StartServer(
             StartupOptions options,
             InvocationContext context);
-
-
-        public delegate Task Install(
-            InstallOptions options,
-            IConsole console);
 
         public delegate Task<int> Jupyter(
             StartupOptions options, 
@@ -47,7 +42,6 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
-            Install install = null,
             Jupyter jupyter = null,
             StartKernelServer startKernelServer = null,
             ITelemetry telemetry = null,
@@ -66,46 +60,23 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                       ((startupOptions, console, server, context) => 
                               JupyterCommand.Do(startupOptions, console, server, context));
 
-
-            install = install ??
-                      InstallCommand.Do;
-
             startKernelServer = startKernelServer ??
                                 ((startupOptions, kernel, console) =>
                            KernelServerCommand.Do(startupOptions, kernel, console));
 
             // Setup first time use notice sentinel.
-            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
+            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? 
+                                         new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
 
             // Setup telemetry.
-            telemetry = telemetry ?? new Telemetry(firstTimeUseNoticeSentinel);
+            telemetry = telemetry ?? new Telemetry.Telemetry(
+                            VersionSensor.Version().AssemblyInformationalVersion,
+                            firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
-            var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
-            {
-                Name = nameof(StartupOptions.RootDirectory),
-                Arity = ArgumentArity.ZeroOrOne,
-                Description = "Specify the path to the root directory for your documentation",
-            };
+            var rootCommand = Start();
 
-            dirArgument.AddValidator(symbolResult =>
-            {
-                var directory = symbolResult.Tokens
-                               .Select(t => t.Value)
-                               .FirstOrDefault();
-
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                {
-                    return $"Directory does not exist: {directory}";
-                }
-
-                return null;
-            });
-
-            var rootCommand = StartInTryMode();
-
-            rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Jupyter());
             rootCommand.AddCommand(KernelServer());
 
@@ -126,15 +97,13 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                    })
                    .Build();
 
-            RootCommand StartInTryMode()
+            RootCommand Start()
             {
                 var command = new RootCommand
                 {
                     Name = "dotnet-interactive",
                     Description = ".NET Interactive"
                 };
-
-                command.AddArgument(dirArgument);
              
                 command.AddOption(new Option(
                                       "--log-path",
@@ -225,28 +194,6 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
 
                 return startKernelServerCommand;
             }
-
-            Command Install()
-            {
-                var installCommand = new Command("install", "Install a Try .NET package")
-                {
-                    new Argument<string>
-                    {
-                        Name = nameof(InstallOptions.PackageName),
-                        Arity = ArgumentArity.ExactlyOne
-                    },
-                    new Option("--add-source")
-                    {
-                        Argument = new Argument<PackageSource>()
-                    }
-                };
-
-                installCommand.IsHidden = true;
-
-                installCommand.Handler = CommandHandler.Create<InstallOptions, IConsole>((options, console) => install(options, console));
-
-                return installCommand;
-            }
         }
 
         private static IKernel CreateKernel(string defaultKernelName)
@@ -255,7 +202,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                                      {
                                          new CSharpKernel()
                                              .UseDefaultRendering()
-                                             .UseNugetDirective(() => new NativeAssemblyLoadHelper())
+                                             .UseNugetDirective()
                                              .UseKernelHelpers()
                                              .UseWho()
                                              .UseXplot(),

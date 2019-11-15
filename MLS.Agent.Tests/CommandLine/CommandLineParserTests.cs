@@ -8,6 +8,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Telemetry.Configurer;

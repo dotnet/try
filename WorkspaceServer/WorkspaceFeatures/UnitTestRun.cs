@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Try.Protocol;
 
-namespace WorkspaceServer.Features
+namespace WorkspaceServer.WorkspaceFeatures
 {
     public class UnitTestRun : IRunResultFeature
     {

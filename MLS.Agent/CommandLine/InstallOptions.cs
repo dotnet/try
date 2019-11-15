@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.DotNet.Interactive.Utility;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;
 

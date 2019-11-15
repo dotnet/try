@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Tools;
 using WorkspaceServer;
 using WorkspaceServer.Packaging;

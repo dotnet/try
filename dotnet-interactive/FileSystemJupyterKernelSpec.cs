@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.App;
-using Microsoft.DotNet.Interactive.Recipes;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {

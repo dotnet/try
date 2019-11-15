@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using Microsoft.DotNet.Interactive.Recipes;
 
 namespace Microsoft.DotNet.Interactive.Telemetry
 {
