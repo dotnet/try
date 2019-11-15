@@ -1,40 +1,44 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MLS.Agent.Telemetry.Utils;
 using System;
 using System.IO;
-using WorkspaceServer;
+using Microsoft.DotNet.Interactive.Recipes;
 
-namespace MLS.Agent.Telemetry.Configurer
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public sealed class UserLevelCacheWriter : IUserLevelCacheWriter
     {
-        private string _dotnetTryUserProfileFolderPath;
+        private readonly string _productVersion;
+        private readonly string _dotnetTryUserProfileFolderPath;
         private readonly Func<string, bool> _fileExists;
         private readonly Func<string, bool> _directoryExists;
         private readonly Action<string> _createDirectory;
         private readonly Action<string, string> _writeAllText;
         private readonly Func<string, string> _readAllText;
 
-        public UserLevelCacheWriter() :
+        public UserLevelCacheWriter(string productVersion) :
             this(
+                productVersion,
                 Paths.DotnetUserProfileFolderPath,
-                path => File.Exists(path),
-                path => Directory.Exists(path),
+                File.Exists,
+                Directory.Exists,
                 path => Directory.CreateDirectory(path),
-                (path, text) => File.WriteAllText(path, text),
-                path => File.ReadAllText(path))
+                File.WriteAllText,
+                File.ReadAllText)
         {
         }
 
-        public UserLevelCacheWriter(string dotnetTryUserProfileFolderPath,
+        public UserLevelCacheWriter(
+            string productVersion,
+            string dotnetTryUserProfileFolderPath,
             Func<string, bool> fileExists,
             Func<string, bool> directoryExists,
             Action<string> createDirectory,
             Action<string, string> writeAllText,
             Func<string, string> readAllText)
         {
+            _productVersion = productVersion;
             _dotnetTryUserProfileFolderPath = dotnetTryUserProfileFolderPath;
             _fileExists = fileExists;
             _directoryExists = directoryExists;
@@ -76,12 +80,11 @@ namespace MLS.Agent.Telemetry.Configurer
 
                 throw;
             }
-
         }
 
         private string GetCacheFilePath(string cacheKey)
         {
-            return Path.Combine(_dotnetTryUserProfileFolderPath, $"{Recipes.VersionSensor.Version().AssemblyInformationalVersion}_{cacheKey}.dotnetTryUserLevelCache");
+            return Path.Combine(_dotnetTryUserProfileFolderPath, $"{_productVersion}_{cacheKey}.dotnetTryUserLevelCache");
         }
     }
 }

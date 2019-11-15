@@ -3,7 +3,7 @@
 
 using System;
 
-namespace MLS.Agent.Telemetry.Configurer
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public sealed class NothingUserLevelCacheWriter : IUserLevelCacheWriter
     {

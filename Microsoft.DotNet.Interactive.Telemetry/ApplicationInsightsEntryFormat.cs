@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MLS.Agent.Telemetry
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public class ApplicationInsightsEntryFormat
     {

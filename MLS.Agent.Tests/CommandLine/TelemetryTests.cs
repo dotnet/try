@@ -11,10 +11,8 @@ using Xunit.Abstractions;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
-using MLS.Agent.Telemetry;
 using System.IO;
-using Microsoft.DotNet.Interactive.Recipes;
-using MLS.Agent.Telemetry.Configurer;
+using Microsoft.DotNet.Interactive.Telemetry;
 
 namespace MLS.Agent.Tests.CommandLine
 {
@@ -358,7 +356,7 @@ namespace MLS.Agent.Tests.CommandLine
             try
             {
                 await _parser.InvokeAsync(String.Empty, _console);
-                _console.Out.ToString().Should().Contain(Telemetry.Telemetry.WelcomeMessage);
+                _console.Out.ToString().Should().Contain(Telemetry.WelcomeMessage);
             }
             finally
             {
@@ -376,7 +374,7 @@ namespace MLS.Agent.Tests.CommandLine
             try
             {
                 await _parser.InvokeAsync(String.Empty, _console);
-                _console.Out.ToString().Should().NotContain(Telemetry.Telemetry.WelcomeMessage);
+                _console.Out.ToString().Should().NotContain(Telemetry.WelcomeMessage);
             }
             finally
             {

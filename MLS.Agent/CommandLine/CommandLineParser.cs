@@ -10,11 +10,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.Markdown;
-using MLS.Agent.Telemetry;
 using MLS.Agent.Tools;
 using MLS.Repositories;
+using Recipes;
 using WorkspaceServer;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
 
@@ -83,10 +84,11 @@ namespace MLS.Agent.CommandLine
                    PackCommand.Do;
 
             // Setup first time use notice sentinel.
-            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
+            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? 
+                                         new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
 
             // Setup telemetry.
-            telemetry = telemetry ?? new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
+            telemetry = telemetry ?? new Telemetry(firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
@@ -124,10 +126,10 @@ namespace MLS.Agent.CommandLine
                    .UseMiddleware(async (context, next) =>
                    {
                        // If sentinel does not exist, print the welcome message showing the telemetry notification.
-                       if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.Telemetry.SkipFirstTimeExperience)
+                       if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.SkipFirstTimeExperience)
                        {
                            context.Console.Out.WriteLine();
-                           context.Console.Out.WriteLine(Telemetry.Telemetry.WelcomeMessage);
+                           context.Console.Out.WriteLine(Telemetry.WelcomeMessage);
 
                            firstTimeUseNoticeSentinel.CreateIfNotExists();
                        }

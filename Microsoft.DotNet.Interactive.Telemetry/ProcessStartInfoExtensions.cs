@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 
-namespace MLS.Agent.Telemetry.Utils
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     internal static class ProcessStartInfoExtensions
     {

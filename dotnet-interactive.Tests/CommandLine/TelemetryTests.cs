@@ -11,7 +11,6 @@ using Xunit.Abstractions;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
-using MLS.Agent.Telemetry;
 using System.IO;
 using Microsoft.DotNet.Interactive.App.CommandLine;
 using MLS.Agent.Telemetry.Configurer;

@@ -9,16 +9,16 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
-using Microsoft.ApplicationInsights.Channel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
+using ITelemetry = Microsoft.ApplicationInsights.Channel.ITelemetry;
 
 namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
@@ -32,7 +32,6 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
         public delegate Task Install(
             InstallOptions options,
             IConsole console);
-
 
         public delegate Task<int> Jupyter(
             StartupOptions options, 
@@ -79,7 +78,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
 
             // Setup telemetry.
-            telemetry = telemetry ?? new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
+            telemetry = telemetry ?? new Telemetry(firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 

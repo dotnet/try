@@ -1,12 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.PlatformAbstractions;
-using Microsoft.Win32;
 using System.IO;
 using System.Security;
+using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.Win32;
 
-namespace MLS.Agent.Telemetry
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     internal class DockerContainerDetectorForTelemetry : IDockerContainerDetector
     {

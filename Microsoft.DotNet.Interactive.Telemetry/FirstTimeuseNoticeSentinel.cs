@@ -5,38 +5,41 @@ using System;
 using System.IO;
 using Microsoft.DotNet.Interactive.Recipes;
 
-namespace MLS.Agent
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
         public const string SkipFirstTimeExperienceEnvironmentVariableName = "DOTNET_TRY_SKIP_FIRST_TIME_EXPERIENCE";
-        public static readonly string SENTINEL = $"{VersionSensor.Version().AssemblyInformationalVersion}.dotnetTryFirstUseSentinel";
 
+        private readonly string _sentinel;
         private readonly string _dotnetTryUserProfileFolderPath;
         private readonly Func<string, bool> _fileExists;
         private readonly Func<string, bool> _directoryExists;
         private readonly Action<string> _createDirectory;
         private readonly Action<string> _createEmptyFile;
 
-        private string SentinelPath => Path.Combine(_dotnetTryUserProfileFolderPath, SENTINEL);
+        private string SentinelPath => Path.Combine(_dotnetTryUserProfileFolderPath, _sentinel);
 
-        public FirstTimeUseNoticeSentinel() :
+        public FirstTimeUseNoticeSentinel(string assemblyInformationalVersion) :
             this(
+                assemblyInformationalVersion,
                 Paths.DotnetUserProfileFolderPath,
-                path => File.Exists(path),
-                path => Directory.Exists(path),
+                File.Exists,
+                Directory.Exists,
                 path => Directory.CreateDirectory(path),
                 path => File.WriteAllBytes(path, new byte[] { }))
         {
         }
 
         public FirstTimeUseNoticeSentinel(
+            string assemblyInformationalVersion,
             string dotnetTryUserProfileFolderPath,
             Func<string, bool> fileExists,
             Func<string, bool> directoryExists,
             Action<string> createDirectory,
             Action<string> createEmptyFile)
         {
+            _sentinel = $"{assemblyInformationalVersion}.dotnetTryFirstUseSentinel";
             _dotnetTryUserProfileFolderPath = dotnetTryUserProfileFolderPath;
             _fileExists = fileExists;
             _directoryExists = directoryExists;

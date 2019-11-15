@@ -1,12 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-
-namespace MLS.Agent.Telemetry
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
-    public interface ITelemetryFilter
+    public interface IFirstTimeUseNoticeSentinel
     {
-        IEnumerable<ApplicationInsightsEntryFormat> Filter(object o);
+        bool Exists();
+
+        void CreateIfNotExists();
     }
 }

@@ -3,32 +3,33 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Runtime.InteropServices;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
-using RuntimeInformation = System.Runtime.InteropServices.RuntimeInformation;
-using MLS.Agent.Telemetry.Utils;
-using MLS.Agent.Telemetry.Configurer;
 
-namespace MLS.Agent.Telemetry
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public class TelemetryCommonProperties
     {
+        private readonly string _productVersion;
+
         public TelemetryCommonProperties(
+            string productVersion,
             Func<string, string> hasher = null,
             Func<string> getMACAddress = null,
             IDockerContainerDetector dockerContainerDetector = null,
             IUserLevelCacheWriter userLevelCacheWriter = null)
         {
+            _productVersion = productVersion;
             _hasher = hasher ?? Sha256Hasher.Hash;
             _getMACAddress = getMACAddress ?? MacAddressGetter.GetMacAddress;
             _dockerContainerDetector = dockerContainerDetector ?? new DockerContainerDetectorForTelemetry();
-            _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter();
+            _userLevelCacheWriter = userLevelCacheWriter ?? new UserLevelCacheWriter(productVersion);
         }
 
         private readonly IUserLevelCacheWriter _userLevelCacheWriter;
         private readonly IDockerContainerDetector _dockerContainerDetector;
-        private Func<string, string> _hasher;
-        private Func<string> _getMACAddress;
+        private readonly Func<string, string> _hasher;
+        private readonly Func<string> _getMACAddress;
         private const string OSVersion = "OS Version";
         private const string OSPlatform = "OS Platform";
         private const string RuntimeId = "Runtime Id";
@@ -47,7 +48,7 @@ namespace MLS.Agent.Telemetry
                 {OSVersion, RuntimeEnvironment.OperatingSystemVersion},
                 {OSPlatform, RuntimeEnvironment.OperatingSystemPlatform.ToString()},
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
-                {ProductVersion, Recipes.VersionSensor.Version().AssemblyInformationalVersion},
+                {ProductVersion, _productVersion},
                 {DockerContainer, IsDockerContainer()},
                 {MachineId, GetMachineId()},
                 {KernelVersion, GetKernelVersion()}

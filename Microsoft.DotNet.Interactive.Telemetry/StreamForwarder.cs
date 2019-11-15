@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MLS.Agent.Telemetry.Utils
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public sealed class StreamForwarder
     {

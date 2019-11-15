@@ -3,12 +3,10 @@
 
 using System.Collections.Generic;
 
-namespace MLS.Agent.Telemetry
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
-    public interface ITelemetry
+    public interface ITelemetryFilter
     {
-        bool Enabled { get; }
-
-        void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements);
+        IEnumerable<ApplicationInsightsEntryFormat> Filter(object o);
     }
 }

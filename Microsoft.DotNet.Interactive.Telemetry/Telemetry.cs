@@ -7,10 +7,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.DotNet.PlatformAbstractions;
-using MLS.Agent.Telemetry.Configurer;
-using MLS.Agent.Telemetry.Utils;
 
-namespace MLS.Agent.Telemetry
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public sealed class Telemetry : ITelemetry
     {
@@ -30,13 +28,12 @@ Telemetry
 The.NET Core tools collect usage data in order to help us improve your experience.The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_TRY_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
 ";
 
-        public bool Enabled { get; }
 
-        public Telemetry() : this(null) { }
-
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
-
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
+        public Telemetry(
+            string productVersion,
+            IFirstTimeUseNoticeSentinel sentinel, 
+            string sessionId = null, 
+            bool blockThreadInitialization = false)
         {
             Enabled = !GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
@@ -50,15 +47,17 @@ The.NET Core tools collect usage data in order to help us improve your experienc
 
             if (blockThreadInitialization)
             {
-                InitializeTelemetry();
+                InitializeTelemetry(productVersion);
             }
             else
             {
                 //initialize in task to offload to parallel thread
-                _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry());
+                _trackEventTask = Task.Factory.StartNew(() => InitializeTelemetry(productVersion));
             }
         }
 
+        public bool Enabled { get; }
+        
         public static bool SkipFirstTimeExperience => GetEnvironmentVariableAsBool(FirstTimeUseNoticeSentinel.SkipFirstTimeExperienceEnvironmentVariableName, false);
 
         public static bool IsRunningInDockerContainer => GetEnvironmentVariableAsBool("DOTNET_RUNNING_IN_CONTAINER", false);
@@ -119,7 +118,7 @@ The.NET Core tools collect usage data in order to help us improve your experienc
             TrackEventTask(eventName, properties, measurements);
         }
 
-        private void InitializeTelemetry()
+        private void InitializeTelemetry(string productVersion)
         {
             try
             {
@@ -128,7 +127,7 @@ The.NET Core tools collect usage data in order to help us improve your experienc
                 _client.Context.Session.Id = CurrentSessionId;
                 _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
 
-                _commonProperties = new TelemetryCommonProperties().GetTelemetryCommonProperties();
+                _commonProperties = new TelemetryCommonProperties(productVersion).GetTelemetryCommonProperties();
                 _commonMeasurements = new Dictionary<string, double>();
             }
             catch (Exception e)

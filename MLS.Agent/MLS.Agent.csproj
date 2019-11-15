@@ -20,15 +20,19 @@
   <ItemGroup>
     <Compile Remove="bin\**" />
     <Compile Remove="node_modules\**" />
+    <Compile Remove="obj\**" />
     <Compile Remove="TestResults\**" />
     <Content Remove="bin\**" />
     <Content Remove="node_modules\**" />
+    <Content Remove="obj\**" />
     <Content Remove="TestResults\**" />
     <EmbeddedResource Remove="bin\**" />
     <EmbeddedResource Remove="node_modules\**" />
+    <EmbeddedResource Remove="obj\**" />
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="bin\**" />
     <None Remove="node_modules\**" />
+    <None Remove="obj\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
 
@@ -103,6 +107,7 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Telemetry\Microsoft.DotNet.Interactive.Telemetry.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.ClientApi\Microsoft.DotNet.Try.Protocol.ClientApi.csproj" />
@@ -120,12 +125,6 @@
     <EmbeddedResource Include="..\MLS.PackageTool\MLS.PackageTool.csproj" />
     <EmbeddedResource Include="..\MLS.PackageTool\Program.cs">
       <LogicalName>MLS.Agent.Program.cs</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
-      <LogicalName>demo.zip</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="$(IntermediateOutputPath)/dotnetKernel.zip">
-      <LogicalName>dotnetKernel.zip</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -1,12 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-
-namespace MLS.Agent.Telemetry.Configurer
+namespace Microsoft.DotNet.Interactive.Telemetry
 {
-    public interface IUserLevelCacheWriter
+    public interface IDockerContainerDetector
     {
-        string RunWithCache(string cacheKey, Func<string> getValueToCache);
+        IsDockerContainerResult IsDockerContainer();
     }
 }
