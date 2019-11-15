@@ -3,13 +3,12 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using WorkspaceServer;
 
-namespace MLS.Agent
+namespace Microsoft.DotNet.Interactive.App
 {
     public interface IJupyterKernelSpec
     {
-        Task<CommandLineResult> ExecuteCommand(string command, string args="");
-        Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory);
+        Task<JupyterCommandLineResult> ExecuteCommand(string command, string args = "");
+        Task<JupyterCommandLineResult> InstallKernel(DirectoryInfo sourceDirectory);
     }
 }

@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.App;
 
-namespace MLS.Agent.Tests
+namespace dotnet_interactive.Tests
 {
     public class InMemoryJupyterKernelSpec : IJupyterKernelSpec
     {
@@ -19,20 +20,20 @@ namespace MLS.Agent.Tests
             _error = error;
         }
 
-        public Task<WorkspaceServer.CommandLineResult> ExecuteCommand(string command, string args = "")
+        public Task<JupyterCommandLineResult> ExecuteCommand(string command, string args = "")
         {
             throw new NotImplementedException();
         }
 
-        public Task<WorkspaceServer.CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
+        public Task<JupyterCommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
         {
             if(_successfulInstall)
             {
                 var installPath = Path.Combine(Directory.GetCurrentDirectory(), sourceDirectory.Name.ToLower());
-                return Task.FromResult(new WorkspaceServer.CommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" }));
+                return Task.FromResult(new JupyterCommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" }));
             }
 
-            return Task.FromResult(new WorkspaceServer.CommandLineResult(1, error:_error));
+            return Task.FromResult(new JupyterCommandLineResult(1, error:_error));
         }
     }
 }

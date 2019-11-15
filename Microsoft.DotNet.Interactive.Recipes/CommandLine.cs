@@ -12,7 +12,7 @@ using Pocket;
 
 namespace Microsoft.DotNet.Interactive.Recipes
 {
-    public static class CommandLine
+    internal static class CommandLine
     {
         public static Task<CommandLineResult> Execute(
             FileInfo exePath,

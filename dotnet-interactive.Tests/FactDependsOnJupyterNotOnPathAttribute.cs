@@ -2,8 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.IO;
-using WorkspaceServer;
+using Microsoft.DotNet.Interactive.Jupyter;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;

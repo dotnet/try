@@ -10,6 +10,9 @@
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Interactive.Recipes\Sha256Hasher.cs" Link="%28Recipes%29\Sha256Hasher.cs" />
+  </ItemGroup>
  
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.9.0" />

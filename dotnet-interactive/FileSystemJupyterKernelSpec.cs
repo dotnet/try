@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using WorkspaceServer;
+using Microsoft.DotNet.Interactive.App;
+using Microsoft.DotNet.Interactive.Recipes;
 
-namespace MLS.Agent
+namespace Microsoft.DotNet.Interactive.Jupyter
 {
     public class FileSystemJupyterKernelSpec : IJupyterKernelSpec
     {
@@ -18,7 +19,7 @@ namespace MLS.Agent
                 return new CommandLineResult(1, error: new List<string> { "Could not find jupyter kernelspec module" });
             }
 
-            return await WorkspaceServer.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
+            return await CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
         }
 
         public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)

@@ -5,8 +5,9 @@ using System.CommandLine;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using MLS.Agent;
 
-namespace MLS.Agent
+namespace Microsoft.DotNet.Interactive.App
 {
     public class JupyterCommandLine
     {
@@ -23,7 +24,7 @@ namespace MLS.Agent
         {
             using (var disposableDirectory = DisposableDirectory.Create())
             {
-                var assembly = typeof(Program).Assembly;
+                var assembly = typeof(JupyterCommandLine).Assembly;
 
                 using (var resourceStream = assembly.GetManifestResourceStream("dotnetKernel.zip"))
                 {

@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
 using XPlot.DotNet.Interactive.KernelExtensions;
 
-namespace MLS.Agent
+namespace Microsoft.DotNet.Interactive.App
 {
     public static class KernelExtensions
     {

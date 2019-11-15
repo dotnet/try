@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using dotnet_interactive.Tests;
+using Microsoft.DotNet.Interactive.App;
+using Microsoft.DotNet.Interactive.Jupyter;
 using WorkspaceServer.Tests;
 
 namespace MLS.Agent.Tests

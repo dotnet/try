@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Telemetry;
 using System.IO;
-using Microsoft.DotNet.Interactive.Recipes;
+using Microsoft.DotNet.Interactive.App.CommandLine;
 using MLS.Agent.Telemetry.Configurer;
 
 namespace MLS.Agent.Tests.CommandLine
@@ -46,7 +46,19 @@ namespace MLS.Agent.Tests.CommandLine
                 {
                     return Task.CompletedTask;
                 },
+                install: (options, console) =>
+                {
+                    return Task.CompletedTask;
+                },
                 verify: (options, console, startupOptions) =>
+                {
+                    return Task.FromResult(1);
+                },
+                jupyter: (startupOptions, console, startServer, context) =>
+                {
+                    return Task.FromResult(1);
+                },
+                startKernelServer: (startupOptions, kernel, console) =>
                 {
                     return Task.FromResult(1);
                 },

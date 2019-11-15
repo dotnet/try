@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.Interactive.Recipes
 {
-    public class CommandLineInvocationException : Exception
+    internal class CommandLineInvocationException : Exception
     {
         public CommandLineInvocationException(CommandLineResult result, string message = null) : base(
             $"{message}{Environment.NewLine}Exit code {result.ExitCode}: {string.Join("\n", result.Error)}".Trim())

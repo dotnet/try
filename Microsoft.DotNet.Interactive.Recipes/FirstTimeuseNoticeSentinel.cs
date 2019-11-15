@@ -1,19 +1,16 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MLS.Agent.Telemetry.Utils;
-using MLS.Agent.Tools;
 using System;
 using System.IO;
 using Microsoft.DotNet.Interactive.Recipes;
-using WorkspaceServer;
 
 namespace MLS.Agent
 {
     public sealed class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
         public const string SkipFirstTimeExperienceEnvironmentVariableName = "DOTNET_TRY_SKIP_FIRST_TIME_EXPERIENCE";
-        public static readonly string SENTINEL = $"{Recipes.VersionSensor.Version().AssemblyInformationalVersion}.dotnetTryFirstUseSentinel";
+        public static readonly string SENTINEL = $"{VersionSensor.Version().AssemblyInformationalVersion}.dotnetTryFirstUseSentinel";
 
         private readonly string _dotnetTryUserProfileFolderPath;
         private readonly Func<string, bool> _fileExists;

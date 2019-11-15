@@ -1,15 +1,6 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using MLS.Agent.Tools;
-using Pocket;
-using Pocket.For.ApplicationInsights;
-using Recipes;
-using Serilog.Sinks.RollingFileAlternate;
 using System;
 using System.CommandLine.Invocation;
 using System.IO;
@@ -17,12 +8,22 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using static Pocket.Logger<MLS.Agent.Program>;
-using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.DotNet.Interactive.App.CommandLine;
+using Microsoft.DotNet.Interactive.Jupyter;
+using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
-using WorkspaceServer.Servers;
+using MLS.Agent.Tools;
+using Pocket;
+using Pocket.For.ApplicationInsights;
+using Recipes;
+using Serilog.Sinks.RollingFileAlternate;
+using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
+using static Pocket.Logger<Microsoft.DotNet.Interactive.App.Program>;
 
-namespace MLS.Agent
+namespace Microsoft.DotNet.Interactive.App
 {
     public class Program
     {
@@ -35,16 +36,10 @@ namespace MLS.Agent
             return await CommandLineParser.Create( _serviceCollection ).InvokeAsync(args);
         }
 
-        public static X509Certificate2 ParseKey(string base64EncodedKey)
-        {
-            var bytes = Convert.FromBase64String(base64EncodedKey);
-            return new X509Certificate2(bytes);
-        }
-
         private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs = {
             typeof(Startup).Assembly,
             typeof(AsyncLazy<>).Assembly,
-            typeof(IWorkspaceServer).Assembly
+            typeof(Shell).Assembly
         };
 
         private static IDisposable StartAppInsightsLogging(StartupOptions options)
@@ -152,7 +147,6 @@ namespace MLS.Agent
                           })
                           .UseEnvironment(options.EnvironmentName)
                           .UseStartup<Startup>()
-                          .ConfigureUrl(options.Mode, options.Port)
                           .Build();
             
             return webHost;

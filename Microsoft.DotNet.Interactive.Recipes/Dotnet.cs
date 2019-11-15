@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive.Recipes
 {
-    public class Dotnet
+    internal class Dotnet
     {
         protected readonly DirectoryInfo _workingDirectory;
 

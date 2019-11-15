@@ -4,8 +4,9 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
+using MLS.Agent.CommandLine;
 
-namespace MLS.Agent.CommandLine
+namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
     public static class JupyterCommand
     {

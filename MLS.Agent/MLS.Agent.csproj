@@ -11,7 +11,7 @@
     <ToolCommandName>dotnet-try</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <Description>Try .NET is an interactive documentation generator for .NET Core.</Description>
+    <Description>Try .NET creates interactive documentation for .NET Core.</Description>
     <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise and Markdig aren't strongly signed -->
     <NoWarn>$(NoWarn);NU5129</NoWarn><!-- Improper warning about missing props file.  See https://github.com/NuGet/Home/issues/8627 -->
@@ -98,11 +98,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Jupyter\Microsoft.DotNet.Interactive.Jupyter.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.ClientApi\Microsoft.DotNet.Try.Protocol.ClientApi.csproj" />
@@ -110,7 +110,6 @@
     <ProjectReference Include="..\MLS.Blazor\MLS.Blazor.csproj" />
     <ProjectReference Include="..\MLS.Repositories\MLS.Repositories.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
-    <ProjectReference Include="..\XPlot.DotNet.Interactive.KernelExtensions\XPlot.DotNet.Interactive.KernelExtensions.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.json">
