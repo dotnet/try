@@ -5,19 +5,21 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
+using Microsoft.DotNet.Interactive.App.CommandLine;
+using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
-using MLS.Agent.CommandLine;
+using Xunit;
 
-namespace MLS.Agent.Tests.CommandLine
+namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
 {
     public class FirstTimeUseSentinelTests
     {
         private static Parser CreateParser(bool sentinelExists)
         {
             var firstTimeUseNoticeSentinel =
-                new FirstTimeUseNoticeSentinel("", 
+                new FirstTimeUseNoticeSentinel(
+                    "product-version",
+                    "", 
                     (_) => sentinelExists, 
                     (_) => true, 
                     (_) => { }, 
@@ -26,26 +28,6 @@ namespace MLS.Agent.Tests.CommandLine
             return CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
             {
             },
-                demo: (options, console, context, startOptions) =>
-                {
-                    return Task.CompletedTask;
-                },
-                tryGithub: (options, c) =>
-                {
-                    return Task.CompletedTask;
-                },
-                pack: (options, console) =>
-                {
-                    return Task.CompletedTask;
-                },
-                install: (options, console) =>
-                {
-                    return Task.CompletedTask;
-                },
-                verify: (options, console, startupOptions) =>
-                {
-                    return Task.FromResult(1);
-                },
                 jupyter: (startupOptions, console, startServer, context) =>
                 {
                     return Task.FromResult(1);

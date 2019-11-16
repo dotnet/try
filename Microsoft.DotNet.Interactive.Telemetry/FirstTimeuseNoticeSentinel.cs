@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.Interactive.Telemetry
 
         private string SentinelPath => Path.Combine(_dotnetTryUserProfileFolderPath, _sentinel);
 
-        public FirstTimeUseNoticeSentinel(string assemblyInformationalVersion) :
+        public FirstTimeUseNoticeSentinel(string productVersion) :
             this(
-                assemblyInformationalVersion,
+                productVersion,
                 Paths.DotnetUserProfileFolderPath,
                 File.Exists,
                 Directory.Exists,
@@ -31,14 +31,14 @@ namespace Microsoft.DotNet.Interactive.Telemetry
         }
 
         public FirstTimeUseNoticeSentinel(
-            string assemblyInformationalVersion,
+            string productVersion,
             string dotnetTryUserProfileFolderPath,
             Func<string, bool> fileExists,
             Func<string, bool> directoryExists,
             Action<string> createDirectory,
             Action<string> createEmptyFile)
         {
-            _sentinel = $"{assemblyInformationalVersion}.dotnetTryFirstUseSentinel";
+            _sentinel = $"{productVersion}.dotnetTryFirstUseSentinel";
             _dotnetTryUserProfileFolderPath = dotnetTryUserProfileFolderPath;
             _fileExists = fileExists;
             _directoryExists = directoryExists;

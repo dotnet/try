@@ -16,7 +16,6 @@ using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MLS.Agent.CommandLine;
 using Recipes;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
 
@@ -168,7 +167,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
                     track(context.ParseResult);
-                    return new JupyterCommandLine(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
+                    return new JupyterInstallCommand(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
                 });
 
                 jupyterCommand.AddCommand(installCommand);

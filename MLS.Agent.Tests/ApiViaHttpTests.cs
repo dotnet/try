@@ -31,6 +31,8 @@ using CodeManipulation = WorkspaceServer.Tests.CodeManipulation;
 using SourceFile = Microsoft.DotNet.Try.Protocol.ClientApi.SourceFile;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
+using WorkspaceServer.Packaging;
+using Package = Microsoft.DotNet.Try.Protocol.Package;
 
 namespace MLS.Agent.Tests
 {

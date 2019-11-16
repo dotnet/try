@@ -1,14 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using FluentAssertions;
 using HtmlAgilityPack;
-using System.Linq;
 using XPlot.DotNet.Interactive.KernelExtensions;
 using XPlot.Plotly;
 using Xunit;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.App.Tests
 {
     public partial class XplotKernelExtensionTests
     {

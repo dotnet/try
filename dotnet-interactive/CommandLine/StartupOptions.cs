@@ -6,7 +6,6 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
-using MLS.Agent.CommandLine;
 
 namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
@@ -32,20 +31,6 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             _parseResult = parseResult;
             LogPath = logPath;
             Verbose = verbose;
-        }
-
-        public StartupMode Mode
-        {
-            get
-            {
-                switch (_parseResult?.CommandResult?.Name)
-                {
-                    case "hosted":
-                        return StartupMode.Hosted;
-                    default:
-                        return StartupMode.Try;
-                }
-            }
         }
 
         public DirectoryInfo LogPath { get; }

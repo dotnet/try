@@ -17,6 +17,7 @@ using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
 using Recipes;
 using WorkspaceServer;
+using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
 using Xunit;
 

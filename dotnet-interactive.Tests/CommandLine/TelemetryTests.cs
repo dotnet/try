@@ -4,18 +4,17 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using FluentAssertions;
+using Microsoft.DotNet.Interactive.App.CommandLine;
+using Microsoft.DotNet.Interactive.Telemetry;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
-using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
-using MLS.Agent.CommandLine;
-using System.IO;
-using Microsoft.DotNet.Interactive.App.CommandLine;
-using MLS.Agent.Telemetry.Configurer;
 
-namespace MLS.Agent.Tests.CommandLine
+namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
 {
     public class TelemetryTests : IDisposable
     {
@@ -33,26 +32,6 @@ namespace MLS.Agent.Tests.CommandLine
             _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
             {
             },
-                demo: (options, console, context, startOptions) =>
-                {
-                    return Task.CompletedTask;
-                },
-                tryGithub: (options, c) =>
-                {
-                    return Task.CompletedTask;
-                },
-                pack: (options, console) =>
-                {
-                    return Task.CompletedTask;
-                },
-                install: (options, console) =>
-                {
-                    return Task.CompletedTask;
-                },
-                verify: (options, console, startupOptions) =>
-                {
-                    return Task.FromResult(1);
-                },
                 jupyter: (startupOptions, console, startServer, context) =>
                 {
                     return Task.FromResult(1);
@@ -333,21 +312,27 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void Telemetry_common_properties_should_contain_if_it_is_in_docker_or_not()
         {
-            var unitUnderTest = new TelemetryCommonProperties(userLevelCacheWriter: new NothingUserLevelCacheWriter());
+            var unitUnderTest = new TelemetryCommonProperties(
+                "product-version",
+                userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties().Should().ContainKey("Docker Container");
         }
 
         [Fact]
         public void Telemetry_common_properties_should_return_hashed_machine_id()
         {
-            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => "plaintext", userLevelCacheWriter: new NothingUserLevelCacheWriter());
+            var unitUnderTest = new TelemetryCommonProperties(
+                "product-version",
+                getMACAddress: () => "plaintext", userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties()["Machine ID"].Should().NotBe("plaintext");
         }
 
         [Fact]
         public void Telemetry_common_properties_should_return_new_guid_when_cannot_get_mac_address()
         {
-            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
+            var unitUnderTest = new TelemetryCommonProperties(
+                "product-version",
+                getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
             var assignedMachineId = unitUnderTest.GetTelemetryCommonProperties()["Machine ID"];
 
             Guid.TryParse(assignedMachineId, out var _).Should().BeTrue("it should be a guid");
@@ -356,7 +341,9 @@ namespace MLS.Agent.Tests.CommandLine
         [Fact]
         public void Telemetry_common_properties_should_contain_kernel_version()
         {
-            var unitUnderTest = new TelemetryCommonProperties(getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
+            var unitUnderTest = new TelemetryCommonProperties(
+                "product-version",
+                getMACAddress: () => null, userLevelCacheWriter: new NothingUserLevelCacheWriter());
             unitUnderTest.GetTelemetryCommonProperties()["Kernel Version"].Should().Be(RuntimeInformation.OSDescription);
         }
 

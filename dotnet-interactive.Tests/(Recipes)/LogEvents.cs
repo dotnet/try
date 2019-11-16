@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using MLS.Agent;
-using MLS.Agent.Tools;
-using WorkspaceServer;
+using Microsoft.DotNet.Interactive.App;
+using Microsoft.DotNet.Interactive.CSharp;
+using Microsoft.DotNet.Interactive.FSharp;
+using Microsoft.DotNet.Interactive.Utility;
 using Xunit.Abstractions;
 
 namespace Pocket
@@ -19,7 +20,8 @@ namespace Pocket
                     typeof(LogEvents).Assembly,
                     typeof(Startup).Assembly,
                     typeof(CommandLine).Assembly,
-                    typeof(ICodeRunner).Assembly,
+                    typeof(CSharpKernel).Assembly,
+                    typeof(FSharpKernel).Assembly,
                 });
     }
 }

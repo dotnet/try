@@ -31,13 +31,15 @@ namespace Microsoft.DotNet.Interactive.Tests
             return finalExtensionDll;
         }
 
-        internal static async Task<FileInfo> CreateExtension(DirectoryInfo extensionDir, string body, [CallerMemberName] string extensionName = null)
+        internal static async Task<FileInfo> CreateExtension(
+            DirectoryInfo extensionDir, 
+            string body, 
+            [CallerMemberName] string extensionName = null)
         {
             var microsoftDotNetInteractiveDllPath = typeof(IKernelExtension).Assembly.Location;
 
-            new InMemoryDirectoryAccessor(extensionDir)
-                {
-                    ( "Extension.cs", $@"
+            extensionDir.Populate(
+                ("Extension.cs", $@"
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -51,8 +53,8 @@ public class TestKernelExtension : IKernelExtension
         {body}
     }}
 }}
-" ),
-                    ("TestExtension.csproj", $@"
+"),
+                ("TestExtension.csproj", $@"
 <Project Sdk=""Microsoft.NET.Sdk"">
 
   <PropertyGroup>
@@ -68,9 +70,7 @@ public class TestKernelExtension : IKernelExtension
   </ItemGroup>
 
 </Project>
-")
-                }
-                .CreateFiles();
+"));
 
             var buildResult = await new Dotnet(extensionDir).Build();
             buildResult.ThrowOnFailure();

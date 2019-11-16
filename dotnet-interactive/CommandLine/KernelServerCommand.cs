@@ -4,10 +4,8 @@
 using System;
 using System.CommandLine;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.App.CommandLine;
 
-namespace MLS.Agent.CommandLine
+namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
     public static class KernelServerCommand
     {

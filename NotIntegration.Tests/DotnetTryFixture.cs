@@ -13,6 +13,7 @@ using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent;
 using MLS.Agent.Tools;
 using WorkspaceServer;
+using WorkspaceServer.Packaging;
 
 namespace NotIntegration.Tests
 {
@@ -38,7 +39,7 @@ namespace NotIntegration.Tests
         private async Task<bool> ReadyAsync()
         {
             var dotnet = new Dotnet();
-            var installResult = await dotnet.ToolInstall("dotnet-try", _disposableDirectory.Directory, version: "1.0.44142.42", addSource: GetPackageSource());
+            var installResult = await dotnet.ToolInstall("dotnet-try", _disposableDirectory.Directory, version: "1.0.44142.42", addSource: GetPackageSource().ToString());
             installResult.ThrowOnFailure();
 
             await Start();

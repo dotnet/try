@@ -5,19 +5,13 @@ using System;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.DotNet.Interactive.App.CommandLine;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.Extensions.DependencyInjection;
-using MLS.Agent.CommandLine;
 using Pocket;
-using Pocket.For.ApplicationInsights;
-using Recipes;
 using Serilog.Sinks.RollingFileAlternate;
 using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 using static Pocket.Logger<Microsoft.DotNet.Interactive.App.Program>;
@@ -32,10 +26,11 @@ namespace Microsoft.DotNet.Interactive.App
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            return await CommandLineParser.Create( _serviceCollection ).InvokeAsync(args);
+            return await CommandLineParser.Create(_serviceCollection).InvokeAsync(args);
         }
 
-        private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs = {
+        private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs =
+        {
             typeof(Startup).Assembly,
             typeof(Shell).Assembly
         };
@@ -87,7 +82,7 @@ namespace Microsoft.DotNet.Interactive.App
                           .UseContentRoot(Path.GetDirectoryName(typeof(Program).Assembly.Location))
                           .UseStartup<Startup>()
                           .Build();
-            
+
             return webHost;
         }
     }

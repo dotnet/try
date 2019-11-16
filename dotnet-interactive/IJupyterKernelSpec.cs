@@ -3,12 +3,13 @@
 
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive.App
 {
     public interface IJupyterKernelSpec
     {
-        Task<JupyterCommandLineResult> ExecuteCommand(string command, string args = "");
-        Task<JupyterCommandLineResult> InstallKernel(DirectoryInfo sourceDirectory);
+        Task<CommandLineResult> ExecuteCommand(string command, string args = "");
+        Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory);
     }
 }

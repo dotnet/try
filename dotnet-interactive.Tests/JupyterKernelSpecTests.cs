@@ -1,17 +1,14 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using dotnet_interactive.Tests;
-using Microsoft.DotNet.Interactive.App;
-using Microsoft.DotNet.Interactive.Jupyter;
-using WorkspaceServer.Tests;
+using FluentAssertions;
+using Microsoft.DotNet.Interactive.Utility;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.App.Tests
 {
     public abstract class JupyterKernelSpecTests: IAsyncDisposable
     {
@@ -32,7 +29,7 @@ namespace MLS.Agent.Tests
             //path containing the environment variables for jupyter
 
             var kernelSpec = GetJupyterKernelSpec(true);
-            var kernelDir = Create.EmptyWorkspace().Directory;
+            var kernelDir = DirectoryUtility.CreateDirectory();
 
             var result = await kernelSpec.InstallKernel(kernelDir);
             result.ExitCode.Should().Be(0);
@@ -46,13 +43,12 @@ namespace MLS.Agent.Tests
         public async Task Returns_failure_when_kernel_installation_did_not_succeed()
         {
             var kernelSpec = GetJupyterKernelSpec(false, error: new [] { "Could not find jupyter kernelspec module" });
-            var kernelDir = Create.EmptyWorkspace().Directory;
+            var kernelDir = DirectoryUtility.CreateDirectory();
 
             var result = await kernelSpec.InstallKernel(kernelDir);
             result.ExitCode.Should().Be(1);
             result.Error.Should().BeEquivalentTo("Could not find jupyter kernelspec module");
         }
-
 
         public async ValueTask DisposeAsync()
         {

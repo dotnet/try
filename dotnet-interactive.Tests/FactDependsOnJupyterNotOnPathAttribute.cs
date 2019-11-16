@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.Interactive.Jupyter;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.App.Tests
 {
     [XunitTestCaseDiscoverer("MLS.Agent.Tests.JupyterNotInstalledTestCaseDiscover", "MLS.Agent.Tests")]
     public class FactDependsOnJupyterNotOnPathAttribute : FactAttribute

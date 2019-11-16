@@ -3,8 +3,8 @@
 
 using System.CommandLine;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Tools;
-using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
@@ -16,7 +16,7 @@ namespace MLS.Agent.CommandLine
             (await dotnet.ToolInstall(
                 options.PackageName,
                 options.Location,
-                options.AddSource)).ThrowOnFailure();
+                options.AddSource.ToString())).ThrowOnFailure();
 
             var tool = WorkspaceServer.WorkspaceFeatures.PackageTool.TryCreateFromDirectory(options.PackageName, new FileSystemDirectoryAccessor(options.Location));
             await tool.Prepare();

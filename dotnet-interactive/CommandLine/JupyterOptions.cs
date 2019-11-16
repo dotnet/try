@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace MLS.Agent.CommandLine
+namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
     public class JupyterOptions
     {

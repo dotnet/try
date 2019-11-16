@@ -4,20 +4,17 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
-using MLS.Agent.CommandLine;
 
 namespace Microsoft.DotNet.Interactive.App.CommandLine
 {
     public static class JupyterCommand
     {
         public static Task<int> Do(
-            StartupOptions startupOptions, 
+            StartupOptions startupOptions,
             IConsole console,
             CommandLineParser.StartServer startServer = null,
             InvocationContext context = null)
         {
-            startupOptions.IsJupyter = true;
-
             startServer?.Invoke(startupOptions, context);
 
             return Task.FromResult(0);

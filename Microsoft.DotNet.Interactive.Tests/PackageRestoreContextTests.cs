@@ -2,15 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using FluentAssertions;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using WorkspaceServer.Packaging;
+using FluentAssertions;
 using Xunit;
-using Microsoft.DotNet.Interactive;
 
-namespace WorkspaceServer.Tests
+namespace Microsoft.DotNet.Interactive.Tests
 {
     public class PackageRestoreContextTests
     {

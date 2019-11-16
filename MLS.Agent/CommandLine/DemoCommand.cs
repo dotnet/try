@@ -9,7 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using WorkspaceServer;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace MLS.Agent.CommandLine
 {

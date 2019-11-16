@@ -3,8 +3,9 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.DotNet.Interactive.Telemetry;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.App.Tests
 {
     public sealed class FakeTelemetry : ITelemetry
     {

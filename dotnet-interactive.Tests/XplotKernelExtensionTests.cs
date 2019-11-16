@@ -1,17 +1,16 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Events;
 using System.Linq;
 using System.Threading.Tasks;
-using WorkspaceServer.Tests.Kernel;
+using FluentAssertions;
+using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.App.Tests
 {
     public partial class XplotKernelExtensionTests : LanguageKernelTestBase
     {

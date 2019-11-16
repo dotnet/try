@@ -35,6 +35,11 @@
     <None Remove="obj\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DirectoryUtility.cs" Link="%28Recipes%29\DirectoryUtility.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DisposableDirectory.cs" Link="%28Recipes%29\DisposableDirectory.cs" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">

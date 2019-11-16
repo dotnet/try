@@ -5,16 +5,16 @@ using System.CommandLine;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
-using MLS.Agent;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive.App
 {
-    public class JupyterCommandLine
+    public class JupyterInstallCommand
     {
         private readonly IConsole _console;
         private readonly IJupyterKernelSpec _jupyterKernelSpec;
 
-        public JupyterCommandLine(IConsole console, IJupyterKernelSpec jupyterKernelSpec)
+        public JupyterInstallCommand(IConsole console, IJupyterKernelSpec jupyterKernelSpec)
         {
             _console = console;
             _jupyterKernelSpec = jupyterKernelSpec;
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Interactive.App
         {
             using (var disposableDirectory = DisposableDirectory.Create())
             {
-                var assembly = typeof(JupyterCommandLine).Assembly;
+                var assembly = typeof(JupyterInstallCommand).Assembly;
 
                 using (var resourceStream = assembly.GetManifestResourceStream("dotnetKernel.zip"))
                 {

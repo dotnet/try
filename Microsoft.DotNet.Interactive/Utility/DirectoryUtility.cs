@@ -56,5 +56,34 @@ namespace Microsoft.DotNet.Interactive.Utility
                 throw new ArgumentException($"Couldn't find a file or directory called {path}");
             }
         }
+
+        public static void Populate(
+            this DirectoryInfo directory,
+            params (string relativePath, string content)[] contents)
+        {
+            EnsureExists(directory);
+
+            foreach (var t in contents)
+            {
+                File.WriteAllText(
+                    Path.Combine(directory.FullName, t.relativePath),
+                    t.content);
+            }
+        }
+
+        private static DirectoryInfo EnsureExists(this DirectoryInfo directory)
+        {
+            if (directory == null)
+            {
+                throw new ArgumentNullException(nameof(directory));
+            }
+
+            if (!directory.Exists)
+            {
+                directory.Create();
+            }
+
+            return directory;
+        }
     }
 }
