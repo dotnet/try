@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Interactive.Telemetry
 {
     public sealed class TelemetryFilter : ITelemetryFilter
     {
-        private const string DotNetTryName = "dotnet-try";
         private readonly Func<string, string> _hash;
 
         public TelemetryFilter(Func<string, string> hash)
@@ -30,28 +29,24 @@ namespace Microsoft.DotNet.Interactive.Telemetry
 
             if (objectToFilter is ParseResult parseResult)
             {
-                var isDotNetTryCommand = parseResult.RootCommandResult?.Token.Value == DotNetTryName;
+                var mainCommand =
+                    // The first command will in the tokens collection will be our main command.
+                    parseResult.Tokens?.FirstOrDefault(x => x.Type == TokenType.Command);
+                var mainCommandName = mainCommand?.Value;
 
-                if (parseResult.RootCommandResult?.Token.Value == DotNetTryName)
+                var tokens =
+                    parseResult.Tokens
+                               // skip directives as we do not care right now
+                               ?.Where(x => x.Type != TokenType.Directive)
+                               .SkipWhile(x => x != mainCommand)
+                               // We skip one to not include the main command as part of the collection we want to filter.
+                               .Skip(1);
+
+                var entryItems = FilterCommand(mainCommandName, tokens, parseResult.CommandResult);
+
+                if (entryItems != null)
                 {
-                    var mainCommand = 
-                        // The first command will in the tokens collection will be our main command.
-                        parseResult.Tokens?.FirstOrDefault(x => x.Type == TokenType.Command);
-                    var mainCommandName = mainCommand?.Value;
-
-                    var tokens = 
-                        parseResult.Tokens
-                        // skip directives as we do not care right now
-                        ?.Where(x => x.Type != TokenType.Directive)
-                        .SkipWhile(x => x != mainCommand)
-                        // We skip one to not include the main command as part of the collection we want to filter.
-                        .Skip(1);
-                    
-                    var entryItems = FilterCommand(mainCommandName, tokens, parseResult.CommandResult);
-                    if (entryItems != null)
-                    {
-                        result.Add(CreateEntry(entryItems));
-                    }
+                    result.Add(CreateEntry(entryItems));
                 }
             }
 

@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                             VersionSensor.Version().AssemblyInformationalVersion,
                             firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
-            Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
+            void Track(ParseResult o) => telemetry.SendFiltered(filter, o);
 
             var rootCommand = Start();
 
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
 
                 jupyterCommand.Handler = CommandHandler.Create<StartupOptions, JupyterOptions, IConsole, InvocationContext>((startupOptions, options, console, context) =>
                 {
-                    track(context.ParseResult);
+                    Track(context.ParseResult);
 
                     services
                         .AddSingleton(c => ConnectionInformation.Load(options.ConnectionFile))
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
                 installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
-                    track(context.ParseResult);
+                    Track(context.ParseResult);
                     return new JupyterInstallCommand(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
                 });
 
@@ -187,7 +187,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 startKernelServerCommand.Handler = CommandHandler.Create<StartupOptions, KernelServerOptions, IConsole, InvocationContext>(
                     (startupOptions, options, console, context) =>
                 {
-                    track(context.ParseResult);
+                    Track(context.ParseResult);
                     return startKernelServer(startupOptions, CreateKernel(options.DefaultKernel), console);
                 });
 

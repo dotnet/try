@@ -83,6 +83,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-interactive.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Interactive.Telemetry", "Microsoft.DotNet.Interactive.Telemetry\Microsoft.DotNet.Interactive.Telemetry.csproj", "{1F413F38-69FE-4329-A0A1-1266BBDE82BE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Interactive.Telemetry.Tests", "Microsoft.DotNet.Interactive.Telemetry.Tests\Microsoft.DotNet.Interactive.Telemetry.Tests.csproj", "{376D1C56-B37B-4871-8E50-D73C4C86BEFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -241,6 +243,10 @@ Global
 		{1F413F38-69FE-4329-A0A1-1266BBDE82BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F413F38-69FE-4329-A0A1-1266BBDE82BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F413F38-69FE-4329-A0A1-1266BBDE82BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{376D1C56-B37B-4871-8E50-D73C4C86BEFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{376D1C56-B37B-4871-8E50-D73C4C86BEFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{376D1C56-B37B-4871-8E50-D73C4C86BEFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{376D1C56-B37B-4871-8E50-D73C4C86BEFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -284,6 +290,7 @@ Global
 		{EEEBE2C6-CF43-444B-97C2-2E5ACC05099E} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
 		{CFC6AABA-3CB6-4E3F-9F32-6A870041F9C0} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
 		{1F413F38-69FE-4329-A0A1-1266BBDE82BE} = {6EE8F484-DFA2-4F0F-939F-400CE78DFAC2}
+		{376D1C56-B37B-4871-8E50-D73C4C86BEFE} = {8192FEAD-BCE6-4E62-97E5-2E9EA884BD71}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D6CD99BA-B16B-4570-8910-225CBDFFA3AD}
