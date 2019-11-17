@@ -209,7 +209,7 @@ using static {typeof(Kernel).FullName};
         {
             var command = new Command("%whos")
             {
-                Handler = CommandHandler.Create(async (ParseResult parseResult, KernelInvocationContext context) =>
+                Handler = CommandHandler.Create((ParseResult parseResult, KernelInvocationContext context) =>
                 {
                     var alias = parseResult.CommandResult.Token.Value;
 
@@ -238,6 +238,8 @@ using static {typeof(Kernel).FullName};
                                         html)
                                 }));
                     }
+
+                    return Task.CompletedTask;
                 })
             };
 

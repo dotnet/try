@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
             ScriptOptions = ScriptOptions.AddReferences(references);
         }
 
-        protected override async Task HandleAsync(
+        protected override Task HandleAsync(
             IKernelCommand command,
             KernelInvocationContext context)
         {
@@ -109,6 +109,8 @@ namespace Microsoft.DotNet.Interactive.CSharp
                     }
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         public Task<bool> IsCompleteSubmissionAsync(string code)
@@ -117,7 +119,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
             return Task.FromResult(SyntaxFactory.IsCompleteSubmission(syntaxTree));
         }
 
-        private async Task HandleCancelCurrentCommand(
+        private Task HandleCancelCurrentCommand(
             CancelCurrentCommand cancelCurrentCommand,
             KernelInvocationContext context)
         {
@@ -129,6 +131,8 @@ namespace Microsoft.DotNet.Interactive.CSharp
             }
 
             context.Publish(reply);
+
+            return Task.CompletedTask;
         }
 
         private async Task HandleSubmitCode(

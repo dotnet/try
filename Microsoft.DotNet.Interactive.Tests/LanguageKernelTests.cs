@@ -1277,9 +1277,7 @@ Formatter<DataFrame>.Register((df, writer) =>
     writer.Write(t);
 }, ""text/html"");");
 
-            events.Should()
-                  .NotContain(e => e is ErrorProduced ||
-                                   e is CommandFailed);
+            events.Should().NotContainErrors();
         }
 
         [Fact(Skip = "requires netcorepp3.0")]

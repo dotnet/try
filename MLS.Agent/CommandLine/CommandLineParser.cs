@@ -127,6 +127,7 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(StartInHostedMode());
             rootCommand.AddCommand(Demo());
             rootCommand.AddCommand(GitHub());
+            rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Pack());
             rootCommand.AddCommand(Verify());
 

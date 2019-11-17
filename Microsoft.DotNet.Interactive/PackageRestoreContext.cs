@@ -36,11 +36,11 @@ namespace Microsoft.DotNet.Interactive
 
         public string Name { get; }
 
-        public async Task<ResolvedNugetPackageReference> GetResolvedNugetPackageReference(string packageName)
+        public Task<ResolvedNugetPackageReference> GetResolvedNugetPackageReference(string packageName)
         {
             var references = GetResolvedNugetReferences();
 
-            return references[packageName];
+            return Task.FromResult(references[packageName]);
         }
 
         public async Task<AddNugetResult> AddPackage(
