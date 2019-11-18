@@ -82,13 +82,14 @@
 
   <Target Name="PrepareKernels">
     <PropertyGroup>
-      <KernelSourceDirectory>$(MSBuildProjectDirectory)/ContentFiles/kernels</KernelSourceDirectory>
+      <KernelRootDirectory>$(MSBuildProjectDirectory)/ContentFiles</KernelRootDirectory>
+      <KernelSourceDirectory>$(KernelRootDirectory)/kernels</KernelSourceDirectory>
       <KernelDestinationDirectory>$(IntermediateOutputPath)dotnetKernel</KernelDestinationDirectory>
     </PropertyGroup>
     <ItemGroup>
       <KernelFiles Include="$(KernelSourceDirectory)/**/*.json" SkipUnchangedFiles="true" />
       <KernelFolders Include="$([System.IO.Directory]::GetDirectories($(KernelSourceDirectory)))" />
-      <KernelLogoFiles Include="$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/*.png" SkipUnchangedFiles="true" />
+      <KernelLogoFiles Include="$(KernelRootDirectory)/*.png" SkipUnchangedFiles="true" />
     </ItemGroup>
   </Target>
 
