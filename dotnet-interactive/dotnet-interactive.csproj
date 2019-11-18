@@ -62,6 +62,7 @@
 
   <ItemGroup>
     <Folder Include="CommandLine\" />
+    <Folder Include="ContentFiles\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -81,7 +82,7 @@
 
   <Target Name="PrepareKernels">
     <PropertyGroup>
-      <KernelSourceDirectory>$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/kernels</KernelSourceDirectory>
+      <KernelSourceDirectory>$(MSBuildProjectDirectory)/ContentFiles/kernels</KernelSourceDirectory>
       <KernelDestinationDirectory>$(IntermediateOutputPath)dotnetKernel</KernelDestinationDirectory>
     </PropertyGroup>
     <ItemGroup>
