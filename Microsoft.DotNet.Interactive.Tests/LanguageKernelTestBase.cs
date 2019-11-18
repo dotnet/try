@@ -8,6 +8,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
+using Microsoft.DotNet.Interactive.Jupyter;
 using Pocket;
 using Xunit.Abstractions;
 
@@ -31,7 +32,6 @@ namespace Microsoft.DotNet.Interactive.Tests
                 Language.CSharp => new CSharpKernel()
                                    .UseDefaultRendering()
                                    .UseNugetDirective()
-                                   .UseExtendDirective()
                                    .UseKernelHelpers(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
@@ -40,7 +40,10 @@ namespace Microsoft.DotNet.Interactive.Tests
 
         protected KernelBase CreateKernel(Language language)
         {
-            var kernel = CreateLanguageKernel(language).LogEventsToPocketLogger();
+            var kernel = CreateLanguageKernel(language)
+                         .UseDefaultMagicCommands()
+                         .UseExtendDirective()
+                         .LogEventsToPocketLogger();
 
             KernelEvents = kernel.KernelEvents.ToSubscribedList();
 

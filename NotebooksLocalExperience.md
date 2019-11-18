@@ -7,23 +7,23 @@ First, make sure you have the following installed:
 - The [.NET 3.0 SDK](https://dotnet.microsoft.com/download).
 - **Jupyter**. Jupyter can be installed using [Anaconda](https://www.anaconda.com/distribution).
 
-- Open the Anaconda Prompt and verify that Jupyter is installed:
+- Open the Anaconda Prompt (Windows) or Terminal (macOS) and verify that Jupyter is installed and present on the path:
 
 ```console
 > jupyter kernelspec list
   python3        ~\jupyter\kernels\python3
 ```
 
-- Next, in an ordinary console, install the `dotnet try` global tool:
+- Next, in an ordinary console, install the `dotnet interactive` global tool:
 
 ```console
-> dotnet tool install -g dotnet-try
+> dotnet tool install -g dotnet-interactive
 ```
 
 - Install the .NET kernel by running the following within your Anaconda Prompt:
 
 ```console
-> dotnet try jupyter install
+> dotnet interactive jupyter install
 [InstallKernelSpec] Installed kernelspec .net-csharp in ~\jupyter\kernels\.net-csharp
 .NET kernel installation succeeded
 

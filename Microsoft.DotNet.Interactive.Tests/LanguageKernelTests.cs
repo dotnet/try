@@ -1196,8 +1196,8 @@ catch (Exception e)
             var extensionsDir =
                 new DirectoryInfo(
                     Path.Combine(
-                    nugetPackageDirectory.FullName,
-                    "interactive-extensions","dotnet","cs"));
+                        nugetPackageDirectory.FullName,
+                        "interactive-extensions", "dotnet", "cs"));
 
             var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(
                                    directory, 

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Utility;
-using WorkspaceServer.Packaging;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -50,7 +49,7 @@ namespace Microsoft.DotNet.Interactive
         {
             var requestedPackage = new NugetPackageReference(packageName, packageVersion, restoreSources);
 
-            if (!string.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out var _))
+            if (!string.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out _))
             {
                 return new AddNugetPackageResult(false, requestedPackage);
             }
@@ -90,8 +89,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 return new AddNugetRestoreSourcesResult(
                     succeeded: true,
-                    requestedPackage: requestedPackage,
-                    addedReferences: addedReferences);
+                    requestedPackage: requestedPackage);
             }
             else
             {

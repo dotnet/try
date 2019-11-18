@@ -5,9 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Interactive;
 
-namespace WorkspaceServer.Packaging
+namespace Microsoft.DotNet.Interactive
 {
     public class ResolvedNugetPackageReference : NugetPackageReference
     {

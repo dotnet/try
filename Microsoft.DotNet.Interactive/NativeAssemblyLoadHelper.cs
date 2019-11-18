@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Pocket;
-using WorkspaceServer.Packaging;
 
 namespace Microsoft.DotNet.Interactive
 {

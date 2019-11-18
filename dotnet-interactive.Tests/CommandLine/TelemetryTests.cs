@@ -10,6 +10,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.App.CommandLine;
 using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
+using Pocket;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,6 +22,8 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         private readonly ITestOutputHelper _output;
         private readonly TestConsole _console = new TestConsole();
         private readonly Parser _parser;
+        private readonly FileInfo _connectionFile;
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         public TelemetryTests(ITestOutputHelper output)
         {
@@ -28,6 +31,10 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
 
             _output = output;
 
+            _connectionFile = new FileInfo(Path.GetTempFileName());
+
+            _disposables.Add(() => _connectionFile.Delete());
+            
             _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
             {
             },
@@ -45,13 +52,13 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
 
         public void Dispose()
         {
-            _output.WriteLine(_console.Error.ToString());
+            _disposables.Dispose();
         }
 
         [Fact]
         public async Task Jupyter_standalone_command_sends_telemetry()
         {
-            await _parser.InvokeAsync("jupyter", _console);
+            await _parser.InvokeAsync($"jupyter {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
                      x.Properties.Count == 2 &&
@@ -62,14 +69,14 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_standalone_command_has_one_entry()
         {
-            await _parser.InvokeAsync("jupyter", _console);
+            await _parser.InvokeAsync($"jupyter {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
         [Fact]
         public async Task Jupyter_default_kernel_csharp_sends_telemetry()
         {
-            await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
+            await _parser.InvokeAsync($"jupyter --default-kernel csharp {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
                      x.Properties.Count == 2 &&
@@ -80,14 +87,14 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_default_kernel_csharp_has_one_entry()
         {
-            await _parser.InvokeAsync("jupyter --default-kernel csharp", _console);
+            await _parser.InvokeAsync($"jupyter --default-kernel csharp {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
         [Fact]
         public async Task Jupyter_default_kernel_fsharp_sends_telemetry()
         {
-            await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
+            await _parser.InvokeAsync($"jupyter --default-kernel fsharp {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
                      x.Properties.Count == 2 &&
@@ -98,14 +105,14 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_default_kernel_fsharp_has_one_entry()
         {
-            await _parser.InvokeAsync("jupyter --default-kernel fsharp", _console);
+            await _parser.InvokeAsync($"jupyter --default-kernel fsharp {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
         [Fact]
         public async Task Jupyter_install_sends_telemetry()
         {
-            await _parser.InvokeAsync("jupyter install", _console);
+            await _parser.InvokeAsync($"jupyter install", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
                      x.Properties.Count == 2 &&
@@ -116,7 +123,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_install_has_one_entry()
         {
-            await _parser.InvokeAsync("jupyter install", _console);
+            await _parser.InvokeAsync($"jupyter install", _console);
             _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
@@ -194,7 +201,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
             var tmp = Path.GetTempFileName();
             try
             {
-                await _parser.InvokeAsync(String.Format("jupyter {0}", tmp), _console);
+                await _parser.InvokeAsync(string.Format("jupyter {0}", tmp), _console);
                 _fakeTelemetry.LogEntries.Should().HaveCount(1);
             }
             finally
@@ -210,7 +217,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_with_verbose_option_sends_telemetry_just_for_juptyer_command()
         {
-            await _parser.InvokeAsync("--verbose jupyter", _console);
+            await _parser.InvokeAsync($"--verbose jupyter  {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().Contain(
                 x => x.EventName == "command" &&
                      x.Properties.Count == 2 &&
@@ -221,14 +228,14 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_with_verbose_option_has_one_entry()
         {
-            await _parser.InvokeAsync("--verbose jupyter", _console);
+            await _parser.InvokeAsync($"--verbose jupyter  {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
         [Fact]
         public async Task Jupyter_with_invalid_argument_does_not_send_any_telemetry()
         {
-            await _parser.InvokeAsync("jupyter invalidargument", _console);
+            await _parser.InvokeAsync($"jupyter invalidargument", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
@@ -236,14 +243,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         public async Task Jupyter_default_kernel_with_invalid_kernel_does_not_send_any_telemetry()
         {
             // Do not capture anything, especially "oops".
-            await _parser.InvokeAsync("jupyter --default-kernel oops", _console);
-            _fakeTelemetry.LogEntries.Should().BeEmpty();
-        }
-
-        [Fact]
-        public async Task Hosted_is_does_not_send_any_telemetry()
-        {
-            await _parser.InvokeAsync("hosted", _console);
+            await _parser.InvokeAsync($"jupyter --default-kernel oops", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
@@ -316,7 +316,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
             Environment.SetEnvironmentVariable(environmentVariableName, null);
             try
             {
-                await _parser.InvokeAsync("jupyter", _console);
+                await _parser.InvokeAsync($"jupyter", _console);
                 _console.Out.ToString().Should().Contain(Telemetry.Telemetry.WelcomeMessage);
             }
             finally
@@ -334,7 +334,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
             Environment.SetEnvironmentVariable(environmentVariableName, "1");
             try
             {
-                await _parser.InvokeAsync("jupyter", _console);
+                await _parser.InvokeAsync($"jupyter", _console);
                 _console.Out.ToString().Should().NotContain(Telemetry.Telemetry.WelcomeMessage);
             }
             finally

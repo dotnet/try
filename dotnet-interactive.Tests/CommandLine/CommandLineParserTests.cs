@@ -35,6 +35,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
                 },
                 jupyter: (startupOptions, console, startServer, context) =>
                 {
+                    _startOptions = startupOptions;
                     return Task.FromResult(1);
                 },
                 telemetry: new FakeTelemetry(),
@@ -51,7 +52,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         {
             var logPath = new DirectoryInfo(Path.GetTempPath());
 
-            await _parser.InvokeAsync($"--log-path {logPath}", _console);
+            await _parser.InvokeAsync($"jupyter --log-path {logPath}", _console);
 
             _startOptions
                 .LogPath
@@ -63,7 +64,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task It_parses_verbose_option()
         {
-            await _parser.InvokeAsync($"--verbose", _console);
+            await _parser.InvokeAsync("jupyter --verbose", _console);
 
             _startOptions
                 .Verbose

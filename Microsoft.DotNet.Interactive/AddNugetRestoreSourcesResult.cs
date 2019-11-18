@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WorkspaceServer.Packaging;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -13,7 +12,6 @@ namespace Microsoft.DotNet.Interactive
         public AddNugetRestoreSourcesResult(
             bool succeeded,
             NugetPackageReference requestedPackage,
-            IReadOnlyList<ResolvedNugetPackageReference> addedReferences = null,
             IReadOnlyCollection<string> errors = null) : base(succeeded, requestedPackage, errors)
         {
         }

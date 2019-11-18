@@ -74,7 +74,24 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             void Track(ParseResult o) => telemetry.SendFiltered(filter, o);
 
-            var rootCommand = Start();
+            var verboseOption = new Option(
+                "--verbose",
+                "Enable verbose logging to the console")
+            {
+                Argument = new Argument<bool>()
+            };
+
+            var logPathOption = new Option(
+                "--log-path",
+                "Enable file logging to the specified directory")
+            {
+                Argument = new Argument<DirectoryInfo>
+                {
+                    Name = "dir"
+                }
+            };
+
+            var rootCommand = DotnetInteractive();
 
             rootCommand.AddCommand(Jupyter());
             rootCommand.AddCommand(KernelServer());
@@ -96,31 +113,16 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                    })
                    .Build();
 
-            RootCommand Start()
+            RootCommand DotnetInteractive()
             {
                 var command = new RootCommand
                 {
                     Name = "dotnet-interactive",
                     Description = ".NET Interactive"
                 };
-             
-                command.AddOption(new Option(
-                                      "--log-path",
-                                      "Enable file logging to the specified directory")
-                {
-                    Argument = new Argument<DirectoryInfo>
-                    {
-                        Name = "dir"
-                    }
-                });
 
-                command.AddOption(new Option(
-                                          "--verbose",
-                                          "Enable verbose logging to the console")
-                {
-                    Argument = new Argument<bool>()
-                });
-
+                command.AddOption(logPathOption);
+                command.AddOption(verboseOption);
 
                 return command;
             }
@@ -128,11 +130,16 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             Command Jupyter()
             {
                 var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel");
+
                 var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
                     Argument = new Argument<string>(defaultValue: () => "csharp")
                 };
+                
                 jupyterCommand.AddOption(defaultKernelOption);
+                jupyterCommand.AddOption(logPathOption);
+                jupyterCommand.AddOption(verboseOption);
+                
                 var connectionFileArgument = new Argument<FileInfo>
                 {
                     Name = "ConnectionFile",
@@ -163,7 +170,12 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                     return jupyter(startupOptions, console, startServer, context);
                 });
 
-                var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
+                var installCommand = new Command("install", "Install the .NET kernel for Jupyter")
+                {
+                    logPathOption,
+                    verboseOption
+                };
+
                 installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
                     Track(context.ParseResult);
@@ -177,12 +189,17 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
 
             Command KernelServer()
             {
-                var startKernelServerCommand = new Command("kernel-server", "Starts dotnet-try with kernel functionality exposed over standard I/O");
                 var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
                     Argument = new Argument<string>(defaultValue: () => "csharp")
                 };
-                startKernelServerCommand.AddOption(defaultKernelOption);
+
+                var startKernelServerCommand = new Command("kernel-server", "Starts dotnet-interactive with kernel functionality exposed over standard I/O")
+                {
+                    defaultKernelOption,
+                    logPathOption,
+                    verboseOption
+                };
 
                 startKernelServerCommand.Handler = CommandHandler.Create<StartupOptions, KernelServerOptions, IConsole, InvocationContext>(
                     (startupOptions, options, console, context) =>
@@ -198,21 +215,21 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
         private static IKernel CreateKernel(string defaultKernelName)
         {
             var kernel = new CompositeKernel
-                                     {
-                                         new CSharpKernel()
-                                             .UseDefaultRendering()
-                                             .UseNugetDirective()
-                                             .UseKernelHelpers()
-                                             .UseWho()
-                                             .UseXplot(),
-                                         new FSharpKernel()
-                                             .UseDefaultRendering()
-                                             .UseKernelHelpers()
-                                             .UseDefaultNamespaces()
-                                             .UseXplot()
-                                     }
-                                     .UseDefaultMagicCommands()
-                                     .UseExtendDirective();
+                         {
+                             new CSharpKernel()
+                                 .UseDefaultRendering()
+                                 .UseNugetDirective()
+                                 .UseKernelHelpers()
+                                 .UseWho()
+                                 .UseXplot(),
+                             new FSharpKernel()
+                                 .UseDefaultRendering()
+                                 .UseKernelHelpers()
+                                 .UseDefaultNamespaces()
+                                 .UseXplot()
+                         }
+                         .UseDefaultMagicCommands()
+                         .UseExtendDirective();
 
             kernel.DefaultKernelName = defaultKernelName;
             kernel.Name = ".NET";

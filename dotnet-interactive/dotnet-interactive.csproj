@@ -73,4 +73,32 @@
     <ProjectReference Include="..\XPlot.DotNet.Interactive.KernelExtensions\XPlot.DotNet.Interactive.KernelExtensions.csproj" />
   </ItemGroup>
 
+  <Target Name="PrepareKernels">
+    <PropertyGroup>
+      <KernelSourceDirectory>$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/kernels</KernelSourceDirectory>
+      <KernelDestinationDirectory>$(IntermediateOutputPath)dotnetKernel</KernelDestinationDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <KernelFiles Include="$(KernelSourceDirectory)/**/*.json" SkipUnchangedFiles="true" />
+      <KernelFolders Include="$([System.IO.Directory]::GetDirectories($(KernelSourceDirectory)))" />
+      <KernelLogoFiles Include="$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/*.png" SkipUnchangedFiles="true" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyKernelFiles" DependsOnTargets="PrepareKernels">
+    <Copy SourceFiles="@(KernelFiles)" DestinationFolder="$(KernelDestinationDirectory)/%(RecursiveDir)" />
+  </Target>
+
+  <Target Name="CopyLogoFiles" DependsOnTargets="PrepareKernels;CopyKernelFiles">
+    <CreateItem Include="@(KernelLogoFiles)" AdditionalMetadata="Destination=$([System.IO.Path]::GetFileName(%(KernelFolders.Identity)))">
+      <Output TaskParameter="Include" ItemName="AllKernelLogoFiles" />
+    </CreateItem>
+    <Copy SourceFiles="%(AllKernelLogoFiles.FullPath)" DestinationFolder="$(KernelDestinationDirectory)/%(AllKernelLogoFiles.Destination)" />
+    <!-- <Message Text="%(AllKernelLogoFiles.Filename) -> %(AllKernelLogoFiles.Destination)" /> -->
+  </Target>
+
+  <Target Name="ZipDotnetKernel" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyKernelFiles;CopyLogoFiles">
+    <ZipDirectory SourceDirectory="$(KernelDestinationDirectory)" DestinationFile="$(IntermediateOutputPath)/dotnetKernel.zip" Overwrite="true" />
+  </Target>
+  
 </Project>
