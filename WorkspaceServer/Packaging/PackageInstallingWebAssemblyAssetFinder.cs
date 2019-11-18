@@ -44,7 +44,7 @@ namespace WorkspaceServer.Packaging
             var installationResult = await dotnet.ToolInstall(
                 packageDesciptor.Name,
                 _workingDirectory.GetFullyQualifiedRoot(),
-                _addSource.ToString());
+                _addSource?.ToString());
 
             if (installationResult.ExitCode != 0)
             {

@@ -751,7 +751,7 @@ namespace FibonacciTest
                         Thread.Sleep(30000);  
                         Console.WriteLine(""end user code."");
                     }  
-                }")]
+                }", Skip = "Not supported")]
         [InlineData(
             "script",
             @"Console.WriteLine(""start user code."");
