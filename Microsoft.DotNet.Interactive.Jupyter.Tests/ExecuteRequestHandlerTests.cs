@@ -81,17 +81,19 @@ ThrowTheException();
 
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageSender
-                .PubSubMessages
-                .Should()
-                .ContainSingle(e => e is Error)
-                .Which
-                .As<Error>()
-                .Traceback
-                .Should()
-                .StartWith("System.ArgumentException")
-                .And
-                .Contain(s => s.Contains("ThrowTheException"), because: "the stack trace should also be present");
+            var traceback = JupyterMessageSender
+                            .PubSubMessages
+                            .Should()
+                            .ContainSingle(e => e is Error)
+                            .Which
+                            .As<Error>()
+                            .Traceback;
+
+            string.Join("\n", traceback)
+                  .Should()
+                  .StartWith("System.ArgumentException: Value does not fall within the expected range")
+                  .And
+                  .Contain("ThrowTheException", because: "the stack trace should also be present");
         }
 
         [Fact]

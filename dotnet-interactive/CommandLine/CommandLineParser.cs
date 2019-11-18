@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 var command = new RootCommand
                 {
                     Name = "dotnet-interactive",
-                    Description = ".NET Interactive"
+                    Description = "Interactive programming for .NET."
                 };
 
                 command.AddOption(logPathOption);
@@ -129,9 +129,9 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
 
             Command Jupyter()
             {
-                var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel");
+                var jupyterCommand = new Command("jupyter", "Starts dotnet-interactive as a Jupyter kernel");
 
-                var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
+                var defaultKernelOption = new Option("--default-kernel", "The the default language for the kernel")
                 {
                     Argument = new Argument<string>(defaultValue: () => "csharp")
                 };
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 
                 var connectionFileArgument = new Argument<FileInfo>
                 {
-                    Name = "ConnectionFile",
+                    Name = "connection-file",
                     Arity = ArgumentArity.ZeroOrOne //should be removed once the commandlineapi allows subcommands to not have arguments from the main command
                 }.ExistingOnly();
                 jupyterCommand.AddArgument(connectionFileArgument);

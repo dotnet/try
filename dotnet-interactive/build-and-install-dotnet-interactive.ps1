@@ -15,4 +15,4 @@ if (Test-Path 'env:DisableArcade') {
 }
 
 dotnet tool uninstall -g dotnet-interactive
-dotnet tool install -g --add-source "$toolLocation" --version $toolVersion dotnet-try
+dotnet tool install -g --add-source "$toolLocation" --version $toolVersion dotnet-interactive

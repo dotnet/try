@@ -15,7 +15,10 @@ namespace Microsoft.DotNet.Interactive.App
         {
             if (!CheckIfJupyterKernelSpecExists())
             {
-                return new CommandLineResult(1, error: new List<string> { "Could not find jupyter kernelspec module" });
+                return new CommandLineResult(1, error: new List<string>
+                {
+                    "Could not find jupyter kernelspec module"
+                });
             }
 
             return await Utility.CommandLine.Execute("jupyter", $"kernelspec {command} {args}");
@@ -28,8 +31,11 @@ namespace Microsoft.DotNet.Interactive.App
 
         public static bool CheckIfJupyterKernelSpecExists()
         {
-            var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which";
-            var jupyterKernelSpecExists = false ;
+            var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) 
+                              ? "where" 
+                              : "which";
+
+            var jupyterKernelSpecExists = false;
 
             Task.Run(async ()=> {
                 var result = await Utility.CommandLine.Execute(command, "jupyter-kernelspec");

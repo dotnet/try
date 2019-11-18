@@ -80,6 +80,16 @@ namespace Microsoft.DotNet.Interactive.App
             var webHost = new WebHostBuilder()
                           .UseKestrel()
                           .UseContentRoot(Path.GetDirectoryName(typeof(Program).Assembly.Location))
+                          .ConfigureServices(c =>
+                          {
+                              c.AddSingleton(options);
+
+                              foreach (var serviceDescriptor in _serviceCollection)
+                              {
+                                  c.Add(serviceDescriptor);
+                              }
+                          })
+                          .UseContentRoot(Path.GetDirectoryName(typeof(Program).Assembly.Location))
                           .UseStartup<Startup>()
                           .Build();
 
