@@ -787,8 +787,6 @@ namespace FibonacciTest
                 workspace = Workspace.FromSource(code, build.Name);
             }
 
-
-
             var requestJson = new WorkspaceRequest(workspace).ToJson();
             var response = await CallRun(requestJson, 10000);
 

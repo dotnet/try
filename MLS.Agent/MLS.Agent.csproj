@@ -117,17 +117,23 @@
     <ProjectReference Include="..\MLS.Repositories\MLS.Repositories.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="..\MLS.PackageTool\MLS.PackageTool.csproj" />
     <EmbeddedResource Include="..\MLS.PackageTool\Program.cs">
       <LogicalName>MLS.Agent.Program.cs</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
+      <LogicalName>demo.zip</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="wwwroot\api\" />
     <Folder Include="wwwroot\client\" />

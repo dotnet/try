@@ -73,6 +73,12 @@
     <ProjectReference Include="..\XPlot.DotNet.Interactive.KernelExtensions\XPlot.DotNet.Interactive.KernelExtensions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="$(IntermediateOutputPath)/dotnetKernel.zip">
+      <LogicalName>dotnetKernel.zip</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <Target Name="PrepareKernels">
     <PropertyGroup>
       <KernelSourceDirectory>$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/kernels</KernelSourceDirectory>
@@ -94,7 +100,6 @@
       <Output TaskParameter="Include" ItemName="AllKernelLogoFiles" />
     </CreateItem>
     <Copy SourceFiles="%(AllKernelLogoFiles.FullPath)" DestinationFolder="$(KernelDestinationDirectory)/%(AllKernelLogoFiles.Destination)" />
-    <!-- <Message Text="%(AllKernelLogoFiles.Filename) -> %(AllKernelLogoFiles.Destination)" /> -->
   </Target>
 
   <Target Name="ZipDotnetKernel" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyKernelFiles;CopyLogoFiles">

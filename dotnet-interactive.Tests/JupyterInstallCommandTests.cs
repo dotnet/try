@@ -1,27 +1,29 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using FluentAssertions;
 using System.CommandLine;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.App;
-using Microsoft.DotNet.Interactive.App.Tests;
+using FluentAssertions;
 using Xunit;
 
-namespace MLS.Agent.Tests
+namespace Microsoft.DotNet.Interactive.App.Tests
 {
-    public class JupyterCommandLineTests
+    public class JupyterInstallCommandTests
     {
         [Fact]
         public async Task Returns_error_when_jupyter_paths_could_not_be_obtained()
         {
             var console = new TestConsole();
-            var jupyterCommandLine = new JupyterInstallCommand(console, new InMemoryJupyterKernelSpec(false, error:new []{ "Could not find jupyter kernelspec module" }));
-            await jupyterCommandLine.InvokeAsync();
+            var installCommand = new JupyterInstallCommand(
+                console, 
+                new InMemoryJupyterKernelSpec(false, error: new[] { "Could not find jupyter kernelspec module" }));
+            
+            await installCommand.InvokeAsync();
+            
             console.Error.ToString().Should()
-                .Contain(".NET kernel installation failed")
-                .And
-                .Contain("Could not find jupyter kernelspec module");
+                   .Contain(".NET kernel installation failed")
+                   .And
+                   .Contain("Could not find jupyter kernelspec module");
         }
 
         [Fact]
@@ -29,7 +31,9 @@ namespace MLS.Agent.Tests
         {
             var console = new TestConsole();
             var jupyterCommandLine = new JupyterInstallCommand(console, new InMemoryJupyterKernelSpec(true, null));
+
             await jupyterCommandLine.InvokeAsync();
+            
             var consoleOut = console.Out.ToString();
             consoleOut.Should().MatchEquivalentOf("*[InstallKernelSpec] Installed kernelspec .net-csharp in *.net-csharp*");
             consoleOut.Should().MatchEquivalentOf("*[InstallKernelSpec] Installed kernelspec .net-fsharp in *.net-fsharp*");

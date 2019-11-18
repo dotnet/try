@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Interactive.App
         {
             using (var disposableDirectory = DisposableDirectory.Create())
             {
-                var assembly = typeof(JupyterInstallCommand).Assembly;
+                var assembly = typeof(Program).Assembly;
 
                 using (var resourceStream = assembly.GetManifestResourceStream("dotnetKernel.zip"))
                 {

@@ -14,7 +14,7 @@ using Microsoft.DotNet.Interactive.Utility;
 namespace MLS.Agent.CommandLine
 {
     public static class DemoCommand
-    {
+    { 
         public static Task<int> Do(
             DemoOptions options,
             IConsole console,
