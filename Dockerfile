@@ -61,7 +61,7 @@ RUN chown -R ${NB_UID} ${HOME}
 USER ${USER}
 
 # Install Microsoft.DotNet.Interactive
-RUN dotnet tool install -g dotnet-try --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json"
+RUN dotnet tool install -g dotnet-try --version "1.0.19569.5" --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json"
 
 ENV PATH="${PATH}:${HOME}/.dotnet/tools"
 RUN echo "$PATH"
