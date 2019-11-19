@@ -293,7 +293,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
-            public void It_formats_string_sequences_correctly()
+            public void It_formats_string_arrays_correctly()
             {
                 var strings = new[] { "apple", "banana", "cherry" };
 
@@ -301,6 +301,21 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                        .Should()
                        .Be(
                            "<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>apple</td></tr><tr><td>1</td><td>banana</td></tr><tr><td>2</td><td>cherry</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void It_formats_ordered_enumerables_correctly()
+            {
+                var sorted = new[]
+                        { "kiwi", "plantain", "apple" }
+                    .OrderBy(fruit => fruit.Length);
+
+                var html = sorted.ToDisplayString("text/html");
+
+                html.ToDisplayString("text/html")
+                    .Should()
+                    .Be(
+                        "<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>kiwi</td></tr><tr><td>1</td><td>apple</td></tr><tr><td>2</td><td>plantain</td></tr></tbody></table>");
             }
 
             [Fact(Skip = "wip")]

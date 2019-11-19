@@ -105,7 +105,12 @@ namespace Microsoft.DotNet.Interactive.Rendering
             {
                 if (!enumerableGenericType.IsArray)
                 {
-                    valueType = typeof(T).GenericTypeArguments.SingleOrDefault();
+                    var genericTypeArguments = typeof(T).GenericTypeArguments;
+
+                    if (genericTypeArguments.Length == 1)
+                    {
+                        valueType = genericTypeArguments[0];
+                    }
                 }
             }
 
