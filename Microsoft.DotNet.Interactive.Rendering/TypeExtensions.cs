@@ -125,5 +125,15 @@ namespace Microsoft.DotNet.Interactive.Rendering
 
             return type.ToString().StartsWith("System.ValueTuple`");
         }
+        
+        public static bool IsTuple(this Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            return type.ToString().StartsWith("System.Tuple`");
+        }
     }
 }
