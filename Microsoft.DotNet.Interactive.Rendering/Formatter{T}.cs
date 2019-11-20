@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 
 namespace Microsoft.DotNet.Interactive.Rendering
 {
@@ -15,6 +14,7 @@ namespace Microsoft.DotNet.Interactive.Rendering
     {
         internal static readonly bool TypeIsAnonymous = typeof(T).IsAnonymous();
         internal static readonly bool TypeIsException = typeof(Exception).IsAssignableFrom(typeof(T));
+        internal static readonly bool TypeIsTuple = typeof(T).IsTuple();
         internal static readonly bool TypeIsValueTuple = typeof(T).IsValueTuple();
 
         private static int? _listExpansionLimit;

@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.Interactive.Rendering
         {
             var accessors = forMembers.GetMemberAccessors<T>();
 
-            if (Formatter<T>.TypeIsValueTuple)
+            if (Formatter<T>.TypeIsValueTuple || 
+                Formatter<T>.TypeIsTuple)
             {
                 return FormatValueTuple;
             }

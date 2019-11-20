@@ -245,6 +245,18 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
 
             [Fact]
+            public void Tuple_values_are_formatted()
+            {
+                var tuple = Tuple.Create(123, "Hello", Enumerable.Range(1, 3));
+
+                var formatter = PlainTextFormatter.Create(tuple.GetType());
+
+                var formatted = tuple.ToDisplayString(formatter);
+
+                formatted.Should().Be("( 123, Hello, [ 1, 2, 3 ] )");
+            }
+            
+            [Fact]
             public void ValueTuple_values_are_formatted()
             {
                 var tuple = (123, "Hello", Enumerable.Range(1, 3));
