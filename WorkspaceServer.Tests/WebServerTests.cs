@@ -9,8 +9,7 @@ using FluentAssertions;
 using MLS.Agent.Tools.Tests;
 using Pocket;
 using Recipes;
-using WorkspaceServer.Features;
-using WorkspaceServer.Tests.Packaging;
+using WorkspaceServer.WorkspaceFeatures;
 using Xunit;
 using Xunit.Abstractions;
 

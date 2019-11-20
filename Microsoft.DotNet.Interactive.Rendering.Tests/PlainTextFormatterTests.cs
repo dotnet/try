@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
 {
-    public class PlainTextFormatterTests
+    public class PlainTextFormatterTests : FormatterTestBase
     {
         [Fact]
         public void Non_generic_Create_creates_generic_formatter()
@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                               .Should()
                               .BeOfType<PlainTextFormatter<Widget>>();
         }
-
-        public class Objects
+   
+        public class Objects : FormatterTestBase
         {
             [Fact]
             public void Create_creates_a_formatter_that_emits_the_property_names_and_values_for_a_specific_type()
@@ -269,7 +269,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
         }
 
-        public class Sequences
+        public class Sequences : FormatterTestBase
         {
             [Fact]
             public void Formatter_expands_IEnumerable()

@@ -77,15 +77,19 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     break;
 
                 case null:
+
                     traceBack.Add(commandFailed.Message);
                     break;
 
                 default:
+                    var exception = commandFailed.Exception;
+
                     traceBack.Add(
-                        commandFailed.Exception.GetType().FullName);
+                        $"{exception.GetType().FullName}: {exception.Message}");
 
                     traceBack.AddRange(
-                        commandFailed.Exception.StackTrace.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+                        exception.StackTrace.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+
                     break;
             }
 

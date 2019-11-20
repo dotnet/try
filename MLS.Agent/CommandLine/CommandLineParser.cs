@@ -10,19 +10,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.FSharp;
-using Microsoft.DotNet.Interactive.Jupyter;
+using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using MLS.Agent.Markdown;
-using MLS.Agent.Telemetry;
-using MLS.Agent.Telemetry.Configurer;
-using MLS.Agent.Telemetry.Utils;
 using MLS.Agent.Tools;
 using MLS.Repositories;
+using Recipes;
 using WorkspaceServer;
-using WorkspaceServer.Kernel;
+using WorkspaceServer.Packaging;
 using CommandHandler = System.CommandLine.Invocation.CommandHandler;
 
 namespace MLS.Agent.CommandLine
@@ -32,6 +27,10 @@ namespace MLS.Agent.CommandLine
         public delegate void StartServer(
             StartupOptions options,
             InvocationContext context);
+
+        public delegate Task Install(
+            InstallOptions options,
+            IConsole console);
 
         public delegate Task Demo(
             DemoOptions options,
@@ -47,36 +46,19 @@ namespace MLS.Agent.CommandLine
             PackOptions options,
             IConsole console);
 
-        public delegate Task Install(
-            InstallOptions options,
-            IConsole console);
-
         public delegate Task<int> Verify(
             VerifyOptions options,
             IConsole console,
             StartupOptions startupOptions);
 
-        public delegate Task<int> Jupyter(
-            StartupOptions options, 
-            IConsole console,
-            StartServer startServer = null,
-            InvocationContext context = null);
-
-        public delegate Task<int> StartKernelServer(
-            StartupOptions options, 
-            IKernel kernel,
-            IConsole console);
-
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
+            Install install = null,
             Demo demo = null,
             TryGitHub tryGithub = null,
             Pack pack = null,
-            Install install = null,
             Verify verify = null,
-            Jupyter jupyter = null,
-            StartKernelServer startKernelServer = null,
             ITelemetry telemetry = null,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = null)
         {
@@ -88,10 +70,6 @@ namespace MLS.Agent.CommandLine
             startServer = startServer ??
                           ((startupOptions, invocationContext) =>
                                   Program.ConstructWebHost(startupOptions).Run());
-
-            jupyter = jupyter ??
-                      ((startupOptions, console, server, context) => 
-                              JupyterCommand.Do(startupOptions, console, server, context));
 
             demo = demo ??
                    DemoCommand.Do;
@@ -111,18 +89,15 @@ namespace MLS.Agent.CommandLine
             pack = pack ??
                    PackCommand.Do;
 
-            install = install ??
-                      InstallCommand.Do;
-
-            startKernelServer = startKernelServer ??
-                                ((startupOptions, kernel, console) =>
-                           KernelServerCommand.Do(startupOptions, kernel, console));
-
             // Setup first time use notice sentinel.
-            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? new FirstTimeUseNoticeSentinel();
+            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? 
+                                         new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
 
             // Setup telemetry.
-            telemetry = telemetry ?? new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
+            telemetry = telemetry ?? 
+                        new Telemetry(
+                            VersionSensor.Version().AssemblyInformationalVersion, 
+                            firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
@@ -130,7 +105,7 @@ namespace MLS.Agent.CommandLine
             {
                 Name = nameof(StartupOptions.RootDirectory),
                 Arity = ArgumentArity.ZeroOrOne,
-                Description = "Specify the path to the root directory for your documentation",
+                Description = "Specify the path to the root directory for your documentation"
             };
 
             dirArgument.AddValidator(symbolResult =>
@@ -152,21 +127,19 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(StartInHostedMode());
             rootCommand.AddCommand(Demo());
             rootCommand.AddCommand(GitHub());
-            rootCommand.AddCommand(Pack());
             rootCommand.AddCommand(Install());
+            rootCommand.AddCommand(Pack());
             rootCommand.AddCommand(Verify());
-            rootCommand.AddCommand(Jupyter());
-            rootCommand.AddCommand(KernelServer());
 
             return new CommandLineBuilder(rootCommand)
                    .UseDefaults()
                    .UseMiddleware(async (context, next) =>
                    {
                        // If sentinel does not exist, print the welcome message showing the telemetry notification.
-                       if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.Telemetry.SkipFirstTimeExperience)
+                       if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.SkipFirstTimeExperience)
                        {
                            context.Console.Out.WriteLine();
-                           context.Console.Out.WriteLine(Telemetry.Telemetry.WelcomeMessage);
+                           context.Console.Out.WriteLine(Telemetry.WelcomeMessage);
 
                            firstTimeUseNoticeSentinel.CreateIfNotExists();
                        }
@@ -397,75 +370,28 @@ namespace MLS.Agent.CommandLine
                 return github;
             }
 
-            Command Jupyter()
+            Command Install()
             {
-                var jupyterCommand = new Command("jupyter", "Starts dotnet try as a Jupyter kernel");
-                var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
+                var installCommand = new Command("install", "Install a Try .NET package")
                 {
-                    Argument = new Argument<string>(defaultValue: () => "csharp")
+                    new Argument<string>
+                    {
+                        Name = nameof(InstallOptions.PackageName),
+                        Arity = ArgumentArity.ExactlyOne
+                    },
+                    new Option("--add-source")
+                    {
+                        Argument = new Argument<PackageSource>()
+                    }
                 };
-                jupyterCommand.AddOption(defaultKernelOption);
-                var connectionFileArgument = new Argument<FileInfo>
-                {
-                    Name = "ConnectionFile",
-                    Arity = ArgumentArity.ZeroOrOne //should be removed once the commandlineapi allows subcommands to not have arguments from the main command
-                }.ExistingOnly();
-                jupyterCommand.AddArgument(connectionFileArgument);
 
-                jupyterCommand.Handler = CommandHandler.Create<StartupOptions, JupyterOptions, IConsole, InvocationContext>((startupOptions, options, console, context) =>
-                {
-                    track(context.ParseResult);
+                installCommand.IsHidden = true;
 
-                    services
-                        .AddSingleton(c => ConnectionInformation.Load(options.ConnectionFile))
-                        .AddSingleton(
-                            c =>
-                            {
-                                return CommandScheduler
-                                    .Create<JupyterRequestContext>(delivery => c.GetRequiredService<ICommandHandler<JupyterRequestContext>>()
-                                                                                .Trace()
-                                                                                .Handle(delivery));
-                            })
-                        .AddSingleton(c => CreateKernel(options.DefaultKernel))
-                        .AddSingleton(c => new JupyterRequestContextHandler(c.GetRequiredService<IKernel>())
-                                          .Trace())
-                        .AddSingleton<IHostedService, Shell>()
-                        .AddSingleton<IHostedService, Heartbeat>();
+                installCommand.Handler = CommandHandler.Create<InstallOptions, IConsole>((options, console) => install(options, console));
 
-                    return jupyter(startupOptions, console, startServer, context);
-                });
-
-                var installCommand = new Command("install", "Install the .NET kernel for Jupyter");
-                installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
-                {
-                    track(context.ParseResult);
-                    return new JupyterCommandLine(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
-                });
-
-                jupyterCommand.AddCommand(installCommand);
-
-                return jupyterCommand;
+                return installCommand;
             }
-
-            Command KernelServer()
-            {
-                var startKernelServerCommand = new Command("kernel-server", "Starts dotnet-try with kernel functionality exposed over standard I/O");
-                var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
-                {
-                    Argument = new Argument<string>(defaultValue: () => "csharp")
-                };
-                startKernelServerCommand.AddOption(defaultKernelOption);
-
-                startKernelServerCommand.Handler = CommandHandler.Create<StartupOptions, KernelServerOptions, IConsole, InvocationContext>(
-                    (startupOptions, options, console, context) =>
-                {
-                    track(context.ParseResult);
-                    return startKernelServer(startupOptions, CreateKernel(options.DefaultKernel), console);
-                });
-
-                return startKernelServerCommand;
-            }
-
+            
             Command Pack()
             {
                 var packCommand = new Command("pack", "Create a Try .NET package")
@@ -492,28 +418,6 @@ namespace MLS.Agent.CommandLine
                 return packCommand;
             }
 
-            Command Install()
-            {
-                var installCommand = new Command("install", "Install a Try .NET package")
-                {
-                    new Argument<string>
-                    {
-                        Name = nameof(InstallOptions.PackageName),
-                        Arity = ArgumentArity.ExactlyOne
-                    },
-                    new Option("--add-source")
-                    {
-                        Argument = new Argument<PackageSource>()
-                    }
-                };
-
-                installCommand.IsHidden = true;
-
-                installCommand.Handler = CommandHandler.Create<InstallOptions, IConsole>((options, console) => install(options, console));
-
-                return installCommand;
-            }
-
             Command Verify()
             {
                 var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
@@ -529,31 +433,6 @@ namespace MLS.Agent.CommandLine
 
                 return verifyCommand;
             }
-        }
-
-        private static IKernel CreateKernel(string defaultKernelName)
-        {
-            var kernel = new CompositeKernel
-                                     {
-                                         new CSharpKernel()
-                                             .UseDefaultRendering()
-                                             .UseNugetDirective(() => new NativeAssemblyLoadHelper())
-                                             .UseKernelHelpers()
-                                             .UseWho()
-                                             .UseXplot(),
-                                         new FSharpKernel()
-                                             .UseDefaultRendering()
-                                             .UseKernelHelpers()
-                                             .UseDefaultNamespaces()
-                                             .UseXplot()
-                                     }
-                                     .UseDefaultMagicCommands()
-                                     .UseExtendDirective();
-
-            kernel.DefaultKernelName = defaultKernelName;
-            kernel.Name = ".NET";
-
-            return kernel;
         }
     }
 }

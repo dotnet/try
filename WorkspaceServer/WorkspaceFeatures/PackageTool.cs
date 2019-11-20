@@ -4,9 +4,8 @@
 using MLS.Agent.Tools;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.WorkspaceFeatures

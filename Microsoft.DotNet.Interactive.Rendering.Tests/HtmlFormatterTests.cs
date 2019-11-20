@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Rendering.Tests
 {
-    public class HtmlFormatterTests
+    public class HtmlFormatterTests : FormatterTestBase
     {
         [Fact]
         public void Non_generic_Create_creates_generic_formatter()
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
                          .BeOfType<HtmlFormatter<Widget>>();
         }
 
-        public class Objects
+        public class Objects : FormatterTestBase
         {
             public Objects()
             {
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Interactive.Rendering.Tests
             }
         }
 
-        public class Sequences
+        public class Sequences : FormatterTestBase
         {
             [Fact]
             public void It_formats_sequences_as_tables_with_an_index_on_the_y_axis()

@@ -6,9 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
-using MLS.Agent;
 using Xunit;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 using File = System.IO.File;
@@ -17,7 +17,6 @@ namespace Microsoft.DotNet.Try.Project.Tests
 {
     public class BufferInliningTransformerTests
     {
-
         [Fact]
         public void When_workspace_is_null_then_the_transformer_throw_exception()
         {

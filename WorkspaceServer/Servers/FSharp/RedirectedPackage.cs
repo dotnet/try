@@ -1,19 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
-using MLS.Agent.Tools;
-using MLS.Agent.Tools.Roslyn;
-using WorkspaceServer.Servers.Roslyn;
 using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Servers.FSharp
 {
     internal class RedirectedPackage : Package, IDisposable
     {
-        private Package _parentPackage;
-        private DirectoryInfo _redirectedDirectory;
-        private Workspace _workspace;
+        private readonly Package _parentPackage;
+        private readonly DirectoryInfo _redirectedDirectory;
+        private readonly Workspace _workspace;
 
         public RedirectedPackage(Workspace workspace, Package parentPackage, DirectoryInfo directory)
             : base(parentPackage.Name, parentPackage.Initializer, directory)

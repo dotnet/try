@@ -3,7 +3,6 @@
 
 using System;
 using MLS.Agent;
-using MLS.Agent.Tools;
 using WorkspaceServer;
 using Xunit.Abstractions;
 
@@ -18,7 +17,6 @@ namespace Pocket
                 {
                     typeof(LogEvents).Assembly,
                     typeof(Startup).Assembly,
-                    typeof(CommandLine).Assembly,
                     typeof(ICodeRunner).Assembly,
                 });
     }

@@ -13,6 +13,7 @@ using MLS.Agent.Tools;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using System.Linq;
 using System;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
 {

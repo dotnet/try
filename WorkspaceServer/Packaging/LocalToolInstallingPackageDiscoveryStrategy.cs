@@ -4,7 +4,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
-using MLS.Agent.Tools;
+using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 
 namespace WorkspaceServer.Packaging
@@ -40,8 +40,7 @@ namespace WorkspaceServer.Packaging
             var installationResult = await dotnet.ToolInstall(
                 packageDesciptor.Name,
                 _workingDirectory,
-                _addSource,
-                budget);
+                _addSource?.ToString());
 
             if (installationResult.ExitCode != 0)
             {

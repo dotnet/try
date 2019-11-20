@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Tools;
 using Pocket;
@@ -12,7 +13,7 @@ using WorkspaceServer.Packaging;
 using static Pocket.Logger;
 using Package = WorkspaceServer.Packaging.Package;
 
-namespace WorkspaceServer.Features
+namespace WorkspaceServer.WorkspaceFeatures
 {
     public class WebServer : IRunResultFeature, IDisposable
     {

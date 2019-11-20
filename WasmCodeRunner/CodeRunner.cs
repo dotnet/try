@@ -29,7 +29,6 @@ namespace MLS.WasmCodeRunner
                 return null;
             }
 
-
             if (messageObject.Data.Base64Assembly == null && messageObject.Data.Diagnostics == null)
             {
                 // Something was posted that wasn't meant for us

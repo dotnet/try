@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MLS.Agent.Telemetry;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.DotNet.Interactive.Telemetry;
 
 namespace MLS.Agent.Tests
 {

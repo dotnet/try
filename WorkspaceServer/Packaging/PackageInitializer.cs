@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
-using MLS.Agent.Tools;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace WorkspaceServer.Packaging
 {
@@ -52,8 +52,7 @@ namespace WorkspaceServer.Packaging
 
             var result = await dotnet
                              .New(Template,
-                                  args: $"--name \"{ProjectName}\" --language \"{Language}\" --output \"{directory.FullName}\"",
-                                  budget: budget);
+                                  args: $"--name \"{ProjectName}\" --language \"{Language}\" --output \"{directory.FullName}\"");
             result.ThrowOnFailure($"Error initializing in {directory.FullName}");
 
             if (afterCreate != null)

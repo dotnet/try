@@ -6,9 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using WorkspaceServer;
+using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
 using Xunit;
 
@@ -64,7 +66,7 @@ namespace MLS.Agent.Tests.CommandLine
 
             var dotnet = new Dotnet(asset.Directory);
 
-            var result = await dotnet.ToolInstall(packageName, asset.Directory, new PackageSource(asset.Directory.FullName));
+            var result = await dotnet.ToolInstall(packageName, asset.Directory, new PackageSource(asset.Directory.FullName).ToString());
 
             var exe = Path.Combine(asset.Directory.FullName, packageName);
 

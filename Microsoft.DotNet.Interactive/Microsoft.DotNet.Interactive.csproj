@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <PackageId>Microsoft.DotNet.Interactive</PackageId>
-    <NoWarn>$(NoWarn);8002</NoWarn>
+    <NoWarn>$(NoWarn);8002;CS8002</NoWarn>
     <LangVersion>preview</LangVersion>
-    <NuspecFile>Microsoft.DotNet.Interactive.nuspec</NuspecFile>
-    <!-- Clockwise isn't strongly signed -->
+    <NuspecFile>Microsoft.DotNet.Interactive.nuspec</NuspecFile> <!-- Clockwise isn't strongly signed -->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,21 +20,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisAnalyzersVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="System.Runtime.Loader" Version="$(SystemRuntimeLoaderVersion)" />
     <PackageReference Include="System.Reactive" Version="$(SystemReactiveVersion)" />
     <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19508.1" />
         <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
-    <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
   </ItemGroup>
 
    <ItemGroup>	

@@ -6,6 +6,7 @@ using System.IO;
 using Clockwise;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Tools;
 using Pocket;
 using WorkspaceServer.Servers.Roslyn;

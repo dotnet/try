@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="%28External%29\NativeMethodsShared.cs" />
-    <Compile Remove="%28External%29\ProcessExtensions.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\FileNameUtilities.cs" Link="%28Recipes%29\FileNameUtilities.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\PathUtilities.cs" Link="%28Recipes%29\PathUtilities.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,9 +31,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="%28External%29\" />
   </ItemGroup>
 </Project>

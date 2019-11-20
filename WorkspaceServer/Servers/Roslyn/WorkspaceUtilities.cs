@@ -12,6 +12,7 @@ using Buildalyzer.Workspaces;
 using Clockwise;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Interactive.Utility;
 using WorkspaceServer.Packaging;
 
 namespace WorkspaceServer.Servers.Roslyn

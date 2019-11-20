@@ -12,6 +12,8 @@ using Xunit.Abstractions;
 using WorkspaceServer;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Interactive.Utility;
+using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests
 {
@@ -34,7 +36,7 @@ namespace MLS.Agent.Tests
                 var package = await Create.ConsoleWorkspaceCopy();
                 File.Move(package.Directory.GetFiles("*.csproj").First().FullName, Path.Combine(package.Directory.FullName, "not-console.csproj"));
                 await PackCommand.Do(new PackOptions(package.Directory, outputDirectory: temp, enableWasm: false), console);
-                var result = await WorkspaceServer.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} not-console --tool-path {temp.FullName}");
+                var result = await Microsoft.DotNet.Interactive.Utility.CommandLine.Execute("dotnet", $"tool install --add-source {temp.FullName} not-console --tool-path {temp.FullName}");
                 output.WriteLine(string.Join("\n", result.Error));
                 result.ExitCode.Should().Be(0);
 

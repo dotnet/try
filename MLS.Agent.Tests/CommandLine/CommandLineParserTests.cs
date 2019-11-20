@@ -8,11 +8,11 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using MLS.Agent.CommandLine;
-using MLS.Agent.Telemetry.Configurer;
 using MLS.Agent.Tools;
-using WorkspaceServer;
+using WorkspaceServer.Packaging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -63,10 +63,6 @@ namespace MLS.Agent.Tests.CommandLine
                 verify: (options, console, startupOptions) =>
                 {
                     _verifyOptions = options;
-                    return Task.FromResult(1);
-                },
-                jupyter: (startupOptions, console, startServer, context) =>
-                {
                     return Task.FromResult(1);
                 },
                 telemetry: new FakeTelemetry(),
@@ -365,80 +361,6 @@ namespace MLS.Agent.Tests.CommandLine
                 .FullName
                 .Should()
                 .Be(expected);
-        }
-
-        [Fact]
-        public void jupyter_parses_connection_file_path()
-        {
-            var expected = Path.GetTempFileName();
-
-            var result = _parser.Parse($"jupyter {expected}");
-
-            var binder = new ModelBinder<JupyterOptions>();
-
-            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
-
-            options
-                .ConnectionFile
-                .FullName
-                .Should()
-                .Be(expected);
-        }
-
-        [Fact]
-        public void jupyter_default_kernel_option_value()
-        {
-            var result = _parser.Parse($"jupyter {Path.GetTempFileName()}");
-            var binder = new ModelBinder<JupyterOptions>();
-            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
-            options.DefaultKernel.Should().Be("csharp");
-        }
-
-        [Fact]
-        public void jupyter_honors_default_kernel_option()
-        {
-            var result = _parser.Parse($"jupyter --default-kernel bsharp {Path.GetTempFileName()}");
-            var binder = new ModelBinder<JupyterOptions>();
-            var options = (JupyterOptions)binder.CreateInstance(new BindingContext(result));
-            options.DefaultKernel.Should().Be("bsharp");
-        }
-
-        [Fact]
-        public async Task jupyter_returns_error_if_connection_file_path_does_not_exits()
-        {
-            var expected = "not_exist.json";
-
-            var testConsole = new TestConsole();
-            await _parser.InvokeAsync($"jupyter {expected}", testConsole);
-
-            testConsole.Error.ToString().Should().Contain("File does not exist: not_exist.json");
-        }
-
-        [Fact]
-        public void kernel_server_starts_with_default_kernel()
-        {
-            var result = _parser.Parse($"kernel-server");
-            var binder = new ModelBinder<KernelServerOptions>();
-            var options = (KernelServerOptions)binder.CreateInstance(new BindingContext(result));
-            options.DefaultKernel.Should().Be("csharp");
-        }
-
-        [Fact]
-        public void kernel_server__honors_default_kernel_option()
-        {
-            var result = _parser.Parse($"kernel-server --default-kernel bsharp");
-            var binder = new ModelBinder<KernelServerOptions>();
-            var options = (KernelServerOptions)binder.CreateInstance(new BindingContext(result));
-            options.DefaultKernel.Should().Be("bsharp");
-        }
-
-        [Fact(Skip = "Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
-        public async Task jupyter_returns_error_if_connection_file_path_is_not_passed()
-        {
-            var testConsole = new TestConsole();
-            await _parser.InvokeAsync("jupyter", testConsole);
-
-            testConsole.Error.ToString().Should().Contain("Required argument missing for command: jupyter");
         }
     }
 }

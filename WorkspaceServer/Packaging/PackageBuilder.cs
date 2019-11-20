@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
-using MLS.Agent.Tools;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace WorkspaceServer.Packaging
 {

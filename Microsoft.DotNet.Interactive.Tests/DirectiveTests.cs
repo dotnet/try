@@ -7,8 +7,8 @@ using System.CommandLine.Invocation;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using WorkspaceServer.Kernel;
 using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Tests

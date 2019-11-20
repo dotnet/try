@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <NoWarn>$(NoWarn);2003</NoWarn> <!-- AssemblyInformationalVersionAttribute contains a non-standard value -->
     <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,12 +20,12 @@
     <Compile Include="FSharpKernel.fs" />
     <Compile Include="FSharpKernelHelpers.fs" />
     <Compile Include="FSharpPocketViewTags.fs" />
+    <Compile Include="FSharpKernelExtensions.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Interactive\Microsoft.DotNet.Interactive.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
-    <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

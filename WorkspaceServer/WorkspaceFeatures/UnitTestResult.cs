@@ -3,7 +3,7 @@
 
 using System.Linq;
 
-namespace WorkspaceServer.Features
+namespace WorkspaceServer.WorkspaceFeatures
 {
     public class UnitTestResult
     {

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "dotnet",
+    "interactive",
+    "jupyter",
+    "--default-kernel",
+    "fsharp",
+    "{connection_file}"
+  ],
+  "display_name": ".NET (F#)",
+  "language": "F#"
+}

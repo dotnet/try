@@ -7,8 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host.Mef;
-using MLS.Agent.Tools;
-using MLS.Agent.Tools.Roslyn;
+using Microsoft.DotNet.Interactive.Utility;
 using WorkspaceServer.Servers.Roslyn;
 
 // adapted from https://github.com/dotnet/roslyn/blob/master/src/Workspaces/Core/Desktop/Workspace/CommandLineProject.cs

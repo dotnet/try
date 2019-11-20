@@ -21,6 +21,7 @@ using Microsoft.CodeAnalysis.Text;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 using WorkspaceServer.Servers.Roslyn;
 using static Pocket.Logger<WorkspaceServer.Packaging.Package>;
@@ -531,8 +532,6 @@ namespace WorkspaceServer.Packaging
                 Interlocked.Exchange(ref publishCount, 0);
             }
         }
-
-
 
         public override string ToString()
         {

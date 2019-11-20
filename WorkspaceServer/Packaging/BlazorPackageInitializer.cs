@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.Tools;
 
 namespace WorkspaceServer.Packaging
@@ -63,7 +64,7 @@ namespace WorkspaceServer.Packaging
             }
            
 
-            var result = await dotnet.Build("-o runtime /bl", budget: budget);
+            var result = await dotnet.Build("-o runtime /bl");
             var stuff = string.Concat(string.Join("\n", result.Output), (string.Join("\n", result.Error)));
             result.ThrowOnFailure(stuff);
 

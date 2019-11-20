@@ -17,7 +17,6 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Jupyter;
 using static Pocket.Logger<MLS.Agent.Program>;
 using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 using MLS.Agent.CommandLine;
@@ -45,8 +44,7 @@ namespace MLS.Agent
         private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs = {
             typeof(Startup).Assembly,
             typeof(AsyncLazy<>).Assembly,
-            typeof(IWorkspaceServer).Assembly,
-            typeof(Shell).Assembly
+            typeof(IWorkspaceServer).Assembly
         };
 
         private static IDisposable StartAppInsightsLogging(StartupOptions options)

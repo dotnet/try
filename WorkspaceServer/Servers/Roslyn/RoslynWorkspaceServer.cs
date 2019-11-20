@@ -11,19 +11,19 @@ using Clockwise;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Recommendations;
+using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
-using MLS.Agent.Tools;
 using Pocket;
 using Recipes;
 using WorkspaceServer.Models.Execution;
 using WorkspaceServer.Servers.Roslyn.Instrumentation;
 using WorkspaceServer.Transformations;
-using WorkspaceServer.Features;
 using static Pocket.Logger<WorkspaceServer.Servers.Roslyn.RoslynWorkspaceServer>;
 using Workspace = Microsoft.DotNet.Try.Protocol.Workspace;
 using WorkspaceServer.LanguageServices;
 using WorkspaceServer.Packaging;
+using WorkspaceServer.WorkspaceFeatures;
 using Package = WorkspaceServer.Packaging.Package;
 
 namespace WorkspaceServer.Servers.Roslyn
@@ -316,8 +316,7 @@ namespace WorkspaceServer.Servers.Roslyn
 
             var commandName = $@"""{package.EntryPointAssemblyPath.FullName}""";
             var commandLineResult = await dotnet.Execute(
-                                        commandName.AppendArgs(commandLineArgs),
-                                        budget);
+                                        commandName.AppendArgs(commandLineArgs));
 
             budget.RecordEntry(UserCodeCompleted);
 
@@ -360,8 +359,7 @@ namespace WorkspaceServer.Servers.Roslyn
             var dotnet = new Dotnet(package.Directory);
 
             var commandLineResult = await dotnet.VSTest(
-                                        $@"--logger:trx ""{package.EntryPointAssemblyPath}""",
-                                        budget);
+                                        $@"--logger:trx ""{package.EntryPointAssemblyPath}""");
 
             budget.RecordEntry(UserCodeCompleted);
 
@@ -383,8 +381,7 @@ namespace WorkspaceServer.Servers.Roslyn
             var tRexResult = await CommandLine.Execute(
                                  trex,
                                  "",
-                                 workingDir: package.Directory,
-                                 budget: budget);
+                                 workingDir: package.Directory);
 
             var result = new RunResult(
                 commandLineResult.ExitCode == 0,

@@ -12,7 +12,7 @@ using Pocket;
 using Recipes;
 using WorkspaceServer.Models.Execution;
 using WorkspaceServer.Servers.Roslyn;
-using WorkspaceServer.Features;
+using WorkspaceServer.WorkspaceFeatures;
 using Xunit;
 using Xunit.Abstractions;
 using Package = WorkspaceServer.Packaging.Package;

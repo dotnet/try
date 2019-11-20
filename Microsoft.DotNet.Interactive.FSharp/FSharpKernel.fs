@@ -14,7 +14,7 @@ open FSharp.DependencyManager
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
-open MLS.Agent.Tools
+open Microsoft.DotNet.Interactive.Utility
 
 type FSharpKernel() =
     inherit KernelBase(Name = "fsharp")

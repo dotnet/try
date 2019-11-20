@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using MLS.Agent.Tools;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive
@@ -11,7 +10,7 @@ namespace Microsoft.DotNet.Interactive
     public interface IExtensibleKernel
     {
         Task LoadExtensionsFromDirectory(
-            IDirectoryAccessor directory, 
+            DirectoryInfo directory, 
             KernelInvocationContext invocationContext, 
             IReadOnlyList<FileInfo> additionalDependencies = null);
     }

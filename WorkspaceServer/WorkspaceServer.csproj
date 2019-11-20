@@ -22,6 +22,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\AddPackageResult.cs" Link="%28Recipes%29\AddPackageResult.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\CommandLine.cs" Link="%28Recipes%29\CommandLine.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\CommandLineInvocationException.cs" Link="%28Recipes%29\CommandLineInvocationException.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\CommandLineResult.cs" Link="%28Recipes%29\CommandLineResult.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\ConsoleOutput.cs" Link="%28Recipes%29\ConsoleOutput.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DirectoryUtility.cs" Link="%28Recipes%29\DirectoryUtility.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\Dotnet.cs" Link="%28Recipes%29\Dotnet.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\Paths.cs" Link="%28Recipes%29\Paths.cs" />
     <Compile Include="..\MLS.PackageTool\Program.cs" Link="WorkspaceFeatures\Program.cs" />
   </ItemGroup>
 
@@ -91,7 +99,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -100,9 +107,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FSharpWorkspaceShim\FSharpWorkspaceShim.fsproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive.FSharp\Microsoft.DotNet.Interactive.FSharp.fsproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive\Microsoft.DotNet.Interactive.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />

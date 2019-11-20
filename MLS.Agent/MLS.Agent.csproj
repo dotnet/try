@@ -11,7 +11,7 @@
     <ToolCommandName>dotnet-try</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <Description>Try .NET is an interactive documentation generator for .NET Core.</Description>
+    <Description>Try .NET creates interactive documentation for .NET Core.</Description>
     <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise and Markdig aren't strongly signed -->
     <NoWarn>$(NoWarn);NU5129</NoWarn><!-- Improper warning about missing props file.  See https://github.com/NuGet/Home/issues/8627 -->
@@ -20,16 +20,25 @@
   <ItemGroup>
     <Compile Remove="bin\**" />
     <Compile Remove="node_modules\**" />
+    <Compile Remove="obj\**" />
     <Compile Remove="TestResults\**" />
     <Content Remove="bin\**" />
     <Content Remove="node_modules\**" />
+    <Content Remove="obj\**" />
     <Content Remove="TestResults\**" />
     <EmbeddedResource Remove="bin\**" />
     <EmbeddedResource Remove="node_modules\**" />
+    <EmbeddedResource Remove="obj\**" />
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="bin\**" />
     <None Remove="node_modules\**" />
+    <None Remove="obj\**" />
     <None Remove="TestResults\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DirectoryUtility.cs" Link="%28Recipes%29\DirectoryUtility.cs" />
+    <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DisposableDirectory.cs" Link="%28Recipes%29\DisposableDirectory.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -94,11 +103,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Jupyter\Microsoft.DotNet.Interactive.Jupyter.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Telemetry\Microsoft.DotNet.Interactive.Telemetry.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.ClientApi\Microsoft.DotNet.Try.Protocol.ClientApi.csproj" />
@@ -106,13 +116,14 @@
     <ProjectReference Include="..\MLS.Blazor\MLS.Blazor.csproj" />
     <ProjectReference Include="..\MLS.Repositories\MLS.Repositories.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
-    <ProjectReference Include="..\XPlot.DotNet.Interactive.KernelExtensions\XPlot.DotNet.Interactive.KernelExtensions.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="..\MLS.PackageTool\MLS.PackageTool.csproj" />
     <EmbeddedResource Include="..\MLS.PackageTool\Program.cs">
@@ -121,9 +132,12 @@
     <EmbeddedResource Include="$(IntermediateOutputPath)/demo.zip">
       <LogicalName>demo.zip</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(IntermediateOutputPath)/dotnetKernel.zip">
-      <LogicalName>dotnetKernel.zip</LogicalName>
-    </EmbeddedResource>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="wwwroot\api\" />
+    <Folder Include="wwwroot\client\" />
+    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
   <Target Name="GatherInputs" Condition="'$(NCrunch)' != '1' And '$(BuildingInsideVisualStudio)' != 'true'">
@@ -211,33 +225,5 @@
 
   <Target Name="ZipDemo" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyDemoFiles">
     <ZipDirectory SourceDirectory="$(IntermediateOutputPath)demo" DestinationFile="$(IntermediateOutputPath)\demo.zip" Overwrite="true" />
-  </Target>
-
-  <Target Name="PrepareKernels">
-    <PropertyGroup>
-      <KernelSourceDirectory>$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/kernels</KernelSourceDirectory>
-      <KernelDestinationDirectory>$(IntermediateOutputPath)dotnetKernel</KernelDestinationDirectory>
-    </PropertyGroup>
-    <ItemGroup>
-      <KernelFiles Include="$(KernelSourceDirectory)/**/*.json" SkipUnchangedFiles="true" />
-      <KernelFolders Include="$([System.IO.Directory]::GetDirectories($(KernelSourceDirectory)))" />
-      <KernelLogoFiles Include="$(MSBuildProjectDirectory)/../Microsoft.DotNet.Interactive.Jupyter/ContentFiles/*.png" SkipUnchangedFiles="true" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="CopyKernelFiles" DependsOnTargets="PrepareKernels">
-    <Copy SourceFiles="@(KernelFiles)" DestinationFolder="$(KernelDestinationDirectory)/%(RecursiveDir)" />
-  </Target>
-
-  <Target Name="CopyLogoFiles" DependsOnTargets="PrepareKernels;CopyKernelFiles">
-    <CreateItem Include="@(KernelLogoFiles)" AdditionalMetadata="Destination=$([System.IO.Path]::GetFileName(%(KernelFolders.Identity)))">
-      <Output TaskParameter="Include" ItemName="AllKernelLogoFiles" />
-    </CreateItem>
-    <Copy SourceFiles="%(AllKernelLogoFiles.FullPath)" DestinationFolder="$(KernelDestinationDirectory)/%(AllKernelLogoFiles.Destination)" />
-    <!-- <Message Text="%(AllKernelLogoFiles.Filename) -> %(AllKernelLogoFiles.Destination)" /> -->
-  </Target>
-
-  <Target Name="ZipDotnetKernel" BeforeTargets="PrepareForBuild" DependsOnTargets="CopyKernelFiles;CopyLogoFiles">
-    <ZipDirectory SourceDirectory="$(KernelDestinationDirectory)" DestinationFile="$(IntermediateOutputPath)/dotnetKernel.zip" Overwrite="true" />
   </Target>
 </Project>
