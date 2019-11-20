@@ -217,13 +217,13 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             var kernel = new CompositeKernel
                          {
                              new CSharpKernel()
-                                 .UseDefaultRendering()
+                                 .UseDefaultFormatting()
                                  .UseNugetDirective()
                                  .UseKernelHelpers()
                                  .UseWho()
                                  .UseXplot(),
                              new FSharpKernel()
-                                 .UseDefaultRendering()
+                                 .UseDefaultFormatting()
                                  .UseKernelHelpers()
                                  .UseDefaultNamespaces()
                                  .UseXplot()

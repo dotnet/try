@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Interactive.FSharp
 
 open System
 open Microsoft.AspNetCore.Html
-open Microsoft.DotNet.Interactive.Rendering
+open Microsoft.DotNet.Interactive.Formatting
 
 type FSharpPocketViewTags(p: PocketView) as this =
     override __.ToString() = p.ToString()

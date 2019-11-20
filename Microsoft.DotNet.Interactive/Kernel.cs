@@ -5,8 +5,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Rendering;
-using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
+using Microsoft.DotNet.Interactive.Formatting;
+using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive
 {
