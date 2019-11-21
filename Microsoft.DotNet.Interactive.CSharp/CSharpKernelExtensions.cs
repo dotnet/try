@@ -10,14 +10,14 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Rendering;
-using static Microsoft.DotNet.Interactive.Rendering.PocketViewTags;
+using Microsoft.DotNet.Interactive.Formatting;
+using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.CSharp
 {
     public static class CSharpKernelExtensions
     {
-        public static CSharpKernel UseDefaultRendering(
+        public static CSharpKernel UseDefaultFormatting(
             this CSharpKernel kernel)
         {
             Task.Run(() =>

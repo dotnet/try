@@ -26,11 +26,11 @@ namespace Microsoft.DotNet.Interactive.Tests
             var kernelBase = language switch
             {
                 Language.FSharp => new FSharpKernel()
-                                   .UseDefaultRendering()
+                                   .UseDefaultFormatting()
                                    .UseKernelHelpers()
                                    .UseDefaultNamespaces() as KernelBase,
                 Language.CSharp => new CSharpKernel()
-                                   .UseDefaultRendering()
+                                   .UseDefaultFormatting()
                                    .UseNugetDirective()
                                    .UseKernelHelpers(),
                 _ => throw new InvalidOperationException("Unknown language specified")

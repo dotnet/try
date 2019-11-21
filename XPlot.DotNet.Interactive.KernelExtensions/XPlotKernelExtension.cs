@@ -3,7 +3,7 @@
 
 using HtmlAgilityPack;
 using Microsoft.DotNet.Interactive;
-using Microsoft.DotNet.Interactive.Rendering;
+using Microsoft.DotNet.Interactive.Formatting;
 using System.Text;
 using System.Threading.Tasks;
 using XPlot.Plotly;

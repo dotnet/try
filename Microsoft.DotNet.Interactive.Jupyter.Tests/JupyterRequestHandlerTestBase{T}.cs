@@ -29,12 +29,12 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             _disposables.Add(output.SubscribeToPocketLogger());
 
             _cSharpKernel = new CSharpKernel()
-                .UseDefaultRendering()
+                .UseDefaultFormatting()
                 .UseExtendDirective()
                 .UseKernelHelpers();
 
             _fSharpKernel = new FSharpKernel()
-                .UseDefaultRendering()
+                .UseDefaultFormatting()
                 .UseKernelHelpers()
                 .UseDefaultNamespaces();
 

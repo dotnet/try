@@ -4,7 +4,7 @@
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
-using Microsoft.DotNet.Interactive.Rendering;
+using Microsoft.DotNet.Interactive.Formatting;
 
 using System;
 using System.Collections.Generic;

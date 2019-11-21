@@ -6,7 +6,7 @@ open Microsoft.AspNetCore.Html
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.FSharp
-open Microsoft.DotNet.Interactive.Rendering
+open Microsoft.DotNet.Interactive.Formatting
 open XPlot.Plotly
 
 [<AbstractClass; Extension; Sealed>]
@@ -16,7 +16,7 @@ type FSharpKernelExtensions private () =
     static let openNamespaceOrType = fun (whatToOpen: String) -> sprintf "open %s" whatToOpen
 
     [<Extension>]
-    static member UseDefaultRendering(kernel: FSharpKernel) = 
+    static member UseDefaultFormatting(kernel: FSharpKernel) = 
         let t = 
             async {
                 let code = 

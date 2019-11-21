@@ -29,15 +29,15 @@
     <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.DotNet.Interactive.Rendering\Microsoft.DotNet.Interactive.Rendering.csproj" />
-  </ItemGroup>
-
    <ItemGroup>	
     <NuspecProperty Include="MicrosoftCodeAnalysisAnalyzersVersion=$(MicrosoftCodeAnalysisAnalyzersVersion)" />	
     <NuspecProperty Include="SystemRuntimeLoaderVersion=$(SystemRuntimeLoaderVersion)" />	
     <NuspecProperty Include="SystemReactiveVersion=$(SystemReactiveVersion)" />	
     <NuspecProperty Include="SystemCommandlineExperimentalVersion=$(SystemCommandlineExperimentalVersion)" />	
   </ItemGroup>
+
+   <ItemGroup>
+     <ProjectReference Include="..\Microsoft.DotNet.Interactive.Formatting\Microsoft.DotNet.Interactive.Formatting.csproj" />
+   </ItemGroup>
  
 </Project>

@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 new CSharpKernel()
                     .UseKernelHelpers()
                     .UseNugetDirective()
-                    .UseDefaultRendering()
+                    .UseDefaultFormatting()
             };
 
             _io = new IOStreams();
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             await gate;
 
             var events = _events
-                         .Select(e => e.ToString(Formatting.None));
+                         .Select(e => e.ToString(Newtonsoft.Json.Formatting.None));
 
             var expectedEvents = new List<string> {
                 IOStreams.ToStreamKernelEvent(new CommandHandled(new SubmitCode(@"var x = 123;")), 0).Serialize(),
@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             
             await gate;
 
-            this.Assent(string.Join("\n", _events.Select(e => e.ToString(Formatting.None))), _configuration);
+            this.Assent(string.Join("\n", _events.Select(e => e.ToString(Newtonsoft.Json.Formatting.None))), _configuration);
         }
 
         [Fact]
