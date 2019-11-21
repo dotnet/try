@@ -18,9 +18,9 @@ using static Pocket.Logger;
 #pragma warning disable 8509
 namespace Microsoft.DotNet.Interactive.Tests
 {
-    public class LanguageKernelRenderingTests : LanguageKernelTestBase
+    public class LanguageKernelFormattingTests : LanguageKernelTestBase
     {
-        public LanguageKernelRenderingTests(ITestOutputHelper output) : base(output)
+        public LanguageKernelFormattingTests(ITestOutputHelper output) : base(output)
         {
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         // sequence of anonymous objects
         [InlineData(Language.CSharp, "new[] { new { a = 123 }, new { a = 456 } }", "<table>")]
         [InlineData(Language.FSharp, "[{| a = 123 |}; {| a = 456 |}]", "<table>")]
-        public async Task Default_rendering_is_HTML(
+        public async Task Default_formatting_is_HTML(
             Language language,
             string submission,
             string expectedContent)
