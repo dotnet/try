@@ -5,7 +5,6 @@ namespace Microsoft.DotNet.Interactive.FSharp
 
 open System
 open System.Collections.Generic
-open System.IO
 open System.Threading
 open System.Threading.Tasks
 open FSharp.Compiler.Interactive.Shell
@@ -29,11 +28,11 @@ type FSharpKernel() =
     let messageMap = Dictionary<string, string>()
 
     let parseReference text =
-        let reference, binLogging = FSharpDependencyManager.parsePackageReference [text]
-        (reference |> List.tryHead), binLogging
+        let reference, binLogPath = FSharpDependencyManager.parsePackageReference [text]
+        (reference |> List.tryHead), binLogPath
 
-    let packageInstallingMessages (refSpec:PackageReference option * bool) =
-        let ref, binLogging = refSpec
+    let packageInstallingMessages (refSpec: PackageReference option * string option option) =
+        let ref, binLogPath = refSpec
         let versionText =
             match ref with
             | Some ref when ref.Version <> "*" -> ", version " + ref.Version
@@ -42,15 +41,15 @@ type FSharpKernel() =
         let installingMessage ref = "Installing package " + ref.Include + versionText + "."
         let loggingMessage = "Binary Logging enabled"
         [|
-            match ref, binLogging with
-            | Some reference, true ->
+            match ref, binLogPath with
+            | Some reference, Some _ ->
                 yield installingMessage reference
                 yield loggingMessage
-            | Some reference, false ->
+            | Some reference, None ->
                 yield installingMessage reference
-            | None, true ->
+            | None, Some _ ->
                 yield loggingMessage
-            | None, false ->
+            | None, None ->
                 ()
         |]
 
