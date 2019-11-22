@@ -200,7 +200,6 @@ namespace Microsoft.DotNet.Interactive
                 {
                     ptr = NativeLibrary.Load(dll);
                     Logger.Log.Info("NativeLibrary.Load({dll})", args.LoadedAssembly.Location);
-                    Console.WriteLine($"NativeLibrary.Load({dll})");
                 }
                 catch (Exception)
                 {
