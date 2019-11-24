@@ -5,23 +5,23 @@
   This file is a terrible hack.
 
 
-  The `dotnet-try.*.nupkg` package is never rebuilt to have a stable version because that's handled manually.  The fix
+  The `dotnet-*.nupkg` packages are never rebuilt to have a stable version because that's handled manually.  The fix
   is to not allow it to be picked up by the repack targets by temporarily renaming it before the
   `PackageReleasePackages` target and restoring it's name after.
   -->
 
   <ItemGroup>
-    <DotNetTryPackages Include="$(ArtifactsShippingPackagesDir)\dotnet-try.*.nupkg" />
+    <StableVersionPackages Include="$(ArtifactsShippingPackagesDir)\dotnet-*.nupkg" />
   </ItemGroup>
 
-  <!-- Appends the extension `.renamed` to the dotnet-try package to force the glob `*.nupkg` to not pick it up. -->
+  <!-- Appends the extension `.renamed` to the dotnet-* packages to force the glob `*.nupkg` to not pick it up. -->
   <Target Name="RenameDotNetTryOutputPackage" BeforeTargets="PackageReleasePackages">
-    <Move SourceFiles="%(DotNetTryPackages.FullPath)" DestinationFiles="%(DotNetTryPackages.FullPath).renamed" />
+    <Move SourceFiles="%(StableVersionPackages.FullPath)" DestinationFiles="%(StableVersionPackages.FullPath).renamed" />
   </Target>
 
-  <!-- Removes the `.renamed` extension from the dotnet-try package. -->
+  <!-- Removes the `.renamed` extension from the dotnet-* packages. -->
   <Target Name="RestoreDotNetTryOutputPackage" AfterTargets="PackageReleasePackages">
-    <Move SourceFiles="%(DotNetTryPackages.FullPath).renamed" DestinationFiles="%(DotNetTryPackages.FullPath)" />
+    <Move SourceFiles="%(StableVersionPackages.FullPath).renamed" DestinationFiles="%(StableVersionPackages.FullPath)" />
   </Target>
 
 </Project>
