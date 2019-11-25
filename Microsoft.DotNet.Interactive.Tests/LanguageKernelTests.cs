@@ -845,17 +845,12 @@ json
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //        [InlineData(Language.FSharp)]                 // Todo: need to generate CompletionRequestReceived event ... perhaps
+        [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_types(Language language)
         {
             var kernel = CreateKernel(language);
 
-            var source = language switch
-            {
-                Language.FSharp => @"System.Console.",
-
-                Language.CSharp => @"System.Console."
-            };
+            var source = "System.Console."; // same code is valid regarless of the language
 
             await kernel.SendAsync(new RequestCompletion(source, 15));
 
@@ -873,7 +868,7 @@ json
 
         [Theory]
         [InlineData(Language.CSharp)]
-        //[InlineData(Language.FSharp)]             //Todo: completion for F#
+        [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_previously_declared_variables(Language language)
         {
             var kernel = CreateKernel(language);

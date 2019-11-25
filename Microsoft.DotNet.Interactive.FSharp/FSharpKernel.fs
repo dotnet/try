@@ -5,12 +5,13 @@ namespace Microsoft.DotNet.Interactive.FSharp
 
 open System
 open System.Collections.Generic
-open System.IO
 open System.Threading
 open System.Threading.Tasks
 open FSharp.Compiler.Interactive.Shell
 open FSharp.Compiler.Scripting
+open FSharp.Compiler.SourceCodeServices
 open FSharp.DependencyManager
+open Microsoft.CodeAnalysis.Tags
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
 open Microsoft.DotNet.Interactive.Events
@@ -29,11 +30,11 @@ type FSharpKernel() =
     let messageMap = Dictionary<string, string>()
 
     let parseReference text =
-        let reference, binLogging = FSharpDependencyManager.parsePackageReference [text]
-        (reference |> List.tryHead), binLogging
+        let reference, binLogPath = FSharpDependencyManager.parsePackageReference [text]
+        (reference |> List.tryHead), binLogPath
 
-    let packageInstallingMessages (refSpec:PackageReference option * bool) =
-        let ref, binLogging = refSpec
+    let packageInstallingMessages (refSpec: PackageReference option * string option option) =
+        let ref, binLogPath = refSpec
         let versionText =
             match ref with
             | Some ref when ref.Version <> "*" -> ", version " + ref.Version
@@ -42,17 +43,67 @@ type FSharpKernel() =
         let installingMessage ref = "Installing package " + ref.Include + versionText + "."
         let loggingMessage = "Binary Logging enabled"
         [|
-            match ref, binLogging with
-            | Some reference, true ->
+            match ref, binLogPath with
+            | Some reference, Some _ ->
                 yield installingMessage reference
                 yield loggingMessage
-            | Some reference, false ->
+            | Some reference, None ->
                 yield installingMessage reference
-            | None, true ->
+            | None, Some _ ->
                 yield loggingMessage
-            | None, false ->
+            | None, None ->
                 ()
         |]
+
+    let getLineAndColumn (text: string) offset =
+        let rec getLineAndColumn' i l c =
+            if i >= offset then l, c
+            else
+                match text.[i] with
+                | '\n' -> getLineAndColumn' (i + 1) (l + 1) 0
+                | _ -> getLineAndColumn' (i + 1) l (c + 1)
+        getLineAndColumn' 0 1 0
+
+    let kindString (glyph: FSharpGlyph) =
+        match glyph with
+        | FSharpGlyph.Class -> WellKnownTags.Class
+        | FSharpGlyph.Constant -> WellKnownTags.Constant
+        | FSharpGlyph.Delegate -> WellKnownTags.Delegate
+        | FSharpGlyph.Enum -> WellKnownTags.Enum
+        | FSharpGlyph.EnumMember -> WellKnownTags.EnumMember
+        | FSharpGlyph.Event -> WellKnownTags.Event
+        | FSharpGlyph.Exception -> WellKnownTags.Class
+        | FSharpGlyph.Field -> WellKnownTags.Field
+        | FSharpGlyph.Interface -> WellKnownTags.Interface
+        | FSharpGlyph.Method -> WellKnownTags.Method
+        | FSharpGlyph.OverridenMethod -> WellKnownTags.Method
+        | FSharpGlyph.Module -> WellKnownTags.Module
+        | FSharpGlyph.NameSpace -> WellKnownTags.Namespace
+        | FSharpGlyph.Property -> WellKnownTags.Property
+        | FSharpGlyph.Struct -> WellKnownTags.Structure
+        | FSharpGlyph.Typedef -> WellKnownTags.Class
+        | FSharpGlyph.Type -> WellKnownTags.Class
+        | FSharpGlyph.Union -> WellKnownTags.Enum
+        | FSharpGlyph.Variable -> WellKnownTags.Local
+        | FSharpGlyph.ExtensionMethod -> WellKnownTags.ExtensionMethod
+        | FSharpGlyph.Error -> WellKnownTags.Error
+
+    let filterText (declarationItem: FSharpDeclarationListItem) =
+        match declarationItem.NamespaceToOpen, declarationItem.Name.Split '.' with
+        // There is no namespace to open and the item name does not contain dots, so we don't need to pass special FilterText to Roslyn.
+        | None, [|_|] -> null
+        // Either we have a namespace to open ("DateTime (open System)") or item name contains dots ("Array.map"), or both.
+        // We are passing last part of long ident as FilterText.
+        | _, idents -> Array.last idents
+
+    let documentation (declarationItem: FSharpDeclarationListItem) =
+        declarationItem.DescriptionText.ToString()
+
+    let completionItem (declarationItem: FSharpDeclarationListItem) =
+        let kind = kindString declarationItem.Glyph
+        let filterText = filterText declarationItem
+        let documentation = documentation declarationItem
+        CompletionItem(declarationItem.Name, kind, filterText=filterText, documentation=documentation)
 
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
@@ -129,6 +180,17 @@ type FSharpKernel() =
                     context.Publish(new CommandFailed(null, codeSubmission, "Command cancelled"))
         }
 
+    let handleRequestCompletion (requestCompletion: RequestCompletion) (context: KernelInvocationContext) =
+        async {
+            context.Publish(CompletionRequestReceived(requestCompletion))
+            let l, c = getLineAndColumn requestCompletion.Code requestCompletion.CursorPosition
+            let! declarationItems = script.GetCompletionItems(requestCompletion.Code, l, c)
+            let completionItems =
+                declarationItems
+                |> Array.map completionItem
+            context.Publish(CompletionRequestCompleted(completionItems, requestCompletion))
+        }
+
     let handleCancelCurrentCommand (cancelCurrentCommand: CancelCurrentCommand) (context: KernelInvocationContext) =
         async {
             cancellationTokenSource.Cancel()
@@ -141,6 +203,7 @@ type FSharpKernel() =
         async {
             match command with
             | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
+            | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun invocationContext -> (handleRequestCompletion requestCompletion invocationContext) |> Async.StartAsTask :> Task
             | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task
