@@ -12,7 +12,7 @@ function TestUsingNPM([string] $testPath) {
 
 try {
     # invoke regular build/test script
-    . (Join-Path $PSScriptRoot "common\build.ps1") @args
+    . (Join-Path $PSScriptRoot "common\build.ps1") "-projects $PSScriptRoot\..\dotnet-interactive.sln;$PSScriptRoot\..\dotnet-try.sln"
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
