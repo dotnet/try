@@ -15,13 +15,13 @@
 
   <ItemGroup>
     <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
-    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19508.1" />
+    <PackageReference Include="System.CommandLine.Experimental" Version="0.3.0-alpha.19602.1" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
   </ItemGroup>
 
   <PropertyGroup>
     <MicrosoftAspNetCoreHtmlAbstractionsVersion>2.2.0</MicrosoftAspNetCoreHtmlAbstractionsVersion>
-    <SystemCommandLineExperimentalVersion>0.3.0-alpha.19420.2</SystemCommandLineExperimentalVersion>
+    <SystemCommandLineExperimentalVersion>0.3.0-alpha.19602.1</SystemCommandLineExperimentalVersion>
     <MarkdigVersion>0.17.1</MarkdigVersion>
   </PropertyGroup>
 

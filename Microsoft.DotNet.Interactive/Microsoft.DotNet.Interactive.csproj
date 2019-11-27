@@ -16,13 +16,13 @@
     <MicrosoftCodeAnalysisAnalyzersVersion>2.9.4</MicrosoftCodeAnalysisAnalyzersVersion>	
     <SystemRuntimeLoaderVersion>4.3.0</SystemRuntimeLoaderVersion>	
     <SystemReactiveVersion>4.1.6</SystemReactiveVersion>	
-    <SystemCommandlineExperimentalVersion>0.3.0-alpha.19420.2</SystemCommandlineExperimentalVersion>	
+    <SystemCommandlineExperimentalVersion>0.3.0-alpha.19602.1</SystemCommandlineExperimentalVersion>	
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Runtime.Loader" Version="$(SystemRuntimeLoaderVersion)" />
     <PackageReference Include="System.Reactive" Version="$(SystemReactiveVersion)" />
-    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19508.1" />
+    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19602.1" />
         <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
