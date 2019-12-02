@@ -111,6 +111,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
                     {
                         valueType = genericTypeArguments[0];
                     }
+                   
                 }
             }
 
@@ -148,7 +149,20 @@ namespace Microsoft.DotNet.Interactive.Formatting
 
                 foreach (var item in getValues(instance))
                 {
-                    var dictionary = (destructurer ?? Destructurer.Create(item.GetType())).Destructure(item);
+                    var destructurer1 = destructurer;
+                    if (destructurer == null)
+                    {
+                        if (item != null)
+                        {
+                            destructurer1 = Destructurer.Create(item.GetType());
+                        }
+                        else
+                        {
+                            destructurer1 = NonDestructurer.Instance;
+                        }
+                    }
+
+                    var dictionary = destructurer1.Destructure(item);
 
                     if (headers == null)
                     {
