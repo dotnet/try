@@ -29,6 +29,4 @@ namespace Microsoft.DotNet.Interactive
             return JsonConvert.SerializeObject(this, _jsonSerializerSettings);
         }
     }
-
-    
 }

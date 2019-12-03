@@ -57,26 +57,13 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task ParseLine(string line)
         {
-            StreamKernelCommand streamKernelCommand = null;
-            try
+            var streamKernelCommand = StreamKernelCommand.Deserialize(line);
+
+            if (!_cancellationSource.IsCancellationRequested)
             {
-                streamKernelCommand = StreamKernelCommand.Deserialize(line);
-                
-                if (!_cancellationSource.IsCancellationRequested)
-                {
-                    var command = streamKernelCommand.Command;
-                    command.Properties["id"] = streamKernelCommand.Id;
-                    await _kernel.SendAsync(command, _cancellationSource.Token);
-                }
-            }
-            catch (JsonReaderException)
-            {
-                Write(
-                    new CommandParseFailure
-                    {
-                        Body = line
-                    },
-                    streamKernelCommand?.Id ?? -1);
+                var command = streamKernelCommand.Command;
+                command.Properties["id"] = streamKernelCommand.Id;
+                await _kernel.SendAsync(command, _cancellationSource.Token);
             }
         }
 

@@ -79,8 +79,6 @@ namespace Microsoft.DotNet.Interactive.Tests
             should
                 .NotContain(e => e is ErrorProduced)
                 .And
-                .NotContain(e => e is CommandParseFailure)
-                .And
                 .NotContain(e => e is CommandFailed);
     }
 }

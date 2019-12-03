@@ -15,7 +15,6 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pocket;
 using Xunit;
@@ -29,79 +28,17 @@ namespace Microsoft.DotNet.Interactive.Tests
         private readonly KernelStreamClient _kernelClient;
         private readonly SubscribedList<JObject> _events;
         private readonly IOStreams _io;
-        private readonly ITestOutputHelper _output;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
-
-        private class IOStreams : IInputTextStream, IOutputTextStream
-        {
-            private readonly ReplaySubject<string> _input;
-            private readonly ReplaySubject<string> _output;
-
-            public IOStreams()
-            {
-                _input = new ReplaySubject<string>();
-                _output = new ReplaySubject<string>();
-            }
-
-            public IObservable<string> OutputStream => _output;
-
-            IDisposable IObservable<string>.Subscribe(IObserver<string> observer)
-            {
-                return _input.Subscribe(observer);
-            }
-
-            Task IInputTextStream.Start(CancellationToken token)
-            {
-                return Task.CompletedTask;
-            }
-
-            void IOutputTextStream.Write(string text)
-            {
-                Task.Run(() => _output.OnNext(text));
-            }
-
-            public void WriteToInput(IKernelCommand command, int correlationId)
-            {
-                var message = ToStreamKernelCommand(command, correlationId);
-                _input.OnNext(message.Serialize());
-            }
-
-            public static StreamKernelCommand ToStreamKernelCommand(IKernelCommand kernelCommand, int correlationId)
-            {
-                return new StreamKernelCommand
-                {
-                    Id = correlationId,
-                    CommandType = kernelCommand.GetType().Name,
-                    Command = kernelCommand
-                };
-            }
-
-            public static StreamKernelEvent ToStreamKernelEvent(IKernelEvent kernelEvent, int correlationId)
-            {
-                return new StreamKernelEvent
-                {
-                    Id = correlationId,
-                    EventType = kernelEvent.GetType().Name,
-                    Event = kernelEvent
-                };
-            }
-
-            public void WriteToInput(string rawMessage)
-            {
-                Task.Run(() => _input.OnNext(rawMessage));
-            }
-        }
 
         public KernelClientTests(ITestOutputHelper output)
         {
-            _output = output;
             var displayIdSeed = 0;
             _configuration = new Configuration()
              .UsingExtension("json");
 
             _configuration = _configuration.SetInteractive(Debugger.IsAttached);
 
-            Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator =
+            Kernel.DisplayIdGenerator =
                 () => Interlocked.Increment(ref displayIdSeed).ToString();
 
             var kernel = new CompositeKernel
@@ -125,10 +62,10 @@ namespace Microsoft.DotNet.Interactive.Tests
                          .ToSubscribedList();
 
             _disposables.Add(_kernelClient);
-            _disposables.Add(_output.SubscribeToPocketLogger());
+            _disposables.Add(output.SubscribeToPocketLogger());
             _disposables.Add(kernel.LogEventsToPocketLogger());
             _disposables.Add(kernel);
-            _disposables.Add(() => Microsoft.DotNet.Interactive.Kernel.DisplayIdGenerator = null);
+            _disposables.Add(() => Kernel.DisplayIdGenerator = null);
         }
 
         [Fact]
@@ -187,11 +124,8 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Kernel_client_surfaces_json_errors()
         {
             await _kernelClient.Start();
-            var gate = _io.OutputStream
-                .TakeUntilCommandParseFailure();
+
             _io.WriteToInput("{ hello");
-            
-            await gate;
 
             this.Assent(string.Join("\n", _events.Select(e => e.ToString(Newtonsoft.Json.Formatting.None))), _configuration);
         }
@@ -259,6 +193,66 @@ namespace Microsoft.DotNet.Interactive.Tests
         public void Dispose()
         {
             _disposables.Dispose();
+        }
+
+        private class IOStreams : IInputTextStream, IOutputTextStream
+        {
+            private readonly ReplaySubject<string> _input;
+            private readonly ReplaySubject<string> _output;
+
+            public IOStreams()
+            {
+                _input = new ReplaySubject<string>();
+                _output = new ReplaySubject<string>();
+            }
+
+            public IObservable<string> OutputStream => _output;
+
+            IDisposable IObservable<string>.Subscribe(IObserver<string> observer)
+            {
+                return _input.Subscribe(observer);
+            }
+
+            Task IInputTextStream.Start(CancellationToken token)
+            {
+                return Task.CompletedTask;
+            }
+
+            void IOutputTextStream.Write(string text)
+            {
+                Task.Run(() => _output.OnNext(text));
+            }
+
+            public void WriteToInput(IKernelCommand command, int correlationId)
+            {
+                var message = ToStreamKernelCommand(command, correlationId);
+                _input.OnNext(message.Serialize());
+            }
+
+            public static StreamKernelCommand ToStreamKernelCommand(IKernelCommand kernelCommand, int correlationId)
+            {
+                return new StreamKernelCommand
+                {
+                    Id = correlationId,
+                    CommandType = kernelCommand.GetType().Name,
+                    Command = kernelCommand
+                };
+            }
+
+            public static StreamKernelEvent ToStreamKernelEvent(IKernelEvent kernelEvent, int correlationId)
+            {
+                return new StreamKernelEvent
+                {
+                    Id = correlationId,
+                    EventType = kernelEvent.GetType().Name,
+                    Event = kernelEvent
+                };
+            }
+
+            public void WriteToInput(string rawMessage)
+            {
+                Task.Run(() => _input.OnNext(rawMessage));
+            }
         }
     }
 }

@@ -66,14 +66,5 @@ namespace Microsoft.DotNet.Interactive.Tests
             return source.TakeUntilEvent<CommandHandled>(timeout);
         }
 
-        public static IObservable<JObject> TakeUntilCommandParseFailure(this IObservable<string> source, TimeSpan? timeout = null)
-        {
-            return source.TakeUntilEvent<CommandParseFailure>(timeout);
-        }
-
-        public static IObservable<JObject> TakeUntilCommandParseFailure(this IObservable<JObject> source, TimeSpan? timeout = null)
-        {
-            return source.TakeUntilEvent<CommandParseFailure>(timeout);
-        }
     }
 }

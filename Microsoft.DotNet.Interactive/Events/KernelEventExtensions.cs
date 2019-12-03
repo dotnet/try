@@ -6,7 +6,7 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public static class KernelEventExtensions
+    internal static class KernelEventExtensions
     {
         public static IKernelCommand GetRootCommand(this IKernelEvent kernelEvent)
         {
