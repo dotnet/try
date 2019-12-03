@@ -7,6 +7,10 @@ namespace Microsoft.DotNet.Interactive.Formatting
 {
     internal class NonDestructurer : IDestructurer
     {
+        private NonDestructurer()
+        {
+        }
+
         public static IDestructurer Instance { get; } = new NonDestructurer();
 
         public IDictionary<string, object> Destructure(object instance)

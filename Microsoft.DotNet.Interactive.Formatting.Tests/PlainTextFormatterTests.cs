@@ -423,6 +423,18 @@ namespace Microsoft.DotNet.Interactive.Formatting.Tests
 
                 writer.ToString().Should().Be("[ 1, 2, 3 ]");
             }
+
+            [Fact]
+            public void It_shows_null_items_in_the_sequence_as_null()
+            {
+                var formatter = PlainTextFormatter.Create(typeof(object[]));
+
+                var writer = new StringWriter();
+
+                formatter.Format(new object[] { 1, null, 3 }, writer);
+
+                writer.ToString().Should().Be("[ 1, <null>, 3 ]");
+            }
         }
     }
 }

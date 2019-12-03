@@ -362,7 +362,22 @@ namespace Microsoft.DotNet.Interactive.Formatting.Tests
 
                 writer.ToString()
                       .Should()
-                      .Be("<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>7</td></tr><tr><td>1</td><td>8</td></tr><tr><td>2</td><td>9</td></tr></tbody></table>");
+                      .Be(
+                          "<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>7</td></tr><tr><td>1</td><td>8</td></tr><tr><td>2</td><td>9</td></tr></tbody></table>");
+            }
+
+            [Fact]
+            public void It_shows_null_items_in_the_sequence_as_null()
+            {
+                var formatter = HtmlFormatter.Create(typeof(object[]));
+
+                var writer = new StringWriter();
+
+                formatter.Format(new object[] { 8, null, 9 }, writer);
+
+                writer.ToString().Should()
+                      .Be(
+                          "<table><thead><tr><th><i>index</i></th><th>value</th></tr></thead><tbody><tr><td>0</td><td>8</td></tr><tr><td>1</td><td>&lt;null&gt;</td></tr><tr><td>2</td><td>9</td></tr></tbody></table>");
             }
         }
     }
