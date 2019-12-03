@@ -4,40 +4,51 @@
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.App.CommandLine;
 using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
+using Pocket;
 using Xunit;
 
 namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
 {
-    public class FirstTimeUseSentinelTests
+    public class FirstTimeUseSentinelTests : IDisposable
     {
+        private readonly FileInfo _connectionFile;
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+
+        public FirstTimeUseSentinelTests()
+        {
+            _connectionFile = new FileInfo(Path.GetTempFileName());
+
+            _disposables.Add(() => _connectionFile.Delete());
+        }
+
         private static Parser CreateParser(bool sentinelExists)
         {
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     "product-version",
-                    "", 
-                    (_) => sentinelExists, 
-                    (_) => true, 
-                    (_) => { }, 
+                    "",
+                    (_) => sentinelExists,
+                    (_) => true,
+                    (_) => { },
                     (_) => { });
 
-            return CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
-            {
-            },
-                jupyter: (startupOptions, console, startServer, context) =>
-                {
-                    return Task.FromResult(1);
-                },
-                startKernelServer: (startupOptions, kernel, console) =>
-                {
-                    return Task.FromResult(1);
-                },
+            return CommandLineParser.Create(
+                new ServiceCollection(),
+                startServer: (options, invocationContext) => { },
+                jupyter: (startupOptions, console, startServer, context) => Task.FromResult(1),
+                startKernelServer: (startupOptions, kernel, console) => Task.FromResult(1),
                 telemetry: new FakeTelemetry(),
                 firstTimeUseNoticeSentinel: firstTimeUseNoticeSentinel);
+        }
+
+        public void Dispose()
+        {
+            _disposables.Dispose();
         }
 
         [Fact]
@@ -45,8 +56,8 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         {
             var console = new TestConsole();
             var parser = CreateParser(false);
-            await parser.InvokeAsync("jupyter", console);
-            Assert.Contains("Telemetry", console.Out.ToString());   
+            await parser.InvokeAsync($"jupyter {_connectionFile}", console);
+            Assert.Contains("Telemetry", console.Out.ToString());
         }
 
         [Fact]
@@ -54,7 +65,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         {
             var console = new TestConsole();
             var parser = CreateParser(true);
-            await parser.InvokeAsync("jupyter", console);
+            await parser.InvokeAsync($"jupyter  {_connectionFile}", console);
             Assert.DoesNotContain("Telemetry", console.Out.ToString());
         }
     }
