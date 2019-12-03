@@ -142,8 +142,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 
                 var connectionFileArgument = new Argument<FileInfo>
                 {
-                    Name = "connection-file",
-                    Arity = ArgumentArity.ZeroOrOne //should be removed once the commandlineapi allows subcommands to not have arguments from the main command
+                    Name = "connection-file"
                 }.ExistingOnly();
                 jupyterCommand.AddArgument(connectionFileArgument);
 

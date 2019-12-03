@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         private readonly TestConsole _console = new TestConsole();
         private StartupOptions _startOptions;
         private readonly Parser _parser;
+        private readonly FileInfo _connectionFile;
 
         public CommandLineParserTests(ITestOutputHelper output)
         {
@@ -40,11 +41,13 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
                 },
                 telemetry: new FakeTelemetry(),
                 firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
+
+            _connectionFile = new FileInfo(Path.GetTempFileName());
         }
 
         public void Dispose()
         {
-            _output.WriteLine(_console.Error.ToString());
+            _connectionFile.Delete();
         }
 
         [Fact]
@@ -52,7 +55,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         {
             var logPath = new DirectoryInfo(Path.GetTempPath());
 
-            await _parser.InvokeAsync($"jupyter --log-path {logPath}", _console);
+            await _parser.InvokeAsync($"jupyter --log-path {logPath} {_connectionFile}", _console);
 
             _startOptions
                 .LogPath
@@ -64,7 +67,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task It_parses_verbose_option()
         {
-            await _parser.InvokeAsync("jupyter --verbose", _console);
+            await _parser.InvokeAsync($"jupyter --verbose {_connectionFile}", _console);
 
             _startOptions
                 .Verbose
@@ -75,9 +78,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public void jupyter_parses_connection_file_path()
         {
-            var expected = Path.GetTempFileName();
-
-            var result = _parser.Parse($"jupyter {expected}");
+            var result = _parser.Parse($"jupyter {_connectionFile}");
 
             var binder = new ModelBinder<JupyterOptions>();
 
@@ -87,7 +88,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
                 .ConnectionFile
                 .FullName
                 .Should()
-                .Be(expected);
+                .Be(_connectionFile.FullName);
         }
 
         [Fact]
@@ -137,7 +138,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
             options.DefaultKernel.Should().Be("bsharp");
         }
 
-        [Fact(Skip = "Skipped until System.CommandLine allows subcommands to skip the arguments from the main command")]
+        [Fact]
         public async Task jupyter_returns_error_if_connection_file_path_is_not_passed()
         {
             var testConsole = new TestConsole();

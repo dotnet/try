@@ -12,40 +12,30 @@ using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Pocket;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
 {
     public class TelemetryTests : IDisposable
     {
         private readonly FakeTelemetry _fakeTelemetry;
-        private readonly ITestOutputHelper _output;
         private readonly TestConsole _console = new TestConsole();
         private readonly Parser _parser;
         private readonly FileInfo _connectionFile;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
-        public TelemetryTests(ITestOutputHelper output)
+        public TelemetryTests()
         {
             _fakeTelemetry = new FakeTelemetry();
-
-            _output = output;
 
             _connectionFile = new FileInfo(Path.GetTempFileName());
 
             _disposables.Add(() => _connectionFile.Delete());
-            
-            _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
-            {
-            },
-                jupyter: (startupOptions, console, startServer, context) =>
-                {
-                    return Task.FromResult(1);
-                },
-                startKernelServer: (startupOptions, kernel, console) =>
-                {
-                    return Task.FromResult(1);
-                },
+
+            _parser = CommandLineParser.Create(
+                new ServiceCollection(),
+                startServer: (options, invocationContext) => { },
+                jupyter: (startupOptions, console, startServer, context) => Task.FromResult(1),
+                startKernelServer: (startupOptions, kernel, console) => Task.FromResult(1),
                 telemetry: _fakeTelemetry,
                 firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
         }
@@ -131,87 +121,39 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         public async Task Jupyter_default_kernel_csharp_ignore_connection_file_sends_telemetry()
         {
             var tmp = Path.GetTempFileName();
-            try
-            {
-                // Do not capture connection file
-                await _parser.InvokeAsync(String.Format("jupyter --default-kernel csharp {0}", tmp), _console);
-                _fakeTelemetry.LogEntries.Should().Contain(
-                    x => x.EventName == "command" &&
-                         x.Properties.Count == 2 &&
-                         x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
-                         x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
-            }
-            finally
-            {
-                try
-                {
-                    File.Delete(tmp);
-                }
-                catch { }
-            }
+            await _parser.InvokeAsync($"jupyter --default-kernel csharp {_connectionFile}", _console);
+            _fakeTelemetry.LogEntries.Should().Contain(
+                x => x.EventName == "command" &&
+                     x.Properties.Count == 2 &&
+                     x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
+                     x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
+
         }
 
         [Fact]
         public async Task Jupyter_default_kernel_csharp_ignore_connection_file_has_one_entry()
         {
-            var tmp = Path.GetTempFileName();
-            try
-            {
-                // Do not capture connection file
-                await _parser.InvokeAsync(String.Format("jupyter --default-kernel csharp {0}", tmp), _console);
-                _fakeTelemetry.LogEntries.Should().HaveCount(1);
-            }
-            finally
-            {
-                try
-                {
-                    File.Delete(tmp);
-                }
-                catch { }
-            }
+            await _parser.InvokeAsync($"jupyter --default-kernel csharp {_connectionFile}", _console);
+            _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
         [Fact]
         public async Task Jupyter_ignore_connection_file_sends_telemetry()
         {
-            var tmp = Path.GetTempFileName();
-            try
-            {
                 // Do not capture connection file
-                await _parser.InvokeAsync(String.Format("jupyter {0}", tmp), _console);
+                await _parser.InvokeAsync($"jupyter  {_connectionFile}", _console);
                 _fakeTelemetry.LogEntries.Should().Contain(
                     x => x.EventName == "command" &&
                          x.Properties.Count == 2 &&
                          x.Properties["verb"] == Sha256Hasher.Hash("JUPYTER") &&
                          x.Properties["default-kernel"] == Sha256Hasher.Hash("CSHARP"));
-            }
-            finally
-            {
-                try
-                {
-                    File.Delete(tmp);
-                }
-                catch { }
-            }
         }
 
         [Fact]
         public async Task Jupyter_ignore_connection_file_has_one_entry()
         {
-            var tmp = Path.GetTempFileName();
-            try
-            {
-                await _parser.InvokeAsync(string.Format("jupyter {0}", tmp), _console);
+                await _parser.InvokeAsync($"jupyter  {_connectionFile}", _console);
                 _fakeTelemetry.LogEntries.Should().HaveCount(1);
-            }
-            finally
-            {
-                try
-                {
-                    File.Delete(tmp);
-                }
-                catch { }
-            }
         }
 
         [Fact]
@@ -228,7 +170,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         [Fact]
         public async Task Jupyter_with_verbose_option_has_one_entry()
         {
-            await _parser.InvokeAsync($"--verbose jupyter  {_connectionFile}", _console);
+            await _parser.InvokeAsync($"--verbose jupyter {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().HaveCount(1);
         }
 
@@ -243,7 +185,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
         public async Task Jupyter_default_kernel_with_invalid_kernel_does_not_send_any_telemetry()
         {
             // Do not capture anything, especially "oops".
-            await _parser.InvokeAsync($"jupyter --default-kernel oops", _console);
+            await _parser.InvokeAsync($"jupyter --default-kernel oops {_connectionFile}", _console);
             _fakeTelemetry.LogEntries.Should().BeEmpty();
         }
 
@@ -316,7 +258,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
             Environment.SetEnvironmentVariable(environmentVariableName, null);
             try
             {
-                await _parser.InvokeAsync($"jupyter", _console);
+                await _parser.InvokeAsync($"jupyter  {_connectionFile}", _console);
                 _console.Out.ToString().Should().Contain(Telemetry.Telemetry.WelcomeMessage);
             }
             finally
@@ -334,7 +276,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests.CommandLine
             Environment.SetEnvironmentVariable(environmentVariableName, "1");
             try
             {
-                await _parser.InvokeAsync($"jupyter", _console);
+                await _parser.InvokeAsync($"jupyter {_connectionFile}", _console);
                 _console.Out.ToString().Should().NotContain(Telemetry.Telemetry.WelcomeMessage);
             }
             finally
