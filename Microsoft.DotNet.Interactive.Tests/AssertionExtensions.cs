@@ -8,6 +8,8 @@ using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using FluentAssertions.Primitives;
 using Microsoft.DotNet.Interactive.Events;
+using Newtonsoft.Json.Linq;
+using Recipes;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
@@ -67,6 +69,41 @@ namespace Microsoft.DotNet.Interactive.Tests
 
                 subject = should.Subject
                                 .OfType<T>()
+                                .Where(where)
+                                .Single();
+            }
+
+            return new AndWhichConstraint<ObjectAssertions, T>(subject.Should(), subject);
+        }
+
+        public static AndWhichConstraint<ObjectAssertions, T> ContainSingle<T>(
+            this GenericCollectionAssertions<JObject> should,
+            Func<T, bool> where = null)
+            where T : IKernelEvent
+        {
+            T subject;
+
+            Func<JObject, T> deserialize = e => e["event"].ToString().FromJsonTo<T>();
+            Func<JObject, bool> isMatch = e => e["eventType"].Value<string>() == typeof(T).Name;
+
+            if (where == null)
+            {
+                should.ContainSingle(e => isMatch(e));
+
+                subject = should.Subject
+                                .Where(isMatch)
+                                .Select(e => deserialize(e))
+                                .Single();
+            }
+            else
+            {
+                should.ContainSingle(e => isMatch(e)
+                                          &&
+                                          where(deserialize(e)));
+
+                subject = should.Subject
+                                .Where(isMatch)
+                                .Select(deserialize)
                                 .Where(where)
                                 .Single();
             }

@@ -5,6 +5,7 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Disposables;
 using System.Threading;
@@ -61,6 +62,7 @@ namespace Microsoft.DotNet.Interactive
             return kernel;
         }
 
+        [DebuggerStepThrough]
         public static T LogEventsToPocketLogger<T>(this T kernel)
             where T : IKernel
         {
