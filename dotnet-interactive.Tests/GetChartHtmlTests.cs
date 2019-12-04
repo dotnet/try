@@ -17,8 +17,8 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             [Fact]
             public void Returns_the_html_with_div()
             {
-                var extension = new XPlotKernelExtension();
-                var html = extension.GetChartHtml(new PlotlyChart());
+                var chart = new PlotlyChart();
+                var html = chart.GetChartHtml();
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
 
@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             [Fact]
             public void Returns_the_html_with_script_containing_require_config()
             {
-                var extension = new XPlotKernelExtension();
-                var html = extension.GetChartHtml(new PlotlyChart());
+                var chart = new PlotlyChart();
+                var html = chart.GetChartHtml();
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
 
@@ -43,8 +43,8 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             [Fact]
             public void Returns_the_html_with_script_containing_require_plotly_and_call_to_new_plot_function()
             {
-                var extension = new XPlotKernelExtension();
-                var html = extension.GetChartHtml(new PlotlyChart());
+                var chart = new PlotlyChart();
+                var html = chart.GetChartHtml();
                 var document = new HtmlDocument();
                 document.LoadHtml(html);
 
