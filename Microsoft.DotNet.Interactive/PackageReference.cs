@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class NugetPackageReference
+    public class PackageReference
     {
         private static readonly Regex _regex = new Regex(
             @"(?<moniker>nuget)(?<colon>\s*:\s*)(?<packageName>(?!RestoreSources\s*=\s*)[^,]+)*(\s*,\s*(?<packageVersion>(?!RestoreSources\s*=\s*)[^,]+))*(?<comma>\s*,\s*)*(RestoreSources\s*=\s*(?<restoreSources>[^,]+)*)*",
@@ -15,11 +15,12 @@ namespace Microsoft.DotNet.Interactive
             RegexOptions.CultureInvariant |
             RegexOptions.Singleline);
 
-        public NugetPackageReference(string packageName, string packageVersion = null, string restoreSources = null)
+        public PackageReference(string packageName, string packageVersion = null, string restoreSources = null, string sourceCode = null)
         {
             PackageName = packageName ?? string.Empty;
             PackageVersion = packageVersion ?? string.Empty;
             RestoreSources = restoreSources ?? string.Empty;
+            SourceCode = sourceCode ?? string.Empty;
         }
 
         public string PackageName { get; }
@@ -28,7 +29,11 @@ namespace Microsoft.DotNet.Interactive
 
         public string RestoreSources { get; }
 
-        public static bool TryParse(string value, out NugetPackageReference reference)
+        public string SourceCode { get; }
+
+        public string PackageKey => $"{PackageName}, {PackageVersion}, {RestoreSources}";
+
+        public static bool TryParse(string value, out PackageReference reference)
         {
             var result = _regex.Match(value);
 
@@ -42,7 +47,7 @@ namespace Microsoft.DotNet.Interactive
             var packageVersion = result.Groups["packageVersion"].Value;
             var restoreSources = result.Groups["restoreSources"].Value;
 
-            reference = new NugetPackageReference(packageName, packageVersion, restoreSources);
+            reference = new PackageReference(packageName, packageVersion, restoreSources, value);
 
             return true;
         }

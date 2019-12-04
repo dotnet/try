@@ -66,11 +66,11 @@ namespace Microsoft.DotNet.Interactive.CSharp
 
         public ScriptState ScriptState { get; private set; }
 
-        internal void AddScriptReferences(IReadOnlyList<ResolvedNugetPackageReference> assemblyPaths)
+        internal void AddScriptReferences(IReadOnlyList<ResolvedPackageReference> assemblyPaths)
         {
             var references = assemblyPaths
                              .SelectMany(r => r.AssemblyPaths)
-                             .Select(r => MetadataReference.CreateFromFile(r.FullName));
+                             .Select(r => MetadataReference.CreateFromFile(r));
 
             ScriptOptions = ScriptOptions.AddReferences(references);
         }
@@ -352,14 +352,14 @@ namespace Microsoft.DotNet.Interactive.CSharp
         }
 
         public async Task LoadExtensionsFromDirectory(
-            DirectoryInfo directory,
+            string directory,
             KernelInvocationContext context,
-            IReadOnlyList<FileInfo> additionalDependencies = null)
+            IReadOnlyList<string> additionalDependencies = null)
         {
             var extensionsDirectory =
                 new DirectoryInfo(
                     Path.Combine(
-                        directory.FullName,
+                        directory,
                         "interactive-extensions",
                         "dotnet",
                         "cs"));

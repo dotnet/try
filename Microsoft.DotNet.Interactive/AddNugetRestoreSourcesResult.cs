@@ -11,7 +11,8 @@ namespace Microsoft.DotNet.Interactive
     {
         public AddNugetRestoreSourcesResult(
             bool succeeded,
-            NugetPackageReference requestedPackage,
+            PackageReference requestedPackage,
+            IReadOnlyList<ResolvedPackageReference> addedReferences = null,
             IReadOnlyCollection<string> errors = null) : base(succeeded, requestedPackage, errors)
         {
         }

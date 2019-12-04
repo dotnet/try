@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class ResolvedNugetPackageReference : NugetPackageReference
+    public class ResolvedPackageReference : PackageReference
     {
-        public ResolvedNugetPackageReference(
+        public ResolvedPackageReference(
             string packageName,
             string packageVersion,
             IReadOnlyList<FileInfo> assemblyPaths,
@@ -22,16 +22,16 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(packageVersion));
             }
 
-            AssemblyPaths = assemblyPaths ?? throw new ArgumentNullException(nameof(assemblyPaths));
-            ProbingPaths = probingPaths ?? Array.Empty<DirectoryInfo>();
-            PackageRoot = packageRoot ?? AssemblyPaths.FirstOrDefault()?.Directory.Parent.Parent;
+            AssemblyPaths = assemblyPaths?.Select(p => p.FullName).ToList() ?? throw new ArgumentNullException(nameof(assemblyPaths));
+            ProbingPaths = probingPaths?.Select(p => p.FullName).ToList() ?? new List<string>();
+            PackageRoot = packageRoot?.FullName ?? assemblyPaths.FirstOrDefault()?.Directory?.Parent?.Parent?.FullName;
         }
 
-        public IReadOnlyList<FileInfo> AssemblyPaths { get; }
+        public IReadOnlyList<string> AssemblyPaths { get; }
 
-        public IReadOnlyList<DirectoryInfo> ProbingPaths { get; }
+        public IReadOnlyList<string> ProbingPaths { get; }
 
-        public DirectoryInfo PackageRoot { get; }
+        public string PackageRoot { get; }
 
         public override string ToString() => $"{PackageName},{PackageVersion}";
     }

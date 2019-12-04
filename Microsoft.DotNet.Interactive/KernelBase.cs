@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Interactive
                 if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
                     await extensibleKernel.LoadExtensionsFromDirectory(
-                        loadExtensionsInDirectory.Directory, 
+                        loadExtensionsInDirectory.Directory.FullName, 
                         context, 
                         loadExtensionsInDirectory.AdditionalDependencies);
                 }

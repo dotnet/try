@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Interactive
             FileInfo assemblyFile, 
             IKernel kernel, 
             KernelInvocationContext context,
-            IEnumerable<FileInfo> additionalDependencies = null)
+            IEnumerable<string> additionalDependencies = null)
         {
             if (assemblyFile == null)
             {
@@ -31,9 +31,9 @@ namespace Microsoft.DotNet.Interactive
 
             if (additionalDependencies != null)
             {
-                foreach (var additionalDependency in additionalDependencies.Where(file => file.Exists))
+                foreach (var additionalDependency in additionalDependencies.Where(file => File.Exists(file)))
                 {
-                    AssemblyLoadContext.Default.LoadFromAssemblyPath(additionalDependency.FullName);
+                    AssemblyLoadContext.Default.LoadFromAssemblyPath(additionalDependency);
                 }
             }
 

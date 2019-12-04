@@ -11,9 +11,23 @@ using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive
 {
+
+    //#r nuget --- events
+
+    //#r "nuget:one"
+    //#r "nuget:two"
+    //#r "nuget:three"
+
+    // Events
+    //  SubmitCode("")
+    //  PackageAdded("one")
+    //  PackageAdded("two")
+    //  PackageAdded("three")
+    //  PackageRestoreCompleted("One", Two", "Three", "TransitiveDependency_one", "TransitiveDependency_two")
+
     public class PackageRestoreContext 
     {
-        private readonly Dictionary<NugetPackageReference, ResolvedNugetPackageReference> _nugetPackageReferences = new Dictionary<NugetPackageReference, ResolvedNugetPackageReference>();
+        private readonly Dictionary<string, (PackageReference, ResolvedPackageReference)> _packageReferences = new Dictionary<string, (PackageReference, ResolvedPackageReference)>();
 
         public PackageRestoreContext()
         {
@@ -35,78 +49,98 @@ namespace Microsoft.DotNet.Interactive
 
         public string Name { get; }
 
-        public Task<ResolvedNugetPackageReference> GetResolvedNugetPackageReference(string packageName)
+        public async Task<ResolvedPackageReference> GetResolvedPackageReference(string packageName)
         {
-            var references = GetResolvedNugetReferences();
+            await Restore();
 
-            return Task.FromResult(references[packageName]);
+            var references = GetResolvedReferences();
+            return references[packageName];
         }
 
-        public async Task<AddNugetResult> AddPackage(
+        public bool AddPackagReference(
             string packageName,
             string packageVersion = null,
-            string restoreSources = null)
+            string restoreSources = null,
+            string sourceCode = null)
         {
-            var requestedPackage = new NugetPackageReference(packageName, packageVersion, restoreSources);
+            var requestedPackage = new PackageReference(packageName, packageVersion, restoreSources, sourceCode);
+            var packageKey = requestedPackage.PackageKey;
 
-            if (!string.IsNullOrEmpty(packageName) && _nugetPackageReferences.TryGetValue(requestedPackage, out _))
+            lock (_packageReferences)
             {
-                return new AddNugetPackageResult(false, requestedPackage);
+                if (!String.IsNullOrEmpty(packageName) && _packageReferences.TryGetValue(packageKey, out var _))
+                {
+                    return false;
+                }
+
+                if (!_packageReferences.ContainsKey(packageKey))
+                {
+                    _packageReferences.Add(packageKey, (requestedPackage, null));
+                }
             }
 
-            _nugetPackageReferences.Add(requestedPackage, null);
+            return true;
+        }
 
+        public IEnumerable<PackageReference> PackageReferences
+        {
+            get
+            {
+                lock (_packageReferences)
+                {
+                    return _packageReferences.Values.Select(t => t.Item1);
+                }
+            }
+        }
+
+        public IEnumerable<ResolvedPackageReference> ResolvedPackageReferences
+        {
+            get
+            {
+                lock (_packageReferences)
+                {
+                    return _packageReferences.Values.Select(t => t.Item2);
+                }
+            }
+        }
+
+        public async Task<PackageRestoreResult> Restore()
+        {
             WriteProjectFile();
 
             var dotnet = new Dotnet(Directory);
-
             var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths");
-
-            if (result.ExitCode != 0)
-            {
-                if (string.IsNullOrEmpty(packageName) && string.IsNullOrEmpty(restoreSources))
-                {
-                    return new AddNugetRestoreSourcesResult(
-                        succeeded: false,
-                        requestedPackage,
-                        errors: result.Output.Concat(result.Error).ToArray());
-                }
-                else
-                {
-                    return new AddNugetPackageResult(
-                        succeeded: false,
-                        requestedPackage,
-                        errors: result.Output.Concat(result.Error).ToArray());
-                }
-            }
-
-            var addedReferences =
-                GetResolvedNugetReferences()
+            var resolvedReferences =
+                GetResolvedReferences()
                     .Values
                     .ToArray();
 
-            if (string.IsNullOrEmpty(packageName) && !string.IsNullOrEmpty(restoreSources))
+            if (result.ExitCode != 0)
             {
-                return new AddNugetRestoreSourcesResult(
-                    succeeded: true,
-                    requestedPackage: requestedPackage);
+                lock (_packageReferences)
+                {
+                    return new PackageRestoreResult(
+                        succeeded: false,
+                        requestedPackages: _packageReferences.Values.Select(t => t.Item1),
+                        errors: result.Output.Concat(result.Error).ToArray());
+                }
             }
             else
             {
-                return new AddNugetPackageResult(
+                return new PackageRestoreResult(
                     succeeded: true,
-                    requestedPackage: requestedPackage,
-                    addedReferences: addedReferences);
+                    requestedPackages: _packageReferences.Values.Select(t => t.Item1),
+                    resolvedReferences: resolvedReferences);
             }
         }
 
-        private Dictionary<string, ResolvedNugetPackageReference> GetResolvedNugetReferences()
+        private Dictionary<string, ResolvedPackageReference> GetResolvedReferences()
         {
             var nugetPathsFile = Directory.GetFiles("*.resolvedReferences.paths").SingleOrDefault();
 
             if (nugetPathsFile == null)
             {
-                return new Dictionary<string, ResolvedNugetPackageReference>();
+                return new Dictionary<string, ResolvedPackageReference>();
             }
 
             var nugetPackageLines = File.ReadAllText(Path.Combine(Directory.FullName, nugetPathsFile.FullName))
@@ -141,7 +175,7 @@ namespace Microsoft.DotNet.Interactive
                                         x.packageName,
                                         x.packageVersion,
                                         x.packageRoot))
-                       .Select(xs => new ResolvedNugetPackageReference(
+                       .Select(xs => new ResolvedPackageReference(
                                    xs.Key.packageName,
                                    xs.Key.packageVersion,
                                    xs.Select(x => x.assemblyPath).ToArray(),
@@ -198,8 +232,9 @@ namespace s
 
                 sb.Append("  <ItemGroup>\n");
 
-                _nugetPackageReferences
-                    .Keys
+                _packageReferences
+                    .Values
+                    .Select(v => v.Item1)
                     .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
                     .ToList()
                     .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>\n"));
@@ -208,8 +243,9 @@ namespace s
 
                 sb.Append("  <PropertyGroup>\n");
 
-                _nugetPackageReferences
-                    .Keys
+                _packageReferences
+                    .Values
+                    .Select(v => v.Item1)
                     .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
                     .ToList()
                     .ForEach(reference => sb.Append($"    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources){reference.RestoreSources}</RestoreAdditionalProjectSources>\n"));

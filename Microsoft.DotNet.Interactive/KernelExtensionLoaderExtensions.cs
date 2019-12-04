@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Interactive
             DirectoryInfo directory, 
             IKernel kernel, 
             KernelInvocationContext context,
-            IReadOnlyList<FileInfo> additionalDependencies = null)
+            IReadOnlyList<string> additionalDependencies = null)
         {
             if (directory.Exists)
             {

@@ -5,13 +5,13 @@ using System;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class AddNugetPackage : KernelCommandBase
+    public class AddPackage : KernelCommandBase
     {
-        public AddNugetPackage(NugetPackageReference packageReference)
+        public AddPackage(PackageReference packageReference)
         {
             PackageReference = packageReference ?? throw new ArgumentNullException(nameof(packageReference));
         }
 
-        public NugetPackageReference PackageReference { get; }
+        public PackageReference PackageReference { get; }
     }
 }

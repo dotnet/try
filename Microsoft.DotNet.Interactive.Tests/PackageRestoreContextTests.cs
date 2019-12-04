@@ -15,31 +15,44 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact]
         public async Task Returns_new_references_if_they_are_added()
         {
-            var result = await new PackageRestoreContext().AddPackage("FluentAssertions", "5.7.0") as AddNugetPackageResult;
+            var restoreContext = new PackageRestoreContext();
+            var added = restoreContext.AddPackagReference("FluentAssertions", "5.7.0") as bool?;
+            added.Should().Be(true);
 
+            var result = await restoreContext.Restore() as PackageRestoreResult;
             result.Errors.Should().BeEmpty();
-            var assemblyPaths = result.AddedReferences.SelectMany(r => r.AssemblyPaths);
-            assemblyPaths.Should().Contain(r => r.Name.Equals("FluentAssertions.dll"));
-            assemblyPaths.Should().Contain(r => r.Name.Equals("System.Configuration.ConfigurationManager.dll"));
-            result.InstalledVersion.Should().Be("5.7.0");
+            var assemblyPaths = result.ResolvedReferences.SelectMany(r => r.AssemblyPaths);
+            assemblyPaths.Should().Contain(r => new FileInfo(r).Name.Equals("FluentAssertions.dll"));
+            assemblyPaths.Should().Contain(r => new FileInfo(r).Name.Equals("System.Configuration.ConfigurationManager.dll"));
+
+            var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
+            packageReference.PackageVersion.Should().Be("5.7.0");
         }
 
         [Fact]
         public async Task Returns_references_when_package_version_is_not_specified()
         {
-            var result = await new PackageRestoreContext().AddPackage("NewtonSoft.Json") as AddNugetPackageResult;
+            var restoreContext = new PackageRestoreContext();
+            var added = restoreContext.AddPackagReference("NewtonSoft.Json") as bool?;
+            added.Should().Be(true);
 
+            var result = await restoreContext.Restore() as PackageRestoreResult;
             result.Succeeded.Should().BeTrue();
-            var assemblyPaths = result.AddedReferences.SelectMany(r => r.AssemblyPaths);
-            assemblyPaths.Should().Contain(r => r.Name.Equals("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
-            result.InstalledVersion.Should().NotBeNullOrWhiteSpace();
+            var assemblyPaths = result.ResolvedReferences.SelectMany(r => r.AssemblyPaths);
+            assemblyPaths.Should().Contain(r => new FileInfo(r).Name.Equals("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
+
+            var packageReference = await restoreContext.GetResolvedPackageReference("NewtonSoft.Json");
+            packageReference.PackageVersion.Should().NotBeNullOrWhiteSpace();
         }
 
         [Fact]
         public async Task Returns_failure_if_package_installation_fails()
         {
-            var result = await new PackageRestoreContext().AddPackage("not-a-real-package-definitely-not", "5.7.0") as AddNugetPackageResult;
+            var restoreContext = new PackageRestoreContext();
+            var added = restoreContext.AddPackagReference("not-a-real-package-definitely-not", "5.7.0") as bool?;
+            added.Should().Be(true);
 
+            var result = await restoreContext.Restore() as PackageRestoreResult;
             result.Succeeded.Should().BeFalse();
             result.Errors.Should().NotBeEmpty();
         }
@@ -47,59 +60,61 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact]
         public async Task Can_get_path_to_nuget_packaged_assembly()
         {
-            var packageRestoreContext = new PackageRestoreContext();
-            await packageRestoreContext.AddPackage("fluentAssertions", "5.7.0");
+            var restoreContext = new PackageRestoreContext();
+            var added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
+            added.Should().Be(true);
 
-            var packageReference = await packageRestoreContext.GetResolvedNugetPackageReference("fluentassertions");
+            var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
 
             var path = packageReference.AssemblyPaths.Single();
 
-            path.FullName
-                .ToLower()
+            path.ToLower()
                 .Should()
                 .EndWith("fluentassertions" + Path.DirectorySeparatorChar +
                          "5.7.0" + Path.DirectorySeparatorChar +
                          "lib" + Path.DirectorySeparatorChar +
                          "netcoreapp2.0" + Path.DirectorySeparatorChar  +
                          "fluentassertions.dll");
-            path.Exists.Should().BeTrue();
+            File.Exists(path).Should().BeTrue();
         }
-        
+
         [Fact]
         public async Task Can_get_path_to_nuget_package_root()
         {
-            var packageRestoreContext = new PackageRestoreContext();
-            await packageRestoreContext.AddPackage("fluentAssertions", "5.7.0");
+            var restoreContext = new PackageRestoreContext();
+            var added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
+            added.Should().Be(true);
 
-            var packageReference = await packageRestoreContext.GetResolvedNugetPackageReference("fluentassertions");
+            var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
 
             var path = packageReference.PackageRoot;
 
-            path.FullName
-                .Should()
+            path.Should()
                 .EndWith("fluentassertions" + Path.DirectorySeparatorChar + "5.7.0" );
-            path.Exists.Should().BeTrue();
+            Directory.Exists(path).Should().BeTrue();
         }
 
         [Fact]
         public async Task Can_get_path_to_nuget_package_when_multiple_packages_are_added()
         {
-            var packageRestoreContext = new PackageRestoreContext();
-            await packageRestoreContext.AddPackage("fluentAssertions", "5.7.0");
-            await packageRestoreContext.AddPackage("htmlagilitypack", "1.11.12");
-            var packageReference = await packageRestoreContext.GetResolvedNugetPackageReference("htmlagilitypack");
+            var restoreContext = new PackageRestoreContext();
+            var fluent_added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
+            var html_added = restoreContext.AddPackagReference("htmlagilitypack", "1.11.12") as bool?;
+            fluent_added.Should().Be(true);
+            html_added.Should().Be(true);
+
+            var packageReference = await restoreContext.GetResolvedPackageReference("htmlagilitypack");
 
             var path = packageReference.AssemblyPaths.Single();
 
-            path.FullName
-                .ToLower()
+            path.ToLower()
                 .Should()
                 .EndWith("htmlagilitypack" + Path.DirectorySeparatorChar +
                          "1.11.12" + Path.DirectorySeparatorChar +
                          "lib" + Path.DirectorySeparatorChar +
                          "netstandard2.0" + Path.DirectorySeparatorChar +
                          "htmlagilitypack.dll");
-            path.Exists.Should().BeTrue();
+            File.Exists(path).Should().BeTrue();
         }
 
         // TODO: (PackageRestoreContextTests) add the same package twice

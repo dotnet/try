@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Formatting;
@@ -42,11 +44,32 @@ using static {typeof(Kernel).FullName};
             return kernel;
         }
 
-        public static CSharpKernel UseNugetDirective(
-            this CSharpKernel kernel)
+        private static string PackageMessage(PackageReference package)
         {
-            var packageRefArg = new Argument<NugetPackageReference>((SymbolResult result, out NugetPackageReference reference) =>
-                                                                        NugetPackageReference.TryParse(result.Token.Value, out reference))
+            string message = null;
+
+            if (!string.IsNullOrEmpty(package.PackageName))
+            {
+                message = $"Installing package {package.PackageName}";
+                if (!string.IsNullOrWhiteSpace(package.PackageVersion))
+                {
+                    message += $", version {package.PackageVersion}";
+                }
+
+            }
+            else if (!string.IsNullOrEmpty(package.RestoreSources))
+            {
+                message += $"    RestoreSources: {package.RestoreSources}" + br;
+            }
+            return message;
+        }
+
+        public static CSharpKernel UseNugetDirective(
+            this CSharpKernel kernel,
+            Func<NativeAssemblyLoadHelper> getHelper = null)
+        {
+            var packageRefArg = new Argument<PackageReference>((SymbolResult result, out PackageReference reference) =>
+                                                                        PackageReference.TryParse(result.Token.Value, out reference))
             {
                 Name = "package"
             };
@@ -57,115 +80,146 @@ using static {typeof(Kernel).FullName};
             };
 
             var restoreContext = new PackageRestoreContext();
-            
-            command.Handler = CommandHandler.Create<NugetPackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
+
+            command.Handler = CommandHandler.Create<PackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {
-                var addPackage = new AddNugetPackage(package);
-
-                addPackage.Handler = async context =>
+                var addPackage = new AddPackage(package)
                 {
-                    var message = $"Installing package {package.PackageName}";
-                    if (!string.IsNullOrWhiteSpace(package.PackageVersion))
+                    Handler = async context =>
                     {
-                        message += $", version {package.PackageVersion}";
+                        await Task.FromResult(
+                            restoreContext.AddPackagReference(
+                                package.PackageName,
+                                package.PackageVersion,
+                                package.RestoreSources));
+                        context.Complete();
                     }
-
-                    message += "...";
-
-                    var key = message;
-                    var displayed = new DisplayedValueProduced(message, context.Command, valueId: key);
-                    context.Publish(displayed);
-
-                    var addPackageTask = restoreContext.AddPackage(
-                        package.PackageName, 
-                        package.PackageVersion,
-                        package.RestoreSources);
-
-                    while (await Task.WhenAny(Task.Delay(500), addPackageTask) != addPackageTask)
-                    {
-                        message += ".";
-                        context.Publish(new DisplayedValueUpdated(message, key));
-                    }
-
-                    message += "done!";
-                    context.Publish(new DisplayedValueUpdated(message, key));
-
-                    var result = await addPackageTask;
-
-                    var helper = kernel.NativeAssemblyLoadHelper;
-                 
-                    if (result.Succeeded)
-                    {
-                        switch (result)
-                        {
-                            case AddNugetPackageResult packageResult:
-
-                                var nativeLibraryProbingPaths = packageResult.NativeLibraryProbingPaths;
-                                helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
-
-                                var addedAssemblyPaths =
-                                    packageResult
-                                        .AddedReferences
-                                        .SelectMany(added => added.AssemblyPaths)
-                                        .ToArray();
-
-                                if (helper != null)
-                                {
-                                    foreach (var addedReference in packageResult.AddedReferences)
-                                    {
-                                        helper.Handle(addedReference);
-                                    }
-                                }
-
-                                kernel.AddScriptReferences(packageResult.AddedReferences);
-
-                                context.Publish(
-                                    new DisplayedValueProduced($"Successfully added reference to package {package.PackageName}, version {packageResult.InstalledVersion}",
-                                                               context.Command));
-
-                                context.Publish(new NuGetPackageAdded(addPackage, package));
-
-                                var resolvedNugetPackageReference = await restoreContext.GetResolvedNugetPackageReference(package.PackageName);
-
-                                await context.HandlingKernel.SendAsync(
-                                    new LoadExtensionsInDirectory(
-                                        resolvedNugetPackageReference.PackageRoot,
-                                        addedAssemblyPaths));
-                                break;
-
-                            default:
-                                break;
-
-                        }
-                    }
-                    else
-                    {
-                        var errors = $"{string.Join(Environment.NewLine, result.Errors)}";
-
-                        switch (result)
-                        {
-                            case AddNugetPackageResult _:
-                                context.Publish(
-                                    new ErrorProduced(
-                                        $"Failed to add reference to package {package.PackageName}{Environment.NewLine}{errors}"));
-                                break;
-                            case AddNugetRestoreSourcesResult _:
-                                context.Publish(
-                                    new ErrorProduced(
-                                        $"Failed to apply RestoreSources {package.RestoreSources}{Environment.NewLine}{errors}"));
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    context.Complete();
                 };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });
 
             kernel.AddDirective(command);
+
+            var restore = new Command("#!nuget-restore")
+            {
+                Handler = CommandHandler.Create(async (KernelInvocationContext pipelineContext) =>
+                {
+                    var nugetRestoreDirective = new NugetRestoreDirective();
+
+                    nugetRestoreDirective.Handler = async context =>
+                    {
+                        var messages = new Dictionary<string, string>();
+                        foreach (var package in restoreContext.PackageReferences)
+                        {
+                            var key = PackageMessage(package);
+                            var message = key + "...";
+                            var displayed = new DisplayedValueProduced(message, context.Command, null, valueId: key);
+                            context.Publish(displayed);
+                            messages.Add(key, message);
+                        }
+
+                        // Restore packages
+                        var restorePackagesTask = restoreContext.Restore();
+                        while (await Task.WhenAny(Task.Delay(500), restorePackagesTask) != restorePackagesTask)
+                        {
+                            foreach (var key in messages.Keys.ToArray())
+                            {
+                                var message = messages[key] + ".";
+                                context.Publish(new DisplayedValueUpdated(message, key, null, null));
+                                messages[key] = message;
+                            }
+                        }
+
+                        var helper = kernel.NativeAssemblyLoadHelper;
+
+                        var result = await restorePackagesTask;
+
+                        if (result.Succeeded)
+                        {
+                            switch (result)
+                            {
+                                case PackageRestoreResult packageRestore:
+
+                                    var nativeLibraryProbingPaths = packageRestore.NativeLibraryProbingPaths;
+                                    helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
+
+                                    var addedAssemblyPaths =
+                                        packageRestore
+                                            .ResolvedReferences
+                                            .SelectMany(added => added.AssemblyPaths)
+                                            .Distinct()
+                                            .ToArray();
+
+                                    if (helper != null)
+                                    {
+                                        foreach (var addedReference in packageRestore.ResolvedReferences)
+                                        {
+                                            helper.Handle(addedReference);
+                                        }
+                                    }
+
+                                    kernel.AddScriptReferences(packageRestore.ResolvedReferences);
+
+                                    foreach (var resolvedReference in packageRestore.ResolvedReferences)
+                                    {
+                                        string message;
+                                        string key = PackageMessage(resolvedReference);
+                                        if (messages.TryGetValue(key, out message))
+                                        {
+                                            context.Publish(new DisplayedValueUpdated(message + " done!", key, null, null));
+                                            messages[key] = message;
+                                        }
+
+                                        context.Publish(new PackageAdded(new AddPackage(resolvedReference)));
+
+                                        // Load extensions
+                                        await context.HandlingKernel.SendAsync(
+                                            new LoadExtensionsInDirectory(
+                                                resolvedReference.PackageRoot,
+                                                addedAssemblyPaths));
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+
+                            }
+                        }
+                        else
+                        {
+                            var errors = $"{string.Join(Environment.NewLine, result.Errors)}";
+
+                            switch (result)
+                            {
+                                case PackageRestoreResult packageRestore:
+                                    foreach (var resolvedReference in packageRestore.ResolvedReferences)
+                                    {
+                                        if (string.IsNullOrEmpty(resolvedReference.PackageName))
+                                        {
+                                            context.Publish(new ErrorProduced($"Failed to apply RestoreSources {resolvedReference.RestoreSources}{Environment.NewLine}{errors}"));
+                                        }
+                                        else
+                                        {
+                                            context.Publish(new ErrorProduced($"Failed to add reference to package {resolvedReference.PackageName}{Environment.NewLine}{errors}"));
+                                        }
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                        }
+
+                        // Events for finished
+                        context.Complete();
+                    };
+
+                    await pipelineContext.HandlingKernel.SendAsync(nugetRestoreDirective);
+                })
+            };
+
+            kernel.AddDirective(restore);
 
             return kernel;
         }

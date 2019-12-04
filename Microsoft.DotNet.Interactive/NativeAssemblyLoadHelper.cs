@@ -12,18 +12,18 @@ namespace Microsoft.DotNet.Interactive
 {
     public class NativeAssemblyLoadHelper : IDisposable
     {
-        private static readonly HashSet<DirectoryInfo> globalProbingPaths = new HashSet<DirectoryInfo>();
-        private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
+        private static readonly HashSet<string> globalProbingPaths = new HashSet<string>();
+        private readonly HashSet<string> _probingPaths = new HashSet<string>();
 
-        private readonly Dictionary<string, ResolvedNugetPackageReference> _resolvers =
-            new Dictionary<string, ResolvedNugetPackageReference>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, ResolvedPackageReference> _resolvers =
+            new Dictionary<string, ResolvedPackageReference>(StringComparer.OrdinalIgnoreCase);
 
         public NativeAssemblyLoadHelper()
         {
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
-        public void SetNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
+        public void SetNativeLibraryProbingPaths(IReadOnlyList<string> probingPaths)
         {
             _probingPaths.UnionWith(probingPaths);
             lock (globalProbingPaths)
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Interactive
             }   
         }
 
-        public void Handle(ResolvedNugetPackageReference reference)
+        public void Handle(ResolvedPackageReference reference)
         {
             var assemblyFile = reference.AssemblyPaths.First();
 
@@ -40,9 +40,9 @@ namespace Microsoft.DotNet.Interactive
             {
                 Logger.Log.Info("Probing: {dir}", dir);
 
-                if (assemblyFile.FullName.StartsWith(dir.FullName))
+                if (assemblyFile.StartsWith(dir))
                 {
-                    _resolvers[assemblyFile.FullName] = reference;
+                    _resolvers[assemblyFile] = reference;
                 }
             }
         }
@@ -181,13 +181,13 @@ namespace Microsoft.DotNet.Interactive
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
-                        ptr = _probingPaths.SelectMany(di => ProbingPaths(di.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                        ptr = _probingPaths.SelectMany(dir => ProbingPaths(dir, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
                     }
                     if (ptr == IntPtr.Zero)
                     {
                         lock (globalProbingPaths)
                         {
-                            ptr = globalProbingPaths.SelectMany(di => ProbingPaths(di.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                            ptr = globalProbingPaths.SelectMany(dir => ProbingPaths(dir, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
                         }
                     }
                     return ptr;

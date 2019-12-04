@@ -5,19 +5,19 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class NuGetPackageAdded : KernelEventBase
+    public class PackageAdded : KernelEventBase
     {
-        public NuGetPackageAdded(AddNugetPackage addNugetPackage,  NugetPackageReference packageReference): base(addNugetPackage)
+        public PackageAdded(AddPackage addNugetPackage): base(addNugetPackage)
         {
             if (addNugetPackage == null)
             {
                 throw new System.ArgumentNullException(nameof(addNugetPackage));
             }
 
-            PackageReference = packageReference;
+            PackageReference = addNugetPackage.PackageReference;
         }
 
-        public NugetPackageReference PackageReference { get; }
+        public PackageReference PackageReference { get; }
     }
 
 }

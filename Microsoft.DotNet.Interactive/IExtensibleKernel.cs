@@ -10,8 +10,8 @@ namespace Microsoft.DotNet.Interactive
     public interface IExtensibleKernel
     {
         Task LoadExtensionsFromDirectory(
-            DirectoryInfo directory, 
+            string directory, 
             KernelInvocationContext invocationContext, 
-            IReadOnlyList<FileInfo> additionalDependencies = null);
+            IReadOnlyList<string> additionalDependencies = null);
     }
 }

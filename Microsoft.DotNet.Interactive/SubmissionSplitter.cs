@@ -28,6 +28,8 @@ namespace Microsoft.DotNet.Interactive
                                       StringSplitOptions.None));
 
             var nonDirectiveLines = new List<string>();
+            var commands = new List<IKernelCommand>();
+            var nugetCommands = new List<IKernelCommand>();
             var commandWasSplit = false;
 
             while (lines.Count > 0)
@@ -35,26 +37,34 @@ namespace Microsoft.DotNet.Interactive
                 var currentLine = lines.Dequeue();
 
                 var parseResult = directiveParser.Parse(currentLine);
+                var command = parseResult.CommandResult.Command;
 
                 if (parseResult.Errors.Count == 0)
                 {
                     commandWasSplit = true;
 
-                    if (AccumulatedSubmission() is { } command)
+                    if (AccumulatedSubmission() is { } cmd)
                     {
-                        yield return command;
+                        commands.Add(cmd);
                     }
 
-                    yield return new RunDirective(parseResult)
+                    var runDirective = new RunDirective(parseResult)
                     {
                         Handler = _ => _directiveParser.InvokeAsync(parseResult)
                     };
+
+                    if (command.Name == "#r")
+                    {
+                        nugetCommands.Add(runDirective);
+                    }
+                    else
+                    {
+                        commands.Add(runDirective);
+                    }
                 }
                 else
                 {
-                    var command = parseResult.CommandResult.Command;
-
-                    if (command == parseResult.Parser.Configuration.RootCommand || 
+                    if (command == parseResult.Parser.Configuration.RootCommand ||
                         command.Name == "#r")
                     {
                         nonDirectiveLines.Add(currentLine);
@@ -66,7 +76,7 @@ namespace Microsoft.DotNet.Interactive
                                         parseResult.Errors
                                                    .Select(e => e.ToString()));
 
-                        yield return new DisplayError(message);
+                        commands.Add(new DisplayError(message));
                     }
                 }
             }
@@ -75,13 +85,25 @@ namespace Microsoft.DotNet.Interactive
             {
                 if (AccumulatedSubmission() is { } command)
                 {
-                    yield return command;
+                    commands.Add(command);
                 }
             }
             else
             {
-                yield return submitCode;
+                commands.Add(submitCode);
             }
+
+            if(nugetCommands.Count > 0)
+            {
+                var parseResult = directiveParser.Parse("#!nuget-restore");
+                var runDirective = new RunDirective(parseResult)
+                {
+                    Handler = _ => _directiveParser.InvokeAsync(parseResult)
+                };
+                nugetCommands.Add(runDirective);
+            }
+
+            return nugetCommands.Concat(commands);
 
             IKernelCommand AccumulatedSubmission()
             {
