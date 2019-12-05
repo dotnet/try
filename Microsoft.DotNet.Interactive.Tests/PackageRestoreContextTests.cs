@@ -22,8 +22,8 @@ namespace Microsoft.DotNet.Interactive.Tests
             var result = await restoreContext.Restore() as PackageRestoreResult;
             result.Errors.Should().BeEmpty();
             var assemblyPaths = result.ResolvedReferences.SelectMany(r => r.AssemblyPaths);
-            assemblyPaths.Should().Contain(r => new FileInfo(r).Name.Equals("FluentAssertions.dll"));
-            assemblyPaths.Should().Contain(r => new FileInfo(r).Name.Equals("System.Configuration.ConfigurationManager.dll"));
+            assemblyPaths.Should().Contain(r => r.Name.Equals("FluentAssertions.dll"));
+            assemblyPaths.Should().Contain(r => r.Name.Equals("System.Configuration.ConfigurationManager.dll"));
 
             var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
             packageReference.PackageVersion.Should().Be("5.7.0");
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             var result = await restoreContext.Restore() as PackageRestoreResult;
             result.Succeeded.Should().BeTrue();
             var assemblyPaths = result.ResolvedReferences.SelectMany(r => r.AssemblyPaths);
-            assemblyPaths.Should().Contain(r => new FileInfo(r).Name.Equals("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
+            assemblyPaths.Should().Contain(r => r.Name.Equals("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
 
             var packageReference = await restoreContext.GetResolvedPackageReference("NewtonSoft.Json");
             packageReference.PackageVersion.Should().NotBeNullOrWhiteSpace();
@@ -58,6 +58,23 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
+        public async Task Returns_failure_if_adding_package_twice()
+        {
+            var restoreContext = new PackageRestoreContext();
+
+            var added = restoreContext.AddPackagReference("another-not-a-real-package-definitely-not", "5.7.0") as bool?;
+            added.Should().Be(true);
+
+            var readded = restoreContext.AddPackagReference("another-not-a-real-package-definitely-not", "5.7.1") as bool?;
+            readded.Should().Be(false);
+
+            var result = await restoreContext.Restore() as PackageRestoreResult;
+            result.Succeeded.Should().BeFalse();
+            result.Errors.Should().NotBeEmpty();
+        }
+
+
+        [Fact]
         public async Task Can_get_path_to_nuget_packaged_assembly()
         {
             var restoreContext = new PackageRestoreContext();
@@ -68,14 +85,14 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var path = packageReference.AssemblyPaths.Single();
 
-            path.ToLower()
+            path.FullName.ToLower()
                 .Should()
                 .EndWith("fluentassertions" + Path.DirectorySeparatorChar +
                          "5.7.0" + Path.DirectorySeparatorChar +
                          "lib" + Path.DirectorySeparatorChar +
                          "netcoreapp2.0" + Path.DirectorySeparatorChar  +
                          "fluentassertions.dll");
-            File.Exists(path).Should().BeTrue();
+            path.Exists.Should().BeTrue();
         }
 
         [Fact]
@@ -89,9 +106,10 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var path = packageReference.PackageRoot;
 
-            path.Should()
+            path.FullName
+                .Should()
                 .EndWith("fluentassertions" + Path.DirectorySeparatorChar + "5.7.0" );
-            Directory.Exists(path).Should().BeTrue();
+            path.Exists.Should().BeTrue();
         }
 
         [Fact]
@@ -107,14 +125,14 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var path = packageReference.AssemblyPaths.Single();
 
-            path.ToLower()
+            path.FullName.ToLower()
                 .Should()
                 .EndWith("htmlagilitypack" + Path.DirectorySeparatorChar +
                          "1.11.12" + Path.DirectorySeparatorChar +
                          "lib" + Path.DirectorySeparatorChar +
                          "netstandard2.0" + Path.DirectorySeparatorChar +
                          "htmlagilitypack.dll");
-            File.Exists(path).Should().BeTrue();
+            path.Exists.Should().BeTrue();
         }
 
         // TODO: (PackageRestoreContextTests) add the same package twice

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.Interactive;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -36,7 +35,7 @@ namespace Microsoft.DotNet.Interactive
 
         public IReadOnlyList<ResolvedPackageReference> ResolvedReferences { get; }
 
-        public IReadOnlyList<string> NativeLibraryProbingPaths =>
+        public IReadOnlyList<DirectoryInfo> NativeLibraryProbingPaths =>
             ResolvedReferences
                 .SelectMany(path => path.ProbingPaths)
                 .Distinct()

@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
         {
             var references = assemblyPaths
                              .SelectMany(r => r.AssemblyPaths)
-                             .Select(r => MetadataReference.CreateFromFile(r));
+                             .Select(r => MetadataReference.CreateFromFile(r.FullName));
 
             ScriptOptions = ScriptOptions.AddReferences(references);
         }
@@ -352,14 +352,14 @@ namespace Microsoft.DotNet.Interactive.CSharp
         }
 
         public async Task LoadExtensionsFromDirectory(
-            string directory,
+            DirectoryInfo directory,
             KernelInvocationContext context,
-            IReadOnlyList<string> additionalDependencies = null)
+            IReadOnlyList<FileInfo> additionalDependencies = null)
         {
             var extensionsDirectory =
                 new DirectoryInfo(
                     Path.Combine(
-                        directory,
+                        directory.FullName,
                         "interactive-extensions",
                         "dotnet",
                         "cs"));

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,23 +12,9 @@ using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive
 {
-
-    //#r nuget --- events
-
-    //#r "nuget:one"
-    //#r "nuget:two"
-    //#r "nuget:three"
-
-    // Events
-    //  SubmitCode("")
-    //  PackageAdded("one")
-    //  PackageAdded("two")
-    //  PackageAdded("three")
-    //  PackageRestoreCompleted("One", Two", "Three", "TransitiveDependency_one", "TransitiveDependency_two")
-
     public class PackageRestoreContext 
     {
-        private readonly Dictionary<string, (PackageReference, ResolvedPackageReference)> _packageReferences = new Dictionary<string, (PackageReference, ResolvedPackageReference)>();
+        private readonly ConcurrentDictionary<string, (PackageReference, ResolvedPackageReference)> _packageReferences = new ConcurrentDictionary<string, (PackageReference, ResolvedPackageReference)>();
 
         public PackageRestoreContext()
         {
@@ -57,6 +44,7 @@ namespace Microsoft.DotNet.Interactive
             return references[packageName];
         }
 
+        // Add a package reference return false if unable to add.
         public bool AddPackagReference(
             string packageName,
             string packageVersion = null,
@@ -64,32 +52,31 @@ namespace Microsoft.DotNet.Interactive
             string sourceCode = null)
         {
             var requestedPackage = new PackageReference(packageName, packageVersion, restoreSources, sourceCode);
-            var packageKey = requestedPackage.PackageKey;
+            var package = requestedPackage.PackageName;
 
+            if (string.IsNullOrEmpty(package)) return false;
+
+            // we use a lock because we are going to be looking up and inserting
             lock (_packageReferences)
             {
-                if (!String.IsNullOrEmpty(packageName) && _packageReferences.TryGetValue(packageKey, out var _))
+                (PackageReference, ResolvedPackageReference) existingPackage;
+                var found = _packageReferences.TryGetValue(package, out existingPackage);
+
+                if (!found)
                 {
-                    return false;
+                    return _packageReferences.TryAdd(package, (requestedPackage, null));
                 }
 
-                if (!_packageReferences.ContainsKey(packageKey))
-                {
-                    _packageReferences.Add(packageKey, (requestedPackage, null));
-                }
+                // Verify version numbers match note: wildcards/previews are considered distinct
+                return existingPackage.Item1.PackageVersion.Trim() == packageVersion.Trim();
             }
-
-            return true;
         }
 
         public IEnumerable<PackageReference> PackageReferences
         {
             get
             {
-                lock (_packageReferences)
-                {
-                    return _packageReferences.Values.Select(t => t.Item1);
-                }
+                return _packageReferences.Values.Select(t => t.Item1);
             }
         }
 
@@ -97,10 +84,7 @@ namespace Microsoft.DotNet.Interactive
         {
             get
             {
-                lock (_packageReferences)
-                {
-                    return _packageReferences.Values.Select(t => t.Item2);
-                }
+                return _packageReferences.Values.Select(t => t.Item2);
             }
         }
 
@@ -117,13 +101,10 @@ namespace Microsoft.DotNet.Interactive
 
             if (result.ExitCode != 0)
             {
-                lock (_packageReferences)
-                {
-                    return new PackageRestoreResult(
-                        succeeded: false,
-                        requestedPackages: _packageReferences.Values.Select(t => t.Item1),
-                        errors: result.Output.Concat(result.Error).ToArray());
-                }
+                return new PackageRestoreResult(
+                    succeeded: false,
+                    requestedPackages: _packageReferences.Values.Select(t => t.Item1),
+                    errors: result.Output.Concat(result.Error).ToArray());
             }
             else
             {

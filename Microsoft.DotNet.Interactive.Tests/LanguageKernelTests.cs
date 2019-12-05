@@ -1195,7 +1195,7 @@ catch (Exception e)
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory.FullName));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
 
             KernelEvents.Should()
                         .ContainSingle(e => e is ExtensionLoaded &&
