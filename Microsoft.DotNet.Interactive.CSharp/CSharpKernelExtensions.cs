@@ -87,14 +87,22 @@ using static {typeof(Kernel).FullName};
                 {
                     Handler = async context =>
                     {
-                        await Task.FromResult(
-                            restoreContext.AddPackagReference(
-                                package.PackageName,
-                                package.PackageVersion,
-                                package.RestoreSources));
+                        var added =
+                            await Task.FromResult(
+                                restoreContext.AddPackagReference(
+                                    package.PackageName,
+                                    package.PackageVersion,
+                                    package.RestoreSources));
+
+                        if (!added)
+                        {
+                            var errorMessage = $"{GenerateErrorMessage(package)}{Environment.NewLine}";
+                            context.Publish(new ErrorProduced(errorMessage));
+                        }
+
                         context.Complete();
                     }
-                };
+                   };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });
@@ -105,18 +113,25 @@ using static {typeof(Kernel).FullName};
             {
                 Handler = CommandHandler.Create(async (KernelInvocationContext pipelineContext) =>
                 {
-                    var nugetRestoreDirective = new NugetRestoreDirective();
+                    var nugetRestoreDirective = new RestoreNugetDirective();
 
                     nugetRestoreDirective.Handler = async context =>
                     {
                         var messages = new Dictionary<string, string>();
                         foreach (var package in restoreContext.PackageReferences)
                         {
-                            var key = PackageMessage(package);
-                            var message = key + "...";
-                            var displayed = new DisplayedValueProduced(message, context.Command, null, valueId: key);
-                            context.Publish(displayed);
-                            messages.Add(key, message);
+                           var key = PackageMessage(package);
+                            if (key == null)
+                            {
+                                context.Publish(new ErrorProduced($"Invalid Package Id: '{package.PackageName}'{Environment.NewLine}"));
+                            }
+                            else
+                            {
+                                var message = key + "...";
+                                var displayed = new DisplayedValueProduced(message, context.Command, null, valueId: key);
+                                context.Publish(displayed);
+                                messages.Add(key, message);
+                            }
                         }
 
                         // Restore packages
@@ -222,6 +237,28 @@ using static {typeof(Kernel).FullName};
             kernel.AddDirective(restore);
 
             return kernel;
+            static string GenerateErrorMessage(PackageReference package)
+            {
+                if (!string.IsNullOrEmpty(package.PackageName))
+                {
+                    if (!string.IsNullOrEmpty(package.PackageVersion))
+                    {
+                        return $"Package Reference already added: '{package.PackageName}, {package.PackageVersion}'";
+                    }
+                    else
+                    {
+                        return $"Package Reference already added: '{package.PackageName}'";
+                    }
+                }
+                else if (!string.IsNullOrEmpty(package.RestoreSources))
+                {
+                    return $"Package RestoreSource already added: '{package.RestoreSources}'";
+                }
+                else
+                {
+                    return $"Invalid Package specification: '{package.PackageName}'";
+                }
+            }
         }
 
         public static CSharpKernel UseWho(this CSharpKernel kernel)

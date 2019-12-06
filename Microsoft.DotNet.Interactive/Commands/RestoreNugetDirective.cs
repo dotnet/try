@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class NugetRestoreDirective : KernelCommandBase
+    public class RestoreNugetDirective : KernelCommandBase
     {
     }
 }

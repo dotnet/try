@@ -14,7 +14,9 @@ namespace Microsoft.DotNet.Interactive
 {
     public class PackageRestoreContext 
     {
-        private readonly ConcurrentDictionary<string, (PackageReference, ResolvedPackageReference)> _packageReferences = new ConcurrentDictionary<string, (PackageReference, ResolvedPackageReference)>();
+        private object _lockObject = new object();
+        private readonly ConcurrentDictionary<string, PackageReference> _packageReferences = new ConcurrentDictionary<string, PackageReference>();
+        private Dictionary<string, ResolvedPackageReference> _resolvedReferences = new Dictionary<string, ResolvedPackageReference>();
 
         public PackageRestoreContext()
         {
@@ -51,24 +53,26 @@ namespace Microsoft.DotNet.Interactive
             string restoreSources = null,
             string sourceCode = null)
         {
-            var requestedPackage = new PackageReference(packageName, packageVersion, restoreSources, sourceCode);
-            var package = requestedPackage.PackageName;
+            var key = string.IsNullOrWhiteSpace(packageName)
+                          ? $"RestoreSources={restoreSources}"
+                          : $"PackageName=: {packageName} RestoreSources={restoreSources}";
 
-            if (string.IsNullOrEmpty(package)) return false;
+            if (string.IsNullOrEmpty(key)) return false;
 
             // we use a lock because we are going to be looking up and inserting
-            lock (_packageReferences)
+            lock (_lockObject)
             {
-                (PackageReference, ResolvedPackageReference) existingPackage;
-                var found = _packageReferences.TryGetValue(package, out existingPackage);
-
-                if (!found)
+                if (!_packageReferences.TryGetValue(key, out PackageReference existingPackage))
                 {
-                    return _packageReferences.TryAdd(package, (requestedPackage, null));
+                    if (!_resolvedReferences.TryGetValue(packageName, out ResolvedPackageReference resolvedPackage))
+                    {
+                        return _packageReferences.TryAdd(key, new PackageReference(packageName, packageVersion, restoreSources, sourceCode));
+                    }
+                    return resolvedPackage.PackageVersion.Trim() == packageVersion.Trim();
                 }
 
                 // Verify version numbers match note: wildcards/previews are considered distinct
-                return existingPackage.Item1.PackageVersion.Trim() == packageVersion.Trim();
+                return existingPackage.PackageVersion.Trim() == packageVersion.Trim();
             }
         }
 
@@ -76,15 +80,7 @@ namespace Microsoft.DotNet.Interactive
         {
             get
             {
-                return _packageReferences.Values.Select(t => t.Item1);
-            }
-        }
-
-        public IEnumerable<ResolvedPackageReference> ResolvedPackageReferences
-        {
-            get
-            {
-                return _packageReferences.Values.Select(t => t.Item2);
+                return _packageReferences.Values;
             }
         }
 
@@ -103,14 +99,14 @@ namespace Microsoft.DotNet.Interactive
             {
                 return new PackageRestoreResult(
                     succeeded: false,
-                    requestedPackages: _packageReferences.Values.Select(t => t.Item1),
+                    requestedPackages: _packageReferences.Values,
                     errors: result.Output.Concat(result.Error).ToArray());
             }
             else
             {
                 return new PackageRestoreResult(
                     succeeded: true,
-                    requestedPackages: _packageReferences.Values.Select(t => t.Item1),
+                    requestedPackages: _packageReferences.Values,
                     resolvedReferences: resolvedReferences);
             }
         }
@@ -164,6 +160,10 @@ namespace Microsoft.DotNet.Interactive
                                    probingPaths))
                        .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
 
+            lock (_lockObject)
+            {
+                _resolvedReferences = dict;
+            }
             return dict;
         }
 
@@ -215,7 +215,6 @@ namespace s
 
                 _packageReferences
                     .Values
-                    .Select(v => v.Item1)
                     .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
                     .ToList()
                     .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>\n"));
@@ -226,7 +225,6 @@ namespace s
 
                 _packageReferences
                     .Values
-                    .Select(v => v.Item1)
                     .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
                     .ToList()
                     .ForEach(reference => sb.Append($"    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources){reference.RestoreSources}</RestoreAdditionalProjectSources>\n"));

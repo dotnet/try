@@ -7,14 +7,14 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public class PackageAdded : KernelEventBase
     {
-        public PackageAdded(AddPackage addNugetPackage): base(addNugetPackage)
+        public PackageAdded(AddPackage addPackage): base(addPackage)
         {
-            if (addNugetPackage == null)
+            if (addPackage == null)
             {
-                throw new System.ArgumentNullException(nameof(addNugetPackage));
+                throw new System.ArgumentNullException(nameof(addPackage));
             }
 
-            PackageReference = addNugetPackage.PackageReference;
+            PackageReference = addPackage.PackageReference;
         }
 
         public PackageReference PackageReference { get; }

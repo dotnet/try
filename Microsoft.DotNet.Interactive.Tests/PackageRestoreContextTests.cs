@@ -73,7 +73,6 @@ namespace Microsoft.DotNet.Interactive.Tests
             result.Errors.Should().NotBeEmpty();
         }
 
-
         [Fact]
         public async Task Can_get_path_to_nuget_packaged_assembly()
         {

@@ -31,8 +31,6 @@ namespace Microsoft.DotNet.Interactive
 
         public string SourceCode { get; }
 
-        public string PackageKey => $"{PackageName}, {PackageVersion}, {RestoreSources}";
-
         public static bool TryParse(string value, out PackageReference reference)
         {
             var result = _regex.Match(value);
