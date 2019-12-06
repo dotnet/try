@@ -44,7 +44,7 @@ using static {typeof(Kernel).FullName};
             return kernel;
         }
 
-        private static string PackageMessage(PackageReference package)
+        private static string InstallingPackageMessage(PackageReference package)
         {
             string message = null;
 
@@ -120,7 +120,7 @@ using static {typeof(Kernel).FullName};
                         var messages = new Dictionary<string, string>();
                         foreach (var package in restoreContext.PackageReferences)
                         {
-                           var key = PackageMessage(package);
+                           var key = InstallingPackageMessage(package);
                             if (key == null)
                             {
                                 context.Publish(new ErrorProduced($"Invalid Package Id: '{package.PackageName}'{Environment.NewLine}"));
@@ -179,7 +179,7 @@ using static {typeof(Kernel).FullName};
                                     foreach (var resolvedReference in packageRestore.ResolvedReferences)
                                     {
                                         string message;
-                                        string key = PackageMessage(resolvedReference);
+                                        string key = InstallingPackageMessage(resolvedReference);
                                         if (messages.TryGetValue(key, out message))
                                         {
                                             context.Publish(new DisplayedValueUpdated(message + " done!", key, null, null));
