@@ -44,26 +44,6 @@ using static {typeof(Kernel).FullName};
             return kernel;
         }
 
-        private static string InstallingPackageMessage(PackageReference package)
-        {
-            string message = null;
-
-            if (!string.IsNullOrEmpty(package.PackageName))
-            {
-                message = $"Installing package {package.PackageName}";
-                if (!string.IsNullOrWhiteSpace(package.PackageVersion))
-                {
-                    message += $", version {package.PackageVersion}";
-                }
-
-            }
-            else if (!string.IsNullOrEmpty(package.RestoreSources))
-            {
-                message += $"    RestoreSources: {package.RestoreSources}" + br;
-            }
-            return message;
-        }
-
         public static CSharpKernel UseNugetDirective(
             this CSharpKernel kernel,
             Func<NativeAssemblyLoadHelper> getHelper = null)
@@ -120,7 +100,7 @@ using static {typeof(Kernel).FullName};
                         var messages = new Dictionary<string, string>();
                         foreach (var package in restoreContext.PackageReferences)
                         {
-                           var key = InstallingPackageMessage(package);
+                            var key = InstallingPackageMessage(package);
                             if (key == null)
                             {
                                 context.Publish(new ErrorProduced($"Invalid Package Id: '{package.PackageName}'{Environment.NewLine}"));
@@ -237,6 +217,27 @@ using static {typeof(Kernel).FullName};
             kernel.AddDirective(restore);
 
             return kernel;
+
+            static string InstallingPackageMessage(PackageReference package)
+            {
+                string message = null;
+
+                if (!string.IsNullOrEmpty(package.PackageName))
+                {
+                    message = $"Installing package {package.PackageName}";
+                    if (!string.IsNullOrWhiteSpace(package.PackageVersion))
+                    {
+                        message += $", version {package.PackageVersion}";
+                    }
+
+                }
+                else if (!string.IsNullOrEmpty(package.RestoreSources))
+                {
+                    message += $"    RestoreSources: {package.RestoreSources}" + br;
+                }
+                return message;
+            }
+
             static string GenerateErrorMessage(PackageReference package)
             {
                 if (!string.IsNullOrEmpty(package.PackageName))
