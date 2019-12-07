@@ -4,11 +4,12 @@
 using System.Diagnostics;
 using Assent;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Server;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Xunit;
 
-namespace Microsoft.DotNet.Interactive.Tests
+namespace Microsoft.DotNet.Interactive.Tests.Server
 {
     public class StreamKernelCommandTests
     {
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         };
 
         private readonly Configuration _configuration;
+
         public StreamKernelCommandTests()
         {
             _configuration = new Configuration()

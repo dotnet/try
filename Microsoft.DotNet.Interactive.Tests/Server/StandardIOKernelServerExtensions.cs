@@ -3,8 +3,9 @@
 
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Server;
 
-namespace Microsoft.DotNet.Interactive.Tests
+namespace Microsoft.DotNet.Interactive.Tests.Server
 {
     public static class StandardIOKernelServerExtensions
     {

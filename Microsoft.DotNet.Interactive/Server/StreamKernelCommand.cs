@@ -5,7 +5,7 @@ using Microsoft.DotNet.Interactive.Commands;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Microsoft.DotNet.Interactive
+namespace Microsoft.DotNet.Interactive.Server
 {
     [JsonConverter(typeof(StreamKernelCommandConverter))]
     public class StreamKernelCommand

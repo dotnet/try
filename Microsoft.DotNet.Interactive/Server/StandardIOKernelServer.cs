@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
 
-namespace Microsoft.DotNet.Interactive
+namespace Microsoft.DotNet.Interactive.Server
 {
     public class StandardIOKernelServer : IDisposable
     {
@@ -17,7 +17,10 @@ namespace Microsoft.DotNet.Interactive
         private readonly OutputTextStream _output;
         private readonly CompositeDisposable _disposables;
 
-        public StandardIOKernelServer(IKernel kernel, TextReader input, TextWriter output) : this(kernel, new InputTextStream(input), new OutputTextStream(output))
+        public StandardIOKernelServer(
+            IKernel kernel, 
+            TextReader input, 
+            TextWriter output) : this(kernel, new InputTextStream(input), new OutputTextStream(output))
         {
         }
 

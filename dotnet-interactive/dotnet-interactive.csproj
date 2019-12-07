@@ -19,6 +19,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="obj\**" />
+    <Content Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
     <PackageReference Include="EnvironmentExtensions" Version="0.1.9120003">
       <PrivateAssets>all</PrivateAssets>

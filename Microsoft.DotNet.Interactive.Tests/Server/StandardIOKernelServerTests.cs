@@ -3,22 +3,21 @@
 
 using System;
 using System.IO;
-using System.Reactive.Linq;
-using FluentAssertions;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions.Collections;
+using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Server;
 using Newtonsoft.Json.Linq;
 using Pocket;
-using Recipes;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Interactive.Tests
+namespace Microsoft.DotNet.Interactive.Tests.Server
 {
     public class StandardIOKernelServerTests : IDisposable
     {
@@ -60,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public async Task Kernel_produces_only_commandHandled_for_root_command()
+        public async Task It_produces_commandHandled_only_for_root_command()
         {
             await _standardIOKernelServer.WriteAsync(new SubmitCode("display(1543); display(4567);"));
 
@@ -69,7 +68,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public async Task Client_does_not_stream_ReturnValueProduced_events_if_the_value_is_DisplayedValue()
+        public async Task It_does_not_publish_ReturnValueProduced_events_if_the_value_is_DisplayedValue()
         {
             await _standardIOKernelServer.WriteAsync(new SubmitCode("display(1543)"));
 
@@ -78,7 +77,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public async Task Kernel_client_surfaces_json_parse_errors()
+        public async Task It_publishes_diagnostic_events_on_json_parse_errors()
         {
             var invalidJson = "{ hello";
 
@@ -93,7 +92,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public async Task Kernel_client_surfaces_code_submission_Errors()
+        public async Task It_can_surface_code_submission_Errors()
         {
             await _standardIOKernelServer.WriteAsync(new SubmitCode(@"var a = 12"));
 
@@ -101,7 +100,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public async Task Kernel_client_eval_function_instances()
+        public async Task It_can_eval_function_instances()
         {
             await _standardIOKernelServer.WriteAsync(new SubmitCode(@"Func<int> func = () => 1;"), 0);
            
