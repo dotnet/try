@@ -2,31 +2,26 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Text;
-using HtmlAgilityPack;
+using Microsoft.DotNet.Interactive.Formatting;
 using XPlot.Plotly;
 
 namespace XPlot.DotNet.Interactive.KernelExtensions
 {
     public static class PlotlyChartExtensions
     {
-        public static string GetChartHtml(this PlotlyChart chart)
+        public static string GetHtml(this PlotlyChart chart)
         {
-            var document = new HtmlDocument();
-            document.LoadHtml(chart.GetInlineHtml());
-
-            var divNode = document.DocumentNode.SelectSingleNode("//div");
-            var scriptNode = document.DocumentNode.SelectSingleNode("//script");
-
-            var newHtmlDocument = new HtmlDocument();
-
-            newHtmlDocument.DocumentNode.ChildNodes.Add(divNode);
-            newHtmlDocument.DocumentNode.ChildNodes.Add(GetScriptNodeWithRequire(scriptNode));
-
-            return newHtmlDocument.DocumentNode.WriteContentTo();
+            dynamic _ = new PocketView();
+            var div = _.div[style: $"width: {chart.Width}px; height: {chart.Height}px;", id: chart.Id]();
+            var js = chart.GetInlineJS();
+            
+            return $@"{div}
+{GetScriptNodeWithRequire(js)}"
+                   ;
         }
 
 
-        private static HtmlNode GetScriptNodeWithRequire(HtmlNode scriptNode)
+        private static string GetScriptNodeWithRequire(string script)
         {
             var newScript = new StringBuilder();
             newScript.AppendLine("<script type=\"text/javascript\">");
@@ -35,7 +30,7 @@ var renderPlotly = function() {
     var xplotRequire = requirejs.config({context:'xplot-3.0.1',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});
     xplotRequire(['plotly'], function(Plotly) {");
 
-            newScript.Append(scriptNode.InnerText);
+            newScript.Append(script);
             newScript.AppendLine(@"});
 };
 if ((typeof(requirejs) !==  typeof(Function)) || (typeof(requirejs.config) !== typeof(Function))) { 
@@ -50,7 +45,7 @@ else {
     renderPlotly();
 }");
             newScript.AppendLine("</script>");
-            return HtmlNode.CreateNode(newScript.ToString());
+            return newScript.ToString();
         }
     }
 }
