@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Text;
+using Microsoft.AspNetCore.Html;
 using XPlot.Plotly;
 using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
@@ -12,15 +13,15 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
         public static string GetHtml(this PlotlyChart chart)
         {
             var divElement = div[style: $"width: {chart.Width}px; height: {chart.Height}px;", id: chart.Id]();
-            var jsElement = chart.GetInlineJS().Replace("<script>", string.Empty).Replace("</script>",string.Empty).Trim();
+            var jsElement = chart.GetInlineJS().Replace("<script>", string.Empty).Replace("</script>",string.Empty);
             
             return $@"{divElement}
-{GetScriptNodeWithRequire(jsElement)}"
+{GetScriptElementWithRequire(jsElement)}"
                    ;
         }
 
 
-        private static string GetScriptNodeWithRequire(string script)
+        private static IHtmlContent GetScriptElementWithRequire(string script)
         {
             var newScript = new StringBuilder();
             newScript.AppendLine("<script type=\"text/javascript\">");
@@ -44,7 +45,7 @@ else {
     renderPlotly();
 }");
             newScript.AppendLine("</script>");
-            return newScript.ToString();
+            return new HtmlString(newScript.ToString());
         }
     }
 }
