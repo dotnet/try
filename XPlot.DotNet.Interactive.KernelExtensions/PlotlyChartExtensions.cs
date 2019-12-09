@@ -1,10 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Text;
-using Microsoft.DotNet.Interactive.Formatting;
 using XPlot.Plotly;
+using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
 namespace XPlot.DotNet.Interactive.KernelExtensions
 {
@@ -12,12 +11,11 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
     {
         public static string GetHtml(this PlotlyChart chart)
         {
-            dynamic _ = new PocketView();
-            var div = _.div[style: $"width: {chart.Width}px; height: {chart.Height}px;", id: chart.Id]();
-            var js = chart.GetInlineJS().Replace("<script>", string.Empty).Replace("</script>",string.Empty).Trim();
+            var divElement = div[style: $"width: {chart.Width}px; height: {chart.Height}px;", id: chart.Id]();
+            var jsElement = chart.GetInlineJS().Replace("<script>", string.Empty).Replace("</script>",string.Empty).Trim();
             
-            return $@"{div}
-{GetScriptNodeWithRequire(js)}"
+            return $@"{divElement}
+{GetScriptNodeWithRequire(jsElement)}"
                    ;
         }
 
