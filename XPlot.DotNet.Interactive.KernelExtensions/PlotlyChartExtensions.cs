@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Text;
 using Microsoft.DotNet.Interactive.Formatting;
 using XPlot.Plotly;
@@ -13,7 +14,7 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
         {
             dynamic _ = new PocketView();
             var div = _.div[style: $"width: {chart.Width}px; height: {chart.Height}px;", id: chart.Id]();
-            var js = chart.GetInlineJS();
+            var js = chart.GetInlineJS().Replace("<script>", string.Empty).Replace("</script>",string.Empty).Trim();
             
             return $@"{div}
 {GetScriptNodeWithRequire(js)}"
@@ -30,7 +31,7 @@ var renderPlotly = function() {
     var xplotRequire = requirejs.config({context:'xplot-3.0.1',paths:{plotly:'https://cdn.plot.ly/plotly-1.49.2.min'}});
     xplotRequire(['plotly'], function(Plotly) {");
 
-            newScript.Append(script);
+            newScript.AppendLine(script);
             newScript.AppendLine(@"});
 };
 if ((typeof(requirejs) !==  typeof(Function)) || (typeof(requirejs.config) !== typeof(Function))) { 
