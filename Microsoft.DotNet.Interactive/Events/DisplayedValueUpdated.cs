@@ -13,13 +13,12 @@ namespace Microsoft.DotNet.Interactive.Events
             object value,
             string valueId,
             IKernelCommand command = null,
-            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(value,command,formattedValues,valueId)
+            IReadOnlyCollection<FormattedValue> formattedValues = null) : base(value, command, formattedValues, valueId)
         {
             if (string.IsNullOrWhiteSpace(valueId))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(valueId));
             }
-           
         }
     }
 }

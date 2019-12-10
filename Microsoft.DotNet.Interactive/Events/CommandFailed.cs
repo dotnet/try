@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.DotNet.Interactive.Commands;
+using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Interactive.Events
             Message = string.IsNullOrWhiteSpace(message) ? exception.Message : message;
         }
 
+        [JsonConstructor]
         public CommandFailed(
             string message,
             IKernelCommand command) : this(null, command, message)

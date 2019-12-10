@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Interactive.Events
             Command = command ?? KernelInvocationContext.Current?.Command;
         }
 
-        public IKernelCommand Command { get; }
+        public IKernelCommand Command { get; internal set; }
 
         public override string ToString()
         {

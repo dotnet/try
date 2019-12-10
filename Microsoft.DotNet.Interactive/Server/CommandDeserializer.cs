@@ -8,7 +8,7 @@ using System.Reflection;
 using Microsoft.DotNet.Interactive.Commands;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.DotNet.Interactive
+namespace Microsoft.DotNet.Interactive.Server
 {
     internal class CommandDeserializer
     {

@@ -7,12 +7,14 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
+using Microsoft.DotNet.Interactive.Server;
 using Microsoft.DotNet.Interactive.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,7 +35,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             StartServer startServer = null,
             InvocationContext context = null);
 
-        public delegate Task<int> StartKernelServer(
+        public delegate Task StartKernelServer(
             StartupOptions options, 
             IKernel kernel,
             IConsole console);
@@ -56,12 +58,18 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                                   Program.ConstructWebHost(startupOptions).Run());
 
             jupyter = jupyter ??
-                      ((startupOptions, console, server, context) => 
-                              JupyterCommand.Do(startupOptions, console, server, context));
+                      JupyterCommand.Do;
 
             startKernelServer = startKernelServer ??
-                                ((startupOptions, kernel, console) =>
-                           KernelServerCommand.Do(startupOptions, kernel, console));
+                                (async (startupOptions, kernel, console) =>
+                                    {
+                                        var server = new StandardIOKernelServer(
+                                            kernel, 
+                                            Console.In, 
+                                            Console.Out);
+
+                                        await server.Input.LastAsync();
+                                    });
 
             // Setup first time use notice sentinel.
             firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? 
