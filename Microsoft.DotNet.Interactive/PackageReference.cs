@@ -15,12 +15,11 @@ namespace Microsoft.DotNet.Interactive
             RegexOptions.CultureInvariant |
             RegexOptions.Singleline);
 
-        public PackageReference(string packageName, string packageVersion = null, string restoreSources = null, string sourceCode = null)
+        public PackageReference(string packageName, string packageVersion = null, string restoreSources = null)
         {
             PackageName = packageName ?? string.Empty;
             PackageVersion = packageVersion ?? string.Empty;
             RestoreSources = restoreSources ?? string.Empty;
-            SourceCode = sourceCode ?? string.Empty;
         }
 
         public string PackageName { get; }
@@ -28,8 +27,6 @@ namespace Microsoft.DotNet.Interactive
         public string PackageVersion { get; }
 
         public string RestoreSources { get; }
-
-        public string SourceCode { get; }
 
         public static bool TryParse(string value, out PackageReference reference)
         {
@@ -44,8 +41,7 @@ namespace Microsoft.DotNet.Interactive
             var packageName = result.Groups["packageName"].Value;
             var packageVersion = result.Groups["packageVersion"].Value;
             var restoreSources = result.Groups["restoreSources"].Value;
-
-            reference = new PackageReference(packageName, packageVersion, restoreSources, value);
+            reference = new PackageReference(packageName, packageVersion, restoreSources);
 
             return true;
         }

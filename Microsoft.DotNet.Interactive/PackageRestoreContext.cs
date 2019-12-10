@@ -50,8 +50,7 @@ namespace Microsoft.DotNet.Interactive
         public bool AddPackagReference(
             string packageName,
             string packageVersion = null,
-            string restoreSources = null,
-            string sourceCode = null)
+            string restoreSources = null)
         {
             var key = string.IsNullOrWhiteSpace(packageName)
                           ? $"RestoreSources={restoreSources}"
@@ -66,7 +65,7 @@ namespace Microsoft.DotNet.Interactive
                 {
                     if (!_resolvedReferences.TryGetValue(packageName, out ResolvedPackageReference resolvedPackage))
                     {
-                        return _packageReferences.TryAdd(key, new PackageReference(packageName, packageVersion, restoreSources, sourceCode));
+                        return _packageReferences.TryAdd(key, new PackageReference(packageName, packageVersion, restoreSources));
                     }
                     return resolvedPackage.PackageVersion.Trim() == packageVersion.Trim();
                 }
