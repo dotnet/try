@@ -3,9 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.IO;
 using FluentAssertions;
+using System.Linq;
+using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Server;
+using Pocket;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,10 +44,50 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
         }
 
         [Theory]
-        [MemberData(nameof(EventTypes))]
-        public void All_event_types_are_round_trip_serializable(Type eventType)
+        [MemberData(nameof(Events))]
+        public void All_event_types_are_round_trip_serializable(IKernelEvent @event)
         {
-            throw new NotImplementedException("test not written");
+            var originalEnvelope = KernelEventEnvelope.Create(@event);
+
+            var json = KernelEventEnvelope.Serialize(originalEnvelope);
+
+            _output.WriteLine($"{Environment.NewLine}{@event.GetType().Name}: {Environment.NewLine}{json}");
+
+            var deserializedEnvelope = KernelEventEnvelope.Deserialize(json);
+
+            deserializedEnvelope
+                .Should()
+                .BeEquivalentTo(originalEnvelope);
+        }
+
+        [Fact]
+        public void All_command_types_are_tested_for_round_trip_serialization()
+        {
+            var commandTypes = typeof(IKernelCommand)
+                               .Assembly
+                               .ExportedTypes
+                               .Concrete()
+                               .DerivedFrom(typeof(IKernelCommand));
+
+            Commands()
+                .Select(e => e[0].GetType())
+                .Should()
+                .BeEquivalentTo(commandTypes);
+        }
+
+        [Fact]
+        public void All_event_types_are_tested_for_round_trip_serialization()
+        {
+            var eventTypes = typeof(IKernelEvent)
+                             .Assembly
+                             .ExportedTypes
+                             .Concrete()
+                             .DerivedFrom(typeof(IKernelEvent));
+
+            Events()
+                .Select(e => e[0].GetType())
+                .Should()
+                .BeEquivalentTo(eventTypes);
         }
 
         public static IEnumerable<object[]> Commands()
@@ -54,12 +100,137 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
             IEnumerable<IKernelCommand> commands()
             {
                 yield return new AddNugetPackage(new NugetPackageReference("MyAwesomePackage", "1.2.3"));
+
+                yield return new CancelCurrentCommand();
+
+                yield return new DisplayError("oops!");
+
+                yield return new DisplayValue(
+                    new HtmlString("<b>hi!</b>"),
+                    new FormattedValue("text/html", "<b>hi!</b>")
+                );
+
+                yield return new LoadExtension(new FileInfo(Path.GetTempFileName()));
+
+                yield return new LoadExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()));
+
+                yield return new RequestCompletion("Cons", 4, "chsarp");
+
+                yield return new RequestDiagnostics();
+
+                yield return new RunDirective();
+
+                yield return new SubmitCode("123", "csharp", SubmissionType.Run);
+
+                yield return new UpdateDisplayedValue(
+                    new HtmlString("<b>hi!</b>"),
+                    new FormattedValue("text/html", "<b>hi!</b>"),
+                    "the-value-id");
             }
         }
 
-        public static IEnumerable<object[]> EventTypes()
+        public static IEnumerable<object[]> Events()
         {
-            yield break;
+            foreach (var @event in events())
+            {
+                yield return new object[] { @event };
+            }
+
+            IEnumerable<IKernelEvent> events()
+            {
+                var submitCode = new SubmitCode("123");
+
+                yield return new CodeSubmissionReceived(
+                    submitCode);
+
+                yield return new CommandFailed(
+                    "Oooops!",
+                    submitCode);
+
+                yield return new CommandHandled(
+                    submitCode);
+
+                yield return new CompleteCodeSubmissionReceived(submitCode);
+
+                var requestCompletion = new RequestCompletion("Console.Wri", 11);
+
+                yield return new CompletionRequestCompleted(
+                    new[]
+                    {
+                        new CompletionItem(
+                            "WriteLine",
+                            "Method",
+                            "WriteLine",
+                            "WriteLine",
+                            "WriteLine",
+                            "Writes the line")
+                    },
+                    requestCompletion);
+
+                yield return new CompletionRequestReceived(requestCompletion);
+
+                yield return new CurrentCommandCancelled(submitCode);
+
+                yield return new DiagnosticLogEventProduced("oops!", submitCode);
+
+                yield return new DisplayedValueProduced(
+                    new HtmlString("<b>hi!</b>"),
+                    new SubmitCode("b(\"hi!\")", "csharp", SubmissionType.Run),
+                    new[]
+                    {
+                        new FormattedValue("text/html", "<b>hi!</b>"),
+                    });
+
+                yield return new DisplayedValueUpdated(
+                    new HtmlString("<b>hi!</b>"),
+                    "the-value-id",
+                    new SubmitCode("b(\"hi!\")", "csharp", SubmissionType.Run),
+                    new[]
+                    {
+                        new FormattedValue("text/html", "<b>hi!</b>"),
+                    });
+
+                yield return new ErrorProduced("oops!");
+
+                yield return new ExtensionLoaded(new FileInfo(Path.GetTempFileName()));
+
+                yield return new IncompleteCodeSubmissionReceived(submitCode);
+
+                yield return new KernelBusy();
+
+                yield return new KernelExtensionLoadException("oops!");
+
+                yield return new KernelIdle();
+
+                yield return new NuGetPackageAdded(
+                    new AddNugetPackage(
+                        new NugetPackageReference("ThePackage", "*", @"c:\temp")),
+                    new NugetPackageReference("ThePackage", "1.2.3"));
+
+                yield return new ReturnValueProduced(
+                    new HtmlString("<b>hi!</b>"),
+                    new SubmitCode("b(\"hi!\")", "csharp", SubmissionType.Run),
+                    new[]
+                    {
+                        new FormattedValue("text/html", "<b>hi!</b>"),
+                    });
+
+                yield return new StandardErrorValueProduced(
+                    "oops!",
+                    submitCode,
+                    new[]
+                    {
+                        new FormattedValue("text/plain", "oops!"),
+                    });
+
+                yield return new StandardOutputValueProduced(
+                    123,
+                    new SubmitCode("Console.Write(123);", "csharp", SubmissionType.Run),
+                    new[]
+                    {
+                        new FormattedValue("text/plain", "123"),
+                    });
+            }
         }
     }
 }

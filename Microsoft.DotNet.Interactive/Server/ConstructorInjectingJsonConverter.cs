@@ -47,7 +47,9 @@ namespace Microsoft.DotNet.Interactive.Server
             var deserializer = _deserializers.GetOrAdd(typeToConvert, t =>
             {
                 var ctors = typeToConvert.GetConstructors();
-                var longestCtorParamCount = ctors.Max(c => c.GetParameters().Length);
+                var longestCtorParamCount = ctors.Any()
+                                                ? ctors.Max(c => c.GetParameters().Length)
+                                                : 0;
 
                 var chosenCtor = ctors.Single(c => c.GetParameters().Length == longestCtorParamCount);
 
@@ -67,6 +69,7 @@ namespace Microsoft.DotNet.Interactive.Server
                     jsonElementParameter);
 
                 var factory = factoryExpr.Compile();
+
                 return factory;
             });
 
@@ -94,7 +97,10 @@ namespace Microsoft.DotNet.Interactive.Server
                             }
                             else
                             {
-                                return GetOptionalParameterValue(jsonElementParameter, p.ParameterType);
+                                return GetOptionalParameterValue(
+                                    jsonElementParameter,
+                                    p.Name,
+                                    p.ParameterType);
                             }
                         }
                     }
@@ -145,7 +151,6 @@ namespace Microsoft.DotNet.Interactive.Server
                 string propertyName,
                 Type type)
             {
-                // jsonElement.GetProperty("propertyName")
                 MethodInfo getProperty = typeof(JsonElement).GetMethod("GetProperty", new[] { typeof(string) });
 
                 var jsonProperty = Expression.Call(
@@ -184,9 +189,15 @@ namespace Microsoft.DotNet.Interactive.Server
                 return deserialize;
             }
 
-            Expression GetOptionalParameterValue(ParameterExpression jsonElementForCtorParameter, Type type)
+            Expression GetOptionalParameterValue(
+                ParameterExpression parentJsonElement,
+                string propertyName,
+                Type type)
             {
-                throw new NotSupportedException();
+                return GetParameterValue(
+                    parentJsonElement,
+                    propertyName,
+                    type);
             }
         }
 

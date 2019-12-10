@@ -119,7 +119,10 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
-                    context.Publish(new CommandFailed($"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", loadExtensionsInDirectory));
+                    context.Publish(
+                        new CommandFailed(
+                            $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", 
+                            command: loadExtensionsInDirectory));
                 }
             };
 

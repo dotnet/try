@@ -8,15 +8,12 @@ namespace Microsoft.DotNet.Interactive.Events
 {
     public class CodeSubmissionReceived : KernelEventBase
     {
-        public CodeSubmissionReceived(string value, SubmitCode submitCode) : base(submitCode)
+        public CodeSubmissionReceived(SubmitCode command) : base(command)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public string Code => ((SubmitCode)Command).Code;
 
-        public string Value { get; }
-
-        public override string ToString() => $"{base.ToString()}: {Value.TruncateForDisplay()}";
+        public override string ToString() => $"{base.ToString()}: {Code.TruncateForDisplay()}";
     }
 }

@@ -6,8 +6,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.Json;
 using Microsoft.DotNet.Interactive.Commands;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.DotNet.Interactive.Server
 {
@@ -16,72 +17,47 @@ namespace Microsoft.DotNet.Interactive.Server
         private static readonly ConcurrentDictionary<Type, Func<IKernelCommand, IKernelCommandEnvelope>> _envelopeFactories =
             new ConcurrentDictionary<Type, Func<IKernelCommand, IKernelCommandEnvelope>>();
 
-        private readonly IKernelCommand _command;
+        private static readonly Dictionary<string, Type> _envelopeTypesByCommandTypeName;
 
-        private static readonly JsonSerializerOptions _deserializeOptions = new JsonSerializerOptions
+        private static readonly Dictionary<string, Type> _commandTypesByCommandTypeName;
+
+        static KernelCommandEnvelope()
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters =
+            _envelopeTypesByCommandTypeName = new Dictionary<string, Type>
             {
-                new ConstructorInjectingJsonConverter()
-            }
-        };
+                [nameof(AddNugetPackage)] = typeof(KernelCommandEnvelope<AddNugetPackage>),
+                [nameof(CancelCurrentCommand)] = typeof(KernelCommandEnvelope<CancelCurrentCommand>),
+                [nameof(DisplayError)] = typeof(KernelCommandEnvelope<DisplayError>),
+                [nameof(DisplayValue)] = typeof(KernelCommandEnvelope<DisplayValue>),
+                [nameof(LoadExtension)] = typeof(KernelCommandEnvelope<LoadExtension>),
+                [nameof(LoadExtensionsInDirectory)] = typeof(KernelCommandEnvelope<LoadExtensionsInDirectory>),
+                [nameof(RequestCompletion)] = typeof(KernelCommandEnvelope<RequestCompletion>),
+                [nameof(RequestDiagnostics)] = typeof(KernelCommandEnvelope<RequestDiagnostics>),
+                [nameof(RunDirective)] = typeof(KernelCommandEnvelope<RunDirective>),
+                [nameof(SubmitCode)] = typeof(KernelCommandEnvelope<SubmitCode>),
+                [nameof(UpdateDisplayedValue)] = typeof(KernelCommandEnvelope<UpdateDisplayedValue>)
+            };
 
-        private static readonly JsonSerializerOptions _serializeOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+            _commandTypesByCommandTypeName = _envelopeTypesByCommandTypeName
+                .ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value.GetGenericArguments()[0]);
+        }
 
-        
+        internal static Type CommandTypeByName(string name) => _commandTypesByCommandTypeName[name];
+
+        private readonly IKernelCommand _command;
 
         protected KernelCommandEnvelope(IKernelCommand command)
         {
             _command = command ?? throw new ArgumentNullException(nameof(command));
         }
 
-        public string Token { get; }
-
         public abstract string CommandType { get; }
 
+        public string Token { get; }
+
         IKernelCommand IKernelCommandEnvelope.Command => _command;
-
-        private static readonly Dictionary<string, Type> _commandEnvelopeTypesByCommandTypeName = new Dictionary<string, Type>
-        {
-            ["AddNugetPackage"] = typeof(KernelCommandEnvelope<AddNugetPackage>),
-            ["CancelCurrentCommand"] = typeof(KernelCommandEnvelope<CancelCurrentCommand>),
-            ["DisplayError"] = typeof(KernelCommandEnvelope<DisplayError>),
-            ["DisplayValue"] = typeof(KernelCommandEnvelope<DisplayValue>),
-            ["LoadExtension"] = typeof(KernelCommandEnvelope<LoadExtension>),
-            ["LoadExtensionsInDirectory"] = typeof(KernelCommandEnvelope<LoadExtensionsInDirectory>),
-            ["Quit"] = typeof(KernelCommandEnvelope<Quit>),
-            ["RequestCompletion"] = typeof(KernelCommandEnvelope<RequestCompletion>),
-            ["RequestDiagnostics"] = typeof(KernelCommandEnvelope<RequestDiagnostics>),
-            ["RunDirective"] = typeof(KernelCommandEnvelope<RunDirective>),
-            ["SubmitCode"] = typeof(KernelCommandEnvelope<SubmitCode>),
-            ["UpdateDisplayedValue"] = typeof(KernelCommandEnvelope<UpdateDisplayedValue>)
-        };
-
-        public static string Serialize(IKernelCommandEnvelope envelope)
-        {
-            return JsonSerializer.Serialize(
-                envelope,
-                envelope.GetType(),
-                _serializeOptions);
-        }
-
-        public static IKernelCommandEnvelope Deserialize(string json)
-        {
-            using JsonDocument document = JsonDocument.Parse(json);
-
-            var commandType = document.RootElement.GetProperty("commandType").GetString();
-
-            var envelopeType = _commandEnvelopeTypesByCommandTypeName[commandType];
-
-            return (IKernelCommandEnvelope) JsonSerializer.Deserialize(
-                json,
-                envelopeType,
-                _deserializeOptions);
-        }
 
         public static IKernelCommandEnvelope Create(IKernelCommand command)
         {
@@ -89,7 +65,7 @@ namespace Microsoft.DotNet.Interactive.Server
                 command.GetType(),
                 commandType =>
                 {
-                    var genericType = _commandEnvelopeTypesByCommandTypeName[command.GetType().Name];
+                    var genericType = _envelopeTypesByCommandTypeName[command.GetType().Name];
 
                     var constructor = genericType.GetConstructors().Single();
 
@@ -109,6 +85,54 @@ namespace Microsoft.DotNet.Interactive.Server
                 });
 
             return factory(command);
+        }
+
+        public static IKernelCommandEnvelope Deserialize(string json)
+        {
+            var jsonObject = JObject.Parse(json);
+
+            return Deserialize(jsonObject);
+        }
+
+        internal static IKernelCommandEnvelope Deserialize(JToken json)
+        {
+            var commandJson = json["command"];
+
+            var commandTypeName = json["commandType"].Value<string>();
+
+            if (commandTypeName == null)
+            {
+                return null;
+            }
+
+            var commandType = CommandTypeByName(commandTypeName);
+
+            var command = (IKernelCommand) commandJson.ToObject(commandType, Serializer.JsonSerializer);
+
+            return Create(command);
+        }
+
+        public static string Serialize(IKernelCommandEnvelope envelope)
+        {
+            var serializationModel = new SerializationModel
+            {
+                command = envelope.Command,
+                commandType = envelope.CommandType,
+                token = envelope.Token
+            };
+
+            return JsonConvert.SerializeObject(
+                serializationModel,
+                Serializer.JsonSerializerSettings);
+        }
+
+        internal class SerializationModel
+        {
+            public string token { get; set; }
+
+            public string commandType { get; set; }
+
+            public object command { get; set; }
         }
     }
 }

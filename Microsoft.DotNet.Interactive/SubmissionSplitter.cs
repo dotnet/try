@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Interactive
                         yield return command;
                     }
 
-                    yield return new RunDirective(parseResult)
+                    yield return new RunDirective
                     {
                         Handler = _ => _directiveParser.InvokeAsync(parseResult)
                     };
