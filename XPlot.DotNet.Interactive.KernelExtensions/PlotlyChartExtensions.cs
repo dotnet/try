@@ -20,7 +20,6 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
                    ;
         }
 
-
         private static IHtmlContent GetScriptElementWithRequire(string script)
         {
             var newScript = new StringBuilder();
