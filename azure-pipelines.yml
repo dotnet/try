@@ -20,7 +20,7 @@ variables:
   - name: DotNetSdkVersion2
     value: '2.1.509'
   - name: DotNetSdkVersion
-    value: '3.0.100'
+    value: '3.0.101'
   - name: NodeJSVersion
     value: '>=12'
   - name: TryDotNetPackagesPath
