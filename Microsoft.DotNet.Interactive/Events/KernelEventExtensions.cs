@@ -6,7 +6,7 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public static class KernelEventExtensions
+    internal static class KernelEventExtensions
     {
         public static IKernelCommand GetRootCommand(this IKernelEvent kernelEvent)
         {
@@ -17,12 +17,20 @@ namespace Microsoft.DotNet.Interactive.Events
 
             var root = kernelEvent.Command;
 
-            while (root is KernelCommandBase kb &&  kb.Parent != null)
+            while (root is KernelCommandBase kb && kb.Parent != null)
             {
                 root = kb.Parent;
             }
 
             return root;
+        }
+    }
+
+    public abstract class DiagnosticEventBase : KernelEventBase
+    {
+        protected DiagnosticEventBase(
+            IKernelCommand command = null) : base(command)
+        {
         }
     }
 }

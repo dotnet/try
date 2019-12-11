@@ -148,7 +148,7 @@ type FSharpKernel() =
                         context.Publish(DisplayedValueUpdated(message, key))
                     ())
 
-            let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission.Code, codeSubmission)
+            let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission)
             context.Publish(codeSubmissionReceived)
             use! console = ConsoleOutput.Capture() |> Async.AwaitTask
             use _ = console.SubscribeToStandardOutput(fun msg -> context.Publish(StandardOutputValueProduced(msg, codeSubmission, FormattedValue.FromObject(msg))))

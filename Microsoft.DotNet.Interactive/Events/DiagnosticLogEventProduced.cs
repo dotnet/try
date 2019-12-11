@@ -5,10 +5,15 @@ using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
-    public class DiagnosticsReceived : KernelEventBase
+    public class DiagnosticLogEventProduced : DiagnosticEventBase
     {
-        public DiagnosticsReceived(IKernelCommand command) : base(command)
+        public DiagnosticLogEventProduced(
+            string message,
+            IKernelCommand command = null) : base(command)
         {
+            Message = message;
         }
+
+        public string Message { get; }
     }
 }

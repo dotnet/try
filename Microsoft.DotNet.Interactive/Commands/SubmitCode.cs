@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 
         public string Code { get; set; }
 
-        public string TargetKernelName { get; set; }
+        public string TargetKernelName { get; }
 
         public SubmissionType SubmissionType { get; }
 

@@ -3,12 +3,14 @@
 
 using Microsoft.DotNet.Interactive.Commands;
 
-namespace Microsoft.DotNet.Interactive.Events
+namespace Microsoft.DotNet.Interactive.Server
 {
-    public class SignatureHelpReceived : KernelEventBase
+    public interface IKernelCommandEnvelope
     {
-        public SignatureHelpReceived(IKernelCommand command) : base(command)
-        {
-        }
+        IKernelCommand Command { get; }
+
+        string CommandType { get; }
+
+        string Token { get; }
     }
 }

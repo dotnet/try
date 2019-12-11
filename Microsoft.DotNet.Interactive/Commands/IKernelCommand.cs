@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Interactive.Commands
     public interface IKernelCommand
     {
         Task InvokeAsync(KernelInvocationContext context);
+
         IDictionary<string, object> Properties { get; }
     }
 }

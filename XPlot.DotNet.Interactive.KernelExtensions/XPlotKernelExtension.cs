@@ -15,7 +15,7 @@ namespace XPlot.DotNet.Interactive.KernelExtensions
             Formatter<PlotlyChart>.Register(
                 (chart, writer) =>
                 {
-                    writer.Write(chart.GetChartHtml());
+                    writer.Write(PlotlyChartExtensions.GetHtml(chart));
                 }, 
                 HtmlFormatter.MimeType);
 

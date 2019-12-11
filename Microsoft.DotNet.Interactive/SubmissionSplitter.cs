@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Interactive
                         commands.Add(cmd);
                     }
 
-                    var runDirective = new RunDirective(parseResult)
+                    var runDirective=new RunDirective
                     {
                         Handler = _ => _directiveParser.InvokeAsync(parseResult)
                     };
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Interactive
             if(nugetCommands.Count > 0)
             {
                 var parseResult = directiveParser.Parse("#!nuget-restore");
-                var runDirective = new RunDirective(parseResult)
+                var runDirective = new RunDirective
                 {
                     Handler = _ => _directiveParser.InvokeAsync(parseResult)
                 };

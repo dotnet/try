@@ -3,45 +3,69 @@
 
 using System;
 using System.IO;
+using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive
 {
-    internal class InputTextStream : IInputTextStream
+    internal class InputTextStream : IObservable<string>, IDisposable
     {
+        private readonly object _lock = new object();
         private readonly TextReader _input;
         private readonly Subject<string> _channel = new Subject<string>();
+        private bool _complete;
+        private bool _started;
 
         public InputTextStream(TextReader input)
         {
             _input = input ?? throw new ArgumentNullException(nameof(input));
         }
+
         public IDisposable Subscribe(IObserver<string> observer)
         {
-            return _channel.Subscribe(observer);
+            EnsureStarted();
+
+            return new CompositeDisposable
+            {
+                Disposable.Create(() => _complete = true),
+                _channel.Subscribe(observer)
+            };
         }
 
-        public Task Start(CancellationToken token)
+        private void EnsureStarted()
         {
-            return Task.Run(async () =>
+            lock (_lock)
             {
-                while (!token.IsCancellationRequested)
+                if (_started)
+                {
+                    return;
+                }
+
+                _started = true;
+            }
+
+            Task.Run(async () =>
+            {
+                while (!_complete)
                 {
                     var line = await _input.ReadLineAsync();
                     if (line == null)
                     {
-                        await Task.Delay(100, token);
+                        await Task.Delay(100);
                     }
                     else
                     {
                         _channel.OnNext(line);
                     }
                 }
+            });
+        }
 
-                _channel.OnCompleted();
-            }, token);
+        public void Dispose()
+        {
+            _channel.OnCompleted();
+            _complete = true;
         }
     }
 }

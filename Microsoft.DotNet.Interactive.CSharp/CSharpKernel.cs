@@ -143,9 +143,8 @@ namespace Microsoft.DotNet.Interactive.CSharp
             {
                 cancellationSource = _cancellationSource;
             }
-            var codeSubmissionReceived = new CodeSubmissionReceived(
-                submitCode.Code,
-                submitCode);
+            
+            var codeSubmissionReceived = new CodeSubmissionReceived(submitCode);
 
             context.Publish(codeSubmissionReceived);
 
