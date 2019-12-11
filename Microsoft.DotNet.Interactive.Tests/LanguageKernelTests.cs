@@ -1270,7 +1270,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetDisallowsEmptyPackageSpecification()
+        public async Task Pound_r_nuget_disallows_empty_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1291,7 +1291,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetDisallowsVersionOnlyPackageSpecification()
+        public async Task Pound_r_nuget_disallows_version_only_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1312,7 +1312,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsRestoreSourcesPackageSpecification()
+        public async Task Pound_r_nuget_allows_RestoreSources_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1328,7 +1328,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsDuplicateSourcesPackageSpecificationSingleCell()
+        public async Task Pound_r_nuge_allows_duplicate_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1345,7 +1345,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsDuplicateSourcesPackageSpecificationMultipleCells()
+        public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1369,7 +1369,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsMulipleSourcesPackageSpecificationSingleCell()
+        public async Task Pound_r_nuget_allows_multiple_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1385,7 +1385,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsMulipleSourcesPackageSpecificationMultipleCells()
+        public async Task Pound_r_nuget_allows_multiple_sources_package_specification_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1408,7 +1408,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsDuplicatePackageSpecificationsSingleCell()
+        public async Task Pound_r_nuget_allows_duplicate_package_specifications_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1426,7 +1426,7 @@ using Microsoft.ML.AutoML;
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsDuplicatePackageSpecificationsMultipleCells()
+        public async Task Pound_r_nuget_allows_duplicate_package_specifications_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1450,7 +1450,7 @@ using Microsoft.ML.AutoML;
         }
 
         [Fact]
-        public async Task PoundRNugetDisAllowsPackageSpecificationsWithDifferentVersionsSingleCell()
+        public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1473,7 +1473,7 @@ using Microsoft.ML.AutoML;
         }
 
         [Fact]
-        public async Task PoundRNugetDisAllowsPackageSpecificationsWithDifferentVersionsMultipleCells()
+        public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1502,7 +1502,7 @@ using Microsoft.ML.AutoML;
         }
 
         [Fact]
-        public async Task PoundRNugetDisAllowsChangingTheVersionOfLoadedDependentPackages()
+        public async Task Pound_r_nuget_disallows_changing_version_of_loaded_dependent_packages()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
@@ -1532,7 +1532,7 @@ using Microsoft.ML.AutoML;
         }
 
         [Fact]
-        public async Task PoundRNugetAllowsUsingTheVersionOfLoadedDependentPackages()
+        public async Task Pound_r_nuget_allows_using_version_of_loaded_dependent_packages()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
 
