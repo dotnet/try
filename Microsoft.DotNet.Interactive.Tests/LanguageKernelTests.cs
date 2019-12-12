@@ -1570,9 +1570,10 @@ using Microsoft.ML.AutoML;
             events.Should()
                   .NotContainErrors();
 
+            // The System.Text.JSon dll ships in : Microsoft.NETCore.App.Ref
             events.OfType<PackageAdded>()
                   .Should()
-                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "System.Text.Json");
+                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
 
         }
     }
