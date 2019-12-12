@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class ResolvedNugetPackageReference : NugetPackageReference
+    public class ResolvedPackageReference : PackageReference
     {
-        public ResolvedNugetPackageReference(
+        public ResolvedPackageReference(
             string packageName,
             string packageVersion,
             IReadOnlyList<FileInfo> assemblyPaths,

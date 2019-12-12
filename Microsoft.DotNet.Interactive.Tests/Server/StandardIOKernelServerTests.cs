@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
             _events
                 .Select(e => e["eventType"].Value<string>())
                 .Should()
-                .Contain(nameof(NuGetPackageAdded));
+                .Contain(nameof(PackageAdded));
         }
 
         public void Dispose()

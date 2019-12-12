@@ -15,8 +15,8 @@ namespace Microsoft.DotNet.Interactive
         private static readonly HashSet<DirectoryInfo> globalProbingPaths = new HashSet<DirectoryInfo>();
         private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
 
-        private readonly Dictionary<string, ResolvedNugetPackageReference> _resolvers =
-            new Dictionary<string, ResolvedNugetPackageReference>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, ResolvedPackageReference> _resolvers =
+            new Dictionary<string, ResolvedPackageReference>(StringComparer.OrdinalIgnoreCase);
 
         public NativeAssemblyLoadHelper()
         {
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Interactive
             }   
         }
 
-        public void Handle(ResolvedNugetPackageReference reference)
+        public void Handle(ResolvedPackageReference reference)
         {
             var assemblyFile = reference.AssemblyPaths.First();
 
@@ -181,13 +181,13 @@ namespace Microsoft.DotNet.Interactive
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
-                        ptr = _probingPaths.SelectMany(di => ProbingPaths(di.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                        ptr = _probingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
                     }
                     if (ptr == IntPtr.Zero)
                     {
                         lock (globalProbingPaths)
                         {
-                            ptr = globalProbingPaths.SelectMany(di => ProbingPaths(di.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                            ptr = globalProbingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
                         }
                     }
                     return ptr;

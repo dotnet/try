@@ -11,10 +11,10 @@ namespace Microsoft.DotNet.Interactive.Commands
     public class LoadExtensionsInDirectory : KernelCommandBase
     {
         public LoadExtensionsInDirectory(
-            DirectoryInfo directory, 
+            DirectoryInfo directoryPath, 
             IReadOnlyList<FileInfo> additionalDependencies = null)
         {
-            Directory = directory;
+            Directory = directoryPath;
             AdditionalDependencies = additionalDependencies ?? Array.Empty<FileInfo>();
         }
 

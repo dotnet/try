@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Server
                 [nameof(KernelBusy)] = typeof(KernelEventEnvelope<KernelBusy>),
                 [nameof(KernelExtensionLoadException)] = typeof(KernelEventEnvelope<KernelExtensionLoadException>),
                 [nameof(KernelIdle)] = typeof(KernelEventEnvelope<KernelIdle>),
-                [nameof(NuGetPackageAdded)] = typeof(KernelEventEnvelope<NuGetPackageAdded>),
+                [nameof(PackageAdded)] = typeof(KernelEventEnvelope<PackageAdded>),
                 [nameof(ReturnValueProduced)] = typeof(KernelEventEnvelope<ReturnValueProduced>),
                 [nameof(StandardErrorValueProduced)] = typeof(KernelEventEnvelope<StandardErrorValueProduced>),
                 [nameof(StandardOutputValueProduced)] = typeof(KernelEventEnvelope<StandardOutputValueProduced>),

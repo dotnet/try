@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class NugetPackageReference
+    public class PackageReference
     {
         private static readonly Regex _regex = new Regex(
             @"(?<moniker>nuget)(?<colon>\s*:\s*)(?<packageName>(?!RestoreSources\s*=\s*)[^,]+)*(\s*,\s*(?<packageVersion>(?!RestoreSources\s*=\s*)[^,]+))*(?<comma>\s*,\s*)*(RestoreSources\s*=\s*(?<restoreSources>[^,]+)*)*",
@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive
             RegexOptions.CultureInvariant |
             RegexOptions.Singleline);
 
-        public NugetPackageReference(string packageName, string packageVersion = null, string restoreSources = null)
+        public PackageReference(string packageName, string packageVersion = null, string restoreSources = null)
         {
             PackageName = packageName ?? string.Empty;
             PackageVersion = packageVersion ?? string.Empty;
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive
 
         public string RestoreSources { get; }
 
-        public static bool TryParse(string value, out NugetPackageReference reference)
+        public static bool TryParse(string value, out PackageReference reference)
         {
             var result = _regex.Match(value);
 
@@ -41,8 +41,7 @@ namespace Microsoft.DotNet.Interactive
             var packageName = result.Groups["packageName"].Value;
             var packageVersion = result.Groups["packageVersion"].Value;
             var restoreSources = result.Groups["restoreSources"].Value;
-
-            reference = new NugetPackageReference(packageName, packageVersion, restoreSources);
+            reference = new PackageReference(packageName, packageVersion, restoreSources);
 
             return true;
         }

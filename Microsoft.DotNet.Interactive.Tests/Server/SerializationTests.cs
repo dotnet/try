@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
             IEnumerable<IKernelCommand> commands()
             {
-                yield return new AddNugetPackage(new NugetPackageReference("MyAwesomePackage", "1.2.3"));
+                yield return new AddPackage(new PackageReference("MyAwesomePackage", "1.2.3"));
 
                 yield return new CancelCurrentCommand();
 
@@ -113,6 +113,8 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                 yield return new LoadExtension(new FileInfo(Path.GetTempFileName()));
 
                 yield return new LoadExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()));
+
+                yield return new RestoreNugetDirective();
 
                 yield return new RequestCompletion("Cons", 4, "chsarp");
 
@@ -202,12 +204,11 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
                 yield return new KernelIdle();
 
-                yield return new NuGetPackageAdded(
-                    new AddNugetPackage(
-                        new NugetPackageReference("ThePackage", "*", @"c:\temp")),
-                    new NugetPackageReference("ThePackage", "1.2.3"));
+                yield return new PackageAdded(
+                    new AddPackage(new PackageReference("ThePackage", "1.2.3")));
 
                 yield return new ReturnValueProduced(
+
                     new HtmlString("<b>hi!</b>"),
                     new SubmitCode("b(\"hi!\")", "csharp", SubmissionType.Run),
                     new[]

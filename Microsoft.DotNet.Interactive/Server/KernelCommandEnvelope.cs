@@ -25,12 +25,13 @@ namespace Microsoft.DotNet.Interactive.Server
         {
             _envelopeTypesByCommandTypeName = new Dictionary<string, Type>
             {
-                [nameof(AddNugetPackage)] = typeof(KernelCommandEnvelope<AddNugetPackage>),
+                [nameof(AddPackage)] = typeof(KernelCommandEnvelope<AddPackage>),
                 [nameof(CancelCurrentCommand)] = typeof(KernelCommandEnvelope<CancelCurrentCommand>),
                 [nameof(DisplayError)] = typeof(KernelCommandEnvelope<DisplayError>),
                 [nameof(DisplayValue)] = typeof(KernelCommandEnvelope<DisplayValue>),
                 [nameof(LoadExtension)] = typeof(KernelCommandEnvelope<LoadExtension>),
                 [nameof(LoadExtensionsInDirectory)] = typeof(KernelCommandEnvelope<LoadExtensionsInDirectory>),
+                [nameof(RestoreNugetDirective)] = typeof(KernelCommandEnvelope<RestoreNugetDirective>),
                 [nameof(RequestCompletion)] = typeof(KernelCommandEnvelope<RequestCompletion>),
                 [nameof(RequestDiagnostics)] = typeof(KernelCommandEnvelope<RequestDiagnostics>),
                 [nameof(RunDirective)] = typeof(KernelCommandEnvelope<RunDirective>),

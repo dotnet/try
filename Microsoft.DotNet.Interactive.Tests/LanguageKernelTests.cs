@@ -937,6 +937,7 @@ json
                 .NotContain(e => e.Code.Contains("#r"));
         }
 
+
         [Theory]
         [InlineData(Language.CSharp, "Microsoft.Extensions.Logging.ILogger logger = null;")]
         [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
@@ -959,21 +960,16 @@ json
 
             events
                 .Should()
-                .Contain(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing"));
+                .ContainSingle(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing package"));
 
             events
                 .Should()
-                .Contain(e => e is DisplayedValueUpdated && ((DisplayedValueUpdated)e).Value.ToString().Contains("done!"));
+                .ContainSingle(e => e is DisplayedValueUpdated && ((DisplayedValueUpdated)e).Value.ToString().Contains("done!"));
 
-            events
-                .Should()
-                .ContainSingle(e => e is NuGetPackageAdded);
-
-            events.OfType<NuGetPackageAdded>()
-                  .Single()
-                  .PackageReference
+            events.OfType<PackageAdded>()
                   .Should()
-                  .BeEquivalentTo(new NugetPackageReference("Microsoft.Extensions.Logging", "2.2.0"));
+                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.Extensions.Logging" 
+                                   && ((PackageAdded)e).PackageReference.PackageVersion == "2.2.0");
 
             if (language == Language.CSharp)
             {
@@ -981,10 +977,8 @@ json
                 events
                     .Should()
                     .ContainSingle<CommandHandled>(
-                        where: e => e.Command is AddNugetPackage);
+                        where: e => e.Command is AddPackage);
             }
-
-
         }
 
         [Fact(Skip = "Should pass after #577 is resolved")]
@@ -992,7 +986,7 @@ json
         {
             var kernel = new CompositeKernel
             {
-                new CSharpKernel().UseNugetDirective()
+                new CSharpKernel()
             };
 
             var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
@@ -1138,7 +1132,7 @@ catch (Exception e)
 
             events
                 .Should()
-                .ContainSingle<NuGetPackageAdded>();
+                .Contain(e => e is PackageAdded);
 
             events
                 .Should()
@@ -1275,7 +1269,293 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact(Skip = "requires netcorepp3.0")]
+        [Fact]
+        public async Task Pound_r_nuget_disallows_empty_package_specification()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:""
+");
+
+            events
+                .OfType<ErrorProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be($"Invalid Package Id: ''{Environment.NewLine}");
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_disallows_version_only_package_specification()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:,1.0.0""
+");
+
+            events
+                .OfType<ErrorProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be($"Invalid Package Id: ''{Environment.NewLine}");
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_RestoreSources_package_specification()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuge_allows_duplicate_sources_package_specification_single_cell()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_multiple_cells()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+");
+
+            events.Should().NotContainErrors();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_multiple_sources_package_specification_single_cell()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_multiple_sources_package_specification_multiple_cells()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
+");
+            events.Should().NotContainErrors();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:RestoreSources=https://anotherCompletelyFakerestoreSource""
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_duplicate_package_specifications_single_cell()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+using Microsoft.ML.AutoML;
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_duplicate_package_specifications_multiple_cells()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview"""
+);
+            events.Should().NotContainErrors();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+using Microsoft.ML.AutoML;
+");
+
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_single_cell()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+#r ""nuget:Microsoft.ML.AutoML,0.16.1-preview""
+using Microsoft.ML.AutoML;
+");
+
+            events
+                .OfType<ErrorProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_multiple_cells()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
+");
+            events.Should().NotContainErrors();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget:Microsoft.ML.AutoML,0.16.1-preview""
+using Microsoft.ML.AutoML;
+");
+
+            events
+                .OfType<ErrorProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_disallows_changing_version_of_loaded_dependent_packages()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget: Microsoft.ML, 1.4.0""
+#r ""nuget:Microsoft.ML.AutoML,0.16.0""
+#r ""nuget:Microsoft.Data.Analysis,0.1.0""
+");
+            events.Should().NotContainErrors();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget: Google.Protobuf, 3.10.1""
+");
+
+            events
+                .OfType<ErrorProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be($"Package Reference already added: 'Google.Protobuf, 3.10.1'{Environment.NewLine}");
+        }
+
+        [Fact]
+        public async Task Pound_r_nuget_allows_using_version_of_loaded_dependent_packages()
+        {
+            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget: Microsoft.ML, 1.4.0""
+#r ""nuget:Microsoft.ML.AutoML,0.16.0""
+#r ""nuget:Microsoft.Data.Analysis,0.1.0""
+");
+            events.Should().NotContainErrors();
+
+            await kernel.SubmitCodeAsync(
+@"
+%%time
+#r ""nuget: Google.Protobuf, 3.10.0""
+");
+            events.Should().NotContainErrors();
+        }
+
+        [Fact]
         public async Task issue_637()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1286,8 +1566,15 @@ Formatter<DataFrame>.Register((df, writer) =>
 #r ""nuget:System.Text.Json""
 //using System.Text.Json;
 ");
+            // It should work, no errors and the requested package should be added
+            events.Should()
+                  .NotContainErrors();
 
-            events.Should().NotContainErrors();
+            // The System.Text.JSon dll ships in : Microsoft.NETCore.App.Ref
+            events.OfType<PackageAdded>()
+                  .Should()
+                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
+
         }
     }
 }
