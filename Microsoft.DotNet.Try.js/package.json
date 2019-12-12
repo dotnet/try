@@ -1,6 +1,6 @@
 {
-  "name": "trydotnet-js",
-  "version": "0.1.0",
+  "name": "@dotnet/trydotnet.js",
+  "version": "0.1.1",
   "description": "client api",
   "main": "dist/trydotnet.js",
   "module": "dist/trydotnet.es.js",
@@ -65,5 +65,8 @@
     "es6-promise": "4.2.5",
     "rxjs": "6.5.2",
     "xterm": "3.13.2"
+  },
+  "publishConfig": {
+    "registry": "https://msazure.pkgs.visualstudio.com/_packaging/MLS/npm/registry"
   }
 }
