@@ -1555,7 +1555,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact(Skip = "requires netcorepp3.0")]
+        [Fact]
         public async Task issue_637()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1566,13 +1566,14 @@ using Microsoft.ML.AutoML;
 #r ""nuget:System.Text.Json""
 //using System.Text.Json;
 ");
+            // It should work, no errors and the requested package should be added
+            events.Should()
+                  .NotContainErrors();
 
-            events
-                .OfType<StandardErrorValueProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be("");
+            events.OfType<PackageAdded>()
+                  .Should()
+                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "System.Text.Json");
+
         }
     }
 }

@@ -114,6 +114,8 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
                 yield return new LoadExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()));
 
+                yield return new RestoreNugetDirective();
+
                 yield return new RequestCompletion("Cons", 4, "chsarp");
 
                 yield return new RequestDiagnostics();

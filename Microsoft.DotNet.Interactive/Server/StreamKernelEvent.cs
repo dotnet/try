@@ -8,12 +8,7 @@ namespace Microsoft.DotNet.Interactive.Server
 {
     public class StreamKernelEvent
     {
-        private static readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            Formatting = Newtonsoft.Json.Formatting.None,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        };
+        private static readonly JsonSerializerSettings _jsonSerializerSettings = Serializer.JsonSerializerSettings;
 
         [JsonProperty("id")]
         public int Id { get; set; }
