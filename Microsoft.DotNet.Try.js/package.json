@@ -1,6 +1,6 @@
 {
-  "name": "@dotnet/try-js",
-  "version": "0.1.0",
+  "name": "@dotnet/trydotnet.js",
+  "version": "0.1.1",
   "description": "client api",
   "main": "dist/trydotnet.js",
   "module": "dist/trydotnet.es.js",
