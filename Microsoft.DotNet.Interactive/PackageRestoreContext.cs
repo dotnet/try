@@ -208,6 +208,11 @@ namespace s
 
             string PackageReferences()
             {
+                string GetReferenceVersion(PackageReference reference)
+                {
+                    return string.IsNullOrEmpty(reference.PackageVersion) ? "*" : reference.PackageVersion;
+                }
+
                 var sb = new StringBuilder();
 
                 sb.Append("  <ItemGroup>\n");
@@ -216,7 +221,7 @@ namespace s
                     .Values
                     .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
                     .ToList()
-                    .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{reference.PackageVersion}\"/>\n"));
+                    .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{GetReferenceVersion(reference)}\"/>\n"));
 
                 sb.Append("  </ItemGroup>\n");
 
