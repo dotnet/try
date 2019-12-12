@@ -93,6 +93,44 @@ namespace Microsoft.DotNet.Interactive.Tests
                 .Be(5);
         }
 
+        // Option 1: inline switch
+        [Theory]
+        [InlineData(Language.CSharp)]
+        //[InlineData(Language.FSharp)]    Todo: Issue 695 - dotnet-interactive with an F# notebook does not load System.Text.Json #695
+        public async Task it_can_reference_system_text_json(Language language)
+        {
+            var source = language switch
+            {
+                Language.FSharp => new[]
+                {
+@"open System.Text.Json;
+let jsonException = JsonException()
+let location = jsonException.GetType().Assembly.Location
+location.EndsWith(""System.Text.Json.dll"")"
+                },
+
+                Language.CSharp => new[]
+                {
+@"using System.Text.Json;
+var jsonException = new JsonException();
+var location = jsonException.GetType().Assembly.Location;
+location.EndsWith(""System.Text.Json.dll"")"
+        }
+            };
+
+            var kernel = CreateKernel(language);
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents
+                .OfType<ReturnValueProduced>()
+                .Last()
+                .Value
+                .Should()
+                .Be(true);
+        }
+
+
         [Theory]
         [InlineData(Language.FSharp)]
         public async Task kernel_base_ignores_command_line_directives(Language language)
@@ -1564,7 +1602,6 @@ using Microsoft.ML.AutoML;
 
             await kernel.SubmitCodeAsync(@"
 #r ""nuget:System.Text.Json""
-//using System.Text.Json;
 ");
             // It should work, no errors and the requested package should be added
             events.Should()
