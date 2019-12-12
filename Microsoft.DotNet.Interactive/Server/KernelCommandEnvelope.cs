@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Interactive.Server
                 [nameof(DisplayValue)] = typeof(KernelCommandEnvelope<DisplayValue>),
                 [nameof(LoadExtension)] = typeof(KernelCommandEnvelope<LoadExtension>),
                 [nameof(LoadExtensionsInDirectory)] = typeof(KernelCommandEnvelope<LoadExtensionsInDirectory>),
+                [nameof(RestoreNugetDirective)] = typeof(KernelCommandEnvelope<RestoreNugetDirective>),
                 [nameof(RequestCompletion)] = typeof(KernelCommandEnvelope<RequestCompletion>),
                 [nameof(RequestDiagnostics)] = typeof(KernelCommandEnvelope<RequestDiagnostics>),
                 [nameof(RunDirective)] = typeof(KernelCommandEnvelope<RunDirective>),
