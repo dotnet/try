@@ -123,11 +123,12 @@ location.EndsWith(""System.Text.Json.dll"")"
             await SubmitCode(kernel, source);
 
             KernelEvents
-                .OfType<ReturnValueProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be(true);
+              .Should()
+              .ContainSingle<ReturnValueProduced>()
+              .Which
+              .Value
+              .Should()
+              .Be(true);
         }
 
 
