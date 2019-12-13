@@ -1595,7 +1595,7 @@ using Microsoft.ML.AutoML;
         }
 
         [Fact]
-        public async Task issue_637()
+        public async Task Pound_r_nuget_with_System_Text_Json_should_succeed()
         {
             var kernel = CreateKernel(Language.CSharp);
 
@@ -1603,6 +1603,7 @@ using Microsoft.ML.AutoML;
 
             await kernel.SubmitCodeAsync(@"
 #r ""nuget:System.Text.Json""
+using System.Text.Json;
 ");
             // It should work, no errors and the requested package should be added
             events.Should()
@@ -1612,7 +1613,28 @@ using Microsoft.ML.AutoML;
             events.OfType<PackageAdded>()
                   .Should()
                   .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
-
         }
+
+        [Fact]
+        public async Task Pound_r_nuget_with_no_version_should_not_get_the_oldest_package_version()
+        {
+            // #r "nuget: with no version specified should get the newest version of the package not the oldest:
+            // For test purposes we evaluate the retrieved package is not the oldest version, since the newest may change over time.
+            var kernel = CreateKernel(Language.CSharp);
+
+            var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(@"
+#r ""nuget:Microsoft.DotNet.PlatformAbstractions""
+");
+            // It should work, no errors and the latest requested package should be added
+            events.Should()
+                  .NotContainErrors();
+
+            events.OfType<PackageAdded>()
+                  .Should()
+                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.DotNet.PlatformAbstractions" && ((PackageAdded)e).PackageReference.PackageVersion != "1.0.3");
+        }
+
     }
 }
