@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var scheduler = CreateScheduler();
             var request = Envelope
 .Create(new IsCompleteRequest("var a = 12;"), null);
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var scheduler = CreateScheduler();
             var request = Envelope
 .Create(new IsCompleteRequest("var a = 12"), null);
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
 
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());

@@ -9,11 +9,8 @@ using FluentAssertions;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Formatting;
-using Pocket;
 using Xunit;
 using Xunit.Abstractions;
-using static Pocket.Logger;
 
 #pragma warning disable 8509
 namespace Microsoft.DotNet.Interactive.Tests
@@ -41,17 +38,12 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             var kernel = CreateKernel(language);
 
-            var result = await kernel.SendAsync(new SubmitCode(submission));
+            await kernel.SendAsync(new SubmitCode(submission));
 
-            var valueProduced = await result
-                                      .KernelEvents
-                                      .OfType<ReturnValueProduced>()
-                                      .Timeout(5.Seconds())
-                                      .FirstAsync();
-
-            Log.Info(valueProduced.ToDisplayString());
-
-            valueProduced
+            KernelEvents
+                .Should()
+                .ContainSingle<ReturnValueProduced>()
+                .Which
                 .FormattedValues
                 .Should()
                 .ContainSingle(v =>

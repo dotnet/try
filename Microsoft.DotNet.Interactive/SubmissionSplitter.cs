@@ -7,7 +7,9 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -29,12 +31,18 @@ namespace Microsoft.DotNet.Interactive
 
             var nonDirectiveLines = new List<string>();
             var commands = new List<IKernelCommand>();
-            var nugetCommands = new List<IKernelCommand>();
+            var syntheticCommands = new List<IKernelCommand>();
             var commandWasSplit = false;
 
             while (lines.Count > 0)
             {
                 var currentLine = lines.Dequeue();
+
+                if (string.IsNullOrWhiteSpace(currentLine))
+                {
+                    nonDirectiveLines.Add(currentLine);
+                    continue;
+                }
 
                 var parseResult = directiveParser.Parse(currentLine);
                 var command = parseResult.CommandResult.Command;
@@ -48,14 +56,12 @@ namespace Microsoft.DotNet.Interactive
                         commands.Add(cmd);
                     }
 
-                    var runDirective=new RunDirective
-                    {
-                        Handler = _ => _directiveParser.InvokeAsync(parseResult)
-                    };
-
+                    var runDirective = new AnonymousKernelCommand(
+                        _ => _directiveParser.InvokeAsync(parseResult));
+                    
                     if (command.Name == "#r")
                     {
-                        nugetCommands.Add(runDirective);
+                        syntheticCommands.Add(runDirective);
                     }
                     else
                     {
@@ -93,17 +99,16 @@ namespace Microsoft.DotNet.Interactive
                 commands.Add(submitCode);
             }
 
-            if(nugetCommands.Count > 0)
+            if (syntheticCommands.Count > 0)
             {
                 var parseResult = directiveParser.Parse("#!nuget-restore");
-                var runDirective = new RunDirective
-                {
-                    Handler = _ => _directiveParser.InvokeAsync(parseResult)
-                };
-                nugetCommands.Add(runDirective);
+
+                syntheticCommands.Add(
+                    new AnonymousKernelCommand(
+                        _ => _directiveParser.InvokeAsync(parseResult)));
             }
 
-            return nugetCommands.Concat(commands);
+            return syntheticCommands.Concat(commands);
 
             IKernelCommand AccumulatedSubmission()
             {

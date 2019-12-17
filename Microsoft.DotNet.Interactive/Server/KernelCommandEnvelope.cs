@@ -31,10 +31,8 @@ namespace Microsoft.DotNet.Interactive.Server
                 [nameof(DisplayValue)] = typeof(KernelCommandEnvelope<DisplayValue>),
                 [nameof(LoadExtension)] = typeof(KernelCommandEnvelope<LoadExtension>),
                 [nameof(LoadExtensionsInDirectory)] = typeof(KernelCommandEnvelope<LoadExtensionsInDirectory>),
-                [nameof(RestoreNugetDirective)] = typeof(KernelCommandEnvelope<RestoreNugetDirective>),
                 [nameof(RequestCompletion)] = typeof(KernelCommandEnvelope<RequestCompletion>),
                 [nameof(RequestDiagnostics)] = typeof(KernelCommandEnvelope<RequestDiagnostics>),
-                [nameof(RunDirective)] = typeof(KernelCommandEnvelope<RunDirective>),
                 [nameof(SubmitCode)] = typeof(KernelCommandEnvelope<SubmitCode>),
                 [nameof(UpdateDisplayedValue)] = typeof(KernelCommandEnvelope<UpdateDisplayedValue>)
             };
@@ -56,7 +54,7 @@ namespace Microsoft.DotNet.Interactive.Server
 
         public abstract string CommandType { get; }
 
-        public string Token { get; }
+        public string Token => _command.GetToken();
 
         IKernelCommand IKernelCommandEnvelope.Command => _command;
 
@@ -85,7 +83,11 @@ namespace Microsoft.DotNet.Interactive.Server
                     return expression.Compile();
                 });
 
-            return factory(command);
+            command.GetToken();
+
+            var envelope = factory(command);
+
+            return envelope;
         }
 
         public static IKernelCommandEnvelope Deserialize(string json)
@@ -97,18 +99,28 @@ namespace Microsoft.DotNet.Interactive.Server
 
         internal static IKernelCommandEnvelope Deserialize(JToken json)
         {
-            var commandJson = json["command"];
-
-            var commandTypeName = json["commandType"].Value<string>();
-
-            if (commandTypeName == null)
+            if (json is JValue)
             {
                 return null;
             }
 
-            var commandType = CommandTypeByName(commandTypeName);
+            var commandTypeJson = json["commandType"];
 
+            if (commandTypeJson == null)
+            {
+                return null;
+            }
+
+            var commandType = CommandTypeByName(commandTypeJson.Value<string>());
+            var commandJson = json["command"];
             var command = (IKernelCommand) commandJson.ToObject(commandType, Serializer.JsonSerializer);
+
+            var token = json["token"].Value<string>();
+
+            if (token != null)
+            {
+                command.SetToken(token);
+            }
 
             return Create(command);
         }

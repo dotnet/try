@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Interactive.Commands
             SubmissionType = submissionType;
         }
 
-        public string Code { get; set; }
+        public string Code { get; }
 
         public string TargetKernelName { get; }
 

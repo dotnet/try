@@ -67,8 +67,6 @@ namespace Microsoft.DotNet.Interactive.Server
 
         public abstract string EventType { get; }
 
-        public string Token { get; }
-
         IKernelEvent IKernelEventEnvelope.Event => _event;
 
         public static IKernelEventEnvelope Create(IKernelEvent @event)
@@ -113,7 +111,15 @@ namespace Microsoft.DotNet.Interactive.Server
 
             var eventType = EventTypeByName(eventTypeName);
 
-            var @event = (IKernelEvent) eventJson.ToObject(eventType, Serializer.JsonSerializer);
+            IKernelEvent @event;
+            try
+            {
+                @event = (IKernelEvent) eventJson.ToObject(eventType, Serializer.JsonSerializer);
+            }
+            catch (Exception exception)
+            {
+                throw;
+            }
 
             if (@event is KernelEventBase eventBase &&
                 commandEnvelope is {})
@@ -126,16 +132,26 @@ namespace Microsoft.DotNet.Interactive.Server
 
         public static string Serialize(IKernelEventEnvelope envelope)
         {
+            KernelCommandEnvelope.SerializationModel commandSerializationModel = null;
+            if (envelope.Event.Command != null)
+            {
+                var kernelCommandEnvelope = KernelCommandEnvelope.Create(envelope.Event.Command);
+
+                commandSerializationModel = new KernelCommandEnvelope.SerializationModel
+                {
+                    command = kernelCommandEnvelope.Command,
+                    commandType = kernelCommandEnvelope.CommandType
+                };
+            }
+            else
+            {
+            }
+
             var serializationModel = new SerializationModel
             {
                 @event = envelope.Event,
                 eventType = envelope.EventType,
-                cause = new KernelCommandEnvelope.SerializationModel
-                {
-                    command = envelope.Event.Command,
-                    commandType = envelope.Event?.Command?.GetType()?.Name,
-                    token = envelope.Token
-                }
+                cause = commandSerializationModel
             };
 
             return JsonConvert.SerializeObject(

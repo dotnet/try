@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else 
                 {
-                    if (command is RunDirective runDirective)
+                    if (command is AnonymousKernelCommand runDirective)
                     {
                         await runDirective.InvokeAsync(context);
                     }
@@ -241,7 +241,19 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task ExecuteCommand(KernelOperation operation)
         {
-            using var context = KernelInvocationContext.Establish(operation.Command);
+            using var disposable = new CompositeDisposable();
+
+            KernelInvocationContext context;
+            if (operation.Command is AnonymousKernelCommand)
+            {
+                context = KernelInvocationContext.Current;
+            }
+            else
+            {
+                context = KernelInvocationContext.Establish(operation.Command);
+                disposable.Add(context);
+            }
+
             using var _ = context.KernelEvents.Subscribe(PublishEvent);
 
             try

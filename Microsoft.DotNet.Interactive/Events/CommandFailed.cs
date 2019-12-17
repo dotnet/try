@@ -14,16 +14,26 @@ namespace Microsoft.DotNet.Interactive.Events
             IKernelCommand command,
             string message = null) : base(command)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             Exception = exception;
 
             Message = string.IsNullOrWhiteSpace(message) ? exception.Message : message;
         }
 
-        [JsonConstructor]
         public CommandFailed(
             string message,
             IKernelCommand command) : this(null, command, message)
         {
+        }
+
+        [JsonConstructor]
+        internal CommandFailed(string message)
+        {
+            Message = message;
         }
 
         public Exception Exception { get; }

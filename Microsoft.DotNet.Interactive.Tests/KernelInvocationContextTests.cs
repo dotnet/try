@@ -76,5 +76,98 @@ namespace Microsoft.DotNet.Interactive.Tests
                   .Should()
                   .BeEquivalentSequenceTo(1, 2, 3);
         }
+
+        [Fact]
+        public void When_Fail_is_called_CommandFailed_is_published()
+        {
+            var command = new SubmitCode("123");
+
+            using var context = KernelInvocationContext.Establish(command);
+
+            var events = context.KernelEvents.ToSubscribedList();
+
+            context.Fail(new CommandFailed("oops!", command));
+
+            events.Should()
+                  .ContainSingle<CommandFailed>();
+        }
+
+        [Fact]
+        public void When_Fail_is_called_CommandHandled_is_not_published()
+        {
+            var command = new SubmitCode("123");
+
+            using var context = KernelInvocationContext.Establish(command);
+
+            var events = context.KernelEvents.ToSubscribedList();
+
+            context.Fail(new CommandFailed("oops!", command));
+
+            events.Should()
+                  .NotContain(e => e is CommandHandled);
+        }
+
+        [Fact]
+        public void When_Complete_is_called_then_CommandHandled_is_published()
+        {
+            var command = new SubmitCode("123");
+
+            using var context = KernelInvocationContext.Establish(command);
+
+            var events = context.KernelEvents.ToSubscribedList();
+
+            context.Complete();
+
+            events.Should()
+                  .ContainSingle<CommandHandled>();
+        }
+
+        [Fact]
+        public void When_Complete_is_called_then_CommandFailed_is_not_published()
+        {
+            var command = new SubmitCode("123");
+
+            using var context = KernelInvocationContext.Establish(command);
+
+            var events = context.KernelEvents.ToSubscribedList();
+
+            context.Complete();
+
+            events.Should()
+                  .NotContain(e => e is CommandFailed);
+        }
+
+        [Fact]
+        public void When_Complete_is_called_then_not_further_events_are_published()
+        {
+            var command = new SubmitCode("123");
+
+            using var context = KernelInvocationContext.Establish(command);
+            
+            var events = context.KernelEvents.ToSubscribedList();
+
+            context.Complete();
+
+            context.Publish(new ErrorProduced("oops", command));
+
+            events.Should().NotContain(e => e is ErrorProduced);
+        }
+
+        [Fact]
+        public void When_Fail_is_called_then_not_further_events_are_published()
+        {
+            
+            var command = new SubmitCode("123");
+
+            using var context = KernelInvocationContext.Establish(command);
+            
+            var events = context.KernelEvents.ToSubscribedList();
+
+            context.Fail(new CommandFailed("oops", command));
+
+            context.Publish(new ErrorProduced("oops", command));
+
+            events.Should().NotContain(e => e is ErrorProduced);
+        }
     }
 }

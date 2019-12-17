@@ -8,8 +8,7 @@ using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using FluentAssertions.Primitives;
 using Microsoft.DotNet.Interactive.Events;
-using Newtonsoft.Json.Linq;
-using Recipes;
+using Microsoft.DotNet.Interactive.Server;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
@@ -42,16 +41,10 @@ namespace Microsoft.DotNet.Interactive.Tests
             return new AndConstraint<GenericCollectionAssertions<T>>(assertions);
         }
 
-        public static AndConstraint<StringCollectionAssertions> BeEquivalentSequenceTo(
-            this StringCollectionAssertions assertions,
-            params string[] expectedValues)
-        {
-            return assertions.BeEquivalentTo(expectedValues, c => c.WithStrictOrderingFor(s => s));
-        }
-
         public static AndWhichConstraint<ObjectAssertions, T> ContainSingle<T>(
             this GenericCollectionAssertions<IKernelEvent> should,
             Func<T, bool> where = null)
+            where T : IKernelEvent
         {
             T subject;
 
@@ -77,33 +70,26 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         public static AndWhichConstraint<ObjectAssertions, T> ContainSingle<T>(
-            this GenericCollectionAssertions<JObject> should,
+            this GenericCollectionAssertions<IKernelEventEnvelope> should,
             Func<T, bool> where = null)
-            where T : IKernelEvent
+            where T : IKernelEventEnvelope
         {
             T subject;
 
-            Func<JObject, T> deserialize = e => e["event"].ToString().FromJsonTo<T>();
-            Func<JObject, bool> isMatch = e => e["eventType"].Value<string>() == typeof(T).Name;
-
             if (where == null)
             {
-                should.ContainSingle(e => isMatch(e));
+                should.ContainSingle(e => e is T);
 
                 subject = should.Subject
-                                .Where(isMatch)
-                                .Select(e => deserialize(e))
+                                .OfType<T>()
                                 .Single();
             }
             else
             {
-                should.ContainSingle(e => isMatch(e)
-                                          &&
-                                          where(deserialize(e)));
+                should.ContainSingle(e => e is T && where((T) e));
 
                 subject = should.Subject
-                                .Where(isMatch)
-                                .Select(deserialize)
+                                .OfType<T>()
                                 .Where(where)
                                 .Single();
             }

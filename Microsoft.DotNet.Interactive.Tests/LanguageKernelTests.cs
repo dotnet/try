@@ -1007,61 +1007,41 @@ json
 
             events.OfType<PackageAdded>()
                   .Should()
-                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.Extensions.Logging" 
-                                   && ((PackageAdded)e).PackageReference.PackageVersion == "2.2.0");
-
-            if (language == Language.CSharp)
-            {
-                // only the C# kernel produces this event, since the F# kernel handles it all natively
-                events
-                    .Should()
-                    .ContainSingle<CommandHandled>(
-                        where: e => e.Command is AddPackage);
-            }
+                  .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.Extensions.Logging" 
+                                   && e.PackageReference.PackageVersion == "2.2.0");
         }
 
-        [Fact(Skip = "Should pass after #577 is resolved")]
+        [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_CodeSubmissionReceived_is_published()
         {
-            var kernel = new CompositeKernel
-            {
-                new CSharpKernel()
-            };
+            var kernel = CreateKernel(Language.CSharp);
 
             var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
 
-            var result = await kernel.SendAsync(command);
+            await kernel.SendAsync(command);
 
-            using var events = result.KernelEvents.ToSubscribedList();
-
-            events.OfType<CodeSubmissionReceived>()
-                  .First()
-                  .Code
-                  .Should()
-                  .Be(command.Code);
+            KernelEvents
+                .Should()
+                .Contain(e => e is CodeSubmissionReceived && 
+                              e.Command == command);
         }
 
-        [Fact(Skip = "Should pass after #577 is resolved")]
+        [Fact]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_last_CommandHandled_is_for_that_submission()
         {
-            var kernel = new CompositeKernel
-            {
-                new CSharpKernel().UseNugetDirective()
-            };
+            var kernel = CreateKernel(Language.CSharp);
 
             var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
 
-            var result = await kernel.SendAsync(command);
+            await kernel.SendAsync(command);
 
-            using var events = result.KernelEvents.ToSubscribedList();
-
-            events.OfType<CommandHandled>()
-                  .Last()
-                  .Command
-                  .As<SubmitCode>()
-                  .Code
-                  .Should()
-                  .Be(command.Code);
+            KernelEvents
+                .OfType<CommandHandled>()
+                .Last()
+                .Command
+                .As<SubmitCode>()
+                .Should()
+                .Be(command);
         }
 
         [Fact]

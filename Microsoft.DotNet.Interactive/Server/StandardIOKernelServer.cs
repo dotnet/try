@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Newtonsoft.Json;
 
@@ -49,8 +50,7 @@ namespace Microsoft.DotNet.Interactive.Server
                             break;
                         default:
                         {
-                            var id = (int) e.GetRootCommand().Properties["id"];
-                            WriteEventToOutput(e, id);
+                            WriteEventToOutput(e);
                         }
                             break;
                     }
@@ -66,10 +66,10 @@ namespace Microsoft.DotNet.Interactive.Server
 
         private async Task DeserializeAndSendCommand(string line)
         {
-            StreamKernelCommand streamKernelCommand;
+            IKernelCommandEnvelope streamKernelCommand;
             try
             {
-                streamKernelCommand = StreamKernelCommand.Deserialize(line);
+                streamKernelCommand = KernelCommandEnvelope.Deserialize(line);
             }
             catch (JsonReaderException ex)
             {
@@ -80,24 +80,20 @@ namespace Microsoft.DotNet.Interactive.Server
                 return;
             }
 
-            var command = streamKernelCommand.Command;
-            command.Properties["id"] = streamKernelCommand.Id;
-            await _kernel.SendAsync(command);
+            await _kernel.SendAsync(streamKernelCommand.Command);
         }
 
-        private void WriteEventToOutput(IKernelEvent kernelEvent, int? correlationId = -1)
+        private void WriteEventToOutput(IKernelEvent kernelEvent)
         {
             if (kernelEvent is ReturnValueProduced rvp && rvp.Value is DisplayedValue)
             {
                 return;
             }
-            var wrapper = new StreamKernelEvent
-            {
-                Id = correlationId ?? -1,
-                Event = kernelEvent,
-                EventType = kernelEvent.GetType().Name
-            };
-            var serialized = wrapper.Serialize();
+
+            var serialized = KernelEventEnvelope.Serialize(
+                KernelEventEnvelope.Create(
+                    kernelEvent));
+
             _output.Write(serialized);
         }
       

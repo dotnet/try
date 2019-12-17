@@ -11,15 +11,12 @@ namespace Microsoft.DotNet.Interactive.Commands
     public abstract class KernelCommandBase : IKernelCommand
     {
         [JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
         public KernelCommandInvocation Handler { get; set; }
 
         [JsonIgnore]   
-        [System.Text.Json.Serialization.JsonIgnore]
         public IKernelCommand Parent { get; }
 
         [JsonIgnore]
-        [JsonExtensionData]
         public IDictionary<string, object> Properties { get; }
 
         protected KernelCommandBase()

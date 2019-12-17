@@ -3,16 +3,16 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
+using FluentAssertions;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Jupyter;
 using Microsoft.DotNet.Interactive.Server;
-using Newtonsoft.Json.Linq;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
     public class StandardIOKernelServerTests : IDisposable
     {
         private readonly StandardIOKernelServer _standardIOKernelServer;
-        private readonly SubscribedList<JObject> _events;
+        private readonly SubscribedList<IKernelEventEnvelope> _kernelEvents;
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         public StandardIOKernelServerTests(ITestOutputHelper output)
@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                     .UseKernelHelpers()
                     .UseNugetDirective()
                     .UseDefaultFormatting()
+                    .UseDefaultMagicCommands()
             };
 
             _standardIOKernelServer = new StandardIOKernelServer(
@@ -45,11 +46,11 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                 new StreamReader(new MemoryStream()),
                 new StringWriter());
 
-            _events = _standardIOKernelServer
-                      .Output
-                      .Where(s => !string.IsNullOrWhiteSpace(s))
-                      .Select(JObject.Parse)
-                      .ToSubscribedList();
+            _kernelEvents = _standardIOKernelServer
+                            .Output
+                            .Where(s => !string.IsNullOrWhiteSpace(s))
+                            .Select(KernelEventEnvelope.Deserialize)
+                            .ToSubscribedList();
 
             _disposables.Add(_standardIOKernelServer);
             _disposables.Add(output.SubscribeToPocketLogger());
@@ -59,12 +60,17 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
         }
 
         [Fact]
-        public async Task It_produces_commandHandled_only_for_root_command()
+        public async Task It_produces_a_unique_CommandHandled_for_root_command()
         {
-            await _standardIOKernelServer.WriteAsync(new SubmitCode("display(1543); display(4567);"));
+            var command = new SubmitCode("%%time\ndisplay(1543); display(4567);");
+            command.SetToken("abc");
 
-            _events.Should()
-                   .ContainSingle(e => e["eventType"].Value<string>() == nameof(CommandHandled));
+            await _standardIOKernelServer.WriteAsync(command);
+
+            _kernelEvents
+                .Should()
+                .ContainSingle<KernelEventEnvelope<CommandHandled>>(
+                    where: e => e.Event.Command.GetToken() == "abc");
         }
 
         [Fact]
@@ -72,8 +78,9 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
         {
             await _standardIOKernelServer.WriteAsync(new SubmitCode("display(1543)"));
 
-            _events.Should()
-                   .NotContain(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced));
+            _kernelEvents
+                .Should()
+                .NotContain(e => e.Event is ReturnValueProduced);
         }
 
         [Fact]
@@ -83,33 +90,40 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
             await _standardIOKernelServer.WriteAsync(invalidJson);
 
-            _events.Should()
-                   .ContainSingle<DiagnosticLogEventProduced>()
-                   .Which
-                   .Message
-                   .Should()
-                   .Contain(invalidJson);
+            _kernelEvents
+                .Should()
+                .ContainSingle<KernelEventEnvelope<DiagnosticLogEventProduced>>()
+                .Which
+                .Event
+                .Message
+                .Should()
+                .Contain(invalidJson);
         }
 
         [Fact]
-        public async Task It_can_surface_code_submission_Errors()
+        public async Task It_can_surface_code_submission_errors()
         {
-            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"var a = 12"));
+            var command = new SubmitCode(@"var a = 12");
+            command.SetToken("abc");
 
-            _events.Should().ContainSingle(e => e["eventType"].Value<string>() == nameof(IncompleteCodeSubmissionReceived));
+            await _standardIOKernelServer.WriteAsync(command);
+
+            _kernelEvents
+                .Should()
+                .ContainSingle<KernelEventEnvelope<IncompleteCodeSubmissionReceived>>(e => e.Event.Command.GetToken() == "abc");
         }
 
         [Fact]
         public async Task It_can_eval_function_instances()
         {
-            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"Func<int> func = () => 1;"), 0);
-           
-            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"func()"), 1);
+            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"Func<int> func = () => 1;"));
 
-            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"func"), 2);
+            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"func()"));
 
-            _events
-                .Count(e => e["eventType"].Value<string>() == nameof(ReturnValueProduced))
+            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"func"));
+
+            _kernelEvents
+                .Count(e => e.Event is ReturnValueProduced)
                 .Should()
                 .Be(2);
         }
@@ -117,12 +131,15 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
         [Fact]
         public async Task Kernel_can_pound_r_nuget_using_kernel_client()
         {
-            await _standardIOKernelServer.WriteAsync(new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0"""));
+            var command = new SubmitCode(@"#r ""nuget:Microsoft.Spark, 0.4.0""");
+            command.SetToken("abc");
 
-            _events
-                .Select(e => e["eventType"].Value<string>())
+            await _standardIOKernelServer.WriteAsync(command);
+
+            _kernelEvents
                 .Should()
-                .Contain(nameof(PackageAdded));
+                .ContainSingle<KernelEventEnvelope<PackageAdded>>(
+                    where: e => e.Event.Command.GetToken() == "abc");
         }
 
         public void Dispose()

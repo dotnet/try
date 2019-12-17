@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class LoadExtension : KernelCommandBase
+    internal class LoadExtension : KernelCommandBase
     {
         public LoadExtension(FileInfo assemblyFile)
         {

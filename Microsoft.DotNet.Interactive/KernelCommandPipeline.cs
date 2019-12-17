@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Formatting;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -45,7 +46,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 context.Publish(
                     new CommandFailed(
-                        exception,
+                        exception.ToDisplayString(),
                         command));
             }
         }

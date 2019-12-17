@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new CompleteRequest("System.Console.", 15));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
 
             await scheduler.Schedule(context);
             

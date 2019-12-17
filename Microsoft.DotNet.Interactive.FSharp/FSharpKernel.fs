@@ -126,12 +126,8 @@ type FSharpKernel() =
                     let reference = parseReference referenceText
                     match reference with
                     | Some ref, _ ->
-                        let packageRef =
-                            if ref.Version = "*" then
-                                PackageReference(ref.Include)
-                            else
-                                PackageReference(ref.Include, packageVersion=ref.Version)
-                        context.Publish(PackageAdded(AddPackage(packageRef)))
+                        let packageRef = ResolvedPackageReference(ref.Include, packageVersion=ref.Version, assemblyPaths=[])
+                        context.Publish(PackageAdded(packageRef))
                     | _ -> ()
 
                     for key in packageInstallingMessages reference do

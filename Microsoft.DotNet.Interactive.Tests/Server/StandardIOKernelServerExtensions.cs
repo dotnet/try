@@ -11,16 +11,12 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
     {
         public static Task WriteAsync(
             this StandardIOKernelServer server,
-            IKernelCommand kernelCommand,
-            int correlationId = -1)
+            IKernelCommand command)
         {
-            return server.WriteAsync(
-                new StreamKernelCommand
-                {
-                    Id = correlationId,
-                    CommandType = kernelCommand.GetType().Name,
-                    Command = kernelCommand
-                }.Serialize());
+            var json = KernelCommandEnvelope.Serialize(
+                KernelCommandEnvelope.Create(command));
+
+            return server.WriteAsync(json);
         }
     }
 }

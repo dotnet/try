@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 
@@ -29,15 +30,22 @@ namespace Microsoft.DotNet.Interactive
 
         public bool IsComplete { get; private set; }
 
-        public void OnError(Exception exception)
-        {
-            _events.OnError(exception);
-        }
-
         public void Complete()
         {
             Publish(new CommandHandled(Command));
             IsComplete = true;
+        }
+
+        public void Fail(CommandFailed failed)
+        {
+            if (failed.Command != Command)
+            {
+                throw new InvalidOperationException("Cannot complete context with a different command.");
+            }
+
+            Publish(failed);
+            IsComplete = true;
+            _events.OnCompleted();
         }
 
         public void Publish(IKernelEvent @event)
@@ -64,7 +72,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 _currentStack.Value = new Stack<KernelInvocationContext>();
             }
-            else
+            else if (_currentStack.Value.Count > 0)
             {
                 parent = Current;
             }
@@ -81,6 +89,13 @@ namespace Microsoft.DotNet.Interactive
         public IKernel HandlingKernel { get; set; }
 
         public IKernel CurrentKernel { get; internal set; }
+
+        public async Task QueueAction(KernelCommandInvocation action)
+        {
+            var command = new AnonymousKernelCommand(action);
+
+            await HandlingKernel.SendAsync(command);
+        }
 
         void IDisposable.Dispose() => _currentStack?.Value?.Pop();
     }

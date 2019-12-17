@@ -10,7 +10,5 @@ namespace Microsoft.DotNet.Interactive.Server
         IKernelEvent Event { get; }
 
         string EventType { get; }
-
-        string Token { get; }
     }
 }
