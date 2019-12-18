@@ -133,6 +133,7 @@ namespace Microsoft.DotNet.Interactive.Server
         public static string Serialize(IKernelEventEnvelope envelope)
         {
             KernelCommandEnvelope.SerializationModel commandSerializationModel = null;
+
             if (envelope.Event.Command != null)
             {
                 var kernelCommandEnvelope = KernelCommandEnvelope.Create(envelope.Event.Command);
@@ -142,9 +143,6 @@ namespace Microsoft.DotNet.Interactive.Server
                     command = kernelCommandEnvelope.Command,
                     commandType = kernelCommandEnvelope.CommandType
                 };
-            }
-            else
-            {
             }
 
             var serializationModel = new SerializationModel

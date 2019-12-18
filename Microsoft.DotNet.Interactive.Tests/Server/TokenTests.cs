@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
         }
 
         [Fact]
-        public void When_created_in_the_same_context_then_child_commands_having_the_same_parent_do_not_have_the_same_token()
+        public void When_created_in_the_same_context_then_child_commands_having_the_same_parent_also_have_the_same_token()
         {
             var parentCommand = new SubmitCode("123");
 
@@ -46,10 +46,10 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                 token2 = new SubmitCode("456").GetToken();
             }
 
-            token1.Should().NotBe(token2);
+            token1.Should().Be(token2);
         }
 
-        [Fact(Skip = "WIP")]
+        [Fact]
         public void When_resent_then_child_commands_having_the_same_parent_have_repeatable_tokens()
         {
             var parentCommand = new SubmitCode("123");

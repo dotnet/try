@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 switch (@event)
                 {
+                    // FIX: (Publish) don't bubble up orchestration commands from child contexts
                     case CommandHandled _:
                     case CommandFailed _:
                         break;

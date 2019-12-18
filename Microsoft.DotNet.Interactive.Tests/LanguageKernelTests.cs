@@ -1024,8 +1024,11 @@ json
 
             KernelEvents
                 .Should()
-                .Contain(e => e is CodeSubmissionReceived && 
-                              e.Command == command);
+                .ContainSingle<CodeSubmissionReceived>()
+                .Which
+                .Command
+                .Should()
+                .Be(command);
         }
 
         [Fact]
@@ -1038,10 +1041,10 @@ json
             await kernel.SendAsync(command);
 
             KernelEvents
-                .OfType<CommandHandled>()
-                .Last()
+                .Should()
+                .ContainSingle<CommandHandled>()
+                .Which
                 .Command
-                .As<SubmitCode>()
                 .Should()
                 .Be(command);
         }

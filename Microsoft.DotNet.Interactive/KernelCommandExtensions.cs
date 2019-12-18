@@ -28,9 +28,10 @@ namespace Microsoft.DotNet.Interactive
 
         public static string GetToken(this IKernelCommand command)
         {
-            if (command is AnonymousKernelCommand anonymous)
+            if (command is KernelCommandBase commandBase &&
+                commandBase.Parent != null)
             {
-                return anonymous.Parent.GetToken();
+                return commandBase.Parent.GetToken();
             }
 
             if (command.Properties.TryGetValue(TokenKey, out var value) &&
