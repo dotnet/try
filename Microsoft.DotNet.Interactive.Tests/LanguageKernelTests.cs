@@ -499,7 +499,9 @@ Console.Write(""value two"");
 Console.Write(""value three"");",
             };
 
-            var kernelCommand = await SubmitCode(kernel, source);
+            var kernelCommand = new SubmitCode(source);
+
+            await kernel.SendAsync(kernelCommand);
 
             KernelEvents
                 .OfType<StandardOutputValueProduced>()
@@ -1056,19 +1058,12 @@ json
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
-            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
+            var submitCode = new SubmitCode($"#extend \"{extensionDllPath}\"");
+            await kernel.SendAsync(submitCode);
 
             events.Should()
                   .ContainSingle(e => e is ExtensionLoaded &&
                                       e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
-
-            events.Should()
-                  .ContainSingle(e => e is CommandHandled &&
-                                      e.As<CommandHandled>()
-                                       .Command
-                                       .As<SubmitCode>()
-                                       .Code
-                                       .Contains("using System.Reflection;"));
 
             events.Should()
                   .ContainSingle(e => e is DisplayedValueProduced &&
@@ -1221,15 +1216,6 @@ catch (Exception e)
                                             e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDll.FullName));
 
             KernelEvents.Should()
-                        .ContainSingle(e => e is CommandHandled &&
-                                            e
-                                                .As<CommandHandled>()
-                                                .Command
-                                                .As<SubmitCode>()
-                                                .Code
-                                                .Contains("using System.Reflection;"));
-
-            KernelEvents.Should()
                         .ContainSingle(e => e is DisplayedValueProduced &&
                                             e
                                                 .As<DisplayedValueProduced>()
@@ -1241,7 +1227,7 @@ catch (Exception e)
         [Fact]
         public async Task Dependency_version_conflicts_are_resolved_correctly()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1291,7 +1277,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_disallows_empty_package_specification()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1312,7 +1298,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_disallows_version_only_package_specification()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1333,7 +1319,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_allows_RestoreSources_package_specification()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1349,7 +1335,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuge_allows_duplicate_sources_package_specification_single_cell()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1366,7 +1352,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_multiple_cells()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1390,7 +1376,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_allows_multiple_sources_package_specification_single_cell()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1406,7 +1392,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_allows_multiple_sources_package_specification_multiple_cells()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1429,7 +1415,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         [Fact]
         public async Task Pound_r_nuget_allows_duplicate_package_specifications_single_cell()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1447,7 +1433,7 @@ using Microsoft.ML.AutoML;
         [Fact]
         public async Task Pound_r_nuget_allows_duplicate_package_specifications_multiple_cells()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1471,7 +1457,7 @@ using Microsoft.ML.AutoML;
         [Fact]
         public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_single_cell()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1494,7 +1480,7 @@ using Microsoft.ML.AutoML;
         [Fact]
         public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_multiple_cells()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1523,7 +1509,7 @@ using Microsoft.ML.AutoML;
         [Fact]
         public async Task Pound_r_nuget_disallows_changing_version_of_loaded_dependent_packages()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -1592,7 +1578,7 @@ using System.Text.Json;
             // The System.Text.JSon dll ships in : Microsoft.NETCore.App.Ref
             events.OfType<PackageAdded>()
                   .Should()
-                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
+                  .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
         }
 
         [Fact]

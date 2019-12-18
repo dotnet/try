@@ -57,23 +57,19 @@ namespace Microsoft.DotNet.Interactive.Tests
             return CreateKernel(Language.CSharp);
         }
 
-        public async Task<SubmitCode[]> SubmitCode(KernelBase kernel, string[] codeFragments, SubmissionType submissionType = SubmissionType.Run)
+        public async Task SubmitCode(KernelBase kernel, string[] codeFragments, SubmissionType submissionType = SubmissionType.Run)
         {
-            var commands = new List<SubmitCode>();
             foreach (var codeFragment in codeFragments)
             {
                 var cmd = new SubmitCode(codeFragment, submissionType: submissionType);
                 await kernel.SendAsync(cmd);
-                commands.Add(cmd);
             }
-            return commands.ToArray();
         }
 
-        public async Task<SubmitCode> SubmitCode(KernelBase kernel, string codeFragment, SubmissionType submissionType = SubmissionType.Run)
+        public async Task SubmitCode(KernelBase kernel, string codeFragment, SubmissionType submissionType = SubmissionType.Run)
         {
             var command = new SubmitCode(codeFragment, submissionType: submissionType);
             await kernel.SendAsync(command);
-            return command;
         }
 
         /// IDispose

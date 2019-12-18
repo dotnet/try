@@ -173,9 +173,9 @@ type FSharpKernel() =
                         match ex with
                         | :? FsiCompilationException -> CodeSubmissionCompilationErrorException(ex) :> Exception
                         | _ -> ex
-                    context.Publish(CommandFailed(reportedException, codeSubmission, aggregateError))
+                    context.Fail(CommandFailed(reportedException, codeSubmission, aggregateError))
                 else
-                    context.Publish(new CommandFailed(null, codeSubmission, "Command cancelled"))
+                    context.Fail(new CommandFailed(null, codeSubmission, "Command cancelled"))
         }
 
     let handleRequestCompletion (requestCompletion: RequestCompletion) (context: KernelInvocationContext) =

@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
                                 (compilationError.InnerException as CompilationErrorException)?.Diagnostics.Select(d => d.ToString())?? Enumerable.Empty<string>());
                     }
 
-                    context.Publish(new CommandFailed(exception, submitCode, message));
+                    context.Fail(new CommandFailed(exception, submitCode, message));
                 }
                 else
                 {
@@ -233,13 +233,11 @@ namespace Microsoft.DotNet.Interactive.CSharp
                                 submitCode,
                                 formattedValues));
                     }
-
-                    context.Complete();
                 }
             }
             else
             {
-                context.Publish(new CommandFailed(null, submitCode, "Command cancelled"));
+                context.Fail(new CommandFailed(null, submitCode, "Command cancelled"));
             }
         }
 

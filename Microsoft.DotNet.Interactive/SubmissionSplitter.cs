@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Interactive
 
         public IReadOnlyCollection<ICommand> Directives => _directiveCommands;
 
-        public IEnumerable<IKernelCommand> SplitSubmission(SubmitCode submitCode)
+        public IReadOnlyList<IKernelCommand> SplitSubmission(SubmitCode submitCode)
         {
             var directiveParser = GetDirectiveParser();
 
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Interactive
 
             var nonDirectiveLines = new List<string>();
             var commands = new List<IKernelCommand>();
-            var syntheticCommands = new List<IKernelCommand>();
+            var hoistedCommands = new List<IKernelCommand>();
             var commandWasSplit = false;
 
             while (lines.Count > 0)
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Interactive
                     
                     if (command.Name == "#r")
                     {
-                        syntheticCommands.Add(runDirective);
+                        hoistedCommands.Add(runDirective);
                     }
                     else
                     {
@@ -99,16 +99,16 @@ namespace Microsoft.DotNet.Interactive
                 commands.Add(submitCode);
             }
 
-            if (syntheticCommands.Count > 0)
+            if (hoistedCommands.Count > 0)
             {
                 var parseResult = directiveParser.Parse("#!nuget-restore");
 
-                syntheticCommands.Add(
+                hoistedCommands.Add(
                     new AnonymousKernelCommand(
                         _ => _directiveParser.InvokeAsync(parseResult)));
             }
 
-            return syntheticCommands.Concat(commands);
+            return hoistedCommands.Concat(commands).ToArray();
 
             IKernelCommand AccumulatedSubmission()
             {

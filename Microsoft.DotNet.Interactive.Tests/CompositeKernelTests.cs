@@ -202,7 +202,6 @@ x"));
                     typeof(KernelBusy),
                     typeof(CodeSubmissionReceived),
                     typeof(CompleteCodeSubmissionReceived),
-                    typeof(CommandHandled),
                     typeof(KernelIdle));
         }
     }

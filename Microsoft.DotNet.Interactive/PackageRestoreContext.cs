@@ -12,29 +12,35 @@ using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class PackageRestoreContext 
+    public class PackageRestoreContext : IDisposable
     {
-        private object _lockObject = new object();
+        private readonly object _lockObject = new object();
         private readonly ConcurrentDictionary<string, PackageReference> _packageReferences = new ConcurrentDictionary<string, PackageReference>();
         private Dictionary<string, ResolvedPackageReference> _resolvedReferences = new Dictionary<string, ResolvedPackageReference>();
+        private readonly Lazy<DirectoryInfo> _lazyDirectory;
 
         public PackageRestoreContext()
         {
             Name = Guid.NewGuid().ToString("N");
 
-            Directory = new DirectoryInfo(
-                Path.Combine(
-                    Paths.UserProfile,
-                    ".net-interactive-csharp",
-                    Name));
-
-            if (!Directory.Exists)
+            _lazyDirectory = new Lazy<DirectoryInfo>(() =>
             {
-                Directory.Create();
-            }
+                var dir = new DirectoryInfo(
+                    Path.Combine(
+                        Paths.UserProfile,
+                        ".net-interactive-csharp",
+                        Name));
+
+                if (!dir.Exists)
+                {
+                    dir.Create();
+                }
+
+                return dir;
+            });
         }
 
-        public DirectoryInfo Directory { get; }
+        public DirectoryInfo Directory => _lazyDirectory.Value;
 
         public string Name { get; }
 
@@ -269,6 +275,20 @@ namespace s
                       Overwrite='True' WriteOnlyWhenDifferent='True' />
   </Target>
 ";
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (_lazyDirectory.IsValueCreated)
+                {
+                    Directory.Delete();
+                }
+            }
+            catch
+            {
+            }
         }
     }
 }

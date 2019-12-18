@@ -34,6 +34,7 @@ namespace Microsoft.DotNet.Interactive
         {
             Publish(new CommandHandled(Command));
             IsComplete = true;
+            _events.OnCompleted();
         }
 
         public void Fail(CommandFailed failed)
@@ -52,7 +53,16 @@ namespace Microsoft.DotNet.Interactive
         {
             if (_parentContext != null)
             {
-                _parentContext.Publish(@event);
+                switch (@event)
+                {
+                    case CommandHandled _:
+                    case CommandFailed _:
+                        break;
+
+                    default:
+                        _parentContext.Publish(@event);
+                        break;
+                }
             }
             else
             {
@@ -84,7 +94,17 @@ namespace Microsoft.DotNet.Interactive
             return context;
         }
 
-        public static KernelInvocationContext Current => _currentStack?.Value?.Peek();
+        public static KernelInvocationContext Current
+        {
+            get
+            {
+                KernelInvocationContext context = null;
+
+                _currentStack?.Value?.TryPeek(out context);
+
+                return context;
+            }
+        }
 
         public IKernel HandlingKernel { get; set; }
 
@@ -97,6 +117,37 @@ namespace Microsoft.DotNet.Interactive
             await HandlingKernel.SendAsync(command);
         }
 
-        void IDisposable.Dispose() => _currentStack?.Value?.Pop();
+        void IDisposable.Dispose()
+        {
+            var stack = _currentStack?.Value;
+
+            if (stack == null)
+            {
+                Complete();
+                return;
+            }
+
+            if (!stack.Contains(this))
+            {
+                Complete();
+                return;
+            }
+
+            while (stack.TryPop(out var context))
+            {
+                if (!context.IsComplete)
+                {
+                    context.Complete();
+                }
+                else
+                {
+                }
+
+                if (context == this)
+                {
+                    break;
+                }
+            }
+        }
     }
 }

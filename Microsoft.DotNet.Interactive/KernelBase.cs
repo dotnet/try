@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -119,7 +118,7 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
-                    context.Publish(
+                    context.Fail(
                         new CommandFailed(
                             $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", 
                             command: loadExtensionsInDirectory));
@@ -148,9 +147,7 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
-            var commands = _submissionSplitter
-                           .SplitSubmission(submitCode)
-                           .ToArray();
+            var commands = _submissionSplitter.SplitSubmission(submitCode);
 
             foreach (var command in commands)
             {
@@ -165,9 +162,9 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else 
                 {
-                    if (command is AnonymousKernelCommand runDirective)
+                    if (command is AnonymousKernelCommand anonymous)
                     {
-                        await runDirective.InvokeAsync(context);
+                        await anonymous.InvokeAsync(context);
                     }
                     else
                     {
@@ -241,19 +238,7 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task ExecuteCommand(KernelOperation operation)
         {
-            using var disposable = new CompositeDisposable();
-
-            KernelInvocationContext context;
-            if (operation.Command is AnonymousKernelCommand)
-            {
-                context = KernelInvocationContext.Current;
-            }
-            else
-            {
-                context = KernelInvocationContext.Establish(operation.Command);
-                disposable.Add(context);
-            }
-
+            var context = KernelInvocationContext.Establish(operation.Command);
             using var _ = context.KernelEvents.Subscribe(PublishEvent);
 
             try
@@ -265,13 +250,19 @@ namespace Microsoft.DotNet.Interactive
                 if (result == null)
                 {
                     result = new KernelCommandResult(KernelEvents);
-                    context.Publish(new CommandHandled(context.Command));
                 }
+
+                ((IDisposable) context).Dispose();
 
                 operation.TaskCompletionSource.SetResult(result);
             }
             catch (Exception exception)
             {
+                if (!context.IsComplete)
+                {
+                    context.Fail(new CommandFailed(exception, context.Command));
+                }
+
                 operation.TaskCompletionSource.SetException(exception);
             }
         }

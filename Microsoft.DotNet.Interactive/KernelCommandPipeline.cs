@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Interactive
             }
             catch (Exception exception)
             {
-                context.Publish(
+                context.Fail(
                     new CommandFailed(
                         exception.ToDisplayString(),
                         command));

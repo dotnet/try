@@ -58,6 +58,7 @@ using static {typeof(Kernel).FullName};
             };
 
             var restoreContext = new PackageRestoreContext();
+            kernel.RegisterForDisposal(restoreContext);
 
             poundR.Handler = CommandHandler.Create<PackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
             {

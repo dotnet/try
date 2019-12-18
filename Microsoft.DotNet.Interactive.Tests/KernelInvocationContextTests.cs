@@ -138,12 +138,12 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public void When_Complete_is_called_then_not_further_events_are_published()
+        public void When_Complete_is_called_then_no_further_events_are_published()
         {
             var command = new SubmitCode("123");
 
             using var context = KernelInvocationContext.Establish(command);
-            
+
             var events = context.KernelEvents.ToSubscribedList();
 
             context.Complete();
@@ -154,13 +154,12 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact]
-        public void When_Fail_is_called_then_not_further_events_are_published()
+        public void When_Fail_is_called_then_no_further_events_are_published()
         {
-            
             var command = new SubmitCode("123");
 
             using var context = KernelInvocationContext.Establish(command);
-            
+
             var events = context.KernelEvents.ToSubscribedList();
 
             context.Fail(new CommandFailed("oops", command));
