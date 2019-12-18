@@ -107,7 +107,8 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext invocationContext,
             KernelPipelineContinuation next)
         {
-            loadExtensionsInDirectory.Handler = async context =>
+            // FIX: (HandleLoadExtensionsInDirectory) move handler to command class
+            loadExtensionsInDirectory.Handler = async (command, context) =>
             {
                 if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
                 {
@@ -119,9 +120,7 @@ namespace Microsoft.DotNet.Interactive
                 else
                 {
                     context.Fail(
-                        new CommandFailed(
-                            $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", 
-                            command: loadExtensionsInDirectory));
+                        message: $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions");
                 }
             };
 
@@ -133,7 +132,8 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext invocationContext,
             KernelPipelineContinuation next)
         {
-            loadExtension.Handler = async context =>
+            // FIX: (HandleLoadExtension)  move handler to command class
+            loadExtension.Handler = async (command, context) =>
             {
                 var kernelExtensionLoader = new KernelExtensionLoader();
                 await kernelExtensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, invocationContext);
@@ -179,7 +179,9 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
-            displayValue.Handler = invocationContext =>
+            // FIX: (HandleDisplayValue) move to command class
+
+            displayValue.Handler = (command, invocationContext) =>
             {
                 invocationContext.Publish(
                     new DisplayedValueProduced(
@@ -199,7 +201,9 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext pipelineContext,
             KernelPipelineContinuation next)
         {
-            displayedValue.Handler = invocationContext =>
+            // FIX: (HandleUpdateDisplayValue) move to command class
+
+            displayedValue.Handler = (command, invocationContext) =>
             {
                 invocationContext.Publish(
                     new DisplayedValueUpdated(
@@ -239,28 +243,26 @@ namespace Microsoft.DotNet.Interactive
         private async Task ExecuteCommand(KernelOperation operation)
         {
             var context = KernelInvocationContext.Establish(operation.Command);
-            using var _ = context.KernelEvents.Subscribe(PublishEvent);
+
+            // only subscribe for the root command 
+            using var _ =
+                context.Command == operation.Command
+                ? context.KernelEvents.Subscribe(PublishEvent)
+                : Disposable.Empty;
 
             try
             {
                 await Pipeline.SendAsync(operation.Command, context);
 
-                var result = context.Result;
+                context.Complete(operation.Command);
 
-                if (result == null)
-                {
-                    result = new KernelCommandResult(KernelEvents);
-                }
-
-                ((IDisposable) context).Dispose();
-
-                operation.TaskCompletionSource.SetResult(result);
+                operation.TaskCompletionSource.SetResult(context.Result);
             }
             catch (Exception exception)
             {
                 if (!context.IsComplete)
                 {
-                    context.Fail(new CommandFailed(exception, context.Command));
+                    context.Fail(exception);
                 }
 
                 operation.TaskCompletionSource.SetException(exception);

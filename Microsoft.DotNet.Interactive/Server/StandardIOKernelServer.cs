@@ -89,9 +89,17 @@ namespace Microsoft.DotNet.Interactive.Server
                 return;
             }
 
-            var serialized = KernelEventEnvelope.Serialize(
-                KernelEventEnvelope.Create(
-                    kernelEvent));
+            if (kernelEvent.Command is {} command)
+            {
+                if (command.Properties.Count == 0)
+                {
+                    
+                }
+            }
+
+            var envelope = KernelEventEnvelope.Create(kernelEvent);
+
+            var serialized = KernelEventEnvelope.Serialize(envelope);
 
             _output.Write(serialized);
         }

@@ -83,8 +83,6 @@ namespace Microsoft.DotNet.Interactive.Server
                     return expression.Compile();
                 });
 
-            command.GetToken();
-
             var envelope = factory(command);
 
             return envelope;

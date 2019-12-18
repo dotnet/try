@@ -10,6 +10,18 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public abstract class KernelCommandBase : IKernelCommand
     {
+        protected KernelCommandBase()
+        {
+            var parent = KernelInvocationContext.Current?.Command;
+            
+            if (parent != this)
+            {
+                Parent = parent;
+            }
+            
+            Properties = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+        }
+
         [JsonIgnore]
         public KernelCommandInvocation Handler { get; set; }
 
@@ -19,12 +31,6 @@ namespace Microsoft.DotNet.Interactive.Commands
         [JsonIgnore]
         public IDictionary<string, object> Properties { get; }
 
-        protected KernelCommandBase()
-        {
-            Parent = KernelInvocationContext.Current?.Command;
-            Properties = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
-        }
-
         public async Task InvokeAsync(KernelInvocationContext context)
         {
             if (Handler == null)
@@ -32,7 +38,7 @@ namespace Microsoft.DotNet.Interactive.Commands
                 throw new InvalidOperationException($"{GetType().Name}.{nameof(Handler)} was not set.");
             }
 
-            await Handler(context);
+            await Handler(this, context);
         }
     }
 }

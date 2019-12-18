@@ -28,16 +28,18 @@ namespace Microsoft.DotNet.Interactive
 
         public static string GetToken(this IKernelCommand command)
         {
-            if (command is KernelCommandBase commandBase &&
-                commandBase.Parent != null)
-            {
-                return commandBase.Parent.GetToken();
-            }
-
             if (command.Properties.TryGetValue(TokenKey, out var value) &&
                 value is TokenSequence tokenSequence)
             {
                 return tokenSequence.Current;
+            }
+
+            if (command is KernelCommandBase commandBase &&
+                commandBase.Parent != null)
+            {
+                var token = commandBase.Parent.GetToken();
+                command.SetToken(token);
+                return token;
             }
 
             return command.GenerateToken();

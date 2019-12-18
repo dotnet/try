@@ -94,7 +94,9 @@ namespace Microsoft.DotNet.Interactive.Server
                     return expression.Compile();
                 });
 
-            return factory(@event);
+            var envelope = factory(@event);
+
+            return envelope;
         }
 
         public static IKernelEventEnvelope Deserialize(string json)
@@ -111,15 +113,7 @@ namespace Microsoft.DotNet.Interactive.Server
 
             var eventType = EventTypeByName(eventTypeName);
 
-            IKernelEvent @event;
-            try
-            {
-                @event = (IKernelEvent) eventJson.ToObject(eventType, Serializer.JsonSerializer);
-            }
-            catch (Exception exception)
-            {
-                throw;
-            }
+            var @event = (IKernelEvent) eventJson.ToObject(eventType, Serializer.JsonSerializer);
 
             if (@event is KernelEventBase eventBase &&
                 commandEnvelope is {})
@@ -130,25 +124,26 @@ namespace Microsoft.DotNet.Interactive.Server
             return Create(@event);
         }
 
-        public static string Serialize(IKernelEventEnvelope envelope)
+        public static string Serialize(IKernelEventEnvelope eventEnvelope)
         {
             KernelCommandEnvelope.SerializationModel commandSerializationModel = null;
 
-            if (envelope.Event.Command != null)
+            if (eventEnvelope.Event.Command != null)
             {
-                var kernelCommandEnvelope = KernelCommandEnvelope.Create(envelope.Event.Command);
+                var commandEnvelope = KernelCommandEnvelope.Create(eventEnvelope.Event.Command);
 
                 commandSerializationModel = new KernelCommandEnvelope.SerializationModel
                 {
-                    command = kernelCommandEnvelope.Command,
-                    commandType = kernelCommandEnvelope.CommandType
+                    command = commandEnvelope.Command,
+                    commandType = commandEnvelope.CommandType,
+                    token = eventEnvelope.Event.Command.GetToken()
                 };
             }
 
             var serializationModel = new SerializationModel
             {
-                @event = envelope.Event,
-                eventType = envelope.EventType,
+                @event = eventEnvelope.Event,
+                eventType = eventEnvelope.EventType,
                 cause = commandSerializationModel
             };
 

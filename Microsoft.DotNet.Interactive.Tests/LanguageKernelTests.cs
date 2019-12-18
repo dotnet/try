@@ -1014,25 +1014,7 @@ json
         }
 
         [Fact]
-        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_CodeSubmissionReceived_is_published()
-        {
-            var kernel = CreateKernel(Language.CSharp);
-
-            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
-
-            await kernel.SendAsync(command);
-
-            KernelEvents
-                .Should()
-                .ContainSingle<CodeSubmissionReceived>()
-                .Which
-                .Command
-                .Should()
-                .Be(command);
-        }
-
-        [Fact]
-        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_last_CommandHandled_is_for_that_submission()
+        public async Task When_submission_is_split_then_CommandHandled_is_published_only_for_the_root_command()
         {
             var kernel = CreateKernel(Language.CSharp);
 

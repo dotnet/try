@@ -69,8 +69,13 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
             _kernelEvents
                 .Should()
-                .ContainSingle<KernelEventEnvelope<CommandHandled>>(
-                    where: e => e.Event.Command.GetToken() == "abc");
+                .ContainSingle<KernelEventEnvelope<CommandHandled>>()
+                .Which
+                .Event
+                .Command
+                .GetToken()
+                .Should()
+                .Be("abc");
         }
 
         [Fact]
@@ -139,7 +144,8 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
             _kernelEvents
                 .Should()
                 .ContainSingle<KernelEventEnvelope<PackageAdded>>(
-                    where: e => e.Event.Command.GetToken() == "abc");
+                    where: e => e.Event.Command.GetToken() == "abc" && 
+                                e.Event.PackageReference.PackageName == "Microsoft.Spark");
         }
 
         public void Dispose()

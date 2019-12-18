@@ -64,7 +64,7 @@ using static {typeof(Kernel).FullName};
             {
                 var addPackage = new AddPackage(package)
                 {
-                    Handler = async context =>
+                    Handler = async (command, context) =>
                     {
                         var added =
                             await Task.FromResult(
@@ -78,8 +78,6 @@ using static {typeof(Kernel).FullName};
                             var errorMessage = $"{GenerateErrorMessage(package)}{Environment.NewLine}";
                             context.Publish(new ErrorProduced(errorMessage));
                         }
-
-                        context.Complete();
                     }
                    };
 
@@ -125,9 +123,9 @@ using static {typeof(Kernel).FullName};
             CSharpKernel kernel, 
             PackageRestoreContext restoreContext)
         {
-            return async (KernelInvocationContext invocationContext) =>
+            return async (IKernelCommand command, KernelInvocationContext invocationContext) =>
             {
-                KernelCommandInvocation restore = async context =>
+                KernelCommandInvocation restore = async (_, context) =>
                 {
                     var messages = new Dictionary<string, string>();
                     foreach (var package in restoreContext.PackageReferences)
@@ -239,9 +237,6 @@ using static {typeof(Kernel).FullName};
                                 break;
                         }
                     }
-
-                    // Events for finished
-                    context.Complete();
                 };
 
                 await invocationContext.QueueAction(restore);

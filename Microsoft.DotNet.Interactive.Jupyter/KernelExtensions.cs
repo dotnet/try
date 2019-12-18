@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                 new FormattedValue("text/html", htmlContent)
                                             }));
 
-                        context.Complete();
+                        context.Complete(submitCode);
                     }
                 })
             });
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                     new FormattedValue("text/html", html)
                                 }));
 
-                        context.Complete();
+                        context.Complete(submitCode);
                     }
                 })
             });
@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     {
                         if (k.Directives.Any(d => d.Name == "%lsmagic"))
                         {
-                            await k.SendAsync(context.Command);
+                            await k.SendAsync(new SubmitCode(((SubmitCode) context.Command).Code));
                         }
                     });
                 })
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                                                    value)
                                             }));
 
-                        context.Complete();
+                        context.Complete(submitCode);
                     }
                 })
             };
@@ -239,8 +239,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                                 {
                                     new FormattedValue(PlainTextFormatter.MimeType, formattableString)
                                 }));
-
-                        context.Complete();
                     }
                 })
             };

@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 
             Message = message;
 
-            Handler = context =>
+            Handler = (_, context) =>
             {
                 context.Publish(new ErrorProduced(Message));
 

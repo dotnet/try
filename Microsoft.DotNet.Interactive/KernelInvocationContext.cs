@@ -13,59 +13,55 @@ namespace Microsoft.DotNet.Interactive
 {
     public class KernelInvocationContext : IDisposable
     {
-        private readonly KernelInvocationContext _parentContext;
-        private static readonly AsyncLocal<Stack<KernelInvocationContext>> _currentStack = new AsyncLocal<Stack<KernelInvocationContext>>();
+        private static readonly AsyncLocal<KernelInvocationContext> _current = new AsyncLocal<KernelInvocationContext>();
 
         private readonly ReplaySubject<IKernelEvent> _events = new ReplaySubject<IKernelEvent>();
 
-        private KernelInvocationContext(
-            IKernelCommand command,
-            KernelInvocationContext parentContext = null)
+        private readonly HashSet<IKernelCommand> _childCommands = new HashSet<IKernelCommand>();
+
+        private KernelInvocationContext(IKernelCommand command)
         {
-            _parentContext = parentContext;
             Command = command;
+            Result = new KernelCommandResult(_events);
         }
 
         public IKernelCommand Command { get; }
 
         public bool IsComplete { get; private set; }
 
-        public void Complete()
+        public void Complete(IKernelCommand command)
         {
-            Publish(new CommandHandled(Command));
-            IsComplete = true;
-            _events.OnCompleted();
+            if (command == Command)
+            {
+                Publish(new CommandHandled(Command));
+                _events.OnCompleted();
+                IsComplete = true;
+            }
+            else
+            {
+                _childCommands.Remove(command);
+            }
         }
 
-        public void Fail(CommandFailed failed)
+        public void Fail(
+            Exception exception = null,
+            string message = null)
         {
-            if (failed.Command != Command)
-            {
-                throw new InvalidOperationException("Cannot complete context with a different command.");
-            }
+            var failed = new CommandFailed(exception, Command, message);
 
             Publish(failed);
-            IsComplete = true;
+
             _events.OnCompleted();
+            IsComplete = true;
         }
 
         public void Publish(IKernelEvent @event)
         {
-            if (_parentContext != null)
-            {
-                switch (@event)
-                {
-                    // FIX: (Publish) don't bubble up orchestration commands from child contexts
-                    case CommandHandled _:
-                    case CommandFailed _:
-                        break;
+            var command = @event.Command;
 
-                    default:
-                        _parentContext.Publish(@event);
-                        break;
-                }
-            }
-            else
+            if (command == null ||
+                Command == command ||
+                _childCommands.Contains(command))
             {
                 _events.OnNext(@event);
             }
@@ -73,39 +69,23 @@ namespace Microsoft.DotNet.Interactive
 
         public IObservable<IKernelEvent> KernelEvents => _events;
 
-        public IKernelCommandResult Result { get; internal set; }
+        public IKernelCommandResult Result { get; }
 
         public static KernelInvocationContext Establish(IKernelCommand command)
         {
-            KernelInvocationContext parent = null;
-
-            if (_currentStack.Value == null)
+            if (_current.Value == null)
             {
-                _currentStack.Value = new Stack<KernelInvocationContext>();
+                _current.Value = new KernelInvocationContext(command);
             }
-            else if (_currentStack.Value.Count > 0)
+            else
             {
-                parent = Current;
+                _current.Value._childCommands.Add(command);
             }
 
-            var context = new KernelInvocationContext(command, parent);
-
-            _currentStack.Value.Push(context);
-
-            return context;
+            return _current.Value;
         }
 
-        public static KernelInvocationContext Current
-        {
-            get
-            {
-                KernelInvocationContext context = null;
-
-                _currentStack?.Value?.TryPeek(out context);
-
-                return context;
-            }
-        }
+        public static KernelInvocationContext Current => _current.Value;
 
         public IKernel HandlingKernel { get; set; }
 
@@ -120,34 +100,10 @@ namespace Microsoft.DotNet.Interactive
 
         void IDisposable.Dispose()
         {
-            var stack = _currentStack?.Value;
-
-            if (stack == null)
+            if (_current.Value is {} active)
             {
-                Complete();
-                return;
-            }
-
-            if (!stack.Contains(this))
-            {
-                Complete();
-                return;
-            }
-
-            while (stack.TryPop(out var context))
-            {
-                if (!context.IsComplete)
-                {
-                    context.Complete();
-                }
-                else
-                {
-                }
-
-                if (context == this)
-                {
-                    break;
-                }
+                _current.Value = null;
+                active.Complete(Command);
             }
         }
     }

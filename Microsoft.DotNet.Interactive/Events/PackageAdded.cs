@@ -15,6 +15,11 @@ namespace Microsoft.DotNet.Interactive.Events
             PackageReference = packageReference ?? throw new ArgumentNullException(nameof(packageReference));
         }
 
-        public PackageReference PackageReference { get; internal set; }
+        public ResolvedPackageReference PackageReference { get; internal set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}: {PackageReference}";
+        }
     }
 }

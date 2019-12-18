@@ -16,6 +16,7 @@ namespace Microsoft.DotNet.Interactive.Events
 
         public CommandHandled(IKernelCommand command) : base(command)
         {
+            // FIX: (CommandHandled) make all constructors internal
             if (command == null)
             {
                 throw new ArgumentNullException(nameof(command));

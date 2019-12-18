@@ -39,9 +39,9 @@ namespace Microsoft.DotNet.Interactive.Tests
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -62,9 +62,8 @@ x"));
 
             receivedOnFakeRepl
                 .Should()
-                .ContainSingle(c => c is SubmitCode)
+                .ContainSingle<SubmitCode>()
                 .Which
-                .As<SubmitCode>()
                 .Code
                 .Should()
                 .Be("hello!");
@@ -80,9 +79,9 @@ x"));
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -121,9 +120,9 @@ x"));
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -157,9 +156,9 @@ x"));
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -202,6 +201,7 @@ x"));
                     typeof(KernelBusy),
                     typeof(CodeSubmissionReceived),
                     typeof(CompleteCodeSubmissionReceived),
+                    typeof(CommandHandled),
                     typeof(KernelIdle));
         }
     }

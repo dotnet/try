@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var events = context.KernelEvents.ToSubscribedList();
 
-            context.Fail(new CommandFailed("oops!", command));
+            context.Fail(message: "oops!");
 
             events.Should()
                   .ContainSingle<CommandFailed>();
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var events = context.KernelEvents.ToSubscribedList();
 
-            context.Fail(new CommandFailed("oops!", command));
+            context.Fail(message: "oops!");
 
             events.Should()
                   .NotContain(e => e is CommandHandled);
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var events = context.KernelEvents.ToSubscribedList();
 
-            context.Complete();
+            context.Complete(command);
 
             events.Should()
                   .ContainSingle<CommandHandled>();
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var events = context.KernelEvents.ToSubscribedList();
 
-            context.Complete();
+            context.Complete(command);
 
             events.Should()
                   .NotContain(e => e is CommandFailed);
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var events = context.KernelEvents.ToSubscribedList();
 
-            context.Complete();
+            context.Complete(command);
 
             context.Publish(new ErrorProduced("oops", command));
 
@@ -162,11 +162,106 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var events = context.KernelEvents.ToSubscribedList();
 
-            context.Fail(new CommandFailed("oops", command));
+            context.Fail(message: "oops");
 
             context.Publish(new ErrorProduced("oops", command));
 
             events.Should().NotContain(e => e is ErrorProduced);
         }
+
+        [Fact]
+        public void When_multiple_commands_are_active_then_context_does_not_publish_CommandHandled_until_all_are_complete()
+        {
+            var outerSubmitCode = new SubmitCode("abc");
+            using var outer = KernelInvocationContext.Establish(outerSubmitCode);
+
+            var events = outer.KernelEvents.ToSubscribedList();
+
+            var innerSubmitCode = new SubmitCode("def");
+            using var inner = KernelInvocationContext.Establish(innerSubmitCode);
+
+            inner.Complete(innerSubmitCode);
+
+            events.Should().NotContain(e => e is CommandHandled);
+        }
+
+        [Fact]
+        public void When_outer_context_is_completed_then_inner_commands_can_no_longer_be_used_to_publish_events()
+        {
+            using var outer = KernelInvocationContext.Establish(new SubmitCode("abc"));
+
+            var events = outer.KernelEvents.ToSubscribedList();
+
+            using var inner = KernelInvocationContext.Establish(new SubmitCode("def"));
+
+            outer.Complete(outer.Command);
+            inner.Publish(new ErrorProduced("oops!"));
+
+            events.Should().NotContain(e => e is ErrorProduced);
+        }
+
+        [Fact]
+        public void When_inner_context_is_completed_then_no_further_events_can_be_published_for_it()
+        {
+            using var outer = KernelInvocationContext.Establish(new SubmitCode("abc"));
+
+            var events = outer.KernelEvents.ToSubscribedList();
+
+            var innerSubmitCode = new SubmitCode("def");
+            using var inner = KernelInvocationContext.Establish(innerSubmitCode);
+
+            inner.Complete(innerSubmitCode);
+
+            inner.Publish(new ErrorProduced("oops!", innerSubmitCode));
+
+            events.Should().NotContain(e => e is ErrorProduced);
+        }
+
+        [Fact]
+        public void After_disposal_Current_is_null()
+        {
+            var context = KernelInvocationContext.Establish(new SubmitCode("123"));
+
+            ((IDisposable) context).Dispose();
+
+            KernelInvocationContext.Current.Should().BeNull();
+        }
+
+        [Fact]
+        public void When_inner_context_fails_then_CommandFailed_is_published_for_outer_command()
+        {
+            using var outer = KernelInvocationContext.Establish(new SubmitCode("abc"));
+
+            var events = outer.KernelEvents.ToSubscribedList();
+
+            var innerCommand = new SubmitCode("def");
+            using var inner = KernelInvocationContext.Establish(innerCommand);
+
+            inner.Fail();
+
+            events.Should()
+                  .ContainSingle<CommandFailed>()
+                  .Which
+                  .Command
+                  .Should()
+                  .Be(outer.Command);
+        }
+
+        [Fact]
+        public void When_inner_context_fails_then_no_further_events_can_be_published()
+        {
+            using var outer = KernelInvocationContext.Establish(new SubmitCode("abc"));
+
+            var events = outer.KernelEvents.ToSubscribedList();
+
+            var innerCommand = new SubmitCode("def");
+            using var inner = KernelInvocationContext.Establish(innerCommand);
+
+            inner.Fail();
+            inner.Publish(new ErrorProduced("oops!"));
+
+            events.Should().NotContain(e => e is ErrorProduced);
+        }
+
     }
 }

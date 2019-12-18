@@ -44,10 +44,7 @@ namespace Microsoft.DotNet.Interactive
             }
             catch (Exception exception)
             {
-                context.Fail(
-                    new CommandFailed(
-                        exception.ToDisplayString(),
-                        command));
+                context.Fail(message: exception.ToDisplayString());
             }
         }
 
@@ -58,7 +55,6 @@ namespace Microsoft.DotNet.Interactive
             invocations.Add(async (command, context, _) =>
             {
                 await _kernel.HandleInternalAsync(command, context);
-                context.Result = new KernelCommandResult(context.KernelEvents);
             });
 
             return invocations.Aggregate(

@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Interactive
                     }
 
                     var runDirective = new AnonymousKernelCommand(
-                        _ => _directiveParser.InvokeAsync(parseResult));
+                        (_, __) => _directiveParser.InvokeAsync(parseResult));
                     
                     if (command.Name == "#r")
                     {
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Interactive
 
                 hoistedCommands.Add(
                     new AnonymousKernelCommand(
-                        _ => _directiveParser.InvokeAsync(parseResult)));
+                        (_, __) => _directiveParser.InvokeAsync(parseResult)));
             }
 
             return hoistedCommands.Concat(commands).ToArray();

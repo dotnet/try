@@ -75,11 +75,13 @@ var i = 0;
 #increment
 i");
 
-            events.OfType<ReturnValueProduced>()
-                  .Single()
-                  .Value
-                  .Should()
-                  .Be(1);
+            events
+                .Should()
+                .ContainSingle<ReturnValueProduced>()
+                .Which
+                .Value
+                .Should()
+                .Be(1);
         }
     }
 }

@@ -165,7 +165,6 @@ type FSharpKernel() =
                     let formattedValues = FormattedValue.FromObject(value)
                     context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
                 | None -> ()
-                context.Complete()
             | Error(ex) ->
                 if not (tokenSource.IsCancellationRequested) then
                     let aggregateError = String.Join("\n", errors)
@@ -173,9 +172,9 @@ type FSharpKernel() =
                         match ex with
                         | :? FsiCompilationException -> CodeSubmissionCompilationErrorException(ex) :> Exception
                         | _ -> ex
-                    context.Fail(CommandFailed(reportedException, codeSubmission, aggregateError))
+                    context.Fail(reportedException, aggregateError)
                 else
-                    context.Fail(new CommandFailed(null, codeSubmission, "Command cancelled"))
+                    context.Fail(null, "Command cancelled")
         }
 
     let handleRequestCompletion (requestCompletion: RequestCompletion) (context: KernelInvocationContext) =
@@ -200,8 +199,8 @@ type FSharpKernel() =
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
         async {
             match command with
-            | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
-            | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun invocationContext -> (handleRequestCompletion requestCompletion invocationContext) |> Async.StartAsTask :> Task
-            | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
+            | :? SubmitCode as submitCode -> submitCode.Handler <- fun command invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
+            | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun command invocationContext -> (handleRequestCompletion requestCompletion invocationContext) |> Async.StartAsTask :> Task
+            | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun command invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task

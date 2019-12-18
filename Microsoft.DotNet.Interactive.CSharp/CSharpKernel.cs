@@ -86,21 +86,21 @@ namespace Microsoft.DotNet.Interactive.CSharp
                     switch (command)
                     {
                         case SubmitCode submitCode:
-                            submitCode.Handler = async invocationContext =>
+                            submitCode.Handler = async (_, invocationContext) =>
                             {
                                 await HandleSubmitCode(submitCode, context);
                             };
                             break;
 
                         case RequestCompletion requestCompletion:
-                            requestCompletion.Handler = async invocationContext =>
+                            requestCompletion.Handler = async (_, invocationContext) =>
                             {
                                 await HandleRequestCompletion(requestCompletion, invocationContext);
                             };
                             break;
 
                         case CancelCurrentCommand interruptExecution:
-                            interruptExecution.Handler = async invocationContext =>
+                            interruptExecution.Handler = async (_, invocationContext) =>
                             {
                                 await HandleCancelCurrentCommand(interruptExecution, invocationContext);
                             };
@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
                                 (compilationError.InnerException as CompilationErrorException)?.Diagnostics.Select(d => d.ToString())?? Enumerable.Empty<string>());
                     }
 
-                    context.Fail(new CommandFailed(exception, submitCode, message));
+                    context.Fail(exception, message);
                 }
                 else
                 {
@@ -237,7 +237,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
             }
             else
             {
-                context.Fail(new CommandFailed(null, submitCode, "Command cancelled"));
+                context.Fail(null, "Command cancelled");
             }
         }
 
