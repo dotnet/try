@@ -7,9 +7,7 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
-using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -58,7 +56,7 @@ namespace Microsoft.DotNet.Interactive
 
                     var runDirective = new AnonymousKernelCommand(
                         (_, __) => _directiveParser.InvokeAsync(parseResult));
-                    
+
                     if (command.Name == "#r")
                     {
                         hoistedCommands.Add(runDirective);
@@ -149,7 +147,7 @@ namespace Microsoft.DotNet.Interactive
                                                   () => KernelInvocationContext.Current));
 
                 commandLineBuilder.EnableDirectives = false;
-                
+
                 _directiveParser = commandLineBuilder.Build();
             }
 

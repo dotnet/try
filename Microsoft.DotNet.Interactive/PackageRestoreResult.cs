@@ -10,7 +10,6 @@ namespace Microsoft.DotNet.Interactive
 {
     public class PackageRestoreResult
     {
-        // FIX: (PackageRestoreResult) move this out of Utility
         public PackageRestoreResult(
             bool succeeded,
             IEnumerable<PackageReference> requestedPackages,

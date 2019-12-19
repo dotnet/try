@@ -14,7 +14,6 @@ namespace Microsoft.DotNet.Interactive.Events
             IKernelCommand command,
             string message = null) : base(command)
         {
-            // FIX: (CommandFailed) make all constructors internal
             if (command == null)
             {
                 throw new ArgumentNullException(nameof(command));

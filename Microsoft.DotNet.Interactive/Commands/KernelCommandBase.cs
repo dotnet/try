@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Interactive.Commands
         [JsonIgnore]
         public IDictionary<string, object> Properties { get; }
 
-        public async Task InvokeAsync(KernelInvocationContext context)
+        public virtual async Task InvokeAsync(KernelInvocationContext context)
         {
             if (Handler == null)
             {

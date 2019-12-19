@@ -67,79 +67,15 @@ namespace Microsoft.DotNet.Interactive
             Pipeline.AddMiddleware(
                 (command, context, next) =>
                     command switch
-                        {
-                            SubmitCode submitCode =>
-                            HandleDirectivesAndSubmitCode(
-                                submitCode,
-                                context,
-                                next),
+                    {
+                        SubmitCode submitCode =>
+                        HandleDirectivesAndSubmitCode(
+                            submitCode,
+                            context,
+                            next),
 
-                            LoadExtension loadExtension =>
-                            HandleLoadExtension(
-                                loadExtension,
-                                context,
-                                next),
-
-                            DisplayValue displayValue =>
-                            HandleDisplayValue(
-                                displayValue,
-                                context,
-                                next),
-
-                            UpdateDisplayedValue updateDisplayValue =>
-                            HandleUpdateDisplayValue(
-                                updateDisplayValue,
-                                context,
-                                next),
-
-                            LoadExtensionsInDirectory loadExtensionsInDirectory =>
-                            HandleLoadExtensionsInDirectory(
-                                loadExtensionsInDirectory,
-                                context,
-                                next),
-
-                            _ => next(command, context)
-                        });
-        }
-
-        private async Task HandleLoadExtensionsInDirectory(
-            LoadExtensionsInDirectory loadExtensionsInDirectory,
-            KernelInvocationContext invocationContext,
-            KernelPipelineContinuation next)
-        {
-            // FIX: (HandleLoadExtensionsInDirectory) move handler to command class
-            loadExtensionsInDirectory.Handler = async (command, context) =>
-            {
-                if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
-                {
-                    await extensibleKernel.LoadExtensionsFromDirectory(
-                        loadExtensionsInDirectory.Directory, 
-                        context, 
-                        loadExtensionsInDirectory.AdditionalDependencies);
-                }
-                else
-                {
-                    context.Fail(
-                        message: $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions");
-                }
-            };
-
-            await next(loadExtensionsInDirectory, invocationContext);
-        }
-
-        private async Task HandleLoadExtension(
-            LoadExtension loadExtension,
-            KernelInvocationContext invocationContext,
-            KernelPipelineContinuation next)
-        {
-            // FIX: (HandleLoadExtension)  move handler to command class
-            loadExtension.Handler = async (command, context) =>
-            {
-                var kernelExtensionLoader = new KernelExtensionLoader();
-                await kernelExtensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, invocationContext);
-            };
-
-            await next(loadExtension, invocationContext);
+                        _ => next(command, context)
+                    });
         }
 
         private async Task HandleDirectivesAndSubmitCode(
@@ -172,51 +108,6 @@ namespace Microsoft.DotNet.Interactive
                     }
                 }
             }
-        }
-
-        private async Task HandleDisplayValue(
-            DisplayValue displayValue,
-            KernelInvocationContext context,
-            KernelPipelineContinuation next)
-        {
-            // FIX: (HandleDisplayValue) move to command class
-
-            displayValue.Handler = (command, invocationContext) =>
-            {
-                invocationContext.Publish(
-                    new DisplayedValueProduced(
-                        displayValue.Value,
-                        displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue },
-                        valueId: displayValue.ValueId));
-
-                return Task.CompletedTask;
-            };
-
-            await next(displayValue, context);
-        }
-
-        private async Task HandleUpdateDisplayValue(
-            UpdateDisplayedValue displayedValue,
-            KernelInvocationContext pipelineContext,
-            KernelPipelineContinuation next)
-        {
-            // FIX: (HandleUpdateDisplayValue) move to command class
-
-            displayedValue.Handler = (command, invocationContext) =>
-            {
-                invocationContext.Publish(
-                    new DisplayedValueUpdated(
-                        displayedValue.Value,
-                        valueId: displayedValue.ValueId,
-                        command: displayedValue,
-                        formattedValues: new[] { displayedValue.FormattedValue }
-                        ));
-
-                return Task.CompletedTask;
-            };
-
-            await next(displayedValue, pipelineContext);
         }
 
         public IObservable<IKernelEvent> KernelEvents => _kernelEvents;

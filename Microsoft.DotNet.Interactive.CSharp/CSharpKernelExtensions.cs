@@ -123,7 +123,7 @@ using static {typeof(Kernel).FullName};
             CSharpKernel kernel, 
             PackageRestoreContext restoreContext)
         {
-            return async (IKernelCommand command, KernelInvocationContext invocationContext) =>
+            return async (command, invocationContext) =>
             {
                 KernelCommandInvocation restore = async (_, context) =>
                 {
@@ -162,79 +162,58 @@ using static {typeof(Kernel).FullName};
 
                     if (result.Succeeded)
                     {
-                        switch (result)
+                        var nativeLibraryProbingPaths = result.NativeLibraryProbingPaths;
+                        helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
+
+                        var addedAssemblyPaths =
+                            result
+                                .ResolvedReferences
+                                .SelectMany(added => added.AssemblyPaths)
+                                .Distinct()
+                                .ToArray();
+
+                        if (helper != null)
                         {
-                            // FIX: (UseNugetDirective) only one case
-                            case PackageRestoreResult packageRestore:
+                            foreach (var addedReference in result.ResolvedReferences)
+                            {
+                                helper.Handle(addedReference);
+                            }
+                        }
 
-                                var nativeLibraryProbingPaths = packageRestore.NativeLibraryProbingPaths;
-                                helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
+                        kernel.AddScriptReferences(result.ResolvedReferences);
 
-                                var addedAssemblyPaths =
-                                    packageRestore
-                                        .ResolvedReferences
-                                        .SelectMany(added => added.AssemblyPaths)
-                                        .Distinct()
-                                        .ToArray();
+                        foreach (var resolvedReference in result.ResolvedReferences)
+                        {
+                            var key = InstallingPackageMessage(resolvedReference);
+                            if (messages.TryGetValue(key, out var message))
+                            {
+                                context.Publish(new DisplayedValueUpdated(message + " done!", key));
+                                messages[key] = message;
+                            }
 
-                                if (helper != null)
-                                {
-                                    foreach (var addedReference in packageRestore.ResolvedReferences)
-                                    {
-                                        helper.Handle(addedReference);
-                                    }
-                                }
+                            context.Publish(new PackageAdded(resolvedReference));
 
-                                kernel.AddScriptReferences(packageRestore.ResolvedReferences);
-
-                                foreach (var resolvedReference in packageRestore.ResolvedReferences)
-                                {
-                                    string message;
-                                    string key = InstallingPackageMessage(resolvedReference);
-                                    if (messages.TryGetValue(key, out message))
-                                    {
-                                        context.Publish(new DisplayedValueUpdated(message + " done!", key, null, null));
-                                        messages[key] = message;
-                                    }
-
-                                    context.Publish(new PackageAdded(resolvedReference));
-
-                                    // Load extensions
-                                    await context.HandlingKernel.SendAsync(
-                                        new LoadExtensionsInDirectory(
-                                            resolvedReference.PackageRoot,
-                                            addedAssemblyPaths));
-                                }
-                                break;
-
-                            default:
-                                break;
-
+                            // Load extensions
+                            await context.HandlingKernel.SendAsync(
+                                new LoadExtensionsInDirectory(
+                                    resolvedReference.PackageRoot,
+                                    addedAssemblyPaths));
                         }
                     }
                     else
                     {
                         var errors = $"{string.Join(Environment.NewLine, result.Errors)}";
 
-                        switch (result)
+                        foreach (var resolvedReference in result.ResolvedReferences)
                         {
-                            // FIX: (UseNugetDirective) only one case
-                            case PackageRestoreResult packageRestore:
-                                foreach (var resolvedReference in packageRestore.ResolvedReferences)
-                                {
-                                    if (string.IsNullOrEmpty(resolvedReference.PackageName))
-                                    {
-                                        context.Publish(new ErrorProduced($"Failed to apply RestoreSources {resolvedReference.RestoreSources}{Environment.NewLine}{errors}"));
-                                    }
-                                    else
-                                    {
-                                        context.Publish(new ErrorProduced($"Failed to add reference to package {resolvedReference.PackageName}{Environment.NewLine}{errors}"));
-                                    }
-                                }
-                                break;
-
-                            default:
-                                break;
+                            if (string.IsNullOrEmpty(resolvedReference.PackageName))
+                            {
+                                context.Publish(new ErrorProduced($"Failed to apply RestoreSources {resolvedReference.RestoreSources}{Environment.NewLine}{errors}"));
+                            }
+                            else
+                            {
+                                context.Publish(new ErrorProduced($"Failed to add reference to package {resolvedReference.PackageName}{Environment.NewLine}{errors}"));
+                            }
                         }
                     }
                 };
