@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <LangVersion>7.3</LangVersion>
+     <LangVersion>preview</LangVersion>
     <NoWarn>$(NoWarn);1591</NoWarn><!-- Missing XML comment for publicly visible type or member '*' -->
   </PropertyGroup>
 
