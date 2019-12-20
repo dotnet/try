@@ -11,6 +11,7 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Formatting;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Utility;
 using Newtonsoft.Json;
@@ -1304,6 +1305,13 @@ Formatter<DataFrame>.Register((df, writer) =>
     
     writer.Write(t);
 }, ""text/html"");");
+
+            var info = await new Dotnet().Execute("--info");
+
+            foreach (var line in info.Output)
+            {
+                _output.WriteLine(line);
+            }
 
             events.Should().NotContainErrors();
         }
