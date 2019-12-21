@@ -12,16 +12,16 @@ function TestUsingNPM([string] $testPath) {
 
 try {
     # invoke regular build/test script
-    . (Join-Path $PSScriptRoot "common\build.ps1") /p:Projects=$PSScriptRoot\..\*.sln @args
+    . (Join-Path $PSScriptRoot "common\build.ps1") /p:Projects=$PSScriptRoot\..\dotnet-interactive.sln @args
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
 
     # directly invoke npm tests
-    if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
-        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
-        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
-    }
+    # if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
+    #     TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
+    #     TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
+    # }
 }
 catch {
     Write-Host $_
