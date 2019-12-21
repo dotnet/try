@@ -17,8 +17,6 @@ variables:
     value: .NETCore
   - name: BlazorTemplateVersion
     value: 3.0.0-preview9.19465.2
-  - name: DotNetSdkVersion2
-    value: '2.1.509'
   - name: DotNetSdkVersion
     value: '3.0.101'
   - name: NodeJSVersion
@@ -82,12 +80,6 @@ stages:
           displayName: Add NodeJS/npm
           inputs:
             versionSpec: $(NodeJSVersion)
-
-        - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
 
         - task: UseDotNet@2
           displayName: Add dotnet 3.0
@@ -179,13 +171,7 @@ stages:
         - task: NodeTool@0
           displayName: Add NodeJS/npm
           inputs:
-            versionSpec: $(NodeJSVersion)
-
-        - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
+            versionSpec: $(NodeJSVersion)        
 
         - task: UseDotNet@2
           displayName: Add dotnet 3.0
@@ -231,11 +217,6 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
         - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
-        - task: UseDotNet@2
           displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
@@ -269,11 +250,6 @@ stages:
             value: $(Build.SourcesDirectory)/.trydotnet/packages
         steps:
         - checkout: none #skip checking out the default repository resource
-        - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
         - task: UseDotNet@2
           displayName: Add dotnet 3.0
           inputs:
