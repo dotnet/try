@@ -1,13 +1,15 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using System.Linq;
 using Microsoft.AspNetCore.Html;
 using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Formatting.Tests
 {
-    public class HtmlAttributesTests
+    public class HtmlAttributesTests : FormatterTestBase
     {
         [Fact]
         public void When_object_constructor_overload_is_passed_a_dictionary_it_initializes_correctly()

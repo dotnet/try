@@ -8,13 +8,8 @@ using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Formatting.Tests
 {
-    public class PocketViewWithFormatterTests
+    public class PocketViewWithFormatterTests : FormatterTestBase
     {
-        public PocketViewWithFormatterTests()
-        {
-            Formatter.ResetToDefault();
-        }
-
         [Theory]
         [InlineData("text/html")]
         [InlineData("text/plain")]

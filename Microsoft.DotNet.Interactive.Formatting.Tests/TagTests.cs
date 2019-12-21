@@ -1,9 +1,12 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using FluentAssertions;
 using Xunit;
 
 namespace Microsoft.DotNet.Interactive.Formatting.Tests
 {
-    public class TagTests
+    public class TagTests : FormatterTestBase
     {
         [Fact]
         public void Name_property_is_set_by_constructor()
