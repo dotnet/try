@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
             _output = output;
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [MemberData(nameof(Commands))]
         public void All_command_types_are_round_trip_serializable(IKernelCommand command)
         {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                                 o => o.Excluding(e => e.Command.Properties));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [MemberData(nameof(Events))]
         public void All_event_types_are_round_trip_serializable(IKernelEvent @event)
         {
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                                 o => o.Excluding(envelope => envelope.Event.Command.Properties));
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void All_command_types_are_tested_for_round_trip_serialization()
         {
             var commandTypes = typeof(IKernelCommand)
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                 .BeEquivalentTo(commandTypes);
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void All_event_types_are_tested_for_round_trip_serialization()
         {
             var eventTypes = typeof(IKernelEvent)

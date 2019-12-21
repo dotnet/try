@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             _output = output;
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_returns_the_result_of_a_non_null_expression(Language language)
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 .Be(123);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_no_result_for_a_null_value(Language language)
         {
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         // Option 1: inline switch
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_remembers_state_between_submissions(Language language)
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         // Option 1: inline switch
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         //[InlineData(Language.FSharp)]    Todo: Issue 695 - dotnet-interactive with an F# notebook does not load System.Text.Json #695
         public async Task it_can_reference_system_text_json(Language language)
@@ -132,7 +132,7 @@ location.EndsWith(""System.Text.Json.dll"")"
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task kernel_base_ignores_command_line_directives(Language language)
         {
@@ -153,7 +153,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Be(10);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned(Language language)
@@ -201,7 +201,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .BeLessThan(lastFailureIndex);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_exceptions_thrown_in_user_code(Language language)
@@ -240,7 +240,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .BeOfType<NotImplementedException>();
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_diagnostics(Language language)
@@ -281,7 +281,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Be(error);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_incomplete_submissions(Language language)
@@ -304,7 +304,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Contain(e => e is IncompleteCodeSubmissionReceived);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_submissions(Language language)
@@ -327,7 +327,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Contain(e => e is CompleteCodeSubmissionReceived);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_stdio_submissions(Language language)
@@ -350,7 +350,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Contain(e => e is CompleteCodeSubmissionReceived);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task expression_evaluated_to_null_has_result_with_null_value(Language language)
@@ -374,7 +374,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                         .BeNull();
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // F# doesn't have the concept of a statement
         public async Task it_does_not_return_a_result_for_a_statement(Language language)
@@ -398,7 +398,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .NotContain(e => e is ReturnValueProduced);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_binding(Language language)
@@ -422,7 +422,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .NotContain(e => e is ReturnValueProduced);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "true ? 25 : 20")]
         [InlineData(Language.FSharp, "if true then 25 else 20")]
         [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
@@ -442,7 +442,7 @@ location.EndsWith(""System.Text.Json.dll"")"
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_aggregates_multiple_submissions(Language language)
@@ -478,7 +478,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                         .Be(3);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_produces_values_when_executing_Console_output(Language language)
@@ -512,7 +512,7 @@ Console.Write(""value three"");",
                     new StandardOutputValueProduced("value three", kernelCommand, new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task kernel_captures_stdout(Language language)
         {
@@ -530,7 +530,7 @@ Console.Write(""value three"");",
                 .Be("hello from F#");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task kernel_captures_stderr(Language language)
         {
@@ -583,7 +583,7 @@ Console.Write(""value three"");",
                 .NotContain(e => e is DisplayEventBase);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_a_similarly_shaped_error(Language language)
@@ -607,7 +607,7 @@ Console.Write(""value three"");",
                 .Be(error);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
@@ -644,7 +644,7 @@ Console.Write(""value three"");
 
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task the_output_is_asynchronous(Language language)
@@ -700,7 +700,7 @@ Console.Write(2);
                 .Be("meow!");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_single_submission(Language language)
@@ -737,7 +737,7 @@ json"
                         .Be(new { value = "hello" }.ToJson());
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_separate_submissions(Language language)
@@ -778,7 +778,7 @@ $"#r \"{dllPath}\"",
                         .Be(new { value = "hello" }.ToJson());
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_quotedpaths(Language language)
         {
@@ -813,7 +813,7 @@ json
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_triplequotedpaths(Language language)
         {
@@ -846,7 +846,7 @@ json
                         .Be(new { value = "hello" }.ToJson());
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_formats_func_instances(Language language)
@@ -884,7 +884,7 @@ json
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_types(Language language)
@@ -907,7 +907,7 @@ json
                 .Contain(i => i.DisplayText == "ReadLine");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_previously_declared_variables(Language language)
@@ -936,7 +936,7 @@ json
                         .Contain(i => i.DisplayText == "alpha");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
             var kernel = CreateKernel();
@@ -958,7 +958,7 @@ json
                 .Contain(i => i.DisplayText == "SerializeObject");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
             var cSharpKernel = new CSharpKernel();
@@ -979,7 +979,7 @@ json
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "Microsoft.Extensions.Logging.ILogger logger = null;")]
         [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
         public async Task When_SubmitCode_command_adds_packages_to_kernel_then_PackageAdded_event_is_raised(Language language, string expression)
@@ -1013,7 +1013,7 @@ json
                                    && e.PackageReference.PackageVersion == "2.2.0");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task When_submission_is_split_then_CommandHandled_is_published_only_for_the_root_command()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1031,7 +1031,7 @@ json
                 .Be(command);
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
@@ -1058,7 +1058,7 @@ json
                                        .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load()
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
@@ -1075,7 +1075,7 @@ json
                   .ContainSingle(e => e is KernelExtensionLoadException);
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Loads_native_dependencies_from_nugets()
         {
             using var kernel = CreateKernel(Language.CSharp);
@@ -1138,7 +1138,7 @@ catch (Exception e)
                 .ContainSingle<StandardOutputValueProduced>(e => e.Value.As<string>().Contains("success"));
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Script_state_is_available_within_middleware_pipeline()
         {
             var variableCountBeforeEvaluation = 0;
@@ -1169,7 +1169,7 @@ catch (Exception e)
             kernel.ScriptState.Should().NotBeNull();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Should_load_extension_in_directory()
         {
             var directory = DirectoryUtility.CreateDirectory();
@@ -1209,7 +1209,7 @@ catch (Exception e)
                                                 .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Dependency_version_conflicts_are_resolved_correctly()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1259,7 +1259,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_empty_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1280,7 +1280,7 @@ Formatter<DataFrame>.Register((df, writer) =>
                 .Be($"Invalid Package Id: ''{Environment.NewLine}");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_version_only_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1301,7 +1301,7 @@ Formatter<DataFrame>.Register((df, writer) =>
                 .Be($"Invalid Package Id: ''{Environment.NewLine}");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_RestoreSources_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1317,7 +1317,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuge_allows_duplicate_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1334,7 +1334,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1358,7 +1358,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_multiple_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1374,7 +1374,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_multiple_sources_package_specification_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1397,7 +1397,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_duplicate_package_specifications_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1415,7 +1415,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_duplicate_package_specifications_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1439,7 +1439,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1462,7 +1462,7 @@ using Microsoft.ML.AutoML;
                 .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1491,7 +1491,7 @@ using Microsoft.ML.AutoML;
                 .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_changing_version_of_loaded_dependent_packages()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1521,7 +1521,7 @@ using Microsoft.ML.AutoML;
                 .Be($"Package Reference already added: 'Google.Protobuf, 3.10.1'{Environment.NewLine}");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_using_version_of_loaded_dependent_packages()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
@@ -1545,7 +1545,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_with_System_Text_Json_should_succeed()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -1566,7 +1566,7 @@ using System.Text.Json;
                   .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_with_no_version_should_not_get_the_oldest_package_version()
         {
             // #r "nuget: with no version specified should get the newest version of the package not the oldest:

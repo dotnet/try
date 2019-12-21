@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 {
     public class PackageRestoreContextTests
     {
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Returns_new_references_if_they_are_added()
         {
             var restoreContext = new PackageRestoreContext();
@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             packageReference.PackageVersion.Should().Be("5.7.0");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Returns_references_when_package_version_is_not_specified()
         {
             var restoreContext = new PackageRestoreContext();
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             packageReference.PackageVersion.Should().NotBeNullOrWhiteSpace();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Returns_failure_if_package_installation_fails()
         {
             var restoreContext = new PackageRestoreContext();
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             result.Errors.Should().NotBeEmpty();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Returns_failure_if_adding_package_twice()
         {
             var restoreContext = new PackageRestoreContext();
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             result.Errors.Should().NotBeEmpty();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Can_get_path_to_nuget_packaged_assembly()
         {
             var restoreContext = new PackageRestoreContext();
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             path.Exists.Should().BeTrue();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Can_get_path_to_nuget_package_root()
         {
             var restoreContext = new PackageRestoreContext();
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             path.Exists.Should().BeTrue();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Can_get_path_to_nuget_package_when_multiple_packages_are_added()
         {
             var restoreContext = new PackageRestoreContext();

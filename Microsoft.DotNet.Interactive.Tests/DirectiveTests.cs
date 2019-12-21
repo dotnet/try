@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 {
     public class DirectiveTests
     {
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void Directives_may_be_prefixed_with_hash()
         {
             var kernel = new CompositeKernel();
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 .NotThrow();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void Directives_may_be_prefixed_with_percent()
         {
             var kernel = new CompositeKernel();
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 .NotThrow();
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData("{")]
         [InlineData(";")]
         [InlineData("a")]
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 .Be("Directives must begin with # or %");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Directive_handlers_are_in_invoked_the_order_in_which_they_occur_in_the_code_submission()
         {
             var kernel = new CSharpKernel();

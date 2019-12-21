@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 {
     public class KernelEventEnvelopeTests
     {
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void Create_creates_envelope_of_the_correct_type()
         {
             IKernelEvent @event = new DisplayedValueProduced(
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
             envelope.Should().BeOfType<KernelEventEnvelope<DisplayedValueProduced>>();
         }
         
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void Create_creates_envelope_with_reference_to_original_event()
         {
             IKernelEvent @event = new DisplayedValueProduced(

@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             _disposables.Dispose();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_using_kernel_name_as_a_magic_command()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
@@ -69,7 +69,7 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_by_setting_the_kernel_name_in_the_command()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
@@ -110,7 +110,7 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_in_middleware()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
@@ -146,7 +146,7 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_as_a_default()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
@@ -180,7 +180,7 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Events_published_by_child_kernel_are_visible_in_parent_kernel()
         {
             var subKernel = new CSharpKernel();
