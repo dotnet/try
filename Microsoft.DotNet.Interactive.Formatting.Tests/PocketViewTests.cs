@@ -8,7 +8,7 @@ using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
 namespace Microsoft.DotNet.Interactive.Formatting.Tests
 {
-    public class PocketViewTests
+    public class PocketViewTests : FormatterTestBase
     {
         [Fact]
         public void Outputs_nested_html_elements_with_attributes()

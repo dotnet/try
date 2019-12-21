@@ -19,12 +19,12 @@ namespace Microsoft.DotNet.Interactive.Formatting
         private static int _recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
-        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters =
-            new ConcurrentDictionary<Type, Action<object, TextWriter, string>>();
-
         private static readonly ConcurrentDictionary<Type, string> _mimeTypesByType = new ConcurrentDictionary<Type, string>();
 
         internal static readonly ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter> TypeFormatters = new ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter>();
+
+        private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters =
+            new ConcurrentDictionary<Type, Action<object, TextWriter, string>>();
 
         /// <summary>
         /// Initializes the <see cref="Formatter"/> class.
@@ -102,10 +102,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
             return new AnonymousTypeFormatter<T>(format, mimeType);
         }
 
-        /// <summary>
-        /// A factory function called to get a TextWriter for writing out log-formatted objects.
-        /// </summary>
-        public static Func<TextWriter> CreateWriter = () => new StringWriter(CultureInfo.InvariantCulture);
+        private static TextWriter CreateWriter() => new StringWriter(CultureInfo.InvariantCulture);
 
         internal static IPlainTextFormatter SingleLinePlainTextFormatter = new SingleLinePlainTextFormatter();
 
@@ -165,13 +162,15 @@ namespace Microsoft.DotNet.Interactive.Formatting
         public static void ResetToDefault()
         {
             TypeFormatters.Clear();
-            Clearing?.Invoke(null, EventArgs.Empty);
+            _mimeTypesByType.Clear();
+            _genericFormatters.Clear();
 
             ListExpansionLimit = 10;
             RecursionLimit = 6;
             NullString = "<null>";
 
-            _mimeTypesByType.Clear();
+            Clearing?.Invoke(null, EventArgs.Empty);
+
             ConfigureDefaultPlainTextFormattersForSpecialTypes();
         }
 

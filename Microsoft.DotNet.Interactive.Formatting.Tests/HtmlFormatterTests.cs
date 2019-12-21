@@ -24,11 +24,6 @@ namespace Microsoft.DotNet.Interactive.Formatting.Tests
 
         public class Objects : FormatterTestBase
         {
-            public Objects()
-            {
-                Formatter.ResetToDefault();
-            }
-
             [Fact]
             public void Formatters_are_generated_on_the_fly_when_HTML_mime_type_is_requested()
             {
