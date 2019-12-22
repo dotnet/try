@@ -19,11 +19,13 @@ open FSharp.DependencyManager
 open FSharp.Compiler.SourceCodeServices
 open Microsoft.CodeAnalysis.Tags
 
+
 type FSharpKernel() =
     inherit KernelBase(Name = "fsharp")
 
     let resolvedAssemblies = List<string>()
-    let script = new FSharpScript(additionalArgs=[|"/langversion:preview"|])
+    static let lockObj = Object();
+    let script = lock lockObj (fun () -> new FSharpScript(additionalArgs=[|"/langversion:preview"|]))
     let mutable cancellationTokenSource = new CancellationTokenSource()
 
     do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
