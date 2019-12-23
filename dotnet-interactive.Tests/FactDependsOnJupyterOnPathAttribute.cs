@@ -8,7 +8,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.DotNet.Interactive.App.Tests
 {
-    [XunitTestCaseDiscoverer("MLS.Agent.Tests.JupyterInstalledTestCaseDiscoverer", "MLS.Agent.Tests")]
+    [XunitTestCaseDiscoverer("Microsoft.DotNet.Interactive.App.Tests.JupyterInstalledTestCaseDiscoverer", "Microsoft.DotNet.Interactive.App.Tests")]
     public class FactDependsOnJupyterOnPathAttribute : FactAttribute
     {
     }

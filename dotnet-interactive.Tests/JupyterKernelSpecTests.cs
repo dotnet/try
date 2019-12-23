@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.DotNet.Interactive.Utility;
+using Xunit;
 
 namespace Microsoft.DotNet.Interactive.App.Tests
 {
@@ -21,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests
 
         public abstract IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null);
 
-        [FactDependsOnJupyterOnPath]
+        [Fact]
         public async Task Returns_success_output_when_kernel_installation_succeeded()
         {
             //For the FileSystemJupyterKernelSpec, this fact needs jupyter to be on the path
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             result.Error.First().Should().MatchEquivalentOf($"[InstallKernelSpec] Installed kernelspec {kernelDir.Name} in *{kernelDir.Name}");
         }
 
-        [FactDependsOnJupyterNotOnPath]
+        [Fact]
         public async Task Returns_failure_when_kernel_installation_did_not_succeed()
         {
             var kernelSpec = GetJupyterKernelSpec(false, error: new [] { "Could not find jupyter kernelspec module" });
