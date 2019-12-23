@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
                     Track(context.ParseResult);
-                    return new JupyterInstallCommand(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
+                    return new JupyterInstallCommand(console, new JupyterKernelSpec()).InvokeAsync();
                 });
 
                 jupyterCommand.AddCommand(installCommand);

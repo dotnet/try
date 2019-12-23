@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             ITestMethod testMethod,
             IAttributeInfo factAttribute)
         {
-            if (testMethod.TestClass.Class.Name.Contains("Integration") && !FileSystemJupyterKernelSpec.CheckIfJupyterKernelSpecExists())
+            if (testMethod.TestClass.Class.Name.Contains("Integration") && !JupyterKernelSpec.JupyterKernelSpecExists())
             {
                 yield break;
             }

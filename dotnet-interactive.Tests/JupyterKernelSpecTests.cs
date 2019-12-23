@@ -3,26 +3,29 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using Microsoft.DotNet.Interactive.Utility;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.App.Tests
 {
-    public abstract class JupyterKernelSpecTests: IAsyncDisposable
+    public abstract class JupyterKernelSpecTests : IDisposable
     {
-        protected List<string> _installedKernels;
+        private readonly List<DirectoryInfo> _kernelInstallations = new List<DirectoryInfo>();
+        private readonly ITestOutputHelper _output;
 
-        protected JupyterKernelSpecTests()
-        { 
-            _installedKernels = new List<string>();
+        protected JupyterKernelSpecTests(ITestOutputHelper output)
+        {
+            _output = output;
         }
 
         public abstract IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null);
 
-        [Fact]
+        [FactDependsOnJupyterOnPath]
         public async Task Returns_success_output_when_kernel_installation_succeeded()
         {
             //For the FileSystemJupyterKernelSpec, this fact needs jupyter to be on the path
@@ -33,17 +36,19 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             var kernelDir = DirectoryUtility.CreateDirectory();
 
             var result = await kernelSpec.InstallKernel(kernelDir);
+            result.Error.Should().BeEmpty();
             result.ExitCode.Should().Be(0);
-            _installedKernels.Add(kernelDir.Name.ToLower());
+
+            _kernelInstallations.Add(new DirectoryInfo(kernelDir.Name));
 
             //The actual jupyter instance is returning the output in the error field
-            result.Error.First().Should().MatchEquivalentOf($"[InstallKernelSpec] Installed kernelspec {kernelDir.Name} in *{kernelDir.Name}");
+            result.Output.First().Should().MatchEquivalentOf($"[InstallKernelSpec] Installed kernelspec {kernelDir.Name} in *{kernelDir.Name}");
         }
 
-        [Fact]
+        [FactDependsOnJupyterNotOnPath]
         public async Task Returns_failure_when_kernel_installation_did_not_succeed()
         {
-            var kernelSpec = GetJupyterKernelSpec(false, error: new [] { "Could not find jupyter kernelspec module" });
+            var kernelSpec = GetJupyterKernelSpec(false, error: new[] { "Could not find jupyter kernelspec module" });
             var kernelDir = DirectoryUtility.CreateDirectory();
 
             var result = await kernelSpec.InstallKernel(kernelDir);
@@ -51,27 +56,45 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             result.Error.Should().BeEquivalentTo("Could not find jupyter kernelspec module");
         }
 
-        public async ValueTask DisposeAsync()
+        public void Dispose()
         {
             var kernelSpec = GetJupyterKernelSpec(true);
-            foreach (var kernel in _installedKernels)
+
+            foreach (var directory in _kernelInstallations)
             {
-                await kernelSpec.ExecuteCommand("uninstall", kernel);
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        kernelSpec.UninstallKernel(directory);
+                    }
+                    catch (Exception exception)
+                    {
+                        _output.WriteLine($"Exception swallowed while disposing {GetType()}: {exception}");
+                    }
+                }).Wait();
             }
         }
     }
 
-    public class FileSystemJupyterKernelSpecIntegrationTests : JupyterKernelSpecTests
+    public class JupyterKernelSpecIntegrationTests : JupyterKernelSpecTests
     {
+        public JupyterKernelSpecIntegrationTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
         public override IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null)
         {
-            return new FileSystemJupyterKernelSpec();
+            return new JupyterKernelSpec();
         }
     }
 
     public class InMemoryJupyterKernelSpecTests : JupyterKernelSpecTests
     {
+        public InMemoryJupyterKernelSpecTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         public override IJupyterKernelSpec GetJupyterKernelSpec(bool success, IReadOnlyCollection<string> error = null)
         {
             return new InMemoryJupyterKernelSpec(success, error);
