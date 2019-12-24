@@ -46,6 +46,8 @@ namespace Microsoft.DotNet.Interactive
             {
                 PublishEvent(e);
             }));
+
+            RegisterForDisposal(kernel);
         }
 
         protected override void SetHandlingKernel(

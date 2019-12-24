@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.FSharp;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
@@ -34,7 +35,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
@@ -74,7 +75,7 @@ x"));
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
@@ -115,7 +116,7 @@ x"));
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
@@ -151,7 +152,7 @@ x"));
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
@@ -185,7 +186,7 @@ x"));
         {
             var subKernel = new CSharpKernel();
 
-            var compositeKernel = new CompositeKernel
+            using var compositeKernel = new CompositeKernel
             {
                 subKernel
             };
@@ -203,6 +204,29 @@ x"));
                     typeof(CompleteCodeSubmissionReceived),
                     typeof(CommandHandled),
                     typeof(KernelIdle));
+        }
+
+        [Fact]
+        public void Child_kernels_are_disposed_when_CompositeKernel_is_disposed()
+        {
+            var csharpKernelWasDisposed = false;
+            var fsharpKernelWasDisposed = false;
+
+            var csharpKernel = new CSharpKernel();
+            csharpKernel.RegisterForDisposal(Disposable.Create(() => csharpKernelWasDisposed = true));
+
+            var fsharpKernel = new FSharpKernel();
+            fsharpKernel.RegisterForDisposal(Disposable.Create(() => fsharpKernelWasDisposed = true));
+
+            var compositeKernel = new CompositeKernel
+            {
+                csharpKernel,
+                fsharpKernel
+            };
+            compositeKernel.Dispose();
+
+            csharpKernelWasDisposed.Should().BeTrue();
+            fsharpKernelWasDisposed.Should().BeTrue();
         }
     }
 }

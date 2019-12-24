@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact(Timeout = 45000)]
         public async Task When_a_command_spawns_another_command_then_parent_context_is_not_complete_until_child_context_is_complete()
         {
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel().UseKernelHelpers()
             };
@@ -262,6 +262,5 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             events.Should().NotContain(e => e is ErrorProduced);
         }
-
     }
 }

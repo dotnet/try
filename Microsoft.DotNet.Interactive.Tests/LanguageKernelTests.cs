@@ -961,7 +961,7 @@ json
         [Fact(Timeout = 45000)]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
-            var cSharpKernel = new CSharpKernel();
+            using var cSharpKernel = new CSharpKernel();
             using var events = cSharpKernel.KernelEvents.ToSubscribedList();
 
             var kernel = new CompositeKernel
@@ -984,7 +984,7 @@ json
         [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
         public async Task When_SubmitCode_command_adds_packages_to_kernel_then_PackageAdded_event_is_raised(Language language, string expression)
         {
-            IKernel kernel = language switch
+            using IKernel kernel = language switch
             {
                 Language.CSharp => new CompositeKernel { new CSharpKernel().UseNugetDirective() },
                 Language.FSharp => new CompositeKernel { new FSharpKernel() }

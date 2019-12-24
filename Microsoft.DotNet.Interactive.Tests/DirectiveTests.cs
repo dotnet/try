@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact(Timeout = 45000)]
         public async Task Directive_handlers_are_in_invoked_the_order_in_which_they_occur_in_the_code_submission()
         {
-            var kernel = new CSharpKernel();
+            using var kernel = new CSharpKernel();
             var events = kernel.KernelEvents.ToSubscribedList();
 
             kernel.AddDirective(new Command("#increment")

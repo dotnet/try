@@ -42,6 +42,8 @@ namespace Microsoft.DotNet.Interactive
                     PublishEvent(new KernelBusy());
                 }
             }));
+
+            _disposables.Add(_kernelEvents);
         }
 
         public KernelCommandPipeline Pipeline { get; }
@@ -203,7 +205,7 @@ namespace Microsoft.DotNet.Interactive
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
                     _idleState.SetAsBusy();
-                        
+
                     Task.Run(async () =>
                     {
                         await ExecuteCommand(currentOperation);
