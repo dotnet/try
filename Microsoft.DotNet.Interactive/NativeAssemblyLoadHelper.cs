@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Interactive
             // Try the name supplied by the pinvoke
             yield return name;
 
-            if( !(Path.IsPathRooted(name)) )
+            if (!Path.IsPathRooted(name))
             {
                 var usePrefix = ProbingUsePrefix(name);
 
@@ -61,15 +61,15 @@ namespace Microsoft.DotNet.Interactive
                 {
                     if (ProbingUseSuffix(name, suffix))
                     {
-                        yield return ($"{name}{suffix}");
+                        yield return $"{name}{suffix}";
                         if (usePrefix)
                         {
-                            yield return ($"lib{name}{suffix}");
+                            yield return $"lib{name}{suffix}";
                         }
                     }
                     else
                     {
-                        yield return ($"lib{name}");
+                        yield return $"lib{name}";
                     }
                 }
             }
@@ -93,13 +93,13 @@ namespace Microsoft.DotNet.Interactive
             }
 
             // linux developers often append a version number to libraries I.e mydll.so.5.3.2
-            bool ProbingUseSuffix(string name, string s)
+            static bool ProbingUseSuffix(string name, string s)
             {
                 return !(name.Contains(s + ".") || name.EndsWith(s));
             }
 
             // If the name looks like a path or a volume name then dont prefix 'lib'
-            bool ProbingUsePrefix(string name)
+            static bool ProbingUsePrefix(string name)
             {
                 return name.IndexOf(Path.DirectorySeparatorChar) == -1
                        && name.IndexOf(Path.AltDirectorySeparatorChar) == -1
@@ -144,10 +144,10 @@ namespace Microsoft.DotNet.Interactive
             // Where rid is: win, win-x64, win-x86, osx-x64, linux-x64 etc ...
             IEnumerable<string> ProbingRids()
             {
-                var processArchitecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture;
+                var processArchitecture = RuntimeInformation.ProcessArchitecture;
                 var baseRid =
-                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win" :
-                    System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" :
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win" :
+                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" :
                     "linux";
 
                 var platformRid =
@@ -181,13 +181,13 @@ namespace Microsoft.DotNet.Interactive
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
-                        ptr = _probingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                        ptr = _probingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(nativeLoader)).FirstOrDefault();
                     }
                     if (ptr == IntPtr.Zero)
                     {
                         lock (globalProbingPaths)
                         {
-                            ptr = globalProbingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(dll => nativeLoader(dll))).FirstOrDefault();
+                            ptr = globalProbingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(nativeLoader)).FirstOrDefault();
                         }
                     }
                     return ptr;

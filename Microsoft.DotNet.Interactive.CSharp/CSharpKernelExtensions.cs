@@ -42,9 +42,7 @@ using static {typeof(Kernel).FullName};
             return kernel;
         }
 
-        public static CSharpKernel UseNugetDirective(
-            this CSharpKernel kernel,
-            Func<NativeAssemblyLoadHelper> getHelper = null)
+        public static CSharpKernel UseNugetDirective(this CSharpKernel kernel)
         {
             var packageRefArg = new Argument<PackageReference>((SymbolResult result, out PackageReference reference) =>
                                                                         PackageReference.TryParse(result.Token.Value, out reference))
