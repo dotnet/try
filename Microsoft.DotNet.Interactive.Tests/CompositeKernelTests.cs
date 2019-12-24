@@ -213,10 +213,10 @@ x"));
             var fsharpKernelWasDisposed = false;
 
             var csharpKernel = new CSharpKernel();
-            csharpKernel.RegisterForDisposal(Disposable.Create(() => csharpKernelWasDisposed = true));
+            csharpKernel.RegisterForDisposal(() => csharpKernelWasDisposed = true);
 
             var fsharpKernel = new FSharpKernel();
-            fsharpKernel.RegisterForDisposal(Disposable.Create(() => fsharpKernelWasDisposed = true));
+            fsharpKernel.RegisterForDisposal(() => fsharpKernelWasDisposed = true);
 
             var compositeKernel = new CompositeKernel
             {

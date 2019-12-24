@@ -28,7 +28,9 @@ type FSharpKernel() =
     let script = lock lockObj (fun () -> new FSharpScript(additionalArgs=[|"/langversion:preview"|]))
     let mutable cancellationTokenSource = new CancellationTokenSource()
 
-    do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
+    let handler = new Handler<string> (fun o s -> resolvedAssemblies.Add(s))
+    do script.AssemblyReferenceAdded.AddHandler handler
+    do base.RegisterForDisposal(fun () -> do script.AssemblyReferenceAdded.RemoveHandler handler)
     do base.RegisterForDisposal(script)
 
     let messageMap = Dictionary<string, string>()

@@ -231,6 +231,8 @@ namespace Microsoft.DotNet.Interactive
             _kernelEvents.OnNext(kernelEvent);
         }
 
+        public void RegisterForDisposal(Action dispose) => RegisterForDisposal(Disposable.Create(dispose));
+
         public void RegisterForDisposal(IDisposable disposable)
         {
             if (disposable == null)
