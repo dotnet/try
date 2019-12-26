@@ -9,14 +9,15 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Pocket;
+using static Microsoft.DotNet.Interactive.Utility.PathUtilities;
 using static Pocket.Logger;
 
 namespace Microsoft.DotNet.Interactive
 {
     public class NativeAssemblyLoadHelper : IDisposable
     {
-        private static readonly HashSet<DirectoryInfo> _globalProbingPaths = new HashSet<DirectoryInfo>();
-        private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
+        private static readonly HashSet<DirectoryInfo> _globalProbingDirectories = new HashSet<DirectoryInfo>();
+        private readonly HashSet<DirectoryInfo> _probingDirectories = new HashSet<DirectoryInfo>();
         private readonly IKernel _kernel;
 
         private readonly ConcurrentDictionary<string, ResolvedPackageReference> _resolvedReferences =
@@ -30,11 +31,11 @@ namespace Microsoft.DotNet.Interactive
 
         public void SetNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
         {
-            _probingPaths.UnionWith(probingPaths);
+            _probingDirectories.UnionWith(probingPaths);
 
-            lock (_globalProbingPaths)
+            lock (_globalProbingDirectories)
             {
-                _globalProbingPaths.UnionWith(probingPaths);
+                _globalProbingDirectories.UnionWith(probingPaths);
             }   
         }
 
@@ -50,11 +51,11 @@ namespace Microsoft.DotNet.Interactive
                 return;
             }
 
-            foreach (var dir in _probingPaths)
+            foreach (var dir in _probingDirectories)
             {
-                op.Info("Probing for native dependencies of {reference} under {dir}", reference, dir);
-
-                if (assemblyFile.FullName.StartsWith(dir.FullName))
+                if (IsSameDirectoryOrChildOf(
+                    assemblyFile.FullName,
+                    dir.FullName))
                 {
                     op.Info("Resolved: {reference}", assemblyFile.FullName);
                     _resolvedReferences[assemblyFile.FullName] = reference;
@@ -125,7 +126,7 @@ namespace Microsoft.DotNet.Interactive
             }
         }
 
-        private IEnumerable<string> ProbingPaths(string probingPath, string name)
+        private IEnumerable<string> FilesMatchingLibName(string probingPath, string name)
         {
             // if name is rooted then it's an absolute path to the dll
             if (Path.IsPathRooted(name))
@@ -215,20 +216,23 @@ namespace Microsoft.DotNet.Interactive
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
-                        ptr = _probingPaths
+                        ptr = _probingDirectories
+                              .Where(p => IsSameDirectoryOrChildOf(
+                                         p.FullName,
+                                         reference.PackageRoot.FullName))
                               .SelectMany(
-                                  dir => ProbingPaths(dir.FullName, libraryName)
+                                  dir => FilesMatchingLibName(dir.FullName, libraryName)
                                       .Select(LoadNative))
                               .FirstOrDefault(p => p != default);
                     }
 
                     if (ptr == IntPtr.Zero)
                     {
-                        lock (_globalProbingPaths)
+                        lock (_globalProbingDirectories)
                         {
-                            ptr = _globalProbingPaths
+                            ptr = _globalProbingDirectories
                                   .SelectMany(
-                                      dir => ProbingPaths(dir.FullName, libraryName)
+                                      dir => FilesMatchingLibName(dir.FullName, libraryName)
                                           .Select(LoadNative))
                                   .FirstOrDefault(p => p != default);
                         }
