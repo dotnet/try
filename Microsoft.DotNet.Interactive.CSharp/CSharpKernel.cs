@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
         {
             _cancellationSource = new CancellationTokenSource();
             Name = DefaultKernelName;
-            NativeAssemblyLoadHelper =new NativeAssemblyLoadHelper();
+            NativeAssemblyLoadHelper = new NativeAssemblyLoadHelper(this);
             RegisterForDisposal(NativeAssemblyLoadHelper);
         }
 

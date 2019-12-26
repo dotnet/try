@@ -17,12 +17,14 @@ namespace Microsoft.DotNet.Interactive
     {
         private static readonly HashSet<DirectoryInfo> _globalProbingPaths = new HashSet<DirectoryInfo>();
         private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
+        private readonly IKernel _kernel;
 
-        private readonly ConcurrentDictionary<string, ResolvedPackageReference> _resolvers =
+        private readonly ConcurrentDictionary<string, ResolvedPackageReference> _resolvedReferences =
             new ConcurrentDictionary<string, ResolvedPackageReference>(StringComparer.OrdinalIgnoreCase);
 
-        public NativeAssemblyLoadHelper()
+        public NativeAssemblyLoadHelper(IKernel kernel)
         {
+            _kernel = kernel ?? throw new ArgumentNullException(nameof(kernel));
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
@@ -42,7 +44,7 @@ namespace Microsoft.DotNet.Interactive
 
             using var op = Log.OnEnterAndExit();
 
-            if (_resolvers.TryGetValue(assemblyFile.FullName, out var previous))
+            if (_resolvedReferences.TryGetValue(assemblyFile.FullName, out var previous))
             {
                 op.Info("Previously resolved {reference} at location {PackageRoot}", assemblyFile.FullName, previous.PackageRoot);
                 return;
@@ -55,7 +57,7 @@ namespace Microsoft.DotNet.Interactive
                 if (assemblyFile.FullName.StartsWith(dir.FullName))
                 {
                     op.Info("Resolved: {reference}", assemblyFile.FullName);
-                    _resolvers[assemblyFile.FullName] = reference;
+                    _resolvedReferences[assemblyFile.FullName] = reference;
                     return;
                 }
             }
@@ -192,6 +194,11 @@ namespace Microsoft.DotNet.Interactive
                 return;
             }
 
+            if (KernelInvocationContext.Current?.HandlingKernel != _kernel)
+            {
+                return;
+            }
+
             Log.Info("OnAssemblyLoad: {location}", args.LoadedAssembly.Location);
             
             NativeLibrary.SetDllImportResolver(
@@ -204,7 +211,7 @@ namespace Microsoft.DotNet.Interactive
                 {
                     var ptr = IntPtr.Zero;
 
-                    if (_resolvers.TryGetValue(
+                    if (_resolvedReferences.TryGetValue(
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
