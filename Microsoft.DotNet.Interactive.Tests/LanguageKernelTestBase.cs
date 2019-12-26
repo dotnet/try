@@ -10,12 +10,25 @@ using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Pocket;
 using Xunit.Abstractions;
+using Serilog.Sinks.RollingFileAlternate;
+using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
     public abstract class LanguageKernelTestBase : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
+
+        static LanguageKernelTestBase()
+        {
+                var log = new SerilogLoggerConfiguration()
+                          .WriteTo
+                          .RollingFileAlternate(".", outputTemplate: "{Message}{NewLine}")
+                          .CreateLogger();
+
+                var subscription = LogEvents.Subscribe(
+                    e => log.Information(e.ToLogString()));
+        }
 
         protected LanguageKernelTestBase(ITestOutputHelper output)
         {

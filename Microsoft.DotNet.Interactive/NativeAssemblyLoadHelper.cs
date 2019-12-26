@@ -2,21 +2,24 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Pocket;
+using static Pocket.Logger;
 
 namespace Microsoft.DotNet.Interactive
 {
     public class NativeAssemblyLoadHelper : IDisposable
     {
-        private static readonly HashSet<DirectoryInfo> globalProbingPaths = new HashSet<DirectoryInfo>();
+        private static readonly HashSet<DirectoryInfo> _globalProbingPaths = new HashSet<DirectoryInfo>();
         private readonly HashSet<DirectoryInfo> _probingPaths = new HashSet<DirectoryInfo>();
 
-        private readonly Dictionary<string, ResolvedPackageReference> _resolvers =
-            new Dictionary<string, ResolvedPackageReference>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, ResolvedPackageReference> _resolvers =
+            new ConcurrentDictionary<string, ResolvedPackageReference>(StringComparer.OrdinalIgnoreCase);
 
         public NativeAssemblyLoadHelper()
         {
@@ -26,9 +29,10 @@ namespace Microsoft.DotNet.Interactive
         public void SetNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
         {
             _probingPaths.UnionWith(probingPaths);
-            lock (globalProbingPaths)
+
+            lock (_globalProbingPaths)
             {
-                globalProbingPaths.UnionWith(probingPaths);
+                _globalProbingPaths.UnionWith(probingPaths);
             }   
         }
 
@@ -36,13 +40,23 @@ namespace Microsoft.DotNet.Interactive
         {
             var assemblyFile = reference.AssemblyPaths.First();
 
+            using var op = Log.OnEnterAndExit();
+
+            if (_resolvers.TryGetValue(assemblyFile.FullName, out var previous))
+            {
+                op.Info("Previously resolved {reference} at location {PackageRoot}", assemblyFile.FullName, previous.PackageRoot);
+                return;
+            }
+
             foreach (var dir in _probingPaths)
             {
-                Logger.Log.Info("Probing: {dir}", dir);
+                op.Info("Probing for native dependencies of {reference} under {dir}", reference, dir);
 
                 if (assemblyFile.FullName.StartsWith(dir.FullName))
                 {
+                    op.Info("Resolved: {reference}", assemblyFile.FullName);
                     _resolvers[assemblyFile.FullName] = reference;
+                    return;
                 }
             }
         }
@@ -54,14 +68,15 @@ namespace Microsoft.DotNet.Interactive
 
             if (!Path.IsPathRooted(name))
             {
-                var usePrefix = ProbingUsePrefix(name);
+                var usePrefix = ProbingUsePrefix();
 
                 // Name is not rooted so we can try with prefix and suffix
                 foreach (var suffix in ProbingSuffixes())
                 {
-                    if (ProbingUseSuffix(name, suffix))
+                    if (ProbingUseSuffix(suffix))
                     {
                         yield return $"{name}{suffix}";
+
                         if (usePrefix)
                         {
                             yield return $"lib{name}{suffix}";
@@ -93,13 +108,13 @@ namespace Microsoft.DotNet.Interactive
             }
 
             // linux developers often append a version number to libraries I.e mydll.so.5.3.2
-            static bool ProbingUseSuffix(string name, string s)
+            bool ProbingUseSuffix(string s)
             {
                 return !(name.Contains(s + ".") || name.EndsWith(s));
             }
 
             // If the name looks like a path or a volume name then dont prefix 'lib'
-            static bool ProbingUsePrefix(string name)
+            bool ProbingUsePrefix()
             {
                 return name.IndexOf(Path.DirectorySeparatorChar) == -1
                        && name.IndexOf(Path.AltDirectorySeparatorChar) == -1
@@ -114,7 +129,9 @@ namespace Microsoft.DotNet.Interactive
             if (Path.IsPathRooted(name))
             {
                 if (File.Exists(name))
+                {
                     yield return name;
+                }
             }
             else
             {
@@ -123,7 +140,9 @@ namespace Microsoft.DotNet.Interactive
                 {
                     var path = Path.Combine(probingPath, pname);
                     if (File.Exists(path))
+                    {
                         yield return path;
+                    }
                 }
                 // Grovel through the platform specific subdirectory
                 foreach(var rid in ProbingRids())
@@ -134,8 +153,11 @@ namespace Microsoft.DotNet.Interactive
                     foreach (var pname in ProbingFilenames(name))
                     {
                         var p = Path.Combine(path, pname);
+                        
                         if (File.Exists(p))
+                        {
                             yield return p;
+                        }
                     }
                 }
             }
@@ -170,43 +192,70 @@ namespace Microsoft.DotNet.Interactive
                 return;
             }
 
-            Logger.Log.Info("OnAssemblyLoad: {location}", args.LoadedAssembly.Location);
-
+            Log.Info("OnAssemblyLoad: {location}", args.LoadedAssembly.Location);
+            
             NativeLibrary.SetDllImportResolver(
                 args.LoadedAssembly,
-                (libraryName, assembly, searchPath) =>
+                Resolve());
+
+            DllImportResolver Resolve()
+            {
+                return (libraryName, assembly, searchPath) =>
                 {
                     var ptr = IntPtr.Zero;
+
                     if (_resolvers.TryGetValue(
                         args.LoadedAssembly.Location,
                         out var reference))
                     {
-                        ptr = _probingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(nativeLoader)).FirstOrDefault();
+                        ptr = _probingPaths
+                              .SelectMany(
+                                  dir => ProbingPaths(dir.FullName, libraryName)
+                                      .Select(LoadNative))
+                              .FirstOrDefault(p => p != default);
                     }
+
                     if (ptr == IntPtr.Zero)
                     {
-                        lock (globalProbingPaths)
+                        lock (_globalProbingPaths)
                         {
-                            ptr = globalProbingPaths.SelectMany(dir => ProbingPaths(dir.FullName, libraryName).Select(nativeLoader)).FirstOrDefault();
+                            ptr = _globalProbingPaths
+                                  .SelectMany(
+                                      dir => ProbingPaths(dir.FullName, libraryName)
+                                          .Select(LoadNative))
+                                  .FirstOrDefault(p => p != default);
                         }
                     }
-                    return ptr;
-                });
 
-            IntPtr nativeLoader(string dll)
-            {
-                var ptr = IntPtr.Zero;
-                try
-                {
-                    ptr = NativeLibrary.Load(dll);
-                    Logger.Log.Info("NativeLibrary.Load({dll})", args.LoadedAssembly.Location);
-                }
-                catch (Exception)
-                {
-                }
-                return ptr;
+                    return ptr;
+
+                    IntPtr LoadNative(string dll)
+                    {
+                        // FIX: (OnAssemblyLoad) 
+
+                        try
+                        {
+                            if (Interlocked.Increment(ref _recursionCount) == 1)
+                            {
+                                ptr = NativeLibrary.Load(dll);
+                                Log.Info("NativeLibrary.Load({dll})", args.LoadedAssembly.Location);
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref _recursionCount);
+                        }
+
+                        return ptr;
+                    }
+                };
             }
         }
+
+        private static int _recursionCount = 0;
 
         public void Dispose()
         {

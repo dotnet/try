@@ -1586,6 +1586,5 @@ using System.Text.Json;
                   .Should()
                   .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.DotNet.PlatformAbstractions" && ((PackageAdded)e).PackageReference.PackageVersion != "1.0.3");
         }
-
     }
 }
