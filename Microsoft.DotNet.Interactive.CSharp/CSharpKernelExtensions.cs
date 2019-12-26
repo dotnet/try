@@ -161,7 +161,7 @@ using static {typeof(Kernel).FullName};
                     if (result.Succeeded)
                     {
                         var nativeLibraryProbingPaths = result.NativeLibraryProbingPaths;
-                        helper?.SetNativeLibraryProbingPaths(nativeLibraryProbingPaths);
+                        helper?.AddNativeLibraryProbingPaths(nativeLibraryProbingPaths);
 
                         var addedAssemblyPaths =
                             result

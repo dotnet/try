@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,8 +17,8 @@ namespace Microsoft.DotNet.Interactive
 {
     public class NativeAssemblyLoadHelper : IDisposable
     {
-        private static readonly HashSet<DirectoryInfo> _globalProbingDirectories = new HashSet<DirectoryInfo>();
-        private readonly HashSet<DirectoryInfo> _probingDirectories = new HashSet<DirectoryInfo>();
+        private static ImmutableArray<DirectoryInfo> _globalProbingDirectories = ImmutableArray<DirectoryInfo>.Empty;
+        private ImmutableArray<DirectoryInfo> _probingDirectories = ImmutableArray<DirectoryInfo>.Empty;
         private readonly IKernel _kernel;
 
         private readonly ConcurrentDictionary<string, ResolvedPackageReference> _resolvedReferences =
@@ -29,14 +30,10 @@ namespace Microsoft.DotNet.Interactive
             AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
         }
 
-        public void SetNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
+        public void AddNativeLibraryProbingPaths(IReadOnlyList<DirectoryInfo> probingPaths)
         {
-            _probingDirectories.UnionWith(probingPaths);
-
-            lock (_globalProbingDirectories)
-            {
-                _globalProbingDirectories.UnionWith(probingPaths);
-            }   
+            _probingDirectories = _probingDirectories.AddRange(probingPaths).Distinct().ToImmutableArray();
+            _globalProbingDirectories = _globalProbingDirectories.AddRange(probingPaths).Distinct().ToImmutableArray();
         }
 
         public void Handle(ResolvedPackageReference reference)
@@ -228,14 +225,11 @@ namespace Microsoft.DotNet.Interactive
 
                     if (ptr == IntPtr.Zero)
                     {
-                        lock (_globalProbingDirectories)
-                        {
-                            ptr = _globalProbingDirectories
-                                  .SelectMany(
-                                      dir => FilesMatchingLibName(dir.FullName, libraryName)
-                                          .Select(LoadNative))
-                                  .FirstOrDefault(p => p != default);
-                        }
+                        ptr = _globalProbingDirectories
+                              .SelectMany(
+                                  dir => FilesMatchingLibName(dir.FullName, libraryName)
+                                      .Select(LoadNative))
+                              .FirstOrDefault(p => p != default);
                     }
 
                     return ptr;
