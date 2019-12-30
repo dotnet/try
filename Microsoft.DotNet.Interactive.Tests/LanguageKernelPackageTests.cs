@@ -424,7 +424,7 @@ Formatter<DataFrame>.Register((df, writer) =>
         }
 
         [Fact(Timeout = 45000, Skip = "temp")]
-        public async Task Pound_r_nuge_allows_duplicate_sources_package_specification_single_cell()
+        public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
 
@@ -651,7 +651,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_with_System_Text_Json_should_succeed()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -672,7 +672,7 @@ using System.Text.Json;
                   .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_with_no_version_should_not_get_the_oldest_package_version()
         {
             // #r "nuget: with no version specified should get the newest version of the package not the oldest:
@@ -690,8 +690,8 @@ using System.Text.Json;
 
             events.OfType<PackageAdded>()
                   .Should()
-                  .ContainSingle(e => ((PackageAdded) e).PackageReference.PackageName == "Microsoft.DotNet.PlatformAbstractions" &&
-                                      ((PackageAdded) e).PackageReference.PackageVersion != "1.0.3");
+                  .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.DotNet.PlatformAbstractions" &&
+                                      e.PackageReference.PackageVersion != "1.0.3");
         }
     }
 }
