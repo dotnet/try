@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.CSharp, Skip = "temp")]
+        [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_single_submission(Language language)
         {
@@ -62,7 +62,7 @@ json"
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.CSharp, Skip = "temp")]
+        [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_separate_submissions(Language language)
         {
