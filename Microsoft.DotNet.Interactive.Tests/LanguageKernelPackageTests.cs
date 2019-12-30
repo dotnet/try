@@ -365,7 +365,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_empty_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -386,7 +386,7 @@ Formatter<DataFrame>.Register((df, writer) =>
                 .Be($"Invalid Package Id: ''{Environment.NewLine}");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_version_only_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -597,7 +597,7 @@ using Microsoft.ML.AutoML;
                 .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_changing_version_of_loaded_dependent_packages()
         {
             var kernel = CreateKernel(Language.CSharp);
