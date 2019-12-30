@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
@@ -11,17 +10,32 @@ using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
 using Pocket;
 using Xunit.Abstractions;
+using Serilog.Sinks.RollingFileAlternate;
+using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
     public abstract class LanguageKernelTestBase : IDisposable
     {
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+
+        static LanguageKernelTestBase()
+        {
+                var log = new SerilogLoggerConfiguration()
+                          .WriteTo
+                          .RollingFileAlternate(".", outputTemplate: "{Message}{NewLine}")
+                          .CreateLogger();
+
+                var subscription = LogEvents.Subscribe(
+                    e => log.Information(e.ToLogString()));
+        }
+
         protected LanguageKernelTestBase(ITestOutputHelper output)
         {
             DisposeAfterTest(output.SubscribeToPocketLogger());
         }
 
-        private KernelBase CreateLanguageKernel(Language language)
+        protected KernelBase CreateKernel(Language language)
         {
             var kernelBase = language switch
             {
@@ -35,21 +49,17 @@ namespace Microsoft.DotNet.Interactive.Tests
                                    .UseKernelHelpers(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
-            return kernelBase;
-        }
 
-        protected KernelBase CreateKernel(Language language)
-        {
-            var kernel = CreateLanguageKernel(language)
+            var languageSpecificKernel = kernelBase
                          .UseDefaultMagicCommands()
                          .UseExtendDirective()
                          .LogEventsToPocketLogger();
 
-            KernelEvents = kernel.KernelEvents.ToSubscribedList();
+            KernelEvents = languageSpecificKernel.KernelEvents.ToSubscribedList();
 
-            DisposeAfterTest(KernelEvents);
+            DisposeAfterTest(languageSpecificKernel);
 
-            return kernel;
+            return languageSpecificKernel;
         }
 
         protected KernelBase CreateKernel()
@@ -57,27 +67,20 @@ namespace Microsoft.DotNet.Interactive.Tests
             return CreateKernel(Language.CSharp);
         }
 
-        public async Task<SubmitCode[]> SubmitCode(KernelBase kernel, string[] codeFragments, SubmissionType submissionType = SubmissionType.Run)
+        public async Task SubmitCode(KernelBase kernel, string[] codeFragments, SubmissionType submissionType = SubmissionType.Run)
         {
-            var commands = new List<SubmitCode>();
             foreach (var codeFragment in codeFragments)
             {
                 var cmd = new SubmitCode(codeFragment, submissionType: submissionType);
                 await kernel.SendAsync(cmd);
-                commands.Add(cmd);
             }
-            return commands.ToArray();
         }
 
-        public async Task<SubmitCode> SubmitCode(KernelBase kernel, string codeFragment, SubmissionType submissionType = SubmissionType.Run)
+        public async Task SubmitCode(KernelBase kernel, string codeFragment, SubmissionType submissionType = SubmissionType.Run)
         {
             var command = new SubmitCode(codeFragment, submissionType: submissionType);
             await kernel.SendAsync(command);
-            return command;
         }
-
-        /// IDispose
-        private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         protected SubscribedList<IKernelEvent> KernelEvents { get; private set; }
 
@@ -86,9 +89,6 @@ namespace Microsoft.DotNet.Interactive.Tests
             _disposables.Add(disposable);
         }
 
-        public void Dispose()
-        {
-            _disposables?.Dispose();
-        }
+        public void Dispose() => _disposables?.Dispose();
     }
 }

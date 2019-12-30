@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -43,6 +42,8 @@ namespace Microsoft.DotNet.Interactive
                     PublishEvent(new KernelBusy());
                 }
             }));
+
+            _disposables.Add(_kernelEvents);
         }
 
         public KernelCommandPipeline Pipeline { get; }
@@ -68,79 +69,15 @@ namespace Microsoft.DotNet.Interactive
             Pipeline.AddMiddleware(
                 (command, context, next) =>
                     command switch
-                        {
-                            SubmitCode submitCode =>
-                            HandleDirectivesAndSubmitCode(
-                                submitCode,
-                                context,
-                                next),
+                    {
+                        SubmitCode submitCode =>
+                        HandleDirectivesAndSubmitCode(
+                            submitCode,
+                            context,
+                            next),
 
-                            LoadExtension loadExtension =>
-                            HandleLoadExtension(
-                                loadExtension,
-                                context,
-                                next),
-
-                            DisplayValue displayValue =>
-                            HandleDisplayValue(
-                                displayValue,
-                                context,
-                                next),
-
-                            UpdateDisplayedValue updateDisplayValue =>
-                            HandleUpdateDisplayValue(
-                                updateDisplayValue,
-                                context,
-                                next),
-
-                            LoadExtensionsInDirectory loadExtensionsInDirectory =>
-                            HandleLoadExtensionsInDirectory(
-                                loadExtensionsInDirectory,
-                                context,
-                                next),
-
-                            _ => next(command, context)
-                        });
-        }
-
-        private async Task HandleLoadExtensionsInDirectory(
-            LoadExtensionsInDirectory loadExtensionsInDirectory,
-            KernelInvocationContext invocationContext,
-            KernelPipelineContinuation next)
-        {
-            loadExtensionsInDirectory.Handler = async context =>
-            {
-                if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
-                {
-                    await extensibleKernel.LoadExtensionsFromDirectory(
-                        loadExtensionsInDirectory.Directory, 
-                        context, 
-                        loadExtensionsInDirectory.AdditionalDependencies);
-                }
-                else
-                {
-                    context.Publish(
-                        new CommandFailed(
-                            $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions", 
-                            command: loadExtensionsInDirectory));
-                }
-            };
-
-            await next(loadExtensionsInDirectory, invocationContext);
-        }
-
-        private async Task HandleLoadExtension(
-            LoadExtension loadExtension,
-            KernelInvocationContext invocationContext,
-            KernelPipelineContinuation next)
-        {
-            loadExtension.Handler = async context =>
-            {
-                var kernelExtensionLoader = new KernelExtensionLoader();
-                await kernelExtensionLoader.LoadFromAssembly(loadExtension.AssemblyFile, invocationContext.HandlingKernel, invocationContext);
-            };
-
-            await next(loadExtension, invocationContext);
+                        _ => next(command, context)
+                    });
         }
 
         private async Task HandleDirectivesAndSubmitCode(
@@ -148,9 +85,7 @@ namespace Microsoft.DotNet.Interactive
             KernelInvocationContext context,
             KernelPipelineContinuation next)
         {
-            var commands = _submissionSplitter
-                           .SplitSubmission(submitCode)
-                           .ToArray();
+            var commands = _submissionSplitter.SplitSubmission(submitCode);
 
             foreach (var command in commands)
             {
@@ -165,9 +100,9 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else 
                 {
-                    if (command is RunDirective runDirective)
+                    if (command is AnonymousKernelCommand anonymous)
                     {
-                        await runDirective.InvokeAsync(context);
+                        await anonymous.InvokeAsync(context);
                     }
                     else
                     {
@@ -175,47 +110,6 @@ namespace Microsoft.DotNet.Interactive
                     }
                 }
             }
-        }
-
-        private async Task HandleDisplayValue(
-            DisplayValue displayValue,
-            KernelInvocationContext context,
-            KernelPipelineContinuation next)
-        {
-            displayValue.Handler = invocationContext =>
-            {
-                invocationContext.Publish(
-                    new DisplayedValueProduced(
-                        displayValue.Value,
-                        displayValue,
-                        formattedValues: new[] { displayValue.FormattedValue },
-                        valueId: displayValue.ValueId));
-
-                return Task.CompletedTask;
-            };
-
-            await next(displayValue, context);
-        }
-
-        private async Task HandleUpdateDisplayValue(
-            UpdateDisplayedValue displayedValue,
-            KernelInvocationContext pipelineContext,
-            KernelPipelineContinuation next)
-        {
-            displayedValue.Handler = invocationContext =>
-            {
-                invocationContext.Publish(
-                    new DisplayedValueUpdated(
-                        displayedValue.Value,
-                        valueId: displayedValue.ValueId,
-                        command: displayedValue,
-                        formattedValues: new[] { displayedValue.FormattedValue }
-                        ));
-
-                return Task.CompletedTask;
-            };
-
-            await next(displayedValue, pipelineContext);
         }
 
         public IObservable<IKernelEvent> KernelEvents => _kernelEvents;
@@ -241,25 +135,29 @@ namespace Microsoft.DotNet.Interactive
 
         private async Task ExecuteCommand(KernelOperation operation)
         {
-            using var context = KernelInvocationContext.Establish(operation.Command);
-            using var _ = context.KernelEvents.Subscribe(PublishEvent);
+            var context = KernelInvocationContext.Establish(operation.Command);
+
+            // only subscribe for the root command 
+            using var _ =
+                context.Command == operation.Command
+                ? context.KernelEvents.Subscribe(PublishEvent)
+                : Disposable.Empty;
 
             try
             {
                 await Pipeline.SendAsync(operation.Command, context);
 
-                var result = context.Result;
+                context.Complete(operation.Command);
 
-                if (result == null)
-                {
-                    result = new KernelCommandResult(KernelEvents);
-                    context.Publish(new CommandHandled(context.Command));
-                }
-
-                operation.TaskCompletionSource.SetResult(result);
+                operation.TaskCompletionSource.SetResult(context.Result);
             }
             catch (Exception exception)
             {
+                if (!context.IsComplete)
+                {
+                    context.Fail(exception);
+                }
+
                 operation.TaskCompletionSource.SetException(exception);
             }
         }
@@ -307,7 +205,7 @@ namespace Microsoft.DotNet.Interactive
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
                     _idleState.SetAsBusy();
-                        
+
                     Task.Run(async () =>
                     {
                         await ExecuteCommand(currentOperation);
@@ -332,6 +230,8 @@ namespace Microsoft.DotNet.Interactive
 
             _kernelEvents.OnNext(kernelEvent);
         }
+
+        public void RegisterForDisposal(Action dispose) => RegisterForDisposal(Disposable.Create(dispose));
 
         public void RegisterForDisposal(IDisposable disposable)
         {

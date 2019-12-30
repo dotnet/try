@@ -9,11 +9,8 @@ using FluentAssertions;
 using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Formatting;
-using Pocket;
 using Xunit;
 using Xunit.Abstractions;
-using static Pocket.Logger;
 
 #pragma warning disable 8509
 namespace Microsoft.DotNet.Interactive.Tests
@@ -24,7 +21,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         // PocketView
         [InlineData(Language.CSharp, "b(123)", "<b>123</b>")]
         [InlineData(Language.FSharp, "b.innerHTML(123)", "<b>123</b>")]
@@ -41,17 +38,12 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             var kernel = CreateKernel(language);
 
-            var result = await kernel.SendAsync(new SubmitCode(submission));
+            await kernel.SendAsync(new SubmitCode(submission));
 
-            var valueProduced = await result
-                                      .KernelEvents
-                                      .OfType<ReturnValueProduced>()
-                                      .Timeout(5.Seconds())
-                                      .FirstAsync();
-
-            Log.Info(valueProduced.ToDisplayString());
-
-            valueProduced
+            KernelEvents
+                .Should()
+                .ContainSingle<ReturnValueProduced>()
+                .Which
                 .FormattedValues
                 .Should()
                 .ContainSingle(v =>
@@ -59,7 +51,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                                    v.Value.ToString().Contains(expectedContent));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "div(123).ToString()", "<div>123</div>")]
         [InlineData(Language.FSharp, "div.innerHTML(123).ToString()", "<div>123</div>")]
         [InlineData(Language.CSharp, "display(div(123).ToString());", "<div>123</div>")]
@@ -89,7 +81,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                                    v.Value.ToString().Contains(expectedContent));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task Display_helper_can_be_called_without_specifying_class_name(Language language)
@@ -116,7 +108,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                                    v.Value.ToString().Contains("<b>hi!</b>"));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task Displayed_value_can_be_updated(Language language)
@@ -150,7 +142,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                     v.Value.ToString().Contains("<b>world</b>"));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task Value_display_and_update_are_in_right_order(Language language)
@@ -175,7 +167,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             valueEvents.Last().Should().BeOfType<DisplayedValueUpdated>();
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "display(HTML(\"<b>hi!</b>\"));")]
         [InlineData(Language.FSharp, "display(HTML(\"<b>hi!</b>\"))")]
         public async Task HTML_helper_emits_HTML_which_is_not_encoded_and_has_the_text_html_mime_type(
@@ -199,7 +191,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                                       f.MimeType == "text/html");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task Javascript_helper_emits_string_as_content_within_a_script_element(Language language)

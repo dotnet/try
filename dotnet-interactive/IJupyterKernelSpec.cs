@@ -9,7 +9,8 @@ namespace Microsoft.DotNet.Interactive.App
 {
     public interface IJupyterKernelSpec
     {
-        Task<CommandLineResult> ExecuteCommand(string command, string args = "");
-        Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory);
+        Task<CommandLineResult> InstallKernel(DirectoryInfo directory);
+
+        Task<CommandLineResult> UninstallKernel(DirectoryInfo directory);
     }
 }

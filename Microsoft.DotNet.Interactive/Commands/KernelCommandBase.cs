@@ -10,32 +10,35 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public abstract class KernelCommandBase : IKernelCommand
     {
-        [JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public KernelCommandInvocation Handler { get; set; }
-
-        [JsonIgnore]   
-        [System.Text.Json.Serialization.JsonIgnore]
-        public IKernelCommand Parent { get; }
-
-        [JsonIgnore]
-        [JsonExtensionData]
-        public IDictionary<string, object> Properties { get; }
-
         protected KernelCommandBase()
         {
-            Parent = KernelInvocationContext.Current?.Command;
+            var parent = KernelInvocationContext.Current?.Command;
+            
+            if (parent != this)
+            {
+                Parent = parent;
+            }
+            
             Properties = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public async Task InvokeAsync(KernelInvocationContext context)
+        [JsonIgnore]
+        public KernelCommandInvocation Handler { get; set; }
+
+        [JsonIgnore]   
+        public IKernelCommand Parent { get; }
+
+        [JsonIgnore]
+        public IDictionary<string, object> Properties { get; }
+
+        public virtual async Task InvokeAsync(KernelInvocationContext context)
         {
             if (Handler == null)
             {
                 throw new InvalidOperationException($"{GetType().Name}.{nameof(Handler)} was not set.");
             }
 
-            await Handler(context);
+            await Handler(this, context);
         }
     }
 }

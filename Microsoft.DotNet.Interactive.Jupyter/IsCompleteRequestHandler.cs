@@ -44,15 +44,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         private void Reply(bool isComplete, Envelope request, IJupyterMessageSender jupyterMessageSender)
         {
-            
-            
-                var status = isComplete ? "complete" : "incomplete";
-                var indent = isComplete ? string.Empty : "*";
-                // reply 
-                var isCompleteReplyPayload = new IsCompleteReply(indent:indent,status: status);
+            var status = isComplete ? "complete" : "incomplete";
+            var indent = isComplete ? string.Empty : "*";
+            // reply 
+            var isCompleteReplyPayload = new IsCompleteReply(indent: indent, status: status);
 
-                // send to server
-                jupyterMessageSender.Send(isCompleteReplyPayload);
+            // send to server
+            jupyterMessageSender.Send(isCompleteReplyPayload);
         }
     }
 }

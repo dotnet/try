@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 {
     public class PackageReferenceTests
     {
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData("nuget:PocketLogger")]
         [InlineData("nuget:PocketLogger,1.2.3")]
         [InlineData("nuget:PocketLogger, 1.2.3")]
@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             reference.PackageName.Should().Be("PocketLogger");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData("nuget:PocketLogger", "")]
         [InlineData("nuget:PocketLogger,1.2.3", "1.2.3")]
         [InlineData("nuget:PocketLogger, 1.2.3", "1.2.3")]

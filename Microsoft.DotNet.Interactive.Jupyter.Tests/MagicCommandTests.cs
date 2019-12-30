@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var subkernel2 = new FSharpKernel();
             subkernel2.AddDirective(new Command("%%from-subkernel-2"));
 
-            var compositeKernel = new CompositeKernel
+            using var compositeKernel = new CompositeKernel
                                   {
                                       subkernel1,
                                       subkernel2
@@ -259,11 +259,11 @@ display(""done!"");
         [Fact]
         public async Task who_lists_the_names_of_variables_in_scope()
         {
-            var kernel = new CompositeKernel
-                         {
-                             new CSharpKernel().UseWho()
-                         }
-                         .LogEventsToPocketLogger();
+            using var kernel = new CompositeKernel
+                               {
+                                   new CSharpKernel().UseWho()
+                               }
+                               .LogEventsToPocketLogger();
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
@@ -296,7 +296,7 @@ display(""done!"");
                 new Argument<string>()
             };
 
-            var kernel = new CSharpKernel();
+            using var kernel = new CSharpKernel();
 
             kernel.AddDirective(command);
 
@@ -320,7 +320,7 @@ display(""done!"");
                 new Argument<string>()
             };
 
-            var kernel = new CSharpKernel();
+            using var kernel = new CSharpKernel();
 
             kernel.AddDirective(command);
 

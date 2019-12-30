@@ -3,10 +3,11 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class LoadExtension : KernelCommandBase
+    internal class LoadExtension : KernelCommandBase
     {
         public LoadExtension(FileInfo assemblyFile)
         {
@@ -14,5 +15,11 @@ namespace Microsoft.DotNet.Interactive.Commands
         }
 
         public FileInfo AssemblyFile { get; }
+
+        public override async Task InvokeAsync(KernelInvocationContext context)
+        {
+            var kernelExtensionLoader = new KernelExtensionLoader();
+            await kernelExtensionLoader.LoadFromAssembly(AssemblyFile, context.HandlingKernel, context);
+        }
     }
 }

@@ -46,6 +46,8 @@ namespace Microsoft.DotNet.Interactive
             {
                 PublishEvent(e);
             }));
+
+            RegisterForDisposal(kernel);
         }
 
         protected override void SetHandlingKernel(
@@ -54,30 +56,28 @@ namespace Microsoft.DotNet.Interactive
         {
             if (context.HandlingKernel == null)
             {
+                switch (_childKernels.Count)
                 {
-                    switch (_childKernels.Count)
-                    {
-                        case 0:
-                            context.HandlingKernel = this;
-                            break;
+                    case 0:
+                        context.HandlingKernel = this;
+                        break;
 
-                        case 1:
-                            context.HandlingKernel = _childKernels[0];
-                            break;
+                    case 1:
+                        context.HandlingKernel = _childKernels[0];
+                        break;
 
-                        default:
-                            if (command is SubmitCode submitCode &&
-                                ChildKernels.SingleOrDefault(k => k.Name == submitCode.TargetKernelName) is {} targetKernel)
-                            {
-                                context.HandlingKernel = targetKernel;
-                            }
-                            else if (DefaultKernelName != null)
-                            {
-                                context.HandlingKernel = ChildKernels.SingleOrDefault(k => k.Name == DefaultKernelName);
-                            }
+                    default:
+                        if (command is SubmitCode submitCode &&
+                            ChildKernels.SingleOrDefault(k => k.Name == submitCode.TargetKernelName) is {} targetKernel)
+                        {
+                            context.HandlingKernel = targetKernel;
+                        }
+                        else if (DefaultKernelName != null)
+                        {
+                            context.HandlingKernel = ChildKernels.SingleOrDefault(k => k.Name == DefaultKernelName);
+                        }
 
-                            break;
-                    }
+                        break;
                 }
             }
         }

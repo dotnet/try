@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -9,11 +10,11 @@ using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive.App
 {
-    public class FileSystemJupyterKernelSpec : IJupyterKernelSpec
+    public class JupyterKernelSpec : IJupyterKernelSpec
     {
         public async Task<CommandLineResult> ExecuteCommand(string command, string args = "")
         {
-            if (!CheckIfJupyterKernelSpecExists())
+            if (!JupyterKernelSpecExists())
             {
                 return new CommandLineResult(1, error: new List<string>
                 {
@@ -28,8 +29,13 @@ namespace Microsoft.DotNet.Interactive.App
         {
             return ExecuteCommand($@"install ""{sourceDirectory.FullName}""", "--user");
         }
+        
+        public Task<CommandLineResult> UninstallKernel(DirectoryInfo sourceDirectory)
+        {
+            return ExecuteCommand($@"uninstall ""{sourceDirectory.FullName}""");
+        }
 
-        public static bool CheckIfJupyterKernelSpecExists()
+        public static bool JupyterKernelSpecExists()
         {
             var command = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) 
                               ? "where" 

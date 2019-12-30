@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("var a =12;"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("var a =12;"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("asdes"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 void ThrowTheException() => throw new ArgumentException();
 ThrowTheException();
 "));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
 
             await scheduler.Schedule(context);
 
@@ -101,7 +101,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("asdes asdasd"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());
@@ -119,7 +119,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("display(2+2);"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
@@ -136,7 +136,7 @@ ThrowTheException();
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);
             var request = Envelope.Create(new ExecuteRequest("display(2+2)"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
@@ -149,7 +149,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
@@ -162,7 +162,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
@@ -175,7 +175,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("2+2"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(20.Seconds());
@@ -188,7 +188,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             var request = Envelope.Create(new ExecuteRequest("%%csharp"));
-            var context = new JupyterRequestContext(JupyterMessageSender, request, "id");
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
             await context.Done().Timeout(5.Seconds());

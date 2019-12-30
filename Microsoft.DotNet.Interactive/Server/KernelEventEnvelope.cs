@@ -67,8 +67,6 @@ namespace Microsoft.DotNet.Interactive.Server
 
         public abstract string EventType { get; }
 
-        public string Token { get; }
-
         IKernelEvent IKernelEventEnvelope.Event => _event;
 
         public static IKernelEventEnvelope Create(IKernelEvent @event)
@@ -96,7 +94,9 @@ namespace Microsoft.DotNet.Interactive.Server
                     return expression.Compile();
                 });
 
-            return factory(@event);
+            var envelope = factory(@event);
+
+            return envelope;
         }
 
         public static IKernelEventEnvelope Deserialize(string json)
@@ -124,18 +124,27 @@ namespace Microsoft.DotNet.Interactive.Server
             return Create(@event);
         }
 
-        public static string Serialize(IKernelEventEnvelope envelope)
+        public static string Serialize(IKernelEventEnvelope eventEnvelope)
         {
+            KernelCommandEnvelope.SerializationModel commandSerializationModel = null;
+
+            if (eventEnvelope.Event.Command != null)
+            {
+                var commandEnvelope = KernelCommandEnvelope.Create(eventEnvelope.Event.Command);
+
+                commandSerializationModel = new KernelCommandEnvelope.SerializationModel
+                {
+                    command = commandEnvelope.Command,
+                    commandType = commandEnvelope.CommandType,
+                    token = eventEnvelope.Event.Command.GetToken()
+                };
+            }
+
             var serializationModel = new SerializationModel
             {
-                @event = envelope.Event,
-                eventType = envelope.EventType,
-                cause = new KernelCommandEnvelope.SerializationModel
-                {
-                    command = envelope.Event.Command,
-                    commandType = envelope.Event?.Command?.GetType()?.Name,
-                    token = envelope.Token
-                }
+                @event = eventEnvelope.Event,
+                eventType = eventEnvelope.EventType,
+                cause = commandSerializationModel
             };
 
             return JsonConvert.SerializeObject(

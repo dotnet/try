@@ -49,8 +49,7 @@ namespace Microsoft.DotNet.Interactive.Server
                             break;
                         default:
                         {
-                            var id = (int) e.GetRootCommand().Properties["id"];
-                            WriteEventToOutput(e, id);
+                            WriteEventToOutput(e);
                         }
                             break;
                     }
@@ -66,10 +65,10 @@ namespace Microsoft.DotNet.Interactive.Server
 
         private async Task DeserializeAndSendCommand(string line)
         {
-            StreamKernelCommand streamKernelCommand;
+            IKernelCommandEnvelope streamKernelCommand;
             try
             {
-                streamKernelCommand = StreamKernelCommand.Deserialize(line);
+                streamKernelCommand = KernelCommandEnvelope.Deserialize(line);
             }
             catch (JsonReaderException ex)
             {
@@ -80,24 +79,28 @@ namespace Microsoft.DotNet.Interactive.Server
                 return;
             }
 
-            var command = streamKernelCommand.Command;
-            command.Properties["id"] = streamKernelCommand.Id;
-            await _kernel.SendAsync(command);
+            await _kernel.SendAsync(streamKernelCommand.Command);
         }
 
-        private void WriteEventToOutput(IKernelEvent kernelEvent, int? correlationId = -1)
+        private void WriteEventToOutput(IKernelEvent kernelEvent)
         {
             if (kernelEvent is ReturnValueProduced rvp && rvp.Value is DisplayedValue)
             {
                 return;
             }
-            var wrapper = new StreamKernelEvent
+
+            if (kernelEvent.Command is {} command)
             {
-                Id = correlationId ?? -1,
-                Event = kernelEvent,
-                EventType = kernelEvent.GetType().Name
-            };
-            var serialized = wrapper.Serialize();
+                if (command.Properties.Count == 0)
+                {
+                    
+                }
+            }
+
+            var envelope = KernelEventEnvelope.Create(kernelEvent);
+
+            var serialized = KernelEventEnvelope.Serialize(envelope);
+
             _output.Write(serialized);
         }
       

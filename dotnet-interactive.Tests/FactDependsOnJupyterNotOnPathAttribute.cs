@@ -8,16 +8,16 @@ using Xunit.Sdk;
 
 namespace Microsoft.DotNet.Interactive.App.Tests
 {
-    [XunitTestCaseDiscoverer("MLS.Agent.Tests.JupyterNotInstalledTestCaseDiscover", "MLS.Agent.Tests")]
+    [XunitTestCaseDiscoverer("Microsoft.DotNet.Interactive.App.Tests.JupyterNotInstalledTestCaseDiscoverer", "Microsoft.DotNet.Interactive.App.Tests")]
     public class FactDependsOnJupyterNotOnPathAttribute : FactAttribute
     {
     }
 
-    public class JupyterNotInstalledTestCaseDiscover : IXunitTestCaseDiscoverer
+    public class JupyterNotInstalledTestCaseDiscoverer : IXunitTestCaseDiscoverer
     {
         private readonly IMessageSink messageSink;
 
-        public JupyterNotInstalledTestCaseDiscover(IMessageSink messageSink)
+        public JupyterNotInstalledTestCaseDiscoverer(IMessageSink messageSink)
         {
             this.messageSink = messageSink;
         }
@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.App.Tests
             ITestMethod testMethod,
             IAttributeInfo factAttribute)
         {
-            if (testMethod.TestClass.Class.Name.Contains("Integration") && FileSystemJupyterKernelSpec.CheckIfJupyterKernelSpecExists())
+            if (testMethod.TestClass.Class.Name.Contains("Integration") && JupyterKernelSpec.JupyterKernelSpecExists())
             {
                 yield break;
             }

@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.FSharp;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,19 +30,19 @@ namespace Microsoft.DotNet.Interactive.Tests
             _disposables.Dispose();
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_using_kernel_name_as_a_magic_command()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -62,27 +63,26 @@ x"));
 
             receivedOnFakeRepl
                 .Should()
-                .ContainSingle(c => c is SubmitCode)
+                .ContainSingle<SubmitCode>()
                 .Which
-                .As<SubmitCode>()
                 .Code
                 .Should()
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_by_setting_the_kernel_name_in_the_command()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -111,19 +111,19 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_in_middleware()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -147,19 +147,19 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_as_a_default()
         {
             var receivedOnFakeRepl = new List<IKernelCommand>();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = context =>
+                    Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(context.Command);
+                        receivedOnFakeRepl.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -181,12 +181,12 @@ x"));
                 .Be("hello!");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Events_published_by_child_kernel_are_visible_in_parent_kernel()
         {
             var subKernel = new CSharpKernel();
 
-            var compositeKernel = new CompositeKernel
+            using var compositeKernel = new CompositeKernel
             {
                 subKernel
             };
@@ -204,6 +204,29 @@ x"));
                     typeof(CompleteCodeSubmissionReceived),
                     typeof(CommandHandled),
                     typeof(KernelIdle));
+        }
+
+        [Fact]
+        public void Child_kernels_are_disposed_when_CompositeKernel_is_disposed()
+        {
+            var csharpKernelWasDisposed = false;
+            var fsharpKernelWasDisposed = false;
+
+            var csharpKernel = new CSharpKernel();
+            csharpKernel.RegisterForDisposal(() => csharpKernelWasDisposed = true);
+
+            var fsharpKernel = new FSharpKernel();
+            fsharpKernel.RegisterForDisposal(() => fsharpKernelWasDisposed = true);
+
+            var compositeKernel = new CompositeKernel
+            {
+                csharpKernel,
+                fsharpKernel
+            };
+            compositeKernel.Dispose();
+
+            csharpKernelWasDisposed.Should().BeTrue();
+            fsharpKernelWasDisposed.Should().BeTrue();
         }
     }
 }

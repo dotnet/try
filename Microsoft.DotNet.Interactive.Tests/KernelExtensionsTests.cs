@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 {
     public class KernelExtensionsTests
     {
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void VisitSubkernels_does_not_recurse_by_default()
         {
             var visited = new List<string>();
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             visited.Should().BeEquivalentTo("child");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public void VisitSubkernels_can_recurse_child_composite_kernels()
         {
             var visited = new List<string>();
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             visited.Should().BeEquivalentTo("child", "grandchild");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task VisitSubkernelsAsync_does_not_recurse_by_default()
         {
             var visited = new List<string>();
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             visited.Should().BeEquivalentTo("child");
         }
 
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task VisitSubkernelsAsync_can_recurse_child_composite_kernels()
         {
             var visited = new List<string>();

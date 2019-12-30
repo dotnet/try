@@ -21,8 +21,10 @@ namespace Microsoft.DotNet.Interactive.Server
             };
 
             JsonSerializerSettings.Converters.Add(new FileSystemInfoJsonConverter());
+            
+            JsonSerializer = JsonSerializer.Create(JsonSerializerSettings);
         }
 
-        public static JsonSerializer JsonSerializer => JsonSerializer.Create(JsonSerializerSettings);
+        public static JsonSerializer JsonSerializer { get; }
     }
 }

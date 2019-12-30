@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
@@ -21,5 +22,21 @@ namespace Microsoft.DotNet.Interactive.Commands
         public DirectoryInfo Directory { get; }
 
         public IReadOnlyList<FileInfo> AdditionalDependencies { get; }
+
+        public override async Task InvokeAsync(KernelInvocationContext context)
+        {
+            if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
+            {
+                await extensibleKernel.LoadExtensionsFromDirectory(
+                    Directory, 
+                    context, 
+                    AdditionalDependencies);
+            }
+            else
+            {
+                context.Fail(
+                    message: $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions");
+            }
+        }
     }
 }

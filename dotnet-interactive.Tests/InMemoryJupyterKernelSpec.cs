@@ -11,29 +11,45 @@ namespace Microsoft.DotNet.Interactive.App.Tests
 {
     public class InMemoryJupyterKernelSpec : IJupyterKernelSpec
     {
-        private readonly bool _successfulInstall;
+        private readonly bool _shouldInstallSucceed;
+        private readonly bool _shouldUninstallSucceed;
         private readonly IReadOnlyCollection<string> _error;
 
-        public InMemoryJupyterKernelSpec(bool successfulInstall, IReadOnlyCollection<string> error)
+        public InMemoryJupyterKernelSpec(
+            bool shouldInstallSucceed,
+            IReadOnlyCollection<string> error,
+            bool shouldUninstallSucceed = true)
         {
-            _successfulInstall = successfulInstall;
+            _shouldInstallSucceed = shouldInstallSucceed;
+            _shouldUninstallSucceed = shouldUninstallSucceed;
             _error = error;
         }
 
-        public Task<CommandLineResult> ExecuteCommand(string command, string args = "")
+        public Task<CommandLineResult> InstallKernel(DirectoryInfo directory)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<CommandLineResult> InstallKernel(DirectoryInfo sourceDirectory)
-        {
-            if(_successfulInstall)
+            if (_shouldInstallSucceed)
             {
-                var installPath = Path.Combine(Directory.GetCurrentDirectory(), sourceDirectory.Name.ToLower());
-                return Task.FromResult(new CommandLineResult(0, error: new List<string> { $"[InstallKernelSpec] Installed kernelspec {sourceDirectory.Name} in {installPath}" }));
+                var installPath = Path.Combine(Directory.GetCurrentDirectory(), directory.Name.ToLower());
+
+                return Task.FromResult(
+                    new CommandLineResult(
+                        0,
+                        output: new List<string> { $"[InstallKernelSpec] Installed kernelspec {directory.Name} in {installPath}" }));
             }
 
-            return Task.FromResult(new CommandLineResult(1, error:_error));
+            return Task.FromResult(new CommandLineResult(1, error: _error));
+        }
+
+        public Task<CommandLineResult> UninstallKernel(DirectoryInfo directory)
+        {
+            if (_shouldUninstallSucceed)
+            {
+                return Task.FromResult(new CommandLineResult(0));
+            }
+            else
+            {
+                return Task.FromResult(new CommandLineResult(1));
+            }
         }
     }
 }

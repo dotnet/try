@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Interactive.Server
                 }
             }
 
-            throw new ArgumentException($"Unexpected type: {objectType}");
+            return null;
         }
 
         public override bool CanRead { get; } = true;

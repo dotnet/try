@@ -6,7 +6,6 @@ using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Clockwise;
@@ -186,7 +185,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 installCommand.Handler = CommandHandler.Create<IConsole, InvocationContext>((console, context) =>
                 {
                     Track(context.ParseResult);
-                    return new JupyterInstallCommand(console, new FileSystemJupyterKernelSpec()).InvokeAsync();
+                    return new JupyterInstallCommand(console, new JupyterKernelSpec()).InvokeAsync();
                 });
 
                 jupyterCommand.AddCommand(installCommand);

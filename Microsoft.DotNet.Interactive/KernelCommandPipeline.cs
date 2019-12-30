@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Formatting;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -43,10 +44,7 @@ namespace Microsoft.DotNet.Interactive
             }
             catch (Exception exception)
             {
-                context.Publish(
-                    new CommandFailed(
-                        exception,
-                        command));
+                context.Fail(message: exception.ToDisplayString());
             }
         }
 
@@ -57,7 +55,6 @@ namespace Microsoft.DotNet.Interactive
             invocations.Add(async (command, context, _) =>
             {
                 await _kernel.HandleInternalAsync(command, context);
-                context.Result = new KernelCommandResult(context.KernelEvents);
             });
 
             return invocations.Aggregate(

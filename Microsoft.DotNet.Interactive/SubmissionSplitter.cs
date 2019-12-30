@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Interactive
 
         public IReadOnlyCollection<ICommand> Directives => _directiveCommands;
 
-        public IEnumerable<IKernelCommand> SplitSubmission(SubmitCode submitCode)
+        public IReadOnlyList<IKernelCommand> SplitSubmission(SubmitCode submitCode)
         {
             var directiveParser = GetDirectiveParser();
 
@@ -29,12 +29,18 @@ namespace Microsoft.DotNet.Interactive
 
             var nonDirectiveLines = new List<string>();
             var commands = new List<IKernelCommand>();
-            var nugetCommands = new List<IKernelCommand>();
+            var hoistedCommands = new List<IKernelCommand>();
             var commandWasSplit = false;
 
             while (lines.Count > 0)
             {
                 var currentLine = lines.Dequeue();
+
+                if (string.IsNullOrWhiteSpace(currentLine))
+                {
+                    nonDirectiveLines.Add(currentLine);
+                    continue;
+                }
 
                 var parseResult = directiveParser.Parse(currentLine);
                 var command = parseResult.CommandResult.Command;
@@ -48,14 +54,12 @@ namespace Microsoft.DotNet.Interactive
                         commands.Add(cmd);
                     }
 
-                    var runDirective=new RunDirective
-                    {
-                        Handler = _ => _directiveParser.InvokeAsync(parseResult)
-                    };
+                    var runDirective = new AnonymousKernelCommand(
+                        (_, __) => _directiveParser.InvokeAsync(parseResult));
 
                     if (command.Name == "#r")
                     {
-                        nugetCommands.Add(runDirective);
+                        hoistedCommands.Add(runDirective);
                     }
                     else
                     {
@@ -93,17 +97,16 @@ namespace Microsoft.DotNet.Interactive
                 commands.Add(submitCode);
             }
 
-            if(nugetCommands.Count > 0)
+            if (hoistedCommands.Count > 0)
             {
                 var parseResult = directiveParser.Parse("#!nuget-restore");
-                var runDirective = new RunDirective
-                {
-                    Handler = _ => _directiveParser.InvokeAsync(parseResult)
-                };
-                nugetCommands.Add(runDirective);
+
+                hoistedCommands.Add(
+                    new AnonymousKernelCommand(
+                        (_, __) => _directiveParser.InvokeAsync(parseResult)));
             }
 
-            return nugetCommands.Concat(commands);
+            return hoistedCommands.Concat(commands).ToArray();
 
             IKernelCommand AccumulatedSubmission()
             {
@@ -144,7 +147,7 @@ namespace Microsoft.DotNet.Interactive
                                                   () => KernelInvocationContext.Current));
 
                 commandLineBuilder.EnableDirectives = false;
-                
+
                 _directiveParser = commandLineBuilder.Build();
             }
 

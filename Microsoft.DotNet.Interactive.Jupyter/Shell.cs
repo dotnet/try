@@ -76,54 +76,53 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            using var activity = Log.OnEnterAndExit();
+
             _shell.Bind(_shellAddress);
             _ioPubSocket.Bind(_ioPubAddress);
             _stdIn.Bind(_stdInAddress);
             _control.Bind(_controlAddress);
-            var id = Guid.NewGuid().ToString();
-          
-            using (var activity = Log.OnEnterAndExit())
+            var kernelIdentity = Guid.NewGuid().ToString();
+
+            while (!cancellationToken.IsCancellationRequested)
             {
-                //SetStarting();
-                while (!cancellationToken.IsCancellationRequested)
+                var request = _shell.GetMessage();
+
+                activity.Info("Received: {message}", request.ToJson());
+
+                SetBusy(request);
+
+                switch (request.Header.MessageType)
                 {
-                    var request = _shell.GetMessage();
+                    case JupyterMessageContentTypes.KernelInfoRequest:
+                        kernelIdentity = Encoding.Unicode.GetString(request.Identifiers[0].ToArray());
+                        HandleKernelInfoRequest(request);
+                        SetIdle(request);
+                        break;
 
-                    activity.Info("Received: {message}", request.ToJson());
+                    case JupyterMessageContentTypes.KernelShutdownRequest:
+                        SetIdle(request);
+                        break;
 
-                    SetBusy(request);
+                    default:
+                        var context = new JupyterRequestContext(
+                            _shellSender,
+                            _ioPubSender,
+                            request, 
+                            kernelIdentity);
 
-                    switch (request.Header.MessageType)
-                    {
-                        case JupyterMessageContentTypes.KernelInfoRequest:
-                            id = Encoding.Unicode.GetString(request.Identifiers[0].ToArray());
-                            HandleKernelInfoRequest(request);
-                            SetIdle(request);
-                            break;
+                        await _scheduler.Schedule(context);
 
-                        case JupyterMessageContentTypes.KernelShutdownRequest:
-                            SetIdle(request);
-                            break;
+                        await context.Done();
 
-                        default:
-                            var context = new JupyterRequestContext(
-                                _shellSender,
-                                _ioPubSender,
-                                request, id);
+                        SetIdle(request);
 
-                            await _scheduler.Schedule(context);
-
-                            await context.Done();
-
-                            SetIdle(request);
-
-                            break;
-                    }
+                        break;
                 }
-
-                void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, id);
-                void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, id);
             }
+
+            void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, kernelIdentity);
+            void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, kernelIdentity);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -145,8 +144,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             {
                 case CompositeKernel composite:
                     return GetLanguageInfo(composite.DefaultKernelName);
-                case IKernel kernel:
-                    return GetLanguageInfo(kernel.Name);
+           
                 default:
                     throw new InvalidOperationException();
             }

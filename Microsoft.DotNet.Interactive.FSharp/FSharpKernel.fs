@@ -19,14 +19,18 @@ open FSharp.DependencyManager
 open FSharp.Compiler.SourceCodeServices
 open Microsoft.CodeAnalysis.Tags
 
+
 type FSharpKernel() =
     inherit KernelBase(Name = "fsharp")
 
     let resolvedAssemblies = List<string>()
-    let script = new FSharpScript(additionalArgs=[|"/langversion:preview"|])
+    static let lockObj = Object();
+    let script = lock lockObj (fun () -> new FSharpScript(additionalArgs=[|"/langversion:preview"|]))
     let mutable cancellationTokenSource = new CancellationTokenSource()
 
-    do Event.add resolvedAssemblies.Add script.AssemblyReferenceAdded
+    let handler = new Handler<string> (fun o s -> resolvedAssemblies.Add(s))
+    do script.AssemblyReferenceAdded.AddHandler handler
+    do base.RegisterForDisposal(fun () -> do script.AssemblyReferenceAdded.RemoveHandler handler)
     do base.RegisterForDisposal(script)
 
     let messageMap = Dictionary<string, string>()
@@ -126,12 +130,8 @@ type FSharpKernel() =
                     let reference = parseReference referenceText
                     match reference with
                     | Some ref, _ ->
-                        let packageRef =
-                            if ref.Version = "*" then
-                                PackageReference(ref.Include)
-                            else
-                                PackageReference(ref.Include, packageVersion=ref.Version)
-                        context.Publish(PackageAdded(AddPackage(packageRef)))
+                        let packageRef = ResolvedPackageReference(ref.Include, packageVersion=ref.Version, assemblyPaths=[])
+                        context.Publish(PackageAdded(packageRef))
                     | _ -> ()
 
                     for key in packageInstallingMessages reference do
@@ -169,7 +169,6 @@ type FSharpKernel() =
                     let formattedValues = FormattedValue.FromObject(value)
                     context.Publish(ReturnValueProduced(value, codeSubmission, formattedValues))
                 | None -> ()
-                context.Complete()
             | Error(ex) ->
                 if not (tokenSource.IsCancellationRequested) then
                     let aggregateError = String.Join("\n", errors)
@@ -177,9 +176,9 @@ type FSharpKernel() =
                         match ex with
                         | :? FsiCompilationException -> CodeSubmissionCompilationErrorException(ex) :> Exception
                         | _ -> ex
-                    context.Publish(CommandFailed(reportedException, codeSubmission, aggregateError))
+                    context.Fail(reportedException, aggregateError)
                 else
-                    context.Publish(new CommandFailed(null, codeSubmission, "Command cancelled"))
+                    context.Fail(null, "Command cancelled")
         }
 
     let handleRequestCompletion (requestCompletion: RequestCompletion) (context: KernelInvocationContext) =
@@ -204,8 +203,8 @@ type FSharpKernel() =
     override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
         async {
             match command with
-            | :? SubmitCode as submitCode -> submitCode.Handler <- fun invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
-            | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun invocationContext -> (handleRequestCompletion requestCompletion invocationContext) |> Async.StartAsTask :> Task
-            | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
+            | :? SubmitCode as submitCode -> submitCode.Handler <- fun command invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
+            | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun command invocationContext -> (handleRequestCompletion requestCompletion invocationContext) |> Async.StartAsTask :> Task
+            | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun command invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
             | _ -> ()
         } |> Async.StartAsTask :> Task

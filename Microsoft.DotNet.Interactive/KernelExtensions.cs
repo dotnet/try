@@ -90,6 +90,11 @@ namespace Microsoft.DotNet.Interactive
                         }));
             });
 
+            if (kernel is KernelBase kernelBase)
+            {
+                kernelBase.RegisterForDisposal(disposables);
+            }
+
             return kernel;
         }
     }

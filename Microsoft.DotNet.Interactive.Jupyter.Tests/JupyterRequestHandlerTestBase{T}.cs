@@ -53,8 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
             JupyterMessageSender = new RecordingJupyterMessageSender();
 
-            _disposables.Add(_cSharpKernel);
-            _disposables.Add(_fSharpKernel);
+            _disposables.Add(_compositeKernel);
             _disposables.Add(Kernel.LogEventsToPocketLogger());
         }
 

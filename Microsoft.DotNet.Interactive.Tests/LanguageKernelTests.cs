@@ -11,10 +11,7 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Utility;
-using Newtonsoft.Json;
-using Recipes;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,7 +27,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             _output = output;
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_returns_the_result_of_a_non_null_expression(Language language)
@@ -47,7 +44,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 .Be(123);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_no_result_for_a_null_value(Language language)
         {
@@ -61,7 +58,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         // Option 1: inline switch
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_remembers_state_between_submissions(Language language)
@@ -94,7 +91,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         // Option 1: inline switch
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         //[InlineData(Language.FSharp)]    Todo: Issue 695 - dotnet-interactive with an F# notebook does not load System.Text.Json #695
         public async Task it_can_reference_system_text_json(Language language)
@@ -132,7 +129,7 @@ location.EndsWith(""System.Text.Json.dll"")"
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task kernel_base_ignores_command_line_directives(Language language)
         {
@@ -153,7 +150,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Be(10);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned(Language language)
@@ -201,7 +198,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .BeLessThan(lastFailureIndex);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_exceptions_thrown_in_user_code(Language language)
@@ -240,7 +237,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .BeOfType<NotImplementedException>();
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_diagnostics(Language language)
@@ -281,7 +278,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Be(error);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_incomplete_submissions(Language language)
@@ -304,7 +301,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Contain(e => e is IncompleteCodeSubmissionReceived);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_submissions(Language language)
@@ -327,7 +324,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Contain(e => e is CompleteCodeSubmissionReceived);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // no F# equivalent, because it doesn't have the concept of complete/incomplete submissions
         public async Task it_can_analyze_complete_stdio_submissions(Language language)
@@ -350,7 +347,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .Contain(e => e is CompleteCodeSubmissionReceived);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task expression_evaluated_to_null_has_result_with_null_value(Language language)
@@ -374,7 +371,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                         .BeNull();
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         // F# doesn't have the concept of a statement
         public async Task it_does_not_return_a_result_for_a_statement(Language language)
@@ -398,7 +395,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .NotContain(e => e is ReturnValueProduced);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_binding(Language language)
@@ -422,7 +419,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                 .NotContain(e => e is ReturnValueProduced);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "true ? 25 : 20")]
         [InlineData(Language.FSharp, "if true then 25 else 20")]
         [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
@@ -442,7 +439,7 @@ location.EndsWith(""System.Text.Json.dll"")"
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_aggregates_multiple_submissions(Language language)
@@ -478,7 +475,7 @@ location.EndsWith(""System.Text.Json.dll"")"
                         .Be(3);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_produces_values_when_executing_Console_output(Language language)
@@ -499,7 +496,9 @@ Console.Write(""value two"");
 Console.Write(""value three"");",
             };
 
-            var kernelCommand = await SubmitCode(kernel, source);
+            var kernelCommand = new SubmitCode(source);
+
+            await kernel.SendAsync(kernelCommand);
 
             KernelEvents
                 .OfType<StandardOutputValueProduced>()
@@ -510,7 +509,7 @@ Console.Write(""value three"");",
                     new StandardOutputValueProduced("value three", kernelCommand, new[] { new FormattedValue("text/plain", "value three"), }));
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task kernel_captures_stdout(Language language)
         {
@@ -528,7 +527,7 @@ Console.Write(""value three"");",
                 .Be("hello from F#");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.FSharp)]
         public async Task kernel_captures_stderr(Language language)
         {
@@ -581,7 +580,7 @@ Console.Write(""value three"");",
                 .NotContain(e => e is DisplayEventBase);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_a_similarly_shaped_error(Language language)
@@ -605,7 +604,7 @@ Console.Write(""value three"");",
                 .Be(error);
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
@@ -642,7 +641,7 @@ Console.Write(""value three"");
 
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task the_output_is_asynchronous(Language language)
@@ -698,153 +697,9 @@ Console.Write(2);
                 .Be("meow!");
         }
 
-        [Theory]
-        [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
-        public async Task it_can_load_assembly_references_using_r_directive_single_submission(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            // F# strings treat \ as an escape character.  So do C# strings, except #r in C# is special, and doesn't.  F# usually uses @ strings for paths @"c:\temp\...."
-            var dllPath = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName.Replace('\\', '/');
-
-            var source = language switch
-            {
-                Language.FSharp => $@"#r ""{dllPath}""
-open Newtonsoft.Json
-let json = JsonConvert.SerializeObject( struct {{| value = ""hello"" |}} )
-json",
-
-                Language.CSharp => $@"#r ""{dllPath}""
-using Newtonsoft.Json;
-var json = JsonConvert.SerializeObject(new {{ value = ""hello"" }});
-json"
-            };
-
-            await SubmitCode(kernel, source);
-
-            KernelEvents
-                        .Should()
-                        .ContainSingle(e => e is ReturnValueProduced);
-
-            KernelEvents
-                        .OfType<ReturnValueProduced>()
-                        .Single()
-                        .Value
-                        .Should()
-                        .Be(new { value = "hello" }.ToJson());
-        }
-
-        [Theory]
-        [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp)]
-        public async Task it_can_load_assembly_references_using_r_directive_separate_submissions(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            // F# strings treat \ as an escape character.  So do C# strings, except #r in C# is special, and doesn't.  F# usually uses @ strings for paths @"c:\temp\...."
-            var dllPath = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName.Replace('\\', '/');
-
-            var source = language switch
-            {
-                Language.FSharp => new[] {
-$"#r \"{dllPath}\"",
-"open Newtonsoft.Json",
-@"let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )",
-"json"
-},
-
-                Language.CSharp => new[] {
-$"#r \"{dllPath}\"",
-"using Newtonsoft.Json;",
-@"var json = JsonConvert.SerializeObject(new { value = ""hello"" });",
-"json"
-}
-            };
-
-            await SubmitCode(kernel, source);
-
-            KernelEvents
-                        .Should()
-                        .ContainSingle(e => e is ReturnValueProduced);
-
-            KernelEvents
-                        .OfType<ReturnValueProduced>()
-                        .Single()
-                        .Value
-                        .Should()
-                        .Be(new { value = "hello" }.ToJson());
-        }
-
-        [Theory]
-        [InlineData(Language.FSharp)]
-        public async Task it_can_load_assembly_references_using_r_directive_at_quotedpaths(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            // F# strings treat \ as an escape character.  So do C# strings, except #r in C# is special, and doesn't.  F# usually uses @ strings for paths @"c:\temp\...."
-            var dllPath = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
-
-            var source = language switch
-            {
-                Language.FSharp => new[] {
-$"#r @\"{dllPath}\"",
-@"
-open Newtonsoft.Json
-let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )
-json
-"}
-            };
-
-            await SubmitCode(kernel, source);
-
-            KernelEvents
-                        .Should()
-                        .ContainSingle(e => e is ReturnValueProduced);
-
-            KernelEvents
-                        .OfType<ReturnValueProduced>()
-                        .Single()
-                        .Value
-                        .Should()
-                        .Be(new { value = "hello" }.ToJson());
-        }
 
 
-        [Theory]
-        [InlineData(Language.FSharp)]
-        public async Task it_can_load_assembly_references_using_r_directive_at_triplequotedpaths(Language language)
-        {
-            var kernel = CreateKernel(language);
-
-            var dllPath = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
-
-            var source = language switch
-            {
-                Language.FSharp => new[] {
-$"#r \"\"\"{dllPath}\"\"\"",
-@"
-open Newtonsoft.Json
-let json = JsonConvert.SerializeObject( struct {| value = ""hello"" |} )
-json
-"},
-            };
-
-            await SubmitCode(kernel, source);
-
-            KernelEvents
-                        .Should()
-                        .ContainSingle(e => e is ReturnValueProduced);
-
-            KernelEvents
-                        .OfType<ReturnValueProduced>()
-                        .Single()
-                        .Value
-                        .Should()
-                        .Be(new { value = "hello" }.ToJson());
-        }
-
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_formats_func_instances(Language language)
@@ -882,7 +737,7 @@ json
         }
 
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_types(Language language)
@@ -905,7 +760,7 @@ json
                 .Contain(i => i.DisplayText == "ReadLine");
         }
 
-        [Theory]
+        [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_previously_declared_variables(Language language)
@@ -934,251 +789,7 @@ json
                         .Contain(i => i.DisplayText == "alpha");
         }
 
-        [Fact]
-        public async Task it_returns_completion_list_for_types_imported_at_runtime()
-        {
-            var kernel = CreateKernel();
-
-            var dll = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
-
-            await kernel.SendAsync(
-                new SubmitCode($"#r \"{dll}\""));
-
-            await kernel.SendAsync(new RequestCompletion("Newtonsoft.Json.JsonConvert.", 28));
-
-            KernelEvents.Should()
-                .ContainSingle(e => e is CompletionRequestReceived);
-
-            KernelEvents.Single(e => e is CompletionRequestCompleted)
-                .As<CompletionRequestCompleted>()
-                .CompletionList
-                .Should()
-                .Contain(i => i.DisplayText == "SerializeObject");
-        }
-
-        [Fact]
-        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
-        {
-            var cSharpKernel = new CSharpKernel();
-            using var events = cSharpKernel.KernelEvents.ToSubscribedList();
-
-            var kernel = new CompositeKernel
-            {
-                cSharpKernel.UseNugetDirective()
-            };
-
-            var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();");
-            await kernel.SendAsync(command);
-
-            events
-                .OfType<CodeSubmissionReceived>()
-                .Should()
-                .NotContain(e => e.Code.Contains("#r"));
-        }
-
-
-        [Theory]
-        [InlineData(Language.CSharp, "Microsoft.Extensions.Logging.ILogger logger = null;")]
-        [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
-        public async Task When_SubmitCode_command_adds_packages_to_kernel_then_PackageAdded_event_is_raised(Language language, string expression)
-        {
-            IKernel kernel = language switch
-            {
-                Language.CSharp => new CompositeKernel { new CSharpKernel().UseNugetDirective() },
-                Language.FSharp => new CompositeKernel { new FSharpKernel() }
-            };
-
-            var code = $@"
-#r ""nuget:Microsoft.Extensions.Logging, 2.2.0""
-{expression}".Trim();
-            var command = new SubmitCode(code);
-
-            var result = await kernel.SendAsync(command);
-
-            using var events = result.KernelEvents.ToSubscribedList();
-
-            events
-                .Should()
-                .ContainSingle(e => e is DisplayedValueProduced && ((DisplayedValueProduced)e).Value.ToString().Contains("Installing package"));
-
-            events
-                .Should()
-                .ContainSingle(e => e is DisplayedValueUpdated && ((DisplayedValueUpdated)e).Value.ToString().Contains("done!"));
-
-            events.OfType<PackageAdded>()
-                  .Should()
-                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.Extensions.Logging" 
-                                   && ((PackageAdded)e).PackageReference.PackageVersion == "2.2.0");
-
-            if (language == Language.CSharp)
-            {
-                // only the C# kernel produces this event, since the F# kernel handles it all natively
-                events
-                    .Should()
-                    .ContainSingle<CommandHandled>(
-                        where: e => e.Command is AddPackage);
-            }
-        }
-
-        [Fact(Skip = "Should pass after #577 is resolved")]
-        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_CodeSubmissionReceived_is_published()
-        {
-            var kernel = new CompositeKernel
-            {
-                new CSharpKernel()
-            };
-
-            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
-
-            var result = await kernel.SendAsync(command);
-
-            using var events = result.KernelEvents.ToSubscribedList();
-
-            events.OfType<CodeSubmissionReceived>()
-                  .First()
-                  .Code
-                  .Should()
-                  .Be(command.Code);
-        }
-
-        [Fact(Skip = "Should pass after #577 is resolved")]
-        public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_last_CommandHandled_is_for_that_submission()
-        {
-            var kernel = new CompositeKernel
-            {
-                new CSharpKernel().UseNugetDirective()
-            };
-
-            var command = new SubmitCode("#r \"nuget:Microsoft.Extensions.Logging, 2.2.0\" \nMicrosoft.Extensions.Logging.ILogger logger = null;");
-
-            var result = await kernel.SendAsync(command);
-
-            using var events = result.KernelEvents.ToSubscribedList();
-
-            events.OfType<CommandHandled>()
-                  .Last()
-                  .Command
-                  .As<SubmitCode>()
-                  .Code
-                  .Should()
-                  .Be(command.Code);
-        }
-
-        [Fact]
-        public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
-        {
-            var extensionDir = DirectoryUtility.CreateDirectory();
-
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));"))
-                .FullName;
-
-            var kernel = CreateKernel();
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
-
-            events.Should()
-                  .ContainSingle(e => e is ExtensionLoaded &&
-                                      e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
-
-            events.Should()
-                  .ContainSingle(e => e is CommandHandled &&
-                                      e.As<CommandHandled>()
-                                       .Command
-                                       .As<SubmitCode>()
-                                       .Code
-                                       .Contains("using System.Reflection;"));
-
-            events.Should()
-                  .ContainSingle(e => e is DisplayedValueProduced &&
-                                      e.As<DisplayedValueProduced>()
-                                       .Value
-                                       .ToString()
-                                       .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
-        }
-
-        [Fact]
-        public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load()
-        {
-            var extensionDir = DirectoryUtility.CreateDirectory();
-
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"throw new Exception();")).FullName;
-
-            var kernel = CreateKernel();
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
-
-            events.Should()
-                  .ContainSingle(e => e is KernelExtensionLoadException);
-        }
-
-        [Fact]
-        public async Task Loads_native_dependencies_from_nugets()
-        {
-            using var kernel = CreateKernel(Language.CSharp);
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            var command = new SubmitCode(@"
-#r ""nuget:Microsoft.ML, 1.3.1""
-
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using System;
-
-class IrisData
-{
-    public IrisData(float sepalLength, float sepalWidth, float petalLength, float petalWidth)
-    {
-        SepalLength = sepalLength;
-        SepalWidth = sepalWidth;
-        PetalLength = petalLength;
-        PetalWidth = petalWidth;
-    }
-    public float SepalLength;
-    public float SepalWidth;
-    public float PetalLength;
-    public float PetalWidth;
-}
-
-var data = new[]
-{
-    new IrisData(1.4f, 1.3f, 2.5f, 4.5f),
-    new IrisData(2.4f, 0.3f, 9.5f, 3.4f),
-    new IrisData(3.4f, 4.3f, 1.6f, 7.5f),
-    new IrisData(3.9f, 5.3f, 1.5f, 6.5f),
-};
-
-MLContext mlContext = new MLContext();
-var pipeline = mlContext.Transforms
-    .Concatenate(""Features"", ""SepalLength"", ""SepalWidth"", ""PetalLength"", ""PetalWidth"")
-    .Append(mlContext.Clustering.Trainers.KMeans(""Features"", numberOfClusters: 2));
-
-try
-{
-    pipeline.Fit(mlContext.Data.LoadFromEnumerable(data));
-    Console.WriteLine(""success"");
-}
-catch (Exception e)
-{
-    Console.WriteLine(e);
-}");
-
-            await kernel.SendAsync(command);
-
-            events
-                .Should()
-                .Contain(e => e is PackageAdded);
-
-            events
-                .Should()
-                .ContainSingle<StandardOutputValueProduced>(e => e.Value.As<string>().Contains("success"));
-        }
-
-        [Fact]
+        [Fact(Timeout = 45000)]
         public async Task Script_state_is_available_within_middleware_pipeline()
         {
             var variableCountBeforeEvaluation = 0;
@@ -1208,433 +819,5 @@ catch (Exception e)
 
             kernel.ScriptState.Should().NotBeNull();
         }
-
-        [Fact]
-        public async Task Should_load_extension_in_directory()
-        {
-            var directory = DirectoryUtility.CreateDirectory();
-
-            const string nugetPackageName = "myNugetPackage";
-            var nugetPackageDirectory = new DirectoryInfo(
-                Path.Combine(
-                    directory.FullName,
-                    nugetPackageName,
-                    "2.0.0"));
-
-            var extensionsDir =
-                new DirectoryInfo(
-                    Path.Combine(
-                        nugetPackageDirectory.FullName,
-                        "interactive-extensions", "dotnet", "cs"));
-
-            var extensionDll = await KernelExtensionTestHelper.CreateExtensionInDirectory(
-                                   directory, 
-                                   @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));",
-                                   extensionsDir);
-
-            var kernel = CreateKernel();
-
-            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
-
-            KernelEvents.Should()
-                        .ContainSingle(e => e is ExtensionLoaded &&
-                                            e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDll.FullName));
-
-            KernelEvents.Should()
-                        .ContainSingle(e => e is CommandHandled &&
-                                            e
-                                                .As<CommandHandled>()
-                                                .Command
-                                                .As<SubmitCode>()
-                                                .Code
-                                                .Contains("using System.Reflection;"));
-
-            KernelEvents.Should()
-                        .ContainSingle(e => e is DisplayedValueProduced &&
-                                            e
-                                                .As<DisplayedValueProduced>()
-                                                .Value
-                                                .ToString()
-                                                .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
-        }
-
-        [Fact]
-        public async Task Dependency_version_conflicts_are_resolved_correctly()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(@"%%time
-#r ""nuget:RestoreSources=https://dotnet.myget.org/F/dotnet-corefxlab/api/v3/index.json""
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-#r ""nuget:Microsoft.Data.DataFrame,1.0.0-e190910-1""
-");
-
-            await kernel.SubmitCodeAsync(@"
-using Microsoft.Data;
-using XPlot.Plotly;");
-
-            await kernel.SubmitCodeAsync(@"
-using Microsoft.AspNetCore.Html;
-Formatter<DataFrame>.Register((df, writer) =>
-{
-    var headers = new List<IHtmlContent>();
-    headers.Add(th(i(""index"")));
-    headers.AddRange(df.Columns.Select(c => (IHtmlContent) th(c)));
-    var rows = new List<List<IHtmlContent>>();
-    var take = 20;
-    for (var i = 0; i < Math.Min(take, df.RowCount); i++)
-    {
-        var cells = new List<IHtmlContent>();
-        cells.Add(td(i));
-        foreach (var obj in df[i])
-        {
-            cells.Add(td(obj));
-        }
-        rows.Add(cells);
-    }
-    
-    var t = table(
-        thead(
-            headers),
-        tbody(
-            rows.Select(
-                r => tr(r))));
-    
-    writer.Write(t);
-}, ""text/html"");");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_disallows_empty_package_specification()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:""
-");
-
-            events
-                .OfType<ErrorProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be($"Invalid Package Id: ''{Environment.NewLine}");
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_disallows_version_only_package_specification()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:,1.0.0""
-");
-
-            events
-                .OfType<ErrorProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be($"Invalid Package Id: ''{Environment.NewLine}");
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_RestoreSources_package_specification()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuge_allows_duplicate_sources_package_specification_single_cell()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_multiple_cells()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-");
-
-            events.Should().NotContainErrors();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_multiple_sources_package_specification_single_cell()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_multiple_sources_package_specification_multiple_cells()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://completelyFakerestoreSource""
-");
-            events.Should().NotContainErrors();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:RestoreSources=https://anotherCompletelyFakerestoreSource""
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_duplicate_package_specifications_single_cell()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-using Microsoft.ML.AutoML;
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_duplicate_package_specifications_multiple_cells()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview"""
-);
-            events.Should().NotContainErrors();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-using Microsoft.ML.AutoML;
-");
-
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_single_cell()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-#r ""nuget:Microsoft.ML.AutoML,0.16.1-preview""
-using Microsoft.ML.AutoML;
-");
-
-            events
-                .OfType<ErrorProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_multiple_cells()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:Microsoft.ML.AutoML,0.16.0-preview""
-");
-            events.Should().NotContainErrors();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget:Microsoft.ML.AutoML,0.16.1-preview""
-using Microsoft.ML.AutoML;
-");
-
-            events
-                .OfType<ErrorProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_disallows_changing_version_of_loaded_dependent_packages()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget: Microsoft.ML, 1.4.0""
-#r ""nuget:Microsoft.ML.AutoML,0.16.0""
-#r ""nuget:Microsoft.Data.Analysis,0.1.0""
-");
-            events.Should().NotContainErrors();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget: Google.Protobuf, 3.10.1""
-");
-
-            events
-                .OfType<ErrorProduced>()
-                .Last()
-                .Value
-                .Should()
-                .Be($"Package Reference already added: 'Google.Protobuf, 3.10.1'{Environment.NewLine}");
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_allows_using_version_of_loaded_dependent_packages()
-        {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget: Microsoft.ML, 1.4.0""
-#r ""nuget:Microsoft.ML.AutoML,0.16.0""
-#r ""nuget:Microsoft.Data.Analysis,0.1.0""
-");
-            events.Should().NotContainErrors();
-
-            await kernel.SubmitCodeAsync(
-@"
-%%time
-#r ""nuget: Google.Protobuf, 3.10.0""
-");
-            events.Should().NotContainErrors();
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_with_System_Text_Json_should_succeed()
-        {
-            var kernel = CreateKernel(Language.CSharp);
-
-            var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(@"
-#r ""nuget:System.Text.Json""
-using System.Text.Json;
-");
-            // It should work, no errors and the requested package should be added
-            events.Should()
-                  .NotContainErrors();
-
-            // The System.Text.JSon dll ships in : Microsoft.NETCore.App.Ref
-            events.OfType<PackageAdded>()
-                  .Should()
-                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
-        }
-
-        [Fact]
-        public async Task Pound_r_nuget_with_no_version_should_not_get_the_oldest_package_version()
-        {
-            // #r "nuget: with no version specified should get the newest version of the package not the oldest:
-            // For test purposes we evaluate the retrieved package is not the oldest version, since the newest may change over time.
-            var kernel = CreateKernel(Language.CSharp);
-
-            var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SubmitCodeAsync(@"
-#r ""nuget:Microsoft.DotNet.PlatformAbstractions""
-");
-            // It should work, no errors and the latest requested package should be added
-            events.Should()
-                  .NotContainErrors();
-
-            events.OfType<PackageAdded>()
-                  .Should()
-                  .ContainSingle(e => ((PackageAdded)e).PackageReference.PackageName == "Microsoft.DotNet.PlatformAbstractions" && ((PackageAdded)e).PackageReference.PackageVersion != "1.0.3");
-        }
-
     }
 }

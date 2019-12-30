@@ -16,23 +16,20 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
         internal JupyterRequestContext(ReplyChannel serverChannel, PubSubChannel ioPubChannel, Envelope
  request, string kernelIdentity) : 
-            this(new JupyterMessageSender(ioPubChannel, serverChannel, kernelIdentity, request),request,kernelIdentity)
+            this(new JupyterMessageSender(ioPubChannel, serverChannel, kernelIdentity, request),request)
         {
         }
 
         public JupyterRequestContext(IJupyterMessageSender jupyterMessageSender, Envelope
- request, string kernelIdentity)
+ request)
         {
             JupyterMessageSender = jupyterMessageSender ?? throw new ArgumentNullException(nameof(jupyterMessageSender));
             Request = request ?? throw new ArgumentNullException(nameof(request));
-            KernelIdentity = kernelIdentity;
         }
 
         public IJupyterMessageSender JupyterMessageSender { get; }
 
-        public Envelope
- Request { get; }
-        public string KernelIdentity { get; }
+        public Envelope Request { get; }
 
         public T GetRequestContent<T>() where T : RequestMessage
         {

@@ -25,7 +25,8 @@ namespace Microsoft.DotNet.Interactive.Utility
         public static async Task<CommandLineResult> Execute(
             string command,
             string args,
-            DirectoryInfo workingDir = null)
+            DirectoryInfo workingDir = null,
+            TimeSpan? timeout = null)
         {
             args = args ?? "";
 
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.Interactive.Utility
                     stdErr.AppendLine(data);
                 }))
             {
-                var exitCode = await process.Complete();
+                var exitCode = await process.Complete().Timeout(timeout ?? TimeSpan.FromMinutes(1));
 
                 var output = stdOut.Replace("\r\n", "\n").ToString().Split('\n');
 
@@ -87,6 +88,20 @@ namespace Microsoft.DotNet.Interactive.Utility
 
                           return process.ExitCode;
                       });
+
+        public static async Task<T> Timeout<T>(
+            this Task<T> source,
+            TimeSpan timeout)
+        {
+            if (await Task.WhenAny(
+                    source,
+                    Task.Delay(timeout)) != source)
+            {
+                throw new TimeoutException();
+            }
+
+            return await source;
+        }
 
         public static Process StartProcess(
             string command,
