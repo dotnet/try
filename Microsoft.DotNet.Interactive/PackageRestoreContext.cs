@@ -58,22 +58,17 @@ namespace Microsoft.DotNet.Interactive
             string packageVersion = null,
             string restoreSources = null)
         {
-            var key = string.IsNullOrWhiteSpace(packageName)
-                          ? $"RestoreSources={restoreSources}"
-                          : $"PackageName=: {packageName} RestoreSources={restoreSources}";
-
-            if (string.IsNullOrEmpty(key)) return false;
-
             // we use a lock because we are going to be looking up and inserting
             lock (_lockObject)
             {
-                if (!_packageReferences.TryGetValue(key, out PackageReference existingPackage))
+                if (!_packageReferences.TryGetValue(packageName, out PackageReference existingPackage))
                 {
                     if (!_resolvedReferences.TryGetValue(packageName, out ResolvedPackageReference resolvedPackage))
                     {
-                        return _packageReferences.TryAdd(key, new PackageReference(packageName, packageVersion, restoreSources));
+                        return _packageReferences.TryAdd(packageName, new PackageReference(packageName, packageVersion, restoreSources));
                     }
-                    return resolvedPackage.PackageVersion.Trim() == packageVersion.Trim();
+
+                    return false;
                 }
 
                 // Verify version numbers match note: wildcards/previews are considered distinct

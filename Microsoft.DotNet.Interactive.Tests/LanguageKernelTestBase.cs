@@ -46,7 +46,8 @@ namespace Microsoft.DotNet.Interactive.Tests
                 Language.CSharp => new CSharpKernel()
                                    .UseDefaultFormatting()
                                    .UseNugetDirective()
-                                   .UseKernelHelpers(),
+                                   .UseKernelHelpers()
+                                   .UseWho(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
 

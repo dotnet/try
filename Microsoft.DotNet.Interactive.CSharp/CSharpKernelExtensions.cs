@@ -62,22 +62,23 @@ using static {typeof(Kernel).FullName};
             {
                 var addPackage = new AddPackage(package)
                 {
-                    Handler = async (command, context) =>
+                    Handler = (command, context) =>
                     {
                         var added =
-                            await Task.FromResult(
-                                restoreContext.AddPackagReference(
-                                    package.PackageName,
-                                    package.PackageVersion,
-                                    package.RestoreSources));
+                            restoreContext.AddPackagReference(
+                                package.PackageName,
+                                package.PackageVersion,
+                                package.RestoreSources);
 
                         if (!added)
                         {
                             var errorMessage = $"{GenerateErrorMessage(package)}{Environment.NewLine}";
                             context.Publish(new ErrorProduced(errorMessage));
                         }
+
+                        return Task.CompletedTask;
                     }
-                   };
+                };
 
                 await pipelineContext.HandlingKernel.SendAsync(addPackage);
             });

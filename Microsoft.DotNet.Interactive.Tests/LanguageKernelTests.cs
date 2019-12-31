@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using FluentAssertions.Extensions;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Utility;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -818,6 +816,24 @@ Console.Write(2);
             using var kernel = new CSharpKernel();
 
             kernel.ScriptState.Should().NotBeNull();
+        }
+
+        [Fact(Timeout = 45000)]
+        public async Task When_submission_is_split_then_CommandHandled_is_published_only_for_the_root_command()
+        {
+            var kernel = CreateKernel(Language.CSharp);
+
+            var command = new SubmitCode("%whos \nvar x = 1;");
+
+            await kernel.SendAsync(command);
+
+            KernelEvents
+                .Should()
+                .ContainSingle<CommandHandled>()
+                .Which
+                .Command
+                .Should()
+                .Be(command);
         }
     }
 }
