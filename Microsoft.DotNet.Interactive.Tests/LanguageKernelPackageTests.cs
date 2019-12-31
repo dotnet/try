@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
@@ -12,6 +13,7 @@ using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
 using Newtonsoft.Json;
 using Recipes;
+using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -175,7 +177,7 @@ json
                 .Be(new { value = "hello" }.ToJson());
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
             var kernel = CreateKernel();
@@ -197,7 +199,7 @@ json
                         .Contain(i => i.DisplayText == "SerializeObject");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
             using var cSharpKernel = new CSharpKernel();
@@ -219,7 +221,7 @@ json
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "Microsoft.Extensions.Logging.ILogger logger = null;")]
-        [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null", Skip = "temp")]
+        [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
         public async Task When_SubmitCode_command_adds_packages_to_kernel_then_PackageAdded_event_is_raised(Language language, string expression)
         {
             using IKernel kernel = language switch
@@ -239,11 +241,16 @@ json
 
             events
                 .Should()
-                .ContainSingle(e => e is DisplayedValueProduced && ((DisplayedValueProduced) e).Value.ToString().Contains("Installing package"));
+                .ContainSingle<DisplayedValueProduced>()
+                .Which
+                .Value
+                .As<string>()
+                .Should()
+                .Contain("Installing package Microsoft.Extensions.Logging");
 
             events
                 .Should()
-                .ContainSingle(e => e is DisplayedValueUpdated && ((DisplayedValueUpdated) e).Value.ToString().Contains("done!"));
+                .ContainSingle<DisplayedValueUpdated>(e => e.Value.Equals("Installed package Microsoft.Extensions.Logging version 2.2.0"));
 
             events.OfType<PackageAdded>()
                   .Should()
@@ -252,7 +259,7 @@ json
         }
 
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Loads_native_dependencies_from_nugets()
         {
             using var kernel = CreateKernel(Language.CSharp);
@@ -315,7 +322,7 @@ catch (Exception e)
                 .ContainSingle<StandardOutputValueProduced>(e => e.Value.As<string>().Contains("success"));
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Dependency_version_conflicts_are_resolved_correctly()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -462,7 +469,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_multiple_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -478,7 +485,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_multiple_sources_package_specification_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -501,7 +508,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_duplicate_package_specifications_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -519,7 +526,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_duplicate_package_specifications_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -543,7 +550,7 @@ using Microsoft.ML.AutoML;
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -563,10 +570,10 @@ using Microsoft.ML.AutoML;
                 .Last()
                 .Value
                 .Should()
-                .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
+                .Be("Microsoft.ML.AutoML version 0.16.1-preview cannot be added because version 0.16.0-preview was added previously.");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_disallows_package_specifications_with_different_versions_multiple_cells()
         {
             var kernel = CreateKernel(Language.CSharp);
@@ -592,7 +599,7 @@ using Microsoft.ML.AutoML;
                 .Last()
                 .Value
                 .Should()
-                .Be($"Package Reference already added: 'Microsoft.ML.AutoML, 0.16.1-preview'{Environment.NewLine}");
+                .Be("Microsoft.ML.AutoML version 0.16.1-preview cannot be added because version 0.16.0-preview was added previously.");
         }
 
         [Fact(Timeout = 45000)]
@@ -622,10 +629,10 @@ using Microsoft.ML.AutoML;
                 .Last()
                 .Value
                 .Should()
-                .Be($"Package Reference already added: 'Google.Protobuf, 3.10.1'{Environment.NewLine}");
+                .Be("Google.Protobuf version 3.10.1 cannot be added because version 3.10.0 was added previously.");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_using_version_of_loaded_dependent_packages()
         {
             var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
@@ -690,6 +697,23 @@ using System.Text.Json;
                   .Should()
                   .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.DotNet.PlatformAbstractions" &&
                                       e.PackageReference.PackageVersion != "1.0.3");
+        }
+
+        [Fact(Timeout = 45000)]
+        public async Task Pound_r_nuget_with_no_version_displays_the_version_that_was_installed()
+        {
+            var kernel = CreateKernel(Language.CSharp);
+
+            var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SubmitCodeAsync(@"
+#r ""nuget:Its.Log""
+");
+
+            events.Should().NotContainErrors();
+
+            events.Should()
+                  .ContainSingle<DisplayedValueUpdated>(e => e.Value.Equals("Installed package Its.Log version 2.10.1"));
         }
     }
 }

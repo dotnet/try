@@ -135,8 +135,12 @@ type FSharpKernel() =
                     | _ -> ()
 
                     for key in packageInstallingMessages reference do
-                        let message = messageMap.[key] + "done!"
-                        context.Publish(DisplayedValueUpdated(message, key))
+                        match reference with
+                        | Some ref, _ ->
+                            let packageRef = ResolvedPackageReference(ref.Include, packageVersion=ref.Version, assemblyPaths=[])
+                            let message = "Installed package " + packageRef.PackageName + " version " + packageRef.PackageVersion
+                            context.Publish(DisplayedValueUpdated(message, key))
+                        | _ -> ()
                     ())
 
             script.DependencyFailed
