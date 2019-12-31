@@ -407,7 +407,7 @@ Formatter<DataFrame>.Register((df, writer) =>
                 .Be($"Invalid Package Id: ''{Environment.NewLine}");
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_RestoreSources_package_specification()
         {
             var kernel = CreateKernel(Language.CSharp);
