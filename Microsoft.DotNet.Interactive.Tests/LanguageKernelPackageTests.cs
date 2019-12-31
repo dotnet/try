@@ -423,7 +423,7 @@ Formatter<DataFrame>.Register((df, writer) =>
             events.Should().NotContainErrors();
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_duplicate_sources_package_specification_single_cell()
         {
             var kernel = CreateKernel(Language.CSharp);
