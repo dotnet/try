@@ -117,7 +117,7 @@ stages:
           continueOnError: true
           condition: always()
 
-        - task: PublishBuildArtifacts@2
+        - task: PublishBuildArtifacts@1
           displayName: Upload Logs
           continueOnError: true
           inputs:
