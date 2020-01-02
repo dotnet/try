@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
@@ -11,23 +13,44 @@ using Microsoft.DotNet.Interactive.Jupyter;
 using Pocket;
 using Xunit.Abstractions;
 using Serilog.Sinks.RollingFileAlternate;
+using Xunit.Sdk;
 using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
+    internal class LogTestNamesToPocketLoggerAttribute : BeforeAfterTestAttribute
+    {
+        private static readonly ConcurrentDictionary<MethodInfo, OperationLogger> _operations = new ConcurrentDictionary<MethodInfo, OperationLogger>();
+
+        public override void Before(MethodInfo methodUnderTest)
+        {
+            var x = Logger.Log.OnEnterAndExit(name: methodUnderTest.Name);
+            _operations.TryAdd(methodUnderTest, x);
+        }
+
+        public override void After(MethodInfo methodUnderTest)
+        {
+            if (_operations.TryRemove(methodUnderTest, out var operation))
+            {
+                operation.Dispose();
+            }
+        }
+    }
+
+    [LogTestNamesToPocketLogger]
     public abstract class LanguageKernelTestBase : IDisposable
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
         static LanguageKernelTestBase()
         {
-                var log = new SerilogLoggerConfiguration()
-                          .WriteTo
-                          .RollingFileAlternate(".", outputTemplate: "{Message}{NewLine}")
-                          .CreateLogger();
+            var log = new SerilogLoggerConfiguration()
+                      .WriteTo
+                      .RollingFileAlternate(".", outputTemplate: "{Message}{NewLine}")
+                      .CreateLogger();
 
-                var subscription = LogEvents.Subscribe(
-                    e => log.Information(e.ToLogString()));
+            LogEvents.Subscribe(
+                e => log.Information(e.ToLogString()));
         }
 
         protected LanguageKernelTestBase(ITestOutputHelper output)
