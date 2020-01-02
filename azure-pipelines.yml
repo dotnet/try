@@ -118,16 +118,6 @@ stages:
           condition: always()
 
         - task: PublishBuildArtifacts@1
-          displayName: Upload Logs
-          continueOnError: true
-          inputs:
-            pathtoPublish: $(Build.SourcesDirectory)/artifacts/**/*.log
-            artifactName: MyLogs-$(Agent.OS)-$(Agent.JobName)
-            artifactType: Container
-            parallel: true
-          condition: always()
-
-        - task: PublishBuildArtifacts@1
           displayName: Publish packages to artifacts container
           inputs:
             pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)

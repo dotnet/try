@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -10,6 +11,7 @@ using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
+using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 using Xunit.Abstractions;
 using Serilog.Sinks.RollingFileAlternate;
@@ -44,9 +46,21 @@ namespace Microsoft.DotNet.Interactive.Tests
 
         static LanguageKernelTestBase()
         {
+            var artifactsPath = new DirectoryInfo(".");
+
+            while (artifactsPath.Name != "artifacts" && artifactsPath != artifactsPath.Root)
+            {
+                artifactsPath = artifactsPath.Parent;
+            }
+
+            var logPath = Path.Combine(
+                artifactsPath.ToString(),
+                "log",
+                "Release");
+
             var log = new SerilogLoggerConfiguration()
                       .WriteTo
-                      .RollingFileAlternate(".", outputTemplate: "{Message}{NewLine}")
+                      .RollingFileAlternate(logPath, outputTemplate: "{Message}{NewLine}")
                       .CreateLogger();
 
             LogEvents.Subscribe(
