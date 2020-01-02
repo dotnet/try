@@ -141,7 +141,7 @@ json
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_can_load_assembly_references_using_r_directive_at_triplequotedpaths(Language language)
         {
             var kernel = CreateKernel(language);
@@ -175,7 +175,7 @@ json
                 .Be(new { value = "hello" }.ToJson());
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {
             var kernel = CreateKernel();
@@ -219,7 +219,7 @@ json
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "Microsoft.Extensions.Logging.ILogger logger = null;")]
-        [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null", Skip = "temp")]
+        [InlineData(Language.FSharp, "let logger: Microsoft.Extensions.Logging.ILogger = null")]
         public async Task When_SubmitCode_command_adds_packages_to_kernel_then_PackageAdded_event_is_raised(Language language, string expression)
         {
             using IKernel kernel = language switch
@@ -257,7 +257,7 @@ json
         }
 
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Loads_native_dependencies_from_nugets()
         {
             using var kernel = CreateKernel(Language.CSharp);
@@ -320,7 +320,7 @@ catch (Exception e)
                 .ContainSingle<StandardOutputValueProduced>(e => e.Value.As<string>().Contains("success"));
         }
 
-        [Fact(Timeout = 45000, Skip = "temp")]
+        [Fact(Timeout = 45000)]
         public async Task Dependency_version_conflicts_are_resolved_correctly()
         {
             var kernel = CreateKernel(Language.CSharp);
