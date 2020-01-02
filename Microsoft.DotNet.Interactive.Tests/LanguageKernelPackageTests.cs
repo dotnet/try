@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
@@ -13,7 +12,6 @@ using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
 using Newtonsoft.Json;
 using Recipes;
-using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
