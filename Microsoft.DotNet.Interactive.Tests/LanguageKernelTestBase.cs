@@ -2,61 +2,48 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.IO;
-using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Jupyter;
-using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
+using Recipes;
 using Xunit.Abstractions;
 using Serilog.Sinks.RollingFileAlternate;
-using Xunit.Sdk;
 using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
-    internal class LogTestNamesToPocketLoggerAttribute : BeforeAfterTestAttribute
-    {
-        private static readonly ConcurrentDictionary<MethodInfo, OperationLogger> _operations = new ConcurrentDictionary<MethodInfo, OperationLogger>();
-
-        public override void Before(MethodInfo methodUnderTest)
-        {
-            var x = Logger.Log.OnEnterAndExit(name: methodUnderTest.Name);
-            _operations.TryAdd(methodUnderTest, x);
-        }
-
-        public override void After(MethodInfo methodUnderTest)
-        {
-            if (_operations.TryRemove(methodUnderTest, out var operation))
-            {
-                operation.Dispose();
-            }
-        }
-    }
-
     [LogTestNamesToPocketLogger]
     public abstract class LanguageKernelTestBase : IDisposable
     {
-        private readonly CompositeDisposable _disposables = new CompositeDisposable();
-
         static LanguageKernelTestBase()
         {
             var artifactsPath = new DirectoryInfo(".");
 
-            while (artifactsPath.Name != "artifacts" && artifactsPath != artifactsPath.Root)
+            while (artifactsPath.Name != "artifacts")
             {
-                artifactsPath = artifactsPath.Parent;
+                if (artifactsPath.Parent != null)
+                {
+                    artifactsPath = artifactsPath.Parent;
+                }
+                else
+                {
+                    break;
+                }
             }
 
-            var logPath = Path.Combine(
-                artifactsPath.ToString(),
-                "log",
-                "Release");
+            var logPath =
+                artifactsPath.Name == "artifacts"
+                    ? Path.Combine(
+                        artifactsPath.ToString(),
+                        "log",
+                        "Release")
+                    : ".";
 
             var log = new SerilogLoggerConfiguration()
                       .WriteTo
@@ -67,9 +54,23 @@ namespace Microsoft.DotNet.Interactive.Tests
                 e => log.Information(e.ToLogString()));
         }
 
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        
+        private static readonly AsyncLock _lock = new AsyncLock();
+        private readonly AsyncLock.Releaser _lockReleaser;
+
         protected LanguageKernelTestBase(ITestOutputHelper output)
         {
+            _lockReleaser = Task.Run(() => _lock.LockAsync()).Result;
+
             DisposeAfterTest(output.SubscribeToPocketLogger());
+        }
+        
+        public void Dispose()
+        {
+            _disposables?.Dispose();
+
+            _lockReleaser.Dispose();
         }
 
         protected KernelBase CreateKernel(Language language)
@@ -126,7 +127,5 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             _disposables.Add(disposable);
         }
-
-        public void Dispose() => _disposables?.Dispose();
     }
 }

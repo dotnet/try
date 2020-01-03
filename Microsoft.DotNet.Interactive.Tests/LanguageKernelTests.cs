@@ -81,8 +81,9 @@ namespace Microsoft.DotNet.Interactive.Tests
             await SubmitCode(kernel, source);
 
             KernelEvents
-                .OfType<ReturnValueProduced>()
-                .Last()
+                .Should()
+                .ContainSingle<ReturnValueProduced>()
+                .Which
                 .Value
                 .Should()
                 .Be(5);
