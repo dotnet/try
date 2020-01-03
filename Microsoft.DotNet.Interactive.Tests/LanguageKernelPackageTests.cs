@@ -203,7 +203,7 @@ json
             using var cSharpKernel = new CSharpKernel();
             using var events = cSharpKernel.KernelEvents.ToSubscribedList();
 
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
             {
                 cSharpKernel.UseNugetDirective()
             };

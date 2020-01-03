@@ -19,6 +19,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Tests.Server
 {
+    [LogTestNamesToPocketLogger]
     public class StandardIOKernelServerTests : IDisposable
     {
         private readonly StandardIOKernelServer _standardIOKernelServer;

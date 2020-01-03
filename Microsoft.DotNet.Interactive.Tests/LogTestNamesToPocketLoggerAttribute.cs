@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using Pocket;
 using Xunit.Sdk;
+using static Pocket.Logger;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
@@ -14,8 +15,14 @@ namespace Microsoft.DotNet.Interactive.Tests
 
         public override void Before(MethodInfo methodUnderTest)
         {
-            var x = Logger.Log.OnEnterAndExit(name: methodUnderTest.Name);
-            _operations.TryAdd(methodUnderTest, x);
+            if (methodUnderTest == null)
+            {
+                return;
+            }
+
+            _operations.TryAdd(
+                methodUnderTest,
+                Log.OnEnterAndExit(name: $"{methodUnderTest?.DeclaringType?.Name}.{methodUnderTest.Name}"));
         }
 
         public override void After(MethodInfo methodUnderTest)
