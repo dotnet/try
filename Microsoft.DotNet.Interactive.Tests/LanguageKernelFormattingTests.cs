@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 #pragma warning disable 8509
 namespace Microsoft.DotNet.Interactive.Tests
 {
+    [LogTestNamesToPocketLogger]
     public class LanguageKernelFormattingTests : LanguageKernelTestBase
     {
         public LanguageKernelFormattingTests(ITestOutputHelper output) : base(output)
