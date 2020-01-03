@@ -183,7 +183,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
                 throw new ArgumentNullException(nameof(mimeType));
             }
 
-            var writer = CreateWriter();
+            using var writer = CreateWriter();
             FormatTo(obj, writer, mimeType);
             return writer.ToString();
         }
@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
                 throw new ArgumentNullException(nameof(formatter));
             }
 
-            var writer = CreateWriter();
+            using var writer = CreateWriter();
             formatter.Format(obj, writer);
             return writer.ToString();
         }
