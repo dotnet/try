@@ -18,11 +18,8 @@ namespace Microsoft.DotNet.Interactive.Tests
 {
     public class LanguageKernelTests : LanguageKernelTestBase
     {
-        private readonly ITestOutputHelper _output;
-
         public LanguageKernelTests(ITestOutputHelper output) : base(output)
         {
-            _output = output;
         }
 
         [Theory(Timeout = 45000)]
