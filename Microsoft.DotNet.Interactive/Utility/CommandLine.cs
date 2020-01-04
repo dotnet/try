@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive.Utility
             DirectoryInfo workingDir = null,
             TimeSpan? timeout = null)
         {
-            args = args ?? "";
+            args ??= "";
 
             var stdOut = new StringBuilder();
             var stdErr = new StringBuilder();
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Interactive.Utility
         {
             using (var operation = Log.OnEnterAndExit())
             {
-                args = args ?? "";
+                args ??= "";
 
                 var process = new Process
                 {
