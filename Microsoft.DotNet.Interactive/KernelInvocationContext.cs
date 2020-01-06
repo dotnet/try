@@ -104,6 +104,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 _current.Value = null;
                 active.Complete(Command);
+                active._events.Dispose();
             }
         }
     }
