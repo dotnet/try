@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact(Timeout = 45000)]
         public void Directives_may_be_prefixed_with_hash()
         {
-            var kernel = new CompositeKernel();
+            using var kernel = new CompositeKernel();
 
             kernel
                 .Invoking(k => k.AddDirective(new Command("#hello")))
@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact(Timeout = 45000)]
         public void Directives_may_be_prefixed_with_percent()
         {
-            var kernel = new CompositeKernel();
+            using var kernel = new CompositeKernel();
 
             kernel
                 .Invoking(k => k.AddDirective(new Command("%hello")))
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         [InlineData("1")]
         public void Directives_may_not_begin_with_(string value)
         {
-            var kernel = new CompositeKernel();
+            using var kernel = new CompositeKernel();
 
             kernel
                 .Invoking(k => k.AddDirective(new Command($"{value}hello")))

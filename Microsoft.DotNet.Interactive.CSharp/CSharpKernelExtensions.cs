@@ -58,29 +58,7 @@ using static {typeof(Kernel).FullName};
             var restoreContext = new PackageRestoreContext();
             kernel.RegisterForDisposal(restoreContext);
 
-            poundR.Handler = CommandHandler.Create<PackageReference, KernelInvocationContext>(async (package, pipelineContext) =>
-            {
-                var addPackage = new AddPackage(package)
-                {
-                    Handler = async (command, context) =>
-                    {
-                        var added =
-                            await Task.FromResult(
-                                restoreContext.AddPackagReference(
-                                    package.PackageName,
-                                    package.PackageVersion,
-                                    package.RestoreSources));
-
-                        if (!added)
-                        {
-                            var errorMessage = $"{GenerateErrorMessage(package)}{Environment.NewLine}";
-                            context.Publish(new ErrorProduced(errorMessage));
-                        }
-                    }
-                   };
-
-                await pipelineContext.HandlingKernel.SendAsync(addPackage);
-            });
+            poundR.Handler = CommandHandler.Create<PackageReference, KernelInvocationContext>(HandleAddPackageReference);
 
             kernel.AddDirective(poundR);
 
@@ -93,27 +71,71 @@ using static {typeof(Kernel).FullName};
 
             return kernel;
 
-            static string GenerateErrorMessage(PackageReference package)
+            async Task HandleAddPackageReference(PackageReference package, KernelInvocationContext pipelineContext)
             {
-                if (!string.IsNullOrEmpty(package.PackageName))
+                var addPackage = new AddPackage(package)
                 {
-                    if (!string.IsNullOrEmpty(package.PackageVersion))
+                    Handler = (command, context) =>
                     {
-                        return $"Package Reference already added: '{package.PackageName}, {package.PackageVersion}'";
+                        if (restoreContext.ResolvedPackageReferences.SingleOrDefault(r => r.PackageName.Equals(package.PackageName, StringComparison.OrdinalIgnoreCase)) is { }
+                                resolvedRef && !string.IsNullOrWhiteSpace(package.PackageVersion) && package.PackageVersion != resolvedRef.PackageVersion)
+                        {
+                            var errorMessage = $"{GenerateErrorMessage(package, resolvedRef)}";
+                            context.Publish(new ErrorProduced(errorMessage));
+                        }
+                        else
+                        {
+                            var added = restoreContext.AddPackagReference(package.PackageName, package.PackageVersion, package.RestoreSources);
+
+                            if (!added)
+                            {
+                                var errorMessage = $"{GenerateErrorMessage(package)}";
+                                context.Publish(new ErrorProduced(errorMessage));
+                            }
+                        }
+
+                        return Task.CompletedTask;
                     }
-                    else
-                    {
-                        return $"Package Reference already added: '{package.PackageName}'";
-                    }
-                }
-                else if (!string.IsNullOrEmpty(package.RestoreSources))
+                };
+
+                await pipelineContext.HandlingKernel.SendAsync(addPackage);
+            }
+
+            static string GenerateErrorMessage(
+                PackageReference requested,
+                ResolvedPackageReference existing = null)
+            {
+                if (existing != null &&
+                    !string.IsNullOrEmpty(requested.PackageName) &&
+                    !string.IsNullOrEmpty(requested.PackageVersion))
                 {
-                    return $"Package RestoreSource already added: '{package.RestoreSources}'";
+                    return $"{requested.PackageName} version {requested.PackageVersion} cannot be added because version {existing.PackageVersion} was added previously.";
                 }
-                else
+
+                return $"Invalid Package specification: '{requested}'";
+            }
+        }
+
+        private class PackageReferenceComparer : IEqualityComparer<PackageReference>
+        {
+            public bool Equals(PackageReference x, PackageReference y) =>
+                string.Equals(
+                    GetDisplayValueId(x),
+                    GetDisplayValueId(y),
+                    StringComparison.OrdinalIgnoreCase);
+
+            public int GetHashCode(PackageReference obj) => obj.PackageName.ToLowerInvariant().GetHashCode();
+
+            public static string GetDisplayValueId(PackageReference package)
+            {
+                var value = package.PackageName;
+
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    return $"Invalid Package specification: '{package.PackageName}'";
+                    value = package.RestoreSources;
                 }
+
+                return value.ToLowerInvariant();
             }
         }
 
@@ -125,20 +147,24 @@ using static {typeof(Kernel).FullName};
             {
                 KernelCommandInvocation restore = async (_, context) =>
                 {
-                    var messages = new Dictionary<string, string>();
-                    foreach (var package in restoreContext.PackageReferences)
+                    var messages = new Dictionary<PackageReference, string>(new PackageReferenceComparer());
+
+                    foreach (var package in restoreContext.RequestedPackageReferences)
                     {
-                        var key = InstallingPackageMessage(package);
-                        if (key == null)
+                        if (string.IsNullOrWhiteSpace(package.PackageName) && 
+                            string.IsNullOrWhiteSpace(package.RestoreSources))
                         {
                             context.Publish(new ErrorProduced($"Invalid Package Id: '{package.PackageName}'{Environment.NewLine}"));
                         }
                         else
                         {
-                            var message = key + "...";
-                            var displayed = new DisplayedValueProduced(message, context.Command, null, valueId: key);
-                            context.Publish(displayed);
-                            messages.Add(key, message);
+                            var message =  InstallingPackageMessage(package) + "...";
+                            context.Publish(
+                                new DisplayedValueProduced(
+                                    message, 
+                                    context.Command, 
+                                    valueId: PackageReferenceComparer.GetDisplayValueId(package)));
+                            messages.Add(package, message);
                         }
                     }
 
@@ -149,7 +175,7 @@ using static {typeof(Kernel).FullName};
                         foreach (var key in messages.Keys.ToArray())
                         {
                             var message = messages[key] + ".";
-                            context.Publish(new DisplayedValueUpdated(message, key));
+                            context.Publish(new DisplayedValueUpdated(message, PackageReferenceComparer.GetDisplayValueId(key)));
                             messages[key] = message;
                         }
                     }
@@ -182,12 +208,10 @@ using static {typeof(Kernel).FullName};
 
                         foreach (var resolvedReference in result.ResolvedReferences)
                         {
-                            var key = InstallingPackageMessage(resolvedReference);
-                            if (messages.TryGetValue(key, out var message))
-                            {
-                                context.Publish(new DisplayedValueUpdated(message + " done!", key));
-                                messages[key] = message;
-                            }
+                            context.Publish(
+                                new DisplayedValueUpdated(
+                                    $"Installed package {resolvedReference.PackageName} version {resolvedReference.PackageVersion}",
+                                    PackageReferenceComparer.GetDisplayValueId(resolvedReference)));
 
                             context.Publish(new PackageAdded(resolvedReference));
 
@@ -236,6 +260,7 @@ using static {typeof(Kernel).FullName};
                 {
                     message += $"    RestoreSources: {package.RestoreSources}" + br;
                 }
+
                 return message;
             }
         }

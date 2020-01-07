@@ -9,27 +9,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Utility;
+using Pocket;
+using static Pocket.Logger;
 
 namespace Microsoft.DotNet.Interactive
 {
     public class PackageRestoreContext : IDisposable
     {
-        private readonly object _lockObject = new object();
-        private readonly ConcurrentDictionary<string, PackageReference> _packageReferences = new ConcurrentDictionary<string, PackageReference>();
-        private Dictionary<string, ResolvedPackageReference> _resolvedReferences = new Dictionary<string, ResolvedPackageReference>();
+        private readonly ConcurrentDictionary<string, PackageReference> _requestedPackageReferences = new ConcurrentDictionary<string, PackageReference>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, ResolvedPackageReference> _resolvedPackageReferences = new Dictionary<string, ResolvedPackageReference>(StringComparer.OrdinalIgnoreCase);
         private readonly Lazy<DirectoryInfo> _lazyDirectory;
 
         public PackageRestoreContext()
         {
-            Name = Guid.NewGuid().ToString("N");
-
             _lazyDirectory = new Lazy<DirectoryInfo>(() =>
             {
                 var dir = new DirectoryInfo(
                     Path.Combine(
                         Paths.UserProfile,
                         ".net-interactive-csharp",
-                        Name));
+                        Guid.NewGuid().ToString("N")));
 
                 if (!dir.Exists)
                 {
@@ -42,52 +41,33 @@ namespace Microsoft.DotNet.Interactive
 
         public DirectoryInfo Directory => _lazyDirectory.Value;
 
-        public string Name { get; }
-
-        public async Task<ResolvedPackageReference> GetResolvedPackageReference(string packageName)
-        {
-            await Restore();
-
-            var references = GetResolvedReferences();
-            return references[packageName];
-        }
-
-        // Add a package reference return false if unable to add.
         public bool AddPackagReference(
             string packageName,
             string packageVersion = null,
             string restoreSources = null)
         {
-            var key = string.IsNullOrWhiteSpace(packageName)
-                          ? $"RestoreSources={restoreSources}"
-                          : $"PackageName=: {packageName} RestoreSources={restoreSources}";
-
-            if (string.IsNullOrEmpty(key)) return false;
-
+            var key = $"{packageName}:{restoreSources}";
+       
             // we use a lock because we are going to be looking up and inserting
-            lock (_lockObject)
+            if (!_requestedPackageReferences.TryGetValue(key, out PackageReference existingPackage))
             {
-                if (!_packageReferences.TryGetValue(key, out PackageReference existingPackage))
+                if (!_resolvedPackageReferences.TryGetValue(key, out ResolvedPackageReference resolvedPackage))
                 {
-                    if (!_resolvedReferences.TryGetValue(packageName, out ResolvedPackageReference resolvedPackage))
-                    {
-                        return _packageReferences.TryAdd(key, new PackageReference(packageName, packageVersion, restoreSources));
-                    }
-                    return resolvedPackage.PackageVersion.Trim() == packageVersion.Trim();
+                    return _requestedPackageReferences.TryAdd(key, new PackageReference(packageName, packageVersion, restoreSources));
                 }
 
-                // Verify version numbers match note: wildcards/previews are considered distinct
-                return existingPackage.PackageVersion.Trim() == packageVersion.Trim();
+                return resolvedPackage.PackageVersion.Trim() == packageVersion.Trim();
             }
+
+            // Verify version numbers match note: wildcards/previews are considered distinct
+            return existingPackage.PackageVersion.Trim() == packageVersion.Trim();
         }
 
-        public IEnumerable<PackageReference> PackageReferences
-        {
-            get
-            {
-                return _packageReferences.Values;
-            }
-        }
+        public IEnumerable<PackageReference> RequestedPackageReferences => _requestedPackageReferences.Values;
+
+        public IEnumerable<ResolvedPackageReference> ResolvedPackageReferences => _resolvedPackageReferences.Values;
+
+        public ResolvedPackageReference GetResolvedPackageReference(string packageName) => _resolvedPackageReferences[packageName];
 
         public async Task<PackageRestoreResult> Restore()
         {
@@ -95,34 +75,34 @@ namespace Microsoft.DotNet.Interactive
 
             var dotnet = new Dotnet(Directory);
             var result = await dotnet.Execute("msbuild -restore /t:WriteNugetAssemblyPaths");
-            var resolvedReferences =
-                GetResolvedReferences()
-                    .Values
-                    .ToArray();
 
             if (result.ExitCode != 0)
             {
                 return new PackageRestoreResult(
                     succeeded: false,
-                    requestedPackages: _packageReferences.Values,
+                    requestedPackages: _requestedPackageReferences.Values,
                     errors: result.Output.Concat(result.Error).ToArray());
             }
             else
             {
+                ReadResolvedReferencesFromBuildOutput();
+
                 return new PackageRestoreResult(
                     succeeded: true,
-                    requestedPackages: _packageReferences.Values,
-                    resolvedReferences: resolvedReferences);
+                    requestedPackages: _requestedPackageReferences.Values,
+                    resolvedReferences: _resolvedPackageReferences.Values.ToList());
             }
         }
 
-        private Dictionary<string, ResolvedPackageReference> GetResolvedReferences()
+        private void ReadResolvedReferencesFromBuildOutput()
         {
-            var nugetPathsFile = Directory.GetFiles("*.resolvedReferences.paths").SingleOrDefault();
+            var resolvedreferenceFilename = "*.resolvedReferences.paths";
+            var nugetPathsFile = Directory.GetFiles(resolvedreferenceFilename).SingleOrDefault();
 
             if (nugetPathsFile == null)
             {
-                return new Dictionary<string, ResolvedPackageReference>();
+                Log.Error($"File not found: {Directory.FullName}{Path.DirectorySeparatorChar}{resolvedreferenceFilename}");
+                return;
             }
 
             var nugetPackageLines = File.ReadAllText(Path.Combine(Directory.FullName, nugetPathsFile.FullName))
@@ -130,7 +110,7 @@ namespace Microsoft.DotNet.Interactive
 
             var probingPaths = new List<DirectoryInfo>();
 
-            var dict = nugetPackageLines
+            var resolved = nugetPackageLines
                        .Select(line => line.Split(','))
                        .Where(line =>
                        {
@@ -163,13 +143,12 @@ namespace Microsoft.DotNet.Interactive
                                    xs.Select(x => x.assemblyPath).ToArray(),
                                    xs.Key.packageRoot,
                                    probingPaths))
-                       .ToDictionary(r => r.PackageName, StringComparer.OrdinalIgnoreCase);
+                       .ToArray();
 
-            lock (_lockObject)
+            foreach (var reference in resolved)
             {
-                _resolvedReferences = dict;
+                _resolvedPackageReferences.TryAdd(reference.PackageName, reference);
             }
-            return dict;
         }
 
         private void WriteProjectFile()
@@ -223,7 +202,7 @@ namespace s
 
                 sb.Append("  <ItemGroup>\n");
 
-                _packageReferences
+                _requestedPackageReferences
                     .Values
                     .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
                     .ToList()
@@ -233,7 +212,7 @@ namespace s
 
                 sb.Append("  <PropertyGroup>\n");
 
-                _packageReferences
+                _requestedPackageReferences
                     .Values
                     .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
                     .ToList()
@@ -283,7 +262,7 @@ namespace s
             {
                 if (_lazyDirectory.IsValueCreated)
                 {
-                    Directory.Delete();
+                    Directory.Delete(true);
                 }
             }
             catch

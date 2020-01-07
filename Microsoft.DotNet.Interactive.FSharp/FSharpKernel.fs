@@ -114,39 +114,43 @@ type FSharpKernel() =
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
 
-            script.DependencyAdding
-            |> Event.add (fun (key, referenceText) ->
-                if key = "nuget" then
-                    let reference = parseReference referenceText
-                    for message in packageInstallingMessages reference do
-                        let key = message
-                        messageMap.[key] <- message
-                        context.Publish(DisplayedValueProduced(message, context.Command, valueId=key))
-                ())
+            use _ = script.DependencyAdding
+                    |> Observable.subscribe (fun (key, referenceText) ->
+                        if key = "nuget" then
+                            let reference = parseReference referenceText
+                            for message in packageInstallingMessages reference do
+                                let key = message
+                                messageMap.[key] <- message
+                                context.Publish(DisplayedValueProduced(message, context.Command, valueId=key))
+                        ())
 
-            script.DependencyAdded
-            |> Event.add (fun (key, referenceText) ->
-                if key = "nuget" then
-                    let reference = parseReference referenceText
-                    match reference with
-                    | Some ref, _ ->
-                        let packageRef = ResolvedPackageReference(ref.Include, packageVersion=ref.Version, assemblyPaths=[])
-                        context.Publish(PackageAdded(packageRef))
-                    | _ -> ()
+            use _ = script.DependencyAdded
+                    |> Observable.subscribe (fun (key, referenceText) ->
+                        if key = "nuget" then
+                            let reference = parseReference referenceText
+                            match reference with
+                            | Some ref, _ ->
+                                let packageRef = ResolvedPackageReference(ref.Include, packageVersion=ref.Version, assemblyPaths=[])
+                                context.Publish(PackageAdded(packageRef))
+                            | _ -> ()
 
-                    for key in packageInstallingMessages reference do
-                        let message = messageMap.[key] + "done!"
-                        context.Publish(DisplayedValueUpdated(message, key))
-                    ())
+                            for key in packageInstallingMessages reference do
+                                match reference with
+                                | Some ref, _ ->
+                                    let packageRef = ResolvedPackageReference(ref.Include, packageVersion=ref.Version, assemblyPaths=[])
+                                    let message = "Installed package " + packageRef.PackageName + " version " + packageRef.PackageVersion
+                                    context.Publish(DisplayedValueUpdated(message, key))
+                                | _ -> ()
+                            ())
 
-            script.DependencyFailed
-            |> Event.add (fun (key, referenceText) ->
-                if key = "nuget" then
-                    let reference = parseReference referenceText
-                    for key in packageInstallingMessages reference do
-                        let message = messageMap.[key] + "failed!"
-                        context.Publish(DisplayedValueUpdated(message, key))
-                    ())
+            use _ = script.DependencyFailed
+                    |> Observable.subscribe (fun (key, referenceText) ->
+                        if key = "nuget" then
+                            let reference = parseReference referenceText
+                            for key in packageInstallingMessages reference do
+                                let message = messageMap.[key] + "failed!"
+                                context.Publish(DisplayedValueUpdated(message, key))
+                            ())
 
             let codeSubmissionReceived = CodeSubmissionReceived(codeSubmission)
             context.Publish(codeSubmissionReceived)
@@ -200,11 +204,10 @@ type FSharpKernel() =
             context.Publish(CurrentCommandCancelled(cancelCurrentCommand))
         }
 
-    override __.HandleAsync(command: IKernelCommand, _context: KernelInvocationContext): Task =
-        async {
-            match command with
-            | :? SubmitCode as submitCode -> submitCode.Handler <- fun command invocationContext -> (handleSubmitCode submitCode invocationContext) |> Async.StartAsTask :> Task
-            | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun command invocationContext -> (handleRequestCompletion requestCompletion invocationContext) |> Async.StartAsTask :> Task
-            | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun command invocationContext -> (handleCancelCurrentCommand cancelCurrentCommand invocationContext) |> Async.StartAsTask :> Task
-            | _ -> ()
-        } |> Async.StartAsTask :> Task
+    override __.HandleAsync(command: IKernelCommand, context: KernelInvocationContext): Task =
+        match command with
+        | :? SubmitCode as submitCode -> submitCode.Handler <- fun _ _ -> (handleSubmitCode submitCode context) |> Async.StartAsTask :> Task
+        | :? RequestCompletion as requestCompletion -> requestCompletion.Handler <- fun _ _ -> (handleRequestCompletion requestCompletion context) |> Async.StartAsTask :> Task
+        | :? CancelCurrentCommand as cancelCurrentCommand -> cancelCurrentCommand.Handler <- fun _ _ -> (handleCancelCurrentCommand cancelCurrentCommand context) |> Async.StartAsTask :> Task
+        | _ -> ()
+        Task.CompletedTask

@@ -6,11 +6,11 @@ using System.Threading;
 
 namespace Microsoft.DotNet.Interactive.Formatting.Tests
 {
-    public class FormatterTestBase : IDisposable
+    public abstract class FormatterTestBase : IDisposable
     {
         private static readonly object _lock = new object();
 
-        public FormatterTestBase()
+        protected FormatterTestBase()
         {
             Monitor.Enter(_lock);
 

@@ -19,14 +19,19 @@ namespace Microsoft.DotNet.Interactive.Tests
             var added = restoreContext.AddPackagReference("FluentAssertions", "5.7.0") as bool?;
             added.Should().Be(true);
 
-            var result = await restoreContext.Restore() as PackageRestoreResult;
+            var result = await restoreContext.Restore();
+
             result.Errors.Should().BeEmpty();
             var assemblyPaths = result.ResolvedReferences.SelectMany(r => r.AssemblyPaths);
+            
             assemblyPaths.Should().Contain(r => r.Name.Equals("FluentAssertions.dll"));
             assemblyPaths.Should().Contain(r => r.Name.Equals("System.Configuration.ConfigurationManager.dll"));
 
-            var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
-            packageReference.PackageVersion.Should().Be("5.7.0");
+            restoreContext
+                .ResolvedPackageReferences
+                .Should()
+                .Contain(r => r.PackageName.Equals("FluentAssertions", StringComparison.OrdinalIgnoreCase) &&
+                              r.PackageVersion == "5.7.0");
         }
 
         [Fact(Timeout = 45000)]
@@ -36,13 +41,18 @@ namespace Microsoft.DotNet.Interactive.Tests
             var added = restoreContext.AddPackagReference("NewtonSoft.Json") as bool?;
             added.Should().Be(true);
 
-            var result = await restoreContext.Restore() as PackageRestoreResult;
+            var result = await restoreContext.Restore();
+
             result.Succeeded.Should().BeTrue();
+            
             var assemblyPaths = result.ResolvedReferences.SelectMany(r => r.AssemblyPaths);
             assemblyPaths.Should().Contain(r => r.Name.Equals("NewtonSoft.Json.dll", StringComparison.InvariantCultureIgnoreCase));
 
-            var packageReference = await restoreContext.GetResolvedPackageReference("NewtonSoft.Json");
-            packageReference.PackageVersion.Should().NotBeNullOrWhiteSpace();
+            restoreContext
+                .ResolvedPackageReferences
+                .Should()
+                .Contain(r => r.PackageName.Equals("NewtonSoft.Json", StringComparison.OrdinalIgnoreCase) &&
+                              !string.IsNullOrWhiteSpace(r.PackageVersion));
         }
 
         [Fact(Timeout = 45000)]
@@ -52,7 +62,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             var added = restoreContext.AddPackagReference("not-a-real-package-definitely-not", "5.7.0") as bool?;
             added.Should().Be(true);
 
-            var result = await restoreContext.Restore() as PackageRestoreResult;
+            var result = await restoreContext.Restore();
             result.Succeeded.Should().BeFalse();
             result.Errors.Should().NotBeEmpty();
         }
@@ -78,13 +88,16 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             var restoreContext = new PackageRestoreContext();
             var added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
-            added.Should().Be(true);
+            added.Should().BeTrue();
 
-            var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
+            await restoreContext.Restore();
+
+            var packageReference = restoreContext.GetResolvedPackageReference("fluentassertions");
 
             var path = packageReference.AssemblyPaths.Single();
 
-            path.FullName.ToLower()
+            path.FullName
+                .ToLower()
                 .Should()
                 .EndWith("fluentassertions" + Path.DirectorySeparatorChar +
                          "5.7.0" + Path.DirectorySeparatorChar +
@@ -99,9 +112,11 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             var restoreContext = new PackageRestoreContext();
             var added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
-            added.Should().Be(true);
+            added.Should().BeTrue();
 
-            var packageReference = await restoreContext.GetResolvedPackageReference("fluentassertions");
+            await restoreContext.Restore();
+
+            var packageReference = restoreContext.GetResolvedPackageReference("fluentassertions");
 
             var path = packageReference.PackageRoot;
 
@@ -120,7 +135,9 @@ namespace Microsoft.DotNet.Interactive.Tests
             fluent_added.Should().Be(true);
             html_added.Should().Be(true);
 
-            var packageReference = await restoreContext.GetResolvedPackageReference("htmlagilitypack");
+            await restoreContext.Restore();
+
+            var packageReference = restoreContext.GetResolvedPackageReference("htmlagilitypack");
 
             var path = packageReference.AssemblyPaths.Single();
 

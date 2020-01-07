@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Interactive.Utility
             DirectoryInfo workingDir = null,
             TimeSpan? timeout = null)
         {
-            args = args ?? "";
+            args ??= "";
 
             var stdOut = new StringBuilder();
             var stdErr = new StringBuilder();
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Interactive.Utility
                 if (exitCode == 0)
                 {
                     operation.Succeed(
-                        "{command} {args} exited with {code}",
+                        "> {command} {args} -> exited with {code}",
                         process.StartInfo.FileName,
                         process.StartInfo.Arguments,
                         process.ExitCode);
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Interactive.Utility
         {
             using (var operation = Log.OnEnterAndExit())
             {
-                args = args ?? "";
+                args ??= "";
 
                 var process = new Process
                 {
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Interactive.Utility
                     }
                 };
 
-                operation.Info("launching {process} with {args}", command, args);
+                operation.Info("> {process} {args}", command, args);
 
                 if (environmentVariables?.Length > 0)
                 {
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Interactive.Utility
             return new ConfirmationLogger(
                 operationName: operationName,
                 category: Log.Category,
-                message: "Invoking {command} {args}",
+                message: "> {command} {args}",
                 args: new[] { command, args },
                 logOnStart: true);
         }

@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.Tests
 {
+    [LogTestNamesToPocketLogger]
     public class LanguageKerneExtensionLoadingTests : LanguageKernelTestBase
     {
         public LanguageKerneExtensionLoadingTests(ITestOutputHelper output) : base(output)

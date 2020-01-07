@@ -19,8 +19,6 @@ namespace Microsoft.DotNet.Interactive.Formatting
         private static int _recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
-        private static readonly ConcurrentDictionary<Type, string> _mimeTypesByType = new ConcurrentDictionary<Type, string>();
-
         internal static readonly ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter> TypeFormatters = new ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter>();
 
         private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters =
@@ -162,7 +160,6 @@ namespace Microsoft.DotNet.Interactive.Formatting
         public static void ResetToDefault()
         {
             TypeFormatters.Clear();
-            _mimeTypesByType.Clear();
             _genericFormatters.Clear();
 
             ListExpansionLimit = 10;
@@ -183,7 +180,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
                 throw new ArgumentNullException(nameof(mimeType));
             }
 
-            var writer = CreateWriter();
+            using var writer = CreateWriter();
             FormatTo(obj, writer, mimeType);
             return writer.ToString();
         }
@@ -197,7 +194,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
                 throw new ArgumentNullException(nameof(formatter));
             }
 
-            var writer = CreateWriter();
+            using var writer = CreateWriter();
             formatter.Format(obj, writer);
             return writer.ToString();
         }

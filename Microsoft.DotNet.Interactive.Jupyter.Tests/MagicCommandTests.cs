@@ -32,9 +32,9 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task lsmagic_lists_registered_magic_commands()
         {
-            var kernel = new CompositeKernel()
-                .UseDefaultMagicCommands()
-                .LogEventsToPocketLogger();
+            using var kernel = new CompositeKernel()
+                               .UseDefaultMagicCommands()
+                               .LogEventsToPocketLogger();
 
             kernel.AddDirective(new Command("%%one"));
             kernel.AddDirective(new Command("%%two"));
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task html_emits_string_as_content_within_a_script_element()
         {
-            var kernel = new CompositeKernel()
+            using var kernel = new CompositeKernel()
                 .UseDefaultMagicCommands();
 
             var html = "<b>hello!</b>";
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task javascript_emits_string_as_content_within_a_script_element()
         {
-            var kernel = new CompositeKernel()
+            using var kernel = new CompositeKernel()
                 .UseDefaultMagicCommands();
 
             var scriptContent = "alert('Hello World!');";
@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task markdown_renders_markdown_content_as_html()
         {
-            var kernel = new CompositeKernel()
+            using var kernel = new CompositeKernel()
                 .UseDefaultMagicCommands();
 
             var expectedHtml = @"<h1 id=""topic"">Topic!</h1><p>Content</p>";
@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         [Fact]
         public async Task time_produces_time_elapsed_to_run_the_code_submission()
         {
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
                 {
                     new CSharpKernel().UseKernelHelpers()
                 }
@@ -224,7 +224,7 @@ display(""done!"");
         [Fact]
         public async Task whos_lists_the_names_and_values_of_variables_in_scope()
         {
-            var kernel = new CompositeKernel
+            using var kernel = new CompositeKernel
                          {
                              new CSharpKernel().UseWho()
                          }
