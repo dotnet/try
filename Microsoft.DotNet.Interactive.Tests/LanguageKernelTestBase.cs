@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 e => log.Information(e.ToLogString()));
         }
 
-        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        private CompositeDisposable _disposables = new CompositeDisposable();
         
         private static readonly AsyncLock _lock = new AsyncLock();
         private readonly AsyncLock.Releaser _lockReleaser;
@@ -68,6 +68,14 @@ namespace Microsoft.DotNet.Interactive.Tests
         public void Dispose()
         {
             _disposables?.Dispose();
+
+            _disposables = null;
+
+            // FIX: (Dispose) 
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            // System.Diagnostics.Debugger.Launch();
 
             _lockReleaser.Dispose();
         }

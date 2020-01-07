@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_returns_the_result_of_a_non_null_expression(Language language)
         {
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_returns_no_result_for_a_null_value(Language language)
         {
             var kernel = CreateKernel(language);
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
         // Option 1: inline switch
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         [InlineData(Language.CSharp)]
         public async Task it_remembers_state_between_submissions(Language language)
         {
@@ -125,7 +125,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task kernel_base_ignores_command_line_directives(Language language)
         {
             // The text `[1;2;3;4]` parses as a System.CommandLine directive; ensure it's not consumed and is passed on to the kernel.
@@ -147,7 +147,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task when_it_throws_exception_after_a_value_was_produced_then_only_the_error_is_returned(Language language)
         {
             var kernel = CreateKernel(language);
@@ -195,7 +195,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_returns_exceptions_thrown_in_user_code(Language language)
         {
             var kernel = CreateKernel(language);
@@ -234,7 +234,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_returns_diagnostics(Language language)
         {
             var kernel = CreateKernel(language);
@@ -344,7 +344,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task expression_evaluated_to_null_has_result_with_null_value(Language language)
         {
             var kernel = CreateKernel(language);
@@ -392,7 +392,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_does_not_return_a_result_for_a_binding(Language language)
         {
             var kernel = CreateKernel(language);
@@ -416,10 +416,10 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp, "true ? 25 : 20")]
-        [InlineData(Language.FSharp, "if true then 25 else 20", Skip = "temp")]
-        [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20", Skip = "temp")]
+        [InlineData(Language.FSharp, "if true then 25 else 20")]
+        [InlineData(Language.FSharp, "if false then 15 elif true then 25 else 20")]
         [InlineData(Language.CSharp, "true switch { true => 25, false => 20 }")]
-        [InlineData(Language.FSharp, "match true with | true -> 25; | false -> 20", Skip = "temp")]
+        [InlineData(Language.FSharp, "match true with | true -> 25; | false -> 20")]
         public async Task it_returns_a_result_for_a_if_expressions(Language language, string expression)
         {
             var kernel = CreateKernel(language);
@@ -436,7 +436,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_aggregates_multiple_submissions(Language language)
         {
             var kernel = CreateKernel(language);
@@ -472,7 +472,7 @@ location.EndsWith(""System.Text.Json.dll"")"
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_produces_values_when_executing_Console_output(Language language)
         {
             var kernel = CreateKernel(language);
@@ -505,7 +505,7 @@ Console.Write(""value three"");",
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task kernel_captures_stdout(Language language)
         {
             var kernel = CreateKernel(language);
@@ -523,7 +523,7 @@ Console.Write(""value three"");",
         }
 
         [Theory(Timeout = 45000)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task kernel_captures_stderr(Language language)
         {
             var kernel = CreateKernel(language);
@@ -542,7 +542,7 @@ Console.Write(""value three"");",
 
         [Theory(Skip = "flaky")]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_can_cancel_execution(Language language)
         {
             var kernel = CreateKernel(language);
@@ -577,7 +577,7 @@ Console.Write(""value three"");",
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_returns_a_similarly_shaped_error(Language language)
         {
             var kernel = CreateKernel(language);
@@ -601,7 +601,7 @@ Console.Write(""value three"");",
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_produces_a_final_value_if_the_code_expression_evaluates(Language language)
         {
             var kernel = CreateKernel(language);
@@ -638,7 +638,7 @@ Console.Write(""value three"");
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task the_output_is_asynchronous(Language language)
         {
             var kernel = CreateKernel(language);
@@ -696,7 +696,7 @@ Console.Write(2);
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_formats_func_instances(Language language)
         {
             var kernel = CreateKernel(language);
@@ -734,7 +734,7 @@ Console.Write(2);
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_types(Language language)
         {
             var kernel = CreateKernel(language);
@@ -757,7 +757,7 @@ Console.Write(2);
 
         [Theory(Timeout = 45000)]
         [InlineData(Language.CSharp)]
-        [InlineData(Language.FSharp, Skip = "temp")]
+        [InlineData(Language.FSharp)]
         public async Task it_returns_completion_list_for_previously_declared_variables(Language language)
         {
             var kernel = CreateKernel(language);
