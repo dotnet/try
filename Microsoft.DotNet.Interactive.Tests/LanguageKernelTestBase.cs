@@ -95,6 +95,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             KernelEvents = languageSpecificKernel.KernelEvents.ToSubscribedList();
 
+            DisposeAfterTest(KernelEvents);
             DisposeAfterTest(languageSpecificKernel);
 
             return languageSpecificKernel;
