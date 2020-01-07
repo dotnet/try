@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -19,12 +18,6 @@ namespace Microsoft.DotNet.Interactive
             {
                 _variables[variable.Name] = variable;
             }
-        }
-
-        public CurrentVariables(Dictionary<string, CurrentVariable> variables, bool detailed)
-            : this(detailed)
-        {
-            _variables = variables ?? throw new ArgumentNullException(nameof(variables));
         }
 
         private CurrentVariables(bool detailed)
