@@ -209,7 +209,7 @@ type FSharpKernel() =
             context.Publish(CurrentCommandCancelled(cancelCurrentCommand))
         }
 
-    member _.Variables =
+    member _.GetCurrentVariables() =
         // `ValueBound` event will make a copy of value types, so to ensure we always get the current value, we re-evaluate each variable
         variables
         |> Seq.filter (fun v -> v <> "it") // don't report special variable `it`

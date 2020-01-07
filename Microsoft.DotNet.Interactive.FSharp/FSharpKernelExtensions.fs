@@ -78,7 +78,8 @@ open System.Linq
                 | :? SubmitCode ->
                     match context.HandlingKernel with
                     | :? FSharpKernel as kernel ->
-                        let currentVariables = CurrentVariables(kernel.Variables, detailed)
+                        let kernelVariables = kernel.GetCurrentVariables()
+                        let currentVariables = CurrentVariables(kernelVariables, detailed)
                         let html = currentVariables.ToDisplayString(HtmlFormatter.MimeType)
                         context.Publish(DisplayedValueProduced(html, context.Command, [| FormattedValue(HtmlFormatter.MimeType, html) |]))
                     | _ -> ()
