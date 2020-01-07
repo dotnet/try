@@ -267,7 +267,7 @@ using static {typeof(Kernel).FullName};
         public static CSharpKernel UseWho(this CSharpKernel kernel)
         {
             kernel.AddDirective(who_and_whos());
-            CurrentVariables.RegisterFormatter();
+            Formatter.Register(new CurrentVariablesFormatter());
             return kernel;
         }
 

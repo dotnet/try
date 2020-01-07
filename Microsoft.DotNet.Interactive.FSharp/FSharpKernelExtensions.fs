@@ -87,5 +87,5 @@ open System.Linq
                 Task.CompletedTask)
         command.AddAlias("%who")
         kernel.AddDirective(command)
-        CurrentVariables.RegisterFormatter()
+        Formatter.Register(CurrentVariablesFormatter())
         kernel
