@@ -46,6 +46,11 @@ namespace Microsoft.DotNet.Interactive
             _disposables.Add(_kernelEvents);
         }
 
+        ~KernelBase()
+        {
+            Dispose(false);
+        }
+
         public KernelCommandPipeline Pipeline { get; }
 
         private void AddSetKernelMiddleware()
@@ -251,7 +256,21 @@ namespace Microsoft.DotNet.Interactive
             IKernelCommand command,
             KernelInvocationContext context) => context.HandlingKernel = this;
 
-        public void Dispose() => _disposables.Dispose();
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposables.IsDisposed)
+            {
+                return;
+            }
+
+            _disposables.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         string IKernel.Name => Name;
     }
