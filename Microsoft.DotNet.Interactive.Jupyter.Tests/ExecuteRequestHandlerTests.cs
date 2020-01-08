@@ -127,11 +127,90 @@ ThrowTheException();
             JupyterMessageSender.PubSubMessages.Should().Contain(r => r is DisplayData);
         }
 
+        [Theory]
+        [InlineData(Language.CSharp, "display(new LaTeXString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\"));", @"F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx")]
+        [InlineData(Language.FSharp, "display(new LaTeXString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\"))", @"F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx")]
+        public async Task does_display_LaTeXString_values_on_ValueProduced(Language language, string code, string expectedDisplayValue)
+        {
+            var scheduler = CreateScheduler();
+            SetKernelLanguage(language);
+            var request = Envelope.Create(new ExecuteRequest(code));
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages
+                .OfType<DisplayData>()
+                .Should()
+                
+                .Contain(dp=> dp.Data["text/latex"] as string == expectedDisplayValue);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp, "new LaTeXString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\")", @"F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx")]
+        [InlineData(Language.FSharp, "new LaTeXString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\")", @"F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx")]
+        public async Task does_display_LaTeXString_values_on_ReturnValueProduced(Language language, string code, string expectedDisplayValue)
+        {
+            var scheduler = CreateScheduler();
+            SetKernelLanguage(language);
+            var request = Envelope.Create(new ExecuteRequest(code));
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages
+                .OfType<ExecuteResult>()
+                .Should()
+
+                .Contain(dp => dp.Data["text/latex"] as string == expectedDisplayValue);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp, "display(new MathString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\"));", @"$$F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx$$")]
+        [InlineData(Language.FSharp, "display(new MathString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\"))", @"$$F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx$$")]
+        public async Task does_display_MathString_values_on_ValueProduced(Language language, string code, string expectedDisplayValue)
+        {
+            var scheduler = CreateScheduler();
+            SetKernelLanguage(language);
+            var request = Envelope.Create(new ExecuteRequest(code));
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages
+                .OfType<DisplayData>()
+                .Should()
+
+                .Contain(dp => dp.Data["text/latex"] as string == expectedDisplayValue);
+        }
+
+        [Theory]
+        [InlineData(Language.CSharp, "new MathString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\")", @"$$F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx$$")]
+        [InlineData(Language.FSharp, "new MathString(@\"F(k) = \\int_{-\\infty}^{\\infty} f(x) e^{2\\pi i k} dx\")", @"$$F(k) = \int_{-\infty}^{\infty} f(x) e^{2\pi i k} dx$$")]
+        public async Task does_display_MathString_values_on_ReturnValueProduced(Language language, string code, string expectedDisplayValue)
+        {
+            var scheduler = CreateScheduler();
+            SetKernelLanguage(language);
+            var request = Envelope.Create(new ExecuteRequest(code));
+            var context = new JupyterRequestContext(JupyterMessageSender, request);
+            await scheduler.Schedule(context);
+
+            await context.Done().Timeout(20.Seconds());
+
+            JupyterMessageSender.PubSubMessages
+                .OfType<ExecuteResult>()
+                .Should()
+
+                .Contain(dp => dp.Data["text/latex"] as string == expectedDisplayValue);
+        }
 
         [Theory]
         [InlineData(Language.CSharp)]
         [InlineData(Language.FSharp)]
-        public async Task _does_not_send_ExecuteResult_message_when_evaluating_display_value(Language language)
+        public async Task does_not_send_ExecuteResult_message_when_evaluating_display_value(Language language)
         {
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);

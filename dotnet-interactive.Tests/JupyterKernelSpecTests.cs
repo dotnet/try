@@ -8,6 +8,7 @@ using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Utility;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Interactive.App.Tests

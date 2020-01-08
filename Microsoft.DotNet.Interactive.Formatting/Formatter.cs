@@ -19,6 +19,10 @@ namespace Microsoft.DotNet.Interactive.Formatting
         private static int _recursionLimit;
         internal static readonly RecursionCounter RecursionCounter = new RecursionCounter();
 
+        private static string _defaultMimeType = HtmlFormatter.MimeType;
+
+        private static readonly ConcurrentDictionary<Type, string> _preferredMimeTypesByType = new ConcurrentDictionary<Type, string>();
+
         internal static readonly ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter> TypeFormatters = new ConcurrentDictionary<(Type type, string mimeType), ITypeFormatter>();
 
         private static readonly ConcurrentDictionary<Type, Action<object, TextWriter, string>> _genericFormatters =
@@ -161,6 +165,9 @@ namespace Microsoft.DotNet.Interactive.Formatting
         {
             TypeFormatters.Clear();
             _genericFormatters.Clear();
+            _preferredMimeTypesByType.Clear();
+            _defaultMimeType = HtmlFormatter.MimeType;
+            _preferredMimeTypesByType[typeof(string)] = PlainTextFormatter.MimeType;
 
             ListExpansionLimit = 10;
             RecursionLimit = 6;
@@ -170,6 +177,42 @@ namespace Microsoft.DotNet.Interactive.Formatting
 
             ConfigureDefaultPlainTextFormattersForSpecialTypes();
         }
+
+        public static void SetPreferredMimeTypeFor(Type type, string preferredMimeType)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (string.IsNullOrWhiteSpace(preferredMimeType))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(preferredMimeType));
+            }
+
+            _preferredMimeTypesByType[type] = preferredMimeType;
+        }
+
+        public static void SetDefaultMimeType(string mimeType)
+        {
+            if (string.IsNullOrWhiteSpace(mimeType))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(mimeType));
+            }
+
+            _defaultMimeType = mimeType;
+        }
+
+        public static string GetDefaultMimeType()
+        {
+            return _defaultMimeType;
+        }
+
+        public static string PreferredMimeTypeFor(Type type)
+        {
+            return _preferredMimeTypesByType.TryGetValue(type, out var mimeType) ? mimeType : null;
+        }
+
 
         public static string ToDisplayString(
             this object obj,
@@ -311,6 +354,11 @@ namespace Microsoft.DotNet.Interactive.Formatting
             SingleLinePlainTextFormatter.WriteEndSequence(writer);
         }
 
+        public static IEnumerable<string> RegisteredMimeTypesFor(Type type)
+        {
+            return TypeFormatters.Keys.Where(k => k.type == type).Select(k => k.mimeType);
+        }
+
         public static void Register(
             Type type,
             Action<object, TextWriter> formatter,
@@ -394,16 +442,16 @@ namespace Microsoft.DotNet.Interactive.Formatting
                      (obj, writer) => Formatter<Type>.FormatTo((Type) obj, writer, Formatting.PlainTextFormatter.MimeType));
 
             // Newtonsoft.Json types -- these implement IEnumerable and their default output is not useful, so use their default ToString
-            TryRegisterDefault("Newtonsoft.Json.Linq.JArray, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
-            TryRegisterDefault("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", (obj, writer) => writer.Write(obj));
+            TryRegisterDefault("Newtonsoft.Json.Linq.JArray, Newtonsoft.Json", (obj, writer) => writer.Write(obj), Formatting.PlainTextFormatter.MimeType);
+            TryRegisterDefault("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", (obj, writer) => writer.Write(obj), Formatting.PlainTextFormatter.MimeType);
         }
 
-        private static void TryRegisterDefault(string typeName, Action<object, TextWriter> write)
+        private static void TryRegisterDefault(string typeName, Action<object, TextWriter> write, string mimeType)
         {
             var type = Type.GetType(typeName);
             if (type != null)
             {
-                Register(type, write);
+                Register(type, write, mimeType);
             }
         }
 
@@ -412,5 +460,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
         internal static readonly MethodInfo FormatReadOnlyMemoryMethod = typeof(Formatter)
                                                                           .GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
                                                                           .Single(m => m.Name == nameof(ReadOnlyMemoryToArray));
+
+      
     }
 }

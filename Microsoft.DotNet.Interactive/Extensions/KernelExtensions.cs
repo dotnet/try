@@ -8,6 +8,20 @@ namespace Microsoft.DotNet.Interactive.Extensions
 {
     public static class KernelExtensions
     {
+        public static IKernel GetRoot(this IKernel kernel)
+        {
+            if (kernel == null) throw new ArgumentNullException(nameof(kernel));
+            var root = KernelHierarchy.GetParent(kernel);
+            while (root != null && KernelHierarchy.GetParent(root) != null)
+            {
+                {
+                    root = KernelHierarchy.GetParent(root);
+                }
+            }
+
+            return root ?? kernel;
+        }
+
         public static void VisitSubkernels(
             this IKernel kernel,
             Action<IKernel> onVisit,
@@ -23,18 +37,13 @@ namespace Microsoft.DotNet.Interactive.Extensions
                 throw new ArgumentNullException(nameof(onVisit));
             }
 
-
-            if (kernel is ICompositeKernel compositeKernel)
+            foreach (var subKernel in KernelHierarchy.GetChildren(kernel))
             {
-                foreach (var subkernel in compositeKernel.ChildKernels)
-                {
-                    onVisit(subkernel);
+                onVisit(subKernel);
 
-                    if (recursive &&
-                        subkernel is ICompositeKernel childCompositeKernel)
-                    {
-                        childCompositeKernel.VisitSubkernels(onVisit, true);
-                    }
+                if (recursive)
+                {
+                    subKernel.VisitSubkernels(onVisit, recursive: true);
                 }
             }
         }
@@ -44,17 +53,23 @@ namespace Microsoft.DotNet.Interactive.Extensions
             Func<IKernel, Task> onVisit,
             bool recursive = false)
         {
-            if (kernel is ICompositeKernel compositeKernel)
+            if (kernel == null)
             {
-                foreach (var subkernel in compositeKernel.ChildKernels)
-                {
-                    await onVisit(subkernel);
+                throw new ArgumentNullException(nameof(kernel));
+            }
 
-                    if (recursive &&
-                        subkernel is ICompositeKernel childCompositeKernel)
-                    {
-                        await childCompositeKernel.VisitSubkernelsAsync(onVisit, true);
-                    }
+            if (onVisit == null)
+            {
+                throw new ArgumentNullException(nameof(onVisit));
+            }
+
+            foreach (var subKernel in KernelHierarchy.GetChildren(kernel))
+            {
+                await onVisit(subKernel);
+
+                if (recursive)
+                {
+                    await subKernel.VisitSubkernelsAsync(onVisit, true);
                 }
             }
         }

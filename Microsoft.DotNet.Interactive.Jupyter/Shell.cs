@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.DotNet.Interactive.Jupyter.Formatting;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
 using Microsoft.Extensions.Hosting;
@@ -78,6 +79,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         {
             using var activity = Log.OnEnterAndExit();
 
+            SetupDefaultMimeTypes();
+
             _shell.Bind(_shellAddress);
             _ioPubSocket.Bind(_ioPubAddress);
             _stdIn.Bind(_stdInAddress);
@@ -123,6 +126,26 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             void SetBusy(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Busy), request, kernelIdentity);
             void SetIdle(Envelope request) => _ioPubSender.Publish(new Status(StatusValues.Idle), request, kernelIdentity);
+        }
+
+        public static void SetupDefaultMimeTypes()
+        {
+            Microsoft.DotNet.Interactive.Formatting.Formatter<LaTeXString>.Register((laTeX, writer) =>
+                {
+                    writer.Write(laTeX.ToString());
+                },
+                "text/latex");
+
+            Microsoft.DotNet.Interactive.Formatting.Formatter<MathString>.Register((math, writer) =>
+                {
+                    writer.Write(math.ToString());
+                },
+                "text/latex");
+
+            Microsoft.DotNet.Interactive.Formatting.Formatter.SetPreferredMimeTypeFor(typeof(LaTeXString), "text/latex");
+            Microsoft.DotNet.Interactive.Formatting.Formatter.SetPreferredMimeTypeFor(typeof(MathString), "text/latex");
+            Microsoft.DotNet.Interactive.Formatting.Formatter.SetPreferredMimeTypeFor(typeof(string), Microsoft.DotNet.Interactive.Formatting.PlainTextFormatter.MimeType);
+            Microsoft.DotNet.Interactive.Formatting.Formatter.SetDefaultMimeType(Microsoft.DotNet.Interactive.Formatting.HtmlFormatter.MimeType);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

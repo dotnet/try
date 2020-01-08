@@ -27,16 +27,17 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         protected JupyterRequestHandlerTestBase(ITestOutputHelper output)
         {
             _disposables.Add(output.SubscribeToPocketLogger());
-
             _cSharpKernel = new CSharpKernel()
                 .UseDefaultFormatting()
                 .UseExtendDirective()
-                .UseKernelHelpers();
+                .UseKernelHelpers()
+                .UseMathAndLaTeX();
 
             _fSharpKernel = new FSharpKernel()
                 .UseDefaultFormatting()
                 .UseKernelHelpers()
-                .UseDefaultNamespaces();
+                .UseDefaultNamespaces()
+                .UseMathAndLaTeX();
 
             _compositeKernel = new CompositeKernel
                 {
@@ -76,6 +77,8 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 
         protected ICommandScheduler<JupyterRequestContext> CreateScheduler()
         {
+            Shell.SetupDefaultMimeTypes();
+
             var handler = new JupyterRequestContextHandler(Kernel);
 
             return CommandScheduler.Create<JupyterRequestContext>(handler.Handle).Trace();

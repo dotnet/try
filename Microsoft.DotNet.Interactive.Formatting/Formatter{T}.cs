@@ -59,6 +59,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
         /// <summary>
         /// Registers a formatter to be used when formatting instances of type <typeparamref name="T" />.
         /// </summary>
+        /// <param name="formatter">The formatter.</param>
         public static void Register(
             Func<T, string> formatter,
             string mimeType = PlainTextFormatter.MimeType) =>

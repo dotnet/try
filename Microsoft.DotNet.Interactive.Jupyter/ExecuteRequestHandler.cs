@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 .ToDictionary(k => k.MimeType, v => v.Value);
 
             var value = displayEvent.Value;
-            PubSubMessage dataMessage = null;
+            PubSubMessage dataMessage;
 
             CreateDefaultFormattedValueIfEmpty(formattedValues, value);
 

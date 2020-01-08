@@ -6,19 +6,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel
+    public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel, IExtensibleKernel
     {
         private readonly List<IKernel> _childKernels = new List<IKernel>();
 
         public CompositeKernel()
         {
             Name = nameof(CompositeKernel);
+            RegisterForDisposal(Disposable.Create(() => { KernelHierarchy.DeleteNode(this); }));
         }
 
         public string DefaultKernelName { get; set; }
@@ -31,6 +34,8 @@ namespace Microsoft.DotNet.Interactive
             }
 
             _childKernels.Add(kernel);
+
+            KernelHierarchy.AddChildKernel(this, kernel);
 
             var chooseKernelCommand = new Command($"%%{kernel.Name}");
 
@@ -107,5 +112,12 @@ namespace Microsoft.DotNet.Interactive
         public IEnumerator<IKernel> GetEnumerator() => _childKernels.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public Task LoadExtensionsFromDirectory(DirectoryInfo directory, KernelInvocationContext invocationContext,
+            IReadOnlyList<FileInfo> additionalDependencies = null)
+        {
+           // TODO: add kernel logic
+           return Task.CompletedTask;
+        }
     }
 }

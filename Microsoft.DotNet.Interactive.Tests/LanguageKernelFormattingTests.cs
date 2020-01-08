@@ -97,16 +97,13 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             await kernel.SendAsync(new SubmitCode(submission));
 
-            var formatted =
-                KernelEvents
-                    .OfType<DisplayedValueProduced>()
-                    .SelectMany(v => v.FormattedValues);
-
-            formatted
+            KernelEvents
+                .OfType<DisplayedValueProduced>()
+                .SelectMany(v => v.FormattedValues)
                 .Should()
                 .ContainSingle(v =>
-                                   v.MimeType == "text/html" &&
-                                   v.Value.ToString().Contains("<b>hi!</b>"));
+                    v.MimeType == "text/html" &&
+                    v.Value.ToString().Contains("<b>hi!</b>"));
         }
 
         [Theory(Timeout = 45000)]
@@ -125,7 +122,6 @@ namespace Microsoft.DotNet.Interactive.Tests
             await kernel.SendAsync(new SubmitCode(submission));
 
             KernelEvents
-                
                 .OfType<DisplayedValueProduced>()
                 .SelectMany(v => v.FormattedValues)
                 .Should()
