@@ -2,9 +2,9 @@ using MLS.Agent.Tools;
 
 namespace MLS.Agent.CommandLine
 {
-    public class SyncOptions
+    public class PublishOptions
     {
-        public SyncOptions(IDirectoryAccessor rootDirectory)
+        public PublishOptions(IDirectoryAccessor rootDirectory)
         {
             RootDirectory = rootDirectory ?? throw new System.ArgumentNullException(nameof(rootDirectory));
         }

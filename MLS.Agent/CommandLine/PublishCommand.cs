@@ -12,15 +12,15 @@ using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
-    public static class SyncCommand
+    public static class PublishCommand
     {
         public static async Task<int> Do(
-            SyncOptions syncOptions,
+            PublishOptions publishOptions,
             IConsole console,
             StartupOptions startupOptions = null
         )
         {
-            var directoryAccessor = syncOptions.RootDirectory;
+            var directoryAccessor = publishOptions.RootDirectory;
             var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor);
             var markdownProject = new MarkdownProject(
                 directoryAccessor,
@@ -41,7 +41,6 @@ namespace MLS.Agent.CommandLine
                 var pipeline = new MarkdownPipelineBuilder().UseNormalizeCodeBlockAnnotations().Build();
                 var writer = new StringWriter();
                 var renderer = new NormalizeRenderer(writer);
-                renderer.Options.ExpandAutoLinks = true;
                 pipeline.Setup(renderer);
 
                 var blocks = document

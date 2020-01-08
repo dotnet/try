@@ -51,8 +51,8 @@ namespace MLS.Agent.CommandLine
             IConsole console,
             StartupOptions startupOptions);
 
-        public delegate Task<int> Sync(
-            SyncOptions options,
+        public delegate Task<int> Publish(
+            PublishOptions options,
             IConsole console,
             StartupOptions startupOptions);
 
@@ -64,7 +64,7 @@ namespace MLS.Agent.CommandLine
             TryGitHub tryGithub = null,
             Pack pack = null,
             Verify verify = null,
-            Sync sync = null,
+            Publish publish = null,
             ITelemetry telemetry = null,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = null)
         {
@@ -92,9 +92,9 @@ namespace MLS.Agent.CommandLine
                                               console,
                                               startupOptions));
 
-            sync = sync ??
+            publish = publish ??
                      ((options, console, startupOptions) =>
-                         SyncCommand.Do(options,
+                         PublishCommand.Do(options,
                              console,
                              startupOptions));
 
@@ -142,7 +142,7 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Pack());
             rootCommand.AddCommand(Verify());
-            rootCommand.AddCommand(Sync());
+            rootCommand.AddCommand(Publish());
 
             return new CommandLineBuilder(rootCommand)
                    .UseDefaults()
@@ -447,20 +447,17 @@ namespace MLS.Agent.CommandLine
                 return verifyCommand;
             }
 
-            Command Sync()
+            Command Publish()
             {
-                var syncCommand = new Command("sync", "Sync code from sample projects to Markdown files in the target directory and its children.")
+                var publishCommand = new Command("publish", "Publish code from sample projects to Markdown files in the target directory and its children.")
                 {
                     dirArgument
                 };
 
-                syncCommand.Handler = CommandHandler.Create<SyncOptions, IConsole, StartupOptions>(
-                    (options, console, startupOptions) =>
-                    {
-                        return sync(options, console, startupOptions);
-                    });
+                publishCommand.Handler = CommandHandler.Create<PublishOptions, IConsole, StartupOptions>(
+                    (options, console, startupOptions) => publish(options, console, startupOptions));
 
-                return syncCommand;
+                return publishCommand;
             }
         }
     }
