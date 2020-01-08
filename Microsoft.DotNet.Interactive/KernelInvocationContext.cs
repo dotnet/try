@@ -53,6 +53,8 @@ namespace Microsoft.DotNet.Interactive
 
             _events.OnCompleted();
             IsComplete = true;
+            _events.OnCompleted();
+            IsComplete = true;
         }
 
         public void Publish(IKernelEvent @event)

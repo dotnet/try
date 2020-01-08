@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.DotNet.Interactive.Formatting;
 
 namespace Microsoft.DotNet.Interactive
@@ -28,22 +29,32 @@ namespace Microsoft.DotNet.Interactive
         {
             var type = value?.GetType();
 
-            var mimeType = MimeTypeFor(type);
+            var mimeTypes = MimeTypesFor(type);
 
-            var formatted = value.ToDisplayString(mimeType);
-
-            return new[]
-            {
-                new FormattedValue(mimeType, formatted)
-            };
+            return mimeTypes
+                .Select(mimeType =>
+                    new FormattedValue(mimeType, value.ToDisplayString(mimeType)))
+                .ToArray();
         }
 
-        private static string MimeTypeFor(Type returnValueType)
+        private static IEnumerable<string> MimeTypesFor(Type returnValueType)
         {
-            return returnValueType?.IsPrimitive == true ||
-                   returnValueType == typeof(string)
-                       ? "text/plain"
-                       : "text/html";
+            var mimeTypes = new HashSet<string> ();
+
+            if (returnValueType != null)
+            {
+                var preferredMimeType = Formatter.PreferredMimeTypeFor(returnValueType) ??
+                      (returnValueType?.IsPrimitive == true
+                          ? PlainTextFormatter.MimeType
+                          : Formatter.GetDefaultMimeType());
+
+                if (!string.IsNullOrWhiteSpace(preferredMimeType))
+                {
+                    mimeTypes.Add(preferredMimeType);
+                }
+            }
+
+            return mimeTypes;
         }
     }
 }

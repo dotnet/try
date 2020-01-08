@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.Extensions;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class LoadExtensionsInDirectory : KernelCommandBase
+    public class LoadKernelExtensionsInDirectory : KernelCommandBase
     {
-        public LoadExtensionsInDirectory(
+        public LoadKernelExtensionsInDirectory(
             DirectoryInfo directoryPath, 
             IReadOnlyList<FileInfo> additionalDependencies = null)
         {
@@ -28,8 +28,8 @@ namespace Microsoft.DotNet.Interactive.Commands
             if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
             {
                 await extensibleKernel.LoadExtensionsFromDirectory(
-                    Directory, 
-                    context, 
+                    Directory,
+                    context,
                     AdditionalDependencies);
             }
             else
@@ -37,6 +37,13 @@ namespace Microsoft.DotNet.Interactive.Commands
                 context.Fail(
                     message: $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions");
             }
+
+            await context.HandlingKernel.VisitSubkernelsAsync(async k =>
+            {
+                var src = context.Command as LoadKernelExtensionsInDirectory;
+                var command = new LoadKernelExtensionsInDirectory(src.Directory, src.AdditionalDependencies);
+                await k.SendAsync(command);
+            });
         }
     }
 }

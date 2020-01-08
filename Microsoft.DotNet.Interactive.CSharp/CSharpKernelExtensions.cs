@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Extensions;
 using Microsoft.DotNet.Interactive.Formatting;
 using static Microsoft.DotNet.Interactive.Formatting.PocketViewTags;
 
@@ -215,8 +216,8 @@ using static {typeof(Kernel).FullName};
                             context.Publish(new PackageAdded(resolvedReference));
 
                             // Load extensions
-                            await context.HandlingKernel.SendAsync(
-                                new LoadExtensionsInDirectory(
+                            await context.HandlingKernel.GetRoot().SendAsync(
+                                new LoadKernelExtensionsInDirectory(
                                     resolvedReference.PackageRoot,
                                     addedAssemblyPaths));
                         }

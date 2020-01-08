@@ -112,8 +112,8 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                     new HtmlString("<b>hi!</b>"),
                     new FormattedValue("text/html", "<b>hi!</b>")
                 );
-
-                yield return new LoadExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()));
+                
+                yield return new LoadKernelExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()));
 
                 yield return new RequestCompletion("Cons", 4, "chsarp");
 

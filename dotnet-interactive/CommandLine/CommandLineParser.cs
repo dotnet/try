@@ -52,32 +52,28 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                 throw new ArgumentNullException(nameof(services));
             }
 
-            startServer = startServer ??
-                          ((startupOptions, invocationContext) =>
-                                  Program.ConstructWebHost(startupOptions).Run());
+            startServer ??= ((startupOptions, invocationContext) =>
+                Program.ConstructWebHost(startupOptions).Run());
 
-            jupyter = jupyter ??
-                      JupyterCommand.Do;
+            jupyter ??= JupyterCommand.Do;
 
-            startKernelServer = startKernelServer ??
-                                (async (startupOptions, kernel, console) =>
-                                    {
-                                        var server = new StandardIOKernelServer(
-                                            kernel, 
-                                            Console.In, 
-                                            Console.Out);
+            startKernelServer ??= (async (startupOptions, kernel, console) =>
+            {
+                var server = new StandardIOKernelServer(
+                    kernel, 
+                    Console.In, 
+                    Console.Out);
 
-                                        await server.Input.LastAsync();
-                                    });
+                await server.Input.LastAsync();
+            });
 
             // Setup first time use notice sentinel.
-            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? 
-                                         new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
+            firstTimeUseNoticeSentinel ??= new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
 
             // Setup telemetry.
-            telemetry = telemetry ?? new Telemetry.Telemetry(
-                            VersionSensor.Version().AssemblyInformationalVersion,
-                            firstTimeUseNoticeSentinel);
+            telemetry ??= new Telemetry.Telemetry(
+                VersionSensor.Version().AssemblyInformationalVersion,
+                firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             void Track(ParseResult o) => telemetry.SendFiltered(filter, o);
 
@@ -227,13 +223,15 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                                  .UseNugetDirective()
                                  .UseKernelHelpers()
                                  .UseWho()
-                                 .UseXplot(),
+                                 .UseXplot()
+                                 .UseMathAndLaTeX(),
                              new FSharpKernel()
                                  .UseDefaultFormatting()
                                  .UseKernelHelpers()
                                  .UseWho()
                                  .UseDefaultNamespaces()
                                  .UseXplot()
+                                 .UseMathAndLaTeX()
                          }
                          .UseDefaultMagicCommands()
                          .UseExtendDirective();

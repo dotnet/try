@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+            await kernel.SendAsync(new LoadKernelExtensionsInDirectory(nugetPackageDirectory));
 
             KernelEvents.Should()
                         .ContainSingle(e => e is ExtensionLoaded &&
