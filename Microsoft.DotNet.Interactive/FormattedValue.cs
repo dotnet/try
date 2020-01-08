@@ -52,11 +52,6 @@ namespace Microsoft.DotNet.Interactive
                 {
                     mimeTypes.Add(preferredMimeType);
                 }
-
-                foreach (var mimeType in Formatter.RegisteredMimeTypesFor(returnValueType))
-                {
-                    mimeTypes.Add(mimeType);
-                }
             }
 
             return mimeTypes;
