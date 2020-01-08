@@ -26,12 +26,17 @@ type FSharpKernel() =
     let resolvedAssemblies = List<string>()
     static let lockObj = Object();
     let script = lock lockObj (fun () -> new FSharpScript(additionalArgs=[|"/langversion:preview"|]))
+    do base.RegisterForDisposal(script)
     let mutable cancellationTokenSource = new CancellationTokenSource()
+    let variables = HashSet<string>()
+
+    let valueBoundHandler = new Handler<(obj * Type * string)>(fun _ (_, _, name) -> variables.Add(name) |> ignore)
+    do script.ValueBound.AddHandler valueBoundHandler
+    do base.RegisterForDisposal(fun () -> script.ValueBound.RemoveHandler valueBoundHandler)
 
     let handler = new Handler<string> (fun o s -> resolvedAssemblies.Add(s))
     do script.AssemblyReferenceAdded.AddHandler handler
     do base.RegisterForDisposal(fun () -> do script.AssemblyReferenceAdded.RemoveHandler handler)
-    do base.RegisterForDisposal(script)
 
     let messageMap = Dictionary<string, string>()
 
@@ -203,6 +208,20 @@ type FSharpKernel() =
             cancellationTokenSource <- new CancellationTokenSource()
             context.Publish(CurrentCommandCancelled(cancelCurrentCommand))
         }
+
+    member _.GetCurrentVariables() =
+        // `ValueBound` event will make a copy of value types, so to ensure we always get the current value, we re-evaluate each variable
+        variables
+        |> Seq.filter (fun v -> v <> "it") // don't report special variable `it`
+        |> Seq.choose (fun v ->
+            let result, _errors =
+                try
+                    script.Eval("``" + v + "``")
+                with
+                | ex -> Error(ex), [||]
+            match result with
+            | Ok(Some(value)) -> Some (CurrentVariable(v, value.ReflectionType, value.ReflectionValue))
+            | _ -> None)
 
     override __.HandleAsync(command: IKernelCommand, context: KernelInvocationContext): Task =
         match command with

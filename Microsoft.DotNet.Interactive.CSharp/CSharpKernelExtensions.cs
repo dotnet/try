@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
@@ -268,35 +267,7 @@ using static {typeof(Kernel).FullName};
         public static CSharpKernel UseWho(this CSharpKernel kernel)
         {
             kernel.AddDirective(who_and_whos());
-
-            Formatter<CurrentVariables>.Register((variables, writer) =>
-            {
-                PocketView output = null;
-
-                if (variables.Detailed)
-                {
-                    output = table(
-                        thead(
-                            tr(
-                                th("Variable"),
-                                th("Type"),
-                                th("Value"))),
-                        tbody(
-                            variables.Select(v =>
-                                 tr(
-                                     td(v.Name),
-                                     td(v.Type),
-                                     td(v.Value.ToDisplayString())
-                                 ))));
-                }
-                else
-                {
-                    output = div(variables.Select(v => v.Name + "\t "));
-                }
-
-                output.WriteTo(writer, HtmlEncoder.Default);
-            }, "text/html");
-
+            Formatter.Register(new CurrentVariablesFormatter());
             return kernel;
         }
 
@@ -313,10 +284,10 @@ using static {typeof(Kernel).FullName};
                     if (context.Command is SubmitCode &&
                         context.HandlingKernel is CSharpKernel kernel)
                     {
-                        var variables = kernel.ScriptState.Variables;
+                        var variables = kernel.ScriptState.Variables.Select(v => new CurrentVariable(v.Name, v.Type, v.Value));
 
                         var currentVariables = new CurrentVariables(
-                            variables, 
+                            variables,
                             detailed);
 
                         var html = currentVariables

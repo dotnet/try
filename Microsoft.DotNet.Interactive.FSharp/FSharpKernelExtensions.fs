@@ -1,10 +1,14 @@
 ﻿namespace Microsoft.DotNet.Interactive.FSharp
 
 open System
+open System.CommandLine
+open System.CommandLine.Invocation
 open System.Runtime.CompilerServices
+open System.Threading.Tasks
 open Microsoft.AspNetCore.Html
 open Microsoft.DotNet.Interactive
 open Microsoft.DotNet.Interactive.Commands
+open Microsoft.DotNet.Interactive.Events
 open Microsoft.DotNet.Interactive.FSharp
 open Microsoft.DotNet.Interactive.Formatting
 open XPlot.Plotly
@@ -61,4 +65,27 @@ open System.Linq
                 return! kernel.SendAsync(SubmitCode code) |> Async.AwaitTask
             }
         Async.RunSynchronously t |> ignore
+        kernel
+
+    [<Extension>]
+    static member UseWho(kernel: FSharpKernel) =
+        let detailedName = "%whos"
+        let command = Command(detailedName)
+        command.Handler <- CommandHandler.Create(
+            fun (parseResult: ParseResult) (context: KernelInvocationContext) ->
+                let detailed = parseResult.CommandResult.Token.Value = detailedName
+                match context.Command with
+                | :? SubmitCode ->
+                    match context.HandlingKernel with
+                    | :? FSharpKernel as kernel ->
+                        let kernelVariables = kernel.GetCurrentVariables()
+                        let currentVariables = CurrentVariables(kernelVariables, detailed)
+                        let html = currentVariables.ToDisplayString(HtmlFormatter.MimeType)
+                        context.Publish(DisplayedValueProduced(html, context.Command, [| FormattedValue(HtmlFormatter.MimeType, html) |]))
+                    | _ -> ()
+                | _ -> ()
+                Task.CompletedTask)
+        command.AddAlias("%who")
+        kernel.AddDirective(command)
+        Formatter.Register(CurrentVariablesFormatter())
         kernel

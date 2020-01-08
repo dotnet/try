@@ -231,6 +231,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                              new FSharpKernel()
                                  .UseDefaultFormatting()
                                  .UseKernelHelpers()
+                                 .UseWho()
                                  .UseDefaultNamespaces()
                                  .UseXplot()
                          }
