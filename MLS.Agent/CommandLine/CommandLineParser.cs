@@ -51,6 +51,11 @@ namespace MLS.Agent.CommandLine
             IConsole console,
             StartupOptions startupOptions);
 
+        public delegate Task<int> Sync(
+            SyncOptions options,
+            IConsole console,
+            StartupOptions startupOptions);
+
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
@@ -59,6 +64,7 @@ namespace MLS.Agent.CommandLine
             TryGitHub tryGithub = null,
             Pack pack = null,
             Verify verify = null,
+            Sync sync = null,
             ITelemetry telemetry = null,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = null)
         {
@@ -85,6 +91,12 @@ namespace MLS.Agent.CommandLine
                              VerifyCommand.Do(options,
                                               console,
                                               startupOptions));
+
+            sync = sync ??
+                     ((options, console, startupOptions) =>
+                         SyncCommand.Do(options,
+                             console,
+                             startupOptions));
 
             pack = pack ??
                    PackCommand.Do;
@@ -130,6 +142,7 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Pack());
             rootCommand.AddCommand(Verify());
+            rootCommand.AddCommand(Sync());
 
             return new CommandLineBuilder(rootCommand)
                    .UseDefaults()
@@ -432,6 +445,22 @@ namespace MLS.Agent.CommandLine
                 });
 
                 return verifyCommand;
+            }
+
+            Command Sync()
+            {
+                var syncCommand = new Command("sync", "Sync code from sample projects to Markdown files in the target directory and its children.")
+                {
+                    dirArgument
+                };
+
+                syncCommand.Handler = CommandHandler.Create<SyncOptions, IConsole, StartupOptions>(
+                    (options, console, startupOptions) =>
+                    {
+                        return sync(options, console, startupOptions);
+                    });
+
+                return syncCommand;
             }
         }
     }
