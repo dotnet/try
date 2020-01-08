@@ -273,7 +273,7 @@ stages:
   #           artifactName: integrationTests
   #           downloadPath: $(System.DefaultWorkingDirectory)
 
-  #       - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegration.Tests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
+  #       - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.1/NotIntegration.Tests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
   #         displayName: Run integration tests
 
   #       - task: PublishTestResults@2

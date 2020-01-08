@@ -12,7 +12,7 @@ namespace WorkspaceServer.Packaging
             { "netcoreapp2.0", "7.3" },
             { "netcoreapp2.1", "7.3" },
             { "netstandard2.0", "7.3" },
-            { "netcoreapp3.0", "8.0" },
+            { "netcoreapp3.1", "8.0" },
             { "netstandard2.1", "8.0" },
         };
 
