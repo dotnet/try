@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Interactive
 <Project Sdk='Microsoft.NET.Sdk'>
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 

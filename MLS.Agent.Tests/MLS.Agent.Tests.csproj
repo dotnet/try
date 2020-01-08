@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <LangVersion>Latest</LangVersion>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net45+win8</AssetTargetFallback>
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Assent, Clockwise, and Markdig aren't strongly signed -->
   </PropertyGroup>
