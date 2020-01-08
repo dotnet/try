@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -10,7 +12,12 @@ namespace Microsoft.DotNet.Interactive
         public CurrentVariables(IEnumerable<CurrentVariable> variables, bool detailed)
             : this(detailed)
         {
-            foreach (var variable in variables)
+            if (variables == null)
+            {
+                throw new ArgumentNullException(nameof(variables));
+            }
+
+            foreach (var variable in variables.Where(v => v != null))
             {
                 _variables[variable.Name] = variable;
             }
