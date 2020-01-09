@@ -57,6 +57,8 @@ namespace Microsoft.DotNet.Interactive.Tests
                 new CSharpKernel().UseKernelHelpers()
             };
 
+            using var kernelEvents = kernel.KernelEvents.ToSubscribedList();
+
             kernel.Pipeline.AddMiddleware(async (command, context, next) =>
             {
                 context.Publish(new DisplayedValueProduced(1, command));

@@ -95,6 +95,8 @@ namespace Microsoft.DotNet.Interactive
 
             if (kernel is KernelBase kernelBase)
             {
+                await kernelBase.RunDeferredCommandsAsync();
+
                 await kernelBase.Pipeline.SendAsync(command, context);
                 return;
             }

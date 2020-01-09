@@ -31,7 +31,6 @@ namespace Microsoft.DotNet.Interactive.Tests
                 foreach (var tuple in actualValues
                                       .Zip(expectedValues, (actual, expected) => (actual, expected))
                                       .Where(t => t.expected == null || t.expected.GetType().GetProperties().Any()))
-
                 {
                     tuple.actual
                          .Should()
@@ -40,6 +39,13 @@ namespace Microsoft.DotNet.Interactive.Tests
             }
 
             return new AndConstraint<GenericCollectionAssertions<T>>(assertions);
+        }
+
+        public static AndConstraint<StringCollectionAssertions> BeEquivalentSequenceTo(
+            this StringCollectionAssertions assertions,
+            params string[] expectedValues)
+        {
+            return assertions.ContainInOrder(expectedValues).And.BeEquivalentTo(expectedValues);
         }
 
         public static AndWhichConstraint<ObjectAssertions, T> ContainSingle<T>(
