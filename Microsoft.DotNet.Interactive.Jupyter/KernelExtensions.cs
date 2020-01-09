@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     if (context.Command is SubmitCode submitCode)
                     {
                         var scriptContent = submitCode.Code
-                                                      .Replace("%%javascript", "")
+                                                      .Replace("%%javascript", string.Empty)
                                                       .Trim();
 
                         string value =
@@ -218,7 +218,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     if (context.Command is SubmitCode submitCode)
                     {
                         var code = submitCode.Code
-                                             .Replace("%%time", "")
+                                             .Replace("%%time", string.Empty)
                                              .Trim();
 
                         var timer = new Stopwatch();

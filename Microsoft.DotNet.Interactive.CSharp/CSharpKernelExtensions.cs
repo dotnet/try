@@ -85,7 +85,7 @@ using static {typeof(Kernel).FullName};
                         }
                         else
                         {
-                            var added = restoreContext.AddPackagReference(package.PackageName, package.PackageVersion, package.RestoreSources);
+                            var added = restoreContext.AddPackageReference(package.PackageName, package.PackageVersion, package.RestoreSources);
 
                             if (!added)
                             {

@@ -99,6 +99,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             DisposeAfterTest(KernelEvents);
             DisposeAfterTest(languageSpecificKernel);
 
+            
             return languageSpecificKernel;
         }
 

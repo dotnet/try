@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive
 
         public DirectoryInfo Directory => _lazyDirectory.Value;
 
-        public bool AddPackagReference(
+        public bool AddPackageReference(
             string packageName,
             string packageVersion = null,
             string restoreSources = null)

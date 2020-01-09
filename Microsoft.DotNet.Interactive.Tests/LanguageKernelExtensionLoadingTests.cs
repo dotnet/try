@@ -13,9 +13,9 @@ using Xunit.Abstractions;
 namespace Microsoft.DotNet.Interactive.Tests
 {
     [LogTestNamesToPocketLogger]
-    public class LanguageKerneExtensionLoadingTests : LanguageKernelTestBase
+    public class LanguageKernelExtensionLoadingTests : LanguageKernelTestBase
     {
-        public LanguageKerneExtensionLoadingTests(ITestOutputHelper output) : base(output)
+        public LanguageKernelExtensionLoadingTests(ITestOutputHelper output) : base(output)
         {
         }
 
@@ -52,8 +52,14 @@ namespace Microsoft.DotNet.Interactive.Tests
             var extensionDir = DirectoryUtility.CreateDirectory();
 
             var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"throw new Exception();")).FullName;
+            var languageKernel = CreateKernel();
+            var kernel = 
+                new CompositeKernel{languageKernel}
+                    .UseNugetDirective();
 
-            var kernel = CreateKernel();
+            DisposeAfterTest(kernel);
+
+            kernel.DefaultKernelName = languageKernel.Name;
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
