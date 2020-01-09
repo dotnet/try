@@ -98,6 +98,7 @@ namespace Microsoft.DotNet.Interactive
                 await kernelBase.RunDeferredCommandsAsync();
 
                 await kernelBase.Pipeline.SendAsync(command, context);
+
                 return;
             }
 
