@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 throw new ArgumentNullException(nameof(kernel));
             }
 
-            kernel.EnqueueForInitialization(
+            kernel.DeferCommand(
                 new SubmitCode($@"
 #r ""{typeof(LaTeXString).Assembly.Location.Replace("\\", "/")}""
 using {typeof(LaTeXString).Namespace};
@@ -34,7 +34,7 @@ using {typeof(LaTeXString).Namespace};
                 throw new ArgumentNullException(nameof(kernel));
             }
 
-            kernel.EnqueueForInitialization(
+            kernel.DeferCommand(
                 new SubmitCode($@"
 #r ""{typeof(LaTeXString).Assembly.Location.Replace("\\", "/")}""
 open {typeof(LaTeXString).Namespace}

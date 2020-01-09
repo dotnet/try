@@ -35,7 +35,7 @@ type FSharpKernelExtensions private () =
                 openNamespaceOrType typeof<Formatter>.Namespace
             ] |> List.reduce(fun x y -> x + Environment.NewLine + y)
 
-        kernel.EnqueueForInitialization(SubmitCode code) 
+        kernel.DeferCommand(SubmitCode code) 
         kernel
 
     [<Extension>]
@@ -45,13 +45,13 @@ open System
 open System.Text
 open System.Threading.Tasks
 open System.Linq"
-        kernel.EnqueueForInitialization(SubmitCode code) 
+        kernel.DeferCommand(SubmitCode code) 
         kernel
 
     [<Extension>]
     static member UseKernelHelpers(kernel: FSharpKernel) =
         let code = openNamespaceOrType (typeof<FSharpKernelHelpers.IMarker>.DeclaringType.Namespace + "." + nameof(FSharpKernelHelpers))
-        kernel.EnqueueForInitialization(SubmitCode code) 
+        kernel.DeferCommand(SubmitCode code) 
         kernel
 
     [<Extension>]

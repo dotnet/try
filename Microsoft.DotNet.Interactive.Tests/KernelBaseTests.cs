@@ -29,8 +29,8 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
-            kernel.EnqueueForInitialization(new SubmitCode("hello"));
-            kernel.EnqueueForInitialization(new SubmitCode("world!"));
+            kernel.DeferCommand(new SubmitCode("hello"));
+            kernel.DeferCommand(new SubmitCode("world!"));
 
             receivedCommands.Should().BeEmpty();
         }
@@ -51,8 +51,8 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
-            kernel.EnqueueForInitialization(new SubmitCode("one"));
-            kernel.EnqueueForInitialization(new SubmitCode("two"));
+            kernel.DeferCommand(new SubmitCode("one"));
+            kernel.DeferCommand(new SubmitCode("two"));
 
             await kernel.SendAsync(new SubmitCode("three"));
 

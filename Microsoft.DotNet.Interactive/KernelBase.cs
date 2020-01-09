@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Interactive
 
         public KernelCommandPipeline Pipeline { get; }
 
-        public void EnqueueForInitialization(IKernelCommand command)
+        public void DeferCommand(IKernelCommand command)
         {
             if (command == null)
             {

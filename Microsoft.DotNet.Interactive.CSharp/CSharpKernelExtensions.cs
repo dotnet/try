@@ -25,7 +25,7 @@ using static {typeof(PocketViewTags).FullName};
 using {typeof(PocketView).Namespace};
 ");
 
-            kernel.EnqueueForInitialization(command);
+            kernel.DeferCommand(command);
 
             return kernel;
         }
@@ -37,7 +37,7 @@ using {typeof(PocketView).Namespace};
 using static {typeof(Kernel).FullName};
 ");
 
-            kernel.EnqueueForInitialization(command);
+            kernel.DeferCommand(command);
 
             return kernel;
         }
