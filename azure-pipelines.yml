@@ -33,7 +33,7 @@ stages:
       enableMicrobuild: true
       enablePublishBuildArtifacts: true
       enablePublishTestResults: true
-      enablePublishBuildAssets: true
+      enablePublishBuildAssets: false
       enablePublishUsingPipelines: $(_PublishUsingPipelines)
       enableTelemetry: true
       helixRepo: dotnet/try
@@ -123,8 +123,7 @@ stages:
             pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
             artifactName: packages
             artifactType: container
-        
-      
+
         # - task: PublishBuildArtifacts@1
         #   displayName: Publish integration tests dll
         #   inputs:
@@ -137,7 +136,7 @@ stages:
       enableMicrobuild: true
       enablePublishBuildArtifacts: true
       enablePublishTestResults: true
-      enablePublishBuildAssets: true
+      enablePublishBuildAssets: false
       enablePublishUsingPipelines: $(_PublishUsingPipelines)
       enableTelemetry: true
       helixRepo: dotnet/try
