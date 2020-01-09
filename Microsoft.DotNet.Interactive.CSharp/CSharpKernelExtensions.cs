@@ -216,10 +216,10 @@ using static {typeof(Kernel).FullName};
                             context.Publish(new PackageAdded(resolvedReference));
 
                             // Load extensions
-                            await context.HandlingKernel.GetRoot().SendAsync(
-                                new LoadKernelExtensionsInDirectory(
-                                    resolvedReference.PackageRoot,
-                                    addedAssemblyPaths));
+                            //await context.HandlingKernel.GetRoot().SendAsync(
+                            //    new LoadKernelExtensionsInDirectory(
+                            //        resolvedReference.PackageRoot,
+                            //        addedAssemblyPaths));
                         }
                     }
                     else

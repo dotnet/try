@@ -52,14 +52,8 @@ namespace Microsoft.DotNet.Interactive.Tests
             var extensionDir = DirectoryUtility.CreateDirectory();
 
             var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"throw new Exception();")).FullName;
-            var languageKernel = CreateKernel();
-            var kernel = 
-                new CompositeKernel{languageKernel}
-                    .UseNugetDirective();
 
-            DisposeAfterTest(kernel);
-
-            kernel.DefaultKernelName = languageKernel.Name;
+            var kernel = CreateKernel();
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 

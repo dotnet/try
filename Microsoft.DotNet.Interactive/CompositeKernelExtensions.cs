@@ -21,10 +21,20 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(kernel));
             }
 
+            var packageRefArg = new Argument<PackageReference>((SymbolResult result, out PackageReference reference) =>
+                PackageReference.TryParse(result.Token.Value, out reference))
+            {
+                Name = "package"
+            };
+
+
             var poundR = new Command("#r")
             {
-                Handler = CommandHandler.Create<KernelInvocationContext>(HandleAddPackageReference)
+                packageRefArg
             };
+
+            poundR.Handler = CommandHandler.Create<KernelInvocationContext>(HandleAddPackageReference);
+            
 
             var restore = new Command("#!nuget-restore")
             {
