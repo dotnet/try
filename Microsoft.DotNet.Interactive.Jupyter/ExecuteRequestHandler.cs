@@ -13,7 +13,7 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using ZeroMQMessage = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
-            Envelope request,
+            ZeroMQMessage request,
             IJupyterMessageSender jupyterMessageSender)
         {
             if (displayEvent is ReturnValueProduced && displayEvent.Value is DisplayedValue)

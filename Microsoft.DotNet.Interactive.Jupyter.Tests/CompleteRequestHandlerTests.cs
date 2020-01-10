@@ -9,7 +9,7 @@ using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
-using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using ZeroMQMessage = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task send_completeReply_on_CompleteRequest()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new CompleteRequest("System.Console.", 15));
+            var request = ZeroMQMessage.Create(new CompleteRequest("System.Console.", 15));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
 
             await scheduler.Schedule(context);

@@ -11,7 +11,7 @@ using Microsoft.DotNet.Interactive.Tests;
 using Recipes;
 using Xunit;
 using Xunit.Abstractions;
-using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using ZeroMQMessage = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteInput_when_ExecuteRequest_is_handled()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("var a =12;"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("var a =12;"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_message_on_when_code_submission_is_handled()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("var a =12;"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("var a =12;"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task sends_ExecuteReply_with_error_message_on_when_code_submission_contains_errors()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("asdes"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("asdes"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
         public async Task Shows_informative_exception_information()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(
+            var request = ZeroMQMessage.Create(
                 new ExecuteRequest(@"
 void ThrowTheException() => throw new ArgumentException();
 ThrowTheException();
@@ -100,7 +100,7 @@ ThrowTheException();
         public async Task does_not_expose_stacktrace_when_code_submission_contains_errors()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("asdes asdasd"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("asdes asdasd"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -118,7 +118,7 @@ ThrowTheException();
         public async Task sends_DisplayData_message_on_ValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("display(2+2);"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("display(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -134,7 +134,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);
-            var request = Envelope.Create(new ExecuteRequest(code));
+            var request = ZeroMQMessage.Create(new ExecuteRequest(code));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -154,7 +154,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);
-            var request = Envelope.Create(new ExecuteRequest(code));
+            var request = ZeroMQMessage.Create(new ExecuteRequest(code));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -174,7 +174,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);
-            var request = Envelope.Create(new ExecuteRequest(code));
+            var request = ZeroMQMessage.Create(new ExecuteRequest(code));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -194,7 +194,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);
-            var request = Envelope.Create(new ExecuteRequest(code));
+            var request = ZeroMQMessage.Create(new ExecuteRequest(code));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -214,7 +214,7 @@ ThrowTheException();
         {
             var scheduler = CreateScheduler();
             SetKernelLanguage(language);
-            var request = Envelope.Create(new ExecuteRequest("display(2+2)"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("display(2+2)"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -227,7 +227,7 @@ ThrowTheException();
         public async Task sends_Stream_message_on_StandardOutputValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("Console.WriteLine(2+2);"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("Console.WriteLine(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -240,7 +240,7 @@ ThrowTheException();
         public async Task sends_Stream_message_on_StandardErrorValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("Console.Error.WriteLine(2+2);"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -253,7 +253,7 @@ ThrowTheException();
         public async Task sends_ExecuteReply_message_on_ReturnValueProduced()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("2+2"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("2+2"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
@@ -266,7 +266,7 @@ ThrowTheException();
         public async Task sends_ExecuteReply_message_when_submission_contains_only_a_directive()
         {
             var scheduler = CreateScheduler();
-            var request = Envelope.Create(new ExecuteRequest("%%csharp"));
+            var request = ZeroMQMessage.Create(new ExecuteRequest("%%csharp"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
             await scheduler.Schedule(context);
 
