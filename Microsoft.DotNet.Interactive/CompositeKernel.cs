@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -22,6 +23,13 @@ namespace Microsoft.DotNet.Interactive
         {
             Name = nameof(CompositeKernel);
             RegisterForDisposal(Disposable.Create(() => { KernelHierarchy.DeleteNode(this); }));
+            RegisterForDisposal(KernelEvents.Subscribe(async e =>
+            {
+                if (e is PackageAdded packageAdded)
+                {
+                    await this.SendAsync(new LoadKernelExtensionsInDirectory(packageAdded.PackageReference.PackageRoot));
+                }
+            }));
         }
 
         public string DefaultKernelName { get; set; }
@@ -47,10 +55,7 @@ namespace Microsoft.DotNet.Interactive
 
             AddDirective(chooseKernelCommand);
 
-            RegisterForDisposal(kernel.KernelEvents.Subscribe(e =>
-            {
-                PublishEvent(e);
-            }));
+            RegisterForDisposal(kernel.KernelEvents.Subscribe(PublishEvent));
 
             RegisterForDisposal(kernel);
         }

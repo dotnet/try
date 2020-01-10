@@ -95,8 +95,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var kernel =
                 new CompositeKernel { kernelBase }
-                    .UseDefaultMagicCommands()
-                    .UseNugetDirective(); 
+                    .UseDefaultMagicCommands(); 
 
             kernel.DefaultKernelName = kernelBase.Name;
 
