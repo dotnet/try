@@ -350,8 +350,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
 
         public async Task LoadExtensionsFromDirectory(
             DirectoryInfo directory,
-            KernelInvocationContext context,
-            IReadOnlyList<FileInfo> additionalDependencies = null)
+            KernelInvocationContext context)
         {
             var extensionsDirectory =
                 new DirectoryInfo(
@@ -364,8 +363,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
                 extensionsDirectory,
                 context.HandlingKernel,
-                context,
-                additionalDependencies);
+                context);
         }
 
         private bool HasReturnValue =>

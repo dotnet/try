@@ -121,8 +121,7 @@ namespace Microsoft.DotNet.Interactive
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public Task LoadExtensionsFromDirectory(DirectoryInfo directory, KernelInvocationContext invocationContext,
-            IReadOnlyList<FileInfo> additionalDependencies = null)
+        public Task LoadExtensionsFromDirectory(DirectoryInfo directory, KernelInvocationContext invocationContext)
         {
            // TODO: add kernel logic
            return Task.CompletedTask;

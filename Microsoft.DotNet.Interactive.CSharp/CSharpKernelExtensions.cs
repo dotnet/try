@@ -214,12 +214,6 @@ using static {typeof(Kernel).FullName};
                                     PackageReferenceComparer.GetDisplayValueId(resolvedReference)));
 
                             context.Publish(new PackageAdded(resolvedReference));
-
-                            // Load extensions
-                            //await context.HandlingKernel.GetRoot().SendAsync(
-                            //    new LoadKernelExtensionsInDirectory(
-                            //        resolvedReference.PackageRoot,
-                            //        addedAssemblyPaths));
                         }
                     }
                     else
@@ -228,14 +222,9 @@ using static {typeof(Kernel).FullName};
 
                         foreach (var resolvedReference in result.ResolvedReferences)
                         {
-                            if (string.IsNullOrEmpty(resolvedReference.PackageName))
-                            {
-                                context.Publish(new ErrorProduced($"Failed to apply RestoreSources {resolvedReference.RestoreSources}{Environment.NewLine}{errors}"));
-                            }
-                            else
-                            {
-                                context.Publish(new ErrorProduced($"Failed to add reference to package {resolvedReference.PackageName}{Environment.NewLine}{errors}"));
-                            }
+                            context.Publish(string.IsNullOrEmpty(resolvedReference.PackageName)
+                                ? new ErrorProduced($"Failed to apply RestoreSources {resolvedReference.RestoreSources}{Environment.NewLine}{errors}")
+                                : new ErrorProduced($"Failed to add reference to package {resolvedReference.PackageName}{Environment.NewLine}{errors}"));
                         }
                     }
                 };

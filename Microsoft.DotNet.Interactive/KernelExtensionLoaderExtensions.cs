@@ -1,9 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Interactive.Events;
 using Task = System.Threading.Tasks.Task;
 
@@ -15,8 +13,7 @@ namespace Microsoft.DotNet.Interactive
             this KernelExtensionLoader loader,
             DirectoryInfo directory, 
             IKernel kernel, 
-            KernelInvocationContext context,
-            IReadOnlyList<FileInfo> additionalDependencies = null)
+            KernelInvocationContext context)
         {
             if (directory.Exists)
             {
@@ -29,8 +26,7 @@ namespace Microsoft.DotNet.Interactive
                     await loader.LoadFromAssembly(
                         extensionDll, 
                         kernel, 
-                        context, 
-                        additionalDependencies);
+                        context);
                 }
 
                 context.Publish(new DisplayedValueProduced($"Loaded kernel extensions in directory {directory.FullName}", context.Command));

@@ -3,7 +3,6 @@
 
 using Microsoft.DotNet.Interactive.Events;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
@@ -16,8 +15,7 @@ namespace Microsoft.DotNet.Interactive
         public async Task<bool> LoadFromAssembly(
             FileInfo assemblyFile, 
             IKernel kernel, 
-            KernelInvocationContext context,
-            IEnumerable<FileInfo> additionalDependencies = null)
+            KernelInvocationContext context)
         {
             if (assemblyFile == null)
             {
@@ -27,14 +25,6 @@ namespace Microsoft.DotNet.Interactive
             if (kernel == null)
             {
                 throw new ArgumentNullException(nameof(kernel));
-            }
-
-            if (additionalDependencies != null)
-            {
-                foreach (var additionalDependency in additionalDependencies.Where(file => file.Exists))
-                {
-                    AssemblyLoadContext.Default.LoadFromAssemblyPath(additionalDependency.FullName);
-                }
             }
 
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
