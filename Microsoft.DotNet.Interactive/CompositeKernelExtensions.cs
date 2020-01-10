@@ -56,15 +56,16 @@ namespace Microsoft.DotNet.Interactive
 
                     if (targetKernel != null)
                     {
-                        using var _ = targetKernel.KernelEvents
-                            .OfType<PackageAdded>()
-                            .Subscribe(async pa =>
-                                {
-                                    await targetKernel.SendAsync(new LoadKernelExtensionsInDirectory(pa.PackageReference.PackageRoot));
-                                });
-
-                        await targetKernel.SendAsync(
+                        var  result = await targetKernel.SendAsync(
                             new SubmitCode(code, targetKernel.Name));
+
+                       var sub = result.KernelEvents.OfType<PackageAdded>()
+                            .Subscribe(async pa =>
+                            {
+                                await kernel.SendAsync(new LoadKernelExtensionsInDirectory(pa.PackageReference.PackageRoot));
+                            });
+
+                       sub.Dispose();
                     }
 
                 }
