@@ -6,7 +6,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Jupyter.Protocol;
 using Microsoft.DotNet.Interactive.Jupyter.ZMQ;
-using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using ZeroMQMessage = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -14,26 +14,29 @@ namespace Microsoft.DotNet.Interactive.Jupyter
     {
         private readonly TaskCompletionSource<Unit> _done = new TaskCompletionSource<Unit>();
 
-        internal JupyterRequestContext(ReplyChannel serverChannel, PubSubChannel ioPubChannel, Envelope
+        internal JupyterRequestContext(ReplyChannel serverChannel, PubSubChannel ioPubChannel, ZeroMQMessage
  request, string kernelIdentity) : 
             this(new JupyterMessageSender(ioPubChannel, serverChannel, kernelIdentity, request),request)
         {
         }
 
-        public JupyterRequestContext(IJupyterMessageSender jupyterMessageSender, Envelope
+        public JupyterRequestContext(IJupyterMessageSender jupyterMessageSender, ZeroMQMessage
  request)
         {
+            Token = Guid.NewGuid().ToString("N");
             JupyterMessageSender = jupyterMessageSender ?? throw new ArgumentNullException(nameof(jupyterMessageSender));
-            Request = request ?? throw new ArgumentNullException(nameof(request));
+            JupyterRequestMessageEnvelope = request ?? throw new ArgumentNullException(nameof(request));
         }
+
+        public string Token { get; }
 
         public IJupyterMessageSender JupyterMessageSender { get; }
 
-        public Envelope Request { get; }
+        public ZeroMQMessage JupyterRequestMessageEnvelope { get; }
 
         public T GetRequestContent<T>() where T : RequestMessage
         {
-            return Request?.Content as T;
+            return JupyterRequestMessageEnvelope?.Content as T;
         }
 
         public void Complete() => _done.SetResult(Unit.Default);

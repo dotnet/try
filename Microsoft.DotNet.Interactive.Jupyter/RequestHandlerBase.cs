@@ -31,9 +31,13 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             JupyterRequestContext context,
             IKernelCommand command)
         {
-            var sub = Kernel.KernelEvents.Subscribe(e => OnKernelEventReceived(e, context));
+            command.SetToken(context.Token);
 
-            await ((KernelBase)Kernel).SendAsync(
+            var sub = Kernel.KernelEvents
+                            .Where(e => e.Command?.GetToken() == context.Token)
+                            .Subscribe(e => OnKernelEventReceived(e, context));
+
+            await ((KernelBase) Kernel).SendAsync(
                 command,
                 CancellationToken.None,
                 onDone: () => sub.Dispose());

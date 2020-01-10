@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         public async Task<ICommandDeliveryResult> Handle(
             ICommandDelivery<JupyterRequestContext> delivery)
         {
-            switch (delivery.Command.Request.Content)
+            switch (delivery.Command.JupyterRequestMessageEnvelope.Content)
             {
                 case ExecuteRequest _:
                     await _executeHandler.Handle(delivery.Command);

@@ -19,24 +19,29 @@ open FSharp.DependencyManager
 open FSharp.Compiler.SourceCodeServices
 open Microsoft.CodeAnalysis.Tags
 
-
-type FSharpKernel() =
+type FSharpKernel() as this =
     inherit KernelBase(Name = "fsharp")
 
     let resolvedAssemblies = List<string>()
     static let lockObj = Object();
-    let script = lock lockObj (fun () -> new FSharpScript(additionalArgs=[|"/langversion:preview"|]))
-    do base.RegisterForDisposal(script)
-    let mutable cancellationTokenSource = new CancellationTokenSource()
+
     let variables = HashSet<string>()
 
-    let valueBoundHandler = new Handler<(obj * Type * string)>(fun _ (_, _, name) -> variables.Add(name) |> ignore)
-    do script.ValueBound.AddHandler valueBoundHandler
-    do base.RegisterForDisposal(fun () -> script.ValueBound.RemoveHandler valueBoundHandler)
+    let createScript registerForDisposal  =  
+        let script = lock lockObj (fun () -> new FSharpScript(additionalArgs=[|"/langversion:preview"|]))
 
-    let handler = new Handler<string> (fun o s -> resolvedAssemblies.Add(s))
-    do script.AssemblyReferenceAdded.AddHandler handler
-    do base.RegisterForDisposal(fun () -> do script.AssemblyReferenceAdded.RemoveHandler handler)
+        let valueBoundHandler = new Handler<(obj * Type * string)>(fun _ (_, _, name) -> variables.Add(name) |> ignore)
+        do script.ValueBound.AddHandler valueBoundHandler
+        do registerForDisposal(fun () -> script.ValueBound.RemoveHandler valueBoundHandler)
+
+        let handler = new Handler<string> (fun o s -> resolvedAssemblies.Add(s))
+        do script.AssemblyReferenceAdded.AddHandler handler
+        do registerForDisposal(fun () -> do script.AssemblyReferenceAdded.RemoveHandler handler)
+        script
+
+    let script = lazy createScript this.RegisterForDisposal
+    do base.RegisterForDisposal(fun () -> if script.IsValueCreated then (script.Value :> IDisposable).Dispose())
+    let mutable cancellationTokenSource = new CancellationTokenSource()
 
     let messageMap = Dictionary<string, string>()
 
@@ -119,7 +124,7 @@ type FSharpKernel() =
     let handleSubmitCode (codeSubmission: SubmitCode) (context: KernelInvocationContext) =
         async {
 
-            use _ = script.DependencyAdding
+            use _ = script.Value.DependencyAdding
                     |> Observable.subscribe (fun (key, referenceText) ->
                         if key = "nuget" then
                             let reference = parseReference referenceText
@@ -129,7 +134,7 @@ type FSharpKernel() =
                                 context.Publish(DisplayedValueProduced(message, context.Command, valueId=key))
                         ())
 
-            use _ = script.DependencyAdded
+            use _ = script.Value.DependencyAdded
                     |> Observable.subscribe (fun (key, referenceText) ->
                         if key = "nuget" then
                             let reference = parseReference referenceText
@@ -148,7 +153,7 @@ type FSharpKernel() =
                                 | _ -> ()
                             ())
 
-            use _ = script.DependencyFailed
+            use _ = script.Value.DependencyFailed
                     |> Observable.subscribe (fun (key, referenceText) ->
                         if key = "nuget" then
                             let reference = parseReference referenceText
@@ -166,7 +171,7 @@ type FSharpKernel() =
             let tokenSource = cancellationTokenSource
             let result, errors =
                 try
-                    script.Eval(codeSubmission.Code, tokenSource.Token)
+                    script.Value.Eval(codeSubmission.Code, tokenSource.Token)
                 with
                 | ex -> Error(ex), [||]
 
@@ -194,7 +199,7 @@ type FSharpKernel() =
         async {
             context.Publish(CompletionRequestReceived(requestCompletion))
             let l, c = getLineAndColumn requestCompletion.Code requestCompletion.CursorPosition
-            let! declarationItems = script.GetCompletionItems(requestCompletion.Code, l, c)
+            let! declarationItems = script.Value.GetCompletionItems(requestCompletion.Code, l, c)
             let completionItems =
                 declarationItems
                 |> Array.map completionItem
@@ -216,7 +221,7 @@ type FSharpKernel() =
         |> Seq.choose (fun v ->
             let result, _errors =
                 try
-                    script.Eval("``" + v + "``")
+                    script.Value.Eval("``" + v + "``")
                 with
                 | ex -> Error(ex), [||]
             match result with

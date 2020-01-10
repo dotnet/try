@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Interactive
         private readonly CompositeDisposable _disposables;
         private readonly KernelIdleState _idleState = new KernelIdleState();
         private readonly SubmissionSplitter _submissionSplitter = new SubmissionSplitter();
+        private readonly ConcurrentQueue<IKernelCommand> _deferredCommands = new ConcurrentQueue<IKernelCommand>();
 
         protected KernelBase()
         {
@@ -48,6 +49,16 @@ namespace Microsoft.DotNet.Interactive
         }
 
         public KernelCommandPipeline Pipeline { get; }
+
+        public void DeferCommand(IKernelCommand command)
+        {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            _deferredCommands.Enqueue(command);
+        }
 
         private void AddSetKernelMiddleware()
         {
@@ -191,6 +202,8 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(command));
             }
 
+            UndeferCommands();
+
             var tcs = new TaskCompletionSource<IKernelCommandResult>();
 
             var operation = new KernelOperation(command, tcs);
@@ -219,6 +232,21 @@ namespace Microsoft.DotNet.Interactive
                     _idleState.SetAsIdle();
                     onDone?.Invoke();
                 }
+            }
+        }
+
+        internal async Task RunDeferredCommandsAsync()
+        {
+            await SendAsync(
+                new AnonymousKernelCommand((command, context) => Task.CompletedTask),
+                CancellationToken.None);
+        }
+
+        private void UndeferCommands()
+        {
+            while (_deferredCommands.TryDequeue(out var initCommand))
+            {
+                _commandQueue.Enqueue(new KernelOperation(initCommand, new TaskCompletionSource<IKernelCommandResult>()));
             }
         }
 

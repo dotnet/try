@@ -20,12 +20,12 @@ namespace Microsoft.DotNet.Interactive.CSharp
         public static CSharpKernel UseDefaultFormatting(
             this CSharpKernel kernel)
         {
-            Task.Run(() =>
-                         kernel.SendAsync(
-                         new SubmitCode($@"
+            var command = new SubmitCode($@"
 using static {typeof(PocketViewTags).FullName};
 using {typeof(PocketView).Namespace};
-"))).Wait();
+");
+
+            kernel.DeferCommand(command);
 
             return kernel;
         }
@@ -33,11 +33,11 @@ using {typeof(PocketView).Namespace};
         public static CSharpKernel UseKernelHelpers(
             this CSharpKernel kernel)
         {
-            Task.Run(() =>
-                         kernel.SendAsync(
-                             new SubmitCode($@"
+            var command = new SubmitCode($@"
 using static {typeof(Kernel).FullName};
-"))).Wait();
+");
+
+            kernel.DeferCommand(command);
 
             return kernel;
         }

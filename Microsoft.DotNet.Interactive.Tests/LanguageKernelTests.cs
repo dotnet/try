@@ -208,28 +208,39 @@ location.EndsWith(""System.Text.Json.dll"")"
                     // ambiguous, but the same effect can be achieved by wrapping the exception in a strongly-typed
                     // function call.
                     "open System",
-                    "let f (): unit = raise (new NotImplementedException())",
+                    "let f (): unit = raise (new DataMisalignedException())",
                     "f ()"
                 },
 
                 Language.CSharp => new[]
                 {
-                    "using System;",
-                    "throw new NotImplementedException();"
+                    @"
+void f()
+{
+    try
+    {
+        throw new Exception(""inner"");
+    }
+    catch(Exception e)
+    {
+        throw new DataMisalignedException(""outer"", e);
+    }
+    
+}
+
+f();"
                 }
             };
 
             await SubmitCode(kernel, source);
 
             KernelEvents
-                .Where(x => x.GetType() != typeof(KernelIdle) && x.GetType() != typeof(KernelBusy))
-                .Last()
                 .Should()
-                .BeOfType<CommandFailed>()
+                .ContainSingle<CommandFailed>()
                 .Which
                 .Exception
                 .Should()
-                .BeOfType<NotImplementedException>();
+                .BeOfType<DataMisalignedException>();
         }
 
         [Theory(Timeout = 45000)]
@@ -719,11 +730,6 @@ Console.Write(2);
             await SubmitCode(kernel, source);
 
             KernelEvents
-                .Count(e => e is CommandHandled)
-                .Should()
-                .Be(3);
-
-            KernelEvents
                 .OfType<ReturnValueProduced>()
                 .Should()
                 .Contain(e => ((SubmitCode)e.Command).Code == source[1])
@@ -826,7 +832,7 @@ Console.Write(2);
 
             KernelEvents
                 .Should()
-                .ContainSingle<CommandHandled>()
+                .ContainSingle<CommandHandled>(c => c.Command == command)
                 .Which
                 .Command
                 .Should()

@@ -34,10 +34,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case CompleteCodeSubmissionReceived completeCodeSubmissionReceived:
-                    Reply( true, context.Request, context.JupyterMessageSender);
+                    Reply( true, context.JupyterRequestMessageEnvelope, context.JupyterMessageSender);
                     break;
                 case IncompleteCodeSubmissionReceived incompleteCodeSubmissionReceived:
-                    Reply( false, context.Request, context.JupyterMessageSender);
+                    Reply( false, context.JupyterRequestMessageEnvelope, context.JupyterMessageSender);
                     break;
             }
         }

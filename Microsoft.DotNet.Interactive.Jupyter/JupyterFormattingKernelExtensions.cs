@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.FSharp;
@@ -19,12 +18,11 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 throw new ArgumentNullException(nameof(kernel));
             }
 
-            Task.Run(() =>
-                kernel.SendAsync(
-                    new SubmitCode($@"
+            kernel.DeferCommand(
+                new SubmitCode($@"
 #r ""{typeof(LaTeXString).Assembly.Location.Replace("\\", "/")}""
 using {typeof(LaTeXString).Namespace};
-"))).Wait();
+"));
 
             return kernel;
         }
@@ -36,12 +34,11 @@ using {typeof(LaTeXString).Namespace};
                 throw new ArgumentNullException(nameof(kernel));
             }
 
-            Task.Run(() =>
-                kernel.SendAsync(
-                    new SubmitCode($@"
+            kernel.DeferCommand(
+                new SubmitCode($@"
 #r ""{typeof(LaTeXString).Assembly.Location.Replace("\\", "/")}""
 open {typeof(LaTeXString).Namespace}
-"))).Wait();
+"));
 
             return kernel;
         }
