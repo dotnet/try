@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 
         public override async Task InvokeAsync(KernelInvocationContext context)
         {
-            if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
+            if (context.CurrentKernel is IExtensibleKernel extensibleKernel)
             {
                 await extensibleKernel.LoadExtensionsFromDirectory(
                     Directory,
@@ -38,10 +38,9 @@ namespace Microsoft.DotNet.Interactive.Commands
                     message: $"Kernel {context.HandlingKernel.Name} doesn't support loading extensions");
             }
 
-            await context.HandlingKernel.VisitSubkernelsAsync(async k =>
+            await context.CurrentKernel.VisitSubkernelsAsync(async k =>
             {
-                var src = context.Command as LoadKernelExtensionsInDirectory;
-                var command = new LoadKernelExtensionsInDirectory(src.Directory, src.AdditionalDependencies);
+                var command = new LoadKernelExtensionsInDirectory(Directory, AdditionalDependencies);
                 await k.SendAsync(command);
             });
         }
