@@ -89,13 +89,14 @@ namespace Microsoft.DotNet.Interactive.Tests
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
             
-        
+            kernelBase = kernelBase
+                .UseExtendDirective()
+                .LogEventsToPocketLogger();
+
             var kernel =
                 new CompositeKernel { kernelBase }
-                    .UseNugetDirective()
                     .UseDefaultMagicCommands()
-                    .UseExtendDirective()
-                    .LogEventsToPocketLogger(); ;
+                    .UseNugetDirective(); 
 
             kernel.DefaultKernelName = kernelBase.Name;
 

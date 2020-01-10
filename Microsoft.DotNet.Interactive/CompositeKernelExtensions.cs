@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Interactive
                 Handler = CommandHandler.Create<KernelInvocationContext>(HandleAddPackageReference)
             };
 
-            kernel.AddDirective(poundR);
+            //kernel.AddDirective(poundR);
             kernel.AddDirective(restore);
 
             return kernel;
