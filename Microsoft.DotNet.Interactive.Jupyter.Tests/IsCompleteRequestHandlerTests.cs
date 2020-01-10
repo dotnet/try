@@ -31,7 +31,10 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             await scheduler.Schedule(context);
             await context.Done().Timeout(5.Seconds());
 
-            JupyterMessageSender.ReplyMessages.OfType<IsCompleteReply>().Should().ContainSingle(r => r.Status == "complete");
+            JupyterMessageSender.ReplyMessages
+                                .OfType<IsCompleteReply>()
+                                .Should()
+                                .ContainSingle(r => r.Status == "complete");
         }
 
         [Fact]

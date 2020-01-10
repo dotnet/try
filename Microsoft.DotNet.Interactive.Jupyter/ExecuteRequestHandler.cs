@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
             switch (@event)
             {
                 case DisplayEventBase displayEvent:
-                    OnDisplayEvent(displayEvent, context.Request, context.JupyterMessageSender);
+                    OnDisplayEvent(displayEvent, context.JupyterRequestMessageEnvelope, context.JupyterMessageSender);
                     break;
                 case CommandHandled _:
                     OnCommandHandled(context.JupyterMessageSender);

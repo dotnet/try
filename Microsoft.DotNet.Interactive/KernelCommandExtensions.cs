@@ -28,6 +28,11 @@ namespace Microsoft.DotNet.Interactive
 
         public static string GetToken(this IKernelCommand command)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             if (command.Properties.TryGetValue(TokenKey, out var value) &&
                 value is TokenSequence tokenSequence)
             {
