@@ -149,7 +149,7 @@ _TeamCity*
 _NCrunch_*
 .*crunch*.local.xml
 nCrunchTemp_*
-*.ncrunch*
+*.ncrunch*.user
 
 # MightyMoose
 *.mm.*
