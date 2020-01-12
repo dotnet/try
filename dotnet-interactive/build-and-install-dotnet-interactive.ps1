@@ -9,7 +9,12 @@ if (Test-Path 'env:DisableArcade') {
     $script:toolLocation = "$thisDir\bin\debug"
     $script:toolVersion = "0.0.0"
 } else {
-    & "$thisDir\..\build.cmd" -pack
+    if ($IsLinux -or $IsMacOS) {
+        & "$thisDir\..\build.sh" --pack
+    } else {
+        & "$thisDir\..\build.cmd" -pack
+    }
+
     $script:toolLocation = "$thisDir\..\artifacts\packages\Debug\Shipping"
     $script:toolVersion = "1.0.44142.42"
 }
