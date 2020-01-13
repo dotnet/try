@@ -20,6 +20,17 @@ namespace Microsoft.DotNet.Interactive.Tests
         }
 
         [Fact(Timeout = 45000)]
+        public async Task can_load_extension_for_composite_Kernel()
+        {
+            var extensionDir = DirectoryUtility.CreateDirectory();
+            var kernel = CreateKernel();
+            using var events = kernel.KernelEvents.ToSubscribedList();
+            await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir));
+
+            events.Should().ContainSingle<CommandFailed>(cf => cf.Exception is KernelExtensionLoadException);
+        }
+
+        [Fact(Timeout = 45000)]
         public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
@@ -35,15 +46,8 @@ namespace Microsoft.DotNet.Interactive.Tests
             await kernel.SendAsync(submitCode);
 
             events.Should()
-                  .ContainSingle(e => e is ExtensionLoaded &&
-                                      e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDllPath));
-
-            events.Should()
-                  .ContainSingle(e => e is DisplayedValueProduced &&
-                                      e.As<DisplayedValueProduced>()
-                                       .Value
-                                       .ToString()
-                                       .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}"));
+                  .ContainSingle<DisplayedValueUpdated>(e => 
+                      e.Value.ToString() == $"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}");
         }
 
         [Fact(Timeout = 45000)]
@@ -60,7 +64,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
 
             events.Should()
-                  .ContainSingle(e => e is KernelExtensionLoadException);
+                .ContainSingle<CommandFailed>(cf => cf.Exception is KernelExtensionLoadException);
         }
 
         [Fact(Timeout = 45000)]
@@ -88,19 +92,11 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadKernelExtensionsInDirectory(nugetPackageDirectory));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
 
             KernelEvents.Should()
-                        .ContainSingle(e => e is ExtensionLoaded &&
-                                            e.As<ExtensionLoaded>().ExtensionPath.FullName.Equals(extensionDll.FullName));
-
-            KernelEvents.Should()
-                        .ContainSingle(e => e is DisplayedValueProduced &&
-                                            e
-                                                .As<DisplayedValueProduced>()
-                                                .Value
-                                                .ToString()
-                                                .Contains($"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}"));
+                        .ContainSingle<DisplayedValueUpdated>(e => 
+                            e.Value.ToString() == $"Loaded kernel extension TestKernelExtension from assembly {extensionDll.FullName}");
         }
     }
 }

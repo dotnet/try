@@ -40,14 +40,14 @@ namespace Microsoft.DotNet.Interactive
 
                 try
                 {
-                    context.Publish(new DisplayedValueProduced($"Loading kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command));
+                    var display = Guid.NewGuid().ToString("N");
+                    context.Publish(new DisplayedValueProduced($"Loading kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command, valueId:display));
                     await extension.OnLoadAsync(kernel);
-                    context.Publish(new DisplayedValueProduced($"Loaded kernel extension {extension} from assembly {assemblyFile.FullName}", context.Command));
-                    context.Publish(new ExtensionLoaded(assemblyFile));
+                    context.Publish(new DisplayedValueUpdated($"Loaded kernel extension {extension} from assembly {assemblyFile.FullName}", display, context.Command));
                 }
                 catch(Exception e)
                 {
-                    context.Publish(new KernelExtensionLoadException($"Extension {assemblyFile.FullName} threw exception {e.Message}"));
+                    context.Fail(new KernelExtensionLoadException(e));
                 }
             }
 

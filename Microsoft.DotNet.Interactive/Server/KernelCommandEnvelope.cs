@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Server
                 [nameof(DisplayError)] = typeof(KernelCommandEnvelope<DisplayError>),
                 [nameof(DisplayValue)] = typeof(KernelCommandEnvelope<DisplayValue>),
                 [nameof(LoadExtension)] = typeof(KernelCommandEnvelope<LoadExtension>),
-                [nameof(LoadKernelExtensionsInDirectory)] = typeof(KernelCommandEnvelope<LoadKernelExtensionsInDirectory>),
+                [nameof(LoadExtensionsInDirectory)] = typeof(KernelCommandEnvelope<LoadExtensionsInDirectory>),
                 [nameof(RequestCompletion)] = typeof(KernelCommandEnvelope<RequestCompletion>),
                 [nameof(RequestDiagnostics)] = typeof(KernelCommandEnvelope<RequestDiagnostics>),
                 [nameof(SubmitCode)] = typeof(KernelCommandEnvelope<SubmitCode>),

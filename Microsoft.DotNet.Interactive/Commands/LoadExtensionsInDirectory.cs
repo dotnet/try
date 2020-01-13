@@ -7,9 +7,9 @@ using Microsoft.DotNet.Interactive.Extensions;
 
 namespace Microsoft.DotNet.Interactive.Commands
 {
-    public class LoadKernelExtensionsInDirectory : KernelCommandBase
+    public class LoadExtensionsInDirectory : KernelCommandBase
     {
-        public LoadKernelExtensionsInDirectory(
+        public LoadExtensionsInDirectory(
             DirectoryInfo directoryPath)
         {
             Directory = directoryPath;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 
             await context.CurrentKernel.VisitSubkernelsAsync(async k =>
             {
-                var command = new LoadKernelExtensionsInDirectory(Directory);
+                var command = new LoadExtensionsInDirectory(Directory);
                 await k.SendAsync(command);
             });
         }

@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 if (e is PackageAdded packageAdded)
                 {
-                    await this.SendAsync(new LoadKernelExtensionsInDirectory(packageAdded.PackageReference.PackageRoot));
+                    await this.SendAsync(new LoadExtensionsInDirectory(packageAdded.PackageReference.PackageRoot));
                 }
             }));
         }
