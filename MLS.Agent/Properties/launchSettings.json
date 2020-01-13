@@ -36,11 +36,11 @@
     },
     "Verify": {
       "commandName": "Project",
-      "commandLineArgs": "verify \"G:\\Projects\\Funicular-Switch\""
+      "commandLineArgs": "verify \"..\\Samples\""
     },
     "Publish": {
       "commandName": "Project",
-      "commandLineArgs": "publish \"G:\\Projects\\Funicular-Switch\" --format Markdown --target-directory \"G:\\Projects\\Funicular-Switch\""
+      "commandLineArgs": "publish \"..\\Samples\" --format Markdown --target-directory \"..\\Samples\\published\""
     }
   }
 }
