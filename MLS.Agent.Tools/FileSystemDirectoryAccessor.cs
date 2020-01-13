@@ -59,8 +59,8 @@ namespace MLS.Agent.Tools
                 throw new ArgumentNullException(nameof(path));
             }
 
-            return path.Match<FileSystemInfo>(directory => new DirectoryInfo(
-                _rootDirectory.Combine(directory).FullName),
+            return path.Match<FileSystemInfo>(
+                directory => new DirectoryInfo(_rootDirectory.Combine(directory).FullName),
                 file => new FileInfo(_rootDirectory.Combine(file).FullName)
             );
         }
