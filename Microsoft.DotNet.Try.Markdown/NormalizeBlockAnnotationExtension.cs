@@ -46,15 +46,11 @@ namespace Microsoft.DotNet.Try.Markdown
                 NormalizeRenderer renderer,
                 CodeBlock codeBlock)
             {
-                if (codeBlock is AnnotatedCodeBlock codeLinkBlock)
+                if (codeBlock is AnnotatedCodeBlock codeLinkBlock && codeLinkBlock.Annotations != null)
                 {
                     codeLinkBlock.Arguments = $"{codeLinkBlock.Annotations.Language} {codeLinkBlock.Annotations.RunArgs}";
-                    base.Write(renderer, codeBlock);
                 }
-                else
-                {
-                    base.Write(renderer, codeBlock);
-                }
+                base.Write(renderer, codeBlock);
             }
         }
     }

@@ -33,6 +33,14 @@
     "Jupyter": {
       "commandName": "Project",
       "commandLineArgs": "../MLS.Agent.Tests/kernel_connection_file.json"
+    },
+    "Verify": {
+      "commandName": "Project",
+      "commandLineArgs": "verify \"G:\\Projects\\Funicular-Switch\""
+    },
+    "Publish": {
+      "commandName": "Project",
+      "commandLineArgs": "publish \"G:\\Projects\\Funicular-Switch\" --format Markdown --target-directory \"G:\\Projects\\Funicular-Switch\""
     }
   }
 }

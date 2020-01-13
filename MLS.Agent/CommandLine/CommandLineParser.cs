@@ -451,6 +451,14 @@ namespace MLS.Agent.CommandLine
             {
                 var publishCommand = new Command("publish", "Publish code from sample projects to Markdown files in the target directory and its children.")
                 {
+                    new Option("--format", "Format of the files to publish")
+                    {
+                        Argument = new Argument<PublishFormat>()
+                    },
+                    new Option("--target-directory", "Specify the path where the rendered files should go. Can be equal to root directory. In case of Markdown output format and equal root and target directories, original source files will be replaced.")
+                    {
+                        Argument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
+                    },
                     dirArgument
                 };
 

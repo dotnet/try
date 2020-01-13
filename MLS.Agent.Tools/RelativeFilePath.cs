@@ -6,7 +6,7 @@ using System.IO;
 
 namespace MLS.Agent.Tools
 { 
-    public class RelativeFilePath :
+    public sealed class RelativeFilePath :
         RelativePath,
         IEquatable<RelativeFilePath>
     {
