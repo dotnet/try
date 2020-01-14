@@ -1,3 +1,6 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using MLS.Agent.Tools;
 
 namespace MLS.Agent.CommandLine
@@ -16,11 +19,5 @@ namespace MLS.Agent.CommandLine
         public IDirectoryAccessor TargetDirectory { get; }
 
         public PublishFormat Format { get; }
-    }
-
-    public enum PublishFormat
-    {
-        Markdown,
-        HTML
     }
 }

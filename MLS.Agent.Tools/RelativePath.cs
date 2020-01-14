@@ -189,20 +189,4 @@ namespace MLS.Agent.Tools
         //     return !Equals(left, right);
         // }
     }
-
-    public static class RelativePathExtension
-    {
-        public static T Match<T>(this RelativePath path, Func<RelativeDirectoryPath, T> directory, Func<RelativeFilePath, T> file)
-        {
-            switch (path)
-            {
-                case RelativeDirectoryPath relativeDirectoryPath:
-                    return directory(relativeDirectoryPath);
-                case RelativeFilePath relativeFilePath:
-                    return file(relativeFilePath);
-                default:
-                    throw new ArgumentOutOfRangeException($"Unexpected type derived from {nameof(RelativePath)}: {path.GetType().Name}");
-            }
-        }
-    }
 }
