@@ -360,10 +360,13 @@ namespace Microsoft.DotNet.Interactive.CSharp
                         "dotnet",
                         "cs"));
 
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
-                extensionsDirectory,
-                this,
-                context);
+            if (extensionsDirectory.Exists)
+            {
+                await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
+                    extensionsDirectory,
+                    this,
+                    context);
+            }
         }
 
         private bool HasReturnValue =>

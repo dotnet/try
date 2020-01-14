@@ -134,10 +134,13 @@ namespace Microsoft.DotNet.Interactive
                         "dotnet",
                         "composite"));
 
-            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
-                extensionsDirectory,
-                this,
-                context);
+            if (extensionsDirectory.Exists)
+            {
+                await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
+                    extensionsDirectory,
+                    this,
+                    context);
+            }
         }
     }
 }
