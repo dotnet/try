@@ -42,26 +42,6 @@ namespace Microsoft.DotNet.Interactive
             return kernel.SendAsync(new SubmitCode(code), CancellationToken.None);
         }
 
-        public static T UseExtendDirective<T>(this T kernel)
-            where T : KernelBase
-        {
-            var extensionDllArg = new Argument<FileInfo>("dll")
-                .ExistingOnly();
-
-            var extend = new Command("#extend")
-            {
-                extensionDllArg
-            };
-
-            extend.Handler = CommandHandler.Create<FileInfo, KernelInvocationContext>(
-                (dll, pipelineContext) =>
-                    kernel.SendAsync(new LoadExtension(dll)));
-
-            kernel.AddDirective(extend);
-
-            return kernel;
-        }
-
         [DebuggerStepThrough]
         public static T LogEventsToPocketLogger<T>(this T kernel)
             where T : IKernel

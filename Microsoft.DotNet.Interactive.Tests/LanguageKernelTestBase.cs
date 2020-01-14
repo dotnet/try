@@ -90,7 +90,6 @@ namespace Microsoft.DotNet.Interactive.Tests
             };
             
             kernelBase = kernelBase
-                .UseExtendDirective()
                 .LogEventsToPocketLogger();
 
             var kernel =
