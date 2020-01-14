@@ -362,7 +362,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
 
             await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
                 extensionsDirectory,
-                context.HandlingKernel,
+                this,
                 context);
         }
 
