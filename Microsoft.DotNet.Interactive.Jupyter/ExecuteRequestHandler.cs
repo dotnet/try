@@ -13,7 +13,7 @@ using System.Reactive.Concurrency;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Envelope = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
+using ZeroMQMessage = Microsoft.DotNet.Interactive.Jupyter.ZMQ.Message;
 
 namespace Microsoft.DotNet.Interactive.Jupyter
 {
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnCommandHandled(context.JupyterMessageSender);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed,  context.JupyterMessageSender);
+                    OnCommandFailed(commandFailed, context.JupyterMessageSender);
                     break;
             }
         }
@@ -84,8 +84,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 default:
                     var exception = commandFailed.Exception;
 
-                    traceBack.Add(
-                        $"{exception.GetType().FullName}: {exception.Message}");
+                    traceBack.Add(exception.ToString());
 
                     traceBack.AddRange(
                         exception.StackTrace.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
@@ -111,7 +110,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
         }
 
         private void OnDisplayEvent(DisplayEventBase displayEvent,
-            Envelope request,
+            ZeroMQMessage request,
             IJupyterMessageSender jupyterMessageSender)
         {
             if (displayEvent is ReturnValueProduced && displayEvent.Value is DisplayedValue)
@@ -123,7 +122,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             var formattedValues = displayEvent
                 .FormattedValues
-                .ToDictionary(k => k.MimeType, v => v.Value);
+                .ToDictionary(k => k.MimeType, v => (object) v.Value);
 
             var value = displayEvent.Value;
             PubSubMessage dataMessage;

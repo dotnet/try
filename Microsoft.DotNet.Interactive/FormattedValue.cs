@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public class FormattedValue
     {
-        public FormattedValue(string mimeType, object value)
+        public FormattedValue(string mimeType, string value)
         {
             if (string.IsNullOrWhiteSpace(mimeType))
             {
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Interactive
 
         public string MimeType { get; }
 
-        public object Value { get; }
+        public string Value { get; }
 
         public static IReadOnlyCollection<FormattedValue> FromObject(object value)
         {

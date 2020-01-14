@@ -603,8 +603,9 @@ Console.Write(""value three"");",
             await SubmitCode(kernel, source);
 
             KernelEvents
-                .OfType<CommandFailed>()
-                .Last()
+                .Should()
+                .ContainSingle<CommandFailed>()
+                .Which
                 .Message
                 .Should()
                 .Be(error);

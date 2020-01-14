@@ -217,5 +217,62 @@ namespace Microsoft.DotNet.Interactive.Tests
                                    v.MimeType == "text/html" &&
                                    v.Value.ToString().Contains($@"<script type=""text/javascript"">{scriptContent}</script>"));
         }
+
+        [Theory(Timeout = 45000)]
+        [InlineData(Language.CSharp)]
+        [InlineData(Language.FSharp)]
+        public async Task it_displays_detailed_information_for_exceptions_thrown_in_user_code(Language language)
+        {
+            var kernel = CreateKernel(language);
+
+            var source = language switch
+            {
+                Language.FSharp => new[]
+                {
+                    // F# syntax doesn't allow a bare `raise ...` expression at the root due to type inference being
+                    // ambiguous, but the same effect can be achieved by wrapping the exception in a strongly-typed
+                    // function call.
+                    @"open System
+let f (): unit = 
+    try
+        raise (Exception(""the-inner-exception""))
+    with
+        | ex -> raise (DataMisalignedException(""the-outer-exception"", ex))
+
+f ()"
+                },
+
+                Language.CSharp => new[]
+                {
+                    @"
+void f()
+{
+    try
+    {
+        throw new Exception(""the-inner-exception"");
+    }
+    catch(Exception e)
+    {
+        throw new DataMisalignedException(""the-outer-exception"", e);
+    }
+    
+}
+
+f();"
+                }
+            };
+
+            await SubmitCode(kernel, source);
+
+            KernelEvents
+                .Should()
+                .ContainSingle<CommandFailed>()
+                .Which
+                .Message
+                .Should()
+                .Contain("the-inner-exception")
+                .And
+                .Contain("the-outer-exception");
+        }
     }
 }
