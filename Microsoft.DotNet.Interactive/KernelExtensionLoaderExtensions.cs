@@ -1,9 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Events;
-using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -17,7 +18,8 @@ namespace Microsoft.DotNet.Interactive
         {
             if (directory.Exists)
             {
-                context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.FullName}", context.Command));
+                var displayId = Guid.NewGuid().ToString("N");
+                context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.FullName}", context.Command, valueId: displayId));
 
                 var extensionDlls = directory.GetFiles("*.dll", SearchOption.AllDirectories);
 
@@ -29,7 +31,7 @@ namespace Microsoft.DotNet.Interactive
                         context);
                 }
 
-                context.Publish(new DisplayedValueProduced($"Loaded kernel extensions in directory {directory.FullName}", context.Command));
+                context.Publish(new DisplayedValueUpdated($"Loaded kernel extensions in directory {directory.FullName}", displayId, context.Command));
             }
         }
     }
