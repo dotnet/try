@@ -274,10 +274,8 @@ f();"
             };
 
             KernelEvents
-                .Where(x => x.GetType() != typeof(KernelIdle) && x.GetType() != typeof(KernelBusy))
-                .Last()
                 .Should()
-                .BeOfType<CommandFailed>()
+                .ContainSingle<CommandFailed>()
                 .Which
                 .Message
                 .Should()

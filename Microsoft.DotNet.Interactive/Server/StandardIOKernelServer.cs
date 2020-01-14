@@ -40,20 +40,7 @@ namespace Microsoft.DotNet.Interactive.Server
                     await DeserializeAndSendCommand(line);
                 }),
 
-                _kernel.KernelEvents.Subscribe(e =>
-                {
-                    switch (e)
-                    {
-                        case KernelBusy _:
-                        case KernelIdle _:
-                            break;
-                        default:
-                        {
-                            WriteEventToOutput(e);
-                        }
-                            break;
-                    }
-                })
+                _kernel.KernelEvents.Subscribe(WriteEventToOutput)
             };
         }
 
