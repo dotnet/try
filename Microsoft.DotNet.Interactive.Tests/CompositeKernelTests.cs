@@ -199,11 +199,9 @@ x"));
                 .Select(e => e.GetType())
                 .Should()
                 .ContainInOrder(
-                    typeof(KernelBusy),
                     typeof(CodeSubmissionReceived),
                     typeof(CompleteCodeSubmissionReceived),
-                    typeof(CommandHandled),
-                    typeof(KernelIdle));
+                    typeof(CommandHandled));
         }
 
         [Fact]

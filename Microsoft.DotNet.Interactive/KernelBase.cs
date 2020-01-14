@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Extensions;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -19,7 +18,6 @@ namespace Microsoft.DotNet.Interactive
     {
         private readonly Subject<IKernelEvent> _kernelEvents = new Subject<IKernelEvent>();
         private readonly CompositeDisposable _disposables;
-        private readonly KernelIdleState _idleState = new KernelIdleState();
         private readonly SubmissionSplitter _submissionSplitter = new SubmissionSplitter();
         private readonly ConcurrentQueue<IKernelCommand> _deferredCommands = new ConcurrentQueue<IKernelCommand>();
 
@@ -32,18 +30,6 @@ namespace Microsoft.DotNet.Interactive
             AddSetKernelMiddleware();
 
             AddDirectiveMiddlewareAndCommonCommandHandlers();
-
-            _disposables.Add(_idleState.IdleState.Subscribe(idle =>
-            {
-                if (idle)
-                {
-                    PublishEvent(new KernelIdle());
-                }
-                else
-                {
-                    PublishEvent(new KernelBusy());
-                }
-            }));
 
             _disposables.Add(_kernelEvents);
         }
@@ -218,9 +204,7 @@ namespace Microsoft.DotNet.Interactive
             {
                 if (commandQueue.TryDequeue(out var currentOperation))
                 {
-                    _idleState.SetAsBusy();
-
-                    Task.Run(async () =>
+                    var x = Task.Run(async () =>
                     {
                         await ExecuteCommand(currentOperation);
 
@@ -229,7 +213,6 @@ namespace Microsoft.DotNet.Interactive
                 }
                 else
                 {
-                    _idleState.SetAsIdle();
                     onDone?.Invoke();
                 }
             }
