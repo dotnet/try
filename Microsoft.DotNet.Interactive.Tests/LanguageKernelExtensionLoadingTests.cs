@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 code,
                 extensionDir.CreateSubdirectory(extensionPath)
                 );
+
             var kernel = CreateKernel();
             using var events = kernel.KernelEvents.ToSubscribedList();
             await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir));
@@ -42,11 +43,11 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load(string extensionPath)
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
-
             await KernelExtensionTestHelper.CreateExtensionInDirectory(
                 extensionDir, 
                 @"throw new Exception();",
-                extensionDir.CreateSubdirectory(extensionPath));
+                extensionDir.CreateSubdirectory(extensionPath)
+                );
 
             var kernel = CreateKernel();
 
