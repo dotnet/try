@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Interactive.Formatting
 
                 GetValue = lambdaExpression.Compile();
             }
-            catch (InvalidProgramException)
+            catch (Exception)
             {
                 GetValue = obj =>
                 {

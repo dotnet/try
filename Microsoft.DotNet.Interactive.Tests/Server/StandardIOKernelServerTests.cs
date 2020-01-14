@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
         }
 
         [Fact(Timeout = 45000)]
-        public async Task It_can_surface_code_submission_errors()
+        public async Task It_indicates_when_a_code_submission_is_incomplete()
         {
             var command = new SubmitCode(@"var a = 12");
             command.SetToken("abc");
@@ -117,6 +117,25 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
             _kernelEvents
                 .Should()
                 .ContainSingle<KernelEventEnvelope<IncompleteCodeSubmissionReceived>>(e => e.Event.Command.GetToken() == "abc");
+        }
+
+        [Fact]
+        public async Task It_does_not_indicate_compilation_errors_as_exceptions()
+        {
+            var command = new SubmitCode("DOES NOT COMPILE");
+            command.SetToken("abc");
+
+            await _standardIOKernelServer.WriteAsync(command);
+
+            _kernelEvents
+                .Should()
+                .ContainSingle<KernelEventEnvelope<CommandFailed>>()
+                .Which
+                .Event
+                .Message
+                .ToLowerInvariant()
+                .Should()
+                .NotContain("exception");
         }
 
         [Fact(Timeout = 45000)]

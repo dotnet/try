@@ -72,9 +72,20 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             var scheduler = CreateScheduler();
             var request = ZeroMQMessage.Create(
                 new ExecuteRequest(@"
-void ThrowTheException() => throw new ArgumentException();
-ThrowTheException();
-"));
+void f()
+{
+    try
+    {
+        throw new Exception(""the-inner-exception"");
+    }
+    catch(Exception e)
+    {
+        throw new DataMisalignedException(""the-outer-exception"", e);
+    }
+    
+}
+
+f();"));
             var context = new JupyterRequestContext(JupyterMessageSender, request);
 
             await scheduler.Schedule(context);
@@ -89,11 +100,13 @@ ThrowTheException();
                             .As<Error>()
                             .Traceback;
 
-            string.Join("\n", traceback)
+            var errorMessage = string.Join("\n", traceback);
+
+            errorMessage
                   .Should()
-                  .StartWith("System.ArgumentException: Value does not fall within the expected range")
+                  .StartWith("System.DataMisalignedException: the-outer-exception")
                   .And
-                  .Contain("ThrowTheException", because: "the stack trace should also be present");
+                  .Contain("---> System.Exception: the-inner-exception");
         }
 
         [Fact]

@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Interactive.Events
             Exception = exception;
 
             Message = string.IsNullOrWhiteSpace(message) 
-                          ? exception?.Message ?? $"Command failed: {Command}"
+                          ? exception?.ToString() ?? $"Command failed: {Command}"
                           : message;
         }
 
@@ -38,9 +38,10 @@ namespace Microsoft.DotNet.Interactive.Events
             Message = message;
         }
 
+        [JsonIgnore]
         public Exception Exception { get; }
 
-        public string Message { get; }
+        public string Message { get; set; }
 
         public override string ToString() => $"{base.ToString()}: {Message}";
     }

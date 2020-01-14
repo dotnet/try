@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                     OnCommandHandled(context.JupyterMessageSender);
                     break;
                 case CommandFailed commandFailed:
-                    OnCommandFailed(commandFailed,  context.JupyterMessageSender);
+                    OnCommandFailed(commandFailed, context.JupyterMessageSender);
                     break;
             }
         }
@@ -84,8 +84,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
                 default:
                     var exception = commandFailed.Exception;
 
-                    traceBack.Add(
-                        $"{exception.GetType().FullName}: {exception.Message}");
+                    traceBack.Add(exception.ToString());
 
                     traceBack.AddRange(
                         exception.StackTrace.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
@@ -123,7 +122,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter
 
             var formattedValues = displayEvent
                 .FormattedValues
-                .ToDictionary(k => k.MimeType, v => v.Value);
+                .ToDictionary(k => k.MimeType, v => (object) v.Value);
 
             var value = displayEvent.Value;
             PubSubMessage dataMessage;

@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Interactive
             }
             catch (Exception exception)
             {
-                context.Fail(message: exception.ToDisplayString());
+                context.Fail(exception);
             }
         }
 

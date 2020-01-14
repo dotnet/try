@@ -166,9 +166,9 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             context.Fail(message: "oops");
 
-            context.Publish(new ErrorProduced("oops", command));
+            context.Publish(new DisplayedValueProduced("oops", command));
 
-            events.Should().NotContain(e => e is ErrorProduced);
+            events.Should().NotContain(e => e is DisplayedValueProduced);
         }
 
         [Fact(Timeout = 45000)]
@@ -252,7 +252,8 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact(Timeout = 45000)]
         public void When_inner_context_fails_then_no_further_events_can_be_published()
         {
-            using var outer = KernelInvocationContext.Establish(new SubmitCode("abc"));
+            var command = new SubmitCode("abc");
+            using var outer = KernelInvocationContext.Establish(command);
 
             var events = outer.KernelEvents.ToSubscribedList();
 
@@ -260,9 +261,9 @@ namespace Microsoft.DotNet.Interactive.Tests
             using var inner = KernelInvocationContext.Establish(innerCommand);
 
             inner.Fail();
-            inner.Publish(new ErrorProduced("oops!"));
+            inner.Publish(new DisplayedValueProduced("oops!", command));
 
-            events.Should().NotContain(e => e is ErrorProduced);
+            events.Should().NotContain(e => e is DisplayedValueProduced);
         }
     }
 }

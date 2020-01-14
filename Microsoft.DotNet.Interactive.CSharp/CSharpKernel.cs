@@ -217,7 +217,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
                     {
                         message =
                             string.Join(Environment.NewLine,
-                                (compilationError.InnerException as CompilationErrorException)?.Diagnostics.Select(d => d.ToString())?? Enumerable.Empty<string>());
+                                (compilationError.InnerException as CompilationErrorException)?.Diagnostics.Select(d => d.ToString()) ?? Enumerable.Empty<string>());
                     }
 
                     context.Fail(exception, message);
