@@ -19,49 +19,40 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
         }
 
-        [Fact(Timeout = 45000)]
-        public async Task can_load_extension_for_composite_Kernel()
+        [Theory(Timeout = 45000)]
+        [InlineData("interactive-extensions/dotnet/cs", @"await kernel.SendAsync(new SubmitCode(""display(\""csharp extension installed\"");""));")]
+        [InlineData("interactive-extensions/dotnet/composite", "")]
+        public async Task can_load_kernel_extensions(string extensionPath, string code)
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
+            var extensionFile =  await KernelExtensionTestHelper.CreateExtensionInDirectory(extensionDir,
+                code,
+                extensionDir.CreateSubdirectory(extensionPath)
+                );
             var kernel = CreateKernel();
             using var events = kernel.KernelEvents.ToSubscribedList();
             await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir));
 
-            events.Should().ContainSingle<CommandFailed>(cf => cf.Exception is KernelExtensionLoadException);
+            events.Should().ContainSingle<DisplayedValueUpdated>(dv => dv.Value.ToString().Contains(extensionFile.FullName));
         }
 
-        [Fact(Timeout = 45000)]
-        public async Task The_extend_directive_can_be_used_to_load_a_kernel_extension()
+        [Theory(Timeout = 45000)]
+        [InlineData("interactive-extensions/dotnet/cs")]
+        [InlineData("interactive-extensions/dotnet/composite")]
+        public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load(string extensionPath)
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
 
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"await kernel.SendAsync(new SubmitCode(""using System.Reflection;""));"))
-                .FullName;
+            await KernelExtensionTestHelper.CreateExtensionInDirectory(
+                extensionDir, 
+                @"throw new Exception();",
+                extensionDir.CreateSubdirectory(extensionPath));
 
             var kernel = CreateKernel();
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
-            var submitCode = new SubmitCode($"#extend \"{extensionDllPath}\"");
-            await kernel.SendAsync(submitCode);
-
-            events.Should()
-                  .ContainSingle<DisplayedValueUpdated>(e => 
-                      e.Value.ToString() == $"Loaded kernel extension TestKernelExtension from assembly {extensionDllPath}");
-        }
-
-        [Fact(Timeout = 45000)]
-        public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load()
-        {
-            var extensionDir = DirectoryUtility.CreateDirectory();
-
-            var extensionDllPath = (await KernelExtensionTestHelper.CreateExtension(extensionDir, @"throw new Exception();")).FullName;
-
-            var kernel = CreateKernel();
-
-            using var events = kernel.KernelEvents.ToSubscribedList();
-
-            await kernel.SendAsync(new SubmitCode($"#extend \"{extensionDllPath}\""));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir));
 
             events.Should()
                 .ContainSingle<CommandFailed>(cf => cf.Exception is KernelExtensionLoadException);

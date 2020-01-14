@@ -78,7 +78,8 @@ namespace Microsoft.DotNet.Interactive
 
                     default:
                         if (command is SubmitCode submitCode &&
-                            ChildKernels.SingleOrDefault(k => k.Name == submitCode.TargetKernelName) is {} targetKernel)
+                            ChildKernels.SingleOrDefault(k => k.Name == submitCode.TargetKernelName) is { }
+                                targetKernel)
                         {
                             context.HandlingKernel = targetKernel;
                         }
@@ -121,10 +122,22 @@ namespace Microsoft.DotNet.Interactive
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public Task LoadExtensionsFromDirectory(DirectoryInfo directory, KernelInvocationContext invocationContext)
+        public async Task LoadExtensionsFromDirectory(
+            DirectoryInfo directory,
+            KernelInvocationContext context)
         {
-           // TODO: add kernel logic
-           return Task.CompletedTask;
+            var extensionsDirectory =
+                new DirectoryInfo(
+                    Path.Combine(
+                        directory.FullName,
+                        "interactive-extensions",
+                        "dotnet",
+                        "composite"));
+
+            await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
+                extensionsDirectory,
+                this,
+                context);
         }
     }
 }
