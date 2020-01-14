@@ -37,7 +37,6 @@ namespace Microsoft.DotNet.Interactive.Server
                 [nameof(DisplayedValueUpdated)] = typeof(KernelEventEnvelope<DisplayedValueUpdated>),
                 [nameof(ErrorProduced)] = typeof(KernelEventEnvelope<ErrorProduced>),
                 [nameof(IncompleteCodeSubmissionReceived)] = typeof(KernelEventEnvelope<IncompleteCodeSubmissionReceived>),
-                [nameof(KernelExtensionLoadException)] = typeof(KernelEventEnvelope<KernelExtensionLoadException>),
                 [nameof(PackageAdded)] = typeof(KernelEventEnvelope<PackageAdded>),
                 [nameof(ReturnValueProduced)] = typeof(KernelEventEnvelope<ReturnValueProduced>),
                 [nameof(StandardErrorValueProduced)] = typeof(KernelEventEnvelope<StandardErrorValueProduced>),

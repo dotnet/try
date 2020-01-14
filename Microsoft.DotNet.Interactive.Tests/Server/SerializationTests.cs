@@ -197,8 +197,6 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
                 yield return new IncompleteCodeSubmissionReceived(submitCode);
 
-                yield return new KernelExtensionLoadException("oops!");
-
                 yield return new PackageAdded(
                     new ResolvedPackageReference("ThePackage", "1.2.3", new[] { new FileInfo(Path.GetTempFileName()) }));
 
