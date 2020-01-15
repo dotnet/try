@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -34,7 +33,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_using_kernel_name_as_a_magic_command()
         {
-            var receivedOnFakeRepl = new List<IKernelCommand>();
+            var receivedOnFakeKernel = new List<IKernelCommand>();
 
             using var kernel = new CompositeKernel
             {
@@ -43,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Tests
                 {
                     Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeKernel.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -62,7 +61,7 @@ hello!"));
                     @"%%csharp
 x"));
 
-            receivedOnFakeRepl
+            receivedOnFakeKernel
                 .Should()
                 .ContainSingle<SubmitCode>()
                 .Which
@@ -79,12 +78,11 @@ x"));
         public async Task when_target_kernel_is_specified_and_not_found_then_command_fails(int kernelCount)
         {
             using var kernel = new CompositeKernel();
+            using var events = kernel.KernelEvents.ToSubscribedList();
             foreach (var kernelName in Enumerable.Range(0, kernelCount).Select(i => $"kernel{i}"))
             {
                     kernel.Add(new FakeKernel(kernelName));
             }
-            
-            using var events = kernel.KernelEvents.ToSubscribedList();
 
             await kernel.SendAsync(
                 new SubmitCode(
@@ -116,7 +114,6 @@ x"));
         [Fact(Timeout = 45000)]
         public async Task can_handle_commands_targeting_composite_kernel_directly()
         {
-            
             using var kernel = new CompositeKernel
             {
                 new FakeKernel("fake")
@@ -126,54 +123,56 @@ x"));
             };
 
             using var events = kernel.KernelEvents.ToSubscribedList();
-            var command = new SubmitCode("//command", kernel.Name);
-            
-            command.Handler = (kernelCommand, context) => Task.CompletedTask;
+            var submitCode = new SubmitCode("//command", kernel.Name)
+            {
+                Handler = (kernelCommand, context) => Task.CompletedTask
+            };
 
-            await kernel.SendAsync(command);
+
+            await kernel.SendAsync(submitCode);
             events.Should()
                 .ContainSingle<CommandHandled>()
                 .Which
                 .Command
                 .Should()
-                .Be(command);
+                .Be(submitCode);
         }
 
         [Fact(Timeout = 45000)]
         public async Task commands_targeting_compositeKernel_are_not_routed_to_childKernels()
         {
-            var receivedOnFakeRepl = new List<IKernelCommand>();
+            var receivedOnFakeKernel = new List<IKernelCommand>();
             using var kernel = new CompositeKernel
             {
                 new FakeKernel("fake")
                 {
-                    Handle = (command, context) =>
+                    Handle = (kernelCommand, context) =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeKernel.Add(kernelCommand);
                         return Task.CompletedTask;
                     }
                 }
             };
 
-            var command = new SubmitCode("//command", kernel.Name);
-            await kernel.SendAsync(command);
-            receivedOnFakeRepl.Should()
+            var submitCode = new SubmitCode("//command", kernel.Name);
+            await kernel.SendAsync(submitCode);
+            receivedOnFakeKernel.Should()
                 .BeEmpty();
         }
 
         [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_by_setting_the_kernel_name_in_the_command()
         {
-            var receivedOnFakeRepl = new List<IKernelCommand>();
+            var receivedOnFakeKernel = new List<IKernelCommand>();
 
             using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = (command, context) =>
+                    Handle = (kernelCommand, context) =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeKernel.Add(kernelCommand);
                         return Task.CompletedTask;
                     }
                 }
@@ -192,7 +191,7 @@ x"));
                     @"x",
                     "csharp"));
 
-            receivedOnFakeRepl
+            receivedOnFakeKernel
                 .Should()
                 .ContainSingle(c => c is SubmitCode)
                 .Which
@@ -205,30 +204,32 @@ x"));
         [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_in_middleware()
         {
-            var receivedOnFakeRepl = new List<IKernelCommand>();
+            var receivedOnFakeKernel = new List<IKernelCommand>();
 
             using var kernel = new CompositeKernel
             {
                 new CSharpKernel(),
                 new FakeKernel("fake")
                 {
-                    Handle = (command, context) =>
+                    Handle = (kernelCommand, context) =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeKernel.Add(kernelCommand);
                         return Task.CompletedTask;
                     }
                 }
             };
 
-            kernel.Pipeline.AddMiddleware(async (command, context, next) =>
+            var childKernels = kernel.ChildKernels;
+
+            kernel.Pipeline.AddMiddleware(async (kernelCommand, context, next) =>
             {
-                context.HandlingKernel = kernel.ChildKernels.Single(k => k.Name == "fake");
-                await next(command, context);
+                context.HandlingKernel = childKernels.Single(k => k.Name == "fake");
+                await next(kernelCommand, context);
             });
 
             await kernel.SendAsync(new SubmitCode("hello!"));
 
-            receivedOnFakeRepl
+            receivedOnFakeKernel
                 .Should()
                 .ContainSingle(c => c is SubmitCode)
                 .Which
@@ -241,7 +242,7 @@ x"));
         [Fact(Timeout = 45000)]
         public async Task Handling_kernel_can_be_specified_as_a_default()
         {
-            var receivedOnFakeRepl = new List<IKernelCommand>();
+            var receivedOnFakeKernel = new List<IKernelCommand>();
 
             using var kernel = new CompositeKernel
             {
@@ -250,7 +251,7 @@ x"));
                 {
                     Handle = (command, context) =>
                     {
-                        receivedOnFakeRepl.Add(command);
+                        receivedOnFakeKernel.Add(command);
                         return Task.CompletedTask;
                     }
                 }
@@ -262,7 +263,7 @@ x"));
                 new SubmitCode(
                     @"hello!"));
 
-            receivedOnFakeRepl
+            receivedOnFakeKernel
                 .Should()
                 .ContainSingle(c => c is SubmitCode)
                 .Which
