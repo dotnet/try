@@ -91,7 +91,8 @@ x"));
                     @"var x = 123;",
                     "unregistered kernel name"));
 
-            events.Should().ContainSingle<CommandFailed>();
+            events.Should()
+                .ContainSingle<CommandFailed>(cf => cf.Exception is NoSuitableKernelException);
         }
 
         [Fact(Timeout = 45000)]
