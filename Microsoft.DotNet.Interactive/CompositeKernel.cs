@@ -8,20 +8,43 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
     public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel, IExtensibleKernel
     {
         private readonly List<IKernel> _childKernels = new List<IKernel>();
+        private readonly CompositeKernelExtensionLoader _extensionLoader;
 
         public CompositeKernel()
         {
             Name = nameof(CompositeKernel);
-            RegisterForDisposal(Disposable.Create(() => { KernelHierarchy.DeleteNode(this); }));
+            _extensionLoader = new CompositeKernelExtensionLoader();
+            Pipeline.AddMiddleware(async (command, context, next) =>
+            {
+                if (command is AddPackage _)
+                {
+                    var packageAddedEvents = new List<PackageAdded>();
+                    using var _ = context.KernelEvents.OfType<PackageAdded>().Subscribe(packageAddedEvents.Add);
+
+                    await next(command, context);
+
+                    foreach (var packageRoot in packageAddedEvents.Select(p => p.PackageReference.PackageRoot)
+                        .Distinct())
+                    {
+                        var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
+                        await this.SendAsync(loadExtensionsInDirectory);
+                    }
+                }
+                else
+                {
+                    await next(command, context);
+                }
+            });
         }
 
         public string DefaultKernelName { get; set; }
@@ -33,9 +56,12 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentNullException(nameof(kernel));
             }
 
-            _childKernels.Add(kernel);
+            if (ChildKernels.Any(k => k.Name == kernel.Name))
+            {
+                throw new ArgumentException($"Kernel \"{kernel.Name}\" already registered", nameof(kernel));
+            }
 
-            KernelHierarchy.AddChildKernel(this, kernel);
+            _childKernels.Add(kernel);
 
             var chooseKernelCommand = new Command($"%%{kernel.Name}");
 
@@ -47,10 +73,7 @@ namespace Microsoft.DotNet.Interactive
 
             AddDirective(chooseKernelCommand);
 
-            RegisterForDisposal(kernel.KernelEvents.Subscribe(e =>
-            {
-                PublishEvent(e);
-            }));
+            RegisterForDisposal(kernel.KernelEvents.Subscribe(PublishEvent));
 
             RegisterForDisposal(kernel);
         }
@@ -59,30 +82,25 @@ namespace Microsoft.DotNet.Interactive
             IKernelCommand command,
             KernelInvocationContext context)
         {
-            if (context.HandlingKernel == null)
+            var targetKernelName = (command as KernelCommandBase)?.TargetKernelName
+                                   ?? DefaultKernelName;
+            if (context.HandlingKernel == null || context.HandlingKernel.Name != targetKernelName)
             {
-                switch (_childKernels.Count)
+                if (targetKernelName != null)
                 {
-                    case 0:
-                        context.HandlingKernel = this;
-                        break;
-
-                    case 1:
-                        context.HandlingKernel = _childKernels[0];
-                        break;
-
-                    default:
-                        if (command is SubmitCode submitCode &&
-                            ChildKernels.SingleOrDefault(k => k.Name == submitCode.TargetKernelName) is {} targetKernel)
-                        {
-                            context.HandlingKernel = targetKernel;
-                        }
-                        else if (DefaultKernelName != null)
-                        {
-                            context.HandlingKernel = ChildKernels.SingleOrDefault(k => k.Name == DefaultKernelName);
-                        }
-
-                        break;
+                    context.HandlingKernel = targetKernelName == Name
+                        ? this
+                        : ChildKernels.FirstOrDefault(k => k.Name == targetKernelName)
+                          ?? throw new NoSuitableKernelException();
+                }
+                else
+                {
+                    context.HandlingKernel = _childKernels.Count switch
+                    {
+                        0 => this,
+                        1 => _childKernels[0],
+                        _ => context.HandlingKernel
+                    };
                 }
             }
         }
@@ -97,7 +115,14 @@ namespace Microsoft.DotNet.Interactive
             {
                 await kernelBase.RunDeferredCommandsAsync();
 
-                await kernelBase.Pipeline.SendAsync(command, context);
+                if (kernelBase != this)
+                {
+                    await kernelBase.Pipeline.SendAsync(command, context);
+                }
+                else
+                {
+                    await command.InvokeAsync(context);
+                }
 
                 return;
             }
@@ -116,11 +141,14 @@ namespace Microsoft.DotNet.Interactive
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public Task LoadExtensionsFromDirectory(DirectoryInfo directory, KernelInvocationContext invocationContext,
-            IReadOnlyList<FileInfo> additionalDependencies = null)
+        public async Task LoadExtensionsFromDirectory(
+            DirectoryInfo directory,
+            KernelInvocationContext context)
         {
-           // TODO: add kernel logic
-           return Task.CompletedTask;
+            await _extensionLoader.LoadFromDirectoryAsync(
+                directory,
+                this,
+                context);
         }
     }
 }

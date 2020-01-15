@@ -88,18 +88,23 @@ namespace Microsoft.DotNet.Interactive.Tests
                                    .UseWho(),
                 _ => throw new InvalidOperationException("Unknown language specified")
             };
+            
+            kernelBase = kernelBase
+                .LogEventsToPocketLogger();
 
-            var languageSpecificKernel = kernelBase
-                         .UseDefaultMagicCommands()
-                         .UseExtendDirective()
-                         .LogEventsToPocketLogger();
+            var kernel =
+                new CompositeKernel { kernelBase }
+                    .UseDefaultMagicCommands(); 
 
-            KernelEvents = languageSpecificKernel.KernelEvents.ToSubscribedList();
+            kernel.DefaultKernelName = kernelBase.Name;
+
+            KernelEvents = kernel.KernelEvents.ToSubscribedList();
 
             DisposeAfterTest(KernelEvents);
-            DisposeAfterTest(languageSpecificKernel);
+            DisposeAfterTest(kernel);
 
-            return languageSpecificKernel;
+
+            return kernel;
         }
 
         protected KernelBase CreateKernel()

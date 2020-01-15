@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
             _disposables.Add(output.SubscribeToPocketLogger());
             _cSharpKernel = new CSharpKernel()
                 .UseDefaultFormatting()
-                .UseExtendDirective()
                 .UseKernelHelpers()
                 .UseMathAndLaTeX();
 
@@ -44,8 +43,7 @@ namespace Microsoft.DotNet.Interactive.Jupyter.Tests
                     _cSharpKernel,
                     _fSharpKernel
                 }
-                .UseDefaultMagicCommands()
-                .UseExtendDirective();
+                .UseDefaultMagicCommands();
 
             SetKernelLanguage(Language.CSharp);
             _compositeKernel.Name = ".NET";

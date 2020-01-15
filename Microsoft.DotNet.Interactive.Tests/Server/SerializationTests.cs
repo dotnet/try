@@ -113,9 +113,9 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
                     new FormattedValue("text/html", "<b>hi!</b>")
                 );
                 
-                yield return new LoadKernelExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()));
+                yield return new LoadExtensionsInDirectory(new DirectoryInfo(Path.GetTempPath()), "csharp");
 
-                yield return new RequestCompletion("Cons", 4, "chsarp");
+                yield return new RequestCompletion("Cons", 4, "csharp");
 
                 yield return new RequestDiagnostics();
 
@@ -195,11 +195,7 @@ namespace Microsoft.DotNet.Interactive.Tests.Server
 
                 yield return new ErrorProduced("oops!");
 
-                yield return new ExtensionLoaded(new FileInfo(Path.GetTempFileName()));
-
                 yield return new IncompleteCodeSubmissionReceived(submitCode);
-
-                yield return new KernelExtensionLoadException("oops!");
 
                 yield return new PackageAdded(
                     new ResolvedPackageReference("ThePackage", "1.2.3", new[] { new FileInfo(Path.GetTempFileName()) }));

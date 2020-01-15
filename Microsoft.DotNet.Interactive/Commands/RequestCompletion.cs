@@ -7,17 +7,14 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public class RequestCompletion : KernelCommandBase
     {
-        public RequestCompletion(string code, int cursorPosition, string targetKernelName = null)
+        public RequestCompletion(string code, int cursorPosition, string targetKernelName = null):base(targetKernelName)
         {
             Code = code ?? throw new ArgumentNullException(nameof(code));
             CursorPosition = cursorPosition < 0 ? throw new ArgumentOutOfRangeException(nameof(cursorPosition), "cannot be negative") : cursorPosition;
-            TargetKernelName = targetKernelName;
         }
 
-        public string Code { get; set; }
+        public string Code { get;  }
 
-        public int CursorPosition { get; set; }
-
-        public string TargetKernelName { get; set; }
+        public int CursorPosition { get; }
     }
 }

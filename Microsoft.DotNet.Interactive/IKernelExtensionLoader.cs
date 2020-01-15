@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public interface IExtensibleKernel
+    public interface IKernelExtensionLoader<in T> where T : IKernel
     {
-        Task LoadExtensionsFromDirectory(
-            DirectoryInfo directory, 
-            KernelInvocationContext invocationContext);
+        Task LoadFromDirectoryAsync(DirectoryInfo directory,
+            T kernel,
+            KernelInvocationContext context);
     }
 }

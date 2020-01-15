@@ -10,16 +10,13 @@ namespace Microsoft.DotNet.Interactive.Commands
         public SubmitCode(
             string code,
             string targetKernelName = null,
-            SubmissionType submissionType = SubmissionType.Run)
+            SubmissionType submissionType = SubmissionType.Run): base(targetKernelName)
         {
             Code = code ?? throw new ArgumentNullException(nameof(code));
-            TargetKernelName = targetKernelName;
             SubmissionType = submissionType;
         }
 
         public string Code { get; }
-
-        public string TargetKernelName { get; }
 
         public SubmissionType SubmissionType { get; }
 

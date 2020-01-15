@@ -1,10 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Utility;
 
@@ -18,7 +18,8 @@ namespace Microsoft.DotNet.Interactive.Tests
             DirectoryInfo outputDir, 
             [CallerMemberName] string testName = null)
         {
-            var extensionDll = await CreateExtension(extensionDir, body, testName);
+            var extensionName = AlignExtensionNameWithDirectoryName(extensionDir, testName);
+            var extensionDll = await CreateExtension(extensionDir, body, extensionName);
 
             if (!outputDir.Exists)
             {
@@ -26,12 +27,18 @@ namespace Microsoft.DotNet.Interactive.Tests
             }
 
             var finalExtensionDll = new FileInfo(Path.Combine(outputDir.FullName, extensionDll.Name));
-            File.Copy(extensionDll.FullName, finalExtensionDll.FullName);
+            File.Move(extensionDll.FullName, finalExtensionDll.FullName);
 
             return finalExtensionDll;
         }
 
-        internal static async Task<FileInfo> CreateExtension(
+        private static string AlignExtensionNameWithDirectoryName(DirectoryInfo extensionDir, string testName)
+        {
+            var match = Regex.Match(extensionDir.Name, @"(?<counter>\.\d+)$");
+            return match.Success ? $"{testName}{match.Groups["counter"].Value}" : testName;
+        }
+
+        private static async Task<FileInfo> CreateExtension(
             DirectoryInfo extensionDir, 
             string body, 
             [CallerMemberName] string extensionName = null)

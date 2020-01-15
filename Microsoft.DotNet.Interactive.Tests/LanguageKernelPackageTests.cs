@@ -246,13 +246,9 @@ json
         [Fact(Timeout = 45000)]
         public async Task When_SubmitCode_command_adds_packages_to_csharp_kernel_then_the_submission_is_not_passed_to_csharpScript()
         {
-            using var cSharpKernel = new CSharpKernel();
-            using var events = cSharpKernel.KernelEvents.ToSubscribedList();
-
-            using var kernel = new CompositeKernel
-            {
-                cSharpKernel.UseNugetDirective()
-            };
+            using var kernel = CreateKernel(Language.CSharp);
+            using var events = kernel.KernelEvents.ToSubscribedList();
+            
 
             var command = new SubmitCode("#r \"nuget:Microsoft.ML, 1.3.1\" \nvar a = new List<int>();");
             await kernel.SendAsync(command);
@@ -679,7 +675,7 @@ using Microsoft.ML.AutoML;
         [Fact(Timeout = 45000)]
         public async Task Pound_r_nuget_allows_using_version_of_loaded_dependent_packages()
         {
-            var kernel = CreateKernel(Language.CSharp) as CSharpKernel;
+            var kernel = CreateKernel(Language.CSharp);
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 

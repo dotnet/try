@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Returns_new_references_if_they_are_added()
         {
             var restoreContext = new PackageRestoreContext();
-            var added = restoreContext.AddPackagReference("FluentAssertions", "5.7.0") as bool?;
+            var added = restoreContext.AddPackageReference("FluentAssertions", "5.7.0") as bool?;
             added.Should().Be(true);
 
             var result = await restoreContext.Restore();
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Returns_references_when_package_version_is_not_specified()
         {
             var restoreContext = new PackageRestoreContext();
-            var added = restoreContext.AddPackagReference("NewtonSoft.Json") as bool?;
+            var added = restoreContext.AddPackageReference("NewtonSoft.Json") as bool?;
             added.Should().Be(true);
 
             var result = await restoreContext.Restore();
@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Returns_failure_if_package_installation_fails()
         {
             var restoreContext = new PackageRestoreContext();
-            var added = restoreContext.AddPackagReference("not-a-real-package-definitely-not", "5.7.0") as bool?;
+            var added = restoreContext.AddPackageReference("not-a-real-package-definitely-not", "5.7.0") as bool?;
             added.Should().Be(true);
 
             var result = await restoreContext.Restore();
@@ -72,10 +72,10 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             var restoreContext = new PackageRestoreContext();
 
-            var added = restoreContext.AddPackagReference("another-not-a-real-package-definitely-not", "5.7.0") as bool?;
+            var added = restoreContext.AddPackageReference("another-not-a-real-package-definitely-not", "5.7.0") as bool?;
             added.Should().Be(true);
 
-            var readded = restoreContext.AddPackagReference("another-not-a-real-package-definitely-not", "5.7.1") as bool?;
+            var readded = restoreContext.AddPackageReference("another-not-a-real-package-definitely-not", "5.7.1") as bool?;
             readded.Should().Be(false);
 
             var result = await restoreContext.Restore() as PackageRestoreResult;
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Can_get_path_to_nuget_packaged_assembly()
         {
             var restoreContext = new PackageRestoreContext();
-            var added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
+            var added = restoreContext.AddPackageReference("fluentAssertions", "5.7.0") as bool?;
             added.Should().BeTrue();
 
             await restoreContext.Restore();
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Can_get_path_to_nuget_package_root()
         {
             var restoreContext = new PackageRestoreContext();
-            var added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
+            var added = restoreContext.AddPackageReference("fluentAssertions", "5.7.0") as bool?;
             added.Should().BeTrue();
 
             await restoreContext.Restore();
@@ -130,8 +130,8 @@ namespace Microsoft.DotNet.Interactive.Tests
         public async Task Can_get_path_to_nuget_package_when_multiple_packages_are_added()
         {
             var restoreContext = new PackageRestoreContext();
-            var fluent_added = restoreContext.AddPackagReference("fluentAssertions", "5.7.0") as bool?;
-            var html_added = restoreContext.AddPackagReference("htmlagilitypack", "1.11.12") as bool?;
+            var fluent_added = restoreContext.AddPackageReference("fluentAssertions", "5.7.0") as bool?;
+            var html_added = restoreContext.AddPackageReference("htmlagilitypack", "1.11.12") as bool?;
             fluent_added.Should().Be(true);
             html_added.Should().Be(true);
 
