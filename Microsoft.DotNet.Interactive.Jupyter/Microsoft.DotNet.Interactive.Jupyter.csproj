@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise isn't strongly signed -->
   </PropertyGroup>
   <ItemGroup>
