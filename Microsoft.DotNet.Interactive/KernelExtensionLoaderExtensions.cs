@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Interactive
                 var displayId = Guid.NewGuid().ToString("N");
                 context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.FullName}", context.Command, valueId: displayId));
 
-                var extensionDlls = directory.GetFiles("*.dll", SearchOption.AllDirectories);
+                var extensionDlls = directory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
 
                 foreach (var extensionDll in extensionDlls)
                 {
