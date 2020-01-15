@@ -15,9 +15,10 @@ namespace Microsoft.DotNet.Interactive
     public class KernelExtensionAssemblyLoader
     {
         private static readonly HashSet<AssemblyName> LoadedAssemblies = new HashSet<AssemblyName>();
+        private static readonly object assemblyLoadLock = new object();
 
         public async Task LoadFromAssembliesInDirectory(
-            
+
             DirectoryInfo directory,
             IKernel kernel,
             KernelInvocationContext context)
@@ -42,8 +43,8 @@ namespace Microsoft.DotNet.Interactive
         }
 
         private async Task LoadFromAssembly(
-            FileInfo assemblyFile, 
-            IKernel kernel, 
+            FileInfo assemblyFile,
+            IKernel kernel,
             KernelInvocationContext context)
         {
             if (assemblyFile == null)
@@ -58,10 +59,17 @@ namespace Microsoft.DotNet.Interactive
 
             if (!assemblyFile.Exists)
             {
-                throw new ArgumentException($"File {assemblyFile.FullName} doesn't exist",nameof(assemblyFile));
+                throw new ArgumentException($"File {assemblyFile.FullName} doesn't exist", nameof(assemblyFile));
             }
 
-            if (LoadedAssemblies.Add(AssemblyName.GetAssemblyName(assemblyFile.FullName)))
+            bool loadExtensions;
+
+            lock (assemblyLoadLock)
+            {
+                loadExtensions = LoadedAssemblies.Add(AssemblyName.GetAssemblyName(assemblyFile.FullName));
+            }
+
+            if (loadExtensions)
             {
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
 
@@ -72,7 +80,7 @@ namespace Microsoft.DotNet.Interactive
 
                 foreach (var extensionType in extensionTypes)
                 {
-                    var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
+                    var extension = (IKernelExtension)Activator.CreateInstance(extensionType);
                     var display = Guid.NewGuid().ToString("N");
                     context.Publish(new DisplayedValueProduced(
                         $"Loading kernel extension {extensionType.Name} from assembly {assemblyFile.FullName}",
@@ -93,6 +101,7 @@ namespace Microsoft.DotNet.Interactive
                     }
                 }
             }
+
         }
     }
 }

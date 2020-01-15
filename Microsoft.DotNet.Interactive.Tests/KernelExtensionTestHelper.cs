@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Interactive.Tests
             return finalExtensionDll;
         }
 
-        internal static async Task<FileInfo> CreateExtension(
+        private static async Task<FileInfo> CreateExtension(
             DirectoryInfo extensionDir, 
             string body, 
             [CallerMemberName] string extensionName = null)
