@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Interactive
     public class KernelExtensionAssemblyLoader
     {
         private static readonly HashSet<AssemblyName> LoadedAssemblies = new HashSet<AssemblyName>();
-        private static readonly object assemblyLoadLock = new object();
+        private static readonly object AssemblyLoadLock = new object();
 
         public async Task LoadFromAssembliesInDirectory(
 
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Interactive
 
             bool loadExtensions;
 
-            lock (assemblyLoadLock)
+            lock (AssemblyLoadLock)
             {
                 loadExtensions = LoadedAssemblies.Add(AssemblyName.GetAssemblyName(assemblyFile.FullName));
             }
