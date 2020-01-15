@@ -175,6 +175,52 @@ json
                 .Be(new { value = "hello" }.ToJson());
         }
 
+        [Theory(Timeout = 45000)]
+        [InlineData(Language.CSharp, false)]
+        [InlineData(Language.FSharp, false)]
+        [InlineData(Language.CSharp, true)]
+        [InlineData(Language.FSharp, true, Skip = "oops")]
+        public async Task it_can_load_assembly_references_using_r_directive_with_relative_path(Language language, bool changeWorkingDirectory)
+        {
+            var workingDirectory = Directory.GetCurrentDirectory();
+            DisposeAfterTest(() => Directory.SetCurrentDirectory(workingDirectory));
+
+            var kernel = CreateKernel(language);
+
+            if (changeWorkingDirectory)
+            {
+                await kernel.SendAsync(new SubmitCode("System.IO.Directory.SetCurrentDirectory(\"..\")"));
+            }
+
+            var fullName = new FileInfo(typeof(JsonConvert).Assembly.Location).FullName;
+
+            var currentDirectoryName = new DirectoryInfo(Directory.GetCurrentDirectory()).Name;
+
+            var relativeDllPath = Path.GetRelativePath(
+                Directory.GetCurrentDirectory(),
+                fullName);
+
+            var relativePath =
+                Path.Combine(
+                    "..",
+                    currentDirectoryName,
+                    relativeDllPath)
+                .Replace("\\", "/");
+
+            var code = language switch
+            {
+                Language.CSharp => $"#r \"{relativePath}\"",
+                Language.FSharp => $"#r \"{relativePath}\""
+            };
+
+            var command = new SubmitCode(code);
+
+            await kernel.SendAsync(command);
+
+            KernelEvents.Should()
+                        .ContainSingle<CommandHandled>(c => c.Command == command);
+        }
+
         [Fact(Timeout = 45000)]
         public async Task it_returns_completion_list_for_types_imported_at_runtime()
         {

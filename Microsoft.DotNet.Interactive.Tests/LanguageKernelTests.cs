@@ -812,14 +812,6 @@ Console.Write(2);
             variableCountAfterEvaluation.Should().Be(1);
         }
 
-        [Fact(Skip = "Should pass after #577 is resolved")]
-        public void ScriptState_is_not_null_prior_to_receiving_code_submissions()
-        {
-            using var kernel = new CSharpKernel();
-
-            kernel.ScriptState.Should().NotBeNull();
-        }
-
         [Fact(Timeout = 45000)]
         public async Task When_submission_is_split_then_CommandHandled_is_published_only_for_the_root_command()
         {
