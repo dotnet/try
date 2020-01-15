@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
         [Theory(Timeout = 45000)]
         [InlineData("interactive-extensions/dotnet/cs", @"await kernel.SendAsync(new SubmitCode(""display(\""csharp extension installed\"");""));")]
-        [InlineData("interactive-extensions/dotnet/composite", "")]
+        [InlineData("interactive-extensions/dotnet/", "")]
         public async Task can_load_kernel_extensions(string extensionPath, string code)
         {
             var extensionDir = DirectoryUtility.CreateDirectory();
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
         [Theory(Timeout = 45000)]
         [InlineData("interactive-extensions/dotnet/cs")]
-        [InlineData("interactive-extensions/dotnet/composite")]
+        [InlineData("interactive-extensions/dotnet/")]
         public async Task Gives_kernel_extension_load_exception_event_when_extension_throws_exception_during_load(string extensionPath)
         {
             var extensionDir = DirectoryUtility.CreateDirectory();

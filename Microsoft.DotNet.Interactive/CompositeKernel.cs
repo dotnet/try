@@ -18,10 +18,12 @@ namespace Microsoft.DotNet.Interactive
     public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel, IExtensibleKernel
     {
         private readonly List<IKernel> _childKernels = new List<IKernel>();
+        private readonly CompositeKernelExtensionLoader _extensionLoader;
 
         public CompositeKernel()
         {
             Name = nameof(CompositeKernel);
+            _extensionLoader = new CompositeKernelExtensionLoader();
             Pipeline.AddMiddleware(async (command, context, next) =>
             {
                 if (command is AddPackage _)
@@ -143,21 +145,10 @@ namespace Microsoft.DotNet.Interactive
             DirectoryInfo directory,
             KernelInvocationContext context)
         {
-            var extensionsDirectory =
-                new DirectoryInfo(
-                    Path.Combine(
-                        directory.FullName,
-                        "interactive-extensions",
-                        "dotnet",
-                        "composite"));
-
-            if (extensionsDirectory.Exists)
-            {
-                await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
-                    extensionsDirectory,
-                    this,
-                    context);
-            }
+            await _extensionLoader.LoadFromDirectoryAsync(
+                directory,
+                this,
+                context);
         }
     }
 }

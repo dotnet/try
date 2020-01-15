@@ -57,10 +57,13 @@ namespace Microsoft.DotNet.Interactive.CSharp
                              typeof(PocketView).Assembly,
                              typeof(PlotlyChart).Assembly);
 
+        private readonly CSharpKernelExtensionLoader _extensionLoader;
+
         public CSharpKernel()
         {
             _cancellationSource = new CancellationTokenSource();
             Name = DefaultKernelName;
+            _extensionLoader = new CSharpKernelExtensionLoader();
             NativeAssemblyLoadHelper = new NativeAssemblyLoadHelper(this);
             RegisterForDisposal(NativeAssemblyLoadHelper);
         }
@@ -144,7 +147,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
             {
                 cancellationSource = _cancellationSource;
             }
-            
+
             var codeSubmissionReceived = new CodeSubmissionReceived(submitCode);
 
             context.Publish(codeSubmissionReceived);
@@ -192,11 +195,11 @@ namespace Microsoft.DotNet.Interactive.CSharp
                             ScriptState = await ScriptState.ContinueWithAsync(
                                     code,
                                     ScriptOptions,
-                                    catchException:  e =>
-                                    {
-                                        exception = e;
-                                        return true;
-                                    },
+                                    catchException: e =>
+                                   {
+                                       exception = e;
+                                       return true;
+                                   },
                                     cancellationToken: cancellationSource.Token)
                                 .UntilCancelled(cancellationSource.Token);
                         }
@@ -274,7 +277,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
                 new FormattedValue(
                     PlainTextFormatter.MimeType, error)
             };
-            
+
             context.Publish(
                 new StandardErrorValueProduced(
                     error,
@@ -292,7 +295,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
 
             var completionList =
                 await GetCompletionList(
-                    requestCompletion.Code, 
+                    requestCompletion.Code,
                     requestCompletion.CursorPosition);
 
             context.Publish(new CompletionRequestCompleted(completionList, requestCompletion));
@@ -352,26 +355,15 @@ namespace Microsoft.DotNet.Interactive.CSharp
             DirectoryInfo directory,
             KernelInvocationContext context)
         {
-            var extensionsDirectory =
-                new DirectoryInfo(
-                    Path.Combine(
-                        directory.FullName,
-                        "interactive-extensions",
-                        "dotnet",
-                        "cs"));
-
-            if (extensionsDirectory.Exists)
-            {
-                await new KernelExtensionLoader().LoadFromAssembliesInDirectory(
-                    extensionsDirectory,
-                    this,
-                    context);
-            }
+            await _extensionLoader.LoadFromDirectoryAsync(
+                directory,
+                this,
+                context);
         }
 
         private bool HasReturnValue =>
             ScriptState != null &&
-            (bool) _hasReturnValueMethod.Invoke(ScriptState.Script, null);
+            (bool)_hasReturnValueMethod.Invoke(ScriptState.Script, null);
 
         internal NativeAssemblyLoadHelper NativeAssemblyLoadHelper { get; }
     }

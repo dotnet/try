@@ -744,7 +744,7 @@ Console.Write(2);
         {
             var kernel = CreateKernel(language);
 
-            var source = "System.Console."; // same code is valid regarless of the language
+            var source = "System.Console."; // same code is valid regardless of the language
 
             await kernel.SendAsync(new RequestCompletion(source, 15));
 
