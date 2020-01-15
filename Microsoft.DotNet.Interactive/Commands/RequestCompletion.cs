@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Interactive.Commands
             CursorPosition = cursorPosition < 0 ? throw new ArgumentOutOfRangeException(nameof(cursorPosition), "cannot be negative") : cursorPosition;
         }
 
-        public string Code { get; set; }
+        public string Code { get;  }
 
-        public int CursorPosition { get; set; }
+        public int CursorPosition { get; }
     }
 }
