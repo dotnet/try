@@ -32,9 +32,12 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var kernel = CreateKernel();
             using var events = kernel.KernelEvents.ToSubscribedList();
-            await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir, kernel.Name));
 
-            events.Should().ContainSingle<DisplayedValueUpdated>(dv => dv.Value.ToString().Contains(extensionFile.FullName));
+            events.Should()
+                .NotContain(e => e is CommandFailed)
+                .And
+                .ContainSingle<DisplayedValueUpdated>(dv => dv.Value.ToString().Contains(extensionFile.FullName));
         }
 
         [Theory(Timeout = 45000)]
@@ -53,7 +56,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             using var events = kernel.KernelEvents.ToSubscribedList();
 
-            await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(extensionDir, kernel.Name));
 
             events.Should()
                 .ContainSingle<CommandFailed>(cf => cf.Exception is KernelExtensionLoadException);
@@ -84,7 +87,7 @@ namespace Microsoft.DotNet.Interactive.Tests
 
             var kernel = CreateKernel();
 
-            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory));
+            await kernel.SendAsync(new LoadExtensionsInDirectory(nugetPackageDirectory, kernel.Name));
 
             KernelEvents.Should()
                         .ContainSingle<DisplayedValueUpdated>(e => 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -68,6 +69,95 @@ x"));
                 .Code
                 .Should()
                 .Be("hello!");
+        }
+
+
+        [Theory(Timeout = 45000)]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        public async Task when_target_kernel_is_specified_and_not_found_then_command_fails(int kernelCount)
+        {
+            using var kernel = new CompositeKernel();
+            foreach (var kernelName in Enumerable.Range(0, kernelCount).Select(i => $"kernel{i}"))
+            {
+                    kernel.Add(new FakeKernel(kernelName));
+            }
+            
+            using var events = kernel.KernelEvents.ToSubscribedList();
+
+            await kernel.SendAsync(
+                new SubmitCode(
+                    @"var x = 123;",
+                    "unregistered kernel name"));
+
+            events.Should().ContainSingle<CommandFailed>();
+        }
+
+        [Fact(Timeout = 45000)]
+        public void cannot_add_duplicated_named_kernels()
+        {
+            using var kernel = new CompositeKernel
+            {
+                new CSharpKernel()
+            };
+
+            kernel.Invoking(k => k.Add(new CSharpKernel()))
+                .Should()
+                .Throw<ArgumentException>()
+                .Which
+                .Message
+                .Should()
+                .Be("Kernel \"csharp\" already registered (Parameter 'kernel')");
+
+        }
+
+        [Fact(Timeout = 45000)]
+        public async Task can_handle_commands_targeting_composite_kernel_directly()
+        {
+            
+            using var kernel = new CompositeKernel
+            {
+                new FakeKernel("fake")
+                {
+                    Handle = (command, context) => Task.CompletedTask
+                }
+            };
+
+            using var events = kernel.KernelEvents.ToSubscribedList();
+            var command = new SubmitCode("//command", kernel.Name);
+            
+            command.Handler = (kernelCommand, context) => Task.CompletedTask;
+
+            await kernel.SendAsync(command);
+            events.Should()
+                .ContainSingle<CommandHandled>()
+                .Which
+                .Command
+                .Should()
+                .Be(command);
+        }
+
+        [Fact(Timeout = 45000)]
+        public async Task commands_targeting_compositeKernel_are_not_routed_to_childKernels()
+        {
+            var receivedOnFakeRepl = new List<IKernelCommand>();
+            using var kernel = new CompositeKernel
+            {
+                new FakeKernel("fake")
+                {
+                    Handle = (command, context) =>
+                    {
+                        receivedOnFakeRepl.Add(command);
+                        return Task.CompletedTask;
+                    }
+                }
+            };
+
+            var command = new SubmitCode("//command", kernel.Name);
+            await kernel.SendAsync(command);
+            receivedOnFakeRepl.Should()
+                .BeEmpty();
         }
 
         [Fact(Timeout = 45000)]

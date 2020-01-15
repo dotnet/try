@@ -10,7 +10,8 @@ namespace Microsoft.DotNet.Interactive.Commands
     public class LoadExtensionsInDirectory : KernelCommandBase
     {
         public LoadExtensionsInDirectory(
-            DirectoryInfo directoryPath)
+            DirectoryInfo directoryPath,
+            string targetKernelName = null): base(targetKernelName)
         {
             Directory = directoryPath;
         }
@@ -20,22 +21,17 @@ namespace Microsoft.DotNet.Interactive.Commands
 
         public override async Task InvokeAsync(KernelInvocationContext context)
         {
-            if (context.CurrentKernel is IExtensibleKernel extensibleKernel)
+            if (context.HandlingKernel is IExtensibleKernel extensibleKernel)
             {
                 await extensibleKernel.LoadExtensionsFromDirectory(
                     Directory,
                     context);
             }
-            else
-            {
-                context.Fail(
-                    message: $"Kernel {context.CurrentKernel.Name} doesn't support loading extensions");
-            }
 
-            await context.CurrentKernel.VisitSubkernelsAsync(async k =>
+            await context.HandlingKernel.VisitSubkernelsAsync(async k =>
             {
-                var command = new LoadExtensionsInDirectory(Directory);
-                await k.SendAsync(command);
+                var loadExtensionsInDirectory = new LoadExtensionsInDirectory(Directory, k.Name);
+                await k.SendAsync(loadExtensionsInDirectory);
             });
         }
     }

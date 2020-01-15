@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -196,33 +197,36 @@ namespace Microsoft.DotNet.Interactive
            
             _commandQueue.Enqueue(operation);
 
-            ProcessCommandQueue(_commandQueue);
+            ProcessCommandQueue(_commandQueue, cancellationToken, onDone);
 
             return tcs.Task;
+        }
 
-            void ProcessCommandQueue(ConcurrentQueue<KernelOperation> commandQueue)
+        private void ProcessCommandQueue(ConcurrentQueue<KernelOperation> commandQueue,
+            CancellationToken cancellationToken,
+            Action onDone)
+        {
+            if (commandQueue.TryDequeue(out var currentOperation))
             {
-                if (commandQueue.TryDequeue(out var currentOperation))
+                var x = Task.Run(async () =>
                 {
-                    var x = Task.Run(async () =>
-                    {
-                        await ExecuteCommand(currentOperation);
+                    await ExecuteCommand(currentOperation);
 
-                        ProcessCommandQueue(commandQueue);
-                    }, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    onDone?.Invoke();
-                }
+                    ProcessCommandQueue(commandQueue, cancellationToken,onDone);
+                }, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                onDone?.Invoke();
             }
         }
 
-        internal async Task RunDeferredCommandsAsync()
+        internal Task RunDeferredCommandsAsync()
         {
-            await SendAsync(
-                new AnonymousKernelCommand((command, context) => Task.CompletedTask),
-                CancellationToken.None);
+            var tcs = new TaskCompletionSource<Unit>();
+                UndeferCommands();
+                ProcessCommandQueue(_commandQueue, CancellationToken.None, () => tcs.SetResult(Unit.Default));
+                return tcs.Task;
         }
 
         private void UndeferCommands()

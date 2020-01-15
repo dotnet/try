@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Interactive.Commands
 {
     public abstract class KernelCommandBase : IKernelCommand
     {
-        protected KernelCommandBase()
+        protected KernelCommandBase(string targetKernelName = null)
         {
             var parent = KernelInvocationContext.Current?.Command;
             
@@ -20,6 +20,8 @@ namespace Microsoft.DotNet.Interactive.Commands
             }
             
             Properties = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+
+            TargetKernelName = targetKernelName;
         }
 
         [JsonIgnore]
@@ -30,6 +32,8 @@ namespace Microsoft.DotNet.Interactive.Commands
 
         [JsonIgnore]
         public IDictionary<string, object> Properties { get; }
+
+        public string TargetKernelName { get; }
 
         public virtual async Task InvokeAsync(KernelInvocationContext context)
         {
