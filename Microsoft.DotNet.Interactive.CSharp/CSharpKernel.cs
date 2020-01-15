@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -172,6 +173,10 @@ namespace Microsoft.DotNet.Interactive.CSharp
             {
                 if (!cancellationSource.IsCancellationRequested)
                 {
+                    ScriptOptions = ScriptOptions.WithMetadataResolver(
+                        ScriptMetadataResolver.Default.WithBaseDirectory(
+                            Directory.GetCurrentDirectory()));
+
                     try
                     {
                         if (ScriptState == null)
@@ -297,11 +302,6 @@ namespace Microsoft.DotNet.Interactive.CSharp
             string code,
             int cursorPosition)
         {
-            if (ScriptState == null)
-            {
-                ScriptState = await CSharpScript.RunAsync(string.Empty, ScriptOptions);
-            }
-
             var compilation = ScriptState.Script.GetCompilation();
             var originalCode =
                 ScriptState?.Script.Code ?? string.Empty;

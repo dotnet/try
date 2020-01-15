@@ -128,5 +128,10 @@ namespace Microsoft.DotNet.Interactive.Tests
         {
             _disposables.Add(disposable);
         }
+        
+        protected void DisposeAfterTest(Action action)
+        {
+            _disposables.Add(action);
+        }
     }
 }
