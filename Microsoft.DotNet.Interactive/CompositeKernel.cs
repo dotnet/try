@@ -24,27 +24,20 @@ namespace Microsoft.DotNet.Interactive
         {
             Name = nameof(CompositeKernel);
             _extensionLoader = new CompositeKernelExtensionLoader();
-            Pipeline.AddMiddleware(async (command, context, next) =>
+            InterceptAddPackageCommand();
+        }
+
+        private void InterceptAddPackageCommand()
+        {
+            RegisterForDisposal(KernelEvents.OfType<PackageAdded>()
+                .Select(pa => pa.PackageReference.PackageRoot)
+                .Where(root => root?.Exists == true)
+                .Distinct()
+                .Subscribe(async packageRoot =>
             {
-                if (command is AddPackage _)
-                {
-                    var packageAddedEvents = new List<PackageAdded>();
-                    using var _ = context.KernelEvents.OfType<PackageAdded>().Subscribe(packageAddedEvents.Add);
-
-                    await next(command, context);
-
-                    foreach (var packageRoot in packageAddedEvents.Select(p => p.PackageReference.PackageRoot)
-                        .Distinct())
-                    {
-                        var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
-                        await this.SendAsync(loadExtensionsInDirectory);
-                    }
-                }
-                else
-                {
-                    await next(command, context);
-                }
-            });
+                var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
+                await this.SendAsync(loadExtensionsInDirectory);
+            }));
         }
 
         public string DefaultKernelName { get; set; }
@@ -63,13 +56,12 @@ namespace Microsoft.DotNet.Interactive
 
             _childKernels.Add(kernel);
 
-            var chooseKernelCommand = new Command($"%%{kernel.Name}");
+            var chooseKernelCommand = new Command($"%%{kernel.Name}")
+            {
+                Handler = CommandHandler.Create<KernelInvocationContext>(
+                    context => { context.HandlingKernel = kernel; })
+            };
 
-            chooseKernelCommand.Handler =
-                CommandHandler.Create<KernelInvocationContext>(context =>
-                {
-                    context.HandlingKernel = kernel;
-                });
 
             AddDirective(chooseKernelCommand);
 

@@ -26,19 +26,25 @@ namespace Microsoft.DotNet.Interactive
             if (directory.Exists)
             {
                 var displayId = Guid.NewGuid().ToString("N");
-                context.Publish(new DisplayedValueProduced($"Loading kernel extensions in directory {directory.FullName}", context.Command, valueId: displayId));
+              
 
-                var extensionDlls = directory.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
-
-                foreach (var extensionDll in extensionDlls)
+                var extensionDlls = directory.GetFiles("*.dll", SearchOption.TopDirectoryOnly).ToList();
+                if (extensionDlls.Count > 0)
                 {
-                    await LoadFromAssembly(
-                        extensionDll,
-                        kernel,
-                        context);
-                }
+                    context.Publish(new DisplayedValueProduced(
+                        $"Loading kernel extensions in directory {directory.FullName}", context.Command,
+                        valueId: displayId));
+                    foreach (var extensionDll in extensionDlls)
+                    {
+                        await LoadFromAssembly(
+                            extensionDll,
+                            kernel,
+                            context);
+                    }
 
-                context.Publish(new DisplayedValueUpdated($"Loaded kernel extensions in directory {directory.FullName}", displayId, context.Command));
+                    context.Publish(new DisplayedValueUpdated(
+                        $"Loaded kernel extensions in directory {directory.FullName}", displayId, context.Command));
+                }
             }
         }
 
