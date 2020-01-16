@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -19,25 +20,42 @@ namespace Microsoft.DotNet.Interactive
     {
         private readonly List<IKernel> _childKernels = new List<IKernel>();
         private readonly CompositeKernelExtensionLoader _extensionLoader;
+        private readonly ConcurrentQueue<DirectoryInfo> _packageRootToScan = new ConcurrentQueue<DirectoryInfo>();
 
         public CompositeKernel()
         {
             Name = nameof(CompositeKernel);
             _extensionLoader = new CompositeKernelExtensionLoader();
-            InterceptAddPackageCommand();
+            InterceptPackageAddedEvent();
         }
 
-        private void InterceptAddPackageCommand()
+        private void InterceptPackageAddedEvent()
         {
             RegisterForDisposal(KernelEvents.OfType<PackageAdded>()
                 .Select(pa => pa.PackageReference.PackageRoot)
                 .Where(root => root?.Exists == true)
                 .Distinct()
-                .Subscribe(async packageRoot =>
+                .Subscribe(onNext: _packageRootToScan.Enqueue));
+        }
+
+        private void InterceptAddPackageCommand(KernelBase kernel)
+        {
+            kernel?.Pipeline.AddMiddleware(async (command, context, next) =>
             {
-                var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
-                await this.SendAsync(loadExtensionsInDirectory);
-            }));
+                if (command is AddPackage)
+                {
+                    await next(command, context);
+                    while (_packageRootToScan.TryDequeue(out var packageRoot))
+                    {
+                        var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
+                        await this.SendAsync(loadExtensionsInDirectory);
+                    }
+                }
+                else
+                {
+                    await next(command, context);
+                }
+            });
         }
 
         public string DefaultKernelName { get; set; }
@@ -54,6 +72,8 @@ namespace Microsoft.DotNet.Interactive
                 throw new ArgumentException($"Kernel \"{kernel.Name}\" already registered", nameof(kernel));
             }
 
+
+
             _childKernels.Add(kernel);
 
             var chooseKernelCommand = new Command($"%%{kernel.Name}")
@@ -62,11 +82,9 @@ namespace Microsoft.DotNet.Interactive
                     context => { context.HandlingKernel = kernel; })
             };
 
-
             AddDirective(chooseKernelCommand);
-
             RegisterForDisposal(kernel.KernelEvents.Subscribe(PublishEvent));
-
+            InterceptAddPackageCommand(kernel as KernelBase);
             RegisterForDisposal(kernel);
         }
 
