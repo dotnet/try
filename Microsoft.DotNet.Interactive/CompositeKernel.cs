@@ -17,8 +17,8 @@ using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
-    public class EventTracker<T>  : IDisposable
-        where T: class ,IKernelEvent
+    public class EventTracker<T> : IDisposable
+        where T : class, IKernelEvent
     {
         private readonly CompositeDisposable _disposables = new CompositeDisposable();
         private readonly ConcurrentDictionary<IKernelCommand, List<T>> _mailBoxes = new ConcurrentDictionary<IKernelCommand, List<T>>();
@@ -36,11 +36,13 @@ namespace Microsoft.DotNet.Interactive
             _onCommandHandled = onCommandHandled ?? throw new ArgumentNullException(nameof(onCommandHandled));
             _onCommandFailed = onCommandFailed;
 
-            _disposables.Add(eventStream.Where(e => e.Command != null).Subscribe(async e =>
+            _disposables.Add(eventStream
+                .Where(e => e.Command != null)
+                .Subscribe(async e =>
             {
                 await TrackEvent(e);
             }));
-          
+
         }
 
 
@@ -49,25 +51,28 @@ namespace Microsoft.DotNet.Interactive
             switch (@event)
             {
                 case CommandFailed cf:
-                {
-                    var events = GetQueue(cf.Command);
-                    if (_onCommandFailed != null)
                     {
-                        await _onCommandFailed(events);
+                        var events = GetEvents(cf.Command);
+                        if (_onCommandFailed != null && events != null)
+                        {
+                            await _onCommandFailed(events);
+                        }
                     }
-                }
                     break;
                 case CommandHandled ch:
-                {
-                    var events = GetQueue(ch.Command);
-                    await _onCommandHandled(events);
-                }
+                    {
+                        var events = GetEvents(ch.Command);
+                        if (events != null)
+                        {
+                            await _onCommandHandled(events);
+                        }
+                    }
                     break;
                 case T trackedEvent:
                     _mailBoxes.AddOrUpdate(trackedEvent.Command,
                             _ =>
                             {
-                                var queue = new List<T> {trackedEvent};
+                                var queue = new List<T> { trackedEvent };
                                 return queue;
                             },
                             (_, queue) =>
@@ -75,12 +80,12 @@ namespace Microsoft.DotNet.Interactive
                                 queue.Add(trackedEvent);
                                 return queue;
                             });
-                    
+
                     break;
             }
         }
 
-        private List<T> GetQueue(IKernelCommand kernelCommand)
+        private List<T> GetEvents(IKernelCommand kernelCommand)
         {
             return _mailBoxes.TryRemove(kernelCommand, out var queue) ? queue : null;
         }
@@ -132,8 +137,6 @@ namespace Microsoft.DotNet.Interactive
             {
                 throw new ArgumentException($"Kernel \"{kernel.Name}\" already registered", nameof(kernel));
             }
-
-
 
             _childKernels.Add(kernel);
 
