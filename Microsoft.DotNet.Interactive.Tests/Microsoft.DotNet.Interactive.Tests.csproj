@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <AssetTargetFallback>portable-net45+win8+wp8+wpa81</AssetTargetFallback>
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Assent isn't strongly signed -->
   </PropertyGroup>
