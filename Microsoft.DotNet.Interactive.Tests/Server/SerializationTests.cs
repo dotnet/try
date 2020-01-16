@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Server;
+using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 using Xunit;
 using Xunit.Abstractions;

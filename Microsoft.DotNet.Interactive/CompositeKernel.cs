@@ -9,6 +9,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -16,11 +17,83 @@ using Microsoft.DotNet.Interactive.Events;
 
 namespace Microsoft.DotNet.Interactive
 {
+    public class EventTracker<T>  : IDisposable
+        where T: class ,IKernelEvent
+    {
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+        private readonly ConcurrentDictionary<IKernelCommand, List<T>> _mailBoxes = new ConcurrentDictionary<IKernelCommand, List<T>>();
+        private readonly Func<List<T>, Task> _onCommandHandled;
+        private readonly Func<List<T>, Task> _onCommandFailed;
+
+        public EventTracker(IObservable<IKernelEvent> eventStream, Func<List<T>, Task> onCommandHandled,
+            Func<List<T>, Task> onCommandFailed = null)
+        {
+            if (eventStream == null)
+            {
+                throw new ArgumentNullException(nameof(eventStream));
+            }
+
+            _onCommandHandled = onCommandHandled ?? throw new ArgumentNullException(nameof(onCommandHandled));
+            _onCommandFailed = onCommandFailed;
+
+            _disposables.Add(eventStream.Where(e => e.Command != null).Subscribe(async e =>
+            {
+                await TrackEvent(e);
+            }));
+          
+        }
+
+
+        private async Task TrackEvent(IKernelEvent @event)
+        {
+            switch (@event)
+            {
+                case CommandFailed cf:
+                {
+                    var events = GetQueue(cf.Command);
+                    if (_onCommandFailed != null)
+                    {
+                        await _onCommandFailed(events);
+                    }
+                }
+                    break;
+                case CommandHandled ch:
+                {
+                    var events = GetQueue(ch.Command);
+                    await _onCommandHandled(events);
+                }
+                    break;
+                case T trackedEvent:
+                    _mailBoxes.AddOrUpdate(trackedEvent.Command,
+                            _ =>
+                            {
+                                var queue = new List<T> {trackedEvent};
+                                return queue;
+                            },
+                            (_, queue) =>
+                            {
+                                queue.Add(trackedEvent);
+                                return queue;
+                            });
+                    
+                    break;
+            }
+        }
+
+        private List<T> GetQueue(IKernelCommand kernelCommand)
+        {
+            return _mailBoxes.TryRemove(kernelCommand, out var queue) ? queue : null;
+        }
+
+        public void Dispose()
+        {
+            _disposables.Dispose();
+        }
+    }
     public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel, IExtensibleKernel
     {
         private readonly List<IKernel> _childKernels = new List<IKernel>();
         private readonly CompositeKernelExtensionLoader _extensionLoader;
-        private readonly ConcurrentQueue<DirectoryInfo> _packageRootToScan = new ConcurrentQueue<DirectoryInfo>();
 
         public CompositeKernel()
         {
@@ -31,32 +104,20 @@ namespace Microsoft.DotNet.Interactive
 
         private void InterceptPackageAddedEvent()
         {
-            RegisterForDisposal(KernelEvents.OfType<PackageAdded>()
-                .Select(pa => pa.PackageReference.PackageRoot)
-                .Where(root => root?.Exists == true)
-                .Distinct()
-                .Subscribe(onNext: _packageRootToScan.Enqueue));
-        }
-
-        private void InterceptAddPackageCommand(KernelBase kernel)
-        {
-            kernel?.Pipeline.AddMiddleware(async (command, context, next) =>
-            {
-                if (command is AddPackage)
+            var tracker = new EventTracker<PackageAdded>(KernelEvents,
+                async events =>
                 {
-                    await next(command, context);
-                    while (_packageRootToScan.TryDequeue(out var packageRoot))
+                    foreach (var packageAdded in events)
                     {
-                        var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
+                        var loadExtensionsInDirectory =
+                            new LoadExtensionsInDirectory(packageAdded.PackageReference.PackageRoot, Name);
                         await this.SendAsync(loadExtensionsInDirectory);
                     }
-                }
-                else
-                {
-                    await next(command, context);
-                }
-            });
+                });
+
+            RegisterForDisposal(tracker);
         }
+
 
         public string DefaultKernelName { get; set; }
 
@@ -84,7 +145,6 @@ namespace Microsoft.DotNet.Interactive
 
             AddDirective(chooseKernelCommand);
             RegisterForDisposal(kernel.KernelEvents.Subscribe(PublishEvent));
-            InterceptAddPackageCommand(kernel as KernelBase);
             RegisterForDisposal(kernel);
         }
 

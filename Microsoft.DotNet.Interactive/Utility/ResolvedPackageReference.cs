@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Microsoft.DotNet.Interactive
+namespace Microsoft.DotNet.Interactive.Utility
 {
     public class ResolvedPackageReference : PackageReference
     {
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Interactive
 
             AssemblyPaths = assemblyPaths ?? throw new ArgumentNullException(nameof(assemblyPaths));
             ProbingPaths = probingPaths ?? Array.Empty<DirectoryInfo>();
-            PackageRoot = packageRoot ?? AssemblyPaths.FirstOrDefault()?.Directory.Parent.Parent;
+            PackageRoot = packageRoot ?? AssemblyPaths.FirstOrDefault()?.Directory?.Parent?.Parent;
         }
 
         public IReadOnlyList<FileInfo> AssemblyPaths { get; }

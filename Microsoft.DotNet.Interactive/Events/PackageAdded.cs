@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Interactive.Events
 {
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.Interactive.Events
             PackageReference = packageReference ?? throw new ArgumentNullException(nameof(packageReference));
         }
 
-        public ResolvedPackageReference PackageReference { get; internal set; }
+        public ResolvedPackageReference PackageReference { get; }
 
         public override string ToString()
         {
