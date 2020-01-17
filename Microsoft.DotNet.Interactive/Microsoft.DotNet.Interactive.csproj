@@ -13,17 +13,17 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftCodeAnalysisAnalyzersVersion>2.9.4</MicrosoftCodeAnalysisAnalyzersVersion>	
+    <MicrosoftCodeAnalysisAnalyzersVersion>2.9.6</MicrosoftCodeAnalysisAnalyzersVersion>	
     <SystemRuntimeLoaderVersion>4.3.0</SystemRuntimeLoaderVersion>	
-    <SystemReactiveVersion>4.1.6</SystemReactiveVersion>	
+    <SystemReactiveVersion>4.3.2</SystemReactiveVersion>	
     <SystemCommandlineExperimentalVersion>0.3.0-alpha.19602.1</SystemCommandlineExperimentalVersion>	
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Runtime.Loader" Version="$(SystemRuntimeLoaderVersion)" />
     <PackageReference Include="System.Reactive" Version="$(SystemReactiveVersion)" />
-    <PackageReference Include="system.commandline.experimental" Version="0.3.0-alpha.19602.1" />
-        <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
+    <PackageReference Include="system.commandline.experimental" Version="$(SystemCommandlineExperimentalVersion)" />
+    <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
