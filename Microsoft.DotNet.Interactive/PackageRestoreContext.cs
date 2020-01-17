@@ -138,7 +138,10 @@ namespace Microsoft.DotNet.Interactive
                        {
                            if (string.IsNullOrWhiteSpace(line[0]))
                            {
-                               probingPaths.Add(new DirectoryInfo(line[3]));
+                               if (!string.IsNullOrWhiteSpace(line[3]))
+                               {
+                                   probingPaths.Add(new DirectoryInfo(line[3]));
+                               }
 
                                return false;
                            }
