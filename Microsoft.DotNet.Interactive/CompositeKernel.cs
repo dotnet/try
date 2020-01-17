@@ -106,21 +106,27 @@ namespace Microsoft.DotNet.Interactive
             _extensionLoader = new CompositeKernelExtensionLoader();
             InterceptPackageAddedEvent();
         }
-
+        private readonly ConcurrentQueue<PackageAdded> _packages = new ConcurrentQueue<PackageAdded>();
         private void InterceptPackageAddedEvent()
         {
-            var tracker = new EventTracker<PackageAdded>(KernelEvents,
-                async events =>
-                {
-                    foreach (var packageAdded in events)
-                    {
-                        var loadExtensionsInDirectory =
-                            new LoadExtensionsInDirectory(packageAdded.PackageReference.PackageRoot, Name);
-                        await this.SendAsync(loadExtensionsInDirectory);
-                    }
-                });
+            //var tracker = new EventTracker<PackageAdded>(KernelEvents,
+            //    async events =>
+            //    {
+            //        foreach (var packageAdded in events)
+            //        {
+            //            var loadExtensionsInDirectory =
+            //                new LoadExtensionsInDirectory(packageAdded.PackageReference.PackageRoot, Name);
+            //            await this.SendAsync(loadExtensionsInDirectory);
+            //        }
+            //    });
 
-            RegisterForDisposal(tracker);
+            //RegisterForDisposal(tracker);
+
+            RegisterForDisposal(KernelEvents.OfType<PackageAdded>().Distinct(pa => pa.PackageReference.PackageRoot).Subscribe(
+                pa =>
+                {
+                    _packages.Enqueue(pa);
+                }));
         }
 
 
@@ -139,6 +145,27 @@ namespace Microsoft.DotNet.Interactive
             }
 
             _childKernels.Add(kernel);
+
+            if (kernel is KernelBase kernelBase)
+            {
+                kernelBase.Pipeline.AddMiddleware(async (command, context, next) =>
+                {
+                   // if (command is AddPackage)
+                   {
+                       await next(command, context);
+                       while (_packages.TryDequeue(out var packageAdded))
+                       {
+                           var loadExtensionsInDirectory =
+                               new LoadExtensionsInDirectory(packageAdded.PackageReference.PackageRoot, Name);
+                           await this.SendAsync(loadExtensionsInDirectory);
+                       }
+                   }
+                   //else
+                   //{
+                   //    await next(command, context);
+                   //}
+                });
+            }
 
             var chooseKernelCommand = new Command($"%%{kernel.Name}")
             {

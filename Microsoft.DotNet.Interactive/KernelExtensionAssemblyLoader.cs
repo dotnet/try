@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Interactive
             if (loadExtensions)
             {
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
-
+                
                 var extensionTypes = assembly
                     .ExportedTypes
                     .Where(t => t.CanBeInstantiated() && typeof(IKernelExtension).IsAssignableFrom(t))
@@ -100,9 +100,9 @@ namespace Microsoft.DotNet.Interactive
                     }
                     catch (Exception e)
                     {
-                        context.Publish(new DisplayedValueUpdated(
+                        context.Publish(new ErrorProduced(
                             $"Failure loading kernel extension {extensionType.Name} from assembly {assemblyFile.FullName}",
-                            display, context.Command));
+                            context.Command));
                         context.Fail(new KernelExtensionLoadException(e));
                     }
                 }

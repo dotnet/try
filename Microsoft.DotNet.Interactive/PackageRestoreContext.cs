@@ -6,9 +6,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 using static Pocket.Logger;
@@ -38,6 +39,27 @@ namespace Microsoft.DotNet.Interactive
 
                 return dir;
             });
+
+            AssemblyLoadContext.Default.Resolving += DefaultOnResolving;
+        }
+
+        private Assembly? DefaultOnResolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        {
+            var data = _resolvedPackageReferences.Values
+                .SelectMany(r => r.AssemblyPaths)
+                .Select(p => ( assemblyName: AssemblyName.GetAssemblyName(p.FullName), fileInfo:p )).ToList();
+            var found = data
+                .FirstOrDefault(a => a.assemblyName.FullName == assemblyName.FullName);
+
+            if (found == default)
+            {
+                return null;
+            }
+            else
+            {
+                return loadContext.LoadFromAssemblyPath(found.fileInfo.FullName);
+                
+            }
         }
 
         public DirectoryInfo Directory => _lazyDirectory.Value;
@@ -261,6 +283,7 @@ namespace s
         {
             try
             {
+                AssemblyLoadContext.Default.Resolving -= DefaultOnResolving;
                 if (_lazyDirectory.IsValueCreated)
                 {
                     Directory.Delete(true);
