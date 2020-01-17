@@ -57,8 +57,7 @@ namespace Microsoft.DotNet.Interactive
             }
             else
             {
-                return loadContext.LoadFromAssemblyPath(found.fileInfo.FullName);
-                
+                return loadContext.LoadFromAssemblyPath(found.fileInfo.FullName);                
             }
         }
 
