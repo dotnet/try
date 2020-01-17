@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Interactive
         }
 
 
-        private Assembly? OnResolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        private Assembly OnResolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
         {
             var data = _resolvedPackageReferences.Values
                 .SelectMany(r => r.AssemblyPaths)
