@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Utility;
@@ -37,6 +39,20 @@ namespace Microsoft.DotNet.Interactive
 
                 return dir;
             });
+
+            AssemblyLoadContext.Default.Resolving += OnResolving;
+        }
+
+
+        private Assembly OnResolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        {
+            var data = _resolvedPackageReferences.Values
+                .SelectMany(r => r.AssemblyPaths)
+                .Select(p => ( assemblyName: AssemblyName.GetAssemblyName(p.FullName), fileInfo:p )).ToList();
+            var found = data
+                .FirstOrDefault(a => a.assemblyName.FullName == assemblyName.FullName);
+
+            return found == default ? null : loadContext.LoadFromAssemblyPath(found.fileInfo.FullName);
         }
 
         public DirectoryInfo Directory => _lazyDirectory.Value;
@@ -116,7 +132,10 @@ namespace Microsoft.DotNet.Interactive
                        {
                            if (string.IsNullOrWhiteSpace(line[0]))
                            {
-                               probingPaths.Add(new DirectoryInfo(line[3]));
+                               if (!string.IsNullOrWhiteSpace(line[3]))
+                               {
+                                   probingPaths.Add(new DirectoryInfo(line[3]));
+                               }
 
                                return false;
                            }
@@ -260,6 +279,7 @@ namespace s
         {
             try
             {
+                AssemblyLoadContext.Default.Resolving -= OnResolving;
                 if (_lazyDirectory.IsValueCreated)
                 {
                     Directory.Delete(true);
@@ -269,5 +289,7 @@ namespace s
             {
             }
         }
+
+     
     }
 }

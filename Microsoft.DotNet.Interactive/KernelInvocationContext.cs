@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Formatting;
 
 namespace Microsoft.DotNet.Interactive
 {
@@ -50,8 +49,6 @@ namespace Microsoft.DotNet.Interactive
         {
             Publish(new CommandFailed(exception, Command, message));
 
-            _events.OnCompleted();
-            IsComplete = true;
             _events.OnCompleted();
             IsComplete = true;
         }

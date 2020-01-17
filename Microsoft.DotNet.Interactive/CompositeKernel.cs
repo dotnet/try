@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -17,6 +18,7 @@ namespace Microsoft.DotNet.Interactive
 {
     public class CompositeKernel : KernelBase, IEnumerable<IKernel>, ICompositeKernel, IExtensibleKernel
     {
+        private readonly ConcurrentQueue<PackageAdded> _packages = new ConcurrentQueue<PackageAdded>();
         private readonly List<IKernel> _childKernels = new List<IKernel>();
         private readonly CompositeKernelExtensionLoader _extensionLoader;
 
@@ -24,27 +26,10 @@ namespace Microsoft.DotNet.Interactive
         {
             Name = nameof(CompositeKernel);
             _extensionLoader = new CompositeKernelExtensionLoader();
-            Pipeline.AddMiddleware(async (command, context, next) =>
-            {
-                if (command is AddPackage _)
-                {
-                    var packageAddedEvents = new List<PackageAdded>();
-                    using var _ = context.KernelEvents.OfType<PackageAdded>().Subscribe(packageAddedEvents.Add);
-
-                    await next(command, context);
-
-                    foreach (var packageRoot in packageAddedEvents.Select(p => p.PackageReference.PackageRoot)
-                        .Distinct())
-                    {
-                        var loadExtensionsInDirectory = new LoadExtensionsInDirectory(packageRoot, Name);
-                        await this.SendAsync(loadExtensionsInDirectory);
-                    }
-                }
-                else
-                {
-                    await next(command, context);
-                }
-            });
+            RegisterForDisposal(KernelEvents
+                .OfType<PackageAdded>()
+                .Distinct(pa => pa.PackageReference.PackageRoot)
+                .Subscribe(_packages.Enqueue));
         }
 
         public string DefaultKernelName { get; set; }
@@ -63,18 +48,29 @@ namespace Microsoft.DotNet.Interactive
 
             _childKernels.Add(kernel);
 
-            var chooseKernelCommand = new Command($"%%{kernel.Name}");
-
-            chooseKernelCommand.Handler =
-                CommandHandler.Create<KernelInvocationContext>(context =>
+            if (kernel is KernelBase kernelBase)
+            {
+                kernelBase.Pipeline.AddMiddleware(async (command, context, next) =>
                 {
-                    context.HandlingKernel = kernel;
+                    await next(command, context);
+                    while (_packages.TryDequeue(out var packageAdded))
+                    {
+                        var loadExtensionsInDirectory =
+                            new LoadExtensionsInDirectory(packageAdded.PackageReference.PackageRoot, Name);
+                        await this.SendAsync(loadExtensionsInDirectory);
+                    }
+
                 });
+            }
+
+            var chooseKernelCommand = new Command($"%%{kernel.Name}")
+            {
+                Handler = CommandHandler.Create<KernelInvocationContext>(
+                    context => { context.HandlingKernel = kernel; })
+            };
 
             AddDirective(chooseKernelCommand);
-
             RegisterForDisposal(kernel.KernelEvents.Subscribe(PublishEvent));
-
             RegisterForDisposal(kernel);
         }
 

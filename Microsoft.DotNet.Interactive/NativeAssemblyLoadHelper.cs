@@ -9,6 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.DotNet.Interactive.Events;
+using Microsoft.DotNet.Interactive.Utility;
 using Pocket;
 using static Microsoft.DotNet.Interactive.Utility.PathUtilities;
 using static Pocket.Logger;
