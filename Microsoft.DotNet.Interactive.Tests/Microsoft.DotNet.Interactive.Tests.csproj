@@ -23,7 +23,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
-    <PackageReference Include="FluentAssertions" Version="5.9.0" />
+    <PackageReference Include="FluentAssertions" Version="5.10.0" />
     <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -42,7 +42,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="System.Reactive" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>
