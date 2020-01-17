@@ -78,7 +78,6 @@ namespace Microsoft.DotNet.Interactive
             if (loadExtensions)
             {
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyFile.FullName);
-                
                 var extensionTypes = assembly
                     .ExportedTypes
                     .Where(t => t.CanBeInstantiated() && typeof(IKernelExtension).IsAssignableFrom(t))
@@ -86,7 +85,7 @@ namespace Microsoft.DotNet.Interactive
 
                 foreach (var extensionType in extensionTypes)
                 {
-                    var extension = (IKernelExtension)Activator.CreateInstance(extensionType);
+                    var extension = (IKernelExtension) Activator.CreateInstance(extensionType);
                     var display = Guid.NewGuid().ToString("N");
                     context.Publish(new DisplayedValueProduced(
                         $"Loading kernel extension {extensionType.Name} from assembly {assemblyFile.FullName}",

@@ -40,10 +40,11 @@ namespace Microsoft.DotNet.Interactive
                 return dir;
             });
 
-            AssemblyLoadContext.Default.Resolving += DefaultOnResolving;
+            AssemblyLoadContext.Default.Resolving += OnResolving;
         }
 
-        private Assembly? DefaultOnResolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
+
+        private Assembly? OnResolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
         {
             var data = _resolvedPackageReferences.Values
                 .SelectMany(r => r.AssemblyPaths)
@@ -51,14 +52,7 @@ namespace Microsoft.DotNet.Interactive
             var found = data
                 .FirstOrDefault(a => a.assemblyName.FullName == assemblyName.FullName);
 
-            if (found == default)
-            {
-                return null;
-            }
-            else
-            {
-                return loadContext.LoadFromAssemblyPath(found.fileInfo.FullName);                
-            }
+            return found == default ? null : loadContext.LoadFromAssemblyPath(found.fileInfo.FullName);
         }
 
         public DirectoryInfo Directory => _lazyDirectory.Value;
@@ -285,7 +279,7 @@ namespace s
         {
             try
             {
-                AssemblyLoadContext.Default.Resolving -= DefaultOnResolving;
+                AssemblyLoadContext.Default.Resolving -= OnResolving;
                 if (_lazyDirectory.IsValueCreated)
                 {
                     Directory.Delete(true);
@@ -295,5 +289,7 @@ namespace s
             {
             }
         }
+
+     
     }
 }

@@ -26,11 +26,10 @@ namespace Microsoft.DotNet.Interactive
         {
             Name = nameof(CompositeKernel);
             _extensionLoader = new CompositeKernelExtensionLoader();
-            RegisterForDisposal(KernelEvents.OfType<PackageAdded>().Distinct(pa => pa.PackageReference.PackageRoot).Subscribe(
-                pa =>
-                {
-                    _packages.Enqueue(pa);
-                }));
+            RegisterForDisposal(KernelEvents
+                .OfType<PackageAdded>()
+                .Distinct(pa => pa.PackageReference.PackageRoot)
+                .Subscribe(_packages.Enqueue));
         }
 
         public string DefaultKernelName { get; set; }
