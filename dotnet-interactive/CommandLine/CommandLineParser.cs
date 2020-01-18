@@ -5,6 +5,8 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -134,9 +136,9 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             {
                 var jupyterCommand = new Command("jupyter", "Starts dotnet-interactive as a Jupyter kernel");
 
-                var defaultKernelOption = new Option("--default-kernel", "The the default language for the kernel")
+                var defaultKernelOption = new Option<string>("--default-kernel", "The the default language for the kernel")
                 {
-                    Argument = new Argument<string>(defaultValue: () => "csharp")
+                    Argument = new Argument<string>(getDefaultValue: () => "csharp")
                 };
                 
                 jupyterCommand.AddOption(defaultKernelOption);
@@ -193,7 +195,7 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
             {
                 var defaultKernelOption = new Option("--default-kernel", "The default .NET kernel language for the notebook.")
                 {
-                    Argument = new Argument<string>(defaultValue: () => "csharp")
+                    Argument = new Argument<string>(getDefaultValue: () => "csharp")
                 };
 
                 var startKernelServerCommand = new Command("kernel-server", "Starts dotnet-interactive with kernel functionality exposed over standard I/O")
