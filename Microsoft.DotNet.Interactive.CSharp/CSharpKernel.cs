@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -66,6 +65,7 @@ namespace Microsoft.DotNet.Interactive.CSharp
             _extensionLoader = new CSharpKernelExtensionLoader();
             NativeAssemblyLoadHelper = new NativeAssemblyLoadHelper(this);
             RegisterForDisposal(NativeAssemblyLoadHelper);
+            RegisterForDisposal(() => { ScriptState = null; });
         }
 
         public ScriptState ScriptState { get; private set; }
