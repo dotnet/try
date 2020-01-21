@@ -26,7 +26,7 @@ namespace WorkspaceServer.Packaging
             var requiredPackages = new List<(string packageName, string packageVersion, string restoreSources)>
             {
                 ("Newtonsoft.Json", "12.0.3", ""),
-                ("System.CommandLine", "0.3.0-alpha.20068.1", "")
+                ("System.CommandLine", "0.3.0-alpha.20071.1", "")
             };
 
             _addPackages = packages.Concat(requiredPackages).Distinct().ToList();

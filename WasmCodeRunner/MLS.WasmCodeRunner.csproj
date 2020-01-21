@@ -11,6 +11,6 @@
   
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="System.CommandLine" Version="0.3.0-alpha.20068.1" />
+    <PackageReference Include="System.CommandLine" Version="0.3.0-alpha.20071.1" />
   </ItemGroup>
 </Project>
