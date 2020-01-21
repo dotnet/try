@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>dotnet-interactive</PackageId>
+    <PackageId>Microsoft.dotnet-interactive</PackageId>
     <ToolCommandName>dotnet-interactive</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
