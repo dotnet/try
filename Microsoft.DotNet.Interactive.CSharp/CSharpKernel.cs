@@ -65,7 +65,10 @@ namespace Microsoft.DotNet.Interactive.CSharp
             _extensionLoader = new CSharpKernelExtensionLoader();
             NativeAssemblyLoadHelper = new NativeAssemblyLoadHelper(this);
             RegisterForDisposal(NativeAssemblyLoadHelper);
-            RegisterForDisposal(() => { ScriptState = null; });
+            RegisterForDisposal(() =>
+            {
+                ScriptState = null;
+            });
         }
 
         public ScriptState ScriptState { get; private set; }

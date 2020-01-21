@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>dotnet_interactive.Profiler</RootNamespace>
+    <RootNamespace>Microsoft.DotNet.Interactive.Profiler</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
