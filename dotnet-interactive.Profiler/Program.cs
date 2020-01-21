@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
 using JetBrains.Profiler.Api;
 using Microsoft.DotNet.Interactive.App;
@@ -19,30 +20,52 @@ namespace Microsoft.DotNet.Interactive.Profiler
             MemoryProfiler.ForceGc();
 
             const int iterationCount = 20;
-
-            for (int i = 0; i < iterationCount; i++)
+            foreach (var kernelName in new []{"csharp", "fsharp"})
             {
-                MemoryProfiler.GetSnapshot($"Before Kernel creation at Iteration {i}");
-                MemoryProfiler.ForceGc();
-                var kernel = CreateKernel();
-                MemoryProfiler.ForceGc();
-                MemoryProfiler.GetSnapshot($"Before Iteration {i}");
-                
-                var submitCode = new SubmitCode(@"
+                for (int i = 0; i < iterationCount; i++)
+                {
+                    MemoryProfiler.GetSnapshot($"Before {kernelName} Kernel creation at Iteration {i}");
+                    MemoryProfiler.ForceGc();
+                    var kernel = CreateKernel(kernelName);
+                    MemoryProfiler.ForceGc();
+                    MemoryProfiler.GetSnapshot($"Before {kernelName} Iteration {i}");
+
+                    var submitCode = CreateSubmitCode(kernelName);
+
+                    await kernel.SendAsync(submitCode);
+                    MemoryProfiler.GetSnapshot($"After {kernelName} Iteration {i}");
+                    kernel.Dispose();
+                    kernel = null;
+                    MemoryProfiler.ForceGc();
+                }
+            }
+           
+        }
+
+        private static SubmitCode CreateSubmitCode(string kernelName)
+        {
+            switch (kernelName)
+            {
+                case "csharp":
+                    return  new SubmitCode(@"
 Console.Write(""value one"");
 Console.Write(""value two"");
 Console.Write(""value three"");"
-                    , targetKernelName: "csharp");
-
-                await kernel.SendAsync(submitCode);
-                MemoryProfiler.GetSnapshot($"After Iteration {i}");
-                kernel.Dispose();
-                kernel = null;
-                MemoryProfiler.ForceGc();
+                        , targetKernelName: kernelName);
+                case "fsharp":
+                    return new SubmitCode(@"open System
+Console.Write(""value one"")
+Console.Write(""value two"")
+Console.Write(""value three"")"
+                        , targetKernelName: kernelName);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(kernelName), $"kernel {kernelName} not supported");
             }
+
+
         }
 
-        private static IKernel CreateKernel()
+        private static IKernel CreateKernel(string kernelName)
         {
             var kernel = new CompositeKernel
                 {
@@ -63,7 +86,7 @@ Console.Write(""value three"");"
                 }
                 .UseDefaultMagicCommands();
 
-            kernel.DefaultKernelName = "csharp";
+            kernel.DefaultKernelName = kernelName;
             kernel.Name = ".NET";
             return kernel;
         }
