@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Interactive
                     }
                     else
                     {
-                        await handlingKernel.SendAsync(command);
+                        await (handlingKernel ?? context.HandlingKernel).SendAsync(command);
                     }
                 }
             }
