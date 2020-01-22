@@ -5,11 +5,13 @@ using System;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharp;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.FSharp;
+using Microsoft.DotNet.Interactive.Jupyter;
 using Newtonsoft.Json;
 using Recipes;
 using Xunit;
@@ -640,6 +642,53 @@ using Microsoft.ML.AutoML;
                 .Value
                 .Should()
                 .Be("Microsoft.ML.AutoML version 0.16.1-preview cannot be added because version 0.16.0-preview was added previously.");
+        }
+
+        [Fact(Timeout = 45000)]
+        public async Task cell_with_nuget_and_code_continues_executions_on_right_kernel()
+        {
+            
+            var kernel =
+                new CompositeKernel {
+                        new CSharpKernel()
+                            .UseDefaultFormatting()
+                            .UseNugetDirective()
+                            .UseKernelHelpers()
+                            .UseWho()
+                            .LogEventsToPocketLogger(),
+
+                        new FSharpKernel()
+                        .UseDefaultFormatting()
+                        .UseKernelHelpers()
+                        .UseWho()
+                        .UseDefaultNamespaces()
+                        .LogEventsToPocketLogger()
+                    }
+                    .UseDefaultMagicCommands();
+
+            kernel.DefaultKernelName = "csharp";
+
+            var events = kernel.KernelEvents.ToSubscribedList();
+
+            DisposeAfterTest(events);
+            DisposeAfterTest(kernel);
+
+            var command = new SubmitCode(@"#r ""nuget:Octokit, 0.32.0""
+#r ""nuget:NodaTime, 2.4.6""
+using Octokit;
+using NodaTime;
+using NodaTime.Extensions;
+using XPlot.Plotly;");
+
+            await kernel.SendAsync(command,CancellationToken.None);
+
+            events.Should().NotContainErrors();
+
+
+
+            events
+                .Should()
+                .ContainSingle<CommandHandled>(ch => ch.Command == command);
         }
 
         [Fact(Timeout = 45000)]
