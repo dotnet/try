@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Interactive
             KernelPipelineContinuation next)
         {
             var commands = _submissionSplitter.SplitSubmission(submitCode);
-
+            var handlingKernel = context.HandlingKernel;
             foreach (var command in commands)
             {
                 if (context.IsComplete)
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Interactive
                     }
                     else
                     {
-                        await context.HandlingKernel.SendAsync(command);
+                        await (handlingKernel ?? context.HandlingKernel).SendAsync(command);
                     }
                 }
             }
