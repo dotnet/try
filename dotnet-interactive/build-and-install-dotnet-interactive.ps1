@@ -19,5 +19,5 @@ if (Test-Path 'env:DisableArcade') {
     $script:toolVersion = "1.0.44142.42"
 }
 
-dotnet tool uninstall -g dotnet-interactive
-dotnet tool install -g --add-source "$toolLocation" --version $toolVersion dotnet-interactive
+dotnet tool uninstall -g Microsoft.dotnet-interactive
+dotnet tool install -g --add-source "$toolLocation" --version $toolVersion Microsoft.dotnet-interactive

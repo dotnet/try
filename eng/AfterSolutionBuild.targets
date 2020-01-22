@@ -11,7 +11,7 @@
   -->
 
   <ItemGroup>
-    <StableVersionPackages Include="$(ArtifactsShippingPackagesDir)\dotnet-*.nupkg" />
+    <StableVersionPackages Include="$(ArtifactsShippingPackagesDir)\Microsoft.dotnet-*.nupkg" />
   </ItemGroup>
 
   <!-- Appends the extension `.renamed` to the dotnet-* packages to force the glob `*.nupkg` to not pick it up. -->
