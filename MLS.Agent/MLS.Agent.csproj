@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>dotnet-try</PackageId>
+    <PackageId>Microsoft.dotnet-try</PackageId>
     <ToolCommandName>dotnet-try</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
