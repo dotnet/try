@@ -10,6 +10,7 @@ using Microsoft.DotNet.Interactive.FSharp;
 using Microsoft.DotNet.Interactive.Tests;
 using Xunit;
 
+#pragma warning disable 8509 // don't warn on incomplete pattern matches
 namespace Microsoft.DotNet.Interactive.Jupyter.Tests
 {
     public partial class MagicCommandTests
