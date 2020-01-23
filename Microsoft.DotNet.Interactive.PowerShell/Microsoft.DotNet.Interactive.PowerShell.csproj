@@ -18,4 +18,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.0.0-rc.1" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Modules\**" PackageCopyToOutput="true">
+      <Link>Modules\%(RecursiveDir)\%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

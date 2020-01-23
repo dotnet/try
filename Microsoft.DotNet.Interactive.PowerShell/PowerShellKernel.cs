@@ -9,6 +9,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Language;
 using System.Management.Automation.Runspaces;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Commands;
@@ -26,43 +27,19 @@ namespace Microsoft.DotNet.Interactive.PowerShell
         private CancellationTokenSource _cancellationSource;
         private readonly object _cancellationSourceLock = new object();
 
-        static PowerShellKernel()
-        {
-            Formatter<WarningRecord>.Register((record, writer) => {
-                PocketView view = PocketViewTags.pre($"WARN: {record.Message}");
-                writer.WriteLine(view.ToDisplayString(HtmlFormatter.MimeType));
-            }, HtmlFormatter.MimeType);
-
-            Formatter<WarningRecord>.Register((record, writer) => {
-                writer.WriteLine($"WARN: {record.Message}");
-            }, PlainTextFormatter.MimeType);
-
-            Formatter<DebugRecord>.Register((record, writer) => {
-                PocketView view = PocketViewTags.pre($"DEBUG: {record.Message}");
-                writer.WriteLine(view.ToDisplayString(HtmlFormatter.MimeType));
-            }, HtmlFormatter.MimeType);
-
-            Formatter<DebugRecord>.Register((record, writer) => {
-                writer.WriteLine($"DEBUG: {record.Message}");
-            }, PlainTextFormatter.MimeType);
-
-            Formatter<VerboseRecord>.Register((record, writer) => {
-                PocketView view = PocketViewTags.pre($"VERBOSE: {record.Message}");
-                writer.WriteLine(view.ToDisplayString(HtmlFormatter.MimeType));
-            }, HtmlFormatter.MimeType);
-
-            Formatter<VerboseRecord>.Register((record, writer) => {
-                writer.WriteLine($"VERBOSE: {record.Message}");
-            }, PlainTextFormatter.MimeType);
-        }
-
         public PowerShellKernel()
         {
-            _runspace = RunspaceFactory.CreateRunspace(InitialSessionState.CreateDefault());
+            var iss = InitialSessionState.CreateDefault();
+            _runspace = RunspaceFactory.CreateRunspace(iss);
             _runspace.Open();
             _runspaceSemaphore = new SemaphoreSlim(1, 1);
             _cancellationSource = new CancellationTokenSource();
             Name = DefaultKernelName;
+
+            string psModulePath = Environment.GetEnvironmentVariable("PSModulePath");
+            Environment.SetEnvironmentVariable("PSModulePath",
+                psModulePath + Path.PathSeparator +
+                System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Modules");
         }
 
         #region Overrides
@@ -138,7 +115,6 @@ namespace Microsoft.DotNet.Interactive.PowerShell
             }
 
             Exception exception = null;
-            Collection<string> results = null;
             if (!cancellationSource.IsCancellationRequested)
             {
                 await _runspaceSemaphore.WaitAsync();
@@ -149,17 +125,18 @@ namespace Microsoft.DotNet.Interactive.PowerShell
                         RegisterPowerShellStreams(ps, context, submitCode);
                         try
                         {
-                            results = ps
-                                .AddScript(code)
-                                .AddCommand("Out-String")
-                                .InvokeAndClearCommands<string>();
+                            ps.AddScript(code)
+                                .AddCommand(@"Microsoft.DotNet.Interactive.PowerShell\Trace-PipelineObject")
+                                .InvokeAndClearCommands();
                         }
                         catch (Exception e)
                         {
-                            results = ps
-                                .AddCommand("Out-String")
+                            string stringifiedErrorRecord =
+                                ps.AddCommand(@"Out-String")
                                     .AddParameter("InputObject", new ErrorRecord(e, null, ErrorCategory.NotSpecified, null))
-                                .InvokeAndClearCommands<string>();
+                                .InvokeAndClearCommands<string>()[0];
+
+                            StreamHandler.PublishStreamRecord(stringifiedErrorRecord, context, submitCode);
                         }
                     }
                 }
@@ -179,19 +156,6 @@ namespace Microsoft.DotNet.Interactive.PowerShell
                 {
                     string message = null;
                     context.Publish(new CommandFailed(exception, submitCode, message));
-                }
-                else
-                {
-                    if (results != null)
-                    {
-
-                        var formattedValues = FormattedValue.FromObject(results.Single());
-                        context.Publish(
-                            new ReturnValueProduced(
-                                results,
-                                submitCode,
-                                formattedValues));
-                    }
                 }
             }
             else

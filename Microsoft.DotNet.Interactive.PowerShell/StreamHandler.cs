@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Interactive.PowerShell
             }
         }
 
-        private void PublishStreamRecord(
+        internal static void PublishStreamRecord(
             object output,
             KernelInvocationContext context,
             IKernelCommand command)
@@ -136,13 +136,13 @@ namespace Microsoft.DotNet.Interactive.PowerShell
 
             // InformationRecord
             Formatter<InformationRecord>.Register((record, writer) => {
-                string prefix = (record.Tags.Count == 1 && record.Tags[0] == "__PipelineObject__") ? "OUTPUT:" : "INFORMATION:";
+                string prefix = (record.Tags.Count == 1 && record.Tags[0] == "__PipelineObject__") ? "" : "INFORMATION:";
                 PocketView view = PocketViewTags.pre($"{prefix} {record.MessageData}");
                 writer.WriteLine(view.ToDisplayString(HtmlFormatter.MimeType));
             }, HtmlFormatter.MimeType);
 
             Formatter<InformationRecord>.Register((record, writer) => {
-                string prefix = (record.Tags.Count == 1 && record.Tags[0] == "__PipelineObject__") ? "OUTPUT:" : "INFORMATION:";
+                string prefix = (record.Tags.Count == 1 && record.Tags[0] == "__PipelineObject__") ? "" : "INFORMATION:";
                 writer.WriteLine($"{prefix} {record.MessageData}");
             }, PlainTextFormatter.MimeType);
 
