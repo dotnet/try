@@ -173,17 +173,16 @@ namespace Microsoft.DotNet.Interactive
         private void WriteProjectFile()
         {
             var directoryPropsContent =
-                $@"
-<Project Sdk='Microsoft.NET.Sdk'>
+                $@"<Project Sdk='Microsoft.NET.Sdk'>
+
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
-    {PackageReferences()}
-    {Targets()}
-    
+{PackageReferences()}
+{Targets()}
+
 </Project>";
 
             File.WriteAllText(
@@ -191,24 +190,6 @@ namespace Microsoft.DotNet.Interactive
                     Directory.FullName,
                     "r.csproj"),
                 directoryPropsContent);
-
-            File.WriteAllText(
-                Path.Combine(
-                    Directory.FullName,
-                    "Program.cs"),
-                @"
-using System;
-
-namespace s
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-        }
-    }
-}
-");
 
             string PackageReferences()
             {
@@ -219,60 +200,68 @@ namespace s
 
                 var sb = new StringBuilder();
 
-                sb.Append("  <ItemGroup>\n");
-
                 _requestedPackageReferences
                     .Values
                     .Where(reference => !string.IsNullOrEmpty(reference.PackageName))
                     .ToList()
-                    .ForEach(reference => sb.Append($"    <PackageReference Include=\"{reference.PackageName}\" Version=\"{GetReferenceVersion(reference)}\"/>\n"));
-
-                sb.Append("  </ItemGroup>\n");
-
-                sb.Append("  <PropertyGroup>\n");
+                    .ForEach(reference => sb.Append($"    <ItemGroup><PackageReference Include=\"{reference.PackageName}\" Version=\"{GetReferenceVersion(reference)}\"/></ItemGroup>\n"));
 
                 _requestedPackageReferences
                     .Values
                     .Where(reference => !string.IsNullOrEmpty(reference.RestoreSources))
                     .ToList()
-                    .ForEach(reference => sb.Append($"    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources){reference.RestoreSources}</RestoreAdditionalProjectSources>\n"));
-                sb.Append("  </PropertyGroup>\n");
+                    .ForEach(reference => sb.Append($"    <PropertyGroup><RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources){reference.RestoreSources}</RestoreAdditionalProjectSources></PropertyGroup>\n"));
 
                 return sb.ToString();
             }
 
-            string Targets() => @"
-  <Target Name='ComputePackageRoots'
-          BeforeTargets='CoreCompile;WriteNugetAssemblyPaths'
-          DependsOnTargets='CollectPackageReferences'>
-      <ItemGroup>
-        <ResolvedFile Include='@(ResolvedCompileFileDefinitions)'>
-           <PackageRootProperty>Pkg$([System.String]::Copy('%(ResolvedCompileFileDefinitions.NugetPackageId)').Replace('.','_'))</PackageRootProperty>
-           <PackageRoot>$(%(ResolvedFile.PackageRootProperty))</PackageRoot>
-           <InitializeSourcePath>$(%(ResolvedFile.PackageRootProperty))\content\%(ResolvedCompileFileDefinitions.FileName)%(ResolvedCompileFileDefinitions.Extension).fsx</InitializeSourcePath>
-        </ResolvedFile>
-        <NativeIncludeRoots
-            Include='@(RuntimeTargetsCopyLocalItems)'
-            Condition=""'%(RuntimeTargetsCopyLocalItems.AssetType)' == 'native'"">
-           <Path>$([System.String]::Copy('%(FullPath)').Substring(0, $([System.String]::Copy('%(FullPath)').LastIndexOf('runtimes'))))</Path>
-        </NativeIncludeRoots>
-      </ItemGroup>
-  </Target>
+            string Targets() => @"    <Target Name='ComputePackageRootsForInteractivePackageManagement'
+            BeforeTargets='CoreCompile'
+            DependsOnTargets='CollectPackageReferences'>
+        <ItemGroup>
+            <InteractiveResolvedFile Remove='@(InteractiveResolvedFile)' />
+            <InteractiveResolvedFile Include='@(ResolvedCompileFileDefinitions->ClearMetadata())' KeepDuplicates='false'>
+                <NormalizedIdentity Condition=""'%(Identity)'!=''"">$([System.String]::Copy('%(Identity)').Replace('\', '/'))</NormalizedIdentity>
+                <NormalizedPathInPackage Condition=""'%(ResolvedCompileFileDefinitions.PathInPackage)'!=''"">$([System.String]::Copy('%(ResolvedCompileFileDefinitions.PathInPackage)').Replace('\', '/'))</NormalizedPathInPackage>
+                <PositionPathInPackage Condition=""'%(InteractiveResolvedFile.NormalizedPathInPackage)'!=''"">$([System.String]::Copy('%(InteractiveResolvedFile.NormalizedIdentity)').IndexOf('%(InteractiveResolvedFile.NormalizedPathInPackage)'))</PositionPathInPackage>
+                <PackageRoot Condition=""'%(InteractiveResolvedFile.NormalizedPathInPackage)'!='' and '%(InteractiveResolvedFile.PositionPathInPackage)'!='-1'"">$([System.String]::Copy('%(InteractiveResolvedFile.NormalizedIdentity)').Substring(0, %(InteractiveResolvedFile.PositionPathInPackage)))</PackageRoot>
+                <InitializeSourcePath>%(InteractiveResolvedFile.PackageRoot)content\%(ResolvedCompileFileDefinitions.FileName)%(ResolvedCompileFileDefinitions.Extension).fsx</InitializeSourcePath>
+                <IsNotImplementationReference>$([System.String]::Copy('%(ResolvedCompileFileDefinitions.PathInPackage)').StartsWith('ref/'))</IsNotImplementationReference>
+                <NuGetPackageId>%(ResolvedCompileFileDefinitions.NuGetPackageId)</NuGetPackageId>
+                <NuGetPackageVersion>%(ResolvedCompileFileDefinitions.NuGetPackageVersion)</NuGetPackageVersion>
+            </InteractiveResolvedFile>
+            <InteractiveResolvedFile Include='@(RuntimeCopyLocalItems->ClearMetadata())' KeepDuplicates='false' >
+                <NormalizedIdentity Condition=""'%(Identity)'!=''"">$([System.String]::Copy('%(Identity)').Replace('\', '/'))</NormalizedIdentity>
+                <NormalizedPathInPackage Condition=""'%(RuntimeCopyLocalItems.PathInPackage)'!=''"">$([System.String]::Copy('%(RuntimeCopyLocalItems.PathInPackage)').Replace('\', '/'))</NormalizedPathInPackage>
+                <PositionPathInPackage Condition=""'%(InteractiveResolvedFile.NormalizedPathInPackage)'!=''"">$([System.String]::Copy('%(InteractiveResolvedFile.NormalizedIdentity)').IndexOf('%(InteractiveResolvedFile.NormalizedPathInPackage)'))</PositionPathInPackage>
+                <PackageRoot Condition=""'%(InteractiveResolvedFile.NormalizedPathInPackage)'!='' and '%(InteractiveResolvedFile.PositionPathInPackage)'!='-1'"">$([System.String]::Copy('%(InteractiveResolvedFile.NormalizedIdentity)').Substring(0, %(InteractiveResolvedFile.PositionPathInPackage)))</PackageRoot>
+                <InitializeSourcePath>%(InteractiveResolvedFile.PackageRoot)content\%(RuntimeCopyLocalItems.FileName)%(RuntimeCopyLocalItems.Extension).fsx</InitializeSourcePath>
+                <IsNotImplementationReference>$([System.String]::Copy('%(RuntimeCopyLocalItems.PathInPackage)').StartsWith('ref/'))</IsNotImplementationReference>
+                <NuGetPackageId>%(RuntimeCopyLocalItems.NuGetPackageId)</NuGetPackageId>
+                <NuGetPackageVersion>%(RuntimeCopyLocalItems.NuGetPackageVersion)</NuGetPackageVersion>
+            </InteractiveResolvedFile>
+            <NativeIncludeRoots Include='@(RuntimeTargetsCopyLocalItems)'
+                                Condition=""'%(RuntimeTargetsCopyLocalItems.AssetType)' == 'native'"">
+                <Path>$([MSBuild]::EnsureTrailingSlash('$([System.String]::Copy('%(FullPath)').Substring(0, $([System.String]::Copy('%(FullPath)').LastIndexOf('runtimes'))))'))</Path>
+            </NativeIncludeRoots>
+        </ItemGroup>
+    </Target>
 
-  <Target Name='WriteNugetAssemblyPaths' 
-          DependsOnTargets='ResolvePackageAssets; ResolveReferences; ProcessFrameworkReferences' 
-          AfterTargets='PrepareForBuild'>
+    <Target Name='WriteNugetAssemblyPaths' 
+            DependsOnTargets='ResolvePackageAssets; ResolveReferences; ProcessFrameworkReferences;ComputePackageRootsForInteractivePackageManagement' 
+            AfterTargets='PrepareForBuild'>
 
-    <ItemGroup>
-      <ResolvedReferenceLines Remove='*' />
-      <ResolvedReferenceLines Include='%(ReferencePath.NugetPackageId),%(ReferencePath.NugetPackageVersion),%(ReferencePath.OriginalItemSpec),%(NativeIncludeRoots.Path),$(AppHostRuntimeIdentifier)' />
-    </ItemGroup>
+        <ItemGroup>
+            <ResolvedReferenceLines Remove='*' />
+            <ResolvedReferenceLines Include=""%(InteractiveResolvedFile.NugetPackageId),%(InteractiveResolvedFile.NugetPackageVersion),%(InteractiveResolvedFile.Identity),%(NativeIncludeRoots.Path),$(AppHostRuntimeIdentifier)""
+                                    Condition=""'%(InteractiveResolvedFile.IsNotImplementationReference)' != 'true'""
+                                    KeepDuplicates='false'/>
+        </ItemGroup>
 
-    <WriteLinesToFile Lines='@(ResolvedReferenceLines)' 
-                      File='$(MSBuildProjectFullPath).resolvedReferences.paths' 
-                      Overwrite='True' WriteOnlyWhenDifferent='True' />
-  </Target>
-";
+        <WriteLinesToFile Lines='@(ResolvedReferenceLines)' 
+                          File='$(MSBuildProjectFullPath).resolvedReferences.paths' 
+                          Overwrite='True' WriteOnlyWhenDifferent='True' />
+    </Target>";
         }
 
         public void Dispose()
@@ -290,6 +279,5 @@ namespace s
             }
         }
 
-     
     }
 }
