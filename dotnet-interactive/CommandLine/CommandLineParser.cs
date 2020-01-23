@@ -220,7 +220,8 @@ namespace Microsoft.DotNet.Interactive.App.CommandLine
                                  .UseXplot()
                                  .UseMathAndLaTeX()
                          }
-                         .UseDefaultMagicCommands();
+                         .UseDefaultMagicCommands()
+                         .UseAbout();
 
             kernel.DefaultKernelName = defaultKernelName;
             kernel.Name = ".NET";
