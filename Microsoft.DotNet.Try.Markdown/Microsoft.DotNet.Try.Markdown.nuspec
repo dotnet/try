@@ -7,7 +7,7 @@
             <group targetFramework=".NETStandard2.0">
                 <!-- Dependencies of Microsoft.DotNet.Try.Markdown -->
                 <dependency id="Microsoft.AspNetCore.Html.Abstractions" version="$MicrosoftAspNetCoreHtmlAbstractionsVersion$" />
-                <dependency id="system.commandline.experimental" version="$SystemCommandlineExperimentalVersion$" />
+                <dependency id="System.CommandLine" version="$SystemCommandLineVersion$" />
                 <dependency id="Markdig" version="$MarkdigVersion$" />
 
                 <!-- Dependencies of MLS.Agent.Tools -->
