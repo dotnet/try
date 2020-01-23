@@ -13,10 +13,7 @@ namespace Microsoft.DotNet.Interactive.App
             where T : KernelBase
         {
             Formatter<PlotlyChart>.Register(
-                (chart, writer) =>
-                {
-                    writer.Write(PlotlyChartExtensions.GetHtml(chart));
-                },
+                (chart, writer) => writer.Write(PlotlyChartExtensions.GetHtml(chart)),
                 HtmlFormatter.MimeType);
 
             return kernel;
