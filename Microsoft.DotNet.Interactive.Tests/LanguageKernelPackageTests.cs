@@ -760,10 +760,9 @@ using System.Text.Json;
             events.Should()
                   .NotContainErrors();
 
-            // The System.Text.JSon dll ships in : Microsoft.NETCore.App.Ref
             events.OfType<PackageAdded>()
                   .Should()
-                  .ContainSingle(e => e.PackageReference.PackageName == "Microsoft.NETCore.App.Ref");
+                  .ContainSingle(e => e.PackageReference.PackageName == "System.Text.Json");
         }
 
         [Fact(Timeout = 45000)]
