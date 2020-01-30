@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using System.CommandLine;
+using System.CommandLine.IO;
 using System.Threading.Tasks;
 using MLS.Agent.CommandLine;
 using WorkspaceServer.Packaging;

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Binding;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Markdig;
 using MLS.Agent.Tools;
@@ -99,12 +100,12 @@ namespace Microsoft.DotNet.Try.Markdown
 
             yield return new Option("--editable")
             {
-                Argument = new Argument<bool>(defaultValue: () => true)
+                Argument = new Argument<bool>(getDefaultValue: () => true)
             };
 
             yield return new Option("--hidden")
             {
-                Argument = new Argument<bool>(defaultValue: () => false)
+                Argument = new Argument<bool>(getDefaultValue: () => false)
             };
 
             yield return new Option("--region")
