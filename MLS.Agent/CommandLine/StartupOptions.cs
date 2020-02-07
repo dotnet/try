@@ -85,7 +85,7 @@ namespace MLS.Agent.CommandLine
         {
             get
             {
-                switch (_parseResult?.CommandResult?.Name)
+                switch (_parseResult?.CommandResult?.Command?.Name)
                 {
                     case "hosted":
                         return StartupMode.Hosted;
