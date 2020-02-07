@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Try.Markdown
                 Session = $"Run{++_sessionIndex}";
             }
 
-            NormalizedLanguage = parseResult?.CommandResult.Name;
+            NormalizedLanguage = parseResult?.CommandResult.Command.Name;
             Language = parseResult?.Tokens.First().Value;
             RunArgs = runArgs ?? Untokenize(parseResult);
         }

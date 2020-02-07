@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Try.Markdown
 
             var result = _parser.Parse(line);
 
-            if (!_supportedLanguages.Contains(result.CommandResult.Name) ||
+            if (!_supportedLanguages.Contains(result.CommandResult.Command.Name) ||
                 result.Tokens.Count == 1)
             {
                 return CodeFenceOptionsParseResult.None;
