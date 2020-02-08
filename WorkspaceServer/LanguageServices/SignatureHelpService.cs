@@ -134,22 +134,26 @@ namespace WorkspaceServer.LanguageServices
 
         private static int InvocationScore(IMethodSymbol symbol, IEnumerable<TypeInfo> types)
         {
-            var parameters = GetParameters(symbol);
-            if (parameters.Count() < types.Count())
+            var parameters = GetParameters(symbol).ToList();
+            var typeInfos = types.ToList();
+
+            if (parameters.Count() < typeInfos.Count)
             {
                 return int.MinValue;
             }
 
             var score = 0;
 
-            foreach (var (invocation, definition) in types.Zip(parameters, (i, d) => (i, d)))
+            foreach (var (invocation, definition) in typeInfos.Zip(parameters, (i, d) => (i, d)))
             {
                 if (invocation.ConvertedType == null)
                 {
                     // 1 point for having a parameter
                     score += 1;
                 }
-                else if (invocation.ConvertedType.Equals(definition.Type))
+
+                else if (definition.Type != null && (SymbolEqualityComparer.Default.Equals(invocation.ConvertedType, definition.Type)))
+
                 {
                     // 2 points for having a parameter and being
                     // the same type
