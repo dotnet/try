@@ -25,7 +25,7 @@ _**Please Note**: At the moment, the Try .NET online (`trydotnet.js API`) is cur
 ### Interactive .NET Core documentation with the `dotnet try` global tool
 
 Try .NET enables .NET developers to create interactive markdown files.
-To make your markdown files interactive, you will need to [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0), the dotnet try global tool and [Visual Studio](https://visualstudio.microsoft.com/) / [VS Code](https://code.visualstudio.com/)(or any other editor of your choice). 
+To make your markdown files interactive, you will need the [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0), the `dotnet try` global tool and [Visual Studio](https://visualstudio.microsoft.com/) / [VS Code](https://code.visualstudio.com/) (or any other editor of your choice). 
 
 <img src ="https://user-images.githubusercontent.com/2546640/57158389-47a2c780-6db1-11e9-96ad-8c6e9ab52853.png" width = "80%">
 
@@ -43,5 +43,4 @@ If you find an issue or have a feature suggestion, please open an [issue](https:
 **Microsoft Docs**  
 
 Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to create interactive documentation. Users can run and edit .NET code in the browser. 
-
 
