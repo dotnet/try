@@ -10,7 +10,7 @@
 
 Try .NET provides developers and content authors with tools to create interactive experiences.
 
-There are different experiencs of  Try .NET interactive experiences:
+There are two different Try .NET interactive experiences:
 * The web experience powered by Blazor (as seen on [Microsoft docs](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world))
 * Interactive documentation with Markdown for .NET Core with the [dotnet try global tool](DotNetTry.md). 
 
@@ -43,4 +43,3 @@ If you find an issue or have a feature suggestion, please open an [issue](https:
 **Microsoft Docs**  
 
 Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to create interactive documentation. Users can run and edit .NET code in the browser. 
-
