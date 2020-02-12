@@ -17,11 +17,11 @@ try {
         exit $LASTEXITCODE
     }
 
-    # directly invoke npm tests
-    # if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
-    #     TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
-    #     TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
-    # }
+    directly invoke npm tests
+    if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
+        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
+        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
+    }
 }
 catch {
     Write-Host $_
