@@ -5,7 +5,7 @@ using System;
 
 namespace MLS.Agent.Tools
 {
-    public sealed class RelativeDirectoryPath :
+    public class RelativeDirectoryPath :
         RelativePath,
         IEquatable<RelativeDirectoryPath>
     {

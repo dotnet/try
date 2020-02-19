@@ -8,27 +8,6 @@ using Markdig.Syntax;
 
 namespace Microsoft.DotNet.Try.Markdown
 {
-    public static class MarkdownNormalizePipelineBuilderExtensions
-    {
-        public static MarkdownPipelineBuilder UseNormalizeCodeBlockAnnotations(
-            this MarkdownPipelineBuilder pipeline)
-        {
-            var extensions = pipeline.Extensions;
-
-            if (!extensions.Contains<NormalizeBlockAnnotationExtension>())
-            {
-                extensions.Add(new NormalizeBlockAnnotationExtension());
-            }
-
-            if (!extensions.Contains<SkipEmptyLinkReferencesExtension>())
-            {
-                extensions.Add(new SkipEmptyLinkReferencesExtension());
-            }
-
-            return pipeline;
-        }
-    }
-
     public class NormalizeBlockAnnotationExtension : IMarkdownExtension
     {
         public void Setup(MarkdownPipelineBuilder pipeline)
