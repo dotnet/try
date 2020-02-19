@@ -3,7 +3,7 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.DependencyInjection;
@@ -85,7 +85,7 @@ namespace MLS.Agent.CommandLine
         {
             get
             {
-                switch (_parseResult?.CommandResult?.Name)
+                switch (_parseResult?.CommandResult?.Command?.Name)
                 {
                     case "hosted":
                         return StartupMode.Hosted;

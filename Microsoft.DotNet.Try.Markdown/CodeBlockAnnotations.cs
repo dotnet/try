@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Try.Markdown
                 Session = $"Run{++_sessionIndex}";
             }
 
-            NormalizedLanguage = parseResult?.CommandResult.Name;
+            NormalizedLanguage = parseResult?.CommandResult.Command.Name;
             Language = parseResult?.Tokens.First().Value;
             RunArgs = runArgs ?? Untokenize(parseResult);
         }

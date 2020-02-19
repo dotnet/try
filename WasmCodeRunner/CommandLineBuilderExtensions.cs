@@ -6,6 +6,7 @@ using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -103,7 +104,7 @@ namespace MLS.WasmCodeRunner
 
             if (parameter.HasDefaultValue)
             {
-                argument.SetDefaultValue(parameter.GetDefaultValue);
+                argument.SetDefaultValue(parameter.GetDefaultValue());
             }
 
             var option = new Option(

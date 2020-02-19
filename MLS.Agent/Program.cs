@@ -11,7 +11,7 @@ using Pocket.For.ApplicationInsights;
 using Recipes;
 using Serilog.Sinks.RollingFileAlternate;
 using System;
-using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
