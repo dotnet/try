@@ -67,24 +67,22 @@ namespace MLS.Agent.Markdown
         private static void AddSourceFileOption(Command command)
         {
             var sourceFileArg = new Argument<RelativeFilePath>(
-                (SymbolResult result, out RelativeFilePath relativeFilePath) =>
+                parse: (result) =>
                 {
                     var filename = result.Tokens.Select(t => t.Value).SingleOrDefault();
 
                     if (filename == null)
                     {
-                        relativeFilePath = null;
-                        return true;
+                        return null;
                     }
 
-                    if (RelativeFilePath.TryParse(filename, out relativeFilePath))
+                    if (RelativeFilePath.TryParse(filename, out var relativeFilePath))
                     {
-                        return true;
+                        return relativeFilePath;
                     }
 
                     result.ErrorMessage = $"Error parsing the filename: {filename}";
-
-                    return false;
+                    return null;
                 })
             {
                 Name = "SourceFile",
@@ -119,27 +117,25 @@ namespace MLS.Agent.Markdown
             string projectFileExtension)
         {
             var projectOptionArgument = new Argument<FileInfo>(
-                (SymbolResult result, out FileInfo projectFile) =>
+                parse: (result) =>
                 {
                     var projectPath = new RelativeFilePath(result.Tokens.Select(t => t.Value).Single());
 
                     if (directoryAccessor.FileExists(projectPath))
                     {
-                        projectFile = directoryAccessor.GetFullyQualifiedFilePath(projectPath);
-
-                        return true;
+                        return directoryAccessor.GetFullyQualifiedFilePath(projectPath);
                     }
 
                     result.ErrorMessage = $"Project not found: {projectPath.Value}";
-                    projectFile = null;
-                    return false;
+                    return null;
                 })
+                
             {
                 Name = "project",
                 Arity = ArgumentArity.ExactlyOne
             };
 
-            projectOptionArgument.SetDefaultValue(() =>
+            projectOptionArgument.SetDefaultValueFactory(() =>
             {
                 var rootDirectory = directoryAccessor.GetFullyQualifiedPath(new RelativeDirectoryPath("."));
                 var projectFiles = directoryAccessor.GetAllFilesRecursively()

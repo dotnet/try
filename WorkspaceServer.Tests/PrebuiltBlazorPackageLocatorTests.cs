@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
+using System.CommandLine.IO;
 using FluentAssertions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Interactive.Utility;

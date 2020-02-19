@@ -7,7 +7,7 @@ using WorkspaceServer.Tests;
 using System.IO;
 using FluentAssertions;
 using System.Threading.Tasks;
-using System.CommandLine;
+using System.CommandLine.IO;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using Microsoft.DotNet.Try.Protocol.Tests;

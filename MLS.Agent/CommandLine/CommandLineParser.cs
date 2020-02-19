@@ -5,6 +5,8 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -279,7 +281,7 @@ namespace MLS.Agent.CommandLine
                         "--id",
                         "A unique id for the agent instance (e.g. its development environment id).")
                     {
-                        Argument = new Argument<string>(defaultValue: () => Environment.MachineName)
+                        Argument = new Argument<string>(getDefaultValue: () => Environment.MachineName)
                     },
                     new Option(
                         "--production",
@@ -350,7 +352,7 @@ namespace MLS.Agent.CommandLine
                     new Option("--output", "Where should the demo project be written to?")
                     {
                         Argument = new Argument<DirectoryInfo>(
-                            defaultValue: () => new DirectoryInfo(Directory.GetCurrentDirectory()))
+                            getDefaultValue: () => new DirectoryInfo(Directory.GetCurrentDirectory()))
                     }
                 };
 

@@ -25,9 +25,10 @@ namespace Microsoft.DotNet.Interactive.Utility
         public static async Task<CommandLineResult> Execute(
             string command,
             string args,
-            DirectoryInfo workingDir = null)
+            DirectoryInfo workingDir = null,
+            TimeSpan? timeout = null)
         {
-            args = args ?? "";
+            args ??= "";
 
             var stdOut = new StringBuilder();
             var stdErr = new StringBuilder();
@@ -46,7 +47,7 @@ namespace Microsoft.DotNet.Interactive.Utility
                     stdErr.AppendLine(data);
                 }))
             {
-                var exitCode = await process.Complete();
+                var exitCode = await process.Complete().Timeout(timeout ?? TimeSpan.FromMinutes(1));
 
                 var output = stdOut.Replace("\r\n", "\n").ToString().Split('\n');
 
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.Interactive.Utility
                 if (exitCode == 0)
                 {
                     operation.Succeed(
-                        "{command} {args} exited with {code}",
+                        "> {command} {args} -> exited with {code}",
                         process.StartInfo.FileName,
                         process.StartInfo.Arguments,
                         process.ExitCode);
@@ -88,6 +89,20 @@ namespace Microsoft.DotNet.Interactive.Utility
                           return process.ExitCode;
                       });
 
+        public static async Task<T> Timeout<T>(
+            this Task<T> source,
+            TimeSpan timeout)
+        {
+            if (await Task.WhenAny(
+                    source,
+                    Task.Delay(timeout)) != source)
+            {
+                throw new TimeoutException();
+            }
+
+            return await source;
+        }
+
         public static Process StartProcess(
             string command,
             string args,
@@ -98,7 +113,7 @@ namespace Microsoft.DotNet.Interactive.Utility
         {
             using (var operation = Log.OnEnterAndExit())
             {
-                args = args ?? "";
+                args ??= "";
 
                 var process = new Process
                 {
@@ -114,7 +129,7 @@ namespace Microsoft.DotNet.Interactive.Utility
                     }
                 };
 
-                operation.Info("launching {process} with {args}", command, args);
+                operation.Info("> {process} {args}", command, args);
 
                 if (environmentVariables?.Length > 0)
                 {
@@ -169,7 +184,7 @@ namespace Microsoft.DotNet.Interactive.Utility
             return new ConfirmationLogger(
                 operationName: operationName,
                 category: Log.Category,
-                message: "Invoking {command} {args}",
+                message: "> {command} {args}",
                 args: new[] { command, args },
                 logOnStart: true);
         }

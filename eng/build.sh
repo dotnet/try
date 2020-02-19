@@ -36,7 +36,7 @@ function TestUsingNPM() {
 }
 
 # invoke regular build/test script
-. "$scriptroot/common/build.sh" /p:Projects=$scriptroot/../*.sln $args
+. "$scriptroot/common/build.sh" /p:Projects=$scriptroot/../dotnet-try.sln $args
 
 # directly invoke npm tests
 if [[ "$run_tests" == "true" ]]; then

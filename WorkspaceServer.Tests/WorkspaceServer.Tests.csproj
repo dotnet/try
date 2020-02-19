@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssetTargetFallback>portable-net45+win8+wp8+wpa81</AssetTargetFallback>
     <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Clockwise isn't strongly signed -->
@@ -40,13 +40,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.4.0-beta2-19467-02" />
-    <PackageReference Include="Microsoft.Reactive.Testing" Version="4.1.6" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.5.0-beta1-final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.5.0-beta1-final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0-beta1-final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.5.0-beta1-final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.5.0-beta1-final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.5.0-beta1-final" />
+    <PackageReference Include="Microsoft.Reactive.Testing" Version="4.3.2" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -61,7 +61,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="System.Reactive" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>

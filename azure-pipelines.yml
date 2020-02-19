@@ -16,13 +16,11 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: BlazorTemplateVersion
-    value: 3.0.0-preview9.19465.2
-  - name: DotNetSdkVersion2
-    value: '2.1.509'
+    value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
-    value: '3.0.101'
+    value: '3.1.100'
   - name: NodeJSVersion
-    value: '>=12'
+    value: '12.15.0'
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -84,12 +82,6 @@ stages:
             versionSpec: $(NodeJSVersion)
 
         - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
-
-        - task: UseDotNet@2
           displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
@@ -132,12 +124,12 @@ stages:
             artifactName: packages
             artifactType: container
 
-        - task: PublishBuildArtifacts@1
-          displayName: Publish integration tests dll
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\NotIntegration.Tests\$(_BuildConfig)
-            artifactName: integrationTests
-            artifactType: container
+        # - task: PublishBuildArtifacts@1
+        #   displayName: Publish integration tests dll
+        #   inputs:
+        #     pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\NotIntegration.Tests\$(_BuildConfig)
+        #     artifactName: integrationTests
+        #     artifactType: container
 
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
@@ -179,13 +171,7 @@ stages:
         - task: NodeTool@0
           displayName: Add NodeJS/npm
           inputs:
-            versionSpec: $(NodeJSVersion)
-
-        - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
+            versionSpec: $(NodeJSVersion)        
 
         - task: UseDotNet@2
           displayName: Add dotnet 3.0
@@ -231,11 +217,6 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
         - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
-        - task: UseDotNet@2
           displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
@@ -249,64 +230,59 @@ stages:
             filePath: eng\tests\UpToDate.ps1
             arguments: -configuration $(_BuildConfig) -restore -ci
 
-  - template: /eng/common/templates/jobs/jobs.yml
-    parameters:
-      enableMicrobuild: true
-      enableTelemetry: true
-      helixRepo: dotnet/try
-      jobs:
-      - job: IntegrationTest
-        dependsOn: Windows_NT
-        condition: succeeded()
-        pool:
-          vmImage: ubuntu-16.04
-        variables:
-          - name: PACKAGESOURCE
-            value: $(System.DefaultWorkingDirectory)/packages/Shipping
-          - name: RUN_DOTNET_TRY_INTEGRATION_TESTS
-            value: true
-          - name: TryDotNetPackagesPath
-            value: $(Build.SourcesDirectory)/.trydotnet/packages
-        steps:
-        - checkout: none #skip checking out the default repository resource
-        - task: UseDotNet@2
-          displayName: Add dotnet 2.2
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion2)
-        - task: UseDotNet@2
-          displayName: Add dotnet 3.0
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion)
-            installationPath: $(Agent.ToolsDirectory)/dotnet
+  # - template: /eng/common/templates/jobs/jobs.yml
+  #   parameters:
+  #     enableMicrobuild: true
+  #     enableTelemetry: true
+  #     helixRepo: dotnet/try
+  #     jobs:
+  #     - job: IntegrationTest
+  #       dependsOn: Windows_NT
+  #       condition: succeeded()
+  #       pool:
+  #         vmImage: ubuntu-16.04
+  #       variables:
+  #         - name: PACKAGESOURCE
+  #           value: $(System.DefaultWorkingDirectory)/packages/Shipping
+  #         - name: RUN_DOTNET_TRY_INTEGRATION_TESTS
+  #           value: true
+  #         - name: TryDotNetPackagesPath
+  #           value: $(Build.SourcesDirectory)/.trydotnet/packages
+  #       steps:
+  #       - checkout: none #skip checking out the default repository resource
+  #       - task: UseDotNet@2
+  #         displayName: Add dotnet 3.0
+  #         inputs:
+  #           packageType: sdk
+  #           version: $(DotNetSdkVersion)
+  #           installationPath: $(Agent.ToolsDirectory)/dotnet
 
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+  #       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+  #         displayName: Install Blazor templates
 
-        - task: DownloadBuildArtifacts@0
-          displayName: 'Download built packages'
-          inputs:
-            artifactName: packages
-            downloadPath: $(System.DefaultWorkingDirectory)
+  #       - task: DownloadBuildArtifacts@0
+  #         displayName: 'Download built packages'
+  #         inputs:
+  #           artifactName: packages
+  #           downloadPath: $(System.DefaultWorkingDirectory)
 
-        - task: DownloadBuildArtifacts@0
-          displayName: 'Download built integrationtests'
-          inputs:
-            artifactName: integrationTests
-            downloadPath: $(System.DefaultWorkingDirectory)
+  #       - task: DownloadBuildArtifacts@0
+  #         displayName: 'Download built integrationtests'
+  #         inputs:
+  #           artifactName: integrationTests
+  #           downloadPath: $(System.DefaultWorkingDirectory)
 
-        - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.0/NotIntegration.Tests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
-          displayName: Run integration tests
+  #       - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.1/NotIntegration.Tests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
+  #         displayName: Run integration tests
 
-        - task: PublishTestResults@2
-          displayName: Publish NPM Test Results
-          inputs:
-            testResultsFormat: 'VSTest'
-            testResultsFiles: '*.trx'
-            searchFolder: '$(SystemWorkingDirectory)/testResults'
-          continueOnError: true
-          condition: always()
+  #       - task: PublishTestResults@2
+  #         displayName: Publish NPM Test Results
+  #         inputs:
+  #           testResultsFormat: 'VSTest'
+  #           testResultsFiles: '*.trx'
+  #           searchFolder: '$(SystemWorkingDirectory)/testResults'
+  #         continueOnError: true
+  #         condition: always()
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                  Package upload                                                     #

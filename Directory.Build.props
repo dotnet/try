@@ -20,10 +20,10 @@
     <NewtonsoftJsonVersion>12.0.3</NewtonsoftJsonVersion>
     <PocketLoggerVersion>0.3.0</PocketLoggerVersion>
     <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
-    <SystemReactiveVersion>4.1.6</SystemReactiveVersion>
+    <SystemReactiveVersion>4.3.2</SystemReactiveVersion>
     <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
-    <MicrosoftCodeAnalysisCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisCommonVersion>
-    <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.4.0-beta2-19467-02</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <MicrosoftCodeAnalysisCommonVersion>3.5.0-beta1-final</MicrosoftCodeAnalysisCommonVersion>
+    <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.5.0-beta1-final</MicrosoftCodeAnalysisWorkspacesCommonVersion>
     <TaskExtensionsVersion>0.1.8580001</TaskExtensionsVersion>
   </PropertyGroup>
 </Project>
