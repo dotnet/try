@@ -20,12 +20,17 @@ namespace MLS.Agent.CommandLine
 {
     public static class PublishCommand
     {
+        public delegate void WriteOutput(string path, string content);
+
         public static async Task<int> Do(
             PublishOptions publishOptions,
             IConsole console,
-            StartupOptions startupOptions = null
+            StartupOptions startupOptions = null,
+            WriteOutput writeOutput = null
         )
         {
+            writeOutput ??= (path, content) => File.WriteAllText(path, content);
+
             var sourceDirectoryAccessor = publishOptions.RootDirectory;
             var packageRegistry = PackageRegistry.CreateForTryMode(sourceDirectoryAccessor);
             var markdownProject = new MarkdownProject(
@@ -54,7 +59,7 @@ namespace MLS.Agent.CommandLine
 
                 var rendered = await Render(publishOptions.Format, document);
 
-                var targetPath = WriteTargetFile(rendered, markdownFilePath, targetDirectoryAccessor, publishOptions);
+                var targetPath = WriteTargetFile(rendered, markdownFilePath, targetDirectoryAccessor, publishOptions, writeOutput);
 
                 console.Out.WriteLine($"Published '{fullSourcePath}' to {targetPath}");
             }
@@ -63,14 +68,14 @@ namespace MLS.Agent.CommandLine
         }
 
         private static string WriteTargetFile(string content, RelativeFilePath relativePath,
-            IDirectoryAccessor targetDirectoryAccessor, PublishOptions publishOptions)
+            IDirectoryAccessor targetDirectoryAccessor, PublishOptions publishOptions, WriteOutput writeOutput)
         {
             var fullyQualifiedPath = targetDirectoryAccessor.GetFullyQualifiedPath(relativePath);
             targetDirectoryAccessor.EnsureDirectoryExists(relativePath);
             var targetPath = fullyQualifiedPath.FullName;
             if (publishOptions.Format == PublishFormat.HTML)
                 targetPath = Path.ChangeExtension(targetPath, ".html");
-            File.WriteAllText(targetPath, content);
+            writeOutput(targetPath, content);
             return targetPath;
         }
 
