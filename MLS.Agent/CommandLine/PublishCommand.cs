@@ -55,9 +55,9 @@ namespace MLS.Agent.CommandLine
                 if (targetIsSubDirectoryOfSource && fullSourcePath.IsChildOf(targetDirectoryAccessor))
                     continue;
 
-                var document = ParseMarkdownDocument(markdownFile);
+                var (document, newLine) = ParseMarkdownDocument(markdownFile);
 
-                var rendered = await Render(publishOptions.Format, document);
+                var rendered = await Render(publishOptions.Format, document, newLine);
 
                 var targetPath = WriteTargetFile(rendered, markdownFilePath, targetDirectoryAccessor, publishOptions, writeOutput);
 
@@ -79,7 +79,7 @@ namespace MLS.Agent.CommandLine
             return targetPath;
         }
 
-        private static async Task<string> Render(PublishFormat format, MarkdownDocument document)
+        private static async Task<string> Render(PublishFormat format, MarkdownDocument document, string newLine)
         {
             MarkdownPipeline pipeline;
             IMarkdownRenderer renderer;
@@ -90,7 +90,9 @@ namespace MLS.Agent.CommandLine
                     pipeline = new MarkdownPipelineBuilder()
                         .UseNormalizeCodeBlockAnnotations()
                         .Build();
-                    renderer = new NormalizeRenderer(writer);
+                    var normalizeRenderer = new NormalizeRenderer(writer);
+                    normalizeRenderer.Writer.NewLine = newLine;
+                    renderer = normalizeRenderer;
                     break;
                 case PublishFormat.HTML:
                     pipeline = new MarkdownPipelineBuilder()
@@ -118,14 +120,34 @@ namespace MLS.Agent.CommandLine
             return rendered;
         }
 
-        private static MarkdownDocument ParseMarkdownDocument(MarkdownFile markdownFile)
+        private static (MarkdownDocument, string newLine) ParseMarkdownDocument(MarkdownFile markdownFile)
         {
             var pipeline = markdownFile.Project.GetMarkdownPipelineFor(markdownFile.Path);
 
+            var markdown = markdownFile.ReadAllText();
+
             var document = Markdig.Markdown.Parse(
-                markdownFile.ReadAllText(),
+                markdown,
                 pipeline);
-            return document;
+            return (document, DetectNewLineByFirstOccurence(markdown));
+        }
+
+        private static string DetectNewLineByFirstOccurence(string markdown)
+        {
+            var cr = markdown.IndexOf('\r');
+            if (cr >= 0)
+            {
+                if (markdown.Length > cr + 1)
+                {
+                    var next = markdown[cr + 1];
+                    if (next == '\n')
+                        return "\r\n";
+                }
+                return "\r";
+            }
+
+            var lf = markdown.IndexOf('\n');
+            return lf >= 0 ? "\n" : Environment.NewLine;
         }
     }
 }
