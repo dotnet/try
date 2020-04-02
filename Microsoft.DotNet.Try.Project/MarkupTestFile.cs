@@ -263,5 +263,13 @@ namespace Microsoft.DotNet.Try.Project
             GetSpans(input, out output, out ImmutableArray<TextSpan> spans);
             textSpan = spans.Single();
         }
+
+        private class MatchComparer : IComparer<Tuple<int, string>>
+        {
+            public int Compare(Tuple<int, string> x, Tuple<int, string> y)
+            {
+                return x.Item1 - y.Item1;
+            }
+        }
     }
 }
