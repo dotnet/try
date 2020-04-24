@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.CommandLine.IO;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ public class Program
                     ("doc.md", markdown)
                 );
 
-                var (publishOutput, resultCode) = await DoPublish(files).ConfigureAwait(false);
+                var (publishOutput, resultCode) = await DoPublish(files);
 
                 resultCode.Should().Be(0);
                 publishOutput.OutputFiles.Single().Content.Should().Be(markdown);
@@ -79,7 +80,7 @@ public class Program
                     ("./folder/doc.md", markdown)
                 );
 
-                var (publishOutput, resultCode) = await DoPublish(files).ConfigureAwait(false);
+                var (publishOutput, resultCode) = await DoPublish(files);
 
                 resultCode.Should().Be(0);
                 MarkdownShouldBeEquivalent(publishOutput.OutputFiles.Single().Content, @"
@@ -88,6 +89,33 @@ public class Program
 var length = (args[0] as string)?.Length ?? 0;
 ```
 ");
+            }
+
+            [Fact]
+            public async Task When_target_directory_is_sub_directory_of_source_then_markdown_files_in_target_dir_are_ignored()
+            {
+                const string markdown = @"
+## C# null coalesce example
+``` cs --source-file ./../project/Program.cs --region null_coalesce --project ./../project/some.csproj
+```
+";
+                var files = PrepareFiles(
+                    ("./project/some.csproj", CsprojContents),
+                    ("./project/Program.cs", CompilingProgramWithRegionCs),
+                    ("./documentation/details/doc.md", markdown),
+                    ("./doc_output/details/doc.md", "result file of previous publish run, will be overridden when publishing docs and should be ignored as source")
+                );
+
+                var targetDir = (DirectoryInfo)files.GetFullyQualifiedPath(new RelativeDirectoryPath("doc_output"));
+                var target = new InMemoryDirectoryAccessor(targetDir);
+                
+                var (publishOutput, resultCode) = await DoPublish(files, target);
+
+                resultCode.Should().Be(0);
+                publishOutput.OutputFiles.Count().Should().Be(1, "Expected existing file in doc_output to be ignored");
+                var outputFilePath = new FileInfo(publishOutput.OutputFiles.Single().Path);
+                var expectedFilePath = target.GetFullyQualifiedPath(new RelativeFilePath("documentation/details/doc.md"));
+                outputFilePath.FullName.Should().Be(expectedFilePath.FullName);
             }
         }
 
@@ -101,31 +129,35 @@ var length = (args[0] as string)?.Length ?? 0;
 
             protected static IDirectoryAccessor PrepareFiles(params (string path, string content)[] files)
             {
-                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
-
-                var directoryAccessor = new InMemoryDirectoryAccessor(rootDirectory);
+                var directoryAccessor = CreateInMemoryDirectoryAccessor();
                 foreach (var file in files)
                     directoryAccessor.Add(file);
                 directoryAccessor.CreateFiles();
 
                 return directoryAccessor;
             }
-            
-            protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(IDirectoryAccessor source)
+
+            private static InMemoryDirectoryAccessor CreateInMemoryDirectoryAccessor()
+            {
+                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
+                return new InMemoryDirectoryAccessor(rootDirectory);
+            }
+
+            protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(IDirectoryAccessor allFiles, IDirectoryAccessor target = null)
             {
                 var console = new TestConsole();
 
                 var output = new PublishOutput();
                 void WriteOutput(string path, string content) => output.Add(path, content);
 
-                var resultCode = await PublishCommand.Do(Options(source), console, writeOutput: WriteOutput).ConfigureAwait(false);
+                var resultCode = await PublishCommand.Do(Options(allFiles, target), console, writeOutput: WriteOutput);
 
                 _output.WriteLine(console.Out.ToString());
                 return (output, resultCode);
             }
         }
 
-        static void MarkdownShouldBeEquivalent(string expected, string actual)
+        private static void MarkdownShouldBeEquivalent(string expected, string actual)
         {
             static string Normalize(string input) => Regex.Replace(input.Trim(), @"[\s]+", " ");
 

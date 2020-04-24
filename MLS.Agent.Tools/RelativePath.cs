@@ -11,7 +11,7 @@ namespace MLS.Agent.Tools
     {
         private string _value;
 
-        protected internal RelativePath(string value)
+        protected RelativePath(string value)
         {
             if (value == null)
             {
