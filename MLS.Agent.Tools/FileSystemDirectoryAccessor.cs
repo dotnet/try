@@ -59,17 +59,10 @@ namespace MLS.Agent.Tools
                 throw new ArgumentNullException(nameof(path));
             }
 
-            switch (path)
-            {
-                case RelativeFilePath file:
-                    return new FileInfo(
-                        _rootDirectory.Combine(file).FullName);
-                case RelativeDirectoryPath dir:
-                    return new DirectoryInfo(
-                        _rootDirectory.Combine(dir).FullName);
-                default:
-                    throw new NotSupportedException($"{path.GetType()} is not supported.");
-            }
+            return path.Match<FileSystemInfo>(
+                directory => new DirectoryInfo(_rootDirectory.Combine(directory).FullName),
+                file => new FileInfo(_rootDirectory.Combine(file).FullName)
+            );
         }
 
         public IDirectoryAccessor GetDirectoryAccessorForRelativePath(RelativeDirectoryPath relativePath)

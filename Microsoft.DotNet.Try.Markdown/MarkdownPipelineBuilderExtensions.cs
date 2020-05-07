@@ -9,13 +9,14 @@ namespace Microsoft.DotNet.Try.Markdown
     {
         public static MarkdownPipelineBuilder UseCodeBlockAnnotations(
             this MarkdownPipelineBuilder pipeline, 
-            CodeFenceAnnotationsParser annotationsParser = null)
+            CodeFenceAnnotationsParser annotationsParser = null,
+            bool inlineControls = true)
         {
             var extensions = pipeline.Extensions;
 
             if (!extensions.Contains<CodeBlockAnnotationExtension>())
             {
-                extensions.Add(new CodeBlockAnnotationExtension(annotationsParser));
+                extensions.Add(new CodeBlockAnnotationExtension(annotationsParser) {InlineControls = inlineControls});
             }
 
             return pipeline;

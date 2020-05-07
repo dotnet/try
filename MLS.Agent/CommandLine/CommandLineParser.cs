@@ -53,6 +53,11 @@ namespace MLS.Agent.CommandLine
             IConsole console,
             StartupOptions startupOptions);
 
+        public delegate Task<int> Publish(
+            PublishOptions options,
+            IConsole console,
+            StartupOptions startupOptions);
+
         public static Parser Create(
             IServiceCollection services,
             StartServer startServer = null,
@@ -61,6 +66,7 @@ namespace MLS.Agent.CommandLine
             TryGitHub tryGithub = null,
             Pack pack = null,
             Verify verify = null,
+            Publish publish = null,
             ITelemetry telemetry = null,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = null)
         {
@@ -87,6 +93,12 @@ namespace MLS.Agent.CommandLine
                              VerifyCommand.Do(options,
                                               console,
                                               startupOptions));
+
+            publish = publish ??
+                     ((options, console, startupOptions) =>
+                         PublishCommand.Do(options,
+                             console,
+                             startupOptions));
 
             pack = pack ??
                    PackCommand.Do;
@@ -132,6 +144,7 @@ namespace MLS.Agent.CommandLine
             rootCommand.AddCommand(Install());
             rootCommand.AddCommand(Pack());
             rootCommand.AddCommand(Verify());
+            rootCommand.AddCommand(Publish());
 
             return new CommandLineBuilder(rootCommand)
                    .UseDefaults()
@@ -434,6 +447,27 @@ namespace MLS.Agent.CommandLine
                 });
 
                 return verifyCommand;
+            }
+
+            Command Publish()
+            {
+                var publishCommand = new Command("publish", "Publish code from sample projects to Markdown files in the target directory and its children.")
+                {
+                    new Option("--format", "Format of the files to publish")
+                    {
+                        Argument = new Argument<PublishFormat>()
+                    },
+                    new Option("--target-directory", "Specify the path where the rendered files should go. Can be equal to root directory. In case of Markdown output format and equal root and target directories, original source files will be replaced.")
+                    {
+                        Argument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
+                    },
+                    dirArgument
+                };
+
+                publishCommand.Handler = CommandHandler.Create<PublishOptions, IConsole, StartupOptions>(
+                    (options, console, startupOptions) => publish(options, console, startupOptions));
+
+                return publishCommand;
             }
         }
     }

@@ -33,6 +33,14 @@
     "Jupyter": {
       "commandName": "Project",
       "commandLineArgs": "../MLS.Agent.Tests/kernel_connection_file.json"
+    },
+    "Verify": {
+      "commandName": "Project",
+      "commandLineArgs": "verify \"..\\Samples\""
+    },
+    "Publish": {
+      "commandName": "Project",
+      "commandLineArgs": "publish \"..\\Samples\" --format Markdown --target-directory \"..\\Samples\\published\""
     }
   }
 }
