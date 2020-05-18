@@ -23,4 +23,4 @@ Try making other changes to the code fence options. Mistype an option name, spec
 
 When `dotnet try verify` detects errors, it will return a non-zero exit code. When everything looks good, it returns `0`. You can use this in your continuous integration scripts to prevent code changes from breaking your documentation.
 
-**NEXT: [Passing Arguments to your Project &raquo;](./PassingArgs.md)**
+**NEXT: [Passing Arguments &raquo;](./PassingArgs.md)**
