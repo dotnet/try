@@ -2,12 +2,12 @@
 
 - [Quick Start](./QuickStart.md)
 - [Create a New Project](./NewProject.md)
-- [Define Regions](./Regions.md)
+- [Show snippets using regions](./Regions.md)
 - **Create Sessions**
 - [Verify your Project](./Verify.md)
 - [Passing Arguments](./PassingArgs.md)
 - [Using Read-only Snippets](./ReadOnlySnippets.md)
-- [Glossary](./Glossary.md)
+- [Reference](./Reference.md)
 
 Let's make this a little more interesting. Your project probably has more than one snippet you want people to be able to run. Sessions allow you to run these code snippets independently of one another.
 

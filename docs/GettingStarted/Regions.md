@@ -62,4 +62,4 @@ This is done using the `--region` option, which targets a [C# code region](https
     Console.WriteLine("Hello World!");
     ```
 
-**NEXT: [Define Sessions &raquo;](./Sessions.md)**
+**NEXT: [Create Sessions &raquo;](./Sessions.md)**

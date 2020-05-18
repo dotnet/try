@@ -20,4 +20,4 @@ Instead of the familiar `Main(string[] args)` entry point, this program's entry 
 
 _Congratulations! You've finished the `dotnet try` step-by-step tutorial._
 
-**NEXT: [Using Read-only snippets &raquo;](./ReadOnlySnippets.md)**
+**NEXT: [Using Read-only Snippets &raquo;](./ReadOnlySnippets.md)**

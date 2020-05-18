@@ -2,12 +2,12 @@
 
 - [Quick Start](./QuickStart.md)
 - [Create a New Project](./NewProject.md)
-- [Define Regions](./Regions.md)
+- [Show snippets using regions](./Regions.md)
 - [Create Sessions](./Sessions.md)
 - [Verify your Project](./Verify.md)
 - [Passing Arguments](./PassingArgs.md)
 - **Using Read-only Snippets**
-- [Glossary](./Glossary.md)
+- [Reference](./Reference.md)
 
 
 ```cs  --editable false --region usings --destination-file ./Snippets/Program.cs --project ./Snippets/Snippets.csproj
@@ -64,7 +64,7 @@ namespace Snippets
             #endregion
 
             Console.WriteLine("this is from hidden include");
-        }        
+        }
     }
 
 ```
