@@ -17,9 +17,9 @@ namespace WorkspaceServer.Packaging
 {
     public static class AnalyzerResultExtensions
     {
-        private static readonly ConditionalWeakTable<AnalyzerResult, string[]> CompilerInputs = new ConditionalWeakTable<AnalyzerResult, string[]>();
+        private static readonly ConditionalWeakTable<IAnalyzerResult, string[]> CompilerInputs = new ConditionalWeakTable<IAnalyzerResult, string[]>();
 
-        public static CSharpParseOptions GetCSharpParseOptions(this AnalyzerResult analyzerResult)
+        public static CSharpParseOptions GetCSharpParseOptions(this IAnalyzerResult analyzerResult)
         {
             var parseOptions = new CSharpParseOptions();
 
@@ -42,7 +42,7 @@ namespace WorkspaceServer.Packaging
             return parseOptions;
         }
 
-        public static string[] GetCompileInputs(this AnalyzerResult analyzerResult)
+        public static string[] GetCompileInputs(this IAnalyzerResult analyzerResult)
         {
             string[] files;
             lock (CompilerInputs)
@@ -60,7 +60,7 @@ namespace WorkspaceServer.Packaging
         }
 
         internal static bool TryGetWorkspace(
-            this AnalyzerResult analyzerResult,
+            this IAnalyzerResult analyzerResult,
             out Workspace ws)
         {
             ws = analyzerResult.GetWorkspace();

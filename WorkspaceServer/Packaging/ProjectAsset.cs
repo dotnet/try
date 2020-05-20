@@ -24,9 +24,9 @@ namespace WorkspaceServer.Packaging
         private const string FullBuildBinlogFileName = "package_fullBuild.binlog";
         private readonly FileInfo _projectFile;
         private readonly FileInfo _lastBuildErrorLogFile;
-        private readonly PipelineStep<AnalyzerResult> _projectBuildStep;
+        private readonly PipelineStep<IAnalyzerResult> _projectBuildStep;
         private readonly PipelineStep<Workspace> _workspaceStep;
-        private readonly PipelineStep<AnalyzerResult> _cleanupStep;
+        private readonly PipelineStep<IAnalyzerResult> _cleanupStep;
 
         public string Name { get; }
         
@@ -52,12 +52,12 @@ namespace WorkspaceServer.Packaging
             Directory = DirectoryAccessor.GetFullyQualifiedRoot();
             Name = _projectFile?.Name ?? Directory?.Name;
             _lastBuildErrorLogFile = directoryAccessor.GetFullyQualifiedFilePath(".trydotnet-builderror");
-            _cleanupStep = new PipelineStep<AnalyzerResult>(LoadResultOrCleanAsync);
+            _cleanupStep = new PipelineStep<IAnalyzerResult>(LoadResultOrCleanAsync);
             _projectBuildStep = _cleanupStep.Then(BuildProjectAsync);
             _workspaceStep = _projectBuildStep.Then(BuildWorkspaceAsync);
         }
 
-        private async Task<AnalyzerResult> LoadResultOrCleanAsync()
+        private async Task<IAnalyzerResult> LoadResultOrCleanAsync()
         {
             using (await DirectoryAccessor.TryLockAsync())
             {
@@ -88,7 +88,7 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-        private bool DidPerformCoreCompile(AnalyzerResult result)
+        private bool DidPerformCoreCompile(IAnalyzerResult result)
         {
             if (result == null)
             {
@@ -101,7 +101,7 @@ namespace WorkspaceServer.Packaging
             return compilerInputs > 0 && sourceCount > 0;
         }
 
-        private Task<Workspace> BuildWorkspaceAsync(AnalyzerResult result)
+        private Task<Workspace> BuildWorkspaceAsync(IAnalyzerResult result)
         {
             if (result.TryGetWorkspace(out var ws))
             {
@@ -116,7 +116,7 @@ namespace WorkspaceServer.Packaging
             throw new InvalidOperationException("Failed creating workspace");
         }
 
-        private async Task<AnalyzerResult> BuildProjectAsync(AnalyzerResult result)
+        private async Task<IAnalyzerResult> BuildProjectAsync(IAnalyzerResult result)
         {
             if (result != null)
             {
@@ -167,9 +167,9 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-        private async Task<AnalyzerResults> TryLoadAnalyzerResultsAsync(FileInfo binLog)
+        private async Task<IAnalyzerResults> TryLoadAnalyzerResultsAsync(FileInfo binLog)
         {
-            AnalyzerResults results = null;
+            IAnalyzerResults results = null;
             await binLog.DoWhenFileAvailable(() =>
             {
                 var manager = new AnalyzerManager();
