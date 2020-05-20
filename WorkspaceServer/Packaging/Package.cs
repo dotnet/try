@@ -131,7 +131,7 @@ namespace WorkspaceServer.Packaging
             if (projectFile != null &&
                 binLog.LastWriteTimeUtc >= projectFile.LastWriteTimeUtc)
             {
-                AnalyzerResults results;
+                IAnalyzerResults results;
                 using (await FileLock.TryCreateAsync(package.Directory))
                 {
                     var manager = new AnalyzerManager();
@@ -561,7 +561,7 @@ namespace WorkspaceServer.Packaging
             }
         }
 
-        protected AnalyzerResult DesignTimeBuildResult { get; set; }
+        protected IAnalyzerResult DesignTimeBuildResult { get; set; }
 
         protected virtual bool ShouldDoFullBuild()
         {
@@ -576,11 +576,11 @@ namespace WorkspaceServer.Packaging
                    || DesignTimeBuildResult.Succeeded == false;
         }
 
-        protected async Task<AnalyzerResult> DesignTimeBuild()
+        protected async Task<IAnalyzerResult> DesignTimeBuild()
         {
             using (var operation = _log.OnEnterAndConfirmOnExit())
             {
-                AnalyzerResult result;
+                IAnalyzerResult result;
                 var csProj = this.GetProjectFile();
                 var logWriter = new StringWriter();
 
