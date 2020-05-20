@@ -9,7 +9,7 @@ Before you get can started creating interactive documentation, you will need to 
 Updating to the latest version of the tool is easy. Run the following command:
 
 ```console
-> dotnet tool update -g dotnet-try
+> dotnet tool update -g Microsoft.dotnet-try
 ```
 
 ## Installing preview builds from `master`
@@ -17,12 +17,12 @@ Updating to the latest version of the tool is easy. Run the following command:
 To install the latest preview build from master, first uninstall the existing version of the tool:
 
 ```console
-> dotnet tool uninstall -g dotnet-try
+> dotnet tool uninstall -g Microsoft.dotnet-try
 ```
 Then, install from the preview package feed:
 
 ```console
-> dotnet tool install -g --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json" dotnet-try
+> dotnet tool install -g --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json" Microsoft.dotnet-try
 ```
 
 ## Getting Started
