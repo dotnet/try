@@ -11,6 +11,8 @@
     <ToolCommandName>dotnet-try</ToolCommandName>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
+    <PackageDescription>Command line tool for developers and content authors to create interactive experiences.</PackageDescription>
+    <PackageTags>dotnet interactive-programming documentation blazor interactive-tutorial csharp fsharp</PackageTags>
     <Description>Try .NET creates interactive documentation for .NET Core.</Description>
     <NoWarn>$(NoWarn);CS8034</NoWarn> <!-- Unable to load Analyzer assembly  -->
     <NoWarn>$(NoWarn);1998</NoWarn><!-- async method doesn't use 'await' -->
