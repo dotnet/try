@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Interactive.Utility;
-using MLS.Agent;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using WorkspaceServer.Packaging;

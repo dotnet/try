@@ -9,7 +9,6 @@ using FluentAssertions;
 using Microsoft.DotNet.Interactive.Utility;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
-using WorkspaceServer;
 using WorkspaceServer.Packaging;
 using WorkspaceServer.Tests;
 using Xunit;
