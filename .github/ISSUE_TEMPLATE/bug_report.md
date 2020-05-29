@@ -11,7 +11,6 @@ Please provide as much information as you can.
 
 #### Did this error occur while using `dotnet try` or online?
 - [ ] `dotnet-try`
-- [ ] .NET Jupyter Notebook 
 - [ ] online
 
 #### What kind of error was it?
