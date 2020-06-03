@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using WorkspaceServer;
 using Xunit;
 using WorkspaceServer.Tests;
 using System.IO;
@@ -12,7 +11,6 @@ using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using System.Linq;
-using System;
 using Microsoft.DotNet.Interactive.Utility;
 
 namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
