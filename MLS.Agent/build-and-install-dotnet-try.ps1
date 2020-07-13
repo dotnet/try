@@ -1,6 +1,8 @@
 Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
 
+dotnet new -i Microsoft.AspNetCore.Blazor.Templates::3.1.0-preview4.19579.2
+
 $thisDir = Split-Path -Parent $PSCommandPath
 $toolLocation = ""
 $toolVersion = ""

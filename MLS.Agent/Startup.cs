@@ -8,10 +8,8 @@ using System.Net;
 using System.Net.Mime;
 using Clockwise;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.DotNet.Try.Markdown;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -185,7 +183,7 @@ namespace MLS.Agent
 
                 operation.Succeed();
 
-                if (StartupOptions.Mode == StartupMode.Try && !StartupOptions.IsJupyter)
+                if (StartupOptions.Mode == StartupMode.Try)
                 {
                     var uri = new Uri(app.ServerFeatures.Get<IServerAddressesFeature>().Addresses.First());
                     Clock.Current
