@@ -26,10 +26,9 @@ namespace MLS.Agent.CommandLine
             PublishOptions publishOptions,
             IConsole console,
             StartupOptions startupOptions = null,
-            WriteOutput writeOutput = null
-        )
+            WriteOutput writeOutput = null)
         {
-            writeOutput ??= (path, content) => File.WriteAllText(path, content);
+            writeOutput ??= File.WriteAllText;
 
             var sourceDirectoryAccessor = publishOptions.RootDirectory;
             var packageRegistry = PackageRegistry.CreateForTryMode(sourceDirectoryAccessor);

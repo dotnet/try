@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20170.1" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20170.1" />
+    <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.20309.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20359.2" />
   </ItemGroup>
 
 </Project>

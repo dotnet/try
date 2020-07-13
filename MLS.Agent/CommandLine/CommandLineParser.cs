@@ -75,66 +75,58 @@ namespace MLS.Agent.CommandLine
                 throw new ArgumentNullException(nameof(services));
             }
 
-            startServer = startServer ??
-                          ((startupOptions, invocationContext) =>
-                                  Program.ConstructWebHost(startupOptions).Run());
+            startServer ??= (startupOptions, invocationContext) =>
+                Program.ConstructWebHost(startupOptions).Run();
 
-            demo = demo ??
-                   DemoCommand.Do;
+            demo ??= DemoCommand.Do;
 
-            tryGithub = tryGithub ??
-                        ((repo, console) =>
-                                GitHubHandler.Handler(repo,
-                                                      console,
-                                                      new GitHubRepoLocator()));
+            tryGithub ??= (repo, console) =>
+                GitHubHandler.Handler(repo,
+                                      console,
+                                      new GitHubRepoLocator());
 
-            verify = verify ??
-                     ((options, console, startupOptions) =>
-                             VerifyCommand.Do(options,
-                                              console,
-                                              startupOptions));
+            verify ??= VerifyCommand.Do;
 
-            publish = publish ??
-                     ((options, console, startupOptions) =>
-                         PublishCommand.Do(options,
-                             console,
-                             startupOptions));
+            publish ??= (options, console, startupOptions) =>
+                PublishCommand.Do(options,
+                                  console,
+                                  startupOptions);
 
-            pack = pack ??
-                   PackCommand.Do;
+            pack ??= PackCommand.Do;
 
             // Setup first time use notice sentinel.
-            firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel ?? 
-                                         new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
+            firstTimeUseNoticeSentinel ??= 
+                new FirstTimeUseNoticeSentinel(VersionSensor.Version().AssemblyInformationalVersion);
 
             // Setup telemetry.
-            telemetry = telemetry ?? 
-                        new Telemetry(
-                            VersionSensor.Version().AssemblyInformationalVersion, 
-                            firstTimeUseNoticeSentinel);
+            telemetry ??= new Telemetry(
+                VersionSensor.Version().AssemblyInformationalVersion,
+                firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
-            var dirArgument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
+            var dirArgument = new Argument<FileSystemDirectoryAccessor>(result =>
             {
-                Name = nameof(StartupOptions.RootDirectory),
-                Arity = ArgumentArity.ZeroOrOne,
-                Description = "Specify the path to the root directory for your documentation"
-            };
+                var directory = result.Tokens
+                                      .Select(t => t.Value)
+                                      .FirstOrDefault();
 
-            dirArgument.AddValidator(symbolResult =>
-            {
-                var directory = symbolResult.Tokens
-                               .Select(t => t.Value)
-                               .FirstOrDefault();
-
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                if (!string.IsNullOrEmpty(directory) && 
+                    !Directory.Exists(directory))
                 {
-                    return $"Directory does not exist: {directory}";
+                    result.ErrorMessage = $"Directory does not exist: {directory}";
+                    return null;
                 }
 
-                return null;
-            });
+                return new FileSystemDirectoryAccessor(
+                    directory ??
+                    Directory.GetCurrentDirectory());
+            }, isDefault: true)
+            {
+                Name = "root-directory",
+                Arity = ArgumentArity.ZeroOrOne,
+                Description = "The root directory for your documentation"
+            };
 
             var rootCommand = StartInTryMode();
 
@@ -150,6 +142,11 @@ namespace MLS.Agent.CommandLine
                    .UseDefaults()
                    .UseMiddleware(async (context, next) =>
                    {
+                       if (context.ParseResult.Errors.Count == 0)
+                       {
+                           telemetry.SendFiltered(filter, context.ParseResult);
+                       }
+
                        // If sentinel does not exist, print the welcome message showing the telemetry notification.
                        if (!firstTimeUseNoticeSentinel.Exists() && !Telemetry.SkipFirstTimeExperience)
                        {
@@ -209,19 +206,13 @@ namespace MLS.Agent.CommandLine
                     }
                 });
 
-                command.AddOption(new Option(
+                command.AddOption(new Option<Uri>(
                                       "--uri",
-                                      "Specify a URL or a relative path to a Markdown file")
-                {
-                    Argument = new Argument<Uri>()
-                });
+                                      "Specify a URL or a relative path to a Markdown file"));
 
-                command.AddOption(new Option(
+                command.AddOption(new Option<bool>(
                                           "--enable-preview-features",
-                                          "Enable preview features")
-                {
-                    Argument = new Argument<bool>()
-                });
+                                          "Enable preview features"));
 
                 command.AddOption(new Option(
                                       "--log-path",
@@ -233,12 +224,9 @@ namespace MLS.Agent.CommandLine
                     }
                 });
 
-                command.AddOption(new Option(
+                command.AddOption(new Option<bool>(
                                           "--verbose",
-                                          "Enable verbose logging to the console")
-                {
-                    Argument = new Argument<bool>()
-                });
+                                          "Enable verbose logging to the console"));
 
                 var portArgument = new Argument<ushort>();
 
@@ -277,56 +265,36 @@ namespace MLS.Agent.CommandLine
             {
                 var command = new Command("hosted")
                 {
-                    new Option(
+                    new Option<string>(
                         "--id",
-                        "A unique id for the agent instance (e.g. its development environment id).")
-                    {
-                        Argument = new Argument<string>(getDefaultValue: () => Environment.MachineName)
-                    },
-                    new Option(
+                        description: "A unique id for the agent instance (e.g. its development environment id).",
+                        getDefaultValue: () => Environment.MachineName),
+                    new Option<bool>(
                         "--production",
-                        "Specifies whether the agent is being run using production resources")
-                    {
-                        Argument = new Argument<bool>()
-                    },
-                    new Option(
+                        "Specifies whether the agent is being run using production resources"),
+                    new Option<bool>(
                         "--language-service",
-                        "Specifies whether the agent is being run in language service-only mode")
-                    {
-                        Argument = new Argument<bool>()
-                    },
-                    new Option(
+                        "Specifies whether the agent is being run in language service-only mode"),
+                    new Option<string>(
                         new[]
                         {
                             "-k",
                             "--key"
                         },
-                        "The encryption key")
-                    {
-                        Argument = new Argument<string>()
-                    },
-                    new Option(
+                        "The encryption key"),
+                    new Option<string>(
                         new[]
                         {
                             "--ai-key",
                             "--application-insights-key"
                         },
-                        "Application Insights key.")
-                    {
-                        Argument = new Argument<string>()
-                    },
-                    new Option(
+                        "Application Insights key."),
+                    new Option<string>(
                         "--region-id",
-                        "A unique id for the agent region")
-                    {
-                        Argument = new Argument<string>()
-                    },
-                    new Option(
+                        "A unique id for the agent region"),
+                    new Option<bool>(
                         "--log-to-file",
                         "Writes a log file")
-                    {
-                        Argument = new Argument<bool>()
-                    }
                 };
 
                 command.Description = "Starts the Try .NET agent";
@@ -349,17 +317,13 @@ namespace MLS.Agent.CommandLine
                     "demo",
                     "Learn how to create Try .NET content with an interactive demo")
                 {
-                    new Option("--output", "Where should the demo project be written to?")
-                    {
-                        Argument = new Argument<DirectoryInfo>(
-                            getDefaultValue: () => new DirectoryInfo(Directory.GetCurrentDirectory()))
-                    }
+                    new Option<DirectoryInfo>(
+                        "--output",
+                        description: "Where should the demo project be written to?",
+                        getDefaultValue: () => new DirectoryInfo(Directory.GetCurrentDirectory()))
                 };
 
-                demoCommand.Handler = CommandHandler.Create<DemoOptions, InvocationContext>((options, context) =>
-                {
-                    demo(options, context.Console, startServer, context);
-                });
+                demoCommand.Handler = CommandHandler.Create<DemoOptions, InvocationContext>((options, context) => { demo(options, context.Console, startServer, context); });
 
                 return demoCommand;
             }
@@ -394,10 +358,7 @@ namespace MLS.Agent.CommandLine
                         Name = nameof(InstallOptions.PackageName),
                         Arity = ArgumentArity.ExactlyOne
                     },
-                    new Option("--add-source")
-                    {
-                        Argument = new Argument<PackageSource>()
-                    }
+                    new Option<PackageSource>("--add-source")
                 };
 
                 installCommand.IsHidden = true;
@@ -415,11 +376,8 @@ namespace MLS.Agent.CommandLine
                     {
                         Name = nameof(PackOptions.PackTarget)
                     },
-                    new Option("--version", "The version of the Try .NET package")
-                    {
-                        Argument = new Argument<string>()
-                    },
-                    new Option("--enable-wasm", "Enables web assembly code execution")
+                    new Option<string>("--version", "The version of the Try .NET package"),
+                    new Option<bool>("--enable-wasm", "Enables web assembly code execution")
                 };
 
                 packCommand.IsHidden = true;
@@ -435,7 +393,7 @@ namespace MLS.Agent.CommandLine
 
             Command Verify()
             {
-                var verifyCommand = new Command("verify", "Verify Markdown files in the target directory and its children.")
+                var verifyCommand = new Command("verify", "Verify Markdown files found under the root directory.")
                 {
                    dirArgument
                 };
@@ -451,19 +409,26 @@ namespace MLS.Agent.CommandLine
 
             Command Publish()
             {
-                var publishCommand = new Command("publish", "Publish code from sample projects to Markdown files in the target directory and its children.")
+                var publishCommand = new Command("publish", "Publish code from sample projects found under the root directory into Markdown files in the target directory")
                 {
-                    new Option("--format", "Format of the files to publish")
-                    {
-                        Argument = new Argument<PublishFormat>()
-                    },
-                    new Option("--target-directory", "Specify the path where the rendered files should go. Can be equal to root directory. In case of Markdown output format and equal root and target directories, original source files will be replaced.")
-                    {
-                        Argument = new Argument<FileSystemDirectoryAccessor>(() => new FileSystemDirectoryAccessor(Directory.GetCurrentDirectory()))
-                    },
+                    new Option<PublishFormat>(
+                        "--format", 
+                        description: "Format of the files to publish",
+                        getDefaultValue: () => PublishFormat.Markdown),
+                    new Option<IDirectoryAccessor>(
+                        "--target-directory",
+                        description: "The path where the output files should go. This can be the same as the root directory, which will overwrite files in place.",
+                        parseArgument: result =>
+                        {
+                            var directory = result.Tokens
+                                                  .Select(t => t.Value)
+                                                  .Single();
+
+                            return new FileSystemDirectoryAccessor(directory);
+                        }
+                    ),
                     dirArgument
                 };
-
                 publishCommand.Handler = CommandHandler.Create<PublishOptions, IConsole, StartupOptions>(
                     (options, console, startupOptions) => publish(options, console, startupOptions));
 

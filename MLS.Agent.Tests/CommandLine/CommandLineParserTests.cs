@@ -30,12 +30,15 @@ namespace MLS.Agent.Tests.CommandLine
         private PackageSource _installPackageSource;
         private VerifyOptions _verifyOptions;
         private DemoOptions _demoOptions;
+        private PublishOptions _publishOptions;
 
         public CommandLineParserTests(ITestOutputHelper output)
         {
             _output = output;
 
-            _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) =>
+            _parser = CommandLineParser.Create(
+                new ServiceCollection(),
+                startServer: (options, invocationContext) =>
                 {
                     _startOptions = options;
                 },
@@ -63,9 +66,14 @@ namespace MLS.Agent.Tests.CommandLine
                 verify: (options, console, startupOptions) =>
                 {
                     _verifyOptions = options;
-                    return Task.FromResult(1);
+                    return Task.FromResult(0);
                 },
                 telemetry: new FakeTelemetry(),
+                publish: (options, console, startupOptions) =>
+                {
+                    _publishOptions = options;
+                    return Task.FromResult(0);
+                },
                 firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
         }
 
@@ -338,15 +346,26 @@ namespace MLS.Agent.Tests.CommandLine
         public async Task Verify_argument_specifies_root_directory()
         {
             var directory = Path.GetDirectoryName(typeof(VerifyCommand).Assembly.Location);
+
             await _parser.InvokeAsync($"verify {directory}", _console);
-            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(directory + Path.DirectorySeparatorChar);
+
+            _verifyOptions.RootDirectory
+                          .GetFullyQualifiedRoot()
+                          .FullName
+                          .Should()
+                          .Be(directory + Path.DirectorySeparatorChar);
         }
 
         [Fact]
         public async Task Verify_takes_current_directory_as_default_if_none_is_specified()
         {
             await _parser.InvokeAsync($"verify", _console);
-            _verifyOptions.RootDirectory.GetFullyQualifiedRoot().FullName.Should().Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
+
+            _verifyOptions.RootDirectory
+                          .GetFullyQualifiedRoot()
+                          .FullName
+                          .Should()
+                          .Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
         }
 
         [Fact]
@@ -361,6 +380,57 @@ namespace MLS.Agent.Tests.CommandLine
                 .FullName
                 .Should()
                 .Be(expected);
+        }
+
+        [Fact]
+        public async Task Publish_root_directory_defaults_to_current_directory()
+        {
+            await _parser.InvokeAsync("publish", _console);
+
+            _publishOptions
+                .RootDirectory
+                .GetFullyQualifiedRoot()
+                .FullName
+                .Should()
+                .Be(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar);
+        }
+        
+        [Fact]
+        public async Task Publish_target_directory_defaults_to_root_directory()
+        {
+            var rootDir = Path.GetTempPath();
+
+            await _parser.InvokeAsync($"publish {rootDir}", _console);
+
+            _publishOptions
+                .TargetDirectory
+                .GetFullyQualifiedRoot()
+                .FullName
+                .Should()
+                .Be(rootDir);
+        }
+
+        [Fact]
+        public async Task Publish_can_specify_source_and_target_directory()
+        {
+            var rootDir = Path.GetTempPath();
+            var targetDir = Path.Combine(Path.GetTempPath(), "target");
+
+            await _parser.InvokeAsync($"publish --target-directory {targetDir} {rootDir}", _console);
+
+            _publishOptions
+                .RootDirectory
+                .GetFullyQualifiedRoot()
+                .FullName
+                .Should()
+                .Be(rootDir);
+
+            _publishOptions
+                .TargetDirectory
+                .GetFullyQualifiedRoot()
+                .FullName
+                .Should()
+                .Be(targetDir + Path.DirectorySeparatorChar);
         }
     }
 }

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
@@ -46,7 +45,6 @@ namespace MLS.Agent.CommandLine
             string packageVersion = null,
             ParseResult parseResult = null,
             ushort? port = null,
-            bool isJupyter = false,
             IDirectoryAccessor rootDirectory = null)
         {
             _parseResult = parseResult;
@@ -65,7 +63,6 @@ namespace MLS.Agent.CommandLine
             Package = package;
             PackageVersion = packageVersion;
             Port = port;
-            IsJupyter = isJupyter;
         }
 
 
@@ -76,7 +73,6 @@ namespace MLS.Agent.CommandLine
         public PackageSource AddPackageSource { get; }
         public Uri Uri { get; set; }
         public bool Production { get; }
-        internal bool IsJupyter { get; set; }
         public bool IsLanguageService { get; set; }
         public string Key { get; }
         public string ApplicationInsightsKey { get; }
