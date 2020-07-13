@@ -228,7 +228,7 @@ stages:
           displayName: Run up-to-date build check
           inputs:
             filePath: eng\tests\UpToDate.ps1
-            arguments: -configuration $(_BuildConfig) -restore -ci
+            arguments: -configuration $(_BuildConfig) -ci
 
   # - template: /eng/common/templates/jobs/jobs.yml
   #   parameters:
