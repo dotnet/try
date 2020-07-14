@@ -16,22 +16,42 @@ namespace Microsoft.DotNet.Try.Markdown
     {
         private readonly IDefaultCodeBlockAnnotations _defaultAnnotations;
         private readonly Parser _parser;
-        private readonly Lazy<ModelBinder> _modelBinder;
-        private HashSet<string> _supportedLanguages;
+        private readonly HashSet<string> _supportedLanguages;
         private const string PackageOptionName = "--package";
         private const string PackageVersionOptionName = "--package-version";
+        private readonly Dictionary<ICommand, Lazy<ModelBinder>> _modelBindersByCommand;
 
         public CodeFenceAnnotationsParser(
             IDefaultCodeBlockAnnotations defaultAnnotations = null,
             Action<Command> configureCsharpCommand = null,
-            Action<Command> configureFsharpCommand = null)
+            Action<Command> configureFsharpCommand = null,
+            Action<Command> configureConsoleCommand = null)
         {
             _defaultAnnotations = defaultAnnotations;
-            _parser = CreateOptionsParser(configureCsharpCommand, configureFsharpCommand);
-            _modelBinder = new Lazy<ModelBinder>(CreateModelBinder);
+
+            var languageBinder =
+                new Lazy<ModelBinder>(() => new ModelBinder(CodeBlockAnnotationsType));
+
+            _modelBindersByCommand = new Dictionary<ICommand, Lazy<ModelBinder>>
+            {
+                [CreateCsharpCommand(configureCsharpCommand)] = languageBinder,
+                [CreateFsharpCommand(configureFsharpCommand)] = languageBinder,
+                [CreateConsoleCommand(configureConsoleCommand)] = new Lazy<ModelBinder>(() => new ModelBinder(typeof(OutputBlockAnnotations)))
+            };
+
+            _supportedLanguages = new HashSet<string>(_modelBindersByCommand.Keys.SelectMany(c => c.Aliases));
+
+            var rootCommand = new RootCommand();
+
+            foreach (var command in _modelBindersByCommand.Keys)
+            {
+                rootCommand.Add((Command) command);
+            }
+
+            _parser = new Parser(rootCommand);
         }
 
-        protected virtual ModelBinder CreateModelBinder() => new ModelBinder(typeof(CodeBlockAnnotations));
+        public virtual Type CodeBlockAnnotationsType => typeof(CodeBlockAnnotations);
 
         public virtual CodeFenceOptionsParseResult TryParseCodeFenceOptions(
             string line,
@@ -60,86 +80,62 @@ namespace Microsoft.DotNet.Try.Markdown
                 return CodeFenceOptionsParseResult.None;
             }
 
+            // FIX: (TryParseCodeFenceOptions) account for different options types
+
             if (result.Errors.Any())
             {
                 return CodeFenceOptionsParseResult.Failed(new List<string>(result.Errors.Select(e => e.Message)));
             }
 
-            var annotations = (CodeBlockAnnotations)_modelBinder.Value.CreateInstance(new BindingContext(result));
+            var modelBinder = _modelBindersByCommand[result.CommandResult.Command].Value;
 
-            return CodeFenceOptionsParseResult.Succeeded(annotations);
-        }
+            var annotations = modelBinder.CreateInstance(new BindingContext(result));
 
-        private Parser CreateOptionsParser(
-            Action<Command> configureCsharpCommand = null,
-            Action<Command> configureFsharpCommand = null)
-        {
-            var languageCommands = new[]
+            switch (annotations)
             {
-                CreateCsharpCommand(configureCsharpCommand),
-                CreateFsharpCommand(configureFsharpCommand)
-            };
-            _supportedLanguages = new HashSet<string>(languageCommands.Select(c => c.Name));
+                case CodeBlockAnnotations codeBlockAnnotations:
+                    return CodeFenceOptionsParseResult.Succeeded(codeBlockAnnotations);
 
-            var rootCommand = new RootCommand();
+                case OutputBlockAnnotations outputBlockAnnotations:
+                    return CodeFenceOptionsParseResult.Succeeded(outputBlockAnnotations);
 
-            foreach (var command in languageCommands)
-            {
-                rootCommand.Add(command);
+                case null:
+                    return CodeFenceOptionsParseResult.Failed($"Failed to bind annotations: {result}");
+
+                default:
+                    return CodeFenceOptionsParseResult.Failed($"Unrecognized annotations type: {annotations}");
             }
-
-            return new Parser(rootCommand);
         }
 
         private IEnumerable<Option> CreateCommandOptions()
         {
-            yield return new Option("--destination-file")
-            {
-                Argument = new Argument<RelativeFilePath>()
-            };
+            yield return new Option<RelativeFilePath>("--destination-file");
 
-            yield return new Option("--editable")
-            {
-                Argument = new Argument<bool>(getDefaultValue: () => true)
-            };
+            yield return new Option<bool>("--editable", getDefaultValue: () => true);
 
-            yield return new Option("--hidden")
-            {
-                Argument = new Argument<bool>(getDefaultValue: () => false)
-            };
+            yield return new Option<bool>("--hidden", getDefaultValue: () => false);
 
-            yield return new Option("--region")
-            {
-                Argument = new Argument<string>()
-            };
-            var packageOption = new Option(PackageOptionName)
-            {
-                Argument = new Argument<string>()
-            };
+            yield return new Option<string>("--region");
 
-            if (_defaultAnnotations?.Package is string defaultPackage)
+            var packageOption = new Option<string>(PackageOptionName);
+
+            if (_defaultAnnotations?.Package is { } defaultPackage)
             {
                 packageOption.Argument.SetDefaultValue(defaultPackage);
             }
 
             yield return packageOption;
 
-            var packageVersionOption = new Option(PackageVersionOptionName)
-            {
-                Argument = new Argument<string>()
-            };
+            var packageVersionOption = new Option<string>(PackageVersionOptionName);
 
-            if (_defaultAnnotations?.PackageVersion is string defaultPackageVersion)
+            if (_defaultAnnotations?.PackageVersion is { } defaultPackageVersion)
             {
                 packageVersionOption.Argument.SetDefaultValue(defaultPackageVersion);
             }
 
             yield return packageVersionOption;
 
-            yield return new Option("--session")
-            {
-                Argument = new Argument<string>()
-            };
+            yield return new Option<string>("--session");
         }
 
         private Command CreateCsharpCommand(Action<Command> configureCsharpCommand)
@@ -158,6 +154,9 @@ namespace Microsoft.DotNet.Try.Markdown
             csharp.AddAlias("CSHARP");
             csharp.AddAlias("cs");
             csharp.AddAlias("c#");
+
+
+
             return csharp;
         }
 
@@ -178,6 +177,18 @@ namespace Microsoft.DotNet.Try.Markdown
             fsharp.AddAlias("fs");
             fsharp.AddAlias("f#");
             return fsharp;
+        }
+
+        private Command CreateConsoleCommand(Action<Command> configureConsoleCommand)
+        {
+            var console = new Command("console")
+            {
+                new Option<string>("--session")
+            };
+
+            configureConsoleCommand?.Invoke(console);
+
+            return console;
         }
     }
 }

@@ -3,7 +3,6 @@
 
 using System;
 using FluentAssertions;
-using Microsoft.DotNet.Try.Markdown;
 using Xunit;
 
 namespace Microsoft.DotNet.Try.Markdown.Tests
@@ -13,7 +12,7 @@ namespace Microsoft.DotNet.Try.Markdown.Tests
         [Fact]
         public void It_requires_options_to_initialize()
         {
-            var block = new AnnotatedCodeBlock(); 
+            var block = new AnnotatedCodeBlock();
 
             block.Invoking(b => b.InitializeAsync().Wait())
                  .Should()

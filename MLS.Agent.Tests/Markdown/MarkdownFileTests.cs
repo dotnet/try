@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using FluentAssertions;
 using System.Linq;
@@ -503,6 +504,40 @@ This is the end of the file"));
                 codeNodes.Should().HaveCount(1);
 
                 codeNodes.Single().InnerText.Should().Match(@"*//some code to include*");
+            }
+
+            [Fact]
+            public async Task Annotated_console_blocks_do_not_produce_HTML_elements()
+            {
+                var codeContent = $@"using System;
+
+namespace BasicConsoleApp
+{{
+    class Program
+    {{
+        static void MyProgram(string[] args)
+        {{
+            #region abc
+            Console.WriteLine(""conca"" + ""tenated"");
+            #endregion
+            
+        }}
+    }}
+}}".EnforceLF();
+
+                var html = await RenderHtml(
+                               ("readme.md", @"
+```cs --source-file Program.cs --region abc --session 123
+```
+```console --session 123
+concatenated
+```
+"),
+                               ("Program.cs", codeContent),
+                               ("sample.csproj", ""));
+
+                html.Should().NotContain("<div class=\"notification is-danger\">");
+                html.Should().NotContain("concatenated");
             }
 
             [Fact]

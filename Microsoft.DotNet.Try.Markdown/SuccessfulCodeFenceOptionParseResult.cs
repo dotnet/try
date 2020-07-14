@@ -5,11 +5,11 @@ namespace Microsoft.DotNet.Try.Markdown
 {
     public sealed class SuccessfulCodeFenceOptionParseResult : CodeFenceOptionsParseResult
     {
-        public SuccessfulCodeFenceOptionParseResult(CodeBlockAnnotations annotations)
+        internal SuccessfulCodeFenceOptionParseResult(CodeFenceAnnotations annotations)
         {
             Annotations = annotations;
         }
 
-        public CodeBlockAnnotations Annotations { get; }
+        public CodeFenceAnnotations Annotations { get; internal set; }
     }
 }

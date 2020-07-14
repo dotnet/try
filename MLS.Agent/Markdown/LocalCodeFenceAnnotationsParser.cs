@@ -3,7 +3,6 @@
 
 using System;
 using System.CommandLine;
-using System.CommandLine.Binding;
 using System.IO;
 using System.Linq;
 using Markdig;
@@ -59,15 +58,12 @@ namespace MLS.Agent.Markdown
             return result;
         }
 
-        protected override ModelBinder CreateModelBinder()
-        {
-            return new ModelBinder(typeof(LocalCodeBlockAnnotations));
-        }
+        public override Type CodeBlockAnnotationsType => typeof(LocalCodeBlockAnnotations);
 
         private static void AddSourceFileOption(Command command)
         {
             var sourceFileArg = new Argument<RelativeFilePath>(
-                parse: (result) =>
+                parse: result =>
                 {
                     var filename = result.Tokens.Select(t => t.Value).SingleOrDefault();
 

@@ -110,11 +110,12 @@ namespace MLS.Agent.Controllers
 
             foreach (var session in sessions)
             {
-                sb.AppendLine($@"<button class=""run"" data-trydotnet-mode=""run"" data-trydotnet-session-id=""{session.Key}"" data-trydotnet-run-args=""{session.First().Annotations.RunArgs.HtmlAttributeEncode()}"">{session.Key}{SvgResources.RunButtonSvg}</button>");
+                sb.AppendLine(
+                    $@"<button class=""run"" data-trydotnet-mode=""run"" data-trydotnet-session-id=""{session.Key}"" data-trydotnet-run-args=""{session.Select(s => s.Annotations).OfType<CodeBlockAnnotations>().First().RunArgs.HtmlAttributeEncode()}"">{session.Key}{SvgResources.RunButtonSvg}</button>");
 
                 sb.AppendLine(enablePreviewFeatures
-                    ? $@"<div class=""output-panel"" data-trydotnet-mode=""runResult"" data-trydotnet-output-type=""terminal"" data-trydotnet-session-id=""{session.Key}""></div>"
-                    : $@"<div class=""output-panel"" data-trydotnet-mode=""runResult"" data-trydotnet-session-id=""{session.Key}""></div>");
+                                  ? $@"<div class=""output-panel"" data-trydotnet-mode=""runResult"" data-trydotnet-output-type=""terminal"" data-trydotnet-session-id=""{session.Key}""></div>"
+                                  : $@"<div class=""output-panel"" data-trydotnet-mode=""runResult"" data-trydotnet-session-id=""{session.Key}""></div>");
             }
 
             return new HtmlString(sb.ToString());

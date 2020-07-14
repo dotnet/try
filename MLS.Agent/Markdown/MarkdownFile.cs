@@ -48,13 +48,17 @@ namespace MLS.Agent.Markdown
 
         public async Task<IEnumerable<AnnotatedCodeBlock>> GetEditableAnnotatedCodeBlocks()
         {
-            var blocks = (await GetAnnotatedCodeBlocks()).Where(b => b.Annotations.Editable);
+            var blocks = (await GetAnnotatedCodeBlocks())
+                .Where(b => b.Annotations is CodeBlockAnnotations a &&
+                            a.Editable);
             return blocks;
         }
 
         public async Task<IEnumerable<AnnotatedCodeBlock>> GetNonEditableAnnotatedCodeBlocks()
         {
-            var blocks = (await GetAnnotatedCodeBlocks()).Where(b => !b.Annotations.Editable);
+            var blocks = (await GetAnnotatedCodeBlocks())
+                .Where(b => b.Annotations is CodeBlockAnnotations a && 
+                            !a.Editable);
             return blocks;
         }
 
@@ -83,17 +87,22 @@ namespace MLS.Agent.Markdown
 
             foreach (var block in blocks)
             {
+                if (!(block.Annotations is CodeBlockAnnotations annotations))
+                {
+                    continue;
+                }
+
                 var sessionId = string.IsNullOrWhiteSpace(block.Annotations.Session) 
                                     ? "global" 
                                     : block.Annotations.Session;
 
                 var filePath = (block.Annotations as LocalCodeBlockAnnotations)?.SourceFile ??
-                               block.Annotations.DestinationFile ??
+                               annotations.DestinationFile ??
                                new RelativeFilePath($"./generated_include_file_{sessionId}.cs");
 
                 var absolutePath = directoryAccessor.GetFullyQualifiedPath(filePath).FullName;
 
-                if (string.IsNullOrWhiteSpace(block.Annotations.Region))
+                if (string.IsNullOrWhiteSpace(annotations.Region))
                 {
                     if (!contentBuildersByFileBySession.TryGetValue(sessionId, out var sessionFileBuffers))
                     {
@@ -111,7 +120,7 @@ namespace MLS.Agent.Markdown
                 }
                 else
                 {
-                    var bufferId = new BufferId(absolutePath, block.Annotations.Region);
+                    var bufferId = new BufferId(absolutePath, annotations.Region);
                     if (!contentBuildersByBufferBySession.TryGetValue(sessionId, out var sessionFileBuffers))
                     {
                         sessionFileBuffers = new Dictionary<BufferId, StringBuilder>();

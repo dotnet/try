@@ -13,8 +13,10 @@ namespace Microsoft.DotNet.Try.Markdown
 
         public static CodeFenceOptionsParseResult Failed(IList<string> errorMessages) => new FailedCodeFenceOptionParseResult(errorMessages);
 
+        public static CodeFenceOptionsParseResult Failed(string errorMessage) => new FailedCodeFenceOptionParseResult(new[] { errorMessage });
+
         public static CodeFenceOptionsParseResult None { get; } = new NoCodeFenceOptions();
 
-        public static CodeFenceOptionsParseResult Succeeded(CodeBlockAnnotations annotations) => new SuccessfulCodeFenceOptionParseResult(annotations);
+        public static CodeFenceOptionsParseResult Succeeded(CodeFenceAnnotations annotations) => new SuccessfulCodeFenceOptionParseResult(annotations);
     }
 }
