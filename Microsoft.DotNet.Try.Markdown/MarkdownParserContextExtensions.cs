@@ -3,7 +3,6 @@
 
 using System;
 using Markdig;
-using Markdig.Helpers;
 
 namespace Microsoft.DotNet.Try.Markdown
 {

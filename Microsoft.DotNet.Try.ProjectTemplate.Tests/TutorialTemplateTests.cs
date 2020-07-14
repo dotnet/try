@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Try.ProjectTemplate.Tests
 {
     public class TutorialTemplateTests
     {
-        private string _pathToTemplateCsproj;
+        private readonly string _pathToTemplateCsproj;
 
         public TutorialTemplateTests()
         {

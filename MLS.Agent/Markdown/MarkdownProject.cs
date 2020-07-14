@@ -5,10 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
-using System.Threading.Tasks;
 using Markdig;
-using Markdig.Extensions.Mathematics;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Tools;
 using Recipes;
@@ -62,11 +59,6 @@ namespace MLS.Agent.Markdown
             public IDirectoryAccessor GetDirectoryAccessorForRelativePath(RelativeDirectoryPath relativePath)
             {
                 return this;
-            }
-
-            public Task<IDisposable> TryLockAsync()
-            {
-                return Task.FromResult(Disposable.Empty);
             }
 
             public void WriteAllText(RelativeFilePath path, string text)

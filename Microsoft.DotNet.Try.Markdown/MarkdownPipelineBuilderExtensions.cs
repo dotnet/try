@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Try.Markdown
     public static class MarkdownPipelineBuilderExtensions
     {
         public static MarkdownPipelineBuilder UseCodeBlockAnnotations(
-            this MarkdownPipelineBuilder pipeline, 
+            this MarkdownPipelineBuilder pipeline,
             CodeFenceAnnotationsParser annotationsParser = null,
             bool inlineControls = true)
         {
@@ -16,7 +16,10 @@ namespace Microsoft.DotNet.Try.Markdown
 
             if (!extensions.Contains<CodeBlockAnnotationExtension>())
             {
-                extensions.Add(new CodeBlockAnnotationExtension(annotationsParser) {InlineControls = inlineControls});
+                extensions.Add(new CodeBlockAnnotationExtension(annotationsParser)
+                {
+                    InlineControls = inlineControls
+                });
             }
 
             return pipeline;

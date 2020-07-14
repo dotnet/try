@@ -23,33 +23,37 @@ namespace Microsoft.DotNet.Try.Markdown
         protected override AnnotatedCodeBlock CreateFencedBlock(BlockProcessor processor) =>
             new AnnotatedCodeBlock(this, _order++);
 
-        protected bool ParseCodeOptions(BlockProcessor state, ref StringSlice line, IFencedBlock fenced, char openingCharacter)
+        protected bool ParseCodeOptions(
+            BlockProcessor state,
+            ref StringSlice line,
+            IFencedBlock fenced,
+            char openingCharacter)
         {
-            if (!(fenced is AnnotatedCodeBlock codeLinkBlock))
+            if (!(fenced is AnnotatedCodeBlock annotatedBlock))
             {
                 return false;
             }
 
-            var result = _codeFenceAnnotationsParser.TryParseCodeFenceOptions(line.ToString(),
+            var result = _codeFenceAnnotationsParser.TryParseCodeFenceOptions(
+                line.ToString(),
                 state.Context);
 
             switch (result)
             {
-                case NoCodeFenceOptions _:
-                    return false;
                 case FailedCodeFenceOptionParseResult failed:
                     foreach (var errorMessage in failed.ErrorMessages)
                     {
-                        codeLinkBlock.Diagnostics.Add(errorMessage);
+                        annotatedBlock.Diagnostics.Add(errorMessage);
                     }
 
-                    break;
-                case SuccessfulCodeFenceOptionParseResult successful:
-                    codeLinkBlock.Annotations = successful.Annotations;
-                    break;
+                    return true;
+
+                case SuccessfulCodeFenceOptionParseResult codeResult:
+                    annotatedBlock.Annotations = codeResult.Annotations;
+                    return true;
             }
 
-            return true;
+            return false;
         }
 
         public override BlockState TryContinue(

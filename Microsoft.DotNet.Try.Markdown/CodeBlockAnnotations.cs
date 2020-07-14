@@ -6,12 +6,11 @@ using System.CommandLine.Parsing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml;
 using MLS.Agent.Tools;
 
 namespace Microsoft.DotNet.Try.Markdown
 {
-    public class CodeBlockAnnotations
+    public class CodeBlockAnnotations : CodeFenceAnnotations
     {
         protected static int _sessionIndex;
 
@@ -24,14 +23,14 @@ namespace Microsoft.DotNet.Try.Markdown
             bool hidden = false,
             string runArgs = null,
             ParseResult parseResult = null,
-            string packageVersion = null)
+            string packageVersion = null) 
+            : base(parseResult, session)
         {
             DestinationFile = destinationFile;
             Package = package;
             Region = region;
             Session = session;
             RunArgs = runArgs;
-            ParseResult = parseResult;
             PackageVersion = packageVersion;
             Editable = !hidden && editable;
             Hidden = hidden;
@@ -40,9 +39,7 @@ namespace Microsoft.DotNet.Try.Markdown
             {
                 Session = $"Run{++_sessionIndex}";
             }
-
-            NormalizedLanguage = parseResult?.CommandResult.Command.Name;
-            Language = parseResult?.Tokens.First().Value;
+         
             RunArgs = runArgs ?? Untokenize(parseResult);
         }
 
@@ -50,13 +47,9 @@ namespace Microsoft.DotNet.Try.Markdown
         public RelativeFilePath DestinationFile { get; }
         public string Region { get; }
         public string RunArgs { get; }
-        public ParseResult ParseResult { get; }
         public string PackageVersion { get; }
-        public string Session { get; }
         public bool Editable { get; }
         public bool Hidden { get; }
-        public string Language { get; }
-        public string NormalizedLanguage { get; }
 
         public virtual Task<CodeBlockContentFetchResult> TryGetExternalContent() => 
             Task.FromResult(CodeBlockContentFetchResult.None);

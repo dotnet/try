@@ -19,17 +19,17 @@ namespace Microsoft.DotNet.Try.Markdown
             HtmlRenderer renderer,
             CodeBlock codeBlock)
         {
-            if (codeBlock is AnnotatedCodeBlock codeLinkBlock)
+            if (codeBlock is AnnotatedCodeBlock block)
             {
-                codeLinkBlock.EnsureInitialized();
+                block.EnsureInitialized();
 
-                if (codeLinkBlock.Diagnostics.Any())
+                if (block.Diagnostics.Any())
                 {
 
                     renderer.WriteLine(@"<div class=""notification is-danger"">");
                     renderer.WriteLine(SvgResources.ErrorSvg);
 
-                    foreach (var diagnostic in codeLinkBlock.Diagnostics)
+                    foreach (var diagnostic in block.Diagnostics)
                     {
                         renderer.WriteEscape("\t" + diagnostic);
                         renderer.WriteLine();
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Try.Markdown
                 }
                 else
                 {
-                    codeLinkBlock.RenderTo(
+                    block.RenderTo(
                         renderer,
                         InlineControls,
                         EnablePreviewFeatures);

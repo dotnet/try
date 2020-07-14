@@ -15,20 +15,21 @@ namespace Microsoft.DotNet.Try.Markdown
 {
     public class AnnotatedCodeBlock : FencedCodeBlock
     {
-        private readonly List<string> _diagnostics = new List<string>();
         private string _sourceCode;
         private bool _initialized;
 
         public AnnotatedCodeBlock(
             BlockParser parser = null,
-            int order = 0) : base(parser ?? new AnnotatedCodeBlockParser(new CodeFenceAnnotationsParser()))
+            int order = 0)
+            : base(
+                parser ?? new AnnotatedCodeBlockParser(new CodeFenceAnnotationsParser()))
         {
             Order = order;
         }
 
-        public IList<string> Diagnostics => _diagnostics;
+        public CodeFenceAnnotations Annotations { get; internal set; }
 
-        public CodeBlockAnnotations Annotations { get; set; }
+        public List<string> Diagnostics { get; } = new List<string>();
 
         public int Order { get; }
 
@@ -46,26 +47,29 @@ namespace Microsoft.DotNet.Try.Markdown
 
             _initialized = true;
 
-            if (Annotations != null)
+            switch (Annotations)
             {
-                var result = await Annotations.TryGetExternalContent();
+                case CodeBlockAnnotations codeBlockAnnotations:
+                    var result = await codeBlockAnnotations.TryGetExternalContent();
 
-                switch (result)
-                {
-                    case SuccessfulCodeBlockContentFetchResult success:
-                        SourceCode = success.Content;
-                        await AddAttributes(Annotations);
-                        break;
+                    switch (result)
+                    {
+                        case SuccessfulCodeBlockContentFetchResult success:
+                            SourceCode = success.Content;
+                            await AddAttributes(codeBlockAnnotations);
+                            break;
 
-                    case ExternalContentNotEnabledResult _:
-                        SourceCode = Lines.ToString();
-                        await AddAttributes(Annotations);
-                        break;
+                        case ExternalContentNotEnabledResult _:
+                            SourceCode = Lines.ToString();
+                            await AddAttributes(codeBlockAnnotations);
+                            break;
 
-                    case FailedCodeBlockContentFetchResult failed:
-                        _diagnostics.AddRange(failed.ErrorMessages);
-                        break;
-                }
+                        case FailedCodeBlockContentFetchResult failed:
+                            Diagnostics.AddRange(failed.ErrorMessages);
+                            break;
+                    }
+
+                    break;
             }
         }
 
@@ -107,9 +111,14 @@ namespace Microsoft.DotNet.Try.Markdown
             bool inlineControls,
             bool enablePreviewFeatures)
         {
+            if (!(Annotations is CodeBlockAnnotations codeBlockAnnotations))
+            {
+                return;
+            }
+
             var height = $"{GetEditorHeightInEm(Lines)}em";
 
-            if (Annotations.Editable)
+            if (codeBlockAnnotations.Editable)
             {
                 renderer
                     .WriteLine(inlineControls
@@ -117,15 +126,15 @@ namespace Microsoft.DotNet.Try.Markdown
                                    : @"<div class=""code-container"">");
             }
 
-            var htmlStyle = Annotations.Editable
-                ? new EditablePreHtmlStyle(height)
-                : Annotations.Hidden
-                    ? new HiddenPreHtmlStyle() as HtmlStyleAttribute
-                    : new EmptyHtmlStyle();
+            var htmlStyle = codeBlockAnnotations.Editable
+                                ? new EditablePreHtmlStyle(height)
+                                : codeBlockAnnotations.Hidden
+                                    ? new HiddenPreHtmlStyle() as HtmlStyleAttribute
+                                    : new EmptyHtmlStyle();
 
             renderer
-                .WriteLineIf(Annotations.Editable, @"<div class=""editor-panel"">")
-                .WriteLine(Annotations.Editable
+                .WriteLineIf(codeBlockAnnotations.Editable, @"<div class=""editor-panel"">")
+                .WriteLine(codeBlockAnnotations.Editable
                                ? $@"<pre {htmlStyle} height=""{height}"" width=""100%"">"
                                : $@"<pre {htmlStyle}>")
                 .Write("<code")
@@ -134,13 +143,13 @@ namespace Microsoft.DotNet.Try.Markdown
                 .WriteLeafRawLines(this, true, true)
                 .Write(@"</code>")
                 .WriteLine(@"</pre>")
-                .WriteLineIf(Annotations.Editable, @"</div >");
+                .WriteLineIf(codeBlockAnnotations.Editable, @"</div >");
 
-            if (inlineControls && Annotations.Editable)
+            if (inlineControls && codeBlockAnnotations.Editable)
             {
                 renderer
                     .WriteLine(
-                        $@"<button class=""run"" data-trydotnet-mode=""run"" data-trydotnet-session-id=""{Annotations.Session}"" data-trydotnet-run-args=""{Annotations.RunArgs.HtmlAttributeEncode()}"">{SvgResources.RunButtonSvg}</button>");
+                        $@"<button class=""run"" data-trydotnet-mode=""run"" data-trydotnet-session-id=""{codeBlockAnnotations.Session}"" data-trydotnet-run-args=""{codeBlockAnnotations.RunArgs.HtmlAttributeEncode()}"">{SvgResources.RunButtonSvg}</button>");
 
                 renderer
                     .WriteLine(enablePreviewFeatures
@@ -148,7 +157,7 @@ namespace Microsoft.DotNet.Try.Markdown
                                    : $@"<div class=""output-panel-inline collapsed size-to-content"" data-trydotnet-mode=""runResult"" data-trydotnet-session-id=""{Annotations.Session}""></div>");
             }
 
-            if (Annotations.Editable)
+            if (codeBlockAnnotations.Editable)
             {
                 renderer.WriteLine("</div>");
             }

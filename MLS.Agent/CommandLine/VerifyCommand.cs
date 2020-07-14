@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.IO;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
@@ -59,6 +58,8 @@ namespace MLS.Agent.CommandLine
 
                 foreach (var session in sessions)
                 {
+
+
                     if (session.Select(block => block.ProjectOrPackageName()).Distinct().Count() != 1)
                     {
                         SetError();
@@ -66,9 +67,9 @@ namespace MLS.Agent.CommandLine
                         continue;
                     }
 
-                    foreach (var codeLinkBlock in session)
+                    foreach (var block in session)
                     {
-                        ReportCodeLinkageResults(codeLinkBlock, markdownFileDirectoryAccessor);
+                        ReportCodeLinkageResults(block, markdownFileDirectoryAccessor);
                     }
 
                     Console.ResetColor();
@@ -129,7 +130,7 @@ namespace MLS.Agent.CommandLine
                 IDirectoryAccessor accessor)
             {
                 var description = session.Count() == 1 || string.IsNullOrWhiteSpace(session.Key)
-                                      ? $"region \"{session.Select(s => s.Annotations.Region).Distinct().First()}\""
+                                      ? $"region \"{session.Select(b => b.Annotations).OfType<CodeBlockAnnotations>().Select(a => a.Region).Distinct().First()}\""
                                       : $"session \"{session.Key}\"";
 
                 console.Out.WriteLine($"\n  Compiling samples for {description}\n");
@@ -142,14 +143,14 @@ namespace MLS.Agent.CommandLine
                     .Select(b => b.Language())
                     .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
 
-                if (!ProjectIsCompatibleWithLanguage( new UriOrFileInfo(projectOrPackageName), language))
+                if (!ProjectIsCompatibleWithLanguage(new UriOrFileInfo(projectOrPackageName), language))
                 {
                     SetError();
 
                     console.Out.WriteLine($"    Build failed as project {projectOrPackageName} is not compatible with language {language}");
                 }
 
-                var editableCodeBlocks = session.Where(b => b.Annotations.Editable).ToList();
+                var editableCodeBlocks = session.Where(b => b.Annotations is CodeBlockAnnotations a && a.Editable).ToList();
 
                 var buffers = editableCodeBlocks
                               .Select(block => block.GetBufferAsync(accessor, markdownFile))
