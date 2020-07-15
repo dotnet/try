@@ -28,7 +28,7 @@ namespace MLS.Agent.Markdown
 
         public MarkdownProject Project { get; }
 
-        public async Task<IEnumerable<AnnotatedCodeBlock>> GetAnnotatedCodeBlocks()
+        public async Task<IReadOnlyCollection<AnnotatedCodeBlock>> GetAnnotatedCodeBlocks()
         {
             var pipeline = Project.GetMarkdownPipelineFor(Path);
 
@@ -39,7 +39,7 @@ namespace MLS.Agent.Markdown
             var blocks = document
                          .OfType<AnnotatedCodeBlock>()
                          .OrderBy(c => c.Order)
-                         .ToList();
+                         .ToArray();
 
             await Task.WhenAll(blocks.Select(b => b.InitializeAsync()));
 

@@ -91,6 +91,43 @@ var length = (args[0] as string)?.Length ?? 0;
 ");
             }
 
+            [Theory]
+            [InlineData(@"
+``` cs --source-file ./project/Program.cs --region null_coalesce --project ./project/some.csproj --session one
+Console.WriteLine(""hello!"");
+```
+``` console --session one
+```
+")]
+            [InlineData(@"
+``` cs --source-file ./project/Program.cs --region null_coalesce --project ./project/some.csproj --session one
+Console.WriteLine(""hello!"");
+```
+``` console --session one
+pre-existing text
+```
+")]
+            public async Task Content_of_console_annotated_blocks_is_replaced_by_code_output(string markdown)
+            {
+                var files = PrepareFiles(
+                    ("./folder/project/some.csproj", CsprojContents),
+                    ("./folder/project/Program.cs", CompilingProgramWithRegionCs),
+                    ("./folder/doc.md", markdown));
+
+                var (publishOutput, resultCode) = await DoPublish(files);
+
+                resultCode.Should().Be(0);
+
+                publishOutput.OutputFiles
+                             .Single().Content.Should()
+                             .Contain(@"
+## C# null coalesce example
+``` console --session one
+hello!
+```
+");
+            }
+
             [Fact]
             public async Task When_target_directory_is_sub_directory_of_source_then_markdown_files_in_target_dir_are_ignored()
             {

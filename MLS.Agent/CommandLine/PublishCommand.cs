@@ -30,6 +30,11 @@ namespace MLS.Agent.CommandLine
         {
             writeOutput ??= File.WriteAllText;
 
+            await VerifyCommand.Do(
+                publishOptions,
+                console,
+                startupOptions);
+
             var sourceDirectoryAccessor = publishOptions.RootDirectory;
             var packageRegistry = PackageRegistry.CreateForTryMode(sourceDirectoryAccessor);
             var markdownProject = new MarkdownProject(
@@ -46,34 +51,69 @@ namespace MLS.Agent.CommandLine
 
             var targetDirectoryAccessor = publishOptions.TargetDirectory;
             var targetIsSubDirectoryOfSource = targetDirectoryAccessor.IsSubDirectoryOf(sourceDirectoryAccessor);
-
             foreach (var markdownFile in markdownFiles)
             {
                 var markdownFilePath = markdownFile.Path;
                 var fullSourcePath = sourceDirectoryAccessor.GetFullyQualifiedPath(markdownFilePath);
+
                 if (targetIsSubDirectoryOfSource && fullSourcePath.IsChildOf(targetDirectoryAccessor))
+                {
                     continue;
+                }
+
+
+
+
+
+                var annotatedCodeBlocks = await markdownFile.GetAnnotatedCodeBlocks();
+                var sessions = annotatedCodeBlocks.GroupBy(block => block.Annotations?.Session);
+
+                foreach (var session in sessions.Where(s => s.Any(s => s.Annotations is OutputBlockAnnotations)))
+                {
+
+                    // FIX: (Do) 
+
+
+                }
+
+
+
+
+
 
                 var (document, newLine) = ParseMarkdownDocument(markdownFile);
 
                 var rendered = await Render(publishOptions.Format, document, newLine);
 
-                var targetPath = WriteTargetFile(rendered, markdownFilePath, targetDirectoryAccessor, publishOptions, writeOutput);
+                var targetPath = WriteTargetFile(
+                    rendered, 
+                    markdownFilePath, 
+                    targetDirectoryAccessor, 
+                    publishOptions, 
+                    writeOutput);
 
                 console.Out.WriteLine($"Published '{fullSourcePath}' to {targetPath}");
             }
 
+
             return 0;
         }
 
-        private static string WriteTargetFile(string content, RelativeFilePath relativePath,
-            IDirectoryAccessor targetDirectoryAccessor, PublishOptions publishOptions, WriteOutput writeOutput)
+        private static string WriteTargetFile(
+            string content,
+            RelativeFilePath relativePath,
+            IDirectoryAccessor targetDirectoryAccessor,
+            PublishOptions publishOptions,
+            WriteOutput writeOutput)
         {
             var fullyQualifiedPath = targetDirectoryAccessor.GetFullyQualifiedPath(relativePath);
             targetDirectoryAccessor.EnsureDirectoryExists(relativePath);
             var targetPath = fullyQualifiedPath.FullName;
             if (publishOptions.Format == PublishFormat.HTML)
+            {
                 targetPath = Path.ChangeExtension(targetPath, ".html");
+            }
+
             writeOutput(targetPath, content);
             return targetPath;
         }
@@ -87,16 +127,16 @@ namespace MLS.Agent.CommandLine
             {
                 case PublishFormat.Markdown:
                     pipeline = new MarkdownPipelineBuilder()
-                        .UseNormalizeCodeBlockAnnotations()
-                        .Build();
+                               .UseNormalizeCodeBlockAnnotations()
+                               .Build();
                     var normalizeRenderer = new NormalizeRenderer(writer);
                     normalizeRenderer.Writer.NewLine = newLine;
                     renderer = normalizeRenderer;
                     break;
                 case PublishFormat.HTML:
                     pipeline = new MarkdownPipelineBuilder()
-                        .UseCodeBlockAnnotations(inlineControls: false)
-                        .Build();
+                               .UseCodeBlockAnnotations(inlineControls: false)
+                               .Build();
                     renderer = new HtmlRenderer(writer);
                     break;
                 default:
@@ -106,9 +146,9 @@ namespace MLS.Agent.CommandLine
             pipeline.Setup(renderer);
 
             var blocks = document
-                .OfType<AnnotatedCodeBlock>()
-                .OrderBy(c => c.Order)
-                .ToList();
+                         .OfType<AnnotatedCodeBlock>()
+                         .OrderBy(c => c.Order)
+                         .ToList();
 
             await Task.WhenAll(blocks.Select(b => b.InitializeAsync()));
 
@@ -140,8 +180,11 @@ namespace MLS.Agent.CommandLine
                 {
                     var next = markdown[cr + 1];
                     if (next == '\n')
+                    {
                         return "\r\n";
+                    }
                 }
+
                 return "\r";
             }
 

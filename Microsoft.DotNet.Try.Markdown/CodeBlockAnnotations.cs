@@ -4,7 +4,6 @@
 using System;
 using System.CommandLine.Parsing;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MLS.Agent.Tools;
 
@@ -24,13 +23,12 @@ namespace Microsoft.DotNet.Try.Markdown
             string runArgs = null,
             ParseResult parseResult = null,
             string packageVersion = null) 
-            : base(parseResult, session)
+            : base(parseResult, session, runArgs)
         {
             DestinationFile = destinationFile;
             Package = package;
             Region = region;
             Session = session;
-            RunArgs = runArgs;
             PackageVersion = packageVersion;
             Editable = !hidden && editable;
             Hidden = hidden;
@@ -39,14 +37,11 @@ namespace Microsoft.DotNet.Try.Markdown
             {
                 Session = $"Run{++_sessionIndex}";
             }
-         
-            RunArgs = runArgs ?? Untokenize(parseResult);
         }
 
         public virtual string Package { get; }
         public RelativeFilePath DestinationFile { get; }
         public string Region { get; }
-        public string RunArgs { get; }
         public string PackageVersion { get; }
         public bool Editable { get; }
         public bool Hidden { get; }
@@ -73,15 +68,5 @@ namespace Microsoft.DotNet.Try.Markdown
 
             return Task.CompletedTask;
         }
-
-        private static string Untokenize(ParseResult result) =>
-            result == null 
-                ? null 
-                : string.Join(" ", result.Tokens
-                    .Select(t => t.Value)
-                    .Skip(1)
-                    .Select(t => Regex.IsMatch(t, @".*\s.*")
-                        ? $"\"{t}\"" 
-                        : t));
     }
 }

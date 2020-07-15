@@ -28,10 +28,17 @@ namespace Microsoft.DotNet.Try.Markdown
                 NormalizeRenderer renderer,
                 CodeBlock codeBlock)
             {
-                if (codeBlock is AnnotatedCodeBlock block && 
-                    block.Annotations is CodeBlockAnnotations annotations)
+                if (codeBlock is AnnotatedCodeBlock block)
                 {
-                    block.Arguments = $"{block.Annotations.Language} {annotations.RunArgs}";
+                    if (block.Annotations is CodeBlockAnnotations annotations)
+                    {
+                        block.Arguments = $"{block.Annotations.Language} {annotations.RunArgs}";
+                    }
+
+                    if (block.Annotations is OutputBlockAnnotations outputBlockAnnotations)
+                    {
+                        
+                    }
                 }
                 base.Write(renderer, codeBlock);
             }

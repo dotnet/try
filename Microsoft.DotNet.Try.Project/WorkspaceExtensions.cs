@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Protocol;
 
 namespace Microsoft.DotNet.Try.Project
@@ -30,5 +31,11 @@ namespace Microsoft.DotNet.Try.Project
                 }
             }
         }
+
+        public static Task<Workspace> MergeAsync(this Workspace workspace) => CodeMergeTransformer.Instance.TransformAsync(workspace);
+
+        public static Task<Workspace> InlineBuffersAsync(this Workspace workspace) => BufferInliningTransformer.Instance.TransformAsync(workspace);
+
+        public static async Task<Workspace> InlineBuffersAsync(this Task<Workspace> workspace) => await BufferInliningTransformer.Instance.TransformAsync(await workspace);
     }
 }
