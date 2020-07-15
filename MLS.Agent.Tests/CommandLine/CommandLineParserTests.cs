@@ -62,13 +62,13 @@ namespace MLS.Agent.Tests.CommandLine
                     _installPackageSource = options.AddSource;
                     return Task.CompletedTask;
                 },
-                verify: (options, console, startupOptions) =>
+                verify: (options, console, startupOptions, context) =>
                 {
                     _verifyOptions = options;
                     return Task.FromResult(0);
                 },
                 telemetry: new FakeTelemetry(),
-                publish: (options, console, startupOptions) =>
+                publish: (options, console, startupOptions, context) =>
                 {
                     _publishOptions = options;
                     return Task.FromResult(0);

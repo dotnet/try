@@ -23,18 +23,26 @@ namespace MLS.Agent.CommandLine
         public static async Task<int> Do(
             VerifyOptions verifyOptions,
             IConsole console,
-            StartupOptions startupOptions = null)
+            StartupOptions startupOptions = null,
+            MarkdownProcessingContext context = null)
         {
+            context ??= new MarkdownProcessingContext();
+
             var directoryAccessor = verifyOptions.RootDirectory;
             var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor);
             var markdownProject = new MarkdownProject(
                 directoryAccessor,
                 packageRegistry,
                 startupOptions);
+
+            context.Project = markdownProject;
+
             var errorCount = 0;
             var workspaceServer = new Lazy<IWorkspaceServer>(() => new WorkspaceServerMultiplexer(packageRegistry));
 
             var markdownFiles = markdownProject.GetAllMarkdownFiles().ToArray();
+
+            console.Out.WriteLine("Verifying...");
 
             if (markdownFiles.Length == 0)
             {
@@ -57,9 +65,13 @@ namespace MLS.Agent.CommandLine
 
                 foreach (var session in sessions)
                 {
-                    if (session
-                        .Where(a => a.Annotations is CodeBlockAnnotations)
-                        .Select(block => block.ProjectOrPackageName()).Distinct().Count() != 1)
+                    var sessionProjectOrPackageNames =
+                        session
+                            .Where(a => a.Annotations is CodeBlockAnnotations)
+                            .Select(block => block.ProjectOrPackageName())
+                            .Distinct();
+
+                    if (sessionProjectOrPackageNames.Count() != 1)
                     {
                         SetError(ref errorCount);
                         console.Out.WriteLine($"Session cannot span projects or packages: --session {session.Key}");

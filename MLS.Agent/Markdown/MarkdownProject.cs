@@ -88,10 +88,11 @@ namespace MLS.Agent.Markdown
             this.defaultAnnotations = defaultAnnotations;
         }
 
-        public IEnumerable<MarkdownFile> GetAllMarkdownFiles() =>
+        public IReadOnlyCollection<MarkdownFile> GetAllMarkdownFiles() =>
             DirectoryAccessor.GetAllFilesRecursively()
                              .Where(file => file.Extension == ".md")
-                             .Select(file => new MarkdownFile(file, this));
+                             .Select(file => new MarkdownFile(file, this))
+                             .ToArray();
 
         public bool TryGetMarkdownFile(RelativeFilePath path, out MarkdownFile markdownFile)
         {

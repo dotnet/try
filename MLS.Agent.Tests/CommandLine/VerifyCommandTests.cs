@@ -124,7 +124,7 @@ This is some sample code:
                        .Trim()
                        .Should()
                        .Match(
-                           $"{root}{Path.DirectorySeparatorChar}doc.md*Line 2:*{root}{Path.DirectorySeparatorChar}Program.cs (in project {root}{Path.DirectorySeparatorChar}some.csproj)*".EnforceLF());
+                           $"*{root}{Path.DirectorySeparatorChar}doc.md*Line 2:*{root}{Path.DirectorySeparatorChar}Program.cs (in project {root}{Path.DirectorySeparatorChar}some.csproj)*".EnforceLF());
             }
 
             [Fact]

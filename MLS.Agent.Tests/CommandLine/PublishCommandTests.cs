@@ -129,11 +129,11 @@ hello!
             }
 
             [Fact]
-            public async Task When_target_directory_is_sub_directory_of_source_then_markdown_files_in_target_dir_are_ignored()
+            public async Task When_target_directory_is_sub_directory_of_source_then_markdown_files_in_target_dir_are_not_used_as_sources()
             {
                 const string markdown = @"
 ## C# null coalesce example
-``` cs --source-file ./../project/Program.cs --region null_coalesce --project ./../project/some.csproj
+``` cs --source-file ./../../project/Program.cs --region null_coalesce --project ./../../project/some.csproj
 ```
 ";
                 var files = PrepareFiles(
@@ -152,6 +152,7 @@ hello!
                 publishOutput.OutputFiles.Count().Should().Be(1, "Expected existing file in doc_output to be ignored");
                 var outputFilePath = new FileInfo(publishOutput.OutputFiles.Single().Path);
                 var expectedFilePath = target.GetFullyQualifiedPath(new RelativeFilePath("documentation/details/doc.md"));
+
                 outputFilePath.FullName.Should().Be(expectedFilePath.FullName);
             }
         }
@@ -180,16 +181,24 @@ hello!
                 return new InMemoryDirectoryAccessor(rootDirectory);
             }
 
-            protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(IDirectoryAccessor allFiles, IDirectoryAccessor target = null)
+            protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(
+                IDirectoryAccessor rootDirectory, 
+                IDirectoryAccessor targetDirectory = null)
             {
                 var console = new TestConsole();
 
                 var output = new PublishOutput();
-                void WriteOutput(string path, string content) => output.Add(path, content);
 
-                var resultCode = await PublishCommand.Do(Options(allFiles, target), console, writeOutput: WriteOutput);
+                var resultCode = await PublishCommand.Do(
+                                     Options(rootDirectory, targetDirectory), 
+                                     console, 
+                                     context: new MarkdownProcessingContext
+                                     {
+                                         WriteFile = output.Add
+                                     });
 
                 _output.WriteLine(console.Out.ToString());
+
                 return (output, resultCode);
             }
         }

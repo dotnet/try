@@ -14,64 +14,55 @@ using Markdig.Syntax;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
-using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
+    public delegate void WriteFile(string path, string content);
+
+
     public static class PublishCommand
     {
-        public delegate void WriteOutput(string path, string content);
 
         public static async Task<int> Do(
             PublishOptions publishOptions,
             IConsole console,
             StartupOptions startupOptions = null,
-            WriteOutput writeOutput = null)
+            MarkdownProcessingContext context = null)
         {
-            writeOutput ??= File.WriteAllText;
+            context ??= new MarkdownProcessingContext();
 
-            await VerifyCommand.Do(
-                publishOptions,
-                console,
-                startupOptions);
+            var verifyResult = await VerifyCommand.Do(
+                                   publishOptions,
+                                   console,
+                                   startupOptions,
+                                   context);
 
-            var sourceDirectoryAccessor = publishOptions.RootDirectory;
-            var packageRegistry = PackageRegistry.CreateForTryMode(sourceDirectoryAccessor);
-            var markdownProject = new MarkdownProject(
-                sourceDirectoryAccessor,
-                packageRegistry,
-                startupOptions);
-
-            var markdownFiles = markdownProject.GetAllMarkdownFiles().ToArray();
-            if (markdownFiles.Length == 0)
+            if (verifyResult != 0)
             {
-                console.Error.WriteLine($"No markdown files found under {sourceDirectoryAccessor.GetFullyQualifiedRoot()}");
-                return -1;
+                return verifyResult;
             }
 
-            var targetDirectoryAccessor = publishOptions.TargetDirectory;
-            var targetIsSubDirectoryOfSource = targetDirectoryAccessor.IsSubDirectoryOf(sourceDirectoryAccessor);
-            foreach (var markdownFile in markdownFiles)
-            {
-                var markdownFilePath = markdownFile.Path;
-                var fullSourcePath = sourceDirectoryAccessor.GetFullyQualifiedPath(markdownFilePath);
+            var targetIsSubDirectoryOfSource =
+                publishOptions.TargetDirectory
+                              .IsSubDirectoryOf(publishOptions.RootDirectory);
 
-                if (targetIsSubDirectoryOfSource && fullSourcePath.IsChildOf(targetDirectoryAccessor))
+            foreach (var markdownFile in context.Project.GetAllMarkdownFiles())
+            {
+                var fullSourcePath = publishOptions.RootDirectory.GetFullyQualifiedPath(markdownFile.Path);
+
+                if (targetIsSubDirectoryOfSource && 
+                    fullSourcePath.IsChildOf(publishOptions.TargetDirectory))
                 {
                     continue;
                 }
 
-
-
-
-
                 var annotatedCodeBlocks = await markdownFile.GetAnnotatedCodeBlocks();
-                var sessions = annotatedCodeBlocks.GroupBy(block => block.Annotations?.Session);
+                var sessions = annotatedCodeBlocks.GroupBy(block => block.Annotations.Session);
 
                 foreach (var session in sessions.Where(s => s.Any(s => s.Annotations is OutputBlockAnnotations)))
                 {
-
                     // FIX: (Do) 
+
 
 
                 }
@@ -87,10 +78,9 @@ namespace MLS.Agent.CommandLine
 
                 var targetPath = WriteTargetFile(
                     rendered, 
-                    markdownFilePath, 
-                    targetDirectoryAccessor, 
+                    markdownFile.Path, 
                     publishOptions, 
-                    writeOutput);
+                    context);
 
                 console.Out.WriteLine($"Published '{fullSourcePath}' to {targetPath}");
             }
@@ -102,19 +92,25 @@ namespace MLS.Agent.CommandLine
         private static string WriteTargetFile(
             string content,
             RelativeFilePath relativePath,
-            IDirectoryAccessor targetDirectoryAccessor,
             PublishOptions publishOptions,
-            WriteOutput writeOutput)
+            MarkdownProcessingContext context)
         {
-            var fullyQualifiedPath = targetDirectoryAccessor.GetFullyQualifiedPath(relativePath);
-            targetDirectoryAccessor.EnsureDirectoryExists(relativePath);
-            var targetPath = fullyQualifiedPath.FullName;
+            context.Project
+                   .DirectoryAccessor
+                   .EnsureDirectoryExists(relativePath);
+
+            var targetPath = publishOptions
+                             .TargetDirectory
+                             .GetFullyQualifiedPath(relativePath)
+                             .FullName;
+
             if (publishOptions.Format == PublishFormat.HTML)
             {
                 targetPath = Path.ChangeExtension(targetPath, ".html");
             }
 
-            writeOutput(targetPath, content);
+            context.WriteFile(targetPath, content);
+
             return targetPath;
         }
 
