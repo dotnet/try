@@ -182,7 +182,7 @@ hello!
             }
 
             protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(
-                IDirectoryAccessor rootDirectory, 
+                IDirectoryAccessor rootDirectory,
                 IDirectoryAccessor targetDirectory = null)
             {
                 var console = new TestConsole();
@@ -190,12 +190,10 @@ hello!
                 var output = new PublishOutput();
 
                 var resultCode = await PublishCommand.Do(
-                                     Options(rootDirectory, targetDirectory), 
-                                     console, 
-                                     context: new MarkdownProcessingContext
-                                     {
-                                         WriteFile = output.Add
-                                     });
+                                     Options(rootDirectory, targetDirectory),
+                                     console,
+                                     context: new MarkdownProcessingContext(rootDirectory,
+                                                                            writeFile: output.Add));
 
                 _output.WriteLine(console.Out.ToString());
 

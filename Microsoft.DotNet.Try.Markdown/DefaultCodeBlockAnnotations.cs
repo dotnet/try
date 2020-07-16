@@ -3,7 +3,7 @@
 
 namespace Microsoft.DotNet.Try.Markdown
 {
-    public class DefaultCodeBlockAnnotations
+    public class DefaultCodeBlockAnnotations : IDefaultCodeBlockAnnotations
     {
         public string Package { get; set; }
 

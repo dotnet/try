@@ -12,6 +12,7 @@ using Markdig.Renderers;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Microsoft.DotNet.Try.Markdown;
+using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
 
@@ -29,7 +30,9 @@ namespace MLS.Agent.CommandLine
             StartupOptions startupOptions = null,
             MarkdownProcessingContext context = null)
         {
-            context ??= new MarkdownProcessingContext();
+            context ??= new MarkdownProcessingContext(
+                publishOptions.RootDirectory,
+                startupOptions);
 
             var verifyResult = await VerifyCommand.Do(
                                    publishOptions,
@@ -63,14 +66,15 @@ namespace MLS.Agent.CommandLine
                 {
                     // FIX: (Do) 
 
+                    // await context.WorkspaceServer.Run(
+                    //     
+                    //     
+                    //     );
+                    //
+                    //
 
 
                 }
-
-
-
-
-
 
                 var (document, newLine) = ParseMarkdownDocument(markdownFile);
 
@@ -84,7 +88,6 @@ namespace MLS.Agent.CommandLine
 
                 console.Out.WriteLine($"Published '{fullSourcePath}' to {targetPath}");
             }
-
 
             return 0;
         }

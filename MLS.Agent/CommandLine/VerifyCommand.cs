@@ -26,34 +26,26 @@ namespace MLS.Agent.CommandLine
             StartupOptions startupOptions = null,
             MarkdownProcessingContext context = null)
         {
-            context ??= new MarkdownProcessingContext();
-
-            var directoryAccessor = verifyOptions.RootDirectory;
-            var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor);
-            var markdownProject = new MarkdownProject(
-                directoryAccessor,
-                packageRegistry,
+            context ??= new MarkdownProcessingContext(
+                verifyOptions.RootDirectory,
                 startupOptions);
 
-            context.Project = markdownProject;
-
             var errorCount = 0;
-            var workspaceServer = new Lazy<IWorkspaceServer>(() => new WorkspaceServerMultiplexer(packageRegistry));
 
-            var markdownFiles = markdownProject.GetAllMarkdownFiles().ToArray();
+            var markdownFiles = context.Project.GetAllMarkdownFiles().ToArray();
 
             console.Out.WriteLine("Verifying...");
 
             if (markdownFiles.Length == 0)
             {
-                console.Error.WriteLine($"No markdown files found under {directoryAccessor.GetFullyQualifiedRoot()}");
+                console.Error.WriteLine($"No markdown files found under {context.RootDirectory.GetFullyQualifiedRoot()}");
                 return -1;
             }
 
             foreach (var markdownFile in markdownFiles)
             {
-                var fullName = directoryAccessor.GetFullyQualifiedPath(markdownFile.Path).FullName;
-                var markdownFileDirectoryAccessor = directoryAccessor.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
+                var fullName = context.RootDirectory.GetFullyQualifiedPath(markdownFile.Path).FullName;
+                var markdownFileDirectoryAccessor = context.RootDirectory.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
 
                 console.Out.WriteLine();
                 console.Out.WriteLine(fullName);
@@ -100,7 +92,7 @@ namespace MLS.Agent.CommandLine
                                          buffersToInclude,
                                          markdownFileDirectoryAccessor,
                                          console,
-                                         workspaceServer.Value);
+                                         context.WorkspaceServer);
 
                         errorCount += result.ErrorCount;
                     }
@@ -170,7 +162,7 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        private static void SetError(ref int errorCount, bool incrementCount = true)
+        internal static void SetError(ref int errorCount, bool incrementCount = true)
         {
             Console.ForegroundColor = ConsoleColor.Red;
 
@@ -281,6 +273,7 @@ namespace MLS.Agent.CommandLine
                 if (result.Succeeded)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
+
                     console.Out.WriteLine($"    {symbol}  No errors found within samples for {description}");
                 }
                 else
@@ -314,6 +307,7 @@ namespace MLS.Agent.CommandLine
                     case ".fsproj":
                         supported = StringComparer.OrdinalIgnoreCase.Compare(language, "fsharp") == 0;
                         break;
+
                     default:
                         supported = false;
                         break;
