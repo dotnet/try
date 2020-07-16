@@ -2,18 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
-using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
-using WorkspaceServer;
 
 namespace MLS.Agent.CommandLine
 {
@@ -81,9 +78,6 @@ namespace MLS.Agent.CommandLine
                     {
                         await Compile(
                             session,
-                            markdownFile,
-                            markdownFileDir,
-                            console,
                             context);
                     }
 
@@ -173,13 +167,8 @@ namespace MLS.Agent.CommandLine
 
         internal static async Task Compile(
             Session session,
-            MarkdownFile markdownFile,
-            IDirectoryAccessor markdownFileDir,
-            IConsole console,
             MarkdownProcessingContext context)
         {
-            var (buffersToInclude, filesToInclude) = await markdownFile.GetIncludes(markdownFile.Project.DirectoryAccessor);
-
             var region = session.CodeBlocks
                                 .Select(b => b.Annotations)
                                 .OfType<CodeBlockAnnotations>()
@@ -191,58 +180,17 @@ namespace MLS.Agent.CommandLine
                                   ? $"region \"{region}\""
                                   : $"session \"{session.Name}\"";
 
-            console.Out.WriteLine($"\n  Compiling samples for {description}\n");
+            context.Console.Out.WriteLine($"\n  Compiling samples for {description}\n");
 
-            if (!ProjectIsCompatibleWithLanguage(new UriOrFileInfo(session.ProjectOrPackageName), session.Language))
+            var workspace = await session.GetWorkspaceAsync();
+            
+            if (!session.IsProjectCompatibleWithLanguage)
             {
                 var error = $"    Build failed as project {session.ProjectOrPackageName} is not compatible with language {session.Language}";
                 AddError(error, context);
             }
-
-            var buffers = session.CodeBlocks
-                                 .Where(b => b.Annotations is CodeBlockAnnotations a && a.Editable)
-                                 .Select(block => block.GetBufferAsync(markdownFileDir))
-                                 .ToList();
-
-            var files = new List<File>();
-
-            if (filesToInclude.TryGetValue("global", out var globalIncludes))
-            {
-                files.AddRange(globalIncludes);
-            }
-
-            if (!string.IsNullOrWhiteSpace(session.Name) && filesToInclude.TryGetValue(session.Name, out var sessionIncludes))
-            {
-                files.AddRange(sessionIncludes);
-            }
-
-            if (buffersToInclude.TryGetValue("global", out var globalSessionBuffersToInclude))
-            {
-                buffers.AddRange(globalSessionBuffersToInclude);
-            }
-
-            if (!string.IsNullOrWhiteSpace(session.Name) && buffersToInclude.TryGetValue(session.Name, out var localSessionBuffersToInclude))
-            {
-                buffers.AddRange(localSessionBuffersToInclude);
-            }
-
-            var workspace = new Workspace(
-                workspaceType: session.ProjectOrPackageName,
-                language: session.Language,
-                files: files.ToArray(),
-                buffers: buffers.ToArray());
-
-            var processed = await workspace
-                                  .MergeAsync()
-                                  .InlineBuffersAsync();
-
-            processed = new Workspace(
-                usings: processed.Usings,
-                workspaceType: processed.WorkspaceType,
-                language: processed.Language,
-                files: processed.Files);
-
-            var result = await context.WorkspaceServer.Compile(new WorkspaceRequest(processed));
+       
+            var result = await context.WorkspaceServer.Compile(new WorkspaceRequest(workspace));
 
             var projectDiagnostics = result.GetFeature<ProjectDiagnostics>()
                                            .Where(e => e.Severity == DiagnosticSeverity.Error)
@@ -269,7 +217,7 @@ namespace MLS.Agent.CommandLine
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
 
-                    console.Out.WriteLine($"    {symbol}  No errors found within samples for {description}");
+                    context.Console.Out.WriteLine($"    {symbol}  No errors found within samples for {description}");
                 }
                 else
                 {
@@ -284,31 +232,6 @@ namespace MLS.Agent.CommandLine
                     AddError(error.ToString(), context);
                 }
             }
-        }
-
-        private static bool ProjectIsCompatibleWithLanguage(UriOrFileInfo projectOrPackage, string language)
-        {
-            var supported = true;
-            if (projectOrPackage.IsFile)
-            {
-                var extension = projectOrPackage.FileExtension.ToLowerInvariant();
-                switch (extension)
-                {
-                    case ".csproj":
-                        supported = StringComparer.OrdinalIgnoreCase.Compare(language, "csharp") == 0;
-                        break;
-
-                    case ".fsproj":
-                        supported = StringComparer.OrdinalIgnoreCase.Compare(language, "fsharp") == 0;
-                        break;
-
-                    default:
-                        supported = false;
-                        break;
-                }
-            }
-
-            return supported;
         }
     }
 }

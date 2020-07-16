@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
-using WorkspaceServer;
 using WorkspaceServer.Tests;
 using Xunit;
 using Xunit.Abstractions;
