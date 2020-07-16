@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Project;
@@ -26,7 +27,8 @@ namespace MLS.Agent.CommandLine
         {
             context ??= new MarkdownProcessingContext(
                 verifyOptions.RootDirectory,
-                startupOptions);
+                startupOptions,
+                console: console);
 
             var markdownFiles = context.Project.GetAllMarkdownFiles().ToArray();
 
@@ -41,7 +43,7 @@ namespace MLS.Agent.CommandLine
             foreach (var markdownFile in markdownFiles)
             {
                 var fullName = context.RootDirectory.GetFullyQualifiedPath(markdownFile.Path).FullName;
-                
+
                 var markdownFileDir = context.RootDirectory.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
 
                 console.Out.WriteLine();
@@ -60,17 +62,16 @@ namespace MLS.Agent.CommandLine
                     if (sessionProjectOrPackageNames.Count() != 1)
                     {
                         var error = $"Session cannot span projects or packages: --session {session.Name}";
-                        SetError(error, context);
-                        console.Out.WriteLine(error);
+                        AddError(error, context);
                         continue;
                     }
 
                     foreach (var block in session.CodeBlocks)
                     {
                         VerifyAnnotationReferences(
-                            block, 
-                            markdownFileDir, 
-                            console, 
+                            block,
+                            markdownFileDir,
+                            console,
                             context);
                     }
 
@@ -78,8 +79,6 @@ namespace MLS.Agent.CommandLine
 
                     if (!session.CodeBlocks.Any(block => block.Diagnostics.Any()))
                     {
-                      
-
                         await Compile(
                             session,
                             markdownFile,
@@ -111,9 +110,9 @@ namespace MLS.Agent.CommandLine
         }
 
         private static void VerifyAnnotationReferences(
-            AnnotatedCodeBlock annotatedCodeBlock, 
-            IDirectoryAccessor markdownFileDir, 
-            IConsole console, 
+            AnnotatedCodeBlock annotatedCodeBlock,
+            IDirectoryAccessor markdownFileDir,
+            IConsole console,
             MarkdownProcessingContext context)
         {
             Console.ResetColor();
@@ -146,12 +145,12 @@ namespace MLS.Agent.CommandLine
                                  : "✓";
 
                 var error = $"    {symbol}  Line {annotatedCodeBlock.Line + 1}:\t{fullyQualifiedPath} (in project {project})";
-                
+
                 if (hasDiagnostics)
                 {
                     context.Errors.Add(error);
                 }
-                
+
                 console.Out.WriteLine(error);
             }
 
@@ -161,11 +160,15 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        internal static void SetError(string error, MarkdownProcessingContext context)
+        internal static void AddError(
+            string error,
+            MarkdownProcessingContext context)
         {
             Console.ForegroundColor = ConsoleColor.Red;
 
             context.Errors.Add(error);
+
+            context.Console.Out.WriteLine(error);
         }
 
         internal static async Task Compile(
@@ -193,8 +196,7 @@ namespace MLS.Agent.CommandLine
             if (!ProjectIsCompatibleWithLanguage(new UriOrFileInfo(session.ProjectOrPackageName), session.Language))
             {
                 var error = $"    Build failed as project {session.ProjectOrPackageName} is not compatible with language {session.Language}";
-                SetError(error, context);
-                console.Out.WriteLine(error);
+                AddError(error, context);
             }
 
             var buffers = session.CodeBlocks
@@ -247,16 +249,15 @@ namespace MLS.Agent.CommandLine
                                            .ToArray();
             if (projectDiagnostics.Any())
             {
-                var error = $"    Build failed for project {session.ProjectOrPackageName}";
-
-                SetError(error, context);
-
-                console.Out.WriteLine(error);
+                var error = new StringBuilder();
+                error.AppendLine($"    Build failed for project {session.ProjectOrPackageName}");
 
                 foreach (var diagnostic in projectDiagnostics)
                 {
-                    console.Out.WriteLine($"\t\t{diagnostic.Location}: {diagnostic.Message}");
+                    error.AppendLine($"\t\t{diagnostic.Location}: {diagnostic.Message}");
                 }
+
+                AddError(error.ToString(), context);
             }
             else
             {
@@ -272,16 +273,15 @@ namespace MLS.Agent.CommandLine
                 }
                 else
                 {
-                    var error = $"    {symbol}  Errors found within samples for {description}";
-
-                    SetError(error, context);
-
-                    console.Out.WriteLine(error);
+                    var error = new StringBuilder();
+                    error.AppendLine($"    {symbol}  Errors found within samples for {description}");
 
                     foreach (var diagnostic in result.GetFeature<Diagnostics>())
                     {
-                        console.Out.WriteLine($"\t\t{diagnostic.Message}");
+                        error.AppendLine($"\t\t{diagnostic.Message}");
                     }
+
+                    AddError(error.ToString(), context);
                 }
             }
         }

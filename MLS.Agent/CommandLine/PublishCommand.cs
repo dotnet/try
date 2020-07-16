@@ -31,7 +31,8 @@ namespace MLS.Agent.CommandLine
         {
             context ??= new MarkdownProcessingContext(
                 publishOptions.RootDirectory,
-                startupOptions);
+                startupOptions,
+                console: console);
 
             var verifyResult = await VerifyCommand.Do(
                                    publishOptions,

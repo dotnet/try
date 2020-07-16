@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.IO;
 using System.IO;
 using Microsoft.DotNet.Try.Markdown;
 using MLS.Agent.Markdown;
@@ -19,9 +21,11 @@ namespace MLS.Agent.CommandLine
         public MarkdownProcessingContext(
             IDirectoryAccessor rootDirectory,
             IDefaultCodeBlockAnnotations defaultAnnotations = null,
-            WriteFile writeFile = null)
+            WriteFile writeFile = null,
+            IConsole console = null)
         {
             RootDirectory = rootDirectory;
+            Console = console ?? new SystemConsole();
 
             var packageRegistry = PackageRegistry.CreateForTryMode(rootDirectory);
 
@@ -34,6 +38,8 @@ namespace MLS.Agent.CommandLine
 
             WriteFile = writeFile ?? File.WriteAllText;
         }
+
+        public IConsole Console { get; }
 
         public IDirectoryAccessor RootDirectory { get; }
 
