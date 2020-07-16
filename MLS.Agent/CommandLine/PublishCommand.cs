@@ -12,7 +12,6 @@ using Markdig.Renderers;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Microsoft.DotNet.Try.Markdown;
-using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
 

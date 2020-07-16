@@ -46,21 +46,23 @@ namespace MLS.Agent.Markdown
             return blocks;
         }
 
-        public async Task<IEnumerable<AnnotatedCodeBlock>> GetEditableAnnotatedCodeBlocks()
-        {
-            var blocks = (await GetAnnotatedCodeBlocks())
-                .Where(b => b.Annotations is CodeBlockAnnotations a &&
-                            a.Editable);
-            return blocks;
-        }
+        public async Task<IReadOnlyCollection<AnnotatedCodeBlock>> GetEditableAnnotatedCodeBlocks() =>
+            (await GetAnnotatedCodeBlocks())
+            .Where(b => b.Annotations is CodeBlockAnnotations a &&
+                        a.Editable)
+            .ToArray();
 
-        public async Task<IEnumerable<AnnotatedCodeBlock>> GetNonEditableAnnotatedCodeBlocks()
-        {
-            var blocks = (await GetAnnotatedCodeBlocks())
-                .Where(b => b.Annotations is CodeBlockAnnotations a && 
-                            !a.Editable);
-            return blocks;
-        }
+        public async Task<IReadOnlyCollection<AnnotatedCodeBlock>> GetNonEditableAnnotatedCodeBlocks() =>
+            (await GetAnnotatedCodeBlocks())
+            .Where(b => b.Annotations is CodeBlockAnnotations a &&
+                        !a.Editable)
+            .ToArray();
+
+        public async Task<IReadOnlyCollection<Session>> GetSessions() =>
+            (await GetAnnotatedCodeBlocks())
+            .GroupBy(block => block.Annotations?.Session)
+            .Select(grouping => new Session(grouping.Key, grouping.ToArray(), this))
+            .ToArray();
 
         public async Task<IHtmlContent> ToHtmlContentAsync()
         {
@@ -74,7 +76,6 @@ namespace MLS.Agent.Markdown
 
         internal async Task<(Dictionary<string, Buffer[]> buffers,  Dictionary<string, File[]> files)> GetIncludes(IDirectoryAccessor directoryAccessor)
         {
-           
             var buffersToIncludeBySession = new Dictionary<string, Buffer[]>(StringComparer.InvariantCultureIgnoreCase);
 
             var contentBuildersByBufferBySession = new Dictionary<string, Dictionary<BufferId, StringBuilder>>(StringComparer.InvariantCultureIgnoreCase);

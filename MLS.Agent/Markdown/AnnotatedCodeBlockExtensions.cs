@@ -13,8 +13,7 @@ namespace MLS.Agent.Markdown
     {
         public static Buffer GetBufferAsync(
             this AnnotatedCodeBlock block,
-            IDirectoryAccessor directoryAccessor,
-            MarkdownFile markdownFile)
+            IDirectoryAccessor directoryAccessor)
         {
             if (block.Annotations is LocalCodeBlockAnnotations localOptions)
             {

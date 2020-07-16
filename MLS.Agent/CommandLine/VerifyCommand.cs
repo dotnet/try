@@ -13,8 +13,6 @@ using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
 using WorkspaceServer;
-using WorkspaceServer.Servers;
-using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 
 namespace MLS.Agent.CommandLine
 {
@@ -30,8 +28,6 @@ namespace MLS.Agent.CommandLine
                 verifyOptions.RootDirectory,
                 startupOptions);
 
-            var errorCount = 0;
-
             var markdownFiles = context.Project.GetAllMarkdownFiles().ToArray();
 
             console.Out.WriteLine("Verifying...");
@@ -45,95 +41,91 @@ namespace MLS.Agent.CommandLine
             foreach (var markdownFile in markdownFiles)
             {
                 var fullName = context.RootDirectory.GetFullyQualifiedPath(markdownFile.Path).FullName;
-                var markdownFileDirectoryAccessor = context.RootDirectory.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
+                
+                var markdownFileDir = context.RootDirectory.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
 
                 console.Out.WriteLine();
                 console.Out.WriteLine(fullName);
                 console.Out.WriteLine(new string('-', fullName.Length));
 
-                var annotatedCodeBlocks = await markdownFile.GetAnnotatedCodeBlocks();
-
-                var sessions = annotatedCodeBlocks.GroupBy(block => block.Annotations?.Session);
-
-                foreach (var session in sessions)
+                foreach (var session in await markdownFile.GetSessions())
                 {
                     var sessionProjectOrPackageNames =
                         session
+                            .CodeBlocks
                             .Where(a => a.Annotations is CodeBlockAnnotations)
                             .Select(block => block.ProjectOrPackageName())
                             .Distinct();
 
                     if (sessionProjectOrPackageNames.Count() != 1)
                     {
-                        SetError(ref errorCount);
-                        console.Out.WriteLine($"Session cannot span projects or packages: --session {session.Key}");
+                        var error = $"Session cannot span projects or packages: --session {session.Name}";
+                        SetError(error, context);
+                        console.Out.WriteLine(error);
                         continue;
                     }
 
-                    foreach (var block in session)
+                    foreach (var block in session.CodeBlocks)
                     {
                         VerifyAnnotationReferences(
                             block, 
-                            markdownFileDirectoryAccessor, 
+                            markdownFileDir, 
                             console, 
-                            ref errorCount);
+                            context);
                     }
 
                     Console.ResetColor();
 
-                    if (!session.Any(block => block.Diagnostics.Any()))
+                    if (!session.CodeBlocks.Any(block => block.Diagnostics.Any()))
                     {
-                        var (buffersToInclude, filesToInclude) = await markdownFile.GetIncludes(markdownFileDirectoryAccessor);
+                      
 
-                        var result = await Compile(
-                                         session,
-                                         markdownFile,
-                                         filesToInclude,
-                                         buffersToInclude,
-                                         markdownFileDirectoryAccessor,
-                                         console,
-                                         context.WorkspaceServer);
-
-                        errorCount += result.ErrorCount;
+                        await Compile(
+                            session,
+                            markdownFile,
+                            markdownFileDir,
+                            console,
+                            context);
                     }
 
                     Console.ResetColor();
                 }
             }
 
-            if (errorCount > 0)
+            if (context.Errors.Count > 0)
             {
-                SetError(ref errorCount, false);
+                Console.ForegroundColor = ConsoleColor.Red;
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Green;
             }
 
-            console.Out.WriteLine($"\nFound {errorCount} error(s)");
+            console.Out.WriteLine($"\nFound {context.Errors.Count} error(s)");
 
             Console.ResetColor();
 
-            return errorCount == 0
+            return context.Errors.Count == 0
                        ? 0
                        : 1;
         }
 
         private static void VerifyAnnotationReferences(
             AnnotatedCodeBlock annotatedCodeBlock, 
-            IDirectoryAccessor accessor, 
+            IDirectoryAccessor markdownFileDir, 
             IConsole console, 
-            ref int errorCount)
+            MarkdownProcessingContext context)
         {
-            var diagnostics = annotatedCodeBlock.Diagnostics.ToArray();
-
             Console.ResetColor();
 
             console.Out.WriteLine("  Checking Markdown...");
 
-            if (diagnostics.Any())
+            var diagnostics = annotatedCodeBlock.Diagnostics.ToArray();
+            var hasDiagnostics = diagnostics.Any();
+
+            if (hasDiagnostics)
             {
-                SetError(ref errorCount);
+                Console.ForegroundColor = ConsoleColor.Red;
             }
             else
             {
@@ -144,16 +136,23 @@ namespace MLS.Agent.CommandLine
             {
                 var file = annotations?.SourceFile ?? annotations?.DestinationFile;
                 var fullyQualifiedPath = file != null
-                                             ? accessor.GetFullyQualifiedPath(file).FullName
+                                             ? markdownFileDir.GetFullyQualifiedPath(file).FullName
                                              : "UNKNOWN";
 
                 var project = annotatedCodeBlock.ProjectOrPackageName() ?? "UNKNOWN";
 
-                var symbol = diagnostics.Any()
+                var symbol = hasDiagnostics
                                  ? "X"
                                  : "✓";
 
-                console.Out.WriteLine($"    {symbol}  Line {annotatedCodeBlock.Line + 1}:\t{fullyQualifiedPath} (in project {project})");
+                var error = $"    {symbol}  Line {annotatedCodeBlock.Line + 1}:\t{fullyQualifiedPath} (in project {project})";
+                
+                if (hasDiagnostics)
+                {
+                    context.Errors.Add(error);
+                }
+                
+                console.Out.WriteLine(error);
             }
 
             foreach (var diagnostic in diagnostics)
@@ -162,53 +161,46 @@ namespace MLS.Agent.CommandLine
             }
         }
 
-        internal static void SetError(ref int errorCount, bool incrementCount = true)
+        internal static void SetError(string error, MarkdownProcessingContext context)
         {
             Console.ForegroundColor = ConsoleColor.Red;
 
-            if (incrementCount)
-            {
-                errorCount++;
-            }
+            context.Errors.Add(error);
         }
 
-        internal static async Task<VerifyResult> Compile(
-            IGrouping<string, AnnotatedCodeBlock> session,
+        internal static async Task Compile(
+            Session session,
             MarkdownFile markdownFile,
-            Dictionary<string, File[]> filesToInclude,
-            IReadOnlyDictionary<string, Buffer[]> buffersToInclude,
-            IDirectoryAccessor accessor,
+            IDirectoryAccessor markdownFileDir,
             IConsole console,
-            IWorkspaceServer workspaceServer)
+            MarkdownProcessingContext context)
         {
-            int errorCount = 0;
+            var (buffersToInclude, filesToInclude) = await markdownFile.GetIncludes(markdownFile.Project.DirectoryAccessor);
 
-            var description = session.Count() == 1 || string.IsNullOrWhiteSpace(session.Key)
-                                  ? $"region \"{session.Select(b => b.Annotations).OfType<CodeBlockAnnotations>().Select(a => a.Region).Distinct().First()}\""
-                                  : $"session \"{session.Key}\"";
+            var region = session.CodeBlocks
+                                .Select(b => b.Annotations)
+                                .OfType<CodeBlockAnnotations>()
+                                .Select(a => a.Region)
+                                .Distinct()
+                                .First();
+
+            var description = session.CodeBlocks.Count == 1 || string.IsNullOrWhiteSpace(session.Name)
+                                  ? $"region \"{region}\""
+                                  : $"session \"{session.Name}\"";
 
             console.Out.WriteLine($"\n  Compiling samples for {description}\n");
 
-            var projectOrPackageName = session
-                                       .Select(b => b.ProjectOrPackageName())
-                                       .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
-
-            var language = session
-                           .Select(b => b.Language())
-                           .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
-
-            if (!ProjectIsCompatibleWithLanguage(new UriOrFileInfo(projectOrPackageName), language))
+            if (!ProjectIsCompatibleWithLanguage(new UriOrFileInfo(session.ProjectOrPackageName), session.Language))
             {
-                SetError(ref errorCount);
-
-                console.Out.WriteLine($"    Build failed as project {projectOrPackageName} is not compatible with language {language}");
+                var error = $"    Build failed as project {session.ProjectOrPackageName} is not compatible with language {session.Language}";
+                SetError(error, context);
+                console.Out.WriteLine(error);
             }
 
-            var editableCodeBlocks = session.Where(b => b.Annotations is CodeBlockAnnotations a && a.Editable).ToList();
-
-            var buffers = editableCodeBlocks
-                          .Select(block => block.GetBufferAsync(accessor, markdownFile))
-                          .ToList();
+            var buffers = session.CodeBlocks
+                                 .Where(b => b.Annotations is CodeBlockAnnotations a && a.Editable)
+                                 .Select(block => block.GetBufferAsync(markdownFileDir))
+                                 .ToList();
 
             var files = new List<File>();
 
@@ -217,7 +209,7 @@ namespace MLS.Agent.CommandLine
                 files.AddRange(globalIncludes);
             }
 
-            if (!string.IsNullOrWhiteSpace(session.Key) && filesToInclude.TryGetValue(session.Key, out var sessionIncludes))
+            if (!string.IsNullOrWhiteSpace(session.Name) && filesToInclude.TryGetValue(session.Name, out var sessionIncludes))
             {
                 files.AddRange(sessionIncludes);
             }
@@ -227,14 +219,14 @@ namespace MLS.Agent.CommandLine
                 buffers.AddRange(globalSessionBuffersToInclude);
             }
 
-            if (!string.IsNullOrWhiteSpace(session.Key) && buffersToInclude.TryGetValue(session.Key, out var localSessionBuffersToInclude))
+            if (!string.IsNullOrWhiteSpace(session.Name) && buffersToInclude.TryGetValue(session.Name, out var localSessionBuffersToInclude))
             {
                 buffers.AddRange(localSessionBuffersToInclude);
             }
 
             var workspace = new Workspace(
-                workspaceType: projectOrPackageName,
-                language: language,
+                workspaceType: session.ProjectOrPackageName,
+                language: session.Language,
                 files: files.ToArray(),
                 buffers: buffers.ToArray());
 
@@ -248,16 +240,18 @@ namespace MLS.Agent.CommandLine
                 language: processed.Language,
                 files: processed.Files);
 
-            var result = await workspaceServer.Compile(new WorkspaceRequest(processed));
+            var result = await context.WorkspaceServer.Compile(new WorkspaceRequest(processed));
 
             var projectDiagnostics = result.GetFeature<ProjectDiagnostics>()
                                            .Where(e => e.Severity == DiagnosticSeverity.Error)
                                            .ToArray();
             if (projectDiagnostics.Any())
             {
-                SetError(ref errorCount);
+                var error = $"    Build failed for project {session.ProjectOrPackageName}";
 
-                console.Out.WriteLine($"    Build failed for project {projectOrPackageName}");
+                SetError(error, context);
+
+                console.Out.WriteLine(error);
 
                 foreach (var diagnostic in projectDiagnostics)
                 {
@@ -278,9 +272,11 @@ namespace MLS.Agent.CommandLine
                 }
                 else
                 {
-                    SetError(ref errorCount);
+                    var error = $"    {symbol}  Errors found within samples for {description}";
 
-                    console.Out.WriteLine($"    {symbol}  Errors found within samples for {description}");
+                    SetError(error, context);
+
+                    console.Out.WriteLine(error);
 
                     foreach (var diagnostic in result.GetFeature<Diagnostics>())
                     {
@@ -288,8 +284,6 @@ namespace MLS.Agent.CommandLine
                     }
                 }
             }
-
-            return new VerifyResult(errorCount);
         }
 
         private static bool ProjectIsCompatibleWithLanguage(UriOrFileInfo projectOrPackage, string language)
