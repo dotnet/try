@@ -70,7 +70,16 @@ namespace MLS.Agent.CommandLine
                     {
                         var workspace = await session.GetWorkspaceAsync();
 
-                        var request = new WorkspaceRequest(workspace);
+                        var runArgs =
+                            session.CodeBlocks
+                                   .Select(c => c.Annotations)
+                                   .OfType<CodeBlockAnnotations>()
+                                   .Select(a => a.RunArgs)
+                                   .FirstOrDefault();
+
+                        var request = new WorkspaceRequest(
+                            workspace,
+                            runArgs: runArgs);
 
                         var result = await context.WorkspaceServer.Run(request);
 

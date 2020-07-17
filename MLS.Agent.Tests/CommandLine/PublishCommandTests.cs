@@ -120,7 +120,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        #region the_region        
+        #region the_region
         Console.WriteLine(""hello!"");
         #endregion
     }
