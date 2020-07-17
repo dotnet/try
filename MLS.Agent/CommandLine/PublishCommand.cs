@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.IO;
 using System.IO;
@@ -12,6 +13,7 @@ using Markdig.Renderers;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Microsoft.DotNet.Try.Markdown;
+using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Markdown;
 using MLS.Agent.Tools;
 
@@ -22,7 +24,6 @@ namespace MLS.Agent.CommandLine
 
     public static class PublishCommand
     {
-
         public static async Task<int> Do(
             PublishOptions publishOptions,
             IConsole console,
@@ -53,38 +54,57 @@ namespace MLS.Agent.CommandLine
             {
                 var fullSourcePath = publishOptions.RootDirectory.GetFullyQualifiedPath(markdownFile.Path);
 
-                if (targetIsSubDirectoryOfSource && 
+                if (targetIsSubDirectoryOfSource &&
                     fullSourcePath.IsChildOf(publishOptions.TargetDirectory))
                 {
                     continue;
                 }
 
-                var annotatedCodeBlocks = await markdownFile.GetAnnotatedCodeBlocks();
-                var sessions = annotatedCodeBlocks.GroupBy(block => block.Annotations.Session);
+                var sessions = await markdownFile.GetSessions();
 
-                foreach (var session in sessions.Where(s => s.Any(s => s.Annotations is OutputBlockAnnotations)))
+                var outputsBySessionName = new Dictionary<string,string>();
+
+                foreach (var session in sessions)
                 {
-                    // FIX: (Do) 
+                    if (session.CodeBlocks.Any(b => b.Annotations is OutputBlockAnnotations))
+                    {
+                        var workspace = await session.GetWorkspaceAsync();
 
-                    // await context.WorkspaceServer.Run(
-                    //     
-                    //     
-                    //     );
-                    //
-                    //
+                        var request = new WorkspaceRequest(workspace);
 
+                        var result = await context.WorkspaceServer.Run(request);
 
+                        if (result.Succeeded)
+                        {
+                            var output = result.Output.Count > 0
+                                             ? string.Join("\n", result.Output)
+                                             : result.Exception;
+
+                            outputsBySessionName.Add(
+                                session.Name,
+                                output);
+                        }
+                        else
+                        {
+                            context.Errors.Add(
+                                $"Running session {session.Name} failed:\n" + result.Exception);
+                        }
+                    }
                 }
 
-                var (document, newLine) = ParseMarkdownDocument(markdownFile);
+                var document = ParseMarkdownDocument(markdownFile);
 
-                var rendered = await Render(publishOptions.Format, document, newLine);
+                var rendered = await Render(
+                                   publishOptions.Format, 
+                                   document, 
+                                   outputsBySessionName);
 
                 var targetPath = WriteTargetFile(
                     rendered, 
                     markdownFile.Path, 
                     publishOptions, 
-                    context);
+                    context, 
+                    publishOptions.Format);
 
                 console.Out.WriteLine($"Published '{fullSourcePath}' to {targetPath}");
             }
@@ -96,7 +116,8 @@ namespace MLS.Agent.CommandLine
             string content,
             RelativeFilePath relativePath,
             PublishOptions publishOptions,
-            MarkdownProcessingContext context)
+            MarkdownProcessingContext context,
+            PublishFormat format)
         {
             context.Project
                    .DirectoryAccessor
@@ -104,10 +125,9 @@ namespace MLS.Agent.CommandLine
 
             var targetPath = publishOptions
                              .TargetDirectory
-                             .GetFullyQualifiedPath(relativePath)
-                             .FullName;
+                             .GetFullyQualifiedPath(relativePath).FullName;
 
-            if (publishOptions.Format == PublishFormat.HTML)
+            if (format == PublishFormat.HTML)
             {
                 targetPath = Path.ChangeExtension(targetPath, ".html");
             }
@@ -117,7 +137,10 @@ namespace MLS.Agent.CommandLine
             return targetPath;
         }
 
-        private static async Task<string> Render(PublishFormat format, MarkdownDocument document, string newLine)
+        private static async Task<string> Render(
+            PublishFormat format,
+            MarkdownDocument document,
+            Dictionary<string, string> outputsBySessionName)
         {
             MarkdownPipeline pipeline;
             IMarkdownRenderer renderer;
@@ -126,10 +149,10 @@ namespace MLS.Agent.CommandLine
             {
                 case PublishFormat.Markdown:
                     pipeline = new MarkdownPipelineBuilder()
-                               .UseNormalizeCodeBlockAnnotations()
+                               .UseNormalizeCodeBlockAnnotations(outputsBySessionName)
                                .Build();
                     var normalizeRenderer = new NormalizeRenderer(writer);
-                    normalizeRenderer.Writer.NewLine = newLine;
+                    normalizeRenderer.Writer.NewLine = "\n";
                     renderer = normalizeRenderer;
                     break;
                 case PublishFormat.HTML:
@@ -158,37 +181,15 @@ namespace MLS.Agent.CommandLine
             return rendered;
         }
 
-        private static (MarkdownDocument, string newLine) ParseMarkdownDocument(MarkdownFile markdownFile)
+        private static MarkdownDocument ParseMarkdownDocument(MarkdownFile markdownFile)
         {
             var pipeline = markdownFile.Project.GetMarkdownPipelineFor(markdownFile.Path);
 
             var markdown = markdownFile.ReadAllText();
 
-            var document = Markdig.Markdown.Parse(
+            return Markdig.Markdown.Parse(
                 markdown,
                 pipeline);
-            return (document, DetectNewLineByFirstOccurence(markdown));
-        }
-
-        private static string DetectNewLineByFirstOccurence(string markdown)
-        {
-            var cr = markdown.IndexOf('\r');
-            if (cr >= 0)
-            {
-                if (markdown.Length > cr + 1)
-                {
-                    var next = markdown[cr + 1];
-                    if (next == '\n')
-                    {
-                        return "\r\n";
-                    }
-                }
-
-                return "\r";
-            }
-
-            var lf = markdown.IndexOf('\n');
-            return lf >= 0 ? "\n" : Environment.NewLine;
         }
     }
 }

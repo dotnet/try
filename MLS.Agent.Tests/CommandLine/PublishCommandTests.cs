@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
@@ -19,6 +20,7 @@ namespace MLS.Agent.Tests.CommandLine
         private const string CsprojContents = @"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 </Project>
 ";
@@ -57,7 +59,7 @@ public class Program
                 var (publishOutput, resultCode) = await DoPublish(files);
 
                 resultCode.Should().Be(0);
-                publishOutput.OutputFiles.Single().Content.Should().Be(markdown);
+                publishOutput.OutputFiles.Single().Content.Should().Be(markdown.EnforceLF());
             }
 
             [Theory]
@@ -93,14 +95,14 @@ var length = (args[0] as string)?.Length ?? 0;
 
             [Theory]
             [InlineData(@"
-``` cs --source-file ./project/Program.cs --region null_coalesce --project ./project/some.csproj --session one
+``` cs --source-file ./project/Program.cs --region the_region --project ./project/some.csproj --session one
 Console.WriteLine(""hello!"");
 ```
 ``` console --session one
 ```
 ")]
             [InlineData(@"
-``` cs --source-file ./project/Program.cs --region null_coalesce --project ./project/some.csproj --session one
+``` cs --source-file ./project/Program.cs --region the_region --project ./project/some.csproj --session one
 Console.WriteLine(""hello!"");
 ```
 ``` console --session one
@@ -110,22 +112,34 @@ pre-existing text
             public async Task Content_of_console_annotated_blocks_is_replaced_by_code_output(string markdown)
             {
                 var files = PrepareFiles(
-                    ("./folder/project/some.csproj", CsprojContents),
-                    ("./folder/project/Program.cs", CompilingProgramWithRegionCs),
-                    ("./folder/doc.md", markdown));
+                    ("./project/some.csproj", CsprojContents),
+                    ("./project/Program.cs", @"
+using System;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        #region the_region        
+        Console.WriteLine(""hello!"");
+        #endregion
+    }
+}"),
+                    ("./doc.md", markdown));
 
                 var (publishOutput, resultCode) = await DoPublish(files);
 
                 resultCode.Should().Be(0);
 
                 publishOutput.OutputFiles
-                             .Single().Content.Should()
+                             .Single()
+                             .Content
+                             .Should()
                              .Contain(@"
-## C# null coalesce example
 ``` console --session one
 hello!
-```
-");
+
+```".EnforceLF());
             }
 
             [Fact]
@@ -165,20 +179,18 @@ hello!
 
             protected WithPublish(ITestOutputHelper output) => _output = output;
 
-            protected static IDirectoryAccessor PrepareFiles(params (string path, string content)[] files)
+            protected static IDirectoryAccessor PrepareFiles(
+                params (string path, string content)[] files)
             {
-                var directoryAccessor = CreateInMemoryDirectoryAccessor();
+                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
+                var directoryAccessor = new InMemoryDirectoryAccessor(rootDirectory);
                 foreach (var file in files)
+                {
                     directoryAccessor.Add(file);
+                }
                 directoryAccessor.CreateFiles();
 
                 return directoryAccessor;
-            }
-
-            private static InMemoryDirectoryAccessor CreateInMemoryDirectoryAccessor()
-            {
-                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
-                return new InMemoryDirectoryAccessor(rootDirectory);
             }
 
             protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(

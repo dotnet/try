@@ -17,6 +17,7 @@ namespace MLS.Agent.CommandLine
     public class MarkdownProcessingContext
     {
         private readonly Lazy<IWorkspaceServer> _lazyWorkspaceServer;
+      
 
         public MarkdownProcessingContext(
             IDirectoryAccessor rootDirectory,
