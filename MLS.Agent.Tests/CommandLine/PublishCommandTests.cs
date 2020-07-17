@@ -19,7 +19,7 @@ namespace MLS.Agent.Tests.CommandLine
     {
         private const string CsprojContents = @"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 </Project>
