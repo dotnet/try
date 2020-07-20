@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -133,8 +132,10 @@ namespace MLS.Agent.Controllers
             else
             {
                 var blocks = await file.GetAnnotatedCodeBlocks();
+
                 var packageUsesWasm = await Task.WhenAll(blocks
                     .Select(b => b.PackageName())
+                    .Where(p => !string.IsNullOrWhiteSpace(p))
                     .Select(async name => (await _packageRegistry.Get<ICanSupportWasm>(name))?.CanSupportWasm ?? false));
 
                 useWasmRunner = packageUsesWasm.Any(p => p);

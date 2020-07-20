@@ -51,12 +51,14 @@ namespace MLS.Agent.CommandLine
         public delegate Task<int> Verify(
             VerifyOptions options,
             IConsole console,
-            StartupOptions startupOptions);
+            StartupOptions startupOptions,
+            MarkdownProcessingContext context);
 
         public delegate Task<int> Publish(
             PublishOptions options,
             IConsole console,
-            StartupOptions startupOptions);
+            StartupOptions startupOptions,
+            MarkdownProcessingContext context);
 
         public static Parser Create(
             IServiceCollection services,
@@ -87,12 +89,11 @@ namespace MLS.Agent.CommandLine
 
             verify ??= VerifyCommand.Do;
 
-            publish ??= (options, console, startupOptions) =>
-                PublishCommand.Do(options,
-                                  console,
-                                  startupOptions);
+            publish ??= PublishCommand.Do;
 
             pack ??= PackCommand.Do;
+
+            install ??= InstallCommand.Do;
 
             // Setup first time use notice sentinel.
             firstTimeUseNoticeSentinel ??= 
@@ -103,7 +104,6 @@ namespace MLS.Agent.CommandLine
                 VersionSensor.Version().AssemblyInformationalVersion,
                 firstTimeUseNoticeSentinel);
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
-            Action<ParseResult> track = o => telemetry.SendFiltered(filter, o);
 
             var dirArgument = new Argument<FileSystemDirectoryAccessor>(result =>
             {
@@ -344,7 +344,7 @@ namespace MLS.Agent.CommandLine
 
                 github.IsHidden = true;
 
-                github.Handler = CommandHandler.Create<TryGitHubOptions, IConsole>((repo, console) => tryGithub(repo, console));
+                github.Handler = CommandHandler.Create(tryGithub);
 
                 return github;
             }
@@ -363,7 +363,7 @@ namespace MLS.Agent.CommandLine
 
                 installCommand.IsHidden = true;
 
-                installCommand.Handler = CommandHandler.Create<InstallOptions, IConsole>((options, console) => install(options, console));
+                installCommand.Handler = CommandHandler.Create(install);
 
                 return installCommand;
             }
@@ -382,11 +382,7 @@ namespace MLS.Agent.CommandLine
 
                 packCommand.IsHidden = true;
 
-                packCommand.Handler = CommandHandler.Create<PackOptions, IConsole>(
-                    (options, console) =>
-                    {
-                        return pack(options, console);
-                    });
+                packCommand.Handler = CommandHandler.Create(pack);
 
                 return packCommand;
             }
@@ -398,11 +394,7 @@ namespace MLS.Agent.CommandLine
                    dirArgument
                 };
 
-                verifyCommand.Handler = CommandHandler.Create<VerifyOptions, IConsole, StartupOptions>(
-                    (options, console, startupOptions) =>
-                {
-                    return verify(options, console, startupOptions);
-                });
+                verifyCommand.Handler = CommandHandler.Create(verify);
 
                 return verifyCommand;
             }
@@ -429,8 +421,7 @@ namespace MLS.Agent.CommandLine
                     ),
                     dirArgument
                 };
-                publishCommand.Handler = CommandHandler.Create<PublishOptions, IConsole, StartupOptions>(
-                    (options, console, startupOptions) => publish(options, console, startupOptions));
+                publishCommand.Handler = CommandHandler.Create(publish);
 
                 return publishCommand;
             }

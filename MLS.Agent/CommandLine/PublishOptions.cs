@@ -5,19 +5,16 @@ using MLS.Agent.Tools;
 
 namespace MLS.Agent.CommandLine
 {
-    public class PublishOptions
+    public class PublishOptions : VerifyOptions
     {
         public PublishOptions(
             IDirectoryAccessor rootDirectory, 
             IDirectoryAccessor targetDirectory = null, 
-            PublishFormat format = PublishFormat.Markdown)
+            PublishFormat format = PublishFormat.Markdown) : base(rootDirectory)
         {
-            RootDirectory = rootDirectory ?? throw new System.ArgumentNullException(nameof(rootDirectory));
             Format = format;
             TargetDirectory = targetDirectory ?? rootDirectory;
         }
-
-        public IDirectoryAccessor RootDirectory { get; }
 
         public IDirectoryAccessor TargetDirectory { get; }
 

@@ -199,9 +199,11 @@ namespace WorkspaceServer.Packaging
 
         public static DirectoryInfo DefaultPackagesDirectory { get; }
 
-        public FileInfo EntryPointAssemblyPath => _entryPointAssemblyPath ?? (_entryPointAssemblyPath = this.GetEntryPointAssemblyPath(IsWebProject));
+        public FileInfo EntryPointAssemblyPath => 
+            _entryPointAssemblyPath ??= this.GetEntryPointAssemblyPath(IsWebProject);
 
-        public string TargetFramework => _targetFramework ?? (_targetFramework = this.GetTargetFramework());
+        public string TargetFramework => 
+            _targetFramework ??= this.GetTargetFramework();
 
         public Task<Workspace> CreateRoslynWorkspaceForRunAsync(Budget budget)
         {

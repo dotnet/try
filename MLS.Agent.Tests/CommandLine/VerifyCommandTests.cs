@@ -5,12 +5,10 @@ using System.CommandLine.IO;
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.DotNet.Try.Markdown;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
-using WorkspaceServer;
 using WorkspaceServer.Tests;
 using Xunit;
 using Xunit.Abstractions;
@@ -126,7 +124,7 @@ This is some sample code:
                        .Trim()
                        .Should()
                        .Match(
-                           $"{root}{Path.DirectorySeparatorChar}doc.md*Line 2:*{root}{Path.DirectorySeparatorChar}Program.cs (in project {root}{Path.DirectorySeparatorChar}some.csproj)*".EnforceLF());
+                           $"*{root}{Path.DirectorySeparatorChar}doc.md*Line 2:*{root}{Path.DirectorySeparatorChar}Program.cs (in project {root}{Path.DirectorySeparatorChar}some.csproj)*".EnforceLF());
             }
 
             [Fact]
@@ -482,6 +480,46 @@ public class Program
             }
 
             [Fact]
+            public async Task Console_output_blocks_do_not_cause_verification_to_fail()
+            {
+                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
+
+                var directoryAccessor = new InMemoryDirectoryAccessor(rootDirectory, rootDirectory)
+                {
+                    ("Program.cs", @"
+    using System;
+
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+#region mask
+            Console.WriteLine(""hello!"");
+#endregion
+        }
+    }"),
+                    ("sample.md", @"
+```cs --source-file Program.cs --region mask  --session one
+```
+```console --session one
+hello!                         
+```
+"),
+                    ("sample.csproj", CsprojContents)
+                }.CreateFiles();
+
+                var console = new TestConsole();
+
+                var resultCode = await VerifyCommand.Do(
+                                     new VerifyOptions(directoryAccessor),
+                                     console);
+
+                _output.WriteLine(console.Out.ToString());
+
+                resultCode.Should().Be(0);
+            }
+
+            [Fact]
             public async Task When_there_are_code_fence_options_errors_then_compilation_is_not_attempted()
             {
                 var root = new DirectoryInfo(Directory.GetDirectoryRoot(Directory.GetCurrentDirectory()));
@@ -623,6 +661,7 @@ This is some sample code:
             {
                 _output = output;
             }
+
             [Fact]
             public async Task When_standalone_markdown_with_non_editable_code_block_targeting_regions_has_compiling_code_then_validation_succeeds()
             {

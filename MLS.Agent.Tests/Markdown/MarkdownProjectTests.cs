@@ -74,9 +74,9 @@ namespace MLS.Agent.Tests
 
                 var markdownFiles = project.GetAllMarkdownFiles();
 
-                var codeLinkBlocks = await Task.WhenAll(markdownFiles.Select(f => f.GetAnnotatedCodeBlocks()));
+                var annotatedCodeBlocks = await Task.WhenAll(markdownFiles.Select(f => f.GetAnnotatedCodeBlocks()));
 
-                codeLinkBlocks
+                annotatedCodeBlocks
                     .SelectMany(f => f)
                     .Select(block => block.Annotations)
                     .OfType<LocalCodeBlockAnnotations>()

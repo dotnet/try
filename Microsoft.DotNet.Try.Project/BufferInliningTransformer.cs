@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Try.Project
 {
     public class BufferInliningTransformer : IWorkspaceTransformer
     {
+        public static IWorkspaceTransformer Instance { get; } = new BufferInliningTransformer();
+
         private static readonly string Padding = "\n";
 
         public static int PaddingSize => Padding.Length;

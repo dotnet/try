@@ -9,7 +9,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
 using FluentAssertions.Extensions;
-using Microsoft.DotNet.Interactive.Utility;
 using Microsoft.DotNet.Try.Protocol;
 using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
@@ -19,7 +18,6 @@ using Xunit;
 using Xunit.Abstractions;
 using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
 using File = Microsoft.DotNet.Try.Protocol.File;
-using WorkspaceServer;
 using MLS.Agent.Tools;
 
 namespace MLS.Agent.Tests

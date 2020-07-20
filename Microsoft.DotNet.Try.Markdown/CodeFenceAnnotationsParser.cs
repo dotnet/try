@@ -80,8 +80,6 @@ namespace Microsoft.DotNet.Try.Markdown
                 return CodeFenceOptionsParseResult.None;
             }
 
-            // FIX: (TryParseCodeFenceOptions) account for different options types
-
             if (result.Errors.Any())
             {
                 return CodeFenceOptionsParseResult.Failed(new List<string>(result.Errors.Select(e => e.Message)));

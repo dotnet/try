@@ -12,7 +12,8 @@ namespace Microsoft.DotNet.Try.Project
 {
     public class CodeMergeTransformer : IWorkspaceTransformer
     {
-        private static readonly string ProcessorName = typeof(CodeMergeTransformer).Name;
+        public static IWorkspaceTransformer Instance { get; } = new CodeMergeTransformer();
+
         private static readonly string Padding = "\n";
 
         public Task<Workspace> TransformAsync(Workspace source)
@@ -29,7 +30,6 @@ namespace Microsoft.DotNet.Try.Project
             var buffers = (source.Buffers ?? Array.Empty<Buffer>())
                 .GroupBy(buffer => buffer.Id)
                 .SelectMany(bufferGroup => MergeBuffers(bufferGroup.Key, bufferGroup));
-
 
             var workspace = new Workspace(
                 workspaceType: source.WorkspaceType,
@@ -61,39 +61,20 @@ namespace Microsoft.DotNet.Try.Project
             var content = string.Empty;
             var order = 0;
 
-            Buffer preRegion = null;
-            Buffer region = null;
-            Buffer postRegion = null;
-
             foreach (var buffer in buffers.OrderBy(buffer => buffer.Order))
             {
                 order = buffer.Order;
                 if (buffer.Position != 0)
                 {
                     position = content.Length + buffer.Position;
-
                 }
+
                 content = $"{content}{buffer.Content}{Padding}";
             }
 
             content = content.Substring(0, content.Length - Padding.Length);
 
-            region = new Buffer(id, content, position: position, order: order);
-
-            if (preRegion != null)
-            {
-                yield return preRegion;
-            }
-
-            if (region != null)
-            {
-                yield return region;
-            }
-
-            if (postRegion != null)
-            {
-                yield return postRegion;
-            }
+            yield return new Buffer(id, content, position: position, order: order);
         }
     }
 }

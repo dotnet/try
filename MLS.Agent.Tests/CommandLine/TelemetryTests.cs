@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.CommandLine.IO;
 using System.Threading.Tasks;
@@ -28,13 +27,15 @@ namespace MLS.Agent.Tests.CommandLine
 
             _output = output;
 
-            _parser = CommandLineParser.Create(new ServiceCollection(), startServer: (options, invocationContext) => { },
-                                               demo: (options, console, context, startOptions) => { return Task.CompletedTask; },
-                                               tryGithub: (options, c) => { return Task.CompletedTask; },
-                                               pack: (options, console) => { return Task.CompletedTask; },
-                                               verify: (options, console, startupOptions) => { return Task.FromResult(1); },
-                                               telemetry: _fakeTelemetry,
-                                               firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
+            _parser = CommandLineParser.Create(
+                new ServiceCollection(),
+                startServer: (options, invocationContext) => { },
+                demo: (options, console, context, startOptions) => Task.CompletedTask,
+                tryGithub: (options, c) => Task.CompletedTask,
+                pack: (options, console) => Task.CompletedTask,
+                verify: (options, console, startupOptions, context) => Task.FromResult(1),
+                telemetry: _fakeTelemetry,
+                firstTimeUseNoticeSentinel: new NopFirstTimeUseNoticeSentinel());
         }
 
         public void Dispose()
@@ -64,7 +65,7 @@ namespace MLS.Agent.Tests.CommandLine
             Environment.SetEnvironmentVariable(environmentVariableName, null);
             try
             {
-                await _parser.InvokeAsync(String.Empty, _console);
+                await _parser.InvokeAsync(string.Empty, _console);
                 _console.Out.ToString().Should().Contain(Telemetry.WelcomeMessage);
             }
             finally
@@ -82,7 +83,7 @@ namespace MLS.Agent.Tests.CommandLine
             Environment.SetEnvironmentVariable(environmentVariableName, "1");
             try
             {
-                await _parser.InvokeAsync(String.Empty, _console);
+                await _parser.InvokeAsync(string.Empty, _console);
                 _console.Out.ToString().Should().NotContain(Telemetry.WelcomeMessage);
             }
             finally

@@ -38,10 +38,10 @@ namespace Microsoft.DotNet.Try.Markdown
 
             if (renderers != null && !renderers.Contains<AnnotatedCodeBlockRenderer>())
             {
-                var codeLinkBlockRenderer = new AnnotatedCodeBlockRenderer();
-                codeLinkBlockRenderer.EnablePreviewFeatures = EnablePreviewFeatures;
-                codeLinkBlockRenderer.InlineControls = InlineControls;
-                renderers.Insert(0, codeLinkBlockRenderer);
+                var annotatedCodeBlockRenderer = new AnnotatedCodeBlockRenderer();
+                annotatedCodeBlockRenderer.EnablePreviewFeatures = EnablePreviewFeatures;
+                annotatedCodeBlockRenderer.InlineControls = InlineControls;
+                renderers.Insert(0, annotatedCodeBlockRenderer);
             }
         }
     }

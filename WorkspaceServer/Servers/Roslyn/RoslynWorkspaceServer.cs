@@ -33,7 +33,6 @@ namespace WorkspaceServer.Servers.Roslyn
         private readonly IPackageFinder _packageFinder;
         private const int defaultBudgetInSeconds = 30;
         private static readonly ConcurrentDictionary<string, AsyncLock> locks = new ConcurrentDictionary<string, AsyncLock>();
-        private readonly IWorkspaceTransformer _transformer = new BufferInliningTransformer();
         private static readonly string UserCodeCompleted = nameof(UserCodeCompleted);
 
         public RoslynWorkspaceServer(IPackage package)
@@ -48,11 +47,12 @@ namespace WorkspaceServer.Servers.Roslyn
 
         public async Task<CompletionResult> GetCompletionList(WorkspaceRequest request, Budget budget)
         {
-            budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
+            budget ??= new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
+            
             var package = await _packageFinder.Find<ICreateWorkspace>(request.Workspace.WorkspaceType);
 
-            var processed = await _transformer.TransformAsync(request.Workspace);
-            var sourceFiles = processed.GetSourceFiles();
+            var workspace = await request.Workspace.InlineBuffersAsync();
+            var sourceFiles = workspace.GetSourceFiles();
 
             var (_, documents) = await package.GetCompilationForLanguageServices(
                                      sourceFiles, 
@@ -60,15 +60,15 @@ namespace WorkspaceServer.Servers.Roslyn
                                      GetUsings(request.Workspace), 
                                      budget);
 
-            var file = processed.GetFileFromBufferId(request.ActiveBufferId);
-            var (_, _, absolutePosition) = processed.GetTextLocation(request.ActiveBufferId);
+            var file = workspace.GetFileFromBufferId(request.ActiveBufferId);
+            var (_, _, absolutePosition) = workspace.GetTextLocation(request.ActiveBufferId);
             var selectedDocument = documents.First(doc => doc.IsMatch(file));
 
             var service = CompletionService.GetService(selectedDocument);
 
             var completionList = await service.GetCompletionsAsync(selectedDocument, absolutePosition);
             var semanticModel = await selectedDocument.GetSemanticModelAsync();
-            var diagnostics = DiagnosticsExtractor.ExtractSerializableDiagnosticsFromSemanticModel(request.ActiveBufferId, budget, semanticModel, processed);
+            var diagnostics = DiagnosticsExtractor.ExtractSerializableDiagnosticsFromSemanticModel(request.ActiveBufferId, budget, semanticModel, workspace);
 
             var symbols = await Recommender.GetRecommendedSymbolsAtPositionAsync(
                               semanticModel,
@@ -117,13 +117,13 @@ namespace WorkspaceServer.Servers.Roslyn
 
         public async Task<SignatureHelpResult> GetSignatureHelp(WorkspaceRequest request, Budget budget)
         {
-            budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
+            budget ??= new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
 
             var package = await _packageFinder.Find<ICreateWorkspace>(request.Workspace.WorkspaceType);
 
-            var processed = await _transformer.TransformAsync(request.Workspace);
+            var workspace = await request.Workspace.InlineBuffersAsync();
 
-            var sourceFiles = processed.GetSourceFiles();
+            var sourceFiles = workspace.GetSourceFiles();
             var (compilation, documents) = await package.GetCompilationForLanguageServices(sourceFiles, GetSourceCodeKind(request), GetUsings(request.Workspace), budget);
 
             var selectedDocument = documents.FirstOrDefault(doc => doc.IsMatch(request.ActiveBufferId.FileName))
@@ -135,11 +135,11 @@ namespace WorkspaceServer.Servers.Roslyn
                 return new SignatureHelpResult(requestId: request.RequestId);
             }
 
-            var diagnostics = await DiagnosticsExtractor.ExtractSerializableDiagnosticsFromDocument(request.ActiveBufferId, budget, selectedDocument, processed);
+            var diagnostics = await DiagnosticsExtractor.ExtractSerializableDiagnosticsFromDocument(request.ActiveBufferId, budget, selectedDocument, workspace);
 
             var tree = await selectedDocument.GetSyntaxTreeAsync();
 
-            var absolutePosition = processed.GetAbsolutePositionForGetBufferWithSpecifiedIdOrSingleBufferIfThereIsOnlyOne(request.ActiveBufferId);
+            var absolutePosition = workspace.GetAbsolutePositionForGetBufferWithSpecifiedIdOrSingleBufferIfThereIsOnlyOne(request.ActiveBufferId);
 
             var syntaxNode = tree.GetRoot().FindToken(absolutePosition).Parent;
 
@@ -158,11 +158,11 @@ namespace WorkspaceServer.Servers.Roslyn
 
         public async Task<DiagnosticResult> GetDiagnostics(WorkspaceRequest request, Budget budget)
         {
-            budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
+            budget ??= new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
 
             var package = await _packageFinder.Find<ICreateWorkspace>(request.Workspace.WorkspaceType);
 
-            var workspace = await _transformer.TransformAsync(request.Workspace);
+            var workspace = await request.Workspace.InlineBuffersAsync();
 
             var sourceFiles = workspace.GetSourceFiles();
             var (_, documents) = await package.GetCompilationForLanguageServices(sourceFiles, GetSourceCodeKind(request), GetUsings(request.Workspace), budget);
@@ -185,7 +185,7 @@ namespace WorkspaceServer.Servers.Roslyn
         public async Task<CompileResult> Compile(WorkspaceRequest request, Budget budget = null)
         {
             var workspace = request.Workspace;
-            budget = budget ?? new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
+            budget ??= new TimeBudget(TimeSpan.FromSeconds(defaultBudgetInSeconds));
 
             using (Log.OnEnterAndExit())
             using (await locks.GetOrAdd(workspace.WorkspaceType, s => new AsyncLock()).LockAsync())
@@ -410,7 +410,7 @@ namespace WorkspaceServer.Servers.Roslyn
             Budget budget)
         {
             var package = await _packageFinder.Find<ICreateWorkspace>(workspace.WorkspaceType);
-            workspace = await _transformer.TransformAsync(workspace);
+            workspace = await workspace.InlineBuffersAsync();
             var sources = workspace.GetSourceFiles();
             var (compilation, documents) = await package.GetCompilation(sources, SourceCodeKind.Regular, workspace.Usings, () => package.CreateRoslynWorkspaceAsync(budget), budget);
             var (diagnosticsInActiveBuffer, allDiagnostics) = workspace.MapDiagnostics(activeBufferId, compilation.GetDiagnostics());

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Try.Protocol.Tests;
 using MLS.Agent.CommandLine;
 using MLS.Agent.Tools;
 using MLS.Agent.Tools.Tests;
@@ -18,7 +19,8 @@ namespace MLS.Agent.Tests.CommandLine
     {
         private const string CsprojContents = @"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 </Project>
 ";
@@ -57,7 +59,7 @@ public class Program
                 var (publishOutput, resultCode) = await DoPublish(files);
 
                 resultCode.Should().Be(0);
-                publishOutput.OutputFiles.Single().Content.Should().Be(markdown);
+                publishOutput.OutputFiles.Single().Content.Should().Be(markdown.EnforceLF());
             }
 
             [Theory]
@@ -91,12 +93,61 @@ var length = (args[0] as string)?.Length ?? 0;
 ");
             }
 
+            [Theory]
+            [InlineData(@"
+``` cs --source-file ./project/Program.cs --region the_region --project ./project/some.csproj --session one
+Console.WriteLine(""hello!"");
+```
+``` console --session one
+```
+")]
+            [InlineData(@"
+``` cs --source-file ./project/Program.cs --region the_region --project ./project/some.csproj --session one
+Console.WriteLine(""hello!"");
+```
+``` console --session one
+pre-existing text
+```
+")]
+            public async Task Content_of_console_annotated_blocks_is_replaced_by_code_output(string markdown)
+            {
+                var files = PrepareFiles(
+                    ("./project/some.csproj", CsprojContents),
+                    ("./project/Program.cs", @"
+using System;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        #region the_region
+        Console.WriteLine(""hello!"");
+        #endregion
+    }
+}"),
+                    ("./doc.md", markdown));
+
+                var (publishOutput, resultCode) = await DoPublish(files);
+
+                resultCode.Should().Be(0);
+
+                publishOutput.OutputFiles
+                             .Single()
+                             .Content
+                             .Should()
+                             .Contain(@"
+``` console --session one
+hello!
+
+```".EnforceLF());
+            }
+
             [Fact]
-            public async Task When_target_directory_is_sub_directory_of_source_then_markdown_files_in_target_dir_are_ignored()
+            public async Task When_target_directory_is_sub_directory_of_source_then_markdown_files_in_target_dir_are_not_used_as_sources()
             {
                 const string markdown = @"
 ## C# null coalesce example
-``` cs --source-file ./../project/Program.cs --region null_coalesce --project ./../project/some.csproj
+``` cs --source-file ./../../project/Program.cs --region null_coalesce --project ./../../project/some.csproj
 ```
 ";
                 var files = PrepareFiles(
@@ -115,6 +166,7 @@ var length = (args[0] as string)?.Length ?? 0;
                 publishOutput.OutputFiles.Count().Should().Be(1, "Expected existing file in doc_output to be ignored");
                 var outputFilePath = new FileInfo(publishOutput.OutputFiles.Single().Path);
                 var expectedFilePath = target.GetFullyQualifiedPath(new RelativeFilePath("documentation/details/doc.md"));
+
                 outputFilePath.FullName.Should().Be(expectedFilePath.FullName);
             }
         }
@@ -127,32 +179,36 @@ var length = (args[0] as string)?.Length ?? 0;
 
             protected WithPublish(ITestOutputHelper output) => _output = output;
 
-            protected static IDirectoryAccessor PrepareFiles(params (string path, string content)[] files)
+            protected static IDirectoryAccessor PrepareFiles(
+                params (string path, string content)[] files)
             {
-                var directoryAccessor = CreateInMemoryDirectoryAccessor();
+                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
+                var directoryAccessor = new InMemoryDirectoryAccessor(rootDirectory);
                 foreach (var file in files)
+                {
                     directoryAccessor.Add(file);
+                }
                 directoryAccessor.CreateFiles();
 
                 return directoryAccessor;
             }
 
-            private static InMemoryDirectoryAccessor CreateInMemoryDirectoryAccessor()
-            {
-                var rootDirectory = Create.EmptyWorkspace(isRebuildablePackage: true).Directory;
-                return new InMemoryDirectoryAccessor(rootDirectory);
-            }
-
-            protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(IDirectoryAccessor allFiles, IDirectoryAccessor target = null)
+            protected async Task<(PublishOutput publishOutput, int resultCode)> DoPublish(
+                IDirectoryAccessor rootDirectory,
+                IDirectoryAccessor targetDirectory = null)
             {
                 var console = new TestConsole();
 
                 var output = new PublishOutput();
-                void WriteOutput(string path, string content) => output.Add(path, content);
 
-                var resultCode = await PublishCommand.Do(Options(allFiles, target), console, writeOutput: WriteOutput);
+                var resultCode = await PublishCommand.Do(
+                                     Options(rootDirectory, targetDirectory),
+                                     console,
+                                     context: new MarkdownProcessingContext(rootDirectory,
+                                                                            writeFile: output.Add));
 
                 _output.WriteLine(console.Out.ToString());
+
                 return (output, resultCode);
             }
         }

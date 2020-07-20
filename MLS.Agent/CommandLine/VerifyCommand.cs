@@ -2,19 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Try.Markdown;
-using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
 using MLS.Agent.Markdown;
-using WorkspaceServer;
-using WorkspaceServer.Servers;
-using Buffer = Microsoft.DotNet.Try.Protocol.Buffer;
-using File = Microsoft.DotNet.Try.Protocol.File;
 using MLS.Agent.Tools;
 
 namespace MLS.Agent.CommandLine
@@ -24,277 +19,219 @@ namespace MLS.Agent.CommandLine
         public static async Task<int> Do(
             VerifyOptions verifyOptions,
             IConsole console,
-            StartupOptions startupOptions = null)
+            StartupOptions startupOptions = null,
+            MarkdownProcessingContext context = null)
         {
-            var directoryAccessor = verifyOptions.RootDirectory;
-            var packageRegistry = PackageRegistry.CreateForTryMode(directoryAccessor);
-            var markdownProject = new MarkdownProject(
-                directoryAccessor,
-                packageRegistry,
-                startupOptions);
-            var errorCount = 0;
-            var workspaceServer = new Lazy<IWorkspaceServer>(() => new WorkspaceServerMultiplexer(packageRegistry));
+            context ??= new MarkdownProcessingContext(
+                verifyOptions.RootDirectory,
+                startupOptions,
+                console: console);
 
-            var markdownFiles = markdownProject.GetAllMarkdownFiles().ToArray();
+            var markdownFiles = context.Project.GetAllMarkdownFiles().ToArray();
+
+            console.Out.WriteLine("Verifying...");
 
             if (markdownFiles.Length == 0)
             {
-                console.Error.WriteLine($"No markdown files found under {directoryAccessor.GetFullyQualifiedRoot()}");
+                console.Error.WriteLine($"No markdown files found under {context.RootDirectory.GetFullyQualifiedRoot()}");
                 return -1;
             }
 
             foreach (var markdownFile in markdownFiles)
             {
-                var fullName = directoryAccessor.GetFullyQualifiedPath(markdownFile.Path).FullName;
-                var markdownFileDirectoryAccessor = directoryAccessor.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
+                var fullName = context.RootDirectory.GetFullyQualifiedPath(markdownFile.Path).FullName;
+
+                var markdownFileDir = context.RootDirectory.GetDirectoryAccessorForRelativePath(markdownFile.Path.Directory);
 
                 console.Out.WriteLine();
                 console.Out.WriteLine(fullName);
                 console.Out.WriteLine(new string('-', fullName.Length));
 
-                var codeLinkBlocks = await markdownFile.GetAnnotatedCodeBlocks();
-
-                var sessions = codeLinkBlocks.GroupBy(block => block.Annotations?.Session);
-
-                foreach (var session in sessions)
+                foreach (var session in await markdownFile.GetSessions())
                 {
+                    var sessionProjectOrPackageNames =
+                        session
+                            .CodeBlocks
+                            .Where(a => a.Annotations is CodeBlockAnnotations)
+                            .Select(block => block.ProjectOrPackageName())
+                            .Distinct();
 
-
-                    if (session.Select(block => block.ProjectOrPackageName()).Distinct().Count() != 1)
+                    if (sessionProjectOrPackageNames.Count() != 1)
                     {
-                        SetError();
-                        console.Out.WriteLine($"Session cannot span projects or packages: --session {session.Key}");
+                        var error = $"Session cannot span projects or packages: --session {session.Name}";
+                        AddError(error, context);
                         continue;
                     }
 
-                    foreach (var block in session)
+                    foreach (var block in session.CodeBlocks)
                     {
-                        ReportCodeLinkageResults(block, markdownFileDirectoryAccessor);
+                        VerifyAnnotationReferences(
+                            block,
+                            markdownFileDir,
+                            console,
+                            context);
                     }
 
                     Console.ResetColor();
 
-                    if (!session.Any(block => block.Diagnostics.Any()))
+                    if (!session.CodeBlocks.Any(block => block.Diagnostics.Any()))
                     {
-                        var (buffersToInclude, filesToInclude) = await markdownFile.GetIncludes(markdownFileDirectoryAccessor);
-
-                        await ReportCompileResults(
+                        await Compile(
                             session,
-                            markdownFile,
-                            filesToInclude,
-                            buffersToInclude,
-                            markdownFileDirectoryAccessor);
+                            context);
                     }
 
                     Console.ResetColor();
                 }
             }
 
-            if (errorCount > 0)
-            {
-                SetError(false);
-            }
-            else
-            {
-                SetOk();
-            }
-
-            console.Out.WriteLine($"\n\ndotnet try verify found {errorCount} error(s)");
-
-            Console.ResetColor();
-
-            return errorCount == 0
-                       ? 0
-                       : 1;
-
-            void SetError(bool incrementCount = true)
+            if (context.Errors.Count > 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-
-                if (incrementCount)
-                {
-                    errorCount++;
-                }
             }
-
-            void SetOk()
+            else
             {
                 Console.ForegroundColor = ConsoleColor.Green;
             }
 
-            async Task ReportCompileResults(
-                IGrouping<string, AnnotatedCodeBlock> session,
-                MarkdownFile markdownFile,
-                Dictionary<string, File[]> filesToInclude,
-                IReadOnlyDictionary<string, Buffer[]> buffersToInclude,
-                IDirectoryAccessor accessor)
+            console.Out.WriteLine($"\nFound {context.Errors.Count} error(s)");
+
+            Console.ResetColor();
+
+            return context.Errors.Count == 0
+                       ? 0
+                       : 1;
+        }
+
+        private static void VerifyAnnotationReferences(
+            AnnotatedCodeBlock annotatedCodeBlock,
+            IDirectoryAccessor markdownFileDir,
+            IConsole console,
+            MarkdownProcessingContext context)
+        {
+            Console.ResetColor();
+
+            console.Out.WriteLine("  Checking Markdown...");
+
+            var diagnostics = annotatedCodeBlock.Diagnostics.ToArray();
+            var hasDiagnostics = diagnostics.Any();
+
+            if (hasDiagnostics)
             {
-                var description = session.Count() == 1 || string.IsNullOrWhiteSpace(session.Key)
-                                      ? $"region \"{session.Select(b => b.Annotations).OfType<CodeBlockAnnotations>().Select(a => a.Region).Distinct().First()}\""
-                                      : $"session \"{session.Key}\"";
-
-                console.Out.WriteLine($"\n  Compiling samples for {description}\n");
-
-                var projectOrPackageName = session
-                                           .Select(b => b.ProjectOrPackageName())
-                                           .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
-
-                var language = session
-                    .Select(b => b.Language())
-                    .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
-
-                if (!ProjectIsCompatibleWithLanguage(new UriOrFileInfo(projectOrPackageName), language))
-                {
-                    SetError();
-
-                    console.Out.WriteLine($"    Build failed as project {projectOrPackageName} is not compatible with language {language}");
-                }
-
-                var editableCodeBlocks = session.Where(b => b.Annotations is CodeBlockAnnotations a && a.Editable).ToList();
-
-                var buffers = editableCodeBlocks
-                              .Select(block => block.GetBufferAsync(accessor, markdownFile))
-                              .ToList();
-
-                var files = new List<File>();
-
-                if (filesToInclude.TryGetValue("global", out var globalIncludes))
-                {
-                    files.AddRange(globalIncludes);
-                }
-
-                if (!string.IsNullOrWhiteSpace(session.Key) && filesToInclude.TryGetValue(session.Key, out var sessionIncludes))
-                {
-                    files.AddRange(sessionIncludes);
-                }
-
-                if (buffersToInclude.TryGetValue("global", out var globalSessionBuffersToInclude))
-                {
-                    buffers.AddRange(globalSessionBuffersToInclude);
-                }
-
-                if (!string.IsNullOrWhiteSpace(session.Key) && buffersToInclude.TryGetValue(session.Key, out var localSessionBuffersToInclude))
-                {
-                    buffers.AddRange(localSessionBuffersToInclude);
-                }
-
-                var workspace = new Workspace(
-                    workspaceType: projectOrPackageName,
-                    language: language,
-                    files: files.ToArray(),
-                    buffers: buffers.ToArray());
-
-                var mergeTransformer = new CodeMergeTransformer();
-                var inliningTransformer = new BufferInliningTransformer();
-
-                var processed = await mergeTransformer.TransformAsync(workspace);
-                processed = await inliningTransformer.TransformAsync(processed);
-                processed = new Workspace(usings: processed.Usings, workspaceType: processed.WorkspaceType, language:processed.Language, files: processed.Files);
-
-                var result = await workspaceServer.Value.Compile(new WorkspaceRequest(processed));
-
-                var projectDiagnostics = result.GetFeature<ProjectDiagnostics>()
-                                               .Where(e => e.Severity == DiagnosticSeverity.Error)
-                                               .ToArray();
-                if (projectDiagnostics.Any())
-                {
-                    SetError();
-
-                    console.Out.WriteLine($"    Build failed for project {projectOrPackageName}");
-
-                    foreach (var diagnostic in projectDiagnostics)
-                    {
-                        console.Out.WriteLine($"\t\t{diagnostic.Location}: {diagnostic.Message}");
-                    }
-                }
-                else
-                {
-                    var symbol = !result.Succeeded
-                                     ? "X"
-                                     : "✓";
-
-                    if (result.Succeeded)
-                    {
-                        SetOk();
-                        console.Out.WriteLine($"    {symbol}  No errors found within samples for {description}");
-                    }
-                    else
-                    {
-                        SetError();
-
-                        console.Out.WriteLine($"    {symbol}  Errors found within samples for {description}");
-
-                        foreach (var diagnostic in result.GetFeature<Diagnostics>())
-                        {
-                            console.Out.WriteLine($"\t\t{diagnostic.Message}");
-                        }
-                    }
-                }
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
             }
 
-            void ReportCodeLinkageResults(
-                AnnotatedCodeBlock codeLinkBlock, 
-                IDirectoryAccessor accessor)
+            if (annotatedCodeBlock.Annotations is LocalCodeBlockAnnotations annotations)
             {
-                var diagnostics = codeLinkBlock.Diagnostics.ToArray();
+                var file = annotations?.SourceFile ?? annotations?.DestinationFile;
+                var fullyQualifiedPath = file != null
+                                             ? markdownFileDir.GetFullyQualifiedPath(file).FullName
+                                             : "UNKNOWN";
 
-                Console.ResetColor();
+                var project = annotatedCodeBlock.ProjectOrPackageName() ?? "UNKNOWN";
 
-                console.Out.WriteLine("  Checking Markdown...");
-
-                if (diagnostics.Any())
-                {
-                    SetError();
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                }
-
-                var blockOptions = (LocalCodeBlockAnnotations)codeLinkBlock.Annotations;
-
-                var file = blockOptions?.SourceFile ?? blockOptions?.DestinationFile;
-                var fullyQualifiedPath =
-                    file != null
-                        ? accessor.GetFullyQualifiedPath(file).FullName
-                        : "UNKNOWN";
-
-                var project = codeLinkBlock.ProjectOrPackageName() ?? "UNKNOWN";
-
-                var symbol = diagnostics.Any()
+                var symbol = hasDiagnostics
                                  ? "X"
                                  : "✓";
 
-                console.Out.WriteLine($"    {symbol}  Line {codeLinkBlock.Line + 1}:\t{fullyQualifiedPath} (in project {project})");
+                var error = $"    {symbol}  Line {annotatedCodeBlock.Line + 1}:\t{fullyQualifiedPath} (in project {project})";
 
-                foreach (var diagnostic in diagnostics)
+                if (hasDiagnostics)
                 {
-                    console.Out.WriteLine($"\t\t{diagnostic}");
+                    context.Errors.Add(error);
                 }
+
+                console.Out.WriteLine(error);
+            }
+
+            foreach (var diagnostic in diagnostics)
+            {
+                console.Out.WriteLine($"\t\t{diagnostic}");
             }
         }
 
-        private static bool ProjectIsCompatibleWithLanguage(UriOrFileInfo projectOrPackage, string language)
+        internal static void AddError(
+            string error,
+            MarkdownProcessingContext context)
         {
-            var supported = true;
-            if (projectOrPackage.IsFile)
-            {
-                var extension = projectOrPackage.FileExtension.ToLowerInvariant();
-                switch (extension)
-                {
-                    case ".csproj":
-                        supported = StringComparer.OrdinalIgnoreCase.Compare(language, "csharp") == 0;
-                        break;
+            Console.ForegroundColor = ConsoleColor.Red;
 
-                    case ".fsproj":
-                        supported = StringComparer.OrdinalIgnoreCase.Compare(language, "fsharp") == 0;
-                        break;
-                    default:
-                        supported = false;
-                        break;
+            context.Errors.Add(error);
+
+            context.Console.Out.WriteLine(error);
+        }
+
+        internal static async Task Compile(
+            Session session,
+            MarkdownProcessingContext context)
+        {
+            var region = session.CodeBlocks
+                                .Select(b => b.Annotations)
+                                .OfType<CodeBlockAnnotations>()
+                                .Select(a => a.Region)
+                                .Distinct()
+                                .First();
+
+            var description = session.CodeBlocks.Count == 1 || string.IsNullOrWhiteSpace(session.Name)
+                                  ? $"region \"{region}\""
+                                  : $"session \"{session.Name}\"";
+
+            context.Console.Out.WriteLine($"\n  Compiling samples for {description}\n");
+
+            var workspace = await session.GetWorkspaceAsync();
+            
+            if (!session.IsProjectCompatibleWithLanguage)
+            {
+                var error = $"    Build failed as project {session.ProjectOrPackageName} is not compatible with language {session.Language}";
+                AddError(error, context);
+            }
+       
+            var result = await context.WorkspaceServer.Compile(new WorkspaceRequest(workspace));
+
+            var projectDiagnostics = result.GetFeature<ProjectDiagnostics>()
+                                           .Where(e => e.Severity == DiagnosticSeverity.Error)
+                                           .ToArray();
+            if (projectDiagnostics.Any())
+            {
+                var error = new StringBuilder();
+                error.AppendLine($"    Build failed for project {session.ProjectOrPackageName}");
+
+                foreach (var diagnostic in projectDiagnostics)
+                {
+                    error.AppendLine($"\t\t{diagnostic.Location}: {diagnostic.Message}");
+                }
+
+                AddError(error.ToString(), context);
+            }
+            else
+            {
+                var symbol = !result.Succeeded
+                                 ? "X"
+                                 : "✓";
+
+                if (result.Succeeded)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+
+                    context.Console.Out.WriteLine($"    {symbol}  No errors found within samples for {description}");
+                }
+                else
+                {
+                    var error = new StringBuilder();
+                    error.AppendLine($"    {symbol}  Errors found within samples for {description}");
+
+                    foreach (var diagnostic in result.GetFeature<Diagnostics>())
+                    {
+                        error.AppendLine($"\t\t{diagnostic.Message}");
+                    }
+
+                    AddError(error.ToString(), context);
                 }
             }
-            return supported;
         }
     }
 }

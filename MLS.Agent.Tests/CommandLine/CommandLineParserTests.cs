@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
 using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.IO;
@@ -63,13 +62,13 @@ namespace MLS.Agent.Tests.CommandLine
                     _installPackageSource = options.AddSource;
                     return Task.CompletedTask;
                 },
-                verify: (options, console, startupOptions) =>
+                verify: (options, console, startupOptions, context) =>
                 {
                     _verifyOptions = options;
                     return Task.FromResult(0);
                 },
                 telemetry: new FakeTelemetry(),
-                publish: (options, console, startupOptions) =>
+                publish: (options, console, startupOptions, context) =>
                 {
                     _publishOptions = options;
                     return Task.FromResult(0);
