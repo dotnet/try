@@ -4,7 +4,7 @@ Before you get can started creating interactive documentation, you will need to 
 
 - The [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0) 
 - The [.NET Core 2.1 SDK](https://dotnet.microsoft.com/download/dotnet-core/2.1) 
-- The [dotnet try](https://www.nuget.org/packages/dotnet-try/)  global tool
+- The [dotnet try](https://www.nuget.org/packages/Microsoft.dotnet-try/)  global tool
 
 Updating to the latest version of the tool is easy. Run the following command:
 
