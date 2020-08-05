@@ -12,6 +12,10 @@
     <None Remove="TestResults\**" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>;NU5104;NU5100;2003;8002</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
