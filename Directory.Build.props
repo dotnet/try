@@ -21,7 +21,7 @@
     <PocketLoggerVersion>0.3.0</PocketLoggerVersion>
     <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
     <SystemReactiveVersion>4.3.2</SystemReactiveVersion>
-    <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
+    <SystemRuntimeExtensionsVersion>4.3.1</SystemRuntimeExtensionsVersion>
     <MicrosoftCodeAnalysisCommonVersion>3.5.0-beta1-final</MicrosoftCodeAnalysisCommonVersion>
     <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.5.0-beta1-final</MicrosoftCodeAnalysisWorkspacesCommonVersion>
     <TaskExtensionsVersion>0.1.8580001</TaskExtensionsVersion>
