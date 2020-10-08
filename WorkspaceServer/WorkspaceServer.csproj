@@ -38,22 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsyncLock" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>   
     <PackageReference Include="Buildalyzer" Version="3.0.0" />
     <PackageReference Include="Buildalyzer.Workspaces" Version="3.0.0" />
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
-    <PackageReference Include="DictionaryExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="FSharp.Core" />
-    <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="3.6.0" />
@@ -69,24 +57,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ConfirmationLoggerExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="DictionaryExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-    <PackageReference Include="TaskExtensions" Version="0.1.5650001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="PocketLogger" Version="0.3.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -95,10 +67,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference> -->
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageReference Include="TaskExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

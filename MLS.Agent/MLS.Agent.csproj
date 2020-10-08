@@ -42,34 +42,11 @@
   <ItemGroup>
     <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DirectoryUtility.cs" Link="%28Recipes%29\DirectoryUtility.cs" />
     <Compile Include="..\Microsoft.DotNet.Interactive\Utility\DisposableDirectory.cs" Link="%28Recipes%29\DisposableDirectory.cs" />
+    <Compile Include="..\WorkspaceServer\(Recipes)\JsonSerializationExtensions.cs" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="BadRequestOnInvalidModelFilter" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ClientConfiguration" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Clockwise" Version="1.0.261-beta" />
-    <PackageReference Include="ConfigurationExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="DictionaryExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="EnvironmentExtensions" Version="0.1.9120003">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="LoggerExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Markdig" Version="0.17.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Server" Version="3.0.0-preview7.19365.7" />
@@ -97,14 +74,6 @@
     </PackageReference>
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20359.2" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
-    <PackageReference Include="TaskExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="VersionSensor" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
