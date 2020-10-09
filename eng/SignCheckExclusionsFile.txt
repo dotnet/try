@@ -1,0 +1,6 @@
+*bundle.js
+blazor.*.js
+editor.worker.js
+interop.js
+mono.js
+trydotnet.min.js

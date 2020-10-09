@@ -18,7 +18,6 @@
                 <dependency id="System.Runtime.Extensions" version="$SystemRuntimeExtensionsVersion$" />
                 <dependency id="Microsoft.CodeAnalysis.Common" version="$MicrosoftCodeAnalysisCommonVersion$" />
                 <dependency id="Microsoft.CodeAnalysis.Workspaces.Common" version="$MicrosoftCodeAnalysisWorkspacesCommonVersion$" />
-                <dependency id="TaskExtensions" version="$TaskExtensionsVersion$" />
             </group>
         </dependencies>
     </metadata>

@@ -10,22 +10,16 @@
     <EmbeddedResource Remove="TestResults\**" />
     <None Remove="TestResults\**" />
   </ItemGroup>
- 
+
+  <ItemGroup>
+    <Compile Include="..\WorkspaceServer\(Recipes)\JsonSerializationExtensions.cs" />
+    <Compile Include="..\WorkspaceServer.Tests\(Recipes)\HttpResponseMessageAssertions.cs" />
+    <Compile Include="..\WorkspaceServer.Tests\(Recipes)\HttpResponseMessageExtensions.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
-    <PackageReference Include="HttpResponseMessageAssertions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="HttpResponseMessageExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="JsonSerializationExtensions" Version="0.1.8580001">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Pocket.Disposable" Version="1.0.5">

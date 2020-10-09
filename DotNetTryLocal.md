@@ -22,7 +22,7 @@ To install the latest preview build from master, first uninstall the existing ve
 Then, install from the preview package feed:
 
 ```console
-> dotnet tool install -g --add-source "https://dotnet.myget.org/F/dotnet-try/api/v3/index.json" Microsoft.dotnet-try
+> dotnet tool install -g --add-source "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json" Microsoft.dotnet-try
 ```
 
 ## Getting Started
