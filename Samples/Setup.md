@@ -2,10 +2,10 @@
 
 ### How do get started with a Try .NET enabled repo?
 - Clone this repo
-- Install .NET Core SDK [3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0) and [2.1](https://dotnet.microsoft.com/download/dotnet-core/2.1) currently dotnet try global tool targets 2.1. 
+- Install .NET Core SDK [3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1) and [2.1](https://dotnet.microsoft.com/download/dotnet-core/2.1) currently dotnet try global tool targets 2.1. 
 - Go to your terminal 
-- Install the [Try .NET tools](https://www.nuget.org/packages/dotnet-try/)
-`dotnet tool install --global dotnet-try`
+- Install the [Try .NET tools](https://www.nuget.org/packages/Microsoft.dotnet-tr/)
+`dotnet tool install --global Microsoft.dotnet-tr`
 - Navigate to the Samples directory of this repository and, type the following  `dotnet try`.
 ![dotnet try](https://user-images.githubusercontent.com/2546640/57164943-ab35f080-6dc3-11e9-8230-ee521e00e428.gif)
 - This will launch the browser.
