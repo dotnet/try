@@ -1,0 +1,5 @@
+string[] TesteGit = {"OK","OK","OK"};
+foreach(var items in TesteGit)
+{
+Console.WriteLine($"Testando Git {items} !");
+}
