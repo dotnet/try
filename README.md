@@ -43,3 +43,9 @@ If you find an issue or have a feature suggestion, please open an [issue](https:
 **Microsoft Docs**  
 
 Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to create interactive documentation. Users can run and edit .NET code in the browser. 
+
+## Community Showcase
+
+**NCache Live by Alachisoft**  
+
+[NCache Live](https://www.alachisoft.com/blogs/try-ncache-anywhere-anytime-with-ncache-live/) uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to let the user experience NCache APIs with the help of executable and editable .NET code in the browser.
