@@ -18,7 +18,7 @@ variables:
   - name: BlazorTemplateVersion
     value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
-    value: '3.1.300'
+    value: '5.0.100'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
@@ -173,7 +173,7 @@ stages:
         - task: NodeTool@0
           displayName: Add NodeJS/npm
           inputs:
-            versionSpec: $(NodeJSVersion)        
+            versionSpec: $(NodeJSVersion)
 
         - task: UseDotNet@2
           displayName: Add dotnet 3.0
