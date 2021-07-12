@@ -19,6 +19,8 @@ variables:
     value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
     value: '5.0.100'
+  - name: DotNetSdkVersion3
+    value: '3.1.300'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
@@ -89,7 +91,7 @@ stages:
           displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
-            version: '3.1.300'
+            version: $(DotNetSdkVersion3)
             installationPath: $(Agent.ToolsDirectory)\dotnet
 
         - task: UseDotNet@2
