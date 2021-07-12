@@ -89,6 +89,12 @@ stages:
           displayName: Add dotnet 3.0
           inputs:
             packageType: sdk
+            version: '3.1.300'
+            installationPath: $(Agent.ToolsDirectory)\dotnet
+                  - task: UseDotNet@2
+          displayName: Add dotnet
+          inputs:
+            packageType: sdk
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)\dotnet
 
