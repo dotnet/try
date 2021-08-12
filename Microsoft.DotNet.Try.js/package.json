@@ -9,11 +9,12 @@
   ],
   "types": "dist/index.d.ts",
   "devDependencies": {
-    "@types/chai": "4.2.11",
-    "@types/chai-as-promised": "7.1.2",
+    "@testdeck/mocha": "0.1.2",
+    "@types/chai": "4.2.21",
+    "@types/chai-as-promised": "7.1.4",
     "@types/chai-subset": "1.3.3",
     "@types/jsdom": "12.2.1",
-    "@types/mocha": "7.0.2",
+    "@types/mocha": "9.0.0",
     "@types/node": "13.9.2",
     "babel-core": "6.26.3",
     "babel-eslint": "10.0.1",
@@ -27,22 +28,22 @@
     "babel-preset-stage-0": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "babel-register": "6.26.0",
-    "chai": "4.2.0",
+    "chai": "4.3.4",
     "chai-as-promised": "7.1.1",
     "jsdom": "13.2.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.21",
     "mkdirp": "1.0.3",
-    "mocha": "7.1.1",
-    "mocha-multi-reporters": "1.1.7",
-    "mocha-trx-reporter": "3.2.3",
-    "mocha-typescript": "1.1.17",
-    "rollup": "2.1.0",
+    "mocha": "9.0.3",
+    "mocha-multi-reporters": "1.5.1",
+    "mocha-trx-reporter": "3.3.1",
+    "requirejs": "2.3.6",
+    "rollup": "2.56.2",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-node-resolve": "5.2.0",
-    "rollup-plugin-typescript2": "0.26.0",
+    "rollup-plugin-typescript2": "0.30.0",
     "source-map-loader": "0.2.4",
     "source-map-support": "0.5.10",
-    "ts-mocha": "7.0.0",
+    "ts-mocha": "8.0.0",
     "ts-node": "8.7.0",
     "tslint": "5.12.1",
     "typescript": "3.3.1",
@@ -56,7 +57,7 @@
     "watch": "rollup -cw",
     "rollup": "rollup -c",
     "tdd": "npm test -- --watch",
-    "test": "mocha --opts mocha.opts",
+    "test": "mocha  test/**/*.specs.ts",
     "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
     "ciCreateDir": "./node_modules/.bin/mkdirp ",
     "ciMinify": "uglifyjs dist/trydotnet.js --source-map"
@@ -68,5 +69,19 @@
   },
   "publishConfig": {
     "registry": "https://msazure.pkgs.visualstudio.com/_packaging/MLS/npm/registry"
+  },
+  "mocha": {
+    "ui": "bdd",
+    "timeout": "10000",
+    "require": [
+      "requirejs",
+      "source-map-support/register",
+      "ts-node/register",
+      "babel-core/register",
+      "babel-polyfill"
+    ],
+    "watch-files": [
+      "test/**/*.specs.ts"
+    ]
   }
 }
