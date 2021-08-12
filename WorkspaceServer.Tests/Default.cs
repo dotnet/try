@@ -33,7 +33,7 @@ namespace WorkspaceServer.Tests
             var packageBuilder = new PackageBuilder("console");
             packageBuilder.CreateUsingDotnet("console");
             packageBuilder.TrySetLanguageVersion("8.0");
-            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            packageBuilder.AddPackageReference("Newtonsoft.Json", "13.0.1");
             var package = packageBuilder.GetPackage() as Package;
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             return package;
@@ -46,7 +46,7 @@ namespace WorkspaceServer.Tests
             packageBuilder.TrySetLanguageVersion("8.0");
             packageBuilder.AddPackageReference("NodaTime", "2.3.0");
             packageBuilder.AddPackageReference("NodaTime.Testing", "2.3.0");
-            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            packageBuilder.AddPackageReference("Newtonsoft.Json", "13.0.1");
             var package = packageBuilder.GetPackage() as Package;
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
             return package;
@@ -85,7 +85,7 @@ namespace aspnet.webapi.Controllers
             var packageBuilder = new PackageBuilder("xunit");
             packageBuilder.CreateUsingDotnet("xunit", "tests");
             packageBuilder.TrySetLanguageVersion("8.0");
-            packageBuilder.AddPackageReference("Newtonsoft.Json");
+            packageBuilder.AddPackageReference("Newtonsoft.Json", "13.0.1");
             packageBuilder.DeleteFile("UnitTest1.cs");
             var package = packageBuilder.GetPackage() as Package;
             await package.CreateRoslynWorkspaceForRunAsync(new Budget());
@@ -120,7 +120,7 @@ namespace aspnet.webapi.Controllers
                 await dotnet.New("classlib");
                 await dotnet.AddPackage("NodaTime", "2.4.4");
                 await dotnet.AddPackage("NodaTime.Testing", "2.4.4");
-                await dotnet.AddPackage("Newtonsoft.Json");
+                await dotnet.AddPackage("Newtonsoft.Json", "13.0.1");
 
                 var console = new TestConsole();
                 var name = await PackCommand.Do(new PackOptions(subDir, enableWasm: true, packageName: "blazor-nodatime.api"), console);
