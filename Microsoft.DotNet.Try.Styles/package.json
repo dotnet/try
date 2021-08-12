@@ -4,11 +4,11 @@
   "description": "css for trydotnet",
   "main": "sass/trydotnet.scss",
   "scripts": {
-    "css-build": "node-sass --omit-source-map-url sass/trydotnet.scss css/trydotnet.css",
+    "css-build": "sass --no-source-map sass/trydotnet.scss css/trydotnet.css",
     "css-watch": "npm run css-build -- --watch",
     "start": "npm run build -- --watch",
-    "build": "node-sass --omit-source-map-url sass/trydotnet.scss ../MLS.Agent/wwwroot/css/trydotnet.css",
-    "release": "node-sass --omit-source-map-url --output-style compact sass/trydotnet.scss",
+    "build": "sass --no-source-map sass/trydotnet.scss ../MLS.Agent/wwwroot/css/trydotnet.css",
+    "release": "sass --no-source-map --style=compressed sass/trydotnet.scss",
     "ciCreateDir": "./node_modules/.bin/mkdirp "
   },
   "author": "Diego Colombo",
@@ -17,10 +17,10 @@
     "@mdi/font": "3.5.95",
     "fstream": "1.0.12",
     "github-markdown-css": "3.0.1",
-    "lodash": "4.17.19",
+    "lodash": "^4.17.21",
     "mkdirp": "1.0.3",
-    "node-sass": "4.13.1",
-    "tar": "6.0.1",
+    "sass": "1.37.5",
+    "tar": "^6.1.8",
     "xterm": "3.12.0"
   }
 }
