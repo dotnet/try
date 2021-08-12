@@ -13,7 +13,9 @@ namespace WorkspaceServer.Servers.Roslyn.Instrumentation
         public Dictionary<ISymbol, HashSet<VariableLocation>> Data;
         public VariableLocationMap()
         {
-            Data = new Dictionary<ISymbol, HashSet<VariableLocation>>(SymbolEqualityComparer.Default);
+#pragma warning disable RS1024 // Compare symbols correctly
+            Data = new Dictionary<ISymbol, HashSet<VariableLocation>>(comparer: SymbolEqualityComparer.Default);
+#pragma warning restore RS1024 // Compare symbols correctly
         }
 
         public void AddLocations(ISymbol variable, IEnumerable<VariableLocation> locations)
