@@ -10,8 +10,10 @@ namespace WorkspaceServer
 {
     public abstract class AbstractEntryPointFinder : SymbolVisitor
     {
+#pragma warning disable RS1024 // Compare symbols correctly
         protected readonly HashSet<IMethodSymbol> EntryPoints = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
- 
+#pragma warning restore RS1024 // Compare symbols correctly
+
         public override void VisitNamespace(INamespaceSymbol symbol)
         {
             foreach (var member in symbol.GetMembers())
