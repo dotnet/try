@@ -18,7 +18,7 @@
 
   <ItemGroup>
   <!-- Any new dependency added here must also be included in the Microsoft.DotNet.Try.Markdown nuspec file -->
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="PocketLogger" Version="$(PocketLoggerVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
