@@ -13,7 +13,7 @@ namespace WorkspaceServer.Servers.Roslyn.Instrumentation
         public Dictionary<ISymbol, HashSet<VariableLocation>> Data;
         public VariableLocationMap()
         {
-            Data = new Dictionary<ISymbol, HashSet<VariableLocation>>();
+            Data = new Dictionary<ISymbol, HashSet<VariableLocation>>(SymbolEqualityComparer.Default);
         }
 
         public void AddLocations(ISymbol variable, IEnumerable<VariableLocation> locations)

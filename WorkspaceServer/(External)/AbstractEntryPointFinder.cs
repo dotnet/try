@@ -10,7 +10,7 @@ namespace WorkspaceServer
 {
     public abstract class AbstractEntryPointFinder : SymbolVisitor
     {
-        protected readonly HashSet<IMethodSymbol> EntryPoints = new HashSet<IMethodSymbol>();
+        protected readonly HashSet<IMethodSymbol> EntryPoints = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
  
         public override void VisitNamespace(INamespaceSymbol symbol)
         {

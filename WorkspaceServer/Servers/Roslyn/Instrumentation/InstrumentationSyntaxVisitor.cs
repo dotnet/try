@@ -85,8 +85,8 @@ namespace WorkspaceServer.Servers.Roslyn.Instrumentation
         private IEnumerable<ISymbol> GetDistinctLocalVariables(IEnumerable<CSharpSyntaxNode> statements)
         {
             return statements.SelectMany(statement => _semanticModel.LookupSymbols(statement.GetLocation().SourceSpan.Start))
-                            .Where(symbol => IsVariable(symbol))
-                            .Distinct();
+                            .Where(IsVariable)
+                            .Distinct(SymbolEqualityComparer.Default);
         }
 
         private bool IsVariable(ISymbol symbol) => symbol.Kind == SymbolKind.Local
@@ -141,18 +141,18 @@ namespace WorkspaceServer.Servers.Roslyn.Instrumentation
             {
                 var statement = filteredStatements[i];
                 var prevAssigned = i > 0 ? _semanticModel.AnalyzeDataFlow(filteredStatements[0], filteredStatements[i - 1]).AlwaysAssigned : Enumerable.Empty<ISymbol>();
-                var assigned = prevAssigned.Union(parentAssigned).Union(dataFlowIn);
+                var assigned = prevAssigned.Union(parentAssigned, SymbolEqualityComparer.Default).Union(dataFlowIn, SymbolEqualityComparer.Default);
 
                 // if the node has children, figure out what variables are valid inside, so the child nodes will be aware of them later on
                 var validForChildren = Enumerable.Empty<ISymbol>();
                 if (statement.ChildNodes().Any(n => n is BlockSyntax))
                 {
                     var dataFlow = _semanticModel.AnalyzeDataFlow(statement);
-                    validForChildren = dataFlow.AlwaysAssigned.Union(dataFlow.DataFlowsIn);
+                    validForChildren = dataFlow.AlwaysAssigned.Union(dataFlow.DataFlowsIn, SymbolEqualityComparer.Default);
                 }
 
                 var symbols = _semanticModel.LookupSymbols(statement.FullSpan.Start);
-                var locals = symbols.Where(s => s.Kind == SymbolKind.Local && assigned.Contains(s));
+                var locals = symbols.Where(s => s.Kind == SymbolKind.Local && assigned.Contains(s, SymbolEqualityComparer.Default));
                 var fields = symbols.Where(s => s.Kind == SymbolKind.Field && (s.IsStatic || !isInStaticMethod));
                 var param = symbols.Where(s => s.Kind == SymbolKind.Parameter);
 
@@ -174,7 +174,7 @@ namespace WorkspaceServer.Servers.Roslyn.Instrumentation
                 var parentAugmentation = Augmentations.Data[block.Parent];
                 if (parentAugmentation != null)
                 {
-                    return parentAugmentation.Locals.Union(parentAugmentation.InternalLocals);
+                    return parentAugmentation.Locals.Union(parentAugmentation.InternalLocals, SymbolEqualityComparer.Default);
                 }
             }
 
