@@ -474,7 +474,7 @@ public class Program
 
                 console.Out.ToString()
                     .Should().Contain("Build failed")
-                    .And.Contain("generated_include_file_global.cs(1,46): error CS1002: ; expected");
+                    .And.Contain("generated_include_file_global.cs(3,53): error CS1002: ; expected");
 
                 resultCode.Should().NotBe(0);
             }
