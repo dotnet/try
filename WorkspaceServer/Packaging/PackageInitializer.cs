@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
 using Microsoft.DotNet.Interactive.Utility;
+using Newtonsoft.Json.Linq;
 
 namespace WorkspaceServer.Packaging
 {
@@ -50,7 +51,12 @@ namespace WorkspaceServer.Packaging
 
             var dotnet = new Dotnet(directory);
 
-            var result = await dotnet
+            // TODO : workaround to make build work, it requires
+            var result = await dotnet.New("globaljson", "--sdk-version 3.1.300");
+            result.ThrowOnFailure($"Error creating global.json in {directory.FullName}");
+            
+
+            result = await dotnet
                              .New(Template,
                                   args: $"--name \"{ProjectName}\" --language \"{Language}\" --output \"{directory.FullName}\"");
             result.ThrowOnFailure($"Error initializing in {directory.FullName}");
