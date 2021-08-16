@@ -31,13 +31,7 @@ namespace WorkspaceServer.Packaging
             {
                 _fileSystemWatcher = new FileSystemWatcher(Directory.FullName)
                 {
-                    EnableRaisingEvents = true,
-                    NotifyFilter = NotifyFilters.CreationTime
-                                   | NotifyFilters.DirectoryName
-                                   | NotifyFilters.FileName
-                                   | NotifyFilters.LastWrite
-                                   | NotifyFilters.LastAccess
-                                   | NotifyFilters.Size
+                    EnableRaisingEvents = true
                 };
 
                 _fileSystemWatcher.Changed += FileSystemWatcherOnChangedOrDeleted;
