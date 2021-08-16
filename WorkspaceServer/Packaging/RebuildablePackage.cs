@@ -37,8 +37,7 @@ namespace WorkspaceServer.Packaging
                                    | NotifyFilters.FileName
                                    | NotifyFilters.LastWrite
                                    | NotifyFilters.LastAccess
-                                   | NotifyFilters.Size,
-                    IncludeSubdirectories = true
+                                   | NotifyFilters.Size
             };
 
                 _fileSystemWatcher.Changed += FileSystemWatcherOnChangedOrDeleted;
