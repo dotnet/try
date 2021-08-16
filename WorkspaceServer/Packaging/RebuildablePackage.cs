@@ -38,7 +38,7 @@ namespace WorkspaceServer.Packaging
                                    | NotifyFilters.LastWrite
                                    | NotifyFilters.LastAccess
                                    | NotifyFilters.Size
-            };
+                };
 
                 _fileSystemWatcher.Changed += FileSystemWatcherOnChangedOrDeleted;
                 _fileSystemWatcher.Deleted += FileSystemWatcherOnDeleted;

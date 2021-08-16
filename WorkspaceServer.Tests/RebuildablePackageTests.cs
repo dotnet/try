@@ -36,13 +36,13 @@ namespace WorkspaceServer.Tests
             var ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var newFile = Path.Combine(package.Directory.FullName, "Sample.cs");
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == newFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain( newFile);
 
             File.WriteAllText(newFile, "//this is a new file");
 
             ws = await package.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(newFile);
         }
 
         [Fact]
@@ -52,14 +52,14 @@ namespace WorkspaceServer.Tests
             var ws = await oldPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var newFile = Path.Combine(oldPackage.Directory.FullName, "Sample.cs");
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == newFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(newFile);
 
             File.WriteAllText(newFile, "//this is a new file");
 
             var newPackage = new RebuildablePackage(directory: oldPackage.Directory);
             ws = await newPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(newFile);
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace WorkspaceServer.Tests
             var sampleCsFile = Path.Combine(oldPackage.Directory.FullName, "Sample.cs");
             File.WriteAllText(sampleCsFile, "//this is a file which will be deleted later");
             var ws = await oldPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == sampleCsFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(sampleCsFile);
 
             File.Delete(sampleCsFile);
             var newFileAdded = Path.Combine(oldPackage.Directory.FullName, "foo.cs");
@@ -79,8 +79,8 @@ namespace WorkspaceServer.Tests
             var newPackage = new RebuildablePackage(directory: oldPackage.Directory);
             ws = await newPackage.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == sampleCsFile);
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == newFileAdded);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(sampleCsFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(newFileAdded);
         }
 
         [Fact]
@@ -114,13 +114,13 @@ namespace WorkspaceServer.Tests
             var ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
 
             var existingFile = Path.Combine(package.Directory.FullName, "Program.cs");
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath == existingFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(existingFile);
 
             File.Delete(existingFile);
             await Task.Delay(1000);
 
             ws = await build.CreateRoslynWorkspaceForRunAsync(new TimeBudget(30.Seconds()));
-            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(filePath => filePath == existingFile);
+            ws.CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().NotContain(existingFile);
         }
 
         [Fact]
@@ -156,8 +156,8 @@ namespace WorkspaceServer.Tests
 
             var workspaces = await Task.WhenAll(workspace1, workspace2);
 
-            workspaces[0].CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath.EndsWith("Sample.cs"));
-            workspaces[1].CurrentSolution.Projects.First().Documents.Select(d => d.FilePath).Should().Contain(filePath => filePath.EndsWith("Sample.cs"));
+            workspaces[0].CurrentSolution.Projects.First().Documents.Select(d => Path.GetFileName(d.FilePath)).Should().Contain("Sample.cs");
+            workspaces[1].CurrentSolution.Projects.First().Documents.Select(d => Path.GetFileName(d.FilePath)).Should().Contain("Sample.cs");
         }
     }
 }
