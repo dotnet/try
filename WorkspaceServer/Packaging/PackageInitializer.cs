@@ -3,9 +3,12 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Clockwise;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive.Utility;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace WorkspaceServer.Packaging
@@ -54,7 +57,11 @@ namespace WorkspaceServer.Packaging
             // TODO : workaround to make build work, it requires
             var result = await dotnet.New("globaljson", "--sdk-version 3.1.300");
             result.ThrowOnFailure($"Error creating global.json in {directory.FullName}");
-            
+            var gbFile = directory.GetFiles("global.json").Single();
+            var gj = JObject.Parse(File.ReadAllText(gbFile.FullName));
+
+            gj["sdk"]["rollForward"] = "latestMinor";
+            File.WriteAllText(gbFile.FullName, gj.ToString(Formatting.Indented));
 
             result = await dotnet
                              .New(Template,
