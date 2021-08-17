@@ -16,7 +16,9 @@
   <ItemGroup>
     <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20359.2" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="$(MicrosoftAspNetCoreHtmlAbstractionsVersion)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="4.5.1" />
   </ItemGroup>
 
   <PropertyGroup>
