@@ -72,25 +72,26 @@ namespace WorkspaceServer.Packaging
 
         private void FileSystemWatcherOnDeleted(object sender, FileSystemEventArgs e)
         {
-            var fileName = e.Name;
-            var build = DesignTimeBuildResult;
-            if (build == null)
-            {
-                return;
-            }
+            HandleFileChanges(e.Name);
+            //var fileName = e.Name;
+            //var build = DesignTimeBuildResult;
+            //if (build == null)
+            //{
+            //    return;
+            //}
 
-            if (IsProjectFile(fileName) || IsBuildLogFile(fileName))
-            {
-                Reset();
-            }
-            else if (IsCodeFile(fileName))
-            {
-                var analyzerInputs = build.GetCompileInputs();
-                if (analyzerInputs.Any(sourceFile => sourceFile.EndsWith(fileName)))
-                {
-                    Reset();
-                }
-            }
+            //if (IsProjectFile(fileName) || IsBuildLogFile(fileName))
+            //{
+            //    Reset();
+            //}
+            //else if (IsCodeFile(fileName))
+            //{
+            //    var analyzerInputs = build.GetCompileInputs();
+            //    if (analyzerInputs.Any(sourceFile => sourceFile.EndsWith(fileName)))
+            //    {
+            //        Reset();
+            //    }
+            //}
         }
 
         private void FileSystemWatcherOnCreated(object sender, FileSystemEventArgs e)
@@ -115,17 +116,13 @@ namespace WorkspaceServer.Packaging
                 return;
             }
 
-            if (IsProjectFile(fileName))
+            if (IsProjectFile(fileName) || IsBuildLogFile(fileName))
             {
                 Reset();
             }
             else if (IsCodeFile(fileName))
             {
-                var analyzerInputs = build.GetCompileInputs();
-                if (analyzerInputs.Any(sourceFile => sourceFile.EndsWith(fileName)))
-                {
-                    Reset();
-                }
+                Reset();
             }
         }
 
