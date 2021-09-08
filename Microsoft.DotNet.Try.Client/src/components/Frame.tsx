@@ -113,6 +113,7 @@ export class Frame extends React.Component<IFrameProps, IFrameState>
         if (this.props.isActive) {
             return (
                 <iframe
+                        aria-hidden="true"
                         ref={el => {
                             this._frame = el;
                         }}
