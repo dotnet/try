@@ -52,14 +52,14 @@
   "scripts": {
     "build": "npm run rollup",
     "release": "npm run rollup && npm run createDir && npm run minify",
-    "createDir": "./node_modules/.bin/mkdirp ../wwwroot/api",
+    "createDir": "\"./node_modules/.bin/mkdirp\"  ../wwwroot/api",
     "minify": "uglifyjs dist/trydotnet.js --source-map --output ../wwwroot/api/trydotnet.min.js",
     "watch": "rollup -cw",
     "rollup": "rollup -c",
     "tdd": "npm test -- --watch",
     "test": "mocha  test/**/*.specs.ts",
     "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
-    "ciCreateDir": "./node_modules/.bin/mkdirp ",
+    "ciCreateDir": "\"./node_modules/.bin/mkdirp\"  ",
     "ciMinify": "uglifyjs dist/trydotnet.js --source-map"
   },
   "dependencies": {
