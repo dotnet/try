@@ -17,9 +17,9 @@
     "@mdi/font": "3.5.95",
     "fstream": "1.0.12",
     "github-markdown-css": "3.0.1",
-    "lodash": "^4.17.21",
-    "mkdirp": "1.0.3",
-    "sass": "1.37.5",
+    "lodash": "4.17.21",
+    "mkdirp": "1.0.4",
+    "sass": "1.49.0",
     "tar": "^6.1.9",
     "xterm": "3.12.0"
   }
