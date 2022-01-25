@@ -24,7 +24,7 @@ describe("a user", () => {
             let awaitableSession = createSessionWithProjectAndOpenDocument(
                 configuration,
                 editorIFrames,
-                dom.window,
+                <Window><any>dom.window,
                 {
                     package: "console",
                     files: [{ name: "program.cs", content: "" }]
@@ -42,7 +42,7 @@ describe("a user", () => {
             let editorIFrames = getEditorIFrames(dom);
             let awaitableSession = createSession(configuration,
                 editorIFrames,
-                dom.window);
+                <Window><any>dom.window);
 
             editorIFrames.forEach((iframe, index) => {
                 notifyEditorReadyWithId(configuration, dom.window, tryGetEditorId(iframe, index.toString()));
@@ -57,7 +57,7 @@ describe("a user", () => {
             let editorIFrames = getEditorIFrames(dom);
             let awaitableSession = createSession(configuration,
                 editorIFrames,
-                dom.window);
+                <Window><any>dom.window);
 
             notifyEditorReadyWithId(configuration, dom.window, tryGetEditorId(editorIFrames[0], "0"));
 

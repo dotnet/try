@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import { DOMWindow } from "jsdom";
 import { Configuration } from "../src";
 import { ApiMessage, RUN_REQUEST, COMPILE_REQUEST, CREATE_OPERATION_ID_REQUEST, CREATE_OPERATION_ID_RESPONSE, CREATE_REGIONS_FROM_SOURCEFILES_REQUEST, CREATE_REGIONS_FROM_SOURCEFILES_RESPONSE, SET_EDITOR_CODE_REQUEST, CODE_CHANGED_EVENT, SET_ACTIVE_BUFFER_REQUEST, HOST_EDITOR_READY_EVENT, SET_WORKSPACE_REQUEST, HOST_RUN_READY_EVENT, } from "../src/internals/apiMessages";
 import { SourceFileRegion, SourceFile } from "../src/project";
@@ -11,7 +12,7 @@ export type EditorState = {
     documentId: string
 };
 
-export function registerForRunRequest(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, onRequest: (request: ApiMessage) => ApiMessage): void {
+export function registerForRunRequest(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (request: ApiMessage) => ApiMessage): void {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         if (message.data.type === RUN_REQUEST) {
             let apiCall = <ApiMessage>(message.data);
@@ -20,7 +21,7 @@ export function registerForRunRequest(configuration: Configuration, iframe: HTML
     });
 }
 
-export function registerForLongRunRequest(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, onRequest: (request: ApiMessage) => ApiMessage): void {
+export function registerForLongRunRequest(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (request: ApiMessage) => ApiMessage): void {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         if (message.data.type === RUN_REQUEST) {
             let apiCall = <ApiMessage>(message.data);
@@ -31,7 +32,7 @@ export function registerForLongRunRequest(configuration: Configuration, iframe: 
     });
 }
 
-export function registerForCompileRequest(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, onRequest: (request: ApiMessage) => ApiMessage): void {
+export function registerForCompileRequest(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (request: ApiMessage) => ApiMessage): void {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         if (message.data.type === COMPILE_REQUEST) {
             let apiCall = <ApiMessage>(message.data);
@@ -40,7 +41,7 @@ export function registerForCompileRequest(configuration: Configuration, iframe: 
     });
 }
 
-export function registerForRequestIdGeneration(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, onRequest: (requestId: string) => string) {
+export function registerForRequestIdGeneration(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (requestId: string) => string) {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         if (message.data.type === CREATE_OPERATION_ID_REQUEST) {
             let response: ApiMessage = {
@@ -54,7 +55,7 @@ export function registerForRequestIdGeneration(configuration: Configuration, ifr
     });
 }
 
-export function registerForRegionFromFile(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, onRequest: (files: SourceFile[]) => SourceFileRegion[]) {
+export function registerForRegionFromFile(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (files: SourceFile[]) => SourceFileRegion[]) {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         if (message.data.type === CREATE_REGIONS_FROM_SOURCEFILES_REQUEST) {
             let response: ApiMessage = {
@@ -68,7 +69,7 @@ export function registerForRegionFromFile(configuration: Configuration, iframe: 
     });
 }
 
-export function registerForEditorMessages(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, editorState: EditorState) {
+export function registerForEditorMessages(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, editorState: EditorState) {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         let apiMessage = <ApiMessage>(message.data);
         if (apiMessage.type === SET_ACTIVE_BUFFER_REQUEST) {
@@ -89,7 +90,7 @@ export function registerForEditorMessages(configuration: Configuration, iframe: 
     });
 }
 
-export function trackSetWorkspaceRequests(configuration: Configuration, iframe: HTMLIFrameElement, window: Window, messageStack: ApiMessage[]) {
+export function trackSetWorkspaceRequests(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, messageStack: ApiMessage[]) {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         let apiMessage = <ApiMessage>(message.data);
         if (apiMessage.type === SET_WORKSPACE_REQUEST) {
@@ -98,7 +99,7 @@ export function trackSetWorkspaceRequests(configuration: Configuration, iframe: 
     });
 }
 
-export function raiseTextChange(configuration: Configuration, window: Window, newText: string, documentId: string) {
+export function raiseTextChange(configuration: Configuration, window: DOMWindow, newText: string, documentId: string) {
     let message = {
         type: CODE_CHANGED_EVENT,
         sourceCode: newText,
@@ -108,7 +109,7 @@ export function raiseTextChange(configuration: Configuration, window: Window, ne
     window.postMessage(message, configuration.hostOrigin);
 }
 
-export function notifyEditorReady(configuration: Configuration, window: Window) {
+export function notifyEditorReady(configuration: Configuration, window: DOMWindow) {
     let response: ApiMessage = {
         type: HOST_EDITOR_READY_EVENT
     };
@@ -116,7 +117,7 @@ export function notifyEditorReady(configuration: Configuration, window: Window) 
     window.postMessage(response, configuration.hostOrigin);
 }
 
-export function notifyEditorReadyWithId(configuration: Configuration, window: Window, editorId: string) {
+export function notifyEditorReadyWithId(configuration: Configuration, window: DOMWindow, editorId: string) {
     let response: ApiMessage = {
         type: HOST_EDITOR_READY_EVENT,
         editorId: editorId
@@ -125,7 +126,7 @@ export function notifyEditorReadyWithId(configuration: Configuration, window: Wi
     window.postMessage(response, configuration.hostOrigin);
 }
 
-export function notifyRunReadyWithId(configuration: Configuration, window: Window, editorId: string) {
+export function notifyRunReadyWithId(configuration: Configuration, window: DOMWindow, editorId: string) {
     let response: ApiMessage = {
         type: HOST_RUN_READY_EVENT,
         editorId: editorId

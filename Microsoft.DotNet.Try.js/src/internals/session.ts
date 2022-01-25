@@ -190,7 +190,7 @@ export class Session implements ISession {
             }).bind(this);
 
             for (let i = 0; i < this.messageBuses.length; i++) {
-                this.messageBuses[i].subscribe(message => listenerHandler(message, i));
+                this.messageBuses[i].subscribe( { next: message => listenerHandler(message, i) });
             }
         });
     }

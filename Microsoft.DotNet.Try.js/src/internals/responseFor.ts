@@ -24,21 +24,26 @@ export function responseFor<T>(messageBus: IMessageBus, responseMessageType: str
 
 export function responseOrErrorFor<T, E>(messageBus: IMessageBus, responseMessageType: string, erroreMessageType: string, requestId: string, responseGenerator: (responseMessage: ApiMessage) => T, errorGenerator: (errorMessage: ApiMessage) => E): Promise<T> {
     let ret = new Promise<T>((resolve, reject) => {
-        let sub = messageBus.subscribe((message) => {
-            if (isApiMessageOfType(message, responseMessageType) && isApiMessageCorrelatedTo(message, requestId)) {
-                let result = responseGenerator(message);
-                sub.unsubscribe();
-                resolve(<T>result);
-            }
+        let sub = messageBus.subscribe({
+            next: (message) => {
+                if (isApiMessageOfType(message, responseMessageType) && isApiMessageCorrelatedTo(message, requestId)) {
+                    let result = responseGenerator(message);
+                    sub.unsubscribe();
+                    resolve(<T>result);
+                }
 
-            else if (isApiMessageOfType(message, erroreMessageType) && isApiMessageCorrelatedTo(message, requestId)) {
-                let result = errorGenerator(message);
-                sub.unsubscribe();
-                reject(<E>result);
-            }
-        }, error => {
-            sub.unsubscribe();
-            reject(error);
+                else if (isApiMessageOfType(message, erroreMessageType) && isApiMessageCorrelatedTo(message, requestId)) {
+                    let result = errorGenerator(message);
+                    sub.unsubscribe();
+                    reject(<E>result);
+                }
+            },
+            error:
+
+                error => {
+                    sub.unsubscribe();
+                    reject(error);
+                }
         });
     });
 
