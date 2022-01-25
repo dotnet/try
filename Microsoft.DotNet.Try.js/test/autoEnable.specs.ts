@@ -39,7 +39,7 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window).then(() => {
                 let iframe = dom.window.document.querySelector<HTMLIFrameElement>("body>iframe");
                 let src = iframe.getAttribute("src");
                 var url = new URL(src);
@@ -75,7 +75,7 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , debug: true}, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , debug: true}, dom.window.document, <Window><any>dom.window).then(() => {
                 let iframe = dom.window.document.querySelector<HTMLIFrameElement>("body>iframe");
                 let src = iframe.getAttribute("src");
                 var url = new URL(src);
@@ -111,7 +111,7 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useWasmRunner: true}, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useWasmRunner: true}, dom.window.document, <Window><any>dom.window).then(() => {
                 let iframe = dom.window.document.querySelector<HTMLIFrameElement>("body>iframe");
                 let src = iframe.getAttribute("src");
                 var url = new URL(src);
@@ -147,7 +147,7 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useWasmRunner: false}, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") , useWasmRunner: false}, dom.window.document, <Window><any>dom.window).then(() => {
                 let iframe = dom.window.document.querySelector<HTMLIFrameElement>("body>iframe");
                 let src = iframe.getAttribute("src");
                 var url = new URL(src);
@@ -195,7 +195,7 @@ describe("a user", () => {
                 });
 
             dom.window.document.querySelectorAll("iframe").length.should.be.equal(0);
-            expect(() => autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window))
+            expect(() => autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window))
                 .to.throw("editor id preSession::editor already defined");
         });
 
@@ -226,7 +226,7 @@ describe("a user", () => {
                 });
 
             dom.window.document.querySelectorAll("iframe").length.should.be.equal(0);
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window).then(() => {
                 dom.window.document.querySelectorAll("iframe").length.should.be.equal(1);
                 done();
             });
@@ -254,7 +254,7 @@ describe("a user", () => {
                 });
 
             dom.window.document.querySelectorAll("iframe").length.should.be.equal(0);
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window).then(() => {
                 dom.window.document.querySelectorAll("iframe").length.should.be.equal(1);
                 done();
             });
@@ -299,7 +299,7 @@ describe("a user", () => {
                 });
 
             dom.window.document.querySelectorAll("iframe").length.should.be.equal(0);
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window).then(() => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window).then(() => {
                 dom.window.document.querySelectorAll("iframe").length.should.be.equal(2);
                 done();
             });
@@ -338,7 +338,7 @@ describe("a user", () => {
             dom.window.document.querySelectorAll("iframe").length.should.be.equal(0);
 
             expect(dom.window.document.querySelectorAll("button")[0].onclick).to.be.null;
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window)
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window)
                 .then((sessions) => {
                     dom.window.document.querySelectorAll("iframe").length.should.be.equal(1);
                     expect(dom.window.document.querySelectorAll("button")[0].onclick).not.to.be.undefined;
@@ -382,7 +382,7 @@ describe("a user", () => {
             dom.window.document.querySelectorAll("iframe").length.should.be.equal(0);
 
             expect(dom.window.document.querySelectorAll("button")[0].onclick).to.be.null;
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window).then((sessions) => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window).then((sessions) => {
 
                 let editorIFrame = sessions[0].editorIframes[0];
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
@@ -434,7 +434,7 @@ describe("a user", () => {
                     runScripts: "dangerously"
                 });
 
-            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, dom.window).then((sessions) => {
+            autoEnable({ apiBaseAddress: new URL("https://try.dot.net") }, dom.window.document, <Window><any>dom.window).then((sessions) => {
 
                 sessions.length.should.be.equal(2);
                 let editorIFrameA = sessions[0].editorIframes[0];
