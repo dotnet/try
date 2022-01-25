@@ -99,7 +99,7 @@ export function tryParseEnum(outputType?: string): tryDotNetOutputModes {
     }
 
     for (let n in tryDotNetOutputModes) {
-        const name = tryDotNetOutputModes[n];
+        const name = <string>(tryDotNetOutputModes[<tryDotNetOutputModes>n]);
         console.log(name);
         if (name === outputType) {
             return <tryDotNetOutputModes>n;
