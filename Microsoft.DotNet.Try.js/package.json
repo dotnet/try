@@ -9,7 +9,7 @@
   ],
   "types": "dist/index.d.ts",
   "devDependencies": {
-    "@testdeck/mocha": "0.1.2",
+    "@testdeck/mocha": "0.2.0",
     "@types/chai": "4.2.21",
     "@types/chai-as-promised": "7.1.4",
     "@types/chai-subset": "1.3.3",
@@ -33,7 +33,7 @@
     "jsdom": "13.2.0",
     "lodash": "4.17.21",
     "mkdirp": "1.0.3",
-    "mocha": "9.0.3",
+    "mocha": "9.2.0",
     "mocha-multi-reporters": "1.5.1",
     "mocha-trx-reporter": "3.3.1",
     "requirejs": "2.3.6",
@@ -43,11 +43,11 @@
     "rollup-plugin-typescript2": "0.30.0",
     "source-map-loader": "0.2.4",
     "source-map-support": "0.5.10",
-    "ts-mocha": "8.0.0",
-    "ts-node": "8.7.0",
+    "ts-mocha": "9.0.2",
+    "ts-node": "10.4.0",
     "tslint": "5.12.1",
-    "typescript": "3.3.1",
-    "uglify-js": "3.4.9"
+    "typescript": "4.5.5",
+    "uglify-js": "3.14.5"
   },
   "scripts": {
     "build": "npm run rollup",
@@ -66,9 +66,6 @@
     "es6-promise": "4.2.5",
     "rxjs": "6.5.2",
     "xterm": "3.13.2"
-  },
-  "publishConfig": {
-    "registry": "https://msazure.pkgs.visualstudio.com/_packaging/MLS/npm/registry"
   },
   "mocha": {
     "ui": "bdd",
