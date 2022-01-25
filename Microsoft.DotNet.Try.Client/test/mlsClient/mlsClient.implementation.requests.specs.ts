@@ -4,7 +4,6 @@
 import * as chai from "chai";
 import MlsClient from "../../src/MlsClient";
 import fetch from "../../src/utilities/fetch";
-import { suite } from "mocha-typescript";
 import {defaultWorkspace, clientConfigurationExample, emptyWorkspace} from "../testResources";
 import { IWorkspaceFile } from "../../src/IState";
 import { IMockHttpServer, createMockHttpServer } from "./mockHttpServerFactory";
@@ -12,7 +11,7 @@ import { NullAIClient } from "../../src/ApplicationInsights";
 
 chai.should();
 
-suite("MlsClient Implementation", function() {
+describe.skip("MlsClient Implementation", function() {
   let server: IMockHttpServer;
   beforeEach(async function() {
     server = await createMockHttpServer("localhost");

@@ -5,13 +5,12 @@ import * as chai from "chai";
 
 import {Request} from "../../src/MlsClient";
 import fetch from "../../src/utilities/fetch";
-import {suite} from "mocha-typescript";
 import { createMockHttpServer, IMockHttpServer } from "../mlsClient/mockHttpServerFactory";
 
 chai.use(require("chai-as-promised"));
 chai.should();
 
-suite("fetch", () => {    
+describe.skip("fetch", () => {    
     let server : IMockHttpServer;
 
     beforeEach(async function () {
