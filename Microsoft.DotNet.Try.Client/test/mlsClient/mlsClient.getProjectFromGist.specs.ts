@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import IMlsClient from "../../src/IMlsClient";
-import { suite } from "mocha-typescript";
 
 import chai = require("chai");
 import { createMockHttpServer, IMockHttpServer } from "./mockHttpServerFactory";
@@ -15,7 +14,7 @@ chai.use(require("chai-subset"));
 chai.should();
 
 export default (getClient: ICanGetAClient) => {
-    suite(`getProjectFromGist`, () => {
+    describe.skip(`getProjectFromGist`, () => {
         let server: IMockHttpServer;
 
         let client: IMlsClient;
