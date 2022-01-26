@@ -22,7 +22,7 @@
     <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
     <SystemReactiveVersion>4.3.2</SystemReactiveVersion>
     <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
-    <MicrosoftCodeAnalysisCommonVersion>3.5.0-beta1-final</MicrosoftCodeAnalysisCommonVersion>
-    <MicrosoftCodeAnalysisWorkspacesCommonVersion>3.5.0-beta1-final</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <MicrosoftCodeAnalysisCommonVersion>4.0.1</MicrosoftCodeAnalysisCommonVersion>
+    <MicrosoftCodeAnalysisWorkspacesCommonVersion>4.0.1</MicrosoftCodeAnalysisWorkspacesCommonVersion>
   </PropertyGroup>
 </Project>
