@@ -9,7 +9,7 @@
     "start": "npm run build -- --watch",
     "build": "sass --no-source-map sass/trydotnet.scss ../MLS.Agent/wwwroot/css/trydotnet.css",
     "release": "sass --no-source-map --style=compressed sass/trydotnet.scss",
-    "ciCreateDir": "pwsh \"./node_modules/.bin/mkdirp\" "
+    "ciCreateDir": "pwsh \"./node_modules/.bin/mkdirp.ps1\" "
   },
   "author": "Diego Colombo",
   "license": "MIT",
