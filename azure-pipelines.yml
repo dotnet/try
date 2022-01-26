@@ -185,7 +185,7 @@ stages:
             versionSpec: $(NodeJSVersion)
 
         - task: UseDotNet@2
-          displayName: Add dotnet 3.0
+          displayName: Add dotnet
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
@@ -228,7 +228,7 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
         - task: UseDotNet@2
-          displayName: Add dotnet 3.0
+          displayName: Add dotnet
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
