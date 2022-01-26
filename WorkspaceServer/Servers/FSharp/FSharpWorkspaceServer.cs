@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Clockwise;
-using FSharpWorkspaceShim;
 using Microsoft.DotNet.Try.Project;
 using Microsoft.DotNet.Try.Protocol;
 using WorkspaceServer.Packaging;
@@ -44,14 +43,16 @@ namespace WorkspaceServer.Servers.FSharp
 
         public async Task<DiagnosticResult> GetDiagnostics(WorkspaceRequest request, Budget budget = null)
         {
-            var workspace = request.Workspace;
-            var package = await _packageFinder.Find<Package>(workspace.WorkspaceType);
-            workspace = await _transformer.TransformAsync(workspace);
-            var packageWithChanges = await CreatePackageWithChanges(package, workspace);
-            var packageFiles = packageWithChanges.GetFiles();
-            var diagnostics = await Shim.GetDiagnostics(packageWithChanges.Name, packageFiles, packageWithChanges.Directory.FullName, package.Directory.FullName);
-            var serializableDiagnostics = workspace.MapDiagnostics(request.ActiveBufferId, diagnostics, budget).DiagnosticsInActiveBuffer;
-            return new DiagnosticResult(serializableDiagnostics, request.RequestId);
+            //var workspace = request.Workspace;
+            //var package = await _packageFinder.Find<Package>(workspace.WorkspaceType);
+            //workspace = await _transformer.TransformAsync(workspace);
+            //var packageWithChanges = await CreatePackageWithChanges(package, workspace);
+            //var packageFiles = packageWithChanges.GetFiles();
+            //var diagnostics = await Shim.GetDiagnostics(packageWithChanges.Name, packageFiles, packageWithChanges.Directory.FullName, package.Directory.FullName);
+            //var serializableDiagnostics = workspace.MapDiagnostics(request.ActiveBufferId, diagnostics, budget).DiagnosticsInActiveBuffer;
+            //return new DiagnosticResult(serializableDiagnostics, request.RequestId);
+
+            throw new NotImplementedException();
         }
 
         public Task<SignatureHelpResult> GetSignatureHelp(WorkspaceRequest request, Budget budget = null)
