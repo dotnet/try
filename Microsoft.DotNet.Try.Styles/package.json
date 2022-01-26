@@ -9,9 +9,7 @@
     "start": "npm run build -- --watch",
     "build": "sass --no-source-map sass/trydotnet.scss ../MLS.Agent/wwwroot/css/trydotnet.css",
     "release": "sass --no-source-map --style=compressed sass/trydotnet.scss",
-    "ciCreateDir:win32": "./node_modules/.bin/mkdirp.cmd ",
-    "ciCreateDir:default": "./node_modules/.bin/mkdirp ",
-    "ciCreateDir": "run-script-os"
+    "ciCreateDir": "npx mkdirp "
   },
   "author": "Diego Colombo",
   "license": "MIT",
@@ -20,8 +18,7 @@
     "fstream": "1.0.12",
     "github-markdown-css": "3.0.1",
     "lodash": "4.17.21",
-    "mkdirp": "1.0.",
-    "run-script-os": "1.1.6",
+    "mkdirp": "1.0.4",
     "sass": "1.49.0",
     "tar": "^6.1.9",
     "xterm": "3.12.0"
