@@ -47,7 +47,8 @@
     "ts-node": "10.4.0",
     "tslint": "5.12.1",
     "typescript": "4.5.5",
-    "uglify-js": "3.14.5"
+    "uglify-js": "3.14.5",
+    "run-script-os": "1.1.6"
   },
   "scripts": {
     "build": "npm run rollup",
@@ -59,7 +60,9 @@
     "tdd": "npm test -- --watch",
     "test": "mocha  test/**/*.specs.ts",
     "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
-    "ciCreateDir": "pwsh \"./node_modules/.bin/mkdirp.ps1\" ",
+    "ciCreateDir:win32": "./node_modules/.bin/mkdirp.cmd ",
+    "ciCreateDir:default": "./node_modules/.bin/mkdirp ",
+    "ciCreateDir": "run-script-os",
     "ciMinify": "uglifyjs dist/trydotnet.js --source-map"
   },
   "dependencies": {
