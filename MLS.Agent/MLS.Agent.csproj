@@ -86,7 +86,6 @@
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Protocol.ClientApi\Microsoft.DotNet.Try.Protocol.ClientApi.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
-    <ProjectReference Include="..\MLS.Blazor\MLS.Blazor.csproj" />
     <ProjectReference Include="..\MLS.Repositories\MLS.Repositories.csproj" />
     <ProjectReference Include="..\WorkspaceServer\WorkspaceServer.csproj" />
   </ItemGroup>
