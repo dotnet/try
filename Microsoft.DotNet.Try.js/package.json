@@ -47,22 +47,19 @@
     "ts-node": "10.4.0",
     "tslint": "5.12.1",
     "typescript": "4.5.5",
-    "uglify-js": "3.14.5",
-    "run-script-os": "1.1.6"
+    "uglify-js": "3.14.5"
   },
   "scripts": {
     "build": "npm run rollup",
     "release": "npm run rollup && npm run createDir && npm run minify",
-    "createDir": "pwsh \"./node_modules/.bin/mkdirp.ps1\"   ../wwwroot/api",
+    "createDir": "npx mkdirp ../wwwroot/api",
     "minify": "uglifyjs dist/trydotnet.js --source-map --output ../wwwroot/api/trydotnet.min.js",
     "watch": "rollup -cw",
     "rollup": "rollup -c",
     "tdd": "npm test -- --watch",
     "test": "mocha  test/**/*.specs.ts",
     "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
-    "ciCreateDir:win32": "./node_modules/.bin/mkdirp.cmd ",
-    "ciCreateDir:default": "./node_modules/.bin/mkdirp ",
-    "ciCreateDir": "run-script-os",
+    "ciCreateDir": "npx mkdirp ",
     "ciMinify": "uglifyjs dist/trydotnet.js --source-map"
   },
   "dependencies": {

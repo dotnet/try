@@ -124,8 +124,7 @@
     "webpack-cli": "3.1.0",
     "webpack-merge": "4.1.4",
     "webpack-monitor": "1.0.14",
-    "webpack-node-externals": "1.7.2",
-    "run-script-os": "1.1.6"
+    "webpack-node-externals": "1.7.2"
   },
   "scripts": {
     "build": "webpack -p --config ./webpack.config/nonTest/prod/webpack.config.ts",
@@ -136,9 +135,7 @@
     "devNoOrchestrator": "webpack --watch --config ./webpack.config/nonTest/dev/webpack.config.ts",
     "profile": "webpack -p --inline --progress --colors --profile --config ./webpack.config/nonTest/profile/webpack.config.ts",
     "tdd": "npm test -- --watch",
-    "ciCreateDir:win32": "./node_modules/.bin/mkdirp.cmd ",
-    "ciCreateDir:default": "./node_modules/.bin/mkdirp ",
-    "ciCreateDir": "run-script-os",
+    "ciCreateDir": "npx mkdirp ",
     "test": "mochapack --opts mocha.opts"
   }
 }
