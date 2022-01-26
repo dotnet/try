@@ -172,7 +172,6 @@
     </PropertyGroup>
 
     <Exec Command="npm ci" WorkingDirectory="$(ClientInputDir)" />
-    <Message Text="npm run ciCreateDir -- $(ClientOutputDir)" />
     <Exec Command="npm run ciCreateDir -- $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
     <Exec Command="npm run buildCi -- --output-path $(ClientOutputDir)" WorkingDirectory="$(ClientInputDir)" />
 
