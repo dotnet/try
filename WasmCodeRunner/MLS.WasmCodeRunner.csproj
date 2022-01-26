@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>MLS.WasmCodeRunner</PackageId>
+    <LangVersion>Latest</LangVersion>
     <IsPackable>true</IsPackable>
     <Description>
       Contains the implementation of the try.dot.net code runner

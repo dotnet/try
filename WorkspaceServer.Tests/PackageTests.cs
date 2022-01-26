@@ -169,9 +169,9 @@ namespace WorkspaceServer.Tests
             }
 
             buildEventsMessages.Should()
-                .Contain(e => e.StartsWith($"Building package {package.Name}"))
+                .Contain(e => e.StartsWith("Building package "+package.Name))
                 .And
-                .Contain(e => e.StartsWith($"Skipping build for package {package.Name}"));
+                .Contain(e => e.StartsWith("Skipping build for package "+package.Name));
         }
 
         [Theory]

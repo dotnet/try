@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
     <NoWarn>$(NoWarn);8002</NoWarn><!-- Markdig isn't strongly signed -->
@@ -15,9 +15,9 @@
 
   <ItemGroup>
     <PackageReference Include="Assent" Version="1.7.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.30" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="Markdig" Version="0.17.1" />
+    <PackageReference Include="Markdig" Version="0.23.0" />
   </ItemGroup>
 
   <ItemGroup>

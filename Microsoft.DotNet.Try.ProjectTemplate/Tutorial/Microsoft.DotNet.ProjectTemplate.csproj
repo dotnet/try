@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageId>Microsoft.DotNet.Try.ProjectTemplate.Tutorial</PackageId>
+    <LangVersion>Latest</LangVersion>
     <IsPackable>true</IsPackable>
     <PackageDescription> A template for interactive documentation with Try.NET</PackageDescription>
     <PackageType>Template</PackageType>

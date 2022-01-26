@@ -18,7 +18,7 @@ variables:
   - name: BlazorTemplateVersion
     value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
-    value: '5.0.100'
+    value: '6.0.101'
   - name: DotNetSdkVersion3
     value: '3.1.300'
   - name: NodeJSVersion
