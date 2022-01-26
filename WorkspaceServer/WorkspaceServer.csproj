@@ -75,7 +75,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FSharpWorkspaceShim\FSharpWorkspaceShim.fsproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Markdown\Microsoft.DotNet.Try.Markdown.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Try.Project\Microsoft.DotNet.Try.Project.csproj" />
     <ProjectReference Include="..\MLS.Agent.Tools\MLS.Agent.Tools.csproj" />
