@@ -15,12 +15,12 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
-  - name: BlazorTemplateVersion
-    value: 3.1.0-preview4.19579.2
+  # - name: BlazorTemplateVersion
+  #   value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
     value: '6.0.101'
-  - name: DotNetSdkVersion3
-    value: '3.1.300'
+  # - name: DotNetSdkVersion3
+  #   value: '3.1.300'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
@@ -87,12 +87,12 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
 
-        - task: UseDotNet@2
-          displayName: Add dotnet 3.0
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion3)
-            installationPath: $(Agent.ToolsDirectory)\dotnet
+        # - task: UseDotNet@2
+        #   displayName: Add dotnet 3.0
+        #   inputs:
+        #     packageType: sdk
+        #     version: $(DotNetSdkVersion3)
+        #     installationPath: $(Agent.ToolsDirectory)\dotnet
 
         - task: UseDotNet@2
           displayName: Add dotnet
@@ -101,8 +101,8 @@ stages:
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)\dotnet
 
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        #   displayName: Install Blazor templates
 
         - script: |
             robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
@@ -191,8 +191,8 @@ stages:
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)/dotnet
 
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        #   displayName: Install Blazor templates
 
         - script: |
             mkdir -p "$(Build.SourcesDirectory)/artifacts"
@@ -233,8 +233,9 @@ stages:
             packageType: sdk
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)/dotnet
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        #   displayName: Install Blazor templates
+
         - task: PowerShell@2
           displayName: Run up-to-date build check
           inputs:
