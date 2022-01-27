@@ -75,11 +75,11 @@ export function getDocumentsToInclude(includes: Includes, sessionId: string): Do
 
     if (includes !== null) {
         if (includes.global && includes.global.documents.length > 0) {
-            merged.push(...includes.global.documents);
+            merged =  merged.concat(includes.global.documents);
         }
         let sessionRelated = includes[sessionId];
         if (sessionRelated && sessionRelated.documents.length > 0) {
-            merged.push(...sessionRelated.documents);
+            merged =  merged.concat(sessionRelated.documents);
         }
     }
     return merged;
@@ -92,15 +92,15 @@ export function mergeFiles(
 ): SourceFile[] {
     let merged: SourceFile[] = [];
     if (source !== null && source.length > 0) {
-        merged.push(...source);
+        merged =  merged.concat(source);
     }
     if (includes !== null) {
         if (includes.global && includes.global.files.length > 0) {
-            merged.push(...includes.global.files);
+            merged =  merged.concat(includes.global.files);
         }
         let sessionRelated = includes[sessionId];
         if (sessionRelated && sessionRelated.files.length > 0) {
-            merged.push(...sessionRelated.files);
+            merged =  merged.concat(sessionRelated.files);
         }
     }
     return merged;

@@ -15,12 +15,14 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
-  - name: BlazorTemplateVersion
-    value: 3.1.0-preview4.19579.2
+  # - name: BlazorTemplateVersion
+  #   value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
-    value: '3.1.300'
+    value: '6.0.101'
+  # - name: DotNetSdkVersion3
+  #   value: '3.1.300'
   - name: NodeJSVersion
-    value: '12.15.0'
+    value: '16.13.0'
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 
@@ -41,8 +43,8 @@ stages:
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
             vmImage: windows-2019
           ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCoreInternal-Pool
-            queue: buildpool.windows.10.amd64.vs2019
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals Build.windows.10.amd64.vs2019
         variables:
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
@@ -85,15 +87,22 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
 
+        # - task: UseDotNet@2
+        #   displayName: Add dotnet 3.0
+        #   inputs:
+        #     packageType: sdk
+        #     version: $(DotNetSdkVersion3)
+        #     installationPath: $(Agent.ToolsDirectory)\dotnet
+
         - task: UseDotNet@2
-          displayName: Add dotnet 3.0
+          displayName: Add dotnet
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)\dotnet
 
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        #   displayName: Install Blazor templates
 
         - script: |
             robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
@@ -145,7 +154,7 @@ stages:
       jobs:
       - job: Linux
         pool:
-          vmImage: ubuntu-16.04
+          vmImage: ubuntu-20.04
         variables:
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
@@ -173,17 +182,17 @@ stages:
         - task: NodeTool@0
           displayName: Add NodeJS/npm
           inputs:
-            versionSpec: $(NodeJSVersion)        
+            versionSpec: $(NodeJSVersion)
 
         - task: UseDotNet@2
-          displayName: Add dotnet 3.0
+          displayName: Add dotnet
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)/dotnet
 
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        #   displayName: Install Blazor templates
 
         - script: |
             mkdir -p "$(Build.SourcesDirectory)/artifacts"
@@ -219,13 +228,14 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
         - task: UseDotNet@2
-          displayName: Add dotnet 3.0
+          displayName: Add dotnet
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)/dotnet
-        - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-          displayName: Install Blazor templates
+        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
+        #   displayName: Install Blazor templates
+
         - task: PowerShell@2
           displayName: Run up-to-date build check
           inputs:
@@ -240,7 +250,7 @@ stages:
   #       dependsOn: Windows_NT
   #       condition: succeeded()
   #       pool:
-  #         vmImage: ubuntu-16.04
+  #         vmImage: ubuntu-20.04
   #       variables:
   #         - name: PACKAGESOURCE
   #           value: $(System.DefaultWorkingDirectory)/packages/Shipping

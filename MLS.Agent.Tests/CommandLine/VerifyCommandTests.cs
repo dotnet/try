@@ -474,7 +474,7 @@ public class Program
 
                 console.Out.ToString()
                     .Should().Contain("Build failed")
-                    .And.Contain("generated_include_file_global.cs(1,46): error CS1002: ; expected");
+                    .And.Contain("generated_include_file_global.cs(3,53): error CS1002: ; expected");
 
                 resultCode.Should().NotBe(0);
             }
@@ -586,7 +586,7 @@ This is some sample code:
 
                 console.Out.ToString()
                        .Should().Contain("Build failed")
-                       .And.Contain("Sample.cs(1,10): error CS1002: ; expected");
+                       .And.Contain("Sample.cs(1,17): error CS1002: ; expected");
 
                 resultCode.Should().NotBe(0);
             }

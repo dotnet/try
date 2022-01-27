@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PackageId>Microsoft.DotNet.Try.ProjectTemplate.Tutorial</PackageId>
+    <LangVersion>Latest</LangVersion>
     <IsPackable>true</IsPackable>
     <PackageDescription> A template for interactive documentation with Try.NET</PackageDescription>
     <PackageType>Template</PackageType>

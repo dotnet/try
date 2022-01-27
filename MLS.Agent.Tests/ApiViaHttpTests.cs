@@ -134,10 +134,9 @@ namespace MLS.Agent.Tests
             var result = await response
                                .EnsureSuccess()
                                .DeserializeAs<RunResult>();
-
+            
             result.ShouldFailWithOutput(
-                "Program.cs(1,19): error CS1022: Type or namespace definition, or end-of-file expected",
-                "Program.cs(1,19): error CS1026: ) expected"
+                "*Program.cs(1,1): error CS8400: Feature 'top-level statements' is not available in C# 8.0. Please use language version 9.0 or greater.*"
             );
         }
 

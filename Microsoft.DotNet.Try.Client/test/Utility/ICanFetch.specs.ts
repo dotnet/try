@@ -42,7 +42,7 @@ export default function ICanFetchSpecs(getICanFetch: ICanGetAnICanFetch, impleme
     });
 }
 
-describe("ICanFetch integration tests", async function () {
+describe.skip("ICanFetch integration tests", async function () {
     this.timeout(10000);
 
 
@@ -51,7 +51,7 @@ describe("ICanFetch integration tests", async function () {
     }
 });
 
-describe("ICanFetch failing simulator tests", async function () {
+describe.skip("ICanFetch failing simulator tests", async function () {
     this.timeout(10000);
 
     ICanFetchSpecs(() => failingFetcher, "failingFetcher");
