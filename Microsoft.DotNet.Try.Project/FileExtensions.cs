@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Try.Project
             {
                 if (!seenBuffers.Add(region.bufferId.ToString()))
                 {
-                    throw new InvalidOperationException("viewport identifiers must be unique");
+                    throw new InvalidOperationException("viewport identifiers must be unique 12345");
                 }
 
                 yield return new Viewport(sourceFile, region.span, region.outerSpan, region.bufferId);
