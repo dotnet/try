@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import typescript from 'rollup-plugin-typescript2'
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import pkg from './package.json';
 
 export default {
@@ -41,7 +41,7 @@ export default {
             main: true,
             browser: true,
             customResolveOptions: {
-                moduleDirectory: 'node_modules'
+                moduleDirectories: ['node_modules']
             }
         }),
         commonjs()

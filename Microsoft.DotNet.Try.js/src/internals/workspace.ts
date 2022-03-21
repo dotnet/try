@@ -11,6 +11,7 @@ import { Project, SourceFileRegion } from "../project";
 import { ITrydotnetMonacoTextEditor } from "./monacoTextEditor";
 import { isNullOrUndefined, isNullOrUndefinedOrWhitespace } from "../stringExtensions";
 
+//todo : this file should go as internal implementation will not user the following types
 export interface IWorkspace {
     workspaceType: string;
     language?: string;

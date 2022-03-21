@@ -378,3 +378,9 @@ docs/\.ionide/
 #Backup files
 *.bak
 NotebookExamples/*/Samples/housing.csv
+
+trydotnet.editor.js/dist/
+
+trydotnet.editor.js/lib/
+
+trydotnet.editor.js/test-results/

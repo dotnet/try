@@ -1,0 +1,13 @@
+{
+    "requests": [
+        {
+            "assembly": "12345678",
+            "events": [
+                {
+                    "source": "stdOut",
+                    "value": "2"
+                }
+            ]
+        }
+    ]
+}

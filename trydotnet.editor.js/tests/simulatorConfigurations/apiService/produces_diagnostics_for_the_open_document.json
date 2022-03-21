@@ -1,0 +1,138 @@
+{
+    "requests": [
+        {
+            "commands": [
+                {
+                    "commandType": "OpenProject",
+                    "command": {
+                        "project": {
+                            "files": [
+                                {
+                                    "relativePath": "program.cs",
+                                    "content": "Console.WriteLine(1);"
+                                },
+                                {
+                                    "relativePath": "class.cs",
+                                    "content": "public class A {}"
+                                }
+                            ]
+                        }
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                },
+                {
+                    "commandType": "OpenDocument",
+                    "command": {
+                        "path": "program.cs"
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                }
+            ],
+            "events": [
+                {
+                    "eventType": "DocumentOpened",
+                    "event": {
+                        "path": "program.cs",
+                        "content": "Console.WriteLine(1);"
+                    },
+                    "command": {
+                        "commandType": "OpenDocument",
+                        "command": {
+                            "path": "program.cs"
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                    }
+                },
+                {
+                    "eventType": "CommandSucceeded",
+                    "event": {},
+                    "command": {
+                        "commandType": "OpenDocument",
+                        "command": {
+                            "path": "program.cs"
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                    }
+                }
+            ]
+        },
+        {
+            "commands": [
+                {
+                    "commandType": "OpenProject",
+                    "command": {
+                        "project": {
+                            "files": [
+                                {
+                                    "relativePath": "program.cs",
+                                    "content": "Console.WriteLine(1);"
+                                },
+                                {
+                                    "relativePath": "class.cs",
+                                    "content": "public class A {}"
+                                }
+                            ]
+                        }
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                },
+                {
+                    "commandType": "OpenDocument",
+                    "command": {
+                        "path": "program.cs"
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                },
+                {
+                    "commandType": "RequestDiagnostics",
+                    "command": {
+                        "code": "Conzole"
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                }
+            ],
+            "events": [
+                {
+                    "eventType": "DiagnosticsProduced",
+                    "event": {
+                        "diagnostics": [
+                            {
+                                "message": "Error here!",
+                                "code": "Conzole",
+                                "severity": "error",
+                                "linePositionSpan": {
+                                    "start": {
+                                        "line": 1,
+                                        "character": 1
+                                    },
+                                    "end": {
+                                        "line": 1,
+                                        "character": 7
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "command": {
+                        "commandType": "RequestDiagnostics",
+                        "command": {
+                            "code": "Conzole"
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                    }
+                },
+                {
+                    "eventType": "CommandSucceeded",
+                    "event": {},
+                    "command": {
+                        "commandType": "RequestDiagnostics",
+                        "command": {
+                            "code": "Conzole"
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
+                    }
+                }
+            ]
+        }
+    ]
+}

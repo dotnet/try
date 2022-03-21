@@ -1,0 +1,76 @@
+{
+  "name": "@microsoft/trydotnet.editor.js",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "playwright:install": "npx playwright install",
+    "playwright:test": "npx playwright test",
+    "playwright": "npm run playwright:install && npm run playwright:test",
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "test": "mocha tests/**/*.tests.ts",
+    "build": "webpack --mode production",
+    "buildDev": "webpack --mode development",
+    "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/dotnet/try"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.20.0",
+    "@testdeck/mocha": "0.2.0",
+    "@types/chai": "4.3.0",
+    "@types/chai-as-promised": "7.1.5",
+    "@types/mocha": "9.1.0",
+    "@types/tmp": "0.2.3",
+    "@types/uuid": "8.3.4",
+    "@typescript-eslint/eslint-plugin": "5.15.0",
+    "@typescript-eslint/parser": "5.15.0",
+    "chai": "4.3.6",
+    "chai-as-promised": "7.1.1",
+    "css-loader": "6.7.1",
+    "eslint": "8.11.0",
+    "eslint-plugin-deprecation": "^1.3.2",
+    "file-loader": "6.2.0",
+    "html-webpack-plugin": "5.5.0",
+    "jsdom": "19.0.0",
+    "mocha": "9.2.2",
+    "mocha-multi-reporters": "1.5.1",
+    "mocha-trx-reporter": "3.3.1",
+    "monaco-editor-webpack-plugin": "7.0.1",
+    "source-map-loader": "3.0.1",
+    "style-loader": "3.3.1",
+    "tmp": "0.2.1",
+    "ts-loader": "9.2.8",
+    "ts-mocha": "9.0.2",
+    "ts-node": "10.7.0",
+    "typescript": "4.6.2",
+    "webpack": "5.70.0",
+    "webpack-cli": "4.9.2",
+    "webpack-dev-server": "4.7.4"
+  },
+  "dependencies": {
+    "@microsoft/dotnet-interactive": "1.0.317102",
+    "monaco-editor": "0.33.0",
+    "rxjs": "7.5.5"
+  },
+  "mocha": {
+    "ui": "bdd",
+    "timeout": "10000",
+    "require": [
+      "source-map-support/register",
+      "ts-node/register"
+    ],
+    "watch-files": [
+      "tests/**/*.tests.ts"
+    ],
+    "mochaExplorer.files": "test/**/*.tests.ts",
+    "mochaExplorer.require": "ts-node/register"
+  }
+}

@@ -1,0 +1,24 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "project": [
+            "./tsconfig.json",
+            "./tsconfig.eslint.json"
+        ],
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint",
+        "deprecation"
+    ],
+    "rules": {
+        "@typescript-eslint/semi": "warn",
+        "curly": "warn",
+        "deprecation/deprecation": "warn",
+        "eqeqeq": "warn",
+        "no-throw-literal": "warn",
+        "semi": "off"
+    }
+}
