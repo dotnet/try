@@ -8,7 +8,70 @@
                         "project": {
                             "files": [
                                 {
-                                    "relativePath": "Program.cs",
+                                    "relativeFilePath": "Program.cs",
+                                    "content": "public class C { }"
+                                }
+                            ]
+                        }
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                }
+            ],
+            "events": [
+                {
+                    "eventType": "ProjectOpened",
+                    "event": {
+                        "projectItems": [
+                            {
+                                "relativeFilePath": "Program.cs",
+                                "regionNames": []
+                            }
+                        ]
+                    },
+                    "command": {
+                        "commandType": "OpenProject",
+                        "command": {
+                            "project": {
+                                "files": [
+                                    {
+                                        "relativeFilePath": "Program.cs",
+                                        "content": "public class C { }"
+                                    }
+                                ]
+                            }
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                    }
+                },
+                {
+                    "eventType": "CommandSucceeded",
+                    "event": {},
+                    "command": {
+                        "commandType": "OpenProject",
+                        "command": {
+                            "project": {
+                                "files": [
+                                    {
+                                        "relativeFilePath": "Program.cs",
+                                        "content": "public class C { }"
+                                    }
+                                ]
+                            }
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                    }
+                }
+            ]
+        },
+        {
+            "commands": [
+                {
+                    "commandType": "OpenProject",
+                    "command": {
+                        "project": {
+                            "files": [
+                                {
+                                    "relativeFilePath": "Program.cs",
                                     "content": "public class C { }"
                                 }
                             ]
@@ -19,7 +82,7 @@
                 {
                     "commandType": "OpenDocument",
                     "command": {
-                        "path": "Program.cs"
+                        "relativeFilePath": "Program.cs"
                     },
                     "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                 }
@@ -28,13 +91,13 @@
                 {
                     "eventType": "DocumentOpened",
                     "event": {
-                        "path": "Program.cs",
+                        "relativeFilePath": "Program.cs",
                         "content": "public class C { }"
                     },
                     "command": {
                         "commandType": "OpenDocument",
                         "command": {
-                            "path": "Program.cs"
+                            "relativeFilePath": "Program.cs"
                         },
                         "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                     }
@@ -45,7 +108,7 @@
                     "command": {
                         "commandType": "OpenDocument",
                         "command": {
-                            "path": "Program.cs"
+                            "relativeFilePath": "Program.cs"
                         },
                         "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                     }

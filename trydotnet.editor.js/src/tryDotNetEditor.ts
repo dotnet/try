@@ -68,7 +68,7 @@ export class TryDotNetEditor {
 
     function toProject(workspace: contract.IWorkspace): dotnetInteractive.Project {
       let project: dotnetInteractive.Project = {
-        files: workspace.buffers.map(buffer => <dotnetInteractive.ProjectFile>{ relativePath: buffer.id, content: buffer.content }),
+        files: workspace.buffers.map(buffer => <dotnetInteractive.ProjectFile>{ relativeFilePath: buffer.id, content: buffer.content }),
       };
 
       return project;
@@ -91,7 +91,7 @@ export class TryDotNetEditor {
     await this.getKernel().send({
       commandType: dotnetInteractive.OpenDocumentType,
       command: <dotnetInteractive.OpenDocument>{
-        path: document.path,
+        relativeFilePath: document.path,
         regionName: document.regionName,
       }
     });

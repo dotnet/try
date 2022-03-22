@@ -5,17 +5,14 @@ import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 
 export abstract class ProjectKernel extends dotnetInteractive.Kernel {
   private _project: dotnetInteractive.Project;
-  private _openDocument?: {
-    path: string;
-    regionName?: string
-  };
+  private _openDocument?: dotnetInteractive.OpenDocument;
 
   protected get openProject() {
     return this._project;
   }
 
   protected get openDocument(): {
-    path: string;
+    relativeFilePath: string;
     regionName?: string
   } {
     return this._openDocument;
@@ -60,7 +57,7 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
         await this.handleOpenDocument(commandInvocation);
         let command = <dotnetInteractive.OpenDocument>commandInvocation.commandEnvelope.command;
         this._openDocument = {
-          path: command.path,
+          relativeFilePath: command.relativeFilePath,
           regionName: command.regionName
         };
       }

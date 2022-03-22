@@ -46,7 +46,7 @@ describe("when loading workspace", () => {
         tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
         let project = <dotnetInteractive.Project>{
-            files: [{ relativePath: "Program.cs", content: "public class C { }" }]
+            files: [{ relativeFilePath: "Program.cs", content: "public class C { }" }]
         };
         await tdn.openProject(project);
         await tdn.openDocument({ path: "Program.cs" });
@@ -67,7 +67,7 @@ describe("when user types in editor", () => {
         tdn.editor = editor;
 
         let project = <dotnetInteractive.Project>{
-            files: [{ relativePath: "Program.cs", content: "" }]
+            files: [{ relativeFilePath: "Program.cs", content: "" }]
         };
 
         await tdn.openProject(project);
@@ -97,7 +97,7 @@ describe("when user types in editor", () => {
         tdn.editor = editor;
 
         let project = <dotnetInteractive.Project>{
-            files: [{ relativePath: "Program.cs", content: "" }]
+            files: [{ relativeFilePath: "Program.cs", content: "" }]
         };
 
         await tdn.openProject(project);

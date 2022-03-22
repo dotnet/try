@@ -8,11 +8,86 @@
                         "project": {
                             "files": [
                                 {
-                                    "relativePath": "program.cs",
+                                    "relativeFilePath": "program.cs",
                                     "content": "Console.WriteLine(1);"
                                 },
                                 {
-                                    "relativePath": "class.cs",
+                                    "relativeFilePath": "class.cs",
+                                    "content": "public class A {}"
+                                }
+                            ]
+                        }
+                    },
+                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                }
+            ],
+            "events": [
+                {
+                    "eventType": "ProjectOpened",
+                    "event": {
+                        "projectItems": [
+                            {
+                                "relativeFilePath": "program.cs",
+                                "regionNames": []
+                            },
+                            {
+                                "relativeFilePath": "class.cs",
+                                "regionNames": []
+                            }
+                        ]
+                    },
+                    "command": {
+                        "commandType": "OpenProject",
+                        "command": {
+                            "project": {
+                                "files": [
+                                    {
+                                        "relativeFilePath": "program.cs",
+                                        "content": "Console.WriteLine(1);"
+                                    },
+                                    {
+                                        "relativeFilePath": "class.cs",
+                                        "content": "public class A {}"
+                                    }
+                                ]
+                            }
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                    }
+                },
+                {
+                    "eventType": "CommandSucceeded",
+                    "event": {},
+                    "command": {
+                        "commandType": "OpenProject",
+                        "command": {
+                            "project": {
+                                "files": [
+                                    {
+                                        "relativeFilePath": "program.cs",
+                                        "content": "Console.WriteLine(1);"
+                                    }
+                                ]
+                            }
+                        },
+                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
+                    }
+                }
+            ]
+        },
+        {
+            "commands": [
+                {
+                    "commandType": "OpenProject",
+                    "command": {
+                        "project": {
+                            "files": [
+                                {
+                                    "relativeFilePath": "program.cs",
+                                    "content": "Console.WriteLine(1);"
+                                },
+                                {
+                                    "relativeFilePath": "class.cs",
                                     "content": "public class A {}"
                                 }
                             ]
@@ -23,7 +98,7 @@
                 {
                     "commandType": "OpenDocument",
                     "command": {
-                        "path": "program.cs"
+                        "relativeFilePath": "program.cs"
                     },
                     "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                 }
@@ -32,13 +107,13 @@
                 {
                     "eventType": "DocumentOpened",
                     "event": {
-                        "path": "program.cs",
+                        "relativeFilePath": "program.cs",
                         "content": "Console.WriteLine(1);"
                     },
                     "command": {
                         "commandType": "OpenDocument",
                         "command": {
-                            "path": "program.cs"
+                            "relativeFilePath": "program.cs"
                         },
                         "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                     }
@@ -49,7 +124,7 @@
                     "command": {
                         "commandType": "OpenDocument",
                         "command": {
-                            "path": "program.cs"
+                            "relativeFilePath": "program.cs"
                         },
                         "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                     }
@@ -64,11 +139,11 @@
                         "project": {
                             "files": [
                                 {
-                                    "relativePath": "program.cs",
+                                    "relativeFilePath": "program.cs",
                                     "content": "Console.WriteLine(1);"
                                 },
                                 {
-                                    "relativePath": "class.cs",
+                                    "relativeFilePath": "class.cs",
                                     "content": "public class A {}"
                                 }
                             ]
@@ -79,7 +154,7 @@
                 {
                     "commandType": "OpenDocument",
                     "command": {
-                        "path": "program.cs"
+                        "relativeFilePath": "program.cs"
                     },
                     "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
                 },

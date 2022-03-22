@@ -10,7 +10,13 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
   private _tokenSeed = 0;
   protected async handleOpenProject(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void> {
-    return Promise.resolve();
+    let rootCommand = commandInvocation.commandEnvelope;
+
+    let commands: Array<dotnetInteractive.KernelCommandEnvelope> = [rootCommand];
+
+    let eventEnvelopes = await this._apiService(commands);
+
+    this.forwardEvents(eventEnvelopes, rootCommand, commandInvocation.context);
 
   }
 
@@ -46,7 +52,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     commands.push({
       commandType: dotnetInteractive.OpenDocumentType,
       command: <dotnetInteractive.OpenDocument>{
-        path: this.openDocument.path,
+        relativeFilePath: this.openDocument.relativeFilePath,
         regionName: this.openDocument.regionName
       },
       token: this.deriveToken(rootCommand)
@@ -98,7 +104,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     commands.push({
       commandType: <dotnetInteractive.KernelCommandType>dotnetInteractive.OpenDocumentType,
       command: <dotnetInteractive.OpenDocument>{
-        path: this.openDocument.path,
+        relativeFilePath: this.openDocument.relativeFilePath,
         regionName: this.openDocument.regionName
       },
       token: this.deriveToken(compileCommand)

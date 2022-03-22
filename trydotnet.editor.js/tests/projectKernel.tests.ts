@@ -25,7 +25,7 @@ describe("Project kernel", () => {
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: dotnetInteractive.OpenDocumentType, command: <dotnetInteractive.OpenDocument>{ path: "Program.cs" } });
+        await kernel.send({ commandType: dotnetInteractive.OpenDocumentType, command: <dotnetInteractive.OpenDocument>{ relativeFilePath: "Program.cs" } });
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
@@ -33,7 +33,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request diagnostics if there is no open document", async () => {
-        let service = createApiServiceSimulator();
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/cannot_request_diagnostics_if_there_is_no_open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -41,7 +41,7 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: ""
                 }]
             });
@@ -58,7 +58,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request completions if there is no open document", async () => {
-        let service = createApiServiceSimulator();
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/cannot_request_completions_if_there_is_no_open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -66,7 +66,7 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: ""
                 }]
             });
@@ -85,7 +85,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request signaturehelp if there is no open document", async () => {
-        let service = createApiServiceSimulator();
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/cannot_request_signaturehelp_if_there_is_no_open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -93,7 +93,7 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: ""
                 }]
             });
@@ -110,7 +110,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request hovertext if there is no open document", async () => {
-        let service = createApiServiceSimulator();
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/cannot_request_hovertext_if_there_is_no_open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -118,7 +118,7 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: ""
                 }]
             });
@@ -135,7 +135,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot submitCode if there is no open document", async () => {
-        let service = createApiServiceSimulator();
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/cannot_submitCode_if_there_is_no_open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -143,7 +143,7 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: ""
                 }]
             });
@@ -159,6 +159,32 @@ describe("Project kernel", () => {
         expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("No Open document found");
     });
 
+    it("when opening a project it produces the project manifest", async () => {
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/when_opening_a_project_it_produces_the_project_manifest.json");
+        let wasmRunner = createWasmRunnerSimulator();
+        let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
+
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
+        kernel.subscribeToKernelEvents(e => {
+            eventEnvelopes.push(e);
+        });
+        await kernel.send({
+            commandType: dotnetInteractive.OpenProjectType, command: <dotnetInteractive.OpenProject>{
+                project: {
+                    files: [{
+                        relativeFilePath: "program.cs",
+                        content: "Console.WriteLine(1);"
+                    }]
+                }
+            }
+        });
+
+        let projectOpened = eventEnvelopes.find(e => e.eventType === dotnetInteractive.ProjectOpenedType)?.event as dotnetInteractive.ProjectOpened;
+        expect(projectOpened).not.to.be.undefined;
+        expect(projectOpened.projectItems).to.not.be.empty;
+        expect(projectOpened.projectItems).to.deep.equal([{ relativeFilePath: "program.cs", regionNames: [] }]);
+    });
+
     it("when opening a document it produces documentOpen event with content", async () => {
         let service = createApiServiceSimulator("./simulatorConfigurations/apiService/when_opening_a_document_it_produces_documentOpen_event_with_content.json");
         let wasmRunner = createWasmRunnerSimulator();
@@ -168,7 +194,7 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: "Console.WriteLine(1);"
                 }]
             });
@@ -177,11 +203,11 @@ describe("Project kernel", () => {
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: dotnetInteractive.OpenDocumentType, command: <dotnetInteractive.OpenDocument>{ path: "program.cs" } });
+        await kernel.send({ commandType: dotnetInteractive.OpenDocumentType, command: <dotnetInteractive.OpenDocument>{ relativeFilePath: "program.cs" } });
 
         let documentOpen = eventEnvelopes.find(e => e.eventType === dotnetInteractive.DocumentOpenedType)?.event as dotnetInteractive.DocumentOpened;
         expect(documentOpen).not.to.be.undefined;
-        expect(documentOpen.path).to.equal("program.cs");
+        expect(documentOpen.relativeFilePath).to.equal("program.cs");
         expect(documentOpen.content).to.equal("Console.WriteLine(1);");
     });
 
@@ -194,10 +220,10 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: "Console.WriteLine(1);"
                 }, {
-                    relativePath: "class.cs",
+                    relativeFilePath: "class.cs",
                     content: "public class A {}"
                 }]
             },
@@ -233,10 +259,10 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativePath: "program.cs",
+                    relativeFilePath: "program.cs",
                     content: "Console.WriteLine(1);"
                 }, {
-                    relativePath: "class.cs",
+                    relativeFilePath: "class.cs",
                     content: "public class A {}"
                 }]
             },
@@ -265,13 +291,13 @@ export function openProject(kernel: dotnetInteractive.Kernel, project: dotnetInt
     });
 }
 
-export async function openProjectAndDocument(kernel: dotnetInteractive.Kernel, project: dotnetInteractive.Project, path: string, regionName?: string): Promise<void> {
+export async function openProjectAndDocument(kernel: dotnetInteractive.Kernel, project: dotnetInteractive.Project, relativeFilePath: string, regionName?: string): Promise<void> {
     await openProject(kernel, project);
 
     await kernel.send({
         commandType: dotnetInteractive.OpenDocumentType,
         command: <dotnetInteractive.OpenDocument>{
-            path: path,
+            relativeFilePath: relativeFilePath,
             regionName: regionName
         }
     });

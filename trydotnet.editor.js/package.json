@@ -30,8 +30,8 @@
     "@types/mocha": "9.1.0",
     "@types/tmp": "0.2.3",
     "@types/uuid": "8.3.4",
-    "@typescript-eslint/eslint-plugin": "5.15.0",
-    "@typescript-eslint/parser": "5.15.0",
+    "@typescript-eslint/eslint-plugin": "5.16.0",
+    "@typescript-eslint/parser": "5.16.0",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "css-loader": "6.7.1",
@@ -56,7 +56,7 @@
     "webpack-dev-server": "4.7.4"
   },
   "dependencies": {
-    "@microsoft/dotnet-interactive": "1.0.317102",
+    "@microsoft/dotnet-interactive": "1.0.317103",
     "monaco-editor": "0.33.0",
     "rxjs": "7.5.5"
   },

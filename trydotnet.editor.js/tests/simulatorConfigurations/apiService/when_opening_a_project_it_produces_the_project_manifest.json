@@ -62,58 +62,6 @@
                     }
                 }
             ]
-        },
-        {
-            "commands": [
-                {
-                    "commandType": "OpenProject",
-                    "command": {
-                        "project": {
-                            "files": [
-                                {
-                                    "relativeFilePath": "program.cs",
-                                    "content": "Console.WriteLine(1);"
-                                }
-                            ]
-                        }
-                    },
-                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3||0"
-                },
-                {
-                    "commandType": "OpenDocument",
-                    "command": {
-                        "relativeFilePath": "program.cs"
-                    },
-                    "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
-                }
-            ],
-            "events": [
-                {
-                    "eventType": "DocumentOpened",
-                    "event": {
-                        "relativeFilePath": "program.cs",
-                        "content": "Console.WriteLine(1);"
-                    },
-                    "command": {
-                        "commandType": "OpenDocument",
-                        "command": {
-                            "relativeFilePath": "program.cs"
-                        },
-                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
-                    }
-                },
-                {
-                    "eventType": "CommandSucceeded",
-                    "event": {},
-                    "command": {
-                        "commandType": "OpenDocument",
-                        "command": {
-                            "relativeFilePath": "program.cs"
-                        },
-                        "token": "a778e15c-c6fe-998b-1599-d8d58784196b::3"
-                    }
-                }
-            ]
         }
     ]
 }
