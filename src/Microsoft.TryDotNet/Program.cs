@@ -18,9 +18,7 @@ IEnumerable<IKernelCommandEnvelope> ReadCommands(JsonElement bundle)
 
 var builder = WebApplication.CreateBuilder(args);
 
-//todo : delete this workaround
-
-KernelEventEnvelope.RegisterEvent<ProjectOpened>();
+CSharpProjectKernel.RegisterEventsAndCommands();
 
 
 // Add services to the container.
@@ -61,9 +59,3 @@ app.MapPost("/commands", async (IConfiguration config, HttpRequest request) =>
     .WithName("commands");
 
 app.Run();
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
-
