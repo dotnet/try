@@ -210,7 +210,7 @@ public class Program
 }
 ") })),
                             new OpenDocument("Program.cs", regionName: "test-region"),
-                            new SubmitCode("int someInt = 1;"),
+                            new SubmitCode("System.Console.WriteLine(2);"),
                             new CompileProject()
                         }
                     }

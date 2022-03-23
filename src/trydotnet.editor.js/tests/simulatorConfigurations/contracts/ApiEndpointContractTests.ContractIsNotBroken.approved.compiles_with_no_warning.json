@@ -239,7 +239,7 @@
           "id": "command-id",
           "commandType": "SubmitCode",
           "command": {
-            "code": "int someInt = 1;",
+            "code": "System.Console.WriteLine(2);",
             "submissionType": "run",
             "targetKernelName": null
           },
@@ -355,7 +355,7 @@
             "id": "command-id",
             "commandType": "SubmitCode",
             "command": {
-              "code": "int someInt = 1;",
+              "code": "System.Console.WriteLine(2);",
               "submissionType": "run",
               "targetKernelName": "project-kernel"
             },

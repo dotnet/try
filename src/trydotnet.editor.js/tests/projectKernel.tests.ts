@@ -274,7 +274,7 @@ describe("Project kernel", () => {
             eventEnvelopes.push(e);
         });
 
-        await kernel.send({ commandType: dotnetInteractive.SubmitCodeType, command: <dotnetInteractive.SubmitCode>{ code: "int someInt = 1;" } });
+        await kernel.send({ commandType: dotnetInteractive.SubmitCodeType, command: <dotnetInteractive.SubmitCode>{ code: "System.Console.WriteLine(2);" } });
 
         let standardOutputValueProduced = eventEnvelopes.find(e => e.eventType === dotnetInteractive.StandardOutputValueProducedType)?.event as dotnetInteractive.StandardOutputValueProduced;
         expect(standardOutputValueProduced).not.to.be.undefined;
