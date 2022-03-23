@@ -1,0 +1,418 @@
+{
+  "requests": [
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "test-region"
+                ]
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "test-region"
+                ]
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "SubmitCode",
+          "command": {
+            "code": "int someInt = 1;",
+            "submissionType": "run",
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "CompileProject",
+          "command": {
+            "targetKernelName": null
+          },
+          "originUri": "",
+          "destinationUri": ""
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "test-region"
+                ]
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "SubmitCode",
+            "command": {
+              "code": "int someInt = 1;",
+              "submissionType": "run",
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {
+            "diagnostics": [],
+            "formattedDiagnostics": []
+          },
+          "eventType": "DiagnosticsProduced",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "CompileProject",
+            "command": {
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {
+            "assembly": {
+              "value": "AABBCC"
+            }
+          },
+          "eventType": "AssemblyProduced",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "CompileProject",
+            "command": {
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "CompileProject",
+            "command": {
+              "targetKernelName": "project-kernel"
+            },
+            "originUri": "",
+            "destinationUri": ""
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -8,6 +8,7 @@ module.exports = function (wallaby) {
         },
         files: [
             "src/**/*.ts*",
+            { pattern: "../Microsoft.TryDotNet.Tests/ApiEndpointContractTests.*.json", instrument: false },
             { pattern: "tests/**/*.json", instrument: false },
             { pattern: "tests/**/*.ts*", instrument: true },
             "!tests/**/*.tests.ts*",

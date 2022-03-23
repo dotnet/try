@@ -25,14 +25,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.SubmitCodeType,
       handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
-        if (!this._project) {
-          // todo : align error message with .NET
-          throw new Error("Project is not loaded");
-        }
-        if (!this._openDocument) {
-          // todo : align error message with .NET
-          throw new Error("No Open document found");
-        }
+        this.throwIfProjectIsNotOpened();
+        this.throwIffDocumentIsNotOpened();
         return this.handleSubmitCode(commandInvocation);
       }
     });
@@ -50,10 +44,7 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.OpenDocumentType,
       handle: async (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
-        if (!this._project) {
-          // todo : align error message with .NET
-          throw new Error("Project is not loaded");
-        }
+        this.throwIfProjectIsNotOpened();
         await this.handleOpenDocument(commandInvocation);
         let command = <dotnetInteractive.OpenDocument>commandInvocation.commandEnvelope.command;
         this._openDocument = {
@@ -66,14 +57,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.RequestDiagnosticsType,
       handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
-        if (!this._project) {
-          // todo : align error message with .NET
-          throw new Error("Project is not loaded");
-        }
-        if (!this._openDocument) {
-          // todo : align error message with .NET
-          throw new Error("No Open document found");
-        }
+        this.throwIfProjectIsNotOpened();
+        this.throwIffDocumentIsNotOpened();
         return this.handleRequestDiagnostics(commandInvocation);
       }
     });
@@ -81,14 +66,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.RequestCompletionsType,
       handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
-        if (!this._project) {
-          // todo : align error message with .NET
-          throw new Error("Project is not loaded");
-        }
-        if (!this._openDocument) {
-          // todo : align error message with .NET
-          throw new Error("No Open document found");
-        }
+        this.throwIfProjectIsNotOpened();
+        this.throwIffDocumentIsNotOpened();
         return this.handleRequestCompletions(commandInvocation);
       }
     });
@@ -96,14 +75,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.RequestHoverTextType,
       handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
-        if (!this._project) {
-          // todo : align error message with .NET
-          throw new Error("Project is not loaded");
-        }
-        if (!this._openDocument) {
-          // todo : align error message with .NET
-          throw new Error("No Open document found");
-        }
+        this.throwIfProjectIsNotOpened();
+        this.throwIffDocumentIsNotOpened();
         return this.handleRequestHoverText(commandInvocation);
       }
     });
@@ -111,19 +84,26 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.RequestSignatureHelpType,
       handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
-        if (!this._project) {
-          // todo : align error message with .NET
-          throw new Error("Project is not loaded");
-        }
-        if (!this._openDocument) {
-          // todo : align error message with .NET
-          throw new Error("No Open document found");
-        }
+        this.throwIfProjectIsNotOpened();
+        this.throwIffDocumentIsNotOpened();
         return this.handleRequestSignatureHelp(commandInvocation);
       }
     });
   }
 
+  protected throwIfProjectIsNotOpened() {
+    if (!this._project) {
+      // todo : align error message with .NET
+      throw new Error(`Project must be opened, send the command '${dotnetInteractive.OpenProjectType}' first.`);
+    }
+  }
+
+  protected throwIffDocumentIsNotOpened() {
+    if (!this._openDocument) {
+      // todo : align error message with .NET
+      throw new Error(`Document must be opened, send the command '${dotnetInteractive.OpenDocumentType}' first.`);
+    }
+  }
 
   protected abstract handleOpenProject(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
   protected abstract handleRequestDiagnostics(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;

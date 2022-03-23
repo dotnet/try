@@ -56,7 +56,7 @@
     "webpack-dev-server": "4.7.4"
   },
   "dependencies": {
-    "@microsoft/dotnet-interactive": "1.0.317103",
+    "@microsoft/dotnet-interactive": "1.0.317203",
     "monaco-editor": "0.33.0",
     "rxjs": "7.5.5"
   },
