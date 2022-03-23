@@ -87,11 +87,11 @@ export class TryDotNetEditor {
     });
   }
 
-  public async openDocument(document: { path: string, regionName?: string }) {
+  public async openDocument(document: { relativeFilePath: string, regionName?: string }) {
     await this.getKernel().send({
       commandType: dotnetInteractive.OpenDocumentType,
       command: <dotnetInteractive.OpenDocument>{
-        relativeFilePath: document.path,
+        relativeFilePath: document.relativeFilePath,
         regionName: document.regionName,
       }
     });

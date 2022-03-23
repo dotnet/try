@@ -88,7 +88,6 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     let compileCommand: dotnetInteractive.KernelCommandEnvelope = {
       commandType: dotnetInteractive.CompileProjectType,
       command: <dotnetInteractive.CompileProject>{
-        code: (<dotnetInteractive.SubmitCode>rootCommand.command).code,
       },
       token: rootCommand.token
     };
@@ -106,6 +105,14 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       command: <dotnetInteractive.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
         regionName: this.openDocument.regionName
+      },
+      token: this.deriveToken(compileCommand)
+    });
+
+    commands.push({
+      commandType: <dotnetInteractive.KernelCommandType>dotnetInteractive.SubmitCodeType,
+      command: <dotnetInteractive.SubmitCode>{
+        code: (<dotnetInteractive.SubmitCode>rootCommand.command).code
       },
       token: this.deriveToken(compileCommand)
     });

@@ -216,7 +216,7 @@ describe("Project kernel", () => {
     });
 
     it("produces diagnostics for the open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/produces_diagnostics_for_the_open_document.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.diagnostics_produced_with_errors_in_code.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -224,38 +224,37 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativeFilePath: "./Program.cs",
-                    content: "Console.WriteLine(1);"
-                }, {
-                    relativeFilePath: "class.cs",
-                    content: "public class A {}"
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                 }]
             },
-            "./Program.cs");
+            "./Program.cs",
+            "test-region");
 
         let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: dotnetInteractive.RequestDiagnosticsType, command: <dotnetInteractive.RequestDiagnostics>{ code: "Conzole" } });
+
+        await kernel.send({ commandType: dotnetInteractive.RequestDiagnosticsType, command: <dotnetInteractive.RequestDiagnostics>{ code: "someInt = \"NaN\";" } });
 
         let diagnostics = eventEnvelopes.find(e => e.eventType === dotnetInteractive.DiagnosticsProducedType)?.event as dotnetInteractive.DiagnosticsProduced;
         expect(diagnostics).not.to.be.undefined;
         expect(diagnostics.diagnostics.length).to.equal(1);
         expect(diagnostics.diagnostics[0]).to.deep.equal({
-            linePositionSpan: {
-                start: { line: 1, character: 1 },
-                end: { line: 1, character: 7 }
+            code: 'CS0029',
+            linePositionSpan:
+            {
+                end: { character: 15, line: 0 },
+                start: { character: 10, line: 0 }
             },
-            severity: dotnetInteractive.DiagnosticSeverity.Error,
-            code: "Conzole",
-            message: "Error here!"
+            message: '(1,11): error CS0029: Cannot implicitly convert type \'string\' to \'int\'',
+            severity: 'error'
         });
     });
 
     it("executes correct code", async () => {
-        // fix this to be handling console writeline
-        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/executes_correct_code.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.compiles_with_no_warning.json");
         let wasmRunner = createWasmRunnerSimulator("./simulatorConfigurations/wasmRunner/executes_correct_code.json");
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -263,21 +262,19 @@ describe("Project kernel", () => {
             kernel,
             {
                 files: [{
-                    relativeFilePath: "./Program.cs",
-                    content: "Console.WriteLine(1);"
-                }, {
-                    relativeFilePath: "class.cs",
-                    content: "public class A {}"
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
                 }]
             },
-            "./Program.cs");
+            "./Program.cs",
+            "test-region");
 
         let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
 
-        await kernel.send({ commandType: dotnetInteractive.SubmitCodeType, command: <dotnetInteractive.SubmitCode>{ code: "Console.WriteLine(2);" } });
+        await kernel.send({ commandType: dotnetInteractive.SubmitCodeType, command: <dotnetInteractive.SubmitCode>{ code: "int someInt = 1;" } });
 
         let standardOutputValueProduced = eventEnvelopes.find(e => e.eventType === dotnetInteractive.StandardOutputValueProducedType)?.event as dotnetInteractive.StandardOutputValueProduced;
         expect(standardOutputValueProduced).not.to.be.undefined;

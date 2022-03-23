@@ -39,19 +39,22 @@ describe("when loading workspace", () => {
 
     it("configures the editor code", async () => {
         let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
-        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/configures_the_editor_code.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
         let tdn = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
         tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
         let project = <dotnetInteractive.Project>{
-            files: [{ relativeFilePath: "Program.cs", content: "public class C { }" }]
+            files: [{
+                relativeFilePath: "./Program.cs",
+                content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+            }]
         };
         await tdn.openProject(project);
-        await tdn.openDocument({ path: "Program.cs" });
+        await tdn.openDocument({ relativeFilePath: "./Program.cs" });
 
-        expect(tdn.editor.getCode()).to.equal("public class C { }");
+        expect(tdn.editor.getCode()).to.equal("\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}");
 
     });
 });
@@ -71,7 +74,7 @@ describe("when user types in editor", () => {
         };
 
         await tdn.openProject(project);
-        await tdn.openDocument({ path: "Program.cs" });
+        await tdn.openDocument({ relativeFilePath: "Program.cs" });
 
         const userContent = "public class C { }";
 
@@ -83,12 +86,9 @@ describe("when user types in editor", () => {
     });
 
     it("the editor asks the kernel for diagnostics", async () => {
-        dotnetInteractive.Logger.configure("debug", (_entry) => {
-            //  console.log(entry.message);
-        });
 
         let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
-        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/the_editor_asks_the_kernel_for_diagnostics.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.diagnostics_produced_with_errors_in_code.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -97,13 +97,16 @@ describe("when user types in editor", () => {
         tdn.editor = editor;
 
         let project = <dotnetInteractive.Project>{
-            files: [{ relativeFilePath: "Program.cs", content: "" }]
+            files: [{
+                "relativeFilePath": "./Program.cs",
+                "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+            }]
         };
 
         await tdn.openProject(project);
-        await tdn.openDocument({ path: "Program.cs" });
+        await tdn.openDocument({ relativeFilePath: "./Program.cs", regionName: "test-region" });
 
-        const userContent = "public class C { }";
+        const userContent = "someInt = \"NaN\";";
 
         editor.type(userContent);
 
@@ -111,19 +114,14 @@ describe("when user types in editor", () => {
 
         expect(editor.diagnostics).not.to.be.empty;
         expect(editor.diagnostics[0]).to.deep.equal({
-            "message": "Error here!",
-            "code": "public class C { }",
-            "severity": "error",
-            "linePositionSpan": {
-                "start": {
-                    "line": 1,
-                    "character": 1
-                },
-                "end": {
-                    "line": 1,
-                    "character": 19
-                }
-            }
+            code: 'CS0029',
+            linePositionSpan:
+            {
+                end: { character: 15, line: 0 },
+                start: { character: 10, line: 0 }
+            },
+            message: '(1,11): error CS0029: Cannot implicitly convert type \'string\' to \'int\'',
+            severity: 'error'
         });
 
     });

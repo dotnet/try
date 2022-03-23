@@ -83,8 +83,14 @@ function areEquivalentCommands(actual: dotnetInteractive.KernelCommandEnvelope, 
     if (actual.command) {
         for (let key in actual.command) {
             if (actual.command.hasOwnProperty(key)) {
-                const left = JSON.stringify(actual.command[key]);
-                const right = JSON.stringify(expected.command[key]);
+                const leftValue = actual.command[key];
+                const rightValue = expected.command[key];
+                if ((leftValue === null || leftValue === undefined) && (rightValue === null || rightValue === undefined)) {
+                    continue;
+                }
+
+                const left = JSON.stringify(leftValue);
+                const right = JSON.stringify(rightValue);
                 if (left !== right) {
                     return false;
                 }
