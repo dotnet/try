@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.Tests", "src\Microsoft.TryDotNet.Tests\Microsoft.TryDotNet.Tests.csproj", "{37A560A7-8A96-400C-A12E-98248EDD1C29}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.WasmRunner", "src\Microsoft.TryDotNet.WasmRunner\Microsoft.TryDotNet.WasmRunner.csproj", "{4D0D85BE-2427-4D8A-86CD-C4C0991794EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{37A560A7-8A96-400C-A12E-98248EDD1C29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37A560A7-8A96-400C-A12E-98248EDD1C29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37A560A7-8A96-400C-A12E-98248EDD1C29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D0D85BE-2427-4D8A-86CD-C4C0991794EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D0D85BE-2427-4D8A-86CD-C4C0991794EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D0D85BE-2427-4D8A-86CD-C4C0991794EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D0D85BE-2427-4D8A-86CD-C4C0991794EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{FDB0E498-AF5C-44B5-93DD-CA77BB26D195} = {77B0B387-FEA7-4FBC-AC04-76CB4A16F758}
 		{37A560A7-8A96-400C-A12E-98248EDD1C29} = {AC4DCFB8-D55F-4B1C-8B74-5517831CB65E}
+		{4D0D85BE-2427-4D8A-86CD-C4C0991794EF} = {77B0B387-FEA7-4FBC-AC04-76CB4A16F758}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D7DA1F1-417C-4A1F-9D78-05D3BF24D31C}

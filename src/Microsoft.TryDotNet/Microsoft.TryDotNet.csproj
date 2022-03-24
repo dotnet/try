@@ -9,10 +9,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.22172.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="Microsoft.TryDotNet.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.TryDotNet.WasmRunner\Microsoft.TryDotNet.WasmRunner.csproj" />
   </ItemGroup>
 
 </Project>

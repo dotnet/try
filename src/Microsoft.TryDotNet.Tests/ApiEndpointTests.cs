@@ -400,9 +400,9 @@ public class Program
             {
                 commands = commandBatch.Select(KernelCommandEnvelope.Create).Select(e => e.ToJsonElement())
             };
+            
             var requestBody = JsonContent.Create(request);
-
-
+            
             var response = await c.PostAsync("commands", requestBody);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -445,9 +445,6 @@ public static class StringExtensions
 
     public static string FixedAssembly(this string source)
     {
-        var r = new Regex(@"(?<start>""assembly""\s*:\s*\{\s*""value""\s*:\s*"")(?<value>([^""\\]|(\\.))*)(?<end>""\s*\}\s*)",
-             RegexOptions.Multiline| RegexOptions.IgnoreCase);
-        var m = r.Matches(source);
         return Regex.Replace(source, @"(?<start>""assembly""\s*:\s*\{\s*""value""\s*:\s*"")(?<value>([^""\\]|(\\.))*)(?<end>""\s*\}\s*)", "${start}AABBCC${end}", RegexOptions.Multiline);
     }
 
