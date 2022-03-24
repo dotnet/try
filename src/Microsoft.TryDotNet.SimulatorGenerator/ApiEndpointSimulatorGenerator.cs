@@ -1,42 +1,41 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Diagnostics;
-using System.Net;
 using System.Net.Http.Json;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using Assent;
-using FluentAssertions;
-
+using System.Xml.Schema;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
 using Microsoft.DotNet.Interactive.CSharpProject;
 using Microsoft.DotNet.Interactive.CSharpProject.Commands;
 using Microsoft.DotNet.Interactive.Server;
+using Microsoft.TryDotNet.Tests;
 
-using Xunit;
+namespace Microsoft.TryDotNet.SimulatorGenerator;
 
-namespace Microsoft.TryDotNet.Tests;
-
-public class ApiEndpointContractTests
+public class ApiEndpointSimulatorGenerator
 {
-    
-    static ApiEndpointContractTests()
+    static ApiEndpointSimulatorGenerator() 
     {
         CSharpProjectKernel.RegisterEventsAndCommands();
     }
-    
-    public static IEnumerable<object[]> ApiContractScenarios()
-    {
-        foreach (var apiContractScenario in scenarios())
-        {
-            yield return new object[] {apiContractScenario};
-        }
 
-        IEnumerable<ApiContractScenario> scenarios()
+    public static async Task CreateScenarioFiles(DirectoryInfo destinationFolder)
+    {
+        foreach (var apiContractScenario in ApiContractScenarios())
+        {
+            var simulatorConfiguration = await ExecuteScenario(apiContractScenario);
+
+            var filename = Path.Combine(destinationFolder.FullName, apiContractScenario.Label + ".json");
+            Console.WriteLine($"Creating configuration for scenario {apiContractScenario.Label} at '{filename}'");
+            await File.WriteAllTextAsync(filename,simulatorConfiguration);
+        }
+    }
+
+    private static IEnumerable<ApiContractScenario> ApiContractScenarios()
+    {
         {
             yield return new ApiContractScenario(
                 "open_project",
@@ -379,13 +378,10 @@ public class Program
         }
     }
 
-    [Theory]
-    [MemberData(nameof(ApiContractScenarios))]
-    public async Task ContractIsNotBroken(ApiContractScenario scenario)
+
+    private static async Task<string> ExecuteScenario(ApiContractScenario scenario)
     {
-        var configuration = new Configuration()
-            .UsingExtension($"{scenario.Label}.json")
-            .SetInteractive(Debugger.IsAttached);
+
         await using var applicationBuilderFactory = new WebApplicationFactory<Program>();
 
         var c = applicationBuilderFactory.CreateDefaultClient();
@@ -405,8 +401,6 @@ public class Program
             
             var response = await c.PostAsync("commands", requestBody);
 
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-
             var responseJson = JsonDocument.Parse(await response.Content.ReadAsStringAsync(CancellationToken.None)).RootElement;
 
             transcript.requests.Add(new
@@ -422,37 +416,6 @@ public class Program
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
-        this.Assent(JsonSerializer.Serialize(transcript, options).Fixed(), configuration);
+        return JsonSerializer.Serialize(transcript, options).Fixed();
     }
 }
-
-public static class StringExtensions
-{
-    public static string FixedToken(this string source)
-    {
-        return Regex.Replace(source, @"""token""\s*:\s*""(?<token>([^""\\]|(\\.))*)""", @"""token"": ""command-token""", RegexOptions.IgnoreCase);
-    }
-
-    public static string FixedId(this string source)
-    {
-        return Regex.Replace(source, @"""id""\s*:\s*""(?<id>([^""\\]|(\\.))*)""", @"""id"": ""command-id""", RegexOptions.IgnoreCase);
-    }
-
-    public static string FixedNewLine(this string source)
-    {
-        return Regex.Replace(source, @"\\r\\n", @"\n");
-    }
-
-    public static string FixedAssembly(this string source)
-    {
-        return Regex.Replace(source, @"(?<start>""assembly""\s*:\s*\{\s*""value""\s*:\s*"")(?<value>([^""\\]|(\\.))*)(?<end>""\s*\}\s*)", "${start}AABBCC${end}", RegexOptions.Multiline);
-    }
-
-
-    public static string Fixed(this string source)
-    {
-        return source.FixedId().FixedToken().FixedNewLine().FixedAssembly();
-    }
-}
-
-public record ApiContractScenario(string Label, KernelCommand[][] CommandBatches);

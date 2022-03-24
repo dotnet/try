@@ -39,7 +39,7 @@ describe("when loading workspace", () => {
 
     it("configures the editor code", async () => {
         let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_document.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
         let tdn = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
@@ -88,7 +88,7 @@ describe("when user types in editor", () => {
     it("the editor asks the kernel for diagnostics", async () => {
 
         let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.diagnostics_produced_with_errors_in_code.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/diagnostics_produced_with_errors_in_code.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 

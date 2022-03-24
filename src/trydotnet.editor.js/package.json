@@ -5,6 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "generateApiSimulator": "pwsh ./generateApiSimulator.ps1",
     "playwright:install": "npx playwright install",
     "playwright:test": "npx playwright test",
     "playwright": "npm run playwright:install && npm run playwright:test",

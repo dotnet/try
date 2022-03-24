@@ -33,7 +33,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request diagnostics if there is no open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_project.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_project.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -58,7 +58,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request completions if there is no open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_project.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_project.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -85,7 +85,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request signaturehelp if there is no open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_project.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_project.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -110,7 +110,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot request hovertext if there is no open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_project.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_project.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -135,7 +135,7 @@ describe("Project kernel", () => {
     });
 
     it("cannot submitCode if there is no open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_project.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_project.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -160,7 +160,7 @@ describe("Project kernel", () => {
     });
 
     it("when opening a project it produces the project manifest", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_project.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_project.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -188,7 +188,7 @@ describe("Project kernel", () => {
     });
 
     it("when opening a document it produces documentOpen event with content", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.open_document_with_region.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_document_with_region.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -216,7 +216,7 @@ describe("Project kernel", () => {
     });
 
     it("produces diagnostics for the open document", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.diagnostics_produced_with_errors_in_code.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/diagnostics_produced_with_errors_in_code.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -254,7 +254,7 @@ describe("Project kernel", () => {
     });
 
     it("executes correct code", async () => {
-        let service = createApiServiceSimulator("./simulatorConfigurations/contracts/ApiEndpointContractTests.ContractIsNotBroken.approved.compiles_with_no_warning.json");
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/compiles_with_no_warning.json");
         let wasmRunner = createWasmRunnerSimulator("./simulatorConfigurations/wasmRunner/executes_correct_code.json");
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 

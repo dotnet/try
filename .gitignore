@@ -386,3 +386,5 @@ trydotnet.editor.js/lib/
 trydotnet.editor.js/test-results/
 
 src/trydotnet.editor.js/dist/
+
+src/trydotnet.editor.js/simulatorGenerator/
