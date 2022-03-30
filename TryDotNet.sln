@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.WasmRun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.SimulatorGenerator", "src\Microsoft.TryDotNet.SimulatorGenerator\Microsoft.TryDotNet.SimulatorGenerator.csproj", "{8630032F-C2A1-4A76-928A-2C828804765B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.TryDotNet.E2E.Tests", "src\Microsoft.TryDotNet.E2E.Tests\Microsoft.TryDotNet.E2E.Tests.csproj", "{C8F85960-8E0B-404D-8E73-6C7EEBF727BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.IntegrationTests", "src\Microsoft.TryDotNet.IntegrationTests\Microsoft.TryDotNet.IntegrationTests.csproj", "{C8F85960-8E0B-404D-8E73-6C7EEBF727BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
