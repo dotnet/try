@@ -16,7 +16,7 @@ test.use({
 
 });
 test.beforeAll(async () => {
-    p = cp.spawn('cmd.exe', ['/c', 'npx', 'http-server']);
+    p = cp.spawn('cmd.exe', ['/c', 'npx', 'http-server', '--yes']);
 });
 
 test('can load monaco editor', async ({ page }) => {
