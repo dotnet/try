@@ -20,6 +20,48 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+
+        window.setCodeRunner = (runnerAdapter) => {
+            window.addEventListener("message", e => {
+                if (e.data && e.data.type === "wasmRunnerCommand")
+                    runnerAdapter.invokeMethodAsync("RunAssembly", e.data.base64EncodedAssembly)
+                        .then(r => {
+                            if (r !== null) {
+                                window.postAndLog({
+                                    type: "wasmRunnerResult",
+                                    result: r
+                                });
+                            }
+                        });
+
+
+            });
+        }
+                
+        window.postAndLog = (message) => {
+            postMessage(message, "*");
+            if (window.codeRunnerEventLogger) {
+                window.codeRunnerEventLogger(message);
+            }
+        };
+
+        window.publishCodeRunnerStdOut = (message) => {
+            window.postAndLog({
+                type: 'stdout',
+                message: message
+            });
+        };
+
+        window.publishCodeRunnerStdError = (message) => {
+            window.postAndLog({
+                type: 'stderror',
+                message: message
+            });
+        };
+
+
+    </script>
 </body>
 
 </html>

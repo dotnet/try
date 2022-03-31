@@ -1,7 +1,27 @@
 ﻿@page "/"
-
+@inject IJSRuntime JS
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>WasmRunner</h1>
 
 Welcome to your new app.
+
+
+@code
+{
+    private CodeRunnerAdapter? _runner;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            _runner = new CodeRunnerAdapter(new CodeRunner(), JS);
+
+            var runnerReference = DotNetObjectReference.Create(_runner);
+
+            await JS.InvokeVoidAsync("setCodeRunner", runnerReference);
+        }
+    }
+
+}
