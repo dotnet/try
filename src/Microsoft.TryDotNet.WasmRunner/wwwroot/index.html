@@ -41,6 +41,10 @@
             element.id = "wasmRunner-sentinel";
             element.style.display = "none";
             document.body.appendChild(element);
+            window.postAndLog({
+                type: "wasmRunner-configuration",
+                success: true
+            });
         }
 
         window.postAndLog = (message) => {
