@@ -21,8 +21,8 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>
-
         window.setCodeRunner = (runnerAdapter) => {
+            console.log("configuring codeRunner interop.");
             window.addEventListener("message", e => {
                 if (e.data && e.data.type === "wasmRunnerCommand")
                     runnerAdapter.invokeMethodAsync("RunAssembly", e.data.base64EncodedAssembly)
@@ -34,11 +34,10 @@
                                 });
                             }
                         });
-
-
             });
+            console.log("codeRunner interop setup completed.");
         }
-                
+
         window.postAndLog = (message) => {
             postMessage(message, "*");
             if (window.codeRunnerEventLogger) {
@@ -48,14 +47,14 @@
 
         window.publishCodeRunnerStdOut = (message) => {
             window.postAndLog({
-                type: 'stdout',
+                type: 'wasmRunne-stdout',
                 message: message
             });
         };
 
         window.publishCodeRunnerStdError = (message) => {
             window.postAndLog({
-                type: 'stderror',
+                type: 'wasmRunne-stderror',
                 message: message
             });
         };

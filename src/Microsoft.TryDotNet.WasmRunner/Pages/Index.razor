@@ -1,10 +1,13 @@
 ﻿@page "/"
 @inject IJSRuntime JS
-<PageTitle>Index</PageTitle>
+<PageTitle>WasmRunner 9000 </PageTitle>
 
 <h1>WasmRunner</h1>
+<div id="wasmRunner-host">
+    Code Runner
+</div>
 
-Welcome to your new app.
+
 
 
 @code
@@ -23,5 +26,4 @@ Welcome to your new app.
             await JS.InvokeVoidAsync("setCodeRunner", runnerReference);
         }
     }
-
 }
