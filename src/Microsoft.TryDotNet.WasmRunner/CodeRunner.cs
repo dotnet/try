@@ -48,11 +48,7 @@ public class CodeRunner
                {
                    return new CompositeDisposable
                    {
-                       c.Out.Subscribe( output =>
-                       {
-                           
-                           onOutput(output);
-                       }),
+                       c.Out.Subscribe( onOutput),
                        c.Error.Subscribe(error =>
                        {
                            lastError = new Exception(error);
