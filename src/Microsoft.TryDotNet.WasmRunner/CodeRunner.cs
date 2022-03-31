@@ -47,7 +47,7 @@ public class CodeRunner
             return new RunResults(success, runnerException: ie);
         }
 
-        using (var consoleState = ConsoleOutput.Subscribe(c =>
+        using (var _ = ConsoleOutput.Subscribe(c =>
                {
                    return new CompositeDisposable
                    {

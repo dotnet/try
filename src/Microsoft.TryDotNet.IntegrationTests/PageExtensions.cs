@@ -11,7 +11,7 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 
 internal static class PageExtensions
 {
-    public static Task<byte[]> TestScreenshotAsync(this IPage page, [CallerMemberName]string testName=null!)
+    public static Task<byte[]> TestScreenShotAsync(this IPage page, [CallerMemberName]string testName=null!)
     {
         return page.ScreenshotAsync(new PageScreenshotOptions {Path = $"screenshot_{testName}.png"});
     }
@@ -24,13 +24,13 @@ internal static class PageExtensions
     public static async Task<List<WasmRunnerMessage>> ExecuteAssembly(this IPage page, string base64EncodedAssembly)
     {
         var messages = new List<WasmRunnerMessage>();
-        TaskCompletionSource ts = new TaskCompletionSource();
+        var ts = new TaskCompletionSource();
         await page.ExposeFunctionAsync("codeRunnerEventLogger", (JsonElement message) =>
         {
-            var wm = message.Deserialize<WasmRunnerMessage>();
-            messages.Add(wm!);
+            var wm = message.Deserialize<WasmRunnerMessage>()!;
+            messages.Add(wm);
 
-            if (wm!.type == "wasmRunnerResult")
+            if (wm.type == "wasmRunner-result")
             {
                 ts.SetResult();
             }
@@ -38,7 +38,7 @@ internal static class PageExtensions
 
         await page.SendRequest(new
         {
-            type = "wasmRunnerCommand",
+            type = "wasmRunner-command",
             base64EncodedAssembly = base64EncodedAssembly
 
         });
