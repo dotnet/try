@@ -24,7 +24,8 @@
         window.setCodeRunner = (runnerAdapter) => {
             console.log("configuring codeRunner interop.");
             window.addEventListener("message", e => {
-                if (e.data && e.data.type === "wasmRunnerCommand")
+                console.log(`message: ${JSON.stringify(e)}`);
+                if (e.data && e.data.type === "wasmRunnerCommand") {
                     runnerAdapter.invokeMethodAsync("RunAssembly", e.data.base64EncodedAssembly)
                         .then(r => {
                             if (r !== null) {
@@ -34,6 +35,7 @@
                                 });
                             }
                         });
+                }
             });
             console.log("codeRunner interop setup completed.");
         }
@@ -47,14 +49,14 @@
 
         window.publishCodeRunnerStdOut = (message) => {
             window.postAndLog({
-                type: 'wasmRunne-stdout',
+                type: 'wasmRunner-stdout',
                 message: message
             });
         };
 
         window.publishCodeRunnerStdError = (message) => {
             window.postAndLog({
-                type: 'wasmRunne-stderror',
+                type: 'wasmRunner-stderror',
                 message: message
             });
         };
