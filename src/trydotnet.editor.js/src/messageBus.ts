@@ -5,18 +5,18 @@ import * as rxjs from 'rxjs';
 import * as messages from './messages';
 
 export interface IMessageBus {
-    postMessage(message: messages.AnyApiMessage): void;
-    messages: rxjs.Observable<messages.AnyApiMessage>;
+  postMessage(message: any): void;
+  messages: rxjs.Observable<messages.AnyApiMessage>;
 }
 
 export class MessageBus implements IMessageBus {
-  constructor (private _onPostMessage: (message: messages.AnyApiMessage) => void, private _messages: rxjs.Observable<messages.AnyApiMessage>) { }
+  constructor(private _onPostMessage: (message: any) => void, private _messages: rxjs.Observable<messages.AnyApiMessage>) { }
 
-  public postMessage (message: messages.AnyApiMessage): void {
+  public postMessage(message: any): void {
     this._onPostMessage(message);
   }
 
-  public get messages (): rxjs.Observable<messages.AnyApiMessage> {
+  public get messages(): rxjs.Observable<any> {
     return this._messages;
   }
 }

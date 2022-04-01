@@ -12,7 +12,7 @@
     "Microsoft.TryDotNet": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "wasmrunner",
+      "launchUrl": "editor",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
