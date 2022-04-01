@@ -16,9 +16,16 @@ internal static class PageExtensions
         return page.ScreenshotAsync(new PageScreenshotOptions {Path = $"screenshot_{testName}.png"});
     }
 
-    public static async Task SendRequest<T>(this IPage page, T data)
+    public static async Task DispatchMessage<T>(this IPage page, T data)
     {
         await page.EvaluateAsync(@"(request) => window.dispatchEvent(new MessageEvent(""message"", { data: request }))",data);
+    }
+
+    public static async Task TypeTextInMonacoEditor(this IPage page, string text, float? delay)
+    {
+        var editor = page.Locator(@"div[role = ""code""]");
+        await editor.FocusAsync();
+        await editor.TypeAsync(text, new LocatorTypeOptions{ Delay = delay});
     }
 
     public static async Task<List<WasmRunnerMessage>> ExecuteAssembly(this IPage page, string base64EncodedAssembly)
@@ -36,7 +43,7 @@ internal static class PageExtensions
             }
         });
 
-        await page.SendRequest(new
+        await page.DispatchMessage(new
         {
             type = "wasmRunner-command",
             base64EncodedAssembly = base64EncodedAssembly

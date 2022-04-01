@@ -8,6 +8,7 @@ using System.Text.Json;
 using Microsoft.DotNet.Interactive.CSharpProject;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Server;
+using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.TryDotNet;
 
@@ -56,10 +57,8 @@ public class Program
         {
             var html = await ContentGenerator.GenerateEditorPageAsync(request);
             response.ContentType = MediaTypeNames.Text.Html;
-         
             response.ContentLength = Encoding.UTF8.GetByteCount(html);
-            await response.WriteAsync(html, Encoding.UTF8);
-            return html;
+            return Results.Content(html);
         });
 
         app.MapPost("/commands", async (HttpRequest request) =>
