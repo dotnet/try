@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+
 using Microsoft.Build.Logging.StructuredLogger;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
@@ -23,7 +24,7 @@ public partial class AspNetProcess : IDisposable
         var uriFound = false;
         _process = CommandLine.StartProcess(
             "dotnet",
-            @"Microsoft.TryDotNet.dll  --urls=""http://127.0.0.1:0""", 
+            @"Microsoft.TryDotNet.dll  --urls=""http://127.0.0.1:0""",
             new DirectoryInfo(ToolPublishedPath),
             output: output =>
             {
@@ -51,7 +52,7 @@ public partial class AspNetProcess : IDisposable
         return await completionSource.Task;
     }
 
-    public static  Uri? ResolveListeningUrl(string output)
+    public static Uri? ResolveListeningUrl(string output)
     {
 
         if (!string.IsNullOrEmpty(output))
@@ -73,7 +74,7 @@ public partial class AspNetProcess : IDisposable
         return null;
 
     }
-    
+
 
     public void Dispose()
     {

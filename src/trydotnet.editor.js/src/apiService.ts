@@ -4,13 +4,12 @@
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 
 export interface IApiServiceConfiguration {
-    referrer: URL;
+    referer?: URL;
+    commandsUrl: URL;
 }
 
-export function createApiService(): IApiService {
-    const configuration = {
-        referrer: new URL("set referrer")
-    };
+export function createApiService(configuration: IApiServiceConfiguration): IApiService {
+
 
     return createApiServiceWithConfiguration(configuration);
 }
@@ -22,7 +21,20 @@ export interface IApiService {
 function createApiServiceWithConfiguration(configuration: IApiServiceConfiguration): IApiService {
     let service: IApiService = async (commands) => {
 
-        throw new Error("Method not implemented.");
+        let headers = {
+            'Content-Type': 'application/json'
+        };
+        if (configuration.referer) {
+            headers['Referer'] = configuration.referer.toString();
+        }
+
+        let response = await fetch(configuration.commandsUrl.toString(), {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(commands)
+        });
+
+        return response.json();
     };
 
     return service;

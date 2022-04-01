@@ -11,19 +11,6 @@ import * as monacoAdapterImpl from './monacoAdapterImpl';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 
 if (window) {
-	dotnetInteractive.Logger.configure('debug', (entry) => {
-		switch (entry.logLevel) {
-			case dotnetInteractive.LogLevel.Error:
-				console.error(entry.message);
-				break;
-			case dotnetInteractive.LogLevel.Info:
-				console.info(entry.message);
-				break;
-			case dotnetInteractive.LogLevel.Warn:
-				console.warn(entry.message);
-				break;
-		}
-	});
 
 	const mainWindowMessages = new rxjs.Subject<messages.AnyApiMessage>();
 	window.addEventListener('message', (event) => {

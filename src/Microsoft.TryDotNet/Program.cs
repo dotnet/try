@@ -46,7 +46,7 @@ public class Program
         {
         }
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
         app.UseBlazorFrameworkFiles("/wasmrunner");
         app.UseStaticFiles();
         app.MapFallbackToFile("/wasmrunner/{*path:nonfile}", "wasmrunner/index.html");
@@ -54,11 +54,12 @@ public class Program
 
         app.MapGet("/editor", async (HttpRequest request, HttpResponse response) =>
         {
-            var html = await ContentGenerator.GenerateEditorPage(request);
+            var html = await ContentGenerator.GenerateEditorPageAsync(request);
             response.ContentType = MediaTypeNames.Text.Html;
-            var htmlText = html.ToString() ?? string.Empty;
-            response.ContentLength = Encoding.UTF8.GetByteCount(htmlText);
-            return response.WriteAsync(htmlText);
+         
+            response.ContentLength = Encoding.UTF8.GetByteCount(html);
+            await response.WriteAsync(html, Encoding.UTF8);
+            return html;
         });
 
         app.MapPost("/commands", async (HttpRequest request) =>
