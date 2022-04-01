@@ -1,8 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Net;
+using System.Net.Mime;
+using System.Text;
 using System.Text.Json;
+
 using Microsoft.DotNet.Interactive.CSharpProject;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.DotNet.Interactive.Server;
@@ -24,11 +26,11 @@ public class Program
 
     public static void Main(string[] args)
     {
-        var app = CreateWebApplication(new WebApplicationOptions{Args = args});
+        var app = CreateWebApplication(new WebApplicationOptions { Args = args });
 
         app.Run();
     }
-    
+
 
     public static WebApplication CreateWebApplication(WebApplicationOptions options)
     {
@@ -38,24 +40,28 @@ public class Program
 
         var app = builder.Build();
 
-        app.Use((context, func) =>
-        {
-            return func(context);
-        });
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
         }
 
-       // app.UseHttpsRedirection();
+        app.UseHttpsRedirection();
         app.UseBlazorFrameworkFiles("/wasmrunner");
         app.UseStaticFiles();
         app.MapFallbackToFile("/wasmrunner/{*path:nonfile}", "wasmrunner/index.html");
 
-        app.MapGet("/", () => "ghghghgh");
 
-        app.MapPost("/commands", async (IConfiguration config, HttpRequest request) =>
+        app.MapGet("/editor", async (HttpRequest request, HttpResponse response) =>
+        {
+            var html = await ContentGenerator.GenerateEditorPage(request);
+            response.ContentType = MediaTypeNames.Text.Html;
+            var htmlText = html.ToString() ?? string.Empty;
+            response.ContentLength = Encoding.UTF8.GetByteCount(htmlText);
+            return response.WriteAsync(htmlText);
+        });
+
+        app.MapPost("/commands", async (HttpRequest request) =>
             {
                 var kernelEvents = new List<KernelEvent>();
                 await using (var requestBody = request.Body)
@@ -73,11 +79,11 @@ public class Program
                     }
                 }
 
-                var eventBundle = new {events = kernelEvents.Select(e => KernelEventEnvelope.Create(e).ToJsonElement())};
+                var eventBundle = new { events = kernelEvents.Select(e => KernelEventEnvelope.Create(e).ToJsonElement()) };
                 return Results.Json(eventBundle, statusCode: 200);
             })
             .WithName("commands");
-        
+
         return app;
     }
 }
