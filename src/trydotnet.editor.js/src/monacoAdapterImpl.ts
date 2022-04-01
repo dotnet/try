@@ -79,10 +79,6 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         });
     }
 
-    setActiveBuffer(bufferId: string) {
-        throw new Error('Method not implemented.');
-    }
-
     getCode(): string {
         return this._editor.getValue();
     }
@@ -105,6 +101,8 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
 
         monaco.languages.registerCompletionItemProvider(language, {
             provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position, context: monaco.languages.CompletionContext, token: monaco.CancellationToken) => {
+
+                const kernel = this.kernel;
                 throw new Error('Method not implemented.');
             }
         });

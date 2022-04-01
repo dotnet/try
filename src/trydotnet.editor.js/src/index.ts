@@ -8,7 +8,6 @@ import './index.css';
 import * as messageBus from './messageBus';
 import * as rxjs from 'rxjs';
 import * as monacoAdapterImpl from './monacoAdapterImpl';
-import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 
 if (window) {
 

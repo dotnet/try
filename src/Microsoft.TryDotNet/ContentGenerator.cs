@@ -3,8 +3,6 @@
 
 using System.Text.Json;
 using System.Web;
-using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Microsoft.TryDotNet
 {
@@ -53,12 +51,12 @@ namespace Microsoft.TryDotNet
     <meta charset=""utf-8"">
     <title>TryDotNet Editor</title>
     <meta name=""viewport"" content=""width=device-width,initial-scale=1"">
-    <script  src=""api/editor/app.bundle.js"" id=""trydotnet-editor-script"" data-trydotnet-configuration=""{HttpUtility.HtmlAttributeEncode(configString)}""></script>
-    <script  src=""api/editor/editor.worker.bundle.js""></script>
-    <script  src=""api/editor/json.worker.bundle.js""></script>
-    <script  src=""api/editor/css.worker.bundle.js""></script>
-    <script  src=""api/editor/html.worker.bundle.js""></script>
-    <script  src=""api/editor/ts.worker.bundle.js""></script>
+    <script defer=""defer"" src=""api/editor/app.bundle.js"" id=""trydotnet-editor-script"" data-trydotnet-configuration=""{HttpUtility.HtmlAttributeEncode(configString)}""></script>
+    <script defer=""defer"" src=""api/editor/editor.worker.bundle.js""></script>
+    <script defer=""defer"" src=""api/editor/json.worker.bundle.js""></script>
+    <script defer=""defer"" src=""api/editor/css.worker.bundle.js""></script>
+    <script defer=""defer"" src=""api/editor/html.worker.bundle.js""></script>
+    <script defer=""defer"" src=""api/editor/ts.worker.bundle.js""></script>
 </head>
 <body>
 </body>
