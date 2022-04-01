@@ -6,6 +6,6 @@ module.exports = {
 	output: {
 		globalObject: 'self',
 		filename: '[name].bundle.js',
-		path: path.resolve(__dirname, '..', 'Microsoft.TryDotNet', 'wwwroot', 'editor')
+		path: path.resolve(__dirname, '..', 'Microsoft.TryDotNet', 'wwwroot', 'api', 'editor')
 	}
 };
