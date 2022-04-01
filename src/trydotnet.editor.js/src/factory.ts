@@ -5,7 +5,6 @@ import * as monaco from 'monaco-editor';
 import * as rxjs from 'rxjs';
 import { ProjectKernelWithWASMRunner } from './ProjectKernelWithWASMRunner';
 import * as messageBus from './messageBus';
-import * as messages from './messages';
 
 import { ProjectKernel } from "./projectKernel";
 import { IWasmRunner } from './wasmRunner';
