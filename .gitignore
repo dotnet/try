@@ -379,16 +379,12 @@ docs/\.ionide/
 *.bak
 NotebookExamples/*/Samples/housing.csv
 
-trydotnet.editor.js/dist/
-
-trydotnet.editor.js/lib/
-
-trydotnet.editor.js/test-results/
+src/trydotnet.editor.js/test-results/
 
 src/trydotnet.editor.js/dist/
 
 src/trydotnet.editor.js/simulatorGenerator/
 
-src/Microsoft.TryDotNet/wwwroot/editor/
-
 src/trydotnet.editor.js/lib/
+
+src/Microsoft.TryDotNet/wwwroot/api/
