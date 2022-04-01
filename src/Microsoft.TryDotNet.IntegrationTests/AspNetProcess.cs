@@ -77,7 +77,9 @@ public partial class AspNetProcess : IDisposable
 
     public void Dispose()
     {
-        _process?.Kill(true);
-        _process?.Dispose();
+        var process = _process;
+        _process = null;
+        process?.Kill(true);
+        process?.Dispose();
     }
 }
