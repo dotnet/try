@@ -17,12 +17,8 @@ variables:
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
-  # - name: BlazorTemplateVersion
-  #   value: 3.1.0-preview4.19579.2
   - name: DotNetSdkVersion
     value: '6.0.101'
-  # - name: DotNetSdkVersion3
-  #   value: '3.1.300'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
@@ -89,22 +85,12 @@ stages:
           inputs:
             versionSpec: $(NodeJSVersion)
 
-        # - task: UseDotNet@2
-        #   displayName: Add dotnet 3.0
-        #   inputs:
-        #     packageType: sdk
-        #     version: $(DotNetSdkVersion3)
-        #     installationPath: $(Agent.ToolsDirectory)\dotnet
-
         - task: UseDotNet@2
           displayName: Add dotnet
           inputs:
             packageType: sdk
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)\dotnet
-
-        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-        #   displayName: Install Blazor templates
 
         - script: |
             robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
@@ -113,12 +99,17 @@ stages:
             exit /b 1
           displayName: Prevent test directory crawling
 
+        - pwsh: |
+            $testArg = if ($env:SKIPTESTS -ne "true") { "-test" } else { "" }
+            Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
+          displayName: Promote variables
+
         - script: eng\CIBuild.cmd
             -configuration $(_BuildConfig)
             -prepareMachine
             -sign
-            -test
             $(_BuildArgs)
+            $(_TestArgs)
           displayName: Build / Test
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
@@ -130,7 +121,7 @@ stages:
             testResultsFiles: '*.trx'
             searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
           continueOnError: true
-          condition: always()
+          condition: ne(variables['SkipTests'], 'true')
 
         - task: PublishBuildArtifacts@1
           displayName: Publish packages to artifacts container
@@ -138,13 +129,6 @@ stages:
             pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
             artifactName: packages
             artifactType: container
-
-        # - task: PublishBuildArtifacts@1
-        #   displayName: Publish integration tests dll
-        #   inputs:
-        #     pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\NotIntegration.Tests\$(_BuildConfig)
-        #     artifactName: integrationTests
-        #     artifactType: container
 
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
@@ -193,18 +177,20 @@ stages:
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)/dotnet
 
-        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-        #   displayName: Install Blazor templates
-
         - script: |
             mkdir -p "$(Build.SourcesDirectory)/artifacts"
             cp eng/resources/* "$(Build.SourcesDirectory)/artifacts"
           displayName: Prevent test directory crawling
 
+        - pwsh: |
+            $testArg = if ($env:SKIPTESTS -ne "true") { "--test" } else { "" }
+            Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
+          displayName: Promote variables
+
         - script: ./eng/cibuild.sh
             --configuration $(_BuildConfig)
             --prepareMachine
-            --test
+            $(_TestArgs)
           displayName: Build / Test
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
@@ -216,85 +202,7 @@ stages:
             testResultsFiles: '*.trx'
             searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
           continueOnError: true
-          condition: always()
-
-      # Up-to-date
-      - job: UpToDate_Windows
-        pool:
-          vmImage: windows-2019
-        steps:
-        - checkout: self
-          clean: true
-        - task: NodeTool@0
-          displayName: Add NodeJS/npm
-          inputs:
-            versionSpec: $(NodeJSVersion)
-        - task: UseDotNet@2
-          displayName: Add dotnet
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion)
-            installationPath: $(Agent.ToolsDirectory)/dotnet
-        # - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-        #   displayName: Install Blazor templates
-
-        - task: PowerShell@2
-          displayName: Run up-to-date build check
-          inputs:
-            filePath: eng\tests\UpToDate.ps1
-            arguments: -configuration $(_BuildConfig) -ci
-
-  # - template: /eng/common/templates/jobs/jobs.yml
-  #   parameters:
-  #     enableMicrobuild: true
-  #     jobs:
-  #     - job: IntegrationTest
-  #       dependsOn: Windows_NT
-  #       condition: succeeded()
-  #       pool:
-  #         vmImage: ubuntu-20.04
-  #       variables:
-  #         - name: PACKAGESOURCE
-  #           value: $(System.DefaultWorkingDirectory)/packages/Shipping
-  #         - name: RUN_DOTNET_TRY_INTEGRATION_TESTS
-  #           value: true
-  #         - name: TryDotNetPackagesPath
-  #           value: $(Build.SourcesDirectory)/.trydotnet/packages
-  #       steps:
-  #       - checkout: none #skip checking out the default repository resource
-  #       - task: UseDotNet@2
-  #         displayName: Add dotnet 3.0
-  #         inputs:
-  #           packageType: sdk
-  #           version: $(DotNetSdkVersion)
-  #           installationPath: $(Agent.ToolsDirectory)/dotnet
-
-  #       - script: dotnet new -i Microsoft.AspNetCore.Blazor.Templates::$(BlazorTemplateVersion)
-  #         displayName: Install Blazor templates
-
-  #       - task: DownloadBuildArtifacts@0
-  #         displayName: 'Download built packages'
-  #         inputs:
-  #           artifactName: packages
-  #           downloadPath: $(System.DefaultWorkingDirectory)
-
-  #       - task: DownloadBuildArtifacts@0
-  #         displayName: 'Download built integrationtests'
-  #         inputs:
-  #           artifactName: integrationTests
-  #           downloadPath: $(System.DefaultWorkingDirectory)
-
-  #       - script: dotnet vstest $(System.DefaultWorkingDirectory)/integrationTests/netcoreapp3.1/NotIntegration.Tests.dll --ResultsDirectory:$(System.DefaultWorkingDirectory)/testResults | tee $(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\log.txt
-  #         displayName: Run integration tests
-
-  #       - task: PublishTestResults@2
-  #         displayName: Publish NPM Test Results
-  #         inputs:
-  #           testResultsFormat: 'VSTest'
-  #           testResultsFiles: '*.trx'
-  #           searchFolder: '$(SystemWorkingDirectory)/testResults'
-  #         continueOnError: true
-  #         condition: always()
+          condition: ne(variables['SkipTests'], 'true')
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #
