@@ -28,8 +28,8 @@ export type ServiceErrorHandler = (
 
 export type AutoEnablerConfiguration = {
     apiBaseAddress: URL,
-    useWasmRunner?:boolean;
-    debug?:boolean;
+    useWasmRunner?: boolean;
+    debug?: boolean;
     runResultHandler?: RunResultHandler;
     serviceErrorHandler?: ServiceErrorHandler;
     editorConfiguration?: { [key: string]: any };
@@ -51,13 +51,8 @@ export enum tryDotNetRegionInjectionPoints {
 }
 
 export enum tryDotNetVisibilityModifiers {
-   visible= "visible",
-   hidden= "hidden",
-}
-
-export enum tryDotNetOutputModes {
-    standard = "standard",
-    terminal = "terminal"
+    visible = "visible",
+    hidden = "hidden",
 }
 
 export type TryDotNetSession = {

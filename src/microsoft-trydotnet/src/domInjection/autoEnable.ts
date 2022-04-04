@@ -7,9 +7,7 @@ import { RunResult, ServiceError, RunConfiguration } from "../session";
 import { isNullOrUndefinedOrWhitespace } from "../stringExtensions";
 import { DocumentsToOpen } from "../internals/session";
 import { IOutputPanel } from "../outputPanel";
-import { XtermTerminal } from "../XtermTerminal";
 import {
-    tryDotNetOutputModes,
     TryDotNetSession,
     tryDotNetModes,
     AutoEnablerConfiguration,
@@ -93,36 +91,10 @@ export function autoEnable(
     );
 }
 
-export function tryParseEnum(outputType?: string): tryDotNetOutputModes {
-    if (isNullOrUndefinedOrWhitespace(outputType)) {
-        return tryDotNetOutputModes.standard;
-    }
-
-    for (let n in tryDotNetOutputModes) {
-        const name = <string>(tryDotNetOutputModes[<tryDotNetOutputModes>n]);
-        console.log(name);
-        if (name === outputType) {
-            return <tryDotNetOutputModes>n;
-        }
-    }
-}
-
 export function createOutputPanel(
-    outputDiv: HTMLDivElement,
-    outputType?: string
+    outputDiv: HTMLDivElement
 ): IOutputPanel {
-    let type: tryDotNetOutputModes = tryParseEnum(outputType);
-    let outputPanel: IOutputPanel;
-
-    switch (type) {
-        case tryDotNetOutputModes.terminal:
-            outputPanel = new XtermTerminal(outputDiv);
-            break;
-        default:
-            outputPanel = new PreOutputPanel(outputDiv);
-            break;
-    }
-
+    const outputPanel = new PreOutputPanel(outputDiv);
     return outputPanel;
 }
 
@@ -137,8 +109,7 @@ export function createRunOutputElements(
     }
     let outputDiv = outputPanelContainer.appendChild(doc.createElement("div"));
     outputDiv.classList.add("trydotnet-output");
-    let outputType = outputPanelContainer.dataset.trydotnetOutputType;
-    let outputPanel: IOutputPanel = createOutputPanel(outputDiv, outputType);
+    let outputPanel: IOutputPanel = createOutputPanel(outputDiv);
 
     return {
         outputPanel
@@ -234,7 +205,7 @@ function internalAutoEnable(
                 packageVersion = packageVersionAttribute;
             }
 
-            
+
             let languageAttribute = codeSource.dataset.trydotnetLanguage;
             if (!isNullOrUndefinedOrWhitespace(languageAttribute)) {
                 language = languageAttribute;
@@ -289,7 +260,7 @@ function internalAutoEnable(
         }
 
         let prj: Project = {
-            package: packageName,            
+            package: packageName,
             files: mergeFiles(files, includes, sessionId)
         };
 
