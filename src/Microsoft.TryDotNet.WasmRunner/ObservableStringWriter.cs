@@ -7,6 +7,8 @@ using System.Text;
 
 namespace Microsoft.TryDotNet.WasmRunner;
 
+#nullable disable
+
 internal class ObservableStringWriter : StringWriter, IObservable<string>
 {
     private readonly Subject<string> _writeEvents = new();
