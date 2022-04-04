@@ -4,7 +4,6 @@
 @charset "utf-8";
 
 @import "../node_modules/github-markdown-css/github-markdown";
-@import "../node_modules/xterm/css/xterm";
 
 @import "./constants";
 @import "./run-button";
@@ -61,12 +60,13 @@ section {
     flex-basis: 67vw;
     padding: 2em 10em;
   }
+
   .control-column {
     flex-grow: 1;
     flex-basis: 33vw;
   }
 
-  > div {
+  >div {
     overflow-y: auto;
     padding: 16px;
   }
@@ -106,10 +106,12 @@ footer {
   border-left-width: 4px;
   display: flex;
   align-items: center;
+
   svg {
     margin: 16px;
     display: inline-flex;
   }
+
   span {
     display: inline-flex;
   }
