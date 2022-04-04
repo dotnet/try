@@ -10,7 +10,8 @@
     "build": "sass --no-source-map sass/trydotnet.scss ../Microsoft.TryDotNet/wwwroot/css/trydotnet.css",
     "buildProd": "sass --no-source-map sass/trydotnet.scss ../Microsoft.TryDotNet/wwwroot/css/trydotnet.css",
     "release": "sass --no-source-map --style=compressed sass/trydotnet.scss",
-    "ciCreateDir": "npx mkdirp "
+    "ciCreateDir": "npx mkdirp ",
+    "ciTest": "echo \"NOOP\""
   },
   "author": "Diego Colombo",
   "license": "MIT",

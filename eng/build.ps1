@@ -1,26 +1,54 @@
+[CmdletBinding(PositionalBinding = $false)]
+param (
+    [switch]$ci,
+    [switch]$noDotnet,
+    [switch]$test,
+    [Parameter(ValueFromRemainingArguments = $true)][String[]]$arguments
+)
+
 Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
 
-function TestUsingNPM([string] $testPath) {
-    Write-Host "Installing packages"
-    Start-Process -PassThru -WindowStyle Hidden -WorkingDirectory $testPath -Wait npm "i"
-    Write-Host "Testing"
-    $test = Start-Process -PassThru -WindowStyle Hidden -WorkingDirectory $testPath -Wait npm "run ciTest"
-    Write-Host "Done with code $($test.ExitCode)"
-    return $test.ExitCode
-}
-
 try {
-    # invoke regular build/test script
-    . (Join-Path $PSScriptRoot "common\build.ps1") /p:Projects=$PSScriptRoot\..\TryDotNet.sln @args
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
+    $repoRoot = Resolve-Path "$PSScriptRoot\.."
+    $npmDirs = @(
+        "src\microsoft-trydotnet",
+        "src\microsoft-trydotnet-editor",
+        "src\microsoft-trydotnet-styles"
+    )
+    foreach ($npmDir in $npmDirs) {
+        Push-Location "$repoRoot\$npmDir"
+        Write-Host "Building NPM in directory $npmDir"
+        npm ci
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        npm run buildProd
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        if ($test) {
+            Write-Host "Testing NPM in directory $npmDir"
+            npm run ciTest
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+
+        Pop-Location
     }
 
-    # directly invoke npm tests
-    if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
-        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
-        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
+    if (-Not $noDotnet) {
+        # promote switches to arguments
+        if ($ci) {
+            $arguments += "-ci"
+        }
+        if ($test -And -Not($ci)) {
+            # CI runs unit tests elsewhere, so only promote the `-test` switch if we're not running CI
+            $arguments += '-test'
+        }
+
+        # invoke regular build/test script
+        $buildScript = (Join-Path $PSScriptRoot "common\build.ps1")
+        Invoke-Expression "$buildScript -projects ""$PSScriptRoot\..\TryDotNet.sln"" $arguments"
+        if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+        }
     }
 }
 catch {

@@ -8,6 +8,8 @@ using System.Text;
 
 namespace Microsoft.TryDotNet.WasmRunner;
 
+#nullable disable
+
 internal class MultiplexingTextWriter : TextWriter
 {
     private static volatile UnicodeEncoding _encoding;
@@ -138,12 +140,6 @@ internal class MultiplexingTextWriter : TextWriter
         GetCurrentWriter().Write(value);
     }
 
-#if !NETSTANDARD2_0
-    public override void Write(ReadOnlySpan<char> buffer)
-    {
-        GetCurrentWriter().Write(buffer);
-    }
-#endif
     public override void Write(float value)
     {
         GetCurrentWriter().Write(value);
@@ -189,13 +185,6 @@ internal class MultiplexingTextWriter : TextWriter
         return GetCurrentWriter().WriteAsync(buffer, index, count);
     }
 
-#if !NETSTANDARD2_0
-    public override Task WriteAsync(ReadOnlyMemory<char> buffer, CancellationToken cancellationToken = new())
-    {
-        return GetCurrentWriter().WriteAsync(buffer, cancellationToken);
-    }
-#endif
-
     public override Task WriteAsync(string value)
     {
         return GetCurrentWriter().WriteAsync(value);
@@ -240,13 +229,6 @@ internal class MultiplexingTextWriter : TextWriter
     {
         GetCurrentWriter().WriteLine(value);
     }
-
-#if !NETSTANDARD2_0
-    public override void WriteLine(ReadOnlySpan<char> buffer)
-    {
-        GetCurrentWriter().WriteLine(buffer);
-    }
-#endif
 
     public override void WriteLine(float value)
     {

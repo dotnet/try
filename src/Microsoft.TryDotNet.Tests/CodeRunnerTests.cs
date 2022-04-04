@@ -94,7 +94,7 @@ class D
 
         var result = await runner.RunAssemblyEntryPoint(encodedAssembly, outputs.Add, errors.Add);
         result.Succeeded.Should().BeFalse();
-        result.RunnerException.Message.Should().Match("*Could not load type 'C'*");
+        result.RunnerException!.Message.Should().Match("*Could not load type 'C'*");
     }
 
 
@@ -112,7 +112,7 @@ class D
 
         var result = await runner.RunAssemblyEntryPoint(encodedAssembly, outputs.Add, errors.Add);
         result.Succeeded.Should().BeFalse();
-        result.RunnerException.Message.Should().Be(
+        result.RunnerException!.Message.Should().Be(
             "Could not find a static entry point 'Main'.");
     }
 

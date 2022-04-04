@@ -6,6 +6,8 @@ using System.Reactive.Disposables;
 
 namespace Microsoft.TryDotNet.WasmRunner;
 
+#nullable disable
+
 internal static class ConsoleOutput
 {
     private static readonly object _systemConsoleSwapLock = new();
