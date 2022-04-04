@@ -14,7 +14,7 @@ public static class CommandLine
     public static Task<CommandLineResult> Execute(
         FileInfo exePath,
         string args,
-        DirectoryInfo workingDir = null,
+        DirectoryInfo? workingDir = null,
         TimeSpan? timeout = null) =>
         Execute(exePath.FullName,
             args,
@@ -25,7 +25,7 @@ public static class CommandLine
     public static async Task<CommandLineResult> Execute(
         string command,
         string args,
-        DirectoryInfo workingDir = null,
+        DirectoryInfo? workingDir = null,
         TimeSpan? timeout = null)
     {
         args ??= "";
@@ -106,9 +106,9 @@ public static class CommandLine
     public static Process StartProcess(
         string command,
         string args,
-        DirectoryInfo workingDir,
-        Action<string> output = null,
-        Action<string> error = null,
+        DirectoryInfo? workingDir,
+        Action<string>? output = null,
+        Action<string>? error = null,
         params (string key, string value)[] environmentVariables)
     {
         using (var operation = Log.OnEnterAndExit())
@@ -171,7 +171,7 @@ public static class CommandLine
         }
     }
 
-    public static string AppendArgs(this string initial, string append = null) =>
+    public static string AppendArgs(this string initial, string? append = null) =>
         string.IsNullOrWhiteSpace(append)
             ? initial
             : $"{initial} {append}";
@@ -179,7 +179,7 @@ public static class CommandLine
     private static ConfirmationLogger ConfirmOnExit(
         object command,
         string args,
-        [CallerMemberName] string operationName = null)
+        [CallerMemberName] string? operationName = null)
     {
         return new ConfirmationLogger(
             operationName: operationName,

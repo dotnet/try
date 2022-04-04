@@ -289,9 +289,24 @@ namespace Microsoft.TryDotNet.Tests
             {
             }
 
-            public int Compare(Tuple<int, string> x, Tuple<int, string> y)
+            public int Compare(Tuple<int, string>? x, Tuple<int, string>? y)
             {
-                return x.Item1 - y.Item1;
+                if (x is null && y is null)
+                {
+                    return 0;
+                }
+                else if (x is null)
+                {
+                    return -1;
+                }
+                else if (y is null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return x.Item1 - y.Item1;
+                }
             }
         }
     }
