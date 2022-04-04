@@ -8,7 +8,7 @@ import './index.css';
 import * as messageBus from './messageBus';
 import * as rxjs from 'rxjs';
 import * as monacoAdapterImpl from './monacoAdapterImpl';
-import { CommandCancelledType, CommandFailedType, CommandSucceededType, SubmitCodeType } from '@microsoft/dotnet-interactive';
+import { CodeSubmissionReceivedType, CommandCancelledType, CommandFailedType, CommandSucceededType, SubmitCodeType } from '@microsoft/dotnet-interactive';
 
 if (window) {
 
@@ -21,7 +21,7 @@ if (window) {
 	});
 
 	const mainWindowMessageBus = new messageBus.MessageBus((message: messages.AnyApiMessage) => {
-		window.postMessage(message);
+		window.postMessage(message, '*');
 	},
 		mainWindowMessages
 	);
@@ -30,14 +30,7 @@ if (window) {
 	const kernel = factory.createWasmProjectKernel();
 	const tdnEditor = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
 
-	// for messaging api backward compatibility
-	kernel.subscribeToKernelEvents((event) => {
-		if ((event.eventType === CommandSucceededType || event.eventType == CommandFailedType || event.eventType == CommandCancelledType) && event.command?.commandType === SubmitCodeType) {
-			window.postMessage({
-				type: "NOTIFY_HOST_RUN_READY"
-			}, '*');
-		}
-	});
+
 
 	tdnEditor.editor = new monacoAdapterImpl.MonacoEditorAdapter(editor);
 
