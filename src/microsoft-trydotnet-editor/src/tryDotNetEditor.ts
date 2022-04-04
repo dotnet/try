@@ -4,7 +4,6 @@
 import * as messages from './messages';
 import * as contract from './contract';
 
-import * as apiService from './apiService';
 import * as messageBus from './messageBus';
 import * as projectKernel from './projectKernel';
 import * as monaco from './EditorAdapter';
@@ -16,6 +15,25 @@ export class TryDotNetEditor {
   constructor(private _mainWindowMessageBus: messageBus.IMessageBus, private _kernel: projectKernel.ProjectKernel) {
     this._mainWindowMessageBus.messages.subscribe(message => {
       this.onHostMessage(message);
+    });
+    // for messaging api backward compatibility
+    this._kernel.subscribeToKernelEvents((event) => {
+      if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
+        switch (event.eventType) {
+          case dotnetInteractive.CommandSucceededType:
+          case dotnetInteractive.CommandFailedType:
+          case dotnetInteractive.CommandCancelledType:
+            _mainWindowMessageBus.postMessage({
+              type: "NOTIFY_HOST_RUN_READY"
+            });
+            break;
+          case dotnetInteractive.CodeSubmissionReceivedType:
+            _mainWindowMessageBus.postMessage({
+              type: "NOTIFY_HOST_RUN_BUSY"
+            });
+            break;
+        }
+      }
     });
   }
 
@@ -61,6 +79,15 @@ export class TryDotNetEditor {
         const project =
           this.configureWorkspace(apiMessage.workspace);
         break;
+      case messages.RUN_REQUEST: {
+        const code = this.getEditor().getCode();
+        this.getKernel().send({
+          commandType: dotnetInteractive.SubmitCodeType,
+          command: <dotnetInteractive.SubmitCode>{
+            code: code
+          }
+        });
+      }
     }
   }
 
