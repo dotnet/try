@@ -36,7 +36,7 @@ internal class MessageInterceptor
 
     public Task<JsonElement> AwaitForMessage(string messageType)
     {
-        var cs =  _completionSources.GetOrAdd(messageType, _ => new TaskCompletionSource<JsonElement>());
+        var cs =  _completionSources.GetOrAdd(messageType, _ => new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously));
         return cs.Task;
     }
 }
