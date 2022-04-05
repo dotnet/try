@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
-      "lib": ["es2015", "dom"],
+      "lib": ["es2021", "dom"],
       "declaration": true,      
       "noImplicitAny": true,
       "module": "commonjs",
       "outDir": "./dist",
-      "target": "es5"
+      "target": "es6"
     },
     "include": [
       "src/**/*"
