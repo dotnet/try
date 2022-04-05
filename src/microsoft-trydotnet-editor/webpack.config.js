@@ -17,7 +17,8 @@ module.exports = {
 	output: {
 		globalObject: 'self',
 		filename: '[name].bundle.js',
-		path: path.resolve(__dirname, 'dist')
+		path: path.resolve(__dirname, 'dist'),
+		clean: true
 	},
 	module: {
 		rules: [
@@ -27,18 +28,36 @@ module.exports = {
 				exclude: /node_modules/
 			},
 			{
-				test: /\.css$/,
-				use: ['style-loader', 'css-loader']
+				test: /\.(png|svg|jpg|jpeg|gif)$/i,
+				type: 'asset/resource',
 			},
 			{
-				test: /\.ttf$/,
-				use: ['file-loader']
+				test: /\.css$/,
+				use: [{
+					loader: 'style-loader'
+				},
+				{
+					loader: 'css-loader',
+					options: {
+						url: true,
+					}
+				}]
+			},
+			{
+				test: /\.(woff|woff2|eot|ttf|otf)$/i,
+				type: 'asset/resource',
+				use: [{
+					loader: 'file-loader',
+					options: {
+						name: 'trydotnet__[name].[ext]',
+					}
+				}]
 			}
 		]
 	},
 	plugins: [
 		new HtmlWebPackPlugin({
-			title: 'editor.js Test'
+			title: 'trydotnet editor'
 		})
 	]
 };
