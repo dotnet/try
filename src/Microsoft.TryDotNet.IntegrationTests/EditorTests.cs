@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 
 using FluentAssertions;
-
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Playwright;
 
 using Xunit;
@@ -155,38 +155,31 @@ public class EditorTests : PlaywrightTestBase
         var interceptor = new MessageInterceptor();
         await page.GotoAsync(TryDotNet.Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-   
 
-        var projectLoadedAwaiter = interceptor.AwaitForMessage("PROJECT_LOADED");
+
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DOCUMENT_OPENED");
         var randomValue = Guid.NewGuid().ToString("N");
         await page.DispatchMessage(new
         {
             type = "setWorkspace",
             workspace = new
             {
+                activeBufferId = "Program.cs",
                 buffers = new[]
                 {
                     new {
                         id = "Program.cs",
-                        content=$@"Console.WriteLine(""Hello World"");"
+                        content=@"Console.WriteLine(""Hello World"");"
                     }
                 }
             }
         });
-        var projectLoaded = await projectLoadedAwaiter;
-        projectLoaded.Should().NotBeNull();
-        var documentOpenedAwaiter = interceptor.AwaitForMessage("DOCUMENT_OPENED");
+       
 
-        await page.DispatchMessage(new
-        {
-            type = "setActiveBufferId",
-            bufferId = "Program.cs"
-        });
+       // var documentOpened = await documentOpenedAwaiter;
+       // documentOpened.Should().NotBeNull();
 
-
-
-        var documentOpened = await documentOpenedAwaiter;
-        documentOpened.Should().NotBeNull();
+        await page.ClearMonacoEditor();
 
         var editor = await page.FindEditor();
         await editor.FocusAsync();
@@ -198,8 +191,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
 
         await editor.PressAsync("Tab");
         await page.TestScreenShotAsync();
-
-        var messages = await page.RequestRunAsync();
+        var message = await page.RequestRunAsync(interceptor);
         throw new NotImplementedException();
     }
 }

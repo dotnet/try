@@ -82,7 +82,7 @@ export class WasmRunner {
   }
 
   public async run(runRequest: {
-    assembly?: dotnetInteractive.Base64EncodedAssembly,
+    assembly: dotnetInteractive.Base64EncodedAssembly,
     onOutput: (output: string) => void,
     onError: (error: string) => void,
   }): Promise<void> {
@@ -105,6 +105,11 @@ export class WasmRunner {
         }
       }
     });
+    this._messageBus.postMessage({
+      type: "wasmRunner-command",
+      base64EncodedAssembly: runRequest.assembly.value
+    });
+
     await completionSource.promise;
     sub.unsubscribe();
   }

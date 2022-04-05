@@ -4,7 +4,7 @@
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 export interface IWasmRunner {
     (runRequest: {
-        assembly?: dotnetInteractive.Base64EncodedAssembly,
+        assembly: dotnetInteractive.Base64EncodedAssembly,
         onOutput: (output: string) => void,
         onError: (error: string) => void,
     }): Promise<void>

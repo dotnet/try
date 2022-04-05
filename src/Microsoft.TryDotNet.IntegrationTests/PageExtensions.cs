@@ -71,38 +71,23 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         await editor.PressAsync("Delete");
     }
 
-    public static async Task<List<JsonElement>> RequestRunAsync(this IPage page)
+    public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor)
     {
-        var messages = new List<JsonElement>();
-        var ts = new TaskCompletionSource<List<JsonElement>>();
-        await page.ExposeFunctionAsync("postMessageLogger", (JsonElement message) =>
-        {
-            messages.Add(message);
-            if (message.TryGetProperty("type", out var typeProperty))
-            {
-
-                if (typeProperty.GetString() == "NOTIFY_HOST_RUN_COMPLETED")
-                {
-                    ts.SetResult(messages);
-                }
-            }
-
-        });
-
+        var awaiter = interceptor.AwaitForMessage("NOTIFY_HOST_RUN_COMPLETED");
         await page.DispatchMessage(new
         {
             type = "run"
 
         });
-        var res = await ts.Task;
-        return res;
+        var res = await awaiter;
+        return interceptor.Messages;
     }
 
 
     public static async Task<List<WasmRunnerMessage>> ExecuteAssembly(this IPage page, string base64EncodedAssembly)
     {
         var messages = new List<WasmRunnerMessage>();
-        var ts = new TaskCompletionSource();
+        var ts = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         await page.ExposeFunctionAsync("postMessageLogger", (JsonElement message) =>
         {
             var wm = message.Deserialize<WasmRunnerMessage>()!;
