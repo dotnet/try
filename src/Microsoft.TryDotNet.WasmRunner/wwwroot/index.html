@@ -49,8 +49,8 @@
 
         window.postAndLog = (message) => {
             postMessage(message, "*");
-            if (window.codeRunnerEventLogger) {
-                window.codeRunnerEventLogger(message);
+            if (window.postMessageLogger) {
+                window.postMessageLogger(message);
             }
         };
 

@@ -24,6 +24,9 @@ export class TryDotNetEditor {
           case dotnetInteractive.CommandFailedType:
           case dotnetInteractive.CommandCancelledType:
             _mainWindowMessageBus.postMessage({
+              type: "NOTIFY_HOST_RUN_COMPLETED"
+            });
+            _mainWindowMessageBus.postMessage({
               type: "NOTIFY_HOST_RUN_READY"
             });
             break;
@@ -32,7 +35,35 @@ export class TryDotNetEditor {
               type: "NOTIFY_HOST_RUN_BUSY"
             });
             break;
+          case dotnetInteractive.StandardOutputValueProducedType:
+            _mainWindowMessageBus.postMessage({
+              type: "output",
+              event: event.event
+            });
+            break;
+          case dotnetInteractive.StandardErrorValueProducedType:
+            _mainWindowMessageBus.postMessage({
+              type: "error",
+              event: event.event
+            });
+            break;
         }
+      } else {
+        switch (event.eventType) {
+          case dotnetInteractive.ProjectOpenedType:
+            _mainWindowMessageBus.postMessage({
+              type: "PROJECT_LOADED",
+              event: event.event
+            });
+            break;
+          case dotnetInteractive.DocumentOpenedType:
+            _mainWindowMessageBus.postMessage({
+              type: "DOCUMENT_OPENED",
+              event: event.event
+            });
+            break;
+        }
+
       }
     });
   }

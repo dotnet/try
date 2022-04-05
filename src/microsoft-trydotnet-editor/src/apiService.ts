@@ -20,7 +20,9 @@ export interface IApiService {
 
 function createApiServiceWithConfiguration(configuration: IApiServiceConfiguration): IApiService {
     let service: IApiService = async (commands) => {
-
+        let bodyContent = JSON.stringify({
+            commands: commands
+        });
         let headers = {
             'Content-Type': 'application/json'
         };
@@ -31,10 +33,11 @@ function createApiServiceWithConfiguration(configuration: IApiServiceConfigurati
         let response = await fetch(configuration.commandsUrl.toString(), {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify(commands)
+            body: bodyContent
         });
 
-        return response.json();
+        let json = await response.json();
+        return json.events;
     };
 
     return service;
