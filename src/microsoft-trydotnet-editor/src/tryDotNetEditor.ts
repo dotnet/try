@@ -110,6 +110,21 @@ export class TryDotNetEditor {
         const project =
           this.configureWorkspace(apiMessage.workspace);
         break;
+      case messages.SET_ACTIVE_BUFFER_REQUEST:
+        const bufferId = apiMessage.bufferId;
+        const parts = bufferId.split('@');
+        const command: dotnetInteractive.OpenDocument = {
+          relativeFilePath: parts[0],
+        };
+        if (parts.length > 1) {
+          command.regionName = parts[1];
+        }
+        this.getKernel().send({
+          commandType: dotnetInteractive.OpenDocumentType,
+          command: command
+        });
+
+        break;
       case messages.RUN_REQUEST: {
         const code = this.getEditor().getCode();
         this.getKernel().send({
@@ -118,6 +133,7 @@ export class TryDotNetEditor {
             code: code
           }
         });
+
       }
     }
   }
@@ -134,6 +150,21 @@ export class TryDotNetEditor {
 
     const project = toProject(workspace);
     await this.openProject(project);
+    if (workspace.activeBufferId) {
+      const bufferId = workspace.activeBufferId;
+      const parts = bufferId.split('@');
+      const command: dotnetInteractive.OpenDocument = {
+        relativeFilePath: parts[0],
+      };
+      if (parts.length > 1) {
+        command.regionName = parts[1];
+      }
+      await this.getKernel().send({
+        commandType: dotnetInteractive.OpenDocumentType,
+        command: command
+      });
+
+    }
   }
 
   public async openProject(project: dotnetInteractive.Project) {

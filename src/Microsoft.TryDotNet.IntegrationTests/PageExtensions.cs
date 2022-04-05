@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -32,6 +33,13 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         return editor;
     }
 
+    public static async Task<ILocator> FindEditorContent(this IPage page)
+    {
+        var editor = page.Locator(@"div[role = ""presentation""] .view-lines");
+        await editor.IsVisibleAsync();
+        return editor;
+    }
+
     public static async Task TypeTextInMonacoEditor(this IPage page, string text, float? delay = null)
     {
         var editor = await page.FindEditor();
@@ -45,6 +53,13 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
             await editor.TypeAsync(text);
         }
         await editor.PressAsync("Escape", new LocatorPressOptions{ Delay = 0.5f});
+    }
+
+    public static async Task<string> GetEditorContentAsync(this IPage page)
+    {
+        var editor = await page.FindEditorContent();
+        var text = await editor.TextContentAsync()?? string.Empty;
+        return text;
     }
 
     public static async Task ClearMonacoEditor(this IPage page)
