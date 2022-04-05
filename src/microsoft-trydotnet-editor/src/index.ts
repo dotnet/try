@@ -11,13 +11,14 @@ import * as monacoAdapterImpl from './monacoAdapterImpl';
 
 if (window) {
 
-	window['postAndLog'] = (message: any) => {
+	const postAndLog = (message: any) => {
 		window.postMessage(message, '*');
 		const messageLogger = window['postMessageLogger'];
 		if (messageLogger) {
 			messageLogger(message);
 		}
 	};
+
 	const mainWindowMessages = new rxjs.Subject<messages.AnyApiMessage>();
 	window.addEventListener('message', (event) => {
 		const apiMessage = <messages.AnyApiMessage>event.data;
@@ -27,7 +28,7 @@ if (window) {
 	});
 
 	const mainWindowMessageBus = new messageBus.MessageBus((message: messages.AnyApiMessage) => {
-		window['postAndLog'](message);
+		postAndLog(message);
 	},
 		mainWindowMessages
 	);
@@ -43,7 +44,7 @@ if (window) {
 	window['trydotnetEditor'] = tdnEditor;
 
 	// for messaging api backward compatibility
-	window['postAndLog']({
+	postAndLog({
 		type: "NOTIFY_HOST_EDITOR_READY"
 	});
 }

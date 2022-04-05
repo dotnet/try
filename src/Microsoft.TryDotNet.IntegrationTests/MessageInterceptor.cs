@@ -16,8 +16,9 @@ internal class MessageInterceptor
 
     public async Task InstallAsync(IPage page)
     {
-        await page.ExposeFunctionAsync("postMessageLogger", (JsonElement message) =>
+        await page.ExposeFunctionAsync("postMessageLogger", async (JsonElement message) =>
         {
+            await Task.Yield();
             Messages.Add(message);
             if (message.TryGetProperty("type", out var typeProperty))
             {
