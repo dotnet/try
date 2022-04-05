@@ -99,8 +99,8 @@ public class EditorTests : PlaywrightTestBase
         });
 
         await page.TestScreenShotAsync();
-        var loaded = await projectLoadedAwaiter;
-        loaded.Should().NotBeNull();
+        var projectLoaded = await projectLoadedAwaiter;
+        projectLoaded.Should().NotBeNull();
     }
 
     [Fact]
@@ -112,20 +112,81 @@ public class EditorTests : PlaywrightTestBase
         await page.GotoAsync(TryDotNet.Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("PROJECT_LOADED");
+        var randomValue = Guid.NewGuid().ToString("N");
+        await page.DispatchMessage(new
+        {
+            type = "setWorkspace",
+            workspace = new
+            {
+                buffers = new[]
+                {
+                    new {
+                        id = "Program.cs",
+                        content=$@"Console.WriteLine(""{randomValue}"");"
+                    }
+                }
+            }
+        });
+        var projectLoaded = await projectLoadedAwaiter;
+        projectLoaded.Should().NotBeNull();
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DOCUMENT_OPENED");
 
+        await page.DispatchMessage(new
+        {
+            type = "setActiveBufferId",
+            bufferId = "Program.cs"
+        });
+
+
+
+        var documentOpened = await documentOpenedAwaiter;
+        documentOpened.Should().NotBeNull();
         await page.TestScreenShotAsync();
-        throw new NotImplementedException();
+        var text = await page.GetEditorContentAsync();
+        text.Should().Contain(randomValue);
+
     }
 
     [Fact]
     public async Task user_code_in_editor_is_executed()
     {
         var page = await Playwright.Browser!.NewPageAsync();
-
+        var interceptor = new MessageInterceptor();
         await page.GotoAsync(TryDotNet.Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+   
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("PROJECT_LOADED");
         var randomValue = Guid.NewGuid().ToString("N");
-        await page.ClearMonacoEditor();
+        await page.DispatchMessage(new
+        {
+            type = "setWorkspace",
+            workspace = new
+            {
+                buffers = new[]
+                {
+                    new {
+                        id = "Program.cs",
+                        content=$@"Console.WriteLine(""Hello World"");"
+                    }
+                }
+            }
+        });
+        var projectLoaded = await projectLoadedAwaiter;
+        projectLoaded.Should().NotBeNull();
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DOCUMENT_OPENED");
+
+        await page.DispatchMessage(new
+        {
+            type = "setActiveBufferId",
+            bufferId = "Program.cs"
+        });
+
+
+
+        var documentOpened = await documentOpenedAwaiter;
+        documentOpened.Should().NotBeNull();
 
         var editor = await page.FindEditor();
         await editor.FocusAsync();
