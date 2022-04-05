@@ -32,7 +32,6 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     });
 
     this.registerCommandHandler({
-      // why???
       commandType: dotnetInteractive.OpenProjectType,
       handle: async (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
         await this.handleOpenProject(commandInvocation);

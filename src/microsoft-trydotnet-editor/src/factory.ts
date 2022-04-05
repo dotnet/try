@@ -33,8 +33,16 @@ export function createWasmProjectKernel(): ProjectKernel {
     }
   });
 
-  const wasmIframeBus = new messageBus.MessageBus((message: IWasmRunnerMessage) => {
+  hostWindow['postAndLog'] = (message: any) => {
     hostWindow.postMessage(message, '*');
+    const messageLogger = hostWindow['postMessageLogger'];
+    if (messageLogger) {
+      messageLogger(message);
+    }
+  };
+
+  const wasmIframeBus = new messageBus.MessageBus((message: IWasmRunnerMessage) => {
+    hostWindow['postAndLog'](message);
   },
     wasmIframeMessages
   );
@@ -57,7 +65,7 @@ export function createWasmProjectKernel(): ProjectKernel {
 
 export function createEditor(container: HTMLElement) {
   const editor = monaco.editor.create(container, {
-    value: 'console.log("Hello, world")',
+    value: '',
     language: 'csharp'
   });
   return editor;

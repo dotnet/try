@@ -1,9 +1,13 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
+
 using FluentAssertions;
+
 using Microsoft.Playwright;
+
 using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
@@ -12,7 +16,7 @@ public class EditorTests : PlaywrightTestBase
 {
     public EditorTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
     {
-       
+
     }
 
     [Fact]
@@ -33,7 +37,7 @@ public class EditorTests : PlaywrightTestBase
     {
         var wasmRunnerLoaded = false;
         var page = await Playwright.Browser!.NewPageAsync();
-   
+
         await page.RouteAsync("**/*", async route =>
         {
             if (route.Request.Url.Contains("blazor.webassembly.js"))
@@ -47,9 +51,94 @@ public class EditorTests : PlaywrightTestBase
         await page.GotoAsync(TryDotNet.Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator("div[role = \"code\"]").IsVisibleAsync();
-   
+
         await page.TestScreenShotAsync();
 
         wasmRunnerLoaded.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task notifies_when_editor_is_ready()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        var readyAwaiter = interceptor.AwaitForMessage("NOTIFY_HOST_EDITOR_READY");
+
+        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        var found = await readyAwaiter;
+
+        await page.TestScreenShotAsync();
+        found.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task can_open_project()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("PROJECT_LOADED");
+
+        await page.DispatchMessage(new
+        {
+            type = "setWorkspace",
+            workspace = new
+            {
+                buffers = new[]
+                {
+                    new {
+                    id = "Program.cs",
+                    content="Console.WriteLine(\"New Project\")"
+                    }
+                }
+            }
+        });
+
+        await page.TestScreenShotAsync();
+        var loaded = await projectLoadedAwaiter;
+        loaded.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task can_open_document()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+
+        await page.TestScreenShotAsync();
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public async Task user_code_in_editor_is_executed()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+
+        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        var randomValue = Guid.NewGuid().ToString("N");
+        await page.ClearMonacoEditor();
+
+        var editor = await page.FindEditor();
+        await editor.FocusAsync();
+        await editor.TypeAsync($@"using System;
+namespace myApp {{ 
+class Program {{
+static void Main() {{
+Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
+
+        await editor.PressAsync("Tab");
+        await page.TestScreenShotAsync();
+
+        var messages = await page.RequestRunAsync();
+        throw new NotImplementedException();
     }
 }

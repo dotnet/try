@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
+    <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
     <GeneratedFileName>GeneratedLocation.cs</GeneratedFileName>
     <PublishLocation>$(MSBuildThisFileDirectory)bin\$(Configuration)\tool</PublishLocation>
     <IsPackable>false</IsPackable>
@@ -11,19 +13,27 @@
   <ItemGroup>
     <PackageReference Include="Assent" Version="1.7.0" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.20.1" />
-    <PackageReference Include="coverlet.collector" Version="3.1.0">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.20.2" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="PocketLogger" Version="0.4.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.TryDotNet\Microsoft.TryDotNet.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <Target Name="DoSomethingElse" BeforeTargets="maybe">
@@ -45,7 +55,7 @@ public partial class AspNetProcess {
 ]]></GeneratedContent>
     </PropertyGroup>
 
-    <WriteLinesToFile File="$(IntermediateOutputPath)\$(GeneratedFileName)" Overwrite="true" Lines="$(GeneratedContent)"/>
+    <WriteLinesToFile File="$(IntermediateOutputPath)\$(GeneratedFileName)" Overwrite="true" Lines="$(GeneratedContent)" />
 
 
   </Target>
@@ -55,7 +65,7 @@ public partial class AspNetProcess {
     </ItemGroup>
   </Target>
   <Target Name="PublishTool" BeforeTargets="CoreCompile">
-    <Exec Command="dotnet publish -o $(PublishLocation)" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.TryDotNet"  />
+    <Exec Command="dotnet publish -o $(PublishLocation)" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.TryDotNet" />
   </Target>
 </Project>
   
