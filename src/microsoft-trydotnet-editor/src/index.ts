@@ -5,7 +5,6 @@ import * as tryDotNetEditor from './tryDotNetEditor';
 import * as messages from './messages';
 import * as factory from './factory';
 import './index.css';
-import * as messageBus from './messageBus';
 import * as rxjs from 'rxjs';
 import * as monacoAdapterImpl from './monacoAdapterImpl';
 
@@ -17,9 +16,10 @@ if (window) {
 		if (messageLogger) {
 			messageLogger(message);
 		}
+		console.log(message);
 	};
 
-	const mainWindowMessages = new rxjs.Subject<messages.AnyApiMessage>();
+	const mainWindowMessages = new rxjs.Subject<any>();
 	window.addEventListener('message', (event) => {
 		const apiMessage = <messages.AnyApiMessage>event.data;
 		if (apiMessage) {
@@ -27,17 +27,9 @@ if (window) {
 		}
 	});
 
-	const mainWindowMessageBus = new messageBus.MessageBus((message: messages.AnyApiMessage) => {
-		postAndLog(message);
-	},
-		mainWindowMessages
-	);
-
 	const editor = factory.createEditor(document.body);
 	const kernel = factory.createWasmProjectKernel();
-	const tdnEditor = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
-
-
+	const tdnEditor = new tryDotNetEditor.TryDotNetEditor(message => postAndLog(message), mainWindowMessages, kernel);
 
 	tdnEditor.editor = new monacoAdapterImpl.MonacoEditorAdapter(editor);
 

@@ -3,8 +3,7 @@
 
 import * as messages from './messages';
 import * as contract from './contract';
-
-import * as messageBus from './messageBus';
+import * as rxjs from 'rxjs';
 import * as projectKernel from './projectKernel';
 import * as monaco from './EditorAdapter';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
@@ -12,8 +11,8 @@ import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
 
-  constructor(private _mainWindowMessageBus: messageBus.IMessageBus, private _kernel: projectKernel.ProjectKernel) {
-    this._mainWindowMessageBus.messages.subscribe(message => {
+  constructor(private _postMessage: (message: any) => void, private _mainWindowMessageBus: rxjs.Subject<any>, private _kernel: projectKernel.ProjectKernel) {
+    this._mainWindowMessageBus.subscribe(message => {
       this.onHostMessage(message);
     });
     // for messaging api backward compatibility
@@ -23,26 +22,26 @@ export class TryDotNetEditor {
           case dotnetInteractive.CommandSucceededType:
           case dotnetInteractive.CommandFailedType:
           case dotnetInteractive.CommandCancelledType:
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "NOTIFY_HOST_RUN_COMPLETED"
             });
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "NOTIFY_HOST_RUN_READY"
             });
             break;
           case dotnetInteractive.CodeSubmissionReceivedType:
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "NOTIFY_HOST_RUN_BUSY"
             });
             break;
           case dotnetInteractive.StandardOutputValueProducedType:
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "output",
               event: event.event
             });
             break;
           case dotnetInteractive.StandardErrorValueProducedType:
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "error",
               event: event.event
             });
@@ -51,13 +50,13 @@ export class TryDotNetEditor {
       } else {
         switch (event.eventType) {
           case dotnetInteractive.ProjectOpenedType:
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "PROJECT_LOADED",
               event: event.event
             });
             break;
           case dotnetInteractive.DocumentOpenedType:
-            _mainWindowMessageBus.postMessage({
+            this._postMessage({
               type: "DOCUMENT_OPENED",
               event: event.event
             });
