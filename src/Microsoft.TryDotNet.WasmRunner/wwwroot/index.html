@@ -48,20 +48,13 @@
         }
 
         window.postAndLog = (message) => {
-
+            if (window.postMessageLogger) {
+                window.postMessageLogger(message);
+            }
             if (window.parent) {
-                if (window.parent.postMessageLogger) {
-                    window.parent.postMessageLogger(message);
-                } else if (window.postMessageLogger) {
-                    window.postMessageLogger(message);
-                }
                 window.parent.postMessage(message, "*");
                 console.log(`[WASM_RUNNER_TO_PARENT_WINDOW] ${JSON.stringify(message)}`);
             } else {
-                if (window.postMessageLogger) {
-                    window.postMessageLogger(message);
-                }
-
                 window.postMessage(message, "*");
                 console.log(`[WASM_RUNNER_TO_WINDOW] ${JSON.stringify(message)}`);
             }

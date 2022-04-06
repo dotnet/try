@@ -38,7 +38,7 @@ export function createWasmProjectKernel(): ProjectKernel {
   const postAndLogToWasmRunner = (message: any) => {
     // console.log(`[to WASM runner] ${JSON.stringify(message)}`);
     const targetWindow = wasmRunnerHostingWindow;
-    const messageLogger = targetWindow['postMessageLogger'] || targetWindow.parent['postMessageLogger'] || window['postMessageLogger'];
+    const messageLogger = window['postMessageLogger'];
     if (typeof (messageLogger) === 'function') {
       messageLogger(message);
     }
