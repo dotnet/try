@@ -48,8 +48,8 @@
     "rollup": "rollup -c",
     "tdd": "npm test -- --watch",
     "test": "mocha  test/**/*.specs.ts",
-    "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
-    "ciCreateDir": "npx mkdirp ",
+    "ciTest": "npm run ciCreateDir && npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
+    "ciCreateDir": "npx mkdirp ../../artifacts/TestResults/Release",
     "ciMinify": "uglifyjs dist/trydotnet.js --source-map"
   },
   "dependencies": {

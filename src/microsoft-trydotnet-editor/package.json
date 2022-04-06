@@ -17,7 +17,8 @@
     "build": "webpack --mode production",
     "buildProd": "webpack --config ./webpack.config.js --config ./webpack-prod.config.js --merge",
     "buildDev": "webpack --mode development",
-    "ciTest": "npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json"
+    "ciTest": "npm run ciCreateDir && npm test -- --reporter mocha-multi-reporters --reporter-options configFile=testConfig.json",
+    "ciCreateDir": "npx mkdirp ../../artifacts/TestResults/Release"
   },
   "author": "",
   "license": "MIT",
