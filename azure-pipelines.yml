@@ -114,14 +114,13 @@ stages:
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
-        - task: PublishTestResults@2
-          displayName: Publish NPM Test Results
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Playwright screen shots
           inputs:
-            testResultsFormat: 'VSTest'
-            testResultsFiles: '*.trx'
-            searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
-          continueOnError: true
-          condition: ne(variables['SkipTests'], 'true')
+            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net6.0\playwright_screenshots
+            artifactName: Windows_playwright_screenshots
+            artifactType: container
+          condition: always()
 
         - task: PublishBuildArtifacts@1
           displayName: Publish packages to artifacts container
@@ -195,14 +194,13 @@ stages:
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
-        - task: PublishTestResults@2
-          displayName: Publish NPM Test Results
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Playwright screen shots
           inputs:
-            testResultsFormat: 'VSTest'
-            testResultsFiles: '*.trx'
-            searchFolder: '$(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)'
-          continueOnError: true
-          condition: ne(variables['SkipTests'], 'true')
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net6.0/playwright_screenshots
+            artifactName: Linux_playwright_screenshots
+            artifactType: container
+          condition: always()
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #
