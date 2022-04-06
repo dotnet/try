@@ -48,9 +48,19 @@
         }
 
         window.postAndLog = (message) => {
-            postMessage(message, "*");
-            if (window.postMessageLogger) {
-                window.postMessageLogger(message);
+
+            if (window.parent) {
+                if (window.parent.postMessageLogger) {
+                    window.parent.postMessageLogger(message);
+                }
+                console.log(`[WASM_RUNNER_TO_PARENT] ${JSON.stringify(message)}`);
+                window.parent.postMessage(message, "*");
+            } else {
+                if (window.postMessageLogger) {
+                    window.postMessageLogger(message);
+                }
+
+                window.postMessage(message, "*");
             }
         };
 
