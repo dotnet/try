@@ -1,8 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ internal static class PageExtensions
 {
     public static Task<byte[]> TestScreenShotAsync(this IPage page, [CallerMemberName] string testName = null!)
     {
-        return page.ScreenshotAsync(new PageScreenshotOptions { Path = $"screenshot_{testName}.png" });
+        return page.ScreenshotAsync(new PageScreenshotOptions { Path = Path.Combine("playwright_screenshots", $"screenshot_{testName}.png") });
     }
 
     public static async Task DispatchMessage<T>(this IPage page, T data)
