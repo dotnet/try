@@ -40,6 +40,7 @@ try {
         }
         if ($test) {
             $arguments += '-test'
+            $arguments += '-integrationTest'
         }
 
         # invoke regular build/test script
