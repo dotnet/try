@@ -17,7 +17,9 @@ export class TryDotNetEditor {
     });
     // for messaging api backward compatibility
     this._kernel.subscribeToKernelEvents((event) => {
+      // console.log(`[kernel events event] : ${JSON.stringify(event)}`);
       if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
+        // console.log(`[SubmitCode event] : ${JSON.stringify(event)}`);
         switch (event.eventType) {
           case dotnetInteractive.CommandSucceededType:
           case dotnetInteractive.CommandFailedType:
@@ -36,14 +38,14 @@ export class TryDotNetEditor {
             break;
           case dotnetInteractive.StandardOutputValueProducedType:
             this._postMessage({
-              type: "output",
-              event: event.event
+              type: dotnetInteractive.StandardOutputValueProducedType,
+              event: event
             });
             break;
           case dotnetInteractive.StandardErrorValueProducedType:
             this._postMessage({
-              type: "error",
-              event: event.event
+              type: dotnetInteractive.StandardErrorValueProducedType,
+              event: event
             });
             break;
         }
@@ -52,13 +54,13 @@ export class TryDotNetEditor {
           case dotnetInteractive.ProjectOpenedType:
             this._postMessage({
               type: "PROJECT_LOADED",
-              event: event.event
+              event: event
             });
             break;
           case dotnetInteractive.DocumentOpenedType:
             this._postMessage({
               type: "DOCUMENT_OPENED",
-              event: event.event
+              event: event
             });
             break;
         }
@@ -74,7 +76,7 @@ export class TryDotNetEditor {
   public set editor(value: monaco.EditorAdapter) {
     this._editor = value;
     if (this._editor) {
-      console.log('configuring editor');
+      //console.log('configuring editor');
       if (this._kernel) {
         this._editor.configureServices(this._kernel);
         // todo : this should be coming from the kernelInfo
