@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using FluentAssertions;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Playwright;
 
 using Xunit;
@@ -63,6 +63,7 @@ public class EditorTests : PlaywrightTestBase
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
+
         var readyAwaiter = interceptor.AwaitForMessage("NOTIFY_HOST_EDITOR_READY");
 
         await page.GotoAsync(TryDotNet.Url + "editor");
@@ -79,8 +80,10 @@ public class EditorTests : PlaywrightTestBase
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
+
         await page.GotoAsync(TryDotNet.Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+      
         var projectLoadedAwaiter = interceptor.AwaitForMessage("PROJECT_LOADED");
 
         await page.DispatchMessage(new
@@ -153,10 +156,10 @@ public class EditorTests : PlaywrightTestBase
     {
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
         await page.GotoAsync(TryDotNet.Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-
+        
         var documentOpenedAwaiter = interceptor.AwaitForMessage("DOCUMENT_OPENED");
         var randomValue = Guid.NewGuid().ToString("N");
         await page.DispatchMessage(new
@@ -176,8 +179,7 @@ public class EditorTests : PlaywrightTestBase
         });
        
 
-       // var documentOpened = await documentOpenedAwaiter;
-       // documentOpened.Should().NotBeNull();
+        await documentOpenedAwaiter;
 
         await page.ClearMonacoEditor();
 
@@ -192,6 +194,13 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await editor.PressAsync("Tab");
         await page.TestScreenShotAsync();
         var message = await page.RequestRunAsync(interceptor);
-        throw new NotImplementedException();
+        message.Should().ContainSingle(e => e.GetProperty("type").GetString() == "StandardOutputValueProduced")
+            .Which
+            .GetProperty("event")
+            .GetProperty("event")
+            .GetProperty("formattedValues")
+            .GetRawText()
+            .Should()
+            .Contain(randomValue);
     }
 }

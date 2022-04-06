@@ -11,21 +11,23 @@ import * as monacoAdapterImpl from './monacoAdapterImpl';
 if (window) {
 
 	const postAndLog = (message: any) => {
-		window.postMessage(message, '*');
+		//console.log(`[from Editor] ${JSON.stringify(message)}`);
 		const messageLogger = window['postMessageLogger'];
 		if (messageLogger) {
 			messageLogger(message);
 		}
-		console.log(message);
+
+		window.postMessage(message, '*');
 	};
 
 	const mainWindowMessages = new rxjs.Subject<any>();
-	window.addEventListener('message', (event) => {
-		const apiMessage = <messages.AnyApiMessage>event.data;
+	window.addEventListener('message', (message) => {
+		//console.log(`[received in editor] ${JSON.stringify(message.data)}`);
+		const apiMessage = <messages.AnyApiMessage>message.data;
 		if (apiMessage) {
 			mainWindowMessages.next(apiMessage);
 		}
-	});
+	}, false);
 
 	const editor = factory.createEditor(document.body);
 	const kernel = factory.createWasmProjectKernel();

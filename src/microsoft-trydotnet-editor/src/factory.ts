@@ -21,27 +21,34 @@ export function createWasmProjectKernel(): ProjectKernel {
   const configuration: IConfiguration = JSON.parse(document.getElementById("trydotnet-editor-script").dataset.trydotnetConfiguration);
 
   document.body.appendChild(wasmIframe);
-  const hostWindow = wasmIframe.contentWindow;
+  const wasmRunnerHostingWindow = wasmIframe.contentWindow;
   const wasmIframeMessages = new rxjs.Subject<IWasmRunnerMessage>();
 
-  hostWindow.addEventListener('message', (event) => {
-    const wasmRunnerMessage = event.data;
-    if (wasmRunnerMessage) {
-      wasmIframeMessages.next(wasmRunnerMessage);
+  window.addEventListener('message', (message) => {
+    const messageType = message.data.type as string;
+    if (messageType && messageType.startsWith("wasmRunner-")) {
+      //console.log(`[received from WASM runner] ${JSON.stringify(message)}`);
+      const wasmRunnerMessage = message.data;
+      if (wasmRunnerMessage) {
+        wasmIframeMessages.next(wasmRunnerMessage);
+      }
     }
-  });
+  }, false);
 
-  const postAndLog = (message: any) => {
-    hostWindow.postMessage(message, '*');
-    const messageLogger = hostWindow['postMessageLogger'] || window['postMessageLogger'];
+  const postAndLogToWasmRunner = (message: any) => {
+    // console.log(`[to WASM runner] ${JSON.stringify(message)}`);
+    const targetWindow = wasmRunnerHostingWindow;
+    const messageLogger = targetWindow['postMessageLogger'] || targetWindow.parent['postMessageLogger'] || window['postMessageLogger'];
     if (typeof (messageLogger) === 'function') {
       messageLogger(message);
     }
+
+    targetWindow.postMessage(message, '*');
   };
 
   wasmIframe.src = configuration.wasmRunnerUrl;
 
-  const wasmRunner = new WasmRunner(message => postAndLog(message), wasmIframeMessages);
+  const wasmRunner = new WasmRunner(message => postAndLogToWasmRunner(message), wasmIframeMessages);
   let runner: IWasmRunner = (runRequest) => {
     return wasmRunner.run(runRequest);
   };
@@ -66,44 +73,54 @@ export function createEditor(container: HTMLElement) {
 
 class WasmRunner {
 
-  constructor(private _postMessage: (message: any) => void, private _wasmIframeMessages: rxjs.Subject<IWasmRunnerMessage>) {
+  constructor(
+    private _postToWasmRunner: (message: any) => void,
+    private _wasmIframeMessages: rxjs.Subject<IWasmRunnerMessage>) {
     if (!this._wasmIframeMessages) {
       throw new Error("wasmIframeMessages is required");
     }
 
   }
 
-  public async run(runRequest: {
+  public run(runRequest: {
     assembly: dotnetInteractive.Base64EncodedAssembly,
     onOutput: (output: string) => void,
     onError: (error: string) => void,
   }): Promise<void> {
-
+    //console.log("WasmRunner.run starting");
     let completionSource = new dotnetInteractive.PromiseCompletionSource<IWasmRunnerMessage>();
 
-    let sub = this._wasmIframeMessages.subscribe((wasmRunnerMessage) => {
-      let type = wasmRunnerMessage.type;
-      if (type) {
-        switch (type) {
-          case "wasmRunner-result":
-            completionSource.resolve(wasmRunnerMessage);
-            break;
-          case "wasmRunner-stdout":
-            runRequest.onOutput(wasmRunnerMessage.message);
-            break;
-          case "wasmRunner-stderror":
-            runRequest.onError(wasmRunnerMessage.message);
-            break;
+    let sub = this._wasmIframeMessages.subscribe({
+      next: (wasmRunnerMessage) => {
+        //console.log(`WasmRunner message ${JSON.stringify(wasmRunnerMessage)}`);
+        let type = wasmRunnerMessage.type;
+        if (type) {
+          switch (type) {
+            case "wasmRunner-result":
+              //console.log("WasmRunner execution completed");
+              completionSource.resolve(wasmRunnerMessage);
+              break;
+            case "wasmRunner-stdout":
+              runRequest.onOutput(wasmRunnerMessage.message);
+              break;
+            case "wasmRunner-stderror":
+              runRequest.onError(wasmRunnerMessage.message);
+              break;
+          }
         }
       }
     });
-    this._postMessage({
+
+    this._postToWasmRunner({
       type: "wasmRunner-command",
       base64EncodedAssembly: runRequest.assembly.value
     });
 
-    await completionSource.promise;
-    sub.unsubscribe();
+    return completionSource.promise.then(r => {
+      sub.unsubscribe();
+      //console.log("WasmRunner.run completed");
+    });
+
   }
 }
 

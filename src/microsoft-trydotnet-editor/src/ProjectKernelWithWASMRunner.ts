@@ -83,6 +83,13 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
   protected async handleSubmitCode(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void> {
 
+    ///console.log("handleSubmitCode - start");
+    commandInvocation.context.publish({
+      eventType: dotnetInteractive.CodeSubmissionReceivedType,
+      event: { code: (<dotnetInteractive.SubmitCode>commandInvocation.commandEnvelope.command).code },
+      command: commandInvocation.commandEnvelope
+    });
+
     let rootCommand = commandInvocation.commandEnvelope;
 
     let compileCommand: dotnetInteractive.KernelCommandEnvelope = {
@@ -121,14 +128,15 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     let eventEnvelopes = await this._apiService(commands);
 
+
     this.forwardEvents(eventEnvelopes, rootCommand, commandInvocation.context);
 
     let assemblyProduced = eventEnvelopes.find(e => e.eventType === dotnetInteractive.AssemblyProducedType);
-
+    //console.log("handleSubmitCode - wasmrunner");
     await this._wasmRunner({
       assembly: (<dotnetInteractive.AssemblyProduced>assemblyProduced.event).assembly,
       onOutput: (output: string) => {
-        commandInvocation.context.publish({
+        const event: dotnetInteractive.KernelEventEnvelope = {
           eventType: dotnetInteractive.StandardOutputValueProducedType,
           event: <dotnetInteractive.StandardOutputValueProduced>{
             formattedValues: [{
@@ -136,11 +144,13 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
               value: output
             }]
           },
-          command: rootCommand
-        });
+          command: commandInvocation.commandEnvelope
+        };
+        // console.log("handleSubmitCode - publish event");
+        commandInvocation.context.publish(event);
       },
       onError: (error: string) => {
-        commandInvocation.context.publish({
+        const event: dotnetInteractive.KernelEventEnvelope = {
           eventType: dotnetInteractive.StandardErrorValueProducedType,
           event: <dotnetInteractive.StandardErrorValueProduced>{
             formattedValues: [{
@@ -148,10 +158,13 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
               value: error
             }]
           },
-          command: rootCommand
-        });
+          command: commandInvocation.commandEnvelope
+        };
+        //console.log("handleSubmitCode - publish event");
+        commandInvocation.context.publish(event);
       }
     });
+    //console.log("handleSubmitCode - done");
   }
 
   private forwardEvents(eventEnvelopes: Array<dotnetInteractive.KernelEventEnvelope>, originalCommand: dotnetInteractive.KernelCommandEnvelope, invocationContext: dotnetInteractive.KernelInvocationContext) {
