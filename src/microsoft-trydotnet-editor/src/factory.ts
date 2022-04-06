@@ -4,7 +4,6 @@
 import * as monaco from 'monaco-editor';
 import * as rxjs from 'rxjs';
 import { ProjectKernelWithWASMRunner } from './ProjectKernelWithWASMRunner';
-import * as messageBus from './messageBus';
 
 import { ProjectKernel } from "./projectKernel";
 import { IWasmRunner } from './wasmRunner';
@@ -33,23 +32,17 @@ export function createWasmProjectKernel(): ProjectKernel {
     }
   });
 
-  hostWindow['postAndLog'] = (message: any) => {
+  const postAndLog = (message: any) => {
     hostWindow.postMessage(message, '*');
     const messageLogger = hostWindow['postMessageLogger'];
-    if (messageLogger) {
+    if (typeof (messageLogger) === 'function') {
       messageLogger(message);
     }
   };
 
-  const wasmIframeBus = new messageBus.MessageBus((message: IWasmRunnerMessage) => {
-    hostWindow['postAndLog'](message);
-  },
-    wasmIframeMessages
-  );
-
   wasmIframe.src = configuration.wasmRunnerUrl;
 
-  const wasmRunner = new WasmRunner(wasmIframeBus);
+  const wasmRunner = new WasmRunner(message => postAndLog(message), wasmIframeMessages);
   let runner: IWasmRunner = (runRequest) => {
     return wasmRunner.run(runRequest);
   };
@@ -72,11 +65,11 @@ export function createEditor(container: HTMLElement) {
 }
 
 
-export class WasmRunner {
+class WasmRunner {
 
-  constructor(private _messageBus: messageBus.IMessageBus) {
-    if (!this._messageBus) {
-      throw new Error("messageBus is required");
+  constructor(private _postMessage: (message: any) => void, private _wasmIframeMessages: rxjs.Subject<IWasmRunnerMessage>) {
+    if (!this._wasmIframeMessages) {
+      throw new Error("wasmIframeMessages is required");
     }
 
   }
@@ -89,7 +82,7 @@ export class WasmRunner {
 
     let completionSource = new PromiseCompletionSource<IWasmRunnerMessage>();
 
-    let sub = this._messageBus.messages.subscribe((wasmRunnerMessage) => {
+    let sub = this._wasmIframeMessages.subscribe((wasmRunnerMessage) => {
       let type = wasmRunnerMessage.type;
       if (type) {
         switch (type) {
@@ -105,7 +98,7 @@ export class WasmRunner {
         }
       }
     });
-    this._messageBus.postMessage({
+    this._postMessage({
       type: "wasmRunner-command",
       base64EncodedAssembly: runRequest.assembly.value
     });

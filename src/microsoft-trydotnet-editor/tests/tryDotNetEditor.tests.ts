@@ -6,7 +6,7 @@ import { describe } from "mocha";
 
 import * as tryDotNetEditor from "../src/tryDotNetEditor";
 import * as monacoEditorSimulator from "./monacoEditorSimulator";
-import * as nullMessageBus from "./nullMessageBus";
+import * as rxjs from 'rxjs';
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 import * as CSharpProjectKernelWithWASMRunner from "../src/ProjectKernelWithWASMRunner";
 import { createApiServiceSimulator } from "./apiServiceSimulator";
@@ -21,11 +21,11 @@ describe("when loading workspace", () => {
     });
 
     it("configures the editor languge", async () => {
-        let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
+
         let service = createApiServiceSimulator();
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
-        let tdn = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
+        let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
         tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
         let project = <dotnetInteractive.Project>{
@@ -38,11 +38,10 @@ describe("when loading workspace", () => {
     });
 
     it("configures the editor code", async () => {
-        let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
         let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_document.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
-        let tdn = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
+        let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
         tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
         let project = <dotnetInteractive.Project>{
@@ -61,11 +60,10 @@ describe("when loading workspace", () => {
 
 describe("when user types in editor", () => {
     it("the editor content and positons are updated", async () => {
-        let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
         let service = createApiServiceSimulator();
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
-        let tdn = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
+        let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
         let editor = new monacoEditorSimulator.MonacoEditorSimulator();
         tdn.editor = editor;
 
@@ -87,12 +85,11 @@ describe("when user types in editor", () => {
 
     it("the editor asks the kernel for diagnostics", async () => {
 
-        let mainWindowMessageBus = new nullMessageBus.NullMessageBus();
         let service = createApiServiceSimulator("./simulatorConfigurations/apiService/diagnostics_produced_with_errors_in_code.json");
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
-        let tdn = new tryDotNetEditor.TryDotNetEditor(mainWindowMessageBus, kernel);
+        let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
         let editor = new monacoEditorSimulator.MonacoEditorSimulator();
         tdn.editor = editor;
 
