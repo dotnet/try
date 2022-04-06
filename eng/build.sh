@@ -60,8 +60,7 @@ done
 
 if [[ "$no_dotnet" != true ]]; then
   # promote switches to arguments
-  if [[ "$run_tests" == true ]] && [[ "$is_ci" != true ]]; then
-    # CI runs unit tests elsewhere, so only promote the `--test` switch if we're not running CI
+  if [[ "$run_tests" == true ]]; then
     args="$args --test"
   fi
 

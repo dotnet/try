@@ -38,8 +38,7 @@ try {
         if ($ci) {
             $arguments += "-ci"
         }
-        if ($test -And -Not($ci)) {
-            # CI runs unit tests elsewhere, so only promote the `-test` switch if we're not running CI
+        if ($test) {
             $arguments += '-test'
         }
 
