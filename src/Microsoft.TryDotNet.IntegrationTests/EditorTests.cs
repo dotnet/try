@@ -190,7 +190,6 @@ class Program {{
 static void Main() {{
 Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
 
-        await editor.PressAsync("Tab");
         await page.TestScreenShotAsync();
         var message = await page.RequestRunAsync(interceptor);
         message.Should().ContainSingle(e => e.GetProperty("type").GetString() == "StandardOutputValueProduced")
