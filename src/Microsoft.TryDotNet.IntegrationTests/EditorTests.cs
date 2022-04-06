@@ -180,7 +180,6 @@ public class EditorTests : PlaywrightTestBase
        
 
         await documentOpenedAwaiter;
-
         await page.ClearMonacoEditor();
 
         var editor = await page.FindEditor();
