@@ -9,7 +9,6 @@ import { ProjectKernel } from "./projectKernel";
 import { IWasmRunner } from './wasmRunner';
 import { createApiService } from './apiService';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
-import { PromiseCompletionSource } from '@microsoft/dotnet-interactive';
 
 export function createWasmProjectKernel(): ProjectKernel {
   const wasmIframe = document.createElement('iframe');
@@ -34,7 +33,7 @@ export function createWasmProjectKernel(): ProjectKernel {
 
   const postAndLog = (message: any) => {
     hostWindow.postMessage(message, '*');
-    const messageLogger = hostWindow['postMessageLogger'];
+    const messageLogger = hostWindow['postMessageLogger'] || window['postMessageLogger'];
     if (typeof (messageLogger) === 'function') {
       messageLogger(message);
     }
@@ -80,7 +79,7 @@ class WasmRunner {
     onError: (error: string) => void,
   }): Promise<void> {
 
-    let completionSource = new PromiseCompletionSource<IWasmRunnerMessage>();
+    let completionSource = new dotnetInteractive.PromiseCompletionSource<IWasmRunnerMessage>();
 
     let sub = this._wasmIframeMessages.subscribe((wasmRunnerMessage) => {
       let type = wasmRunnerMessage.type;
