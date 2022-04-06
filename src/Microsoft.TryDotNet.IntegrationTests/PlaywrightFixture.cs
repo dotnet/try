@@ -17,7 +17,12 @@ public class PlaywrightFixture :  IDisposable, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-      
+        var exitCode = Playwright.Program.Main(new[] { "install" });
+        if (exitCode != 0)
+        {
+            throw new Exception($"Playwright exited with code {exitCode}");
+        }
+
         _playwrightSession = await Playwright.Playwright.CreateAsync();
 
         var browserTypeLaunchOptions = new BrowserTypeLaunchOptions();
