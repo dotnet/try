@@ -16,7 +16,6 @@ scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
 # parse args
 args=""
-is_ci=false
 no_dotnet=false
 run_tests=false
 
@@ -61,7 +60,7 @@ done
 if [[ "$no_dotnet" != true ]]; then
   # promote switches to arguments
   if [[ "$run_tests" == true ]]; then
-    args="$args --test"
+    args="$args --test --integrationTest"
   fi
 
   # invoke regular build/test script
