@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -79,7 +80,7 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
             type = "run"
 
         });
-        var res = await awaiter;
+        await awaiter;
         return interceptor.Messages;
     }
 
@@ -106,7 +107,7 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
 
         });
 
-        await ts.Task;
+        await ts.Task.Timeout(TimeSpan.FromSeconds(30));
 
         return messages;
 

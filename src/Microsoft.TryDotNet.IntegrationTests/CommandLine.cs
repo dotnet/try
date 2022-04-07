@@ -103,6 +103,20 @@ public static class CommandLine
         return await source;
     }
 
+    public static async Task Timeout(
+        this Task source,
+        TimeSpan timeout)
+    {
+        if (await Task.WhenAny(
+                source,
+                Task.Delay(timeout)) != source)
+        {
+            throw new TimeoutException();
+        }
+
+        await source;
+    }
+
     public static Process StartProcess(
         string command,
         string args,
