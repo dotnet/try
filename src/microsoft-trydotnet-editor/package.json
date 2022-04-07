@@ -26,15 +26,15 @@
     "url": "https://github.com/dotnet/try"
   },
   "devDependencies": {
-    "@playwright/test": "1.20.1",
+    "@playwright/test": "1.20.2",
     "@testdeck/mocha": "0.2.0",
     "@types/chai": "4.3.0",
     "@types/chai-as-promised": "7.1.5",
     "@types/mocha": "9.1.0",
     "@types/tmp": "0.2.3",
     "@types/uuid": "8.3.4",
-    "@typescript-eslint/eslint-plugin": "5.17.0",
-    "@typescript-eslint/parser": "5.17.0",
+    "@typescript-eslint/eslint-plugin": "5.18.0",
+    "@typescript-eslint/parser": "5.18.0",
     "chai": "4.3.6",
     "chai-as-promised": "7.1.1",
     "css-loader": "6.7.1",
@@ -54,12 +54,12 @@
     "ts-mocha": "9.0.2",
     "ts-node": "10.7.0",
     "typescript": "4.6.3",
-    "webpack": "5.70.0",
+    "webpack": "5.71.0",
     "webpack-cli": "4.9.2",
-    "webpack-dev-server": "4.7.4"
+    "webpack-dev-server": "4.8.1"
   },
   "dependencies": {
-    "@microsoft/dotnet-interactive": "1.0.318101",
+    "@microsoft/dotnet-interactive": "1.0.320601",
     "monaco-editor": "0.33.0",
     "rxjs": "7.5.5"
   },
