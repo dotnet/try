@@ -1,3 +1,9 @@
+parameters:
+- name: SkipTests
+  displayName: Skip Tests
+  type: boolean
+  default: false
+
 # CI and PR triggers
 trigger:
 - main
