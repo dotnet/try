@@ -25,6 +25,7 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     this.registerCommandHandler({
       commandType: dotnetInteractive.SubmitCodeType,
       handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+
         this.throwIfProjectIsNotOpened();
         this.throwIffDocumentIsNotOpened();
         return this.handleSubmitCode(commandInvocation);
@@ -47,9 +48,12 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
         await this.handleOpenDocument(commandInvocation);
         let command = <dotnetInteractive.OpenDocument>commandInvocation.commandEnvelope.command;
         this._openDocument = {
-          relativeFilePath: command.relativeFilePath,
-          regionName: command.regionName
+          relativeFilePath: command.relativeFilePath
         };
+
+        if (command.regionName) {
+          this._openDocument.regionName = command.regionName;
+        }
       }
     });
 
@@ -112,4 +116,3 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
   protected abstract handleSubmitCode(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
   protected abstract handleOpenDocument(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
 }
-

@@ -43,7 +43,8 @@ done
 # build and test NPM
 npmDirs='src/microsoft-trydotnet
          src/microsoft-trydotnet-editor
-         src/microsoft-trydotnet-styles'
+         src/microsoft-trydotnet-styles
+         src/microsoft-learn-mock'
 for npmDir in $npmDirs;
 do
   echo "Building NPM in directory $npmDir"

@@ -15,10 +15,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -29,7 +29,10 @@
                 "relativeFilePath": "./Program.cs",
                 "regionNames": [
                   "TEST_REGION"
-                ]
+                ],
+                "regionsContent": {
+                  "TEST_REGION": ""
+                }
               }
             ]
           },
@@ -47,10 +50,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -69,10 +72,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]
@@ -92,10 +95,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -104,10 +107,10 @@
           "command": {
             "relativeFilePath": "./Program.cs",
             "regionName": "TEST_REGION",
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -118,7 +121,10 @@
                 "relativeFilePath": "./Program.cs",
                 "regionNames": [
                   "TEST_REGION"
-                ]
+                ],
+                "regionsContent": {
+                  "TEST_REGION": ""
+                }
               }
             ]
           },
@@ -136,10 +142,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -158,10 +164,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -178,10 +184,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -194,10 +200,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]
@@ -217,10 +223,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -229,10 +235,10 @@
           "command": {
             "relativeFilePath": "./Program.cs",
             "regionName": "TEST_REGION",
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -244,10 +250,10 @@
               "line": 0,
               "character": 9
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -258,7 +264,10 @@
                 "relativeFilePath": "./Program.cs",
                 "regionNames": [
                   "TEST_REGION"
-                ]
+                ],
+                "regionsContent": {
+                  "TEST_REGION": ""
+                }
               }
             ]
           },
@@ -276,10 +285,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -298,10 +307,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -318,10 +327,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -334,10 +343,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -350,6 +359,7 @@
                 "filterText": "AppendText",
                 "sortText": "AppendText",
                 "insertText": "AppendText",
+                "insertTextFormat": null,
                 "documentation": "Creates a System.IO.StreamWriter  that appends text to the file represented by this instance of the System.IO.FileInfo ."
               },
               {
@@ -358,6 +368,7 @@
                 "filterText": "Attributes",
                 "sortText": "Attributes",
                 "insertText": "Attributes",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the attributes for the current file or directory."
               },
               {
@@ -366,6 +377,7 @@
                 "filterText": "CopyTo",
                 "sortText": "CopyTo",
                 "insertText": "CopyTo",
+                "insertTextFormat": null,
                 "documentation": "Copies an existing file to a new file, disallowing the overwriting of an existing file."
               },
               {
@@ -374,6 +386,7 @@
                 "filterText": "Create",
                 "sortText": "Create",
                 "insertText": "Create",
+                "insertTextFormat": null,
                 "documentation": "Creates a file."
               },
               {
@@ -382,6 +395,7 @@
                 "filterText": "CreateAsSymbolicLink",
                 "sortText": "CreateAsSymbolicLink",
                 "insertText": "CreateAsSymbolicLink",
+                "insertTextFormat": null,
                 "documentation": "Creates a symbolic link located in System.IO.FileSystemInfo.FullName  that points to the specified pathToTarget ."
               },
               {
@@ -390,6 +404,7 @@
                 "filterText": "CreateText",
                 "sortText": "CreateText",
                 "insertText": "CreateText",
+                "insertTextFormat": null,
                 "documentation": "Creates a System.IO.StreamWriter  that writes a new text file."
               },
               {
@@ -398,6 +413,7 @@
                 "filterText": "CreationTime",
                 "sortText": "CreationTime",
                 "insertText": "CreationTime",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the creation time of the current file or directory."
               },
               {
@@ -406,6 +422,7 @@
                 "filterText": "CreationTimeUtc",
                 "sortText": "CreationTimeUtc",
                 "insertText": "CreationTimeUtc",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the creation time, in coordinated universal time (UTC), of the current file or directory."
               },
               {
@@ -414,6 +431,7 @@
                 "filterText": "Decrypt",
                 "sortText": "Decrypt",
                 "insertText": "Decrypt",
+                "insertTextFormat": null,
                 "documentation": "Decrypts a file that was encrypted by the current account using the System.IO.FileInfo.Encrypt  method."
               },
               {
@@ -422,6 +440,7 @@
                 "filterText": "Delete",
                 "sortText": "Delete",
                 "insertText": "Delete",
+                "insertTextFormat": null,
                 "documentation": "Permanently deletes a file."
               },
               {
@@ -430,6 +449,7 @@
                 "filterText": "Directory",
                 "sortText": "Directory",
                 "insertText": "Directory",
+                "insertTextFormat": null,
                 "documentation": "Gets an instance of the parent directory."
               },
               {
@@ -438,6 +458,7 @@
                 "filterText": "DirectoryName",
                 "sortText": "DirectoryName",
                 "insertText": "DirectoryName",
+                "insertTextFormat": null,
                 "documentation": "Gets a string representing the directory's full path."
               },
               {
@@ -446,6 +467,7 @@
                 "filterText": "Encrypt",
                 "sortText": "Encrypt",
                 "insertText": "Encrypt",
+                "insertTextFormat": null,
                 "documentation": "Encrypts a file so that only the account used to encrypt the file can decrypt it."
               },
               {
@@ -454,6 +476,7 @@
                 "filterText": "Equals",
                 "sortText": "Equals",
                 "insertText": "Equals",
+                "insertTextFormat": null,
                 "documentation": "Determines whether the specified object is equal to the current object."
               },
               {
@@ -462,6 +485,7 @@
                 "filterText": "Exists",
                 "sortText": "Exists",
                 "insertText": "Exists",
+                "insertTextFormat": null,
                 "documentation": "Gets a value indicating whether a file exists."
               },
               {
@@ -470,6 +494,7 @@
                 "filterText": "Extension",
                 "sortText": "Extension",
                 "insertText": "Extension",
+                "insertTextFormat": null,
                 "documentation": "Gets the extension part of the file name, including the leading dot . even if it is the entire file name, or an empty string if no extension is present."
               },
               {
@@ -478,6 +503,7 @@
                 "filterText": "FullName",
                 "sortText": "FullName",
                 "insertText": "FullName",
+                "insertTextFormat": null,
                 "documentation": "Gets the full path of the directory or file."
               },
               {
@@ -486,6 +512,7 @@
                 "filterText": "GetAccessControl",
                 "sortText": "GetAccessControl",
                 "insertText": "GetAccessControl",
+                "insertTextFormat": null,
                 "documentation": "Returns the security information of a file."
               },
               {
@@ -494,6 +521,7 @@
                 "filterText": "GetHashCode",
                 "sortText": "GetHashCode",
                 "insertText": "GetHashCode",
+                "insertTextFormat": null,
                 "documentation": "Serves as the default hash function."
               },
               {
@@ -502,6 +530,7 @@
                 "filterText": "GetLifetimeService",
                 "sortText": "GetLifetimeService",
                 "insertText": "GetLifetimeService",
+                "insertTextFormat": null,
                 "documentation": "Retrieves the current lifetime service object that controls the lifetime policy for this instance."
               },
               {
@@ -510,6 +539,7 @@
                 "filterText": "GetObjectData",
                 "sortText": "GetObjectData",
                 "insertText": "GetObjectData",
+                "insertTextFormat": null,
                 "documentation": "Sets the System.Runtime.Serialization.SerializationInfo  object with the file name and additional exception information."
               },
               {
@@ -518,6 +548,7 @@
                 "filterText": "GetType",
                 "sortText": "GetType",
                 "insertText": "GetType",
+                "insertTextFormat": null,
                 "documentation": "Gets the System.Type  of the current instance."
               },
               {
@@ -526,6 +557,7 @@
                 "filterText": "InitializeLifetimeService",
                 "sortText": "InitializeLifetimeService",
                 "insertText": "InitializeLifetimeService",
+                "insertTextFormat": null,
                 "documentation": "Obtains a lifetime service object to control the lifetime policy for this instance."
               },
               {
@@ -534,6 +566,7 @@
                 "filterText": "IsReadOnly",
                 "sortText": "IsReadOnly",
                 "insertText": "IsReadOnly",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets a value that determines if the current file is read only."
               },
               {
@@ -542,6 +575,7 @@
                 "filterText": "LastAccessTime",
                 "sortText": "LastAccessTime",
                 "insertText": "LastAccessTime",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the time the current file or directory was last accessed."
               },
               {
@@ -550,6 +584,7 @@
                 "filterText": "LastAccessTimeUtc",
                 "sortText": "LastAccessTimeUtc",
                 "insertText": "LastAccessTimeUtc",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the time, in coordinated universal time (UTC), that the current file or directory was last accessed."
               },
               {
@@ -558,6 +593,7 @@
                 "filterText": "LastWriteTime",
                 "sortText": "LastWriteTime",
                 "insertText": "LastWriteTime",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the time when the current file or directory was last written to."
               },
               {
@@ -566,6 +602,7 @@
                 "filterText": "LastWriteTimeUtc",
                 "sortText": "LastWriteTimeUtc",
                 "insertText": "LastWriteTimeUtc",
+                "insertTextFormat": null,
                 "documentation": "Gets or sets the time, in coordinated universal time (UTC), when the current file or directory was last written to."
               },
               {
@@ -574,6 +611,7 @@
                 "filterText": "Length",
                 "sortText": "Length",
                 "insertText": "Length",
+                "insertTextFormat": null,
                 "documentation": "Gets the size, in bytes, of the current file."
               },
               {
@@ -582,6 +620,7 @@
                 "filterText": "LinkTarget",
                 "sortText": "LinkTarget",
                 "insertText": "LinkTarget",
+                "insertTextFormat": null,
                 "documentation": "If this System.IO.FileSystemInfo  instance represents a link, returns the link target's path.\n If a link does not exist in System.IO.FileSystemInfo.FullName , or this instance does not represent a link, returns null."
               },
               {
@@ -590,6 +629,7 @@
                 "filterText": "MoveTo",
                 "sortText": "MoveTo",
                 "insertText": "MoveTo",
+                "insertTextFormat": null,
                 "documentation": "Moves a specified file to a new location, providing the option to specify a new file name."
               },
               {
@@ -598,6 +638,7 @@
                 "filterText": "Name",
                 "sortText": "Name",
                 "insertText": "Name",
+                "insertTextFormat": null,
                 "documentation": "Gets the name of the file."
               },
               {
@@ -606,6 +647,7 @@
                 "filterText": "Open",
                 "sortText": "Open",
                 "insertText": "Open",
+                "insertTextFormat": null,
                 "documentation": "Opens a file in the specified mode."
               },
               {
@@ -614,6 +656,7 @@
                 "filterText": "OpenRead",
                 "sortText": "OpenRead",
                 "insertText": "OpenRead",
+                "insertTextFormat": null,
                 "documentation": "Creates a read-only System.IO.FileStream ."
               },
               {
@@ -622,6 +665,7 @@
                 "filterText": "OpenText",
                 "sortText": "OpenText",
                 "insertText": "OpenText",
+                "insertTextFormat": null,
                 "documentation": "Creates a System.IO.StreamReader  with UTF8 encoding that reads from an existing text file."
               },
               {
@@ -630,6 +674,7 @@
                 "filterText": "OpenWrite",
                 "sortText": "OpenWrite",
                 "insertText": "OpenWrite",
+                "insertTextFormat": null,
                 "documentation": "Creates a write-only System.IO.FileStream ."
               },
               {
@@ -638,6 +683,7 @@
                 "filterText": "Refresh",
                 "sortText": "Refresh",
                 "insertText": "Refresh",
+                "insertTextFormat": null,
                 "documentation": "Refreshes the state of the object."
               },
               {
@@ -646,6 +692,7 @@
                 "filterText": "Replace",
                 "sortText": "Replace",
                 "insertText": "Replace",
+                "insertTextFormat": null,
                 "documentation": "Replaces the contents of a specified file with the file described by the current System.IO.FileInfo  object, deleting the original file, and creating a backup of the replaced file."
               },
               {
@@ -654,6 +701,7 @@
                 "filterText": "ResolveLinkTarget",
                 "sortText": "ResolveLinkTarget",
                 "insertText": "ResolveLinkTarget",
+                "insertTextFormat": null,
                 "documentation": "Gets the target of the specified link."
               },
               {
@@ -662,6 +710,7 @@
                 "filterText": "SetAccessControl",
                 "sortText": "SetAccessControl",
                 "insertText": "SetAccessControl",
+                "insertTextFormat": null,
                 "documentation": "Changes the security attributes of an existing file."
               },
               {
@@ -670,6 +719,7 @@
                 "filterText": "ToString",
                 "sortText": "ToString",
                 "insertText": "ToString",
+                "insertTextFormat": null,
                 "documentation": "Returns the path as a string. Use the System.IO.FileInfo.Name  property for the full path."
               }
             ]
@@ -685,10 +735,10 @@
                 "line": 0,
                 "character": 9
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -704,10 +754,10 @@
                 "line": 0,
                 "character": 9
               },
-              "targetKernelName": null
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": null,
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]

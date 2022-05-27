@@ -5,7 +5,7 @@ import * as chai from "chai";
 import { MonacoTextEditor } from "../../src/internals/monacoTextEditor";
 import { FakeMessageBus } from "../fakes/fakeMessageBus";
 import { FakeIdGenerator } from "../fakes/fakeIdGenerator";
-import { ApiMessage, CONFIGURE_MONACO_REQUEST, DEFINE_THEMES_REQUEST } from "../../src/internals/apiMessages";
+import { ApiMessage, CONFIGURE_MONACO_REQUEST, DEFINE_THEMES_REQUEST } from "../../src/apiMessages";
 
 chai.should();
 
@@ -18,20 +18,20 @@ describe("a monaco editor", () => {
     beforeEach(() => {
         bus = new FakeMessageBus("test bus");
         idGenerator = new FakeIdGenerator();
-        editor = new MonacoTextEditor(bus, idGenerator, bus.id());
+        editor = new MonacoTextEditor(bus, idGenerator);
     });
 
     it("can set the theme as string", () => {
-        let messages: ApiMessage[] = [];
-        bus.subscribe(m => messages.push(m));
+        let messages: { type: string, requestId?: string }[] = [];
+        bus.subscribe({ next: m => messages.push(m) });
         editor.setTheme("different theme");
         messages.should.not.be.empty;
         messages[0].type.should.equal(CONFIGURE_MONACO_REQUEST);
     });
 
     it("can set the theme as object", () => {
-        let messages: ApiMessage[] = [];
-        bus.subscribe(m => messages.push(m));
+        let messages: { type: string, requestId?: string }[] = [];
+        bus.subscribe({ next: m => messages.push(m) });
         editor.setTheme({
             name: "different theme",
             monacoEditorTheme: {
@@ -61,8 +61,8 @@ describe("a monaco editor", () => {
     });
 
     it("can set the editor options", () => {
-        let messages: ApiMessage[] = [];
-        bus.subscribe(m => messages.push(m));
+        let messages: { type: string, requestId?: string }[] = [];
+        bus.subscribe({ next: m => messages.push(m) });
         editor.setOptions({
             minimap: {
                 enabled: false
@@ -78,8 +78,8 @@ describe("a monaco editor", () => {
     });
 
     it("can be configured", () => {
-        let messages: ApiMessage[] = [];
-        bus.subscribe(m => messages.push(m));
+        let messages: { type: string, requestId?: string }[] = [];
+        bus.subscribe({ next: m => messages.push(m) });
         editor.configure({
             theme: "different theme",
             options: {

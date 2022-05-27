@@ -398,3 +398,7 @@ src/microsoft-trydotnet/lib/
 src/Microsoft.TryDotNet/wwwroot/api/
 
 src/Microsoft.TryDotNet/wwwroot/css/trydotnet.css
+
+src/microsoft-learn-mock/dist/
+
+src/microsoft-learn-mock/site/index.js

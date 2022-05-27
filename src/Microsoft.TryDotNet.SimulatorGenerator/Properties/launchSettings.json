@@ -2,7 +2,7 @@
   "profiles": {
     "Microsoft.TryDotNet.SimulatorGenerator": {
       "commandName": "Project",
-      "commandLineArgs": "--destination-folder \"D:\\Repos\\public\\try\\src\\trydotnet.editor.js\\tests\\simulatorConfigurations\\apiService\""
+      "commandLineArgs": "--destination-folder \"D:\\Repos\\public\\try\\src\\microsoft-trydotnet-editor\\tests\\simulatorConfigurations\\apiService\""
     }
   }
 }

@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-
-using Microsoft.Build.Logging.StructuredLogger;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
@@ -49,7 +46,7 @@ public partial class AspNetProcess : IDisposable
                 completionSource.SetException(new Exception(error));
             });
 
-        return await completionSource.Task;
+        return (await completionSource.Task).ToLocalHost();
     }
 
     public static Uri? ResolveListeningUrl(string output)

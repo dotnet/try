@@ -6,7 +6,7 @@ import { Done } from "mocha";
 import { buildSimpleIFrameDom } from "../domUtilities";
 import * as trydotnet from "../../src/index";
 import { IFrameMessageBus } from "../../src/internals/messageBus";
-import { RUN_REQUEST, RUN_RESPONSE, HOST_EDITOR_READY_EVENT } from "../../src/internals/apiMessages";
+import { RUN_REQUEST, RUN_RESPONSE, HOST_EDITOR_READY_EVENT } from "../../src/apiMessages";
 import { configureEmbeddableEditorIFrame } from "../../src/htmlDomHelpers";
 
 chai.should();
@@ -19,7 +19,7 @@ describe("a message bus", () => {
         var dom = buildSimpleIFrameDom(defaultConfiguration);
 
         let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
-        iframe = configureEmbeddableEditorIFrame(iframe, "0", defaultConfiguration);
+        iframe = configureEmbeddableEditorIFrame(iframe, defaultConfiguration);
 
         iframe.contentWindow.addEventListener("message", (message: any) => {
             if (message.data.type === RUN_REQUEST) {
@@ -27,7 +27,7 @@ describe("a message bus", () => {
             }
         });
 
-        let bus = new IFrameMessageBus(iframe, <Window><any>dom.window, "0");
+        let bus = new IFrameMessageBus(iframe, <Window><any>dom.window);
 
         bus.post({ type: RUN_REQUEST, requestId: "0" });
     });
@@ -36,14 +36,16 @@ describe("a message bus", () => {
         var dom = buildSimpleIFrameDom(defaultConfiguration);;
 
         let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
-        iframe = configureEmbeddableEditorIFrame(iframe, "0", defaultConfiguration);
+        iframe = configureEmbeddableEditorIFrame(iframe, defaultConfiguration);
 
         dom.window.postMessage({ type: RUN_RESPONSE }, defaultConfiguration.hostOrigin);
 
-        let bus = new IFrameMessageBus(iframe, <Window><any>dom.window, "0");
+        let bus = new IFrameMessageBus(iframe, <Window><any>dom.window);
 
-        bus.subscribe((message) => {
-            done();
+        bus.subscribe({
+            next: (_message) => {
+                done();
+            }
         });
     });
 
@@ -51,14 +53,16 @@ describe("a message bus", () => {
         var dom = buildSimpleIFrameDom(defaultConfiguration);;
 
         let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
-        iframe = configureEmbeddableEditorIFrame(iframe, "0", defaultConfiguration);
+        iframe = configureEmbeddableEditorIFrame(iframe, defaultConfiguration);
 
-        dom.window.postMessage({ type: HOST_EDITOR_READY_EVENT, editorId: "0" }, defaultConfiguration.hostOrigin);
+        dom.window.postMessage({ type: HOST_EDITOR_READY_EVENT }, defaultConfiguration.hostOrigin);
 
-        let bus = new IFrameMessageBus(iframe, <Window><any>dom.window, "0");
+        let bus = new IFrameMessageBus(iframe, <Window><any>dom.window);
 
-        bus.subscribe((message) => {
-            done();
+        bus.subscribe({
+            next: (_message) => {
+                done();
+            }
         });
     });
 });

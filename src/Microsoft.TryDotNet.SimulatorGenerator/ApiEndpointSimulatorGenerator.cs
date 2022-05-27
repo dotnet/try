@@ -4,13 +4,12 @@
 using System.Net.Http.Json;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Xml.Schema;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Commands;
+using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.CSharpProject;
 using Microsoft.DotNet.Interactive.CSharpProject.Commands;
-using Microsoft.DotNet.Interactive.Server;
 using Microsoft.TryDotNet.Tests;
 
 namespace Microsoft.TryDotNet.SimulatorGenerator;

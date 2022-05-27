@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { CompletionResult } from "./completion";
-import { SignatureHelpResult } from "./signatureHelp";
 import { Diagnostic } from "./diagnostics";
 import { Project } from "./project";
 import { Region, IDocument } from "./editableDocument";
@@ -48,30 +46,22 @@ export interface ServiceErrorSubscriber {
     (error: ServiceError): void;
 }
 
-export type OpenDocumentParameters={
-    fileName:string,
-    region?:Region,
-    editorId?:string,
-    content?:string
+export type OpenDocumentParameters = {
+    fileName: string,
+    region?: Region,
+    content?: string
 }
 export interface ISession {
-    getOpenDocuments(): IDocument[];
     openProject(project: Project): Promise<void>;
-    openDocument(parameters:OpenDocumentParameters): Promise<IDocument>;
+    openDocument(parameters: OpenDocumentParameters): Promise<IDocument>;
+    getOpenDocument(): IDocument;
 
     getTextEditor(): ITextEditor;
-    getTextEditors(): ITextEditor[];
-
-    getTextEditorById(editorId: string): ITextEditor;
 
     run(configuration?: RunConfiguration): Promise<RunResult>;
-    compile(): Promise<CompilationResult>;
 
     subscribeToOutputEvents(handler: OutputEventSubscriber): Unsubscribable;
     subscribeToServiceErrorEvents(handler: ServiceErrorSubscriber): Unsubscribable;
-
-    getSignatureHelp(fileName: string, position: number, region?: Region): Promise<SignatureHelpResult>;
-    getCompletionList(fileName: string, position: number, region?: Region): Promise<CompletionResult>;
 
     onCanRunChanged(changed: (canRun: boolean) => void): void;
 }

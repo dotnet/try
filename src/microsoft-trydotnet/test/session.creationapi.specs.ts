@@ -3,10 +3,10 @@
 
 import * as chai from "chai";
 import * as chaiAsPromised from "chai-as-promised";
-import { Configuration, createSessionWithProjectAndOpenDocument, createSession } from "../src/index";
-import { buildSimpleIFrameDom, getEditorIFrames, buildMultiIFrameDom } from "./domUtilities";
-import { notifyEditorReady, notifyEditorReadyWithId } from "./messagingMocks";
-import { tryGetEditorId } from "../src/internals/messageBus";
+import { Configuration, createSessionWithProjectAndOpenDocument } from "../src/index";
+import { buildSimpleIFrameDom, getEditorIFrame } from "./domUtilities";
+import { notifyEditorReady, registerForSetWorkspace } from "./messagingMocks";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -20,10 +20,10 @@ describe("a user", () => {
     describe("with single iframe", () => {
         it("can create a session with initial project", async () => {
             let dom = buildSimpleIFrameDom(configuration);
-            let editorIFrames = getEditorIFrames(dom);
+            let editorIFrame = getEditorIFrame(dom);
             let awaitableSession = createSessionWithProjectAndOpenDocument(
                 configuration,
-                editorIFrames,
+                [editorIFrame],
                 <Window><any>dom.window,
                 {
                     package: "console",
@@ -31,37 +31,53 @@ describe("a user", () => {
                 },
                 "program.cs");
 
+            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.name,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
+            });
+
             notifyEditorReady(configuration, dom.window);
             let session = await awaitableSession;
             session.should.not.be.null;
         });
-    });
-    describe("with multiple iframes", () => {
-        it("can create a session", async () => {
-            let dom = buildMultiIFrameDom(configuration);
-            let editorIFrames = getEditorIFrames(dom);
-            let awaitableSession = createSession(configuration,
-                editorIFrames,
-                <Window><any>dom.window);
 
-            editorIFrames.forEach((iframe, index) => {
-                notifyEditorReadyWithId(configuration, dom.window, tryGetEditorId(iframe, index.toString()));
+        it("can create a session with initial project with regions", async () => {
+            let dom = buildSimpleIFrameDom(configuration);
+            let editorIFrame = getEditorIFrame(dom);
+
+
+            let awaitableSession = createSessionWithProjectAndOpenDocument(
+                configuration,
+                [editorIFrame],
+                <Window><any>dom.window,
+                {
+                    package: "console",
+                    files: [{ name: "./Program.cs", content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}" },]
+                },
+                "program.cs");
+
+            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.name,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
             });
+
+            notifyEditorReady(configuration, dom.window);
 
             let session = await awaitableSession;
             session.should.not.be.null;
         });
-
-        it("requires all buses to be ready", async () => {
-            let dom = buildMultiIFrameDom(configuration);
-            let editorIFrames = getEditorIFrames(dom);
-            let awaitableSession = createSession(configuration,
-                editorIFrames,
-                <Window><any>dom.window);
-
-            notifyEditorReadyWithId(configuration, dom.window, tryGetEditorId(editorIFrames[0], "0"));
-
-            awaitableSession.should.not.be.fulfilled;
-        });
     });
+
 });

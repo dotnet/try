@@ -6,26 +6,26 @@ import { Workspace } from "../../src/internals/workspace";
 import { createProject } from "../../src";
 import { FakeMonacoTextEditor } from "../fakes/fakeMonacoTextEditor";
 import { FakeMessageBus } from "../fakes/fakeMessageBus";
-import { FakeIdGenerator } from "../fakes/fakeIdGenerator";
 import { expect } from "chai";
+import { RequestIdGenerator } from "../../src/internals/requestIdGenerator";
 chai.should();
 
 describe("a workspace", () => {
 
     it("is not marked as modified at creation", () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         ws.isModified().should.be.false;
     });
 
     it("is marked as modified when propulated from a project", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         ws.isModified().should.be.true;
     });
 
     it("is should have default language", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         ws.isModified().should.be.true;
@@ -34,7 +34,7 @@ describe("a workspace", () => {
     });
 
     it("is retains the language of hte project", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", language: "fsharp", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         ws.isModified().should.be.true;
@@ -43,7 +43,7 @@ describe("a workspace", () => {
     });
 
     it("is marked as modified when a document is opened", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         await ws.openDocument({ fileName: "program.cs" });
@@ -51,7 +51,7 @@ describe("a workspace", () => {
     });
 
     it("is not marked as modified when is exported as setWorkspaceRequest object", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         ws.isModified().should.be.true;
@@ -60,7 +60,7 @@ describe("a workspace", () => {
     });
 
     it("is not marked as modified when a document is opened again", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         ws.isModified().should.be.true;
@@ -71,7 +71,7 @@ describe("a workspace", () => {
     });
 
     it("is marked as modified when a document is opened and  the content is changed", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs" });
@@ -80,7 +80,7 @@ describe("a workspace", () => {
     });
 
     it("generates set workspace request object", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
         ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs" });
@@ -92,7 +92,7 @@ describe("a workspace", () => {
     });
 
     it("generates set workspace request object with active bufferId equal to the document currently open in an editor", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",
@@ -105,21 +105,18 @@ describe("a workspace", () => {
 
         ws.fromProject(project);
         let editorZero = new FakeMonacoTextEditor("0");
-        let editorOne = new FakeMonacoTextEditor("1");
         let programDocument = await ws.openDocument({ fileName: "program.cs", textEditor: editorZero });
-        let otherFileDocument = await ws.openDocument({ fileName: "otherFile.cs", textEditor: editorOne });
+
         programDocument.setContent("modified content");
         let wsr = ws.toSetWorkspaceRequests();
 
         wsr.workspace.should.not.be.null;
         wsr.workspace.buffers[0].should.not.be.null;
-        wsr.workspace.buffers[1].should.not.be.null;
-        wsr.bufferIds[editorZero.id()].should.be.equal("program.cs");
-        wsr.bufferIds[editorOne.id()].should.be.equal("otherFile.cs");
+        wsr.workspace.activeBufferId.should.be.equal("program.cs");
     });
 
     it("can open a document and set its content", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",
@@ -136,7 +133,7 @@ describe("a workspace", () => {
     });
 
     it("can open a document in the editor and set its content", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",
@@ -157,7 +154,7 @@ describe("a workspace", () => {
     });
 
     it("can open a document in one edtior at a time", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",
@@ -183,7 +180,7 @@ describe("a workspace", () => {
     });
 
     it("can open documents in different edtiors at same time", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",

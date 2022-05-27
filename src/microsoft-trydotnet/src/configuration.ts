@@ -6,10 +6,6 @@ import { MonacoEditorConfiguration } from "./editor";
 export type Configuration = {
     hostOrigin?: string,
     trydotnetOrigin?: string,
-    debug?: boolean,
-    useWasmRunner?: boolean,
-    enablePreviewFeatures?: boolean,
-    enableGithubPanel?: boolean,
     editorConfiguration?: MonacoEditorConfiguration,
-    runAsCodeChanges?: boolean
+    enableLogging?: boolean,
 }

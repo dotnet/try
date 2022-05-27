@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import { Logger } from '@microsoft/dotnet-interactive';
 import * as apiService from './apiService';
 import * as projectKernel from './projectKernel';
 import * as runner from './wasmRunner';
@@ -15,7 +16,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     let commands: Array<dotnetInteractive.KernelCommandEnvelope> = [rootCommand];
 
     let eventEnvelopes = await this._apiService(commands);
-
+    commandInvocation.context;//?
     this.forwardEvents(eventEnvelopes, rootCommand, commandInvocation.context);
 
   }
@@ -34,7 +35,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     commands.push(rootCommand);
 
     let eventEnvelopes = await this._apiService(commands);
-
+    commandInvocation.context;//?
     this.forwardEvents(eventEnvelopes, rootCommand, commandInvocation.context);
   }
 
@@ -83,13 +84,14 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
   protected async handleSubmitCode(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void> {
 
-    ///console.log("handleSubmitCode - start");
+    dotnetInteractive.Logger.default.info("[ProjectKernelWithWASMRunner] handleSubmitCode - start");
     commandInvocation.context.publish({
       eventType: dotnetInteractive.CodeSubmissionReceivedType,
       event: { code: (<dotnetInteractive.SubmitCode>commandInvocation.commandEnvelope.command).code },
       command: commandInvocation.commandEnvelope
     });
 
+    // original submitcode command
     let rootCommand = commandInvocation.commandEnvelope;
 
     let compileCommand: dotnetInteractive.KernelCommandEnvelope = {
@@ -126,15 +128,21 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     commands.push(compileCommand);
 
+    Logger.default.info(`[ProjectKernelWithWASMRunner] commands: ${JSON.stringify(commands)}`);
     let eventEnvelopes = await this._apiService(commands);
-
+    Logger.default.info(`[ProjectKernelWithWASMRunner] events: ${JSON.stringify(eventEnvelopes)}`);
 
     this.forwardEvents(eventEnvelopes, rootCommand, commandInvocation.context);
 
     let assemblyProduced = eventEnvelopes.find(e => e.eventType === dotnetInteractive.AssemblyProducedType);
-    //console.log("handleSubmitCode - wasmrunner");
+    dotnetInteractive.Logger.default.info("[ProjectKernelWithWASMRunner] handleSubmitCode - wasmrunner");
+
+    const assembly = (<dotnetInteractive.AssemblyProduced>assemblyProduced.event).assembly;
+
+    dotnetInteractive.Logger.default.info(`[ProjectKernelWithWASMRunner]  assembly to run : ${JSON.stringify(assemblyProduced)}`);
+
     await this._wasmRunner({
-      assembly: (<dotnetInteractive.AssemblyProduced>assemblyProduced.event).assembly,
+      assembly: assembly,
       onOutput: (output: string) => {
         const event: dotnetInteractive.KernelEventEnvelope = {
           eventType: dotnetInteractive.StandardOutputValueProducedType,
@@ -146,7 +154,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
           },
           command: commandInvocation.commandEnvelope
         };
-        // console.log("handleSubmitCode - publish event");
+        dotnetInteractive.Logger.default.info("handleSubmitCode - publish event");
         commandInvocation.context.publish(event);
       },
       onError: (error: string) => {
@@ -160,14 +168,14 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
           },
           command: commandInvocation.commandEnvelope
         };
-        //console.log("handleSubmitCode - publish event");
+        dotnetInteractive.Logger.default.info("handleSubmitCode - publish event");
         commandInvocation.context.publish(event);
       }
     });
-    //console.log("handleSubmitCode - done");
+    dotnetInteractive.Logger.default.info("handleSubmitCode - done");
   }
 
-  private forwardEvents(eventEnvelopes: Array<dotnetInteractive.KernelEventEnvelope>, originalCommand: dotnetInteractive.KernelCommandEnvelope, invocationContext: dotnetInteractive.KernelInvocationContext) {
+  private forwardEvents(eventEnvelopes: Array<dotnetInteractive.KernelEventEnvelope>, rootCommand: dotnetInteractive.KernelCommandEnvelope, invocationContext: dotnetInteractive.KernelInvocationContext) {
     for (let eventEnvelope of eventEnvelopes) {
       if (eventEnvelope.eventType === dotnetInteractive.CommandFailedType) {
         throw new Error((<dotnetInteractive.CommandFailed>(eventEnvelope.event)).message);
@@ -175,12 +183,18 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       else if (eventEnvelope.eventType === dotnetInteractive.CommandCancelledType) {
         throw new Error("Command cancelled");
       }
-      else if (eventEnvelope.eventType === dotnetInteractive.CommandSucceededType && eventEnvelope.command.token === originalCommand.token) {
-        break;
+      else if (eventEnvelope.eventType === dotnetInteractive.CommandSucceededType
+        && eventEnvelope.command.token === rootCommand.token) {
+        if (eventEnvelope.command.commandType === rootCommand.commandType) {
+          break;
+        }
+        else {
+          continue;
+        }
       }
-      else if (eventEnvelope.command.commandType === originalCommand.commandType && eventEnvelope.command.token === originalCommand.token) {
+      else if (eventEnvelope.command.commandType === rootCommand.commandType && eventEnvelope.command.token === rootCommand.token) {
         // todo: do we need processing this?
-        invocationContext.publish({ ...eventEnvelope, command: originalCommand });
+        invocationContext.publish({ ...eventEnvelope, command: rootCommand });
       }
     }
   }

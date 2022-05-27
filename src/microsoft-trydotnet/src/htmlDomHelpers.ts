@@ -4,11 +4,11 @@
 import { Configuration } from "./configuration";
 import { generateEditorUrl } from "./internals/urlHelpers";
 
-export function configureEmbeddableEditorIFrame(iframe: HTMLIFrameElement, messageBusId: string, configuration: Configuration): HTMLIFrameElement {
+export function configureEmbeddableEditorIFrame(iframe: HTMLIFrameElement, configuration: Configuration): HTMLIFrameElement {
     if (configuration) {
         let src = iframe.getAttribute("src")
         if (!src) {
-            const url = generateEditorUrl(configuration, messageBusId);
+            const url = generateEditorUrl(configuration);
             iframe.setAttribute("src", url);
         }
     }
@@ -16,11 +16,11 @@ export function configureEmbeddableEditorIFrame(iframe: HTMLIFrameElement, messa
 }
 
 
-export function configureEmbeddableEditorIFrameWithPackage(iframe: HTMLIFrameElement, messageBusId: string, configuration: Configuration, packageName: string): HTMLIFrameElement {
+export function configureEmbeddableEditorIFrameWithPackage(iframe: HTMLIFrameElement, configuration: Configuration, packageName: string): HTMLIFrameElement {
     if (configuration) {
         let src = iframe.getAttribute("src")
         if (!src) {
-            const url = generateEditorUrl(configuration, messageBusId, packageName);
+            const url = generateEditorUrl(configuration, packageName);
             iframe.setAttribute("src", url);
         }
     }

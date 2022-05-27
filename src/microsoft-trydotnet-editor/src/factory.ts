@@ -7,69 +7,85 @@ import { ProjectKernelWithWASMRunner } from './ProjectKernelWithWASMRunner';
 
 import { ProjectKernel } from "./projectKernel";
 import { IWasmRunner } from './wasmRunner';
-import { createApiService } from './apiService';
+import { createApiService, IServiceError } from './apiService';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 
-export function createWasmProjectKernel(): ProjectKernel {
-  const wasmIframe = document.createElement('iframe');
-  // hide the frame from screen readres.
-  wasmIframe.setAttribute('aria-hidden', 'true');
-  wasmIframe.setAttribute('height', '0px');
-  wasmIframe.setAttribute('width', '0px');
-  wasmIframe.setAttribute('role', 'wasm-runner');
+export function createWasmProjectKernel(onServiceError: (serviceError: IServiceError) => void): ProjectKernel {
 
-  const configuration: IConfiguration = JSON.parse(document.getElementById("trydotnet-editor-script").dataset.trydotnetConfiguration);
+  try {
+    const wasmIframe = document.createElement('iframe');
+    // hide the frame from screen readres.
+    wasmIframe.setAttribute('aria-hidden', 'true');
+    wasmIframe.setAttribute('height', '0px');
+    wasmIframe.setAttribute('width', '0px');
+    wasmIframe.setAttribute('role', 'wasm-runner');
+    // remove the frame from the tab order.
+    wasmIframe.setAttribute('tabindex', '-1');
 
-  document.body.appendChild(wasmIframe);
-  const wasmRunnerHostingWindow = wasmIframe.contentWindow;
-  const wasmIframeMessages = new rxjs.Subject<IWasmRunnerMessage>();
+    const configuration: IConfiguration = JSON.parse(document.getElementById("trydotnet-editor-script").dataset.trydotnetConfiguration);
 
-  window.addEventListener('message', (message) => {
-    const messageType = message.data.type as string;
-    if (messageType && messageType.startsWith("wasmRunner-")) {
-      //console.log(`[received from WASM runner] ${JSON.stringify(message)}`);
-      const wasmRunnerMessage = message.data;
-      if (wasmRunnerMessage) {
-        wasmIframeMessages.next(wasmRunnerMessage);
+    document.body.appendChild(wasmIframe);
+    const wasmRunnerHostingWindow = wasmIframe.contentWindow;
+    const wasmIframeMessages = new rxjs.Subject<IWasmRunnerMessage>();
+
+    window.addEventListener('message', (message) => {
+      const messageType = message.data.type as string;
+      if (messageType && messageType.startsWith("wasmRunner-")) {
+        dotnetInteractive.Logger.default.info(`[received from WASM runner] ${JSON.stringify(message)}`);
+        const wasmRunnerMessage = message.data;
+        if (wasmRunnerMessage) {
+          wasmIframeMessages.next(wasmRunnerMessage);
+        }
       }
-    }
-  }, false);
+    }, false);
 
-  const postAndLogToWasmRunner = (message: any) => {
-    // console.log(`[to WASM runner] ${JSON.stringify(message)}`);
-    const targetWindow = wasmRunnerHostingWindow;
-    const messageLogger = window['postMessageLogger'];
-    if (typeof (messageLogger) === 'function') {
-      messageLogger(message);
-    }
+    const postAndLogToWasmRunner = (message: any) => {
+      dotnetInteractive.Logger.default.info(`[to WASM runner] ${JSON.stringify(message)}`);
+      const targetWindow = wasmRunnerHostingWindow;
+      const messageLogger = window['postMessageLogger'];
+      if (typeof (messageLogger) === 'function') {
+        messageLogger(message);
+      }
 
-    targetWindow.postMessage(message, '*');
-  };
+      targetWindow.postMessage(message, '*');
+    };
 
-  wasmIframe.src = configuration.wasmRunnerUrl;
+    wasmIframe.src = configuration.wasmRunnerUrl;
 
-  const wasmRunner = new WasmRunner(message => postAndLogToWasmRunner(message), wasmIframeMessages);
-  let runner: IWasmRunner = (runRequest) => {
-    return wasmRunner.run(runRequest);
-  };
+    const wasmRunner = new WasmRunner(message => postAndLogToWasmRunner(message), wasmIframeMessages);
+    let runner: IWasmRunner = (runRequest) => {
+      return wasmRunner.run(runRequest);
+    };
 
-  const apiService = createApiService({
-    commandsUrl: new URL(configuration.commandsUrl),
-    referer: configuration.refererUrl ? new URL(configuration.refererUrl) : null
-  });
+    const apiService = createApiService({
+      commandsUrl: new URL(configuration.commandsUrl),
+      referer: configuration.refererUrl ? new URL(configuration.refererUrl) : null,
+      onServiceError: onServiceError
+    });
 
 
-  return new ProjectKernelWithWASMRunner("csharp", runner, apiService);
+    return new ProjectKernelWithWASMRunner("csharp", runner, apiService);
+  } catch (e) {
+    onServiceError({
+      statusCode: "500",
+      message: e.message
+    });
+  }
 }
 
 export function createEditor(container: HTMLElement) {
+
   const editor = monaco.editor.create(container, {
     value: '',
-    language: 'csharp'
+    language: 'csharp',
+    scrollBeyondLastLine: false,
+    selectOnLineNumbers: true,
+    minimap: {
+      enabled: false
+    }
   });
   return editor;
 }
-
 
 class WasmRunner {
 
@@ -87,17 +103,17 @@ class WasmRunner {
     onOutput: (output: string) => void,
     onError: (error: string) => void,
   }): Promise<void> {
-    //console.log("WasmRunner.run starting");
+    dotnetInteractive.Logger.default.info("WasmRunner.run starting");
     let completionSource = new dotnetInteractive.PromiseCompletionSource<IWasmRunnerMessage>();
 
     let sub = this._wasmIframeMessages.subscribe({
       next: (wasmRunnerMessage) => {
-        //console.log(`WasmRunner message ${JSON.stringify(wasmRunnerMessage)}`);
+        dotnetInteractive.Logger.default.info(`WasmRunner message ${JSON.stringify(wasmRunnerMessage)}`);
         let type = wasmRunnerMessage.type;
         if (type) {
           switch (type) {
             case "wasmRunner-result":
-              //console.log("WasmRunner execution completed");
+              dotnetInteractive.Logger.default.info("WasmRunner execution completed");
               completionSource.resolve(wasmRunnerMessage);
               break;
             case "wasmRunner-stdout":
@@ -118,7 +134,7 @@ class WasmRunner {
 
     return completionSource.promise.then(r => {
       sub.unsubscribe();
-      //console.log("WasmRunner.run completed");
+      dotnetInteractive.Logger.default.info("WasmRunner.run completed");
     });
 
   }
@@ -135,8 +151,9 @@ interface IWasmRunnerMessage {
   success?: boolean
 }
 
-interface IConfiguration {
+export interface IConfiguration {
   wasmRunnerUrl: string,
   refererUrl: string,
-  commandsUrl: string
+  commandsUrl: string,
+  enableLogging: boolean
 } 

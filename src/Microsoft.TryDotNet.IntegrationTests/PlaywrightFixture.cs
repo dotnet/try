@@ -17,13 +17,13 @@ public class PlaywrightFixture :  IDisposable, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var exitCode = Playwright.Program.Main(new[] { "install" });
+        var exitCode = Playwright.Program.Main(new[] { "install", "chromium" });
         if (exitCode != 0)
         {
             throw new Exception($"Playwright exited with code {exitCode}");
         }
 
-        _playwrightSession = await Playwright.Playwright.CreateAsync();
+        _playwrightSession = await Playwright.Playwright.CreateAsync().Timeout(TimeSpan.FromMinutes(5), "Timeout creating Playwright session");
 
         var browserTypeLaunchOptions = new BrowserTypeLaunchOptions();
         if (Debugger.IsAttached)
@@ -31,8 +31,7 @@ public class PlaywrightFixture :  IDisposable, IAsyncLifetime
             browserTypeLaunchOptions.Headless = false;
         }
 
-        Browser = await _playwrightSession.Chromium.LaunchAsync(browserTypeLaunchOptions);
-
+        Browser = await _playwrightSession.Chromium.LaunchAsync(browserTypeLaunchOptions).Timeout(TimeSpan.FromMinutes(5), "Timeout launching browser");
     }
     
 

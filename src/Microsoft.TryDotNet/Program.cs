@@ -1,14 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Diagnostics;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
+using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.CSharpProject;
+using Microsoft.DotNet.Interactive.CSharpProject.Commands;
 using Microsoft.DotNet.Interactive.Events;
-using Microsoft.DotNet.Interactive.Server;
-using Microsoft.Net.Http.Headers;
 
 namespace Microsoft.TryDotNet;
 
@@ -36,6 +37,13 @@ public class Program
     public static WebApplication CreateWebApplication(WebApplicationOptions options)
     {
         var builder = WebApplication.CreateBuilder(options);
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("trydotnet", policy =>
+            {
+                policy.AllowAnyOrigin();
+            });
+        });
 
         CSharpProjectKernel.RegisterEventsAndCommands();
 
@@ -48,6 +56,7 @@ public class Program
         }
 
         //app.UseHttpsRedirection();
+        app.UseCors("trydotnet");
         app.UseBlazorFrameworkFiles("/wasmrunner");
         app.UseStaticFiles();
         app.MapFallbackToFile("/wasmrunner/{*path:nonfile}", "wasmrunner/index.html");
@@ -73,7 +82,13 @@ public class Program
 
                     kernel.KernelEvents.Subscribe(e => kernelEvents.Add(e));
 
-                    foreach (var commandEnvelope in ReadCommands(bundle))
+                    var commandEnvelopes = ReadCommands(bundle).ToList();
+                    //if (commandEnvelopes.FirstOrDefault(ce => ce.Command is CompileProject) is not null)
+                    //{
+                    //    Debugger.Launch();
+                    //}
+                    
+                    foreach (var commandEnvelope in commandEnvelopes)
                     {
                         var results = await kernel.SendAsync(commandEnvelope.Command, CancellationToken.None);
                     }

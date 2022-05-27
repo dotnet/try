@@ -14,7 +14,8 @@ try {
     $npmDirs = @(
         "src\microsoft-trydotnet",
         "src\microsoft-trydotnet-editor",
-        "src\microsoft-trydotnet-styles"
+        "src\microsoft-trydotnet-styles",
+        "src\microsoft-learn-mock"
     )
     foreach ($npmDir in $npmDirs) {
         Push-Location "$repoRoot\$npmDir"

@@ -1,0 +1,21 @@
+{
+  "name": "microsoft-learn-mock",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "buildProd": "npm run rollup",
+    "rollup": "rollup -c",
+    "ciTest": "echo \"NOOP\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "22.0.0",
+    "@rollup/plugin-node-resolve": "13.2.1",
+    "typescript": "4.6.3",
+    "rollup": "2.70.2",
+    "rollup-plugin-typescript2": "0.31.2"
+  }
+}

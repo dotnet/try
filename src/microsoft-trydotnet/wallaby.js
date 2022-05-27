@@ -8,7 +8,7 @@ module.exports = function (wallaby) {
         },
         files: [
             "src/**/*.ts",
-            { pattern:"test/**/*.ts", instrument: false },
+            { pattern: "test/**/*.ts", instrument: true },
             "!test/**/*.specs.ts*"
         ],
         tests: ["test/**/*.specs.ts"],
