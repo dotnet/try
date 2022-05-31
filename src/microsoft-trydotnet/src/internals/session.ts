@@ -7,16 +7,13 @@ import { RequestIdGenerator, IRequestIdGenerator } from "./requestIdGenerator";
 import { Workspace } from "./workspace";
 import { Region, IDocument } from "../editableDocument";
 import { executionService } from "./executionService";
-import { SHOW_EDITOR_REQUEST, HOST_EDITOR_READY_EVENT, HOST_RUN_READY_EVENT, ApiMessage, SET_WORKSPACE_REQUEST } from "../apiMessages";
+import { SHOW_EDITOR_REQUEST, HOST_EDITOR_READY_EVENT, HOST_RUN_READY_EVENT, ApiMessage } from "../apiMessages";
 import { MonacoTextEditor } from "./monacoTextEditor";
 import { ITextEditor, TextChangedEvent } from "../editor";
 import { Project } from "../project";
 import { debounceTime, Subject, Unsubscribable } from "rxjs";
 import { isNullOrUndefined } from "../stringExtensions";
 import { ServiceError, ISession, OutputEventSubscriber, ServiceErrorSubscriber, OpenDocumentParameters, RunConfiguration, RunResult } from "../session";
-import { responseFor } from "./responseFor";
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
-import * as newContract from "../newContract";
 
 export type DocumentObject = { fileName: string, region: Region, content: string };
 

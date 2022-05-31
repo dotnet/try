@@ -3,8 +3,7 @@
 
 import { DOMWindow } from "jsdom";
 import { Configuration } from "../src";
-import { ApiMessage, RUN_REQUEST, SET_EDITOR_CODE_REQUEST, HOST_EDITOR_READY_EVENT, SET_WORKSPACE_REQUEST, HOST_RUN_READY_EVENT, } from "../src/apiMessages";
-import { SourceFile } from "../src/project";
+import { ApiMessage, RUN_REQUEST, SET_EDITOR_CODE_REQUEST, HOST_EDITOR_READY_EVENT, HOST_RUN_READY_EVENT, } from "../src/apiMessages";
 import { wait } from "./wait";
 import * as newContract from "../src/newContract";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";

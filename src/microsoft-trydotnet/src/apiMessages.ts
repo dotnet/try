@@ -25,7 +25,6 @@ export const FOCUS_EDITOR_REQUEST = "focusEditor";
 export const SHOW_EDITOR_REQUEST = "showEditor";
 
 // workspace api
-export const SET_WORKSPACE_REQUEST = "setWorkspace";
 export const SET_EDITOR_CODE_REQUEST = "setSourceCode";
 export const GET_EDITOR_CODE_REQUEST = "getEditorSourceCode";
 export const GET_EDITOR_CODE_RESPONSE = "editorSourceCode";
@@ -60,11 +59,6 @@ export type ApiMessage =
         type: typeof FOCUS_EDITOR_REQUEST
     } | {
         type: typeof SHOW_EDITOR_REQUEST
-    } | {
-        type: typeof SET_WORKSPACE_REQUEST,
-        workspace: any,
-        bufferId: string,
-        requestId: string
     } | {
         type: typeof SET_EDITOR_CODE_REQUEST,
         sourceCode: string,
