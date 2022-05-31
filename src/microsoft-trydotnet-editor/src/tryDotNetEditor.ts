@@ -129,20 +129,6 @@ export class TryDotNetEditor {
             });
             break;
         }
-      } else {
-        switch (event.eventType) {
-          case dotnetInteractive.ProjectOpenedType:
-            this._postMessage({
-              type: "PROJECT_LOADED",
-              ...event
-            });
-            break;
-          case dotnetInteractive.DocumentOpenedType:
-            this._postMessage({
-              type: "DOCUMENT_OPENED",
-              ...event
-            });
-        }
       }
     });
   }
@@ -225,8 +211,10 @@ export class TryDotNetEditor {
             editorId
           };
           this._postMessage(projectOpenedMessage);
+          dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request project opened] : ${JSON.stringify(projectOpenedMessage)}`);
           if (this._currentDocument) {
-            const projectOpenedMessage: newContract.DocumentOpened = {
+
+            const documentOpenMessage: newContract.DocumentOpened = {
               type: dotnetInteractive.DocumentOpenedType,
               content: this._currentDocument.content,
               relativeFilePath: this._currentDocument.relativeFilePath,
@@ -234,7 +222,9 @@ export class TryDotNetEditor {
               requestId,
               editorId
             };
-            this._postMessage(projectOpenedMessage);
+
+            this._postMessage(documentOpenMessage);
+            dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request document opened] : ${JSON.stringify(documentOpenMessage)}`);
           }
           dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request done] : ${JSON.stringify(projectOpenedMessage)}`);
         }

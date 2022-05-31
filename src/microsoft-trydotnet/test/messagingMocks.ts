@@ -35,16 +35,38 @@ export function registerForLongRunRequest(configuration: Configuration, iframe: 
     });
 }
 
-export function registerForSetWorkspace(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (files: SourceFile[]) => dotnetInteractive.ProjectItem[]) {
+
+export function registerForOpenProject(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (files: dotnetInteractive.ProjectFile[]) => dotnetInteractive.ProjectItem[]) {
     iframe.contentWindow.addEventListener("message", (message: any) => {
         message.data;//?
-        if (message.data.type === SET_WORKSPACE_REQUEST) {
-
+        if (message.data.type === dotnetInteractive.OpenProjectType) {
+            const request = <newContract.OpenProject>message.data;
             let response: newContract.ProjectOpened = {
                 type: dotnetInteractive.ProjectOpenedType,
-                requestId: message.data.requestId,
-                editorId: message.data.editorId,
-                projectItems: onRequest(message.data.workspace.files.map((f: { text: string; name: string; }) => ({ content: f.text, name: f.name })))
+                requestId: request.requestId,
+                editorId: request.editorId,
+                projectItems: onRequest(request.project.files)
+
+            };
+            window.postMessage(response, configuration.hostOrigin);
+        }
+    });
+}
+
+export function registerForOpeDocument(configuration: Configuration, iframe: HTMLIFrameElement, window: DOMWindow, onRequest: (documentId: DocumentId) => string) {
+    iframe.contentWindow.addEventListener("message", (message: any) => {
+        message.data;//?
+
+        if (message.data.type === dotnetInteractive.OpenDocumentType) {
+
+            const request = <newContract.OpenDocument>message.data;
+            let response: newContract.DocumentOpened = {
+                type: dotnetInteractive.DocumentOpenedType,
+                requestId: request.requestId,
+                editorId: request.editorId,
+                relativeFilePath: request.relativeFilePath,
+                regionName: request.regionName,
+                content: onRequest(new DocumentId(request))
 
             };
             window.postMessage(response, configuration.hostOrigin);

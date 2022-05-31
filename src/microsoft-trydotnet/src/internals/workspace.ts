@@ -10,7 +10,6 @@ import { ITrydotnetMonacoTextEditor } from "./monacoTextEditor";
 import { isNullOrUndefined, isNullOrUndefinedOrWhitespace } from "../stringExtensions";
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import { OpenProject } from "../newContract";
-import { SET_WORKSPACE_REQUEST } from "../apiMessages";
 import { responseFor } from "./responseFor";
 import * as newContract from "../newContract";
 
@@ -48,7 +47,6 @@ export class Workspace {
     private _projectItems: dotnetInteractive.ProjectItem[];
     private workspace: IWorkspace;
     private _currentOpenDocument: Document;
-    private workspaceIsModified = false;
 
     constructor(private projectApiMessageBus: IMessageBus, private requestIdGenerator: IRequestIdGenerator) {
         if (!this.projectApiMessageBus) {
@@ -61,7 +59,7 @@ export class Workspace {
     }
 
     public isModified(): boolean {
-        return this.workspaceIsModified || (this._currentOpenDocument?.isModified === true);
+        return (this._currentOpenDocument?.isModified === true);
     }
 
     public async fromProject(project: Project): Promise<void> {
@@ -83,31 +81,29 @@ export class Workspace {
             this.workspace.files = project.files.map(f => ({ name: f.name, text: f.content }));
         }
 
-        this.workspaceIsModified = true;
 
         let requestId = await this.requestIdGenerator.getNewRequestId();
-        let wsr = this.toSetWorkspaceRequests();
-        if (wsr.workspace) { // && wsr.workspace.buffers && wsr.workspace.buffers.length > 0) {
+        let prjr = this.toOpenProjectRequests();
+        if (prjr.project) { // && wsr.workspace.buffers && wsr.workspace.buffers.length > 0) {
 
-            let request: any = {
-                type: SET_WORKSPACE_REQUEST,
+            let request: newContract.OpenProject = {
+                type: dotnetInteractive.OpenProjectType,
                 requestId: requestId,
-                workspace: wsr.workspace
+                project: prjr.project,
             }
             let messageBus = this.projectApiMessageBus;
 
 
-            let projectOpenedPromise = responseFor(messageBus, dotnetInteractive.ProjectOpenedType, requestId, response => {
+            let projectOpenedPromise = responseFor<newContract.ProjectOpened>(messageBus, dotnetInteractive.ProjectOpenedType, requestId, response => {
 
-                return response;
+                return <newContract.ProjectOpened>response;
             });
 
             messageBus.post(request);
 
-            let projectOpened = <newContract.ProjectOpened><any>(await projectOpenedPromise); //?
+            let projectOpened = await projectOpenedPromise; //?
 
             this.setProjectItems(projectOpened.projectItems);
-
         }
     }
 
@@ -116,13 +112,13 @@ export class Workspace {
         return file;
     }
 
-    private async createDocumentFromSourceFileRegion(file: IWorkspaceFile, regionName: string): Promise<Document> {
+    private createDocumentFromSourceFileRegion(file: IWorkspaceFile, regionName: string): Document {
         this._projectItems;//?
         if (this._projectItems.length > 0) {
             let item = this._projectItems.find(i => areSameFile(i.relativeFilePath, file.name) && Object.defineProperty(i.regionsContent, regionName, {}));
             if (item) {
                 let doc = new Document({ relativeFilePath: item.relativeFilePath, regionName }, item.regionsContent[regionName] ?? "");
-                return Promise.resolve(doc);
+                return doc;
             }
             else {
                 throw new Error("Could not find file in project");
@@ -134,10 +130,6 @@ export class Workspace {
     }
 
     private async createDocument(fileName: string, region: Region, content: string): Promise<Document> {
-        let id = fileName;
-
-
-
         let document: Document = null;
 
         if (region) {
@@ -146,7 +138,7 @@ export class Workspace {
                 if (!isNullOrUndefined(content)) {
                     document = new Document({ relativeFilePath: file.name, regionName: region }, content);
                 } else {
-                    document = await this.createDocumentFromSourceFileRegion(file, region);
+                    document = this.createDocumentFromSourceFileRegion(file, region);
                 }
             }
         }
@@ -170,10 +162,25 @@ export class Workspace {
 
     private async createAndOpenDocument(fileName: string, region: Region, content: string): Promise<Document> {
 
-        let document = await this.createDocument(fileName, region, content);
+        const requestId = await this.requestIdGenerator.getNewRequestId();
+        let openDocumentResponse = responseFor<newContract.DocumentOpened>(this.projectApiMessageBus, dotnetInteractive.DocumentOpenedType, requestId, reponse => {
+            const od: newContract.DocumentOpened = <newContract.DocumentOpened><any>reponse;
+            return od;
+        });
+        const openDocumentRequest: newContract.OpenDocument = {
+            type: dotnetInteractive.OpenDocumentType,
+            relativeFilePath: fileName,
+            regionName: region,
+            requestId: requestId
+        };
+
+        this.projectApiMessageBus.post(openDocumentRequest);
+        let documentOpened = await openDocumentResponse;
+        let document = await this.createDocument(fileName, region, content ?? documentOpened.content);
         if (document) {
             this._currentOpenDocument = document;
         }
+
 
         return document;
     }
@@ -183,9 +190,6 @@ export class Workspace {
             this._currentOpenDocument.unbindFromEditor();
             this._currentOpenDocument = null;
         }
-
-        this.workspaceIsModified = true;
-
     }
 
 
@@ -205,7 +209,6 @@ export class Workspace {
         if (!document) {
             this.closeDocumentBeforeOpen(id);
             document = await this.createAndOpenDocument(fileName, region, content);
-            this.workspaceIsModified = true;
         } else if (content) {
             await document.setContent(content);
         }
@@ -237,31 +240,6 @@ export class Workspace {
         return document;
     }
 
-    public toSetWorkspaceRequests(): SetWorkspaceRequests {
-
-        if (this._currentOpenDocument) {
-            this.workspace.buffers = [{
-                id: this._currentOpenDocument.id().toString(),
-                content: this._currentOpenDocument.getContent(),
-                position: this._currentOpenDocument.getCursorPosition()
-            }];
-        } else {
-            this.workspace.buffers = [];
-        }
-
-        this.workspaceIsModified = false;
-        let requests: SetWorkspaceRequests = {
-            workspace: JSON.parse(JSON.stringify(this.workspace))
-        };
-
-        let activeDocuments = this.getActiveDocuments();
-        for (let activeDocument of activeDocuments) {
-            requests.workspace.activeBufferId = activeDocument.document.id().toString();
-            activeDocument.document.isModified = false;
-        }
-        return requests;
-    }
-
     public toOpenProjectRequests(): OpenProject {
         if (this._currentOpenDocument) {
             this.workspace.buffers = [{
@@ -274,7 +252,6 @@ export class Workspace {
             this.workspace.buffers = [];
         }
 
-        this.workspaceIsModified = false;
         let request: OpenProject = {
             type: dotnetInteractive.OpenProjectType,
             project: <dotnetInteractive.Project>{
@@ -289,7 +266,6 @@ export class Workspace {
 
     setProjectItems(projectItems: dotnetInteractive.ProjectItem[]) {
         this._projectItems = projectItems ? [...projectItems] : []//?
-        this.workspaceIsModified = false;
     }
 }
 

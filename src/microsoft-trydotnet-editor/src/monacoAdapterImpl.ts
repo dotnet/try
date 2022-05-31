@@ -38,9 +38,8 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         }
 
         monaco.editor.setModelMarkers(model, "trydotnetdiagnostics", markers);
-
-        throw new Error('Method not implemented.');
     }
+
     getPosition(): { line: number; column: number; } {
         const position = this._editor.getPosition() ?? { lineNumber: 1, column: 1 };
 

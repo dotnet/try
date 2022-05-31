@@ -18,7 +18,7 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         Learn = learn;
     }
 
-    [Fact(Skip = "wip")]
+    [Fact]
     public async Task loads_trydotnet()
     {
         var page = await Playwright.Browser!.NewPageAsync();

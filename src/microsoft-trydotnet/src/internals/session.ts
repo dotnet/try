@@ -73,14 +73,21 @@ export class Session implements ISession {
         this.executionService = new executionService(this.messageBus, this.requestIdGenerator, this.serviceErrorChannel);
         this.textEditor = new MonacoTextEditor(this.messageBus, this.requestIdGenerator);
 
-        let textChangedHandler = (() => {
-            this.setWorkspaceIfRequired();
+        let textChangedHandler = ((event: TextChangedEvent) => {
+            if (this.workspace) {
+                const document = this.workspace.getOpenDocument();
+                if (document && document.id().equal(event.documentId)) {
+                    document.setContent(event.text);
+                }
+
+
+            }
         }).bind(this);
 
         this.mergedTextChangedEvents = new Subject<TextChangedEvent>();
         this.mergedTextChangedEvents.pipe(debounceTime(1000)).subscribe({
-            next: (_next: any) => {
-                textChangedHandler();
+            next: (event) => {
+                textChangedHandler(event);
             }
         });
     }
@@ -95,47 +102,6 @@ export class Session implements ISession {
         }
     }
 
-    private setWorkspaceIfRequired(): Promise<void> {
-        if (this.workspace && this.workspace.isModified) {
-            dotnetInteractive.Logger.default.info(`[setWorkspaceIfRequired] ${this.workspace.isModified}`);
-            return this.setWorkspace();
-        }
-    }
-
-    private async setWorkspace(): Promise<void> {
-        dotnetInteractive.Logger.default.info("---- start session.setWorkspace");
-        if (this.workspace) {
-            let requestId = await this.requestIdGenerator.getNewRequestId();
-            let wsr = this.workspace.toSetWorkspaceRequests();
-            if (wsr.workspace) { // && wsr.workspace.buffers && wsr.workspace.buffers.length > 0) {
-                dotnetInteractive.Logger.default.info("---- processing session.setWorkspace");
-                let request: any = {
-                    type: SET_WORKSPACE_REQUEST,
-                    requestId: requestId,
-                    workspace: wsr.workspace
-                }
-                let messageBus = this.textEditor.messageBus();
-                let bufferToBind = wsr?.workspace.activeBufferId;
-                if (bufferToBind) {
-                    request.activeBufferId = bufferToBind;
-                }
-
-                let projectOpenedPromise = responseFor(messageBus, dotnetInteractive.ProjectOpenedType, requestId, response => {
-
-                    return response;
-                });
-                dotnetInteractive.Logger.default.info(`[session.setWorkspace] ${JSON.stringify(request)}`);
-                messageBus.post(request);
-
-                let projectOpened = <newContract.ProjectOpened><any>(await projectOpenedPromise); //?
-                dotnetInteractive.Logger.default.info(`[session.setWorkspace] ${JSON.stringify(projectOpened)}`);
-                this.workspace.setProjectItems(projectOpened.projectItems);
-
-            }
-
-        }
-        dotnetInteractive.Logger.default.info("---- completed session.setWorkspace");
-    }
 
     public getTextEditor(): ITextEditor {
         return this.textEditor;
@@ -165,8 +131,6 @@ export class Session implements ISession {
                 this._configureAndInitialize(configuration, initialState)
                     .then(() => {
                         this.textEditor.textChanges.subscribe(this.mergedTextChangedEvents);
-
-                        this.setWorkspace();
                         resolve();
                     })
                     .catch((error: any) => reject(error));
@@ -289,14 +253,12 @@ export class Session implements ISession {
             content: parameters.content,
             textEditor: editor
         });
-        await this.setWorkspaceIfRequired();
         return document;
     }
 
     async run(configuration?: RunConfiguration): Promise<RunResult> {
         this.requiresWorkspace("Cannot run without loading a project first");
         this.DispatchRunChanged(false);
-        await this.setWorkspaceIfRequired();
         return this.executionService.run(configuration).then(result => {
             this.DispatchRunChanged(true);
             return result;

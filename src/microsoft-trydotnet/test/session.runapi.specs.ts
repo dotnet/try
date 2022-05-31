@@ -7,7 +7,7 @@ import { buildSimpleIFrameDom } from "./domUtilities";
 import { JSDOM } from "jsdom";
 import { Done } from "mocha";
 import { ApiMessage, RUN_RESPONSE, RUN_REQUEST, SERVICE_ERROR_RESPONSE, } from "../src/apiMessages";
-import { registerForRunRequest, registerForLongRunRequest, notifyRunReadyWithId, registerForSetWorkspace } from "./messagingMocks";
+import { registerForRunRequest, registerForLongRunRequest, notifyRunReadyWithId, registerForOpenProject } from "./messagingMocks";
 import { createReadySession } from "./sessionFactory";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 chai.should();
@@ -37,16 +37,18 @@ describe("a user", () => {
                         outcome: "Success"
                     };
                 });
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
                         return item;
                     });
                 });
+
 
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
 
@@ -66,16 +68,17 @@ describe("a user", () => {
             let results = ["", ""];
 
             awaitableSession.then(session => {
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
                         return item;
                     });
                 });
+
 
                 registerForLongRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     count++;
@@ -118,10 +121,10 @@ describe("a user", () => {
         it("can subscribe to output events", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
@@ -153,10 +156,10 @@ describe("a user", () => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
 
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
@@ -188,16 +191,17 @@ describe("a user", () => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
 
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
                         return item;
                     });
                 });
+
 
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     return {
@@ -236,16 +240,17 @@ describe("a user", () => {
         it("can run the loaded project with workflow id", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
                         return item;
                     });
                 });
+
 
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     return {

@@ -6,13 +6,14 @@ import { Configuration, createProject } from "../src/index";
 import { JSDOM } from "jsdom";
 import { buildSimpleIFrameDom, getEditorIFrame } from "./domUtilities";
 import * as chaiAsPromised from "chai-as-promised";
-import { registerForEditorMessages, registerForSetWorkspace } from "./messagingMocks";
+import { registerForEditorMessages, registerForOpeDocument, registerForOpenProject } from "./messagingMocks";
 import { wait } from "./wait";
 import { createReadySession } from "./sessionFactory";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 
 import { expect } from "chai";
-import { DocumentId } from "../src/internals/document";
+import { areSameFile, DocumentId } from "../src/internals/document";
+import { EditorContentChangedType } from "../src/newContract";
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -34,16 +35,22 @@ describe("A user", () => {
         it("can open a document", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
             });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+            });
+
             await session.openProject(project);
             let document = await session.openDocument({ fileName: "program.cs" });
 
@@ -54,16 +61,22 @@ describe("A user", () => {
         it("creates a empty document when the project does not have a matching file", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
             });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+            });
+
             await session.openProject(project);
 
             let document = await session.openDocument({ fileName: "program_two.cs" });
@@ -75,16 +88,22 @@ describe("A user", () => {
         it("creates a empty document when using region and the project does not have a matching file", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
             });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+            });
+
             await session.openProject(project);
 
             let document = await session.openDocument({ fileName: "program_two.cs", region: "controller" });
@@ -97,10 +116,11 @@ describe("A user", () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n//content\n e#endregion\n//post/n" }] });
 
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
-                return files.map(f => {
+            const items: { [key: string]: dotnetInteractive.ProjectItem } = {};
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                const pi = files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: ["controller"],
                         regionsContent: {
                             controller: "//content"
@@ -108,6 +128,21 @@ describe("A user", () => {
                     };
                     return item;
                 });
+
+                for (let i of pi) {
+                    items[i.relativeFilePath] = i;
+                }
+
+                return pi;
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                if (documentId.regionName) {
+                    content = items[documentId.relativeFilePath].regionsContent[documentId.regionName];
+                }
+                return content;
             });
 
             await session.openProject(project);
@@ -120,10 +155,11 @@ describe("A user", () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n#endregion\n//post/n" }] });
 
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
-                return files.map(f => {
+            const items: { [key: string]: dotnetInteractive.ProjectItem } = {};
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                const pi = files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: ["controller"],
                         regionsContent: {
                             controller: undefined
@@ -131,7 +167,24 @@ describe("A user", () => {
                     };
                     return item;
                 });
+
+                for (let i of pi) {
+                    items[i.relativeFilePath] = i;
+                }
+
+                return pi;
             });
+
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                if (documentId.regionName) {
+                    content = items[documentId.relativeFilePath].regionsContent[documentId.regionName];
+                }
+                return content;
+            });
+
 
             await session.openProject(project);
             let document = await session.openDocument({ fileName: "program.cs", region: "controller" });
@@ -143,16 +196,24 @@ describe("A user", () => {
             let editorState = { content: "", documentId: <DocumentId>undefined };
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
             });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                return content;
+            });
+
             await session.openProject(project);
             registerForEditorMessages(configuration, editorIFrame, dom.window, editorState);
             await session.openDocument({ fileName: "program.cs" });
@@ -164,16 +225,23 @@ describe("A user", () => {
         it("can return the open documents", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
             });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                return content;
+            });
+
             await session.openProject(project);
 
             await session.openDocument({ fileName: "program.cs", content: "i am a document" });
@@ -187,15 +255,21 @@ describe("A user", () => {
                 let editorState = { content: "", documentId: <DocumentId>undefined };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
                         return item;
                     });
+                });
+
+                registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                    documentId;//?
+                    let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                    return content;
                 });
 
                 await session.openProject(project);
@@ -211,15 +285,19 @@ describe("A user", () => {
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
 
-                registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
                         let item: dotnetInteractive.ProjectItem = {
-                            relativeFilePath: f.name,
+                            relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
                         };
                         return item;
                     });
+                });
+
+                registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                    return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content;
                 });
 
                 await session.openProject(project);

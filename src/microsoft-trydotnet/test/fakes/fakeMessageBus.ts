@@ -7,19 +7,40 @@ import { ApiMessage } from "../../src/apiMessages";
 
 export class FakeMessageBus implements IMessageBus {
 
+    private _requests = new Subject<{
+        type: string; requestId?: string;[key: string]: any
+    }>();
+
+    private _responses = new Subject<{
+        type: string; requestId?: string;[key: string]: any
+    }>();
     constructor(private busId: string) {
     }
-    subscribe(observer: Partial<Observer<{ type: string; requestId?: string; }>>): Unsubscribable {
-        return this.channel.subscribe(observer);
+    subscribe(observer: Partial<Observer<{
+        type: string; requestId?: string;[key: string]: any
+    }>>): Unsubscribable {
+        return this._responses.subscribe(observer);
     }
-
-    public channel = new Subject<ApiMessage>();
 
     dispose(): void {
     }
 
-    post(message: ApiMessage): void {
-        this.channel.next(message);
+    post(message: {
+        type: string; requestId?: string;[key: string]: any
+    }): void {
+        this._requests.next(message);
+    }
+
+    postResponse(message: {
+        type: string; requestId?: string;[key: string]: any
+    }): void {
+        this._responses.next(message);
+    }
+
+    public get requests(): Subject<{
+        type: string; requestId?: string;[key: string]: any
+    }> {
+        return this._requests;
     }
 
     // subscribe(observer?: PartialObserver<{ type: string, requestId?: string }>): Unsubscribable;

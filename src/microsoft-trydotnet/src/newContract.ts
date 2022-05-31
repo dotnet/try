@@ -12,7 +12,7 @@ export interface ProjectOpened {
 export interface OpenProject {
     type: typeof dotnetInteractive.OpenProjectType;
     requestId: string;
-    editorId: string;
+    editorId?: string;
     project: dotnetInteractive.Project
 }
 
@@ -35,8 +35,8 @@ export interface EditorContentChanged {
 
 export interface OpenDocument {
     type: typeof dotnetInteractive.OpenDocumentType;
-    content: string;
     relativeFilePath: string;
     regionName?: string;
-    editorId: string;
+    editorId?: string;
+    requestId: string;
 } 

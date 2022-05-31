@@ -5,8 +5,9 @@ import * as chai from "chai";
 import * as chaiAsPromised from "chai-as-promised";
 import { Configuration, createSessionWithProjectAndOpenDocument } from "../src/index";
 import { buildSimpleIFrameDom, getEditorIFrame } from "./domUtilities";
-import { notifyEditorReady, registerForSetWorkspace } from "./messagingMocks";
+import { notifyEditorReady, registerForOpeDocument, registerForOpenProject } from "./messagingMocks";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import { areSameFile } from "../src/internals/document";
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -21,25 +22,32 @@ describe("a user", () => {
         it("can create a session with initial project", async () => {
             let dom = buildSimpleIFrameDom(configuration);
             let editorIFrame = getEditorIFrame(dom);
+            const project = {
+                package: "console",
+                files: [{ name: "program.cs", content: "" }]
+            };
             let awaitableSession = createSessionWithProjectAndOpenDocument(
                 configuration,
                 [editorIFrame],
                 <Window><any>dom.window,
-                {
-                    package: "console",
-                    files: [{ name: "program.cs", content: "" }]
-                },
+                project,
                 "program.cs");
 
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                return content;
             });
 
             notifyEditorReady(configuration, dom.window);
@@ -51,26 +59,32 @@ describe("a user", () => {
             let dom = buildSimpleIFrameDom(configuration);
             let editorIFrame = getEditorIFrame(dom);
 
-
+            const project = {
+                package: "console",
+                files: [{ name: "./Program.cs", content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}" },]
+            };
             let awaitableSession = createSessionWithProjectAndOpenDocument(
                 configuration,
                 [editorIFrame],
                 <Window><any>dom.window,
-                {
-                    package: "console",
-                    files: [{ name: "./Program.cs", content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}" },]
-                },
+                project,
                 "program.cs");
 
-            registerForSetWorkspace(configuration, editorIFrame, dom.window, (files) => {
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
                     let item: dotnetInteractive.ProjectItem = {
-                        relativeFilePath: f.name,
+                        relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
                     };
                     return item;
                 });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                return content;
             });
 
             notifyEditorReady(configuration, dom.window);

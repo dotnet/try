@@ -3,7 +3,7 @@
 
 import { RunConfiguration, RunResult, OutputEvent, ServiceError } from "../session";
 import { Workspace } from "./workspace";
-import { ApiMessage, RUN_REQUEST, RUN_RESPONSE, SERVICE_ERROR_RESPONSE, isApiMessageOfType } from "../apiMessages";
+import { ApiMessage, RUN_REQUEST, RUN_RESPONSE, SERVICE_ERROR_RESPONSE, isMessageOfType } from "../apiMessages";
 import { responseFor } from "./responseFor";
 import { IMessageBus } from "./messageBus";
 import { RequestIdGenerator } from "./requestIdGenerator";
@@ -69,7 +69,7 @@ export class executionService implements Subscribable<OutputEvent>{
 
             this.currentRun = null;
             this.state = executionServiceStates.ready;
-            if (serviceErrorChannel !== null && serviceErrorChannel !== undefined && isApiMessageOfType(_error as ApiMessage, SERVICE_ERROR_RESPONSE)) {
+            if (serviceErrorChannel !== null && serviceErrorChannel !== undefined && isMessageOfType(_error as ApiMessage, SERVICE_ERROR_RESPONSE)) {
                 serviceErrorChannel.next(<ServiceError>_error)
             }
         });

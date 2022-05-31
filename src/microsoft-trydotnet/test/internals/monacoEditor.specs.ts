@@ -23,7 +23,7 @@ describe("a monaco editor", () => {
 
     it("can set the theme as string", () => {
         let messages: { type: string, requestId?: string }[] = [];
-        bus.subscribe({ next: m => messages.push(m) });
+        bus.requests.subscribe({ next: m => messages.push(m) });
         editor.setTheme("different theme");
         messages.should.not.be.empty;
         messages[0].type.should.equal(CONFIGURE_MONACO_REQUEST);
@@ -31,7 +31,7 @@ describe("a monaco editor", () => {
 
     it("can set the theme as object", () => {
         let messages: { type: string, requestId?: string }[] = [];
-        bus.subscribe({ next: m => messages.push(m) });
+        bus.requests.subscribe({ next: m => messages.push(m) });
         editor.setTheme({
             name: "different theme",
             monacoEditorTheme: {
@@ -62,7 +62,7 @@ describe("a monaco editor", () => {
 
     it("can set the editor options", () => {
         let messages: { type: string, requestId?: string }[] = [];
-        bus.subscribe({ next: m => messages.push(m) });
+        bus.requests.subscribe({ next: m => messages.push(m) });
         editor.setOptions({
             minimap: {
                 enabled: false
@@ -79,7 +79,7 @@ describe("a monaco editor", () => {
 
     it("can be configured", () => {
         let messages: { type: string, requestId?: string }[] = [];
-        bus.subscribe({ next: m => messages.push(m) });
+        bus.requests.subscribe({ next: m => messages.push(m) });
         editor.configure({
             theme: "different theme",
             options: {

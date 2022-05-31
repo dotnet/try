@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { SourceFile, SourceFileRegion, Project } from "./project";
 
 // run api
 export const RUN_REQUEST = "run";
@@ -33,11 +32,11 @@ export const GET_EDITOR_CODE_RESPONSE = "editorSourceCode";
 
 
 
-export function isApiMessageOfType(message: { type: string }, type: string): boolean {
+export function isMessageOfType(message: { type: string }, type: string): boolean {
     return message && message.type && type && message.type.toLowerCase() === type.toLowerCase();
 }
 
-export function isApiMessageCorrelatedTo(message: { requestId?: string }, requestId: string): boolean {
+export function isMessageCorrelatedTo(message: { requestId?: string }, requestId: string): boolean {
     return message && requestId && message.requestId && message.requestId === requestId;
 }
 

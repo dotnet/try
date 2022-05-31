@@ -28,8 +28,9 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     commands.push({
       commandType: dotnetInteractive.OpenProjectType,
-      command: <dotnetInteractive.OpenProject>{ project: { ... this.openProject } },
-      token: this.deriveToken(rootCommand)
+      command: <dotnetInteractive.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName },
+      token: this.deriveToken(rootCommand),
+
     });
 
     commands.push(rootCommand);
@@ -46,7 +47,10 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     commands.push({
       commandType: dotnetInteractive.OpenProjectType,
-      command: <dotnetInteractive.OpenProject>{ project: { ... this.openProject } },
+      command: <dotnetInteractive.OpenProject>{
+        project: { ... this.openProject },
+        targetKernelName: rootCommand.command.targetKernelName
+      },
       token: this.deriveToken(rootCommand)
     });
 
@@ -54,7 +58,8 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       commandType: dotnetInteractive.OpenDocumentType,
       command: <dotnetInteractive.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
-        regionName: this.openDocument.regionName
+        regionName: this.openDocument.regionName,
+        targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(rootCommand)
     });
@@ -97,6 +102,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     let compileCommand: dotnetInteractive.KernelCommandEnvelope = {
       commandType: dotnetInteractive.CompileProjectType,
       command: <dotnetInteractive.CompileProject>{
+        targetKernelName: rootCommand.command.targetKernelName
       },
       token: rootCommand.token
     };
@@ -105,7 +111,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     commands.push({
       commandType: dotnetInteractive.OpenProjectType,
-      command: <dotnetInteractive.OpenProject>{ project: { ... this.openProject } },
+      command: <dotnetInteractive.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName },
       token: this.deriveToken(compileCommand)
     });
 
@@ -113,7 +119,8 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       commandType: <dotnetInteractive.KernelCommandType>dotnetInteractive.OpenDocumentType,
       command: <dotnetInteractive.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
-        regionName: this.openDocument.regionName
+        regionName: this.openDocument.regionName,
+        targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(compileCommand)
     });
@@ -121,7 +128,8 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     commands.push({
       commandType: <dotnetInteractive.KernelCommandType>dotnetInteractive.SubmitCodeType,
       command: <dotnetInteractive.SubmitCode>{
-        code: (<dotnetInteractive.SubmitCode>rootCommand.command).code
+        code: (<dotnetInteractive.SubmitCode>rootCommand.command).code,
+        targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(compileCommand)
     });
@@ -178,6 +186,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
   private forwardEvents(eventEnvelopes: Array<dotnetInteractive.KernelEventEnvelope>, rootCommand: dotnetInteractive.KernelCommandEnvelope, invocationContext: dotnetInteractive.KernelInvocationContext) {
     for (let eventEnvelope of eventEnvelopes) {
       if (eventEnvelope.eventType === dotnetInteractive.CommandFailedType) {
+        Logger.default.error(`[ProjectKernelWithWASMRunner] command failed: ${JSON.stringify(eventEnvelope)}`);
         throw new Error((<dotnetInteractive.CommandFailed>(eventEnvelope.event)).message);
       }
       else if (eventEnvelope.eventType === dotnetInteractive.CommandCancelledType) {
