@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
@@ -12,7 +13,6 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 public partial class AspNetProcess : IDisposable
 {
     private Process? _process;
-    private const string ListeningMessagePrefix = "Now listening on: ";
 
     public async Task<Uri> Start()
     {
@@ -28,16 +28,12 @@ public partial class AspNetProcess : IDisposable
                 if (!uriFound)
                 {
                     buffer.AppendLine(output);
-                    var allText = buffer.ToString();
-                    if (allText.Contains(ListeningMessagePrefix))
+                    var matches = Regex.Match(output, @"listening on:\s*(?<URI>http(s)?://(\d+\.){3}(\d+)(:\d+)?)");
+                    if (matches.Success)
                     {
-                        var uri = ResolveListeningUrl(allText);
-                        if (uri != null)
-                        {
-                            uriFound = true;
-                            completionSource.SetResult(uri);
-                        }
-
+                        uriFound = true;
+                        var result = new Uri(matches.Groups["URI"].Value, UriKind.Absolute);
+                        completionSource.SetResult(result);
                     }
                 }
             },
@@ -46,32 +42,8 @@ public partial class AspNetProcess : IDisposable
                 completionSource.SetException(new Exception(error));
             });
 
-        return (await completionSource.Task).ToLocalHost();
+        return (await completionSource.Task.Timeout(TimeSpan.FromMinutes(1), $"ASP.NET Process failed to start.  Output =\n{buffer})")).ToLocalHost();
     }
-
-    public static Uri? ResolveListeningUrl(string output)
-    {
-
-        if (!string.IsNullOrEmpty(output))
-        {
-            output = output.Trim();
-            // Verify we have a valid URL to make requests to
-            var listeningUrlString = output.Substring(output.IndexOf(
-                ListeningMessagePrefix, StringComparison.Ordinal) + ListeningMessagePrefix.Length).Trim();
-
-
-            if (!string.IsNullOrEmpty(listeningUrlString))
-            {
-                return new Uri(listeningUrlString, UriKind.Absolute);
-            }
-
-            return null;
-        }
-
-        return null;
-
-    }
-
 
     public void Dispose()
     {
