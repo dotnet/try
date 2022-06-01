@@ -209,7 +209,7 @@ public class EditorTests : PlaywrightTestBase
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.DispatchMessage(new
         {
-            type = "configureMonacoEditor",
+            type = "ConfigureMonacoEditor",
             editorOptions = new
             {
                 minimap = new
@@ -234,7 +234,7 @@ public class EditorTests : PlaywrightTestBase
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.DispatchMessage(new
         {
-            type = "configureMonacoEditor",
+            type = "ConfigureMonacoEditor",
             theme = "vs-dark"
         });
 
