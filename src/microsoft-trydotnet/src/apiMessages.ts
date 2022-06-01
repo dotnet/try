@@ -10,11 +10,6 @@ export const RUN_COMPLETED_EVENT = "RunCompleted";
 export const SERVICE_ERROR_RESPONSE = "ServiceError";
 
 
-
-// theme api
-export const CONFIGURE_MONACO_REQUEST = "configureMonacoEditor";
-export const DEFINE_THEMES_REQUEST = "defineMonacoEditorThemes";
-
 // events 
 export const MONACO_READY_EVENT = "MonacoEditorReady";
 export const HOST_EDITOR_READY_EVENT = "HostEditorReady";
@@ -24,20 +19,7 @@ export const HOST_RUN_READY_EVENT = "HostRunReady";
 export const FOCUS_EDITOR_REQUEST = "focusEditor";
 export const SHOW_EDITOR_REQUEST = "showEditor";
 
-// workspace api
-export const SET_EDITOR_CODE_REQUEST = "setSourceCode";
-export const GET_EDITOR_CODE_REQUEST = "getEditorSourceCode";
-export const GET_EDITOR_CODE_RESPONSE = "editorSourceCode";
 
-
-
-export function isMessageOfType(message: { type: string }, type: string): boolean {
-    return message && message.type && type && message.type.toLowerCase() === type.toLowerCase();
-}
-
-export function isMessageCorrelatedTo(message: { requestId?: string }, requestId: string): boolean {
-    return message && requestId && message.requestId && message.requestId === requestId;
-}
 
 export type ApiMessage =
     {
@@ -50,19 +32,9 @@ export type ApiMessage =
         outcome: "Success" | "Exception" | "CompilationError",
         [key: string]: any
     } | {
-        type: typeof CONFIGURE_MONACO_REQUEST,
-        [key: string]: any
-    } | {
-        type: typeof DEFINE_THEMES_REQUEST,
-        themes: any
-    } | {
         type: typeof FOCUS_EDITOR_REQUEST
     } | {
         type: typeof SHOW_EDITOR_REQUEST
-    } | {
-        type: typeof SET_EDITOR_CODE_REQUEST,
-        sourceCode: string,
-        requestId: string
     } | {
         type: typeof HOST_EDITOR_READY_EVENT,
         editorId?: string

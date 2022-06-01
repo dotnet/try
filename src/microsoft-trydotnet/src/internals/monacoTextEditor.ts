@@ -4,12 +4,12 @@
 import { TextChangedEvent, IMonacoEditor, Theme, MonacoEditorTheme, MonacoEditorOptions, MonacoEditorConfiguration } from "../editor";
 import { Observable, Subject } from "rxjs";
 import { IMessageBus } from "./messageBus";
-import { SET_EDITOR_CODE_REQUEST, CONFIGURE_MONACO_REQUEST, DEFINE_THEMES_REQUEST, ApiMessage } from "../apiMessages";
+import { ApiMessage } from "../apiMessages";
 import { IRequestIdGenerator } from "./requestIdGenerator";
 import { isNullOrUndefinedOrWhitespace } from "../stringExtensions";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
-import { DocumentId } from "./document";
 import * as newContract from "../newContract";
+import { DocumentId } from "../documentId";
 
 export interface ITrydotnetMonacoTextEditor extends IMonacoEditor {
     setBufferId(bufferId: DocumentId): Promise<void>;
@@ -76,11 +76,12 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
 
     public async setContent(content: string): Promise<void> {
         let requestId = await this.requestIdGenerator.getNewRequestId();
-        this.editorApimessageBus.post({
-            type: SET_EDITOR_CODE_REQUEST,
+        const request: newContract.SetEditorContent = {
+            type: newContract.SetEditorContentType,
             requestId: requestId,
-            sourceCode: content
-        });
+            content: content
+        }
+        this.editorApimessageBus.post(request);
     }
 
     public setTheme(theme: Theme): void {
@@ -95,11 +96,12 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
     };
 
     public setOptions(options: MonacoEditorOptions): void {
-
-        this.editorApimessageBus.post({
-            type: CONFIGURE_MONACO_REQUEST,
+        const request: newContract.CongureMonacoEditor = {
+            type: newContract.ConfigureMonacoEditorType,
             editorOptions: { ...options }
-        });
+        };
+
+        this.editorApimessageBus.post(request);
     }
 
     public configure(configuration: MonacoEditorConfiguration): void {
@@ -109,19 +111,22 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
 
     private _defineTheme(themeName: string, editorTheme: any): void {
         let name = isNullOrUndefinedOrWhitespace(themeName) ? "trydotnetJs" : themeName;
-        this.editorApimessageBus.post({
-            type: DEFINE_THEMES_REQUEST,
+        const request: newContract.DefineMonacoEditorThemes = {
+            type: newContract.DefineMonacoEditorThemesType,
             themes: {
                 [name]: { ...editorTheme }
             }
-        });
+        };
+        this.editorApimessageBus.post(request);
     }
 
     private _setTheme(themeName: string): void {
-        this.editorApimessageBus.post({
-            type: CONFIGURE_MONACO_REQUEST,
+        const request: newContract.CongureMonacoEditor = {
+            type: newContract.ConfigureMonacoEditorType,
             theme: themeName
-        });
+        };
+
+        this.editorApimessageBus.post(request);
     }
 }
 

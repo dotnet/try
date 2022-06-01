@@ -12,8 +12,7 @@ import { createReadySession } from "./sessionFactory";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 
 import { expect } from "chai";
-import { areSameFile, DocumentId } from "../src/internals/document";
-import { EditorContentChangedType } from "../src/newContract";
+import { areSameFile, DocumentId } from "../src/documentId";
 
 chai.use(chaiAsPromised);
 chai.should();

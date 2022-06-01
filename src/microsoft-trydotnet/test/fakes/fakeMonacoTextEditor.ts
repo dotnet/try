@@ -4,8 +4,7 @@
 import { TextChangedEvent, Theme, MonacoEditorOptions, MonacoEditorConfiguration } from "../../src";
 import { Observable, Subject } from "rxjs";
 import { ITrydotnetMonacoTextEditor } from "../../src/internals/monacoTextEditor";
-import { DocumentId } from "../../src/internals/document";
-
+import { DocumentId } from "../../src/documentId";
 export class FakeMonacoTextEditor implements ITrydotnetMonacoTextEditor {
 
     textChanges: Observable<TextChangedEvent> = new Subject<TextChangedEvent>();

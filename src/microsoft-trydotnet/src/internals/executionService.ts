@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { RunConfiguration, RunResult, OutputEvent, ServiceError } from "../session";
-import { Workspace } from "./workspace";
-import { ApiMessage, RUN_REQUEST, RUN_RESPONSE, SERVICE_ERROR_RESPONSE, isMessageOfType } from "../apiMessages";
+import { ApiMessage, RUN_REQUEST, RUN_RESPONSE, SERVICE_ERROR_RESPONSE } from "../apiMessages";
 import { responseFor } from "./responseFor";
 import { IMessageBus } from "./messageBus";
 import { RequestIdGenerator } from "./requestIdGenerator";
 import { Subject, Subscribable, PartialObserver, Unsubscribable, Observer } from "rxjs";
+import * as newContract from "../newContract";
 
 enum executionServiceStates {
     ready,
@@ -69,7 +69,7 @@ export class executionService implements Subscribable<OutputEvent>{
 
             this.currentRun = null;
             this.state = executionServiceStates.ready;
-            if (serviceErrorChannel !== null && serviceErrorChannel !== undefined && isMessageOfType(_error as ApiMessage, SERVICE_ERROR_RESPONSE)) {
+            if (serviceErrorChannel !== null && serviceErrorChannel !== undefined && newContract.isMessageOfType(_error as ApiMessage, SERVICE_ERROR_RESPONSE)) {
                 serviceErrorChannel.next(<ServiceError>_error)
             }
         });

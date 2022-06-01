@@ -3,7 +3,7 @@
 
 import { ITextDisplay } from "./textDisplay";
 import { Observable } from "rxjs";
-import { DocumentId } from "./internals/document";
+import { DocumentId } from "./documentId";
 
 export type TextChangedEvent = {
     text: string,

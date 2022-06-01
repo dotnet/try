@@ -2,76 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import * as messages from './legacyTryDotNetMessages';
-import * as legacyContract from './legacyContract';
 import * as rxjs from 'rxjs';
 import * as projectKernel from './projectKernel';
 import * as monaco from './EditorAdapter';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as newContract from './newContract';
-
-function areSameFile(fileOne: string, fileTwo: string): boolean {
-  return fileOne.replace(/\.\//g, "") === fileTwo.replace(/\.\//g, "");
-}
-function isNullOrUndefinedOrWhitespace(input: string): boolean {
-  if (isNullOrUndefined(input)) {
-    return true;
-  }
-  return input.replace(/\s/g, "").length < 1;
-}
-
-function isNullOrUndefined(input: string): boolean {
-  return input === undefined || input === null;
-}
-class DocumentId {
-  private _relativeFilePath: string;
-  private _regionName: string;
-  private _stringValue: string;
-  toString(): string {
-    return this._stringValue;
-  }
-
-  constructor(documentId: { relativeFilePath: string, regionName?: string }) {
-    this._relativeFilePath = documentId.relativeFilePath;
-    this._regionName = documentId.regionName;
-    this._stringValue = this._relativeFilePath;
-    if (!isNullOrUndefinedOrWhitespace(this._regionName)) {
-      this._stringValue = `${this._relativeFilePath}@${this._regionName}`;
-    }
-  }
-
-  public get relativeFilePath(): string {
-    return this._relativeFilePath;
-  }
-
-  public get regionName(): string | undefined {
-    return this._regionName;
-  }
-
-  public static areEqual(a: DocumentId, b: DocumentId): boolean {
-    let ret = a === b;
-    if (!ret) {
-      if (a !== undefined && b !== undefined) {
-        ret = a.equal(b);
-      }
-
-    }
-    return ret;
-  }
-
-  public equal(other: DocumentId): boolean {
-    return areSameFile(this.relativeFilePath, other.relativeFilePath) && this.regionName === other.regionName;
-  }
-
-
-  public static parse(documentId: string): DocumentId {
-    const parts = documentId.split("@");//?
-    return parts.length === 1
-      ? new DocumentId({ relativeFilePath: parts[0], regionName: parts[1] })
-      : new DocumentId({ relativeFilePath: parts[0] });
-
-  }
-}
-
+import { DocumentId } from './documentId';
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
   private _currentProject?: { projectItems: dotnetInteractive.ProjectItem[]; };
@@ -164,12 +100,15 @@ export class TryDotNetEditor {
     }
   }
 
-  public async handleHostMessage(apiMessage: messages.AnyApiMessage) {
+  public async handleHostMessage(apiMessage: {
+    type: string;
+    [index: string]: any
+  }) {
     const requestId = apiMessage?.requestId;
     const editorId = apiMessage?.editorId;
     dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleHostMessage] : ${JSON.stringify(apiMessage)}`);
     switch (apiMessage.type) {
-      case messages.CONFIGURE_MONACO_REQUEST:
+      case newContract.ConfigureMonacoEditorType:
         let options = {};
         if (apiMessage.editorOptions) {
           options = { ...options, ...apiMessage.editorOptions };
@@ -180,12 +119,11 @@ export class TryDotNetEditor {
         this.getEditor().updateOptions(options);
 
         break;
-      case messages.SET_EDITOR_CODE_REQUEST:
-        const sourceCode = apiMessage.sourceCode;
-        this.getEditor().setCode(sourceCode);
+      case newContract.SetEditorContentType:
+        const content = (<newContract.SetEditorContent>apiMessage).content;
+        this.getEditor().setCode(content);
         break;
-      case messages.DEFINE_THEMES_REQUEST:
-        const source = { ...apiMessage };
+      case newContract.DefineMonacoEditorThemesType:
         this.getEditor().defineTheme(apiMessage.themes);
         break;
       case dotnetInteractive.OpenProjectType:
@@ -198,35 +136,6 @@ export class TryDotNetEditor {
             editorId
           };
           this._postMessage(message);
-        }
-        break;
-      case messages.SET_WORKSPACE_REQUEST:
-        {
-          dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request] : ${JSON.stringify(apiMessage)}`);
-          await this.configureWorkspace(apiMessage.workspace, requestId);
-          const projectOpenedMessage: newContract.ProjectOpened = {
-            type: dotnetInteractive.ProjectOpenedType,
-            projectItems: this._currentProject?.projectItems,
-            requestId,
-            editorId
-          };
-          this._postMessage(projectOpenedMessage);
-          dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request project opened] : ${JSON.stringify(projectOpenedMessage)}`);
-          if (this._currentDocument) {
-
-            const documentOpenMessage: newContract.DocumentOpened = {
-              type: dotnetInteractive.DocumentOpenedType,
-              content: this._currentDocument.content,
-              relativeFilePath: this._currentDocument.relativeFilePath,
-              regionName: this._currentDocument.regionName,
-              requestId,
-              editorId
-            };
-
-            this._postMessage(documentOpenMessage);
-            dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request document opened] : ${JSON.stringify(documentOpenMessage)}`);
-          }
-          dotnetInteractive.Logger.default.info(`[tryDotNetEditor set workspace request done] : ${JSON.stringify(projectOpenedMessage)}`);
         }
         break;
       case dotnetInteractive.OpenDocumentType:
@@ -250,25 +159,6 @@ export class TryDotNetEditor {
           }
           this._postMessage(message);
 
-        }
-        break;
-      case dotnetInteractive.OpenDocumentType:
-        {
-
-          let documentOpened = await this.openDocument(<newContract.OpenDocument>apiMessage);
-
-          const message: newContract.DocumentOpened = {
-            type: dotnetInteractive.DocumentOpenedType,
-            relativeFilePath: documentOpened.relativeFilePath,
-            content: documentOpened.content,
-            requestId,
-            editorId
-          };
-
-          if (documentOpened.regionName) {
-            message.regionName = documentOpened.regionName;
-          }
-          this._postMessage(message);
         }
         break;
       case messages.FOCUS_EDITOR_REQUEST:
@@ -338,46 +228,6 @@ export class TryDotNetEditor {
         dotnetInteractive.Logger.default.warn(`unhandled message: ${JSON.stringify(apiMessage)}`);
         break;
     }
-  }
-
-  private async configureWorkspace(workspace: legacyContract.IWorkspace, requestId: string) {
-
-    function toProject(ws: legacyContract.IWorkspace): dotnetInteractive.Project {
-      let p: dotnetInteractive.Project = {
-        files: []
-      };
-
-      if (ws.files) {
-        for (let wsfile of ws.files) {
-          let projectFile: dotnetInteractive.ProjectFile = {
-            relativeFilePath: wsfile.name, content: wsfile.text
-          };
-          p.files.push(projectFile);
-        }
-        return p;
-      }
-
-      if (ws.buffers) {
-        for (let wsbuffer of ws.buffers) {
-          let projectFile: dotnetInteractive.ProjectFile = {
-            relativeFilePath: wsbuffer.id, content: wsbuffer.content
-          };
-          p.files.push(projectFile);
-        }
-        return p;
-      }
-    }
-
-    const project = toProject(workspace);
-    dotnetInteractive.Logger.default.info(`[tryDotNetEditor configureWorkspace] : ${JSON.stringify(project)}`);
-    await this.openProject(project);
-
-
-
-    const bufferId = workspace.activeBufferId ?? workspace.files[0].name;
-    const documentId = DocumentId.parse(bufferId);
-    await this.openDocument(documentId);
-
   }
 
   public async openProject(project: dotnetInteractive.Project) {

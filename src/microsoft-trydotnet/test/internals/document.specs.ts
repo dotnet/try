@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import * as chai from "chai";
-import { Document, DocumentId } from "../../src/internals/document";
+import { DocumentId } from "../../src/documentId";
+import { Document } from "../../src/internals/document";
 import { FakeMonacoTextEditor } from "../fakes/fakeMonacoTextEditor";
 
 chai.should();

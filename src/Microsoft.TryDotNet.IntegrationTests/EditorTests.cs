@@ -23,7 +23,7 @@ public class EditorTests : PlaywrightTestBase
     public async Task can_load_monaco_editor()
     {
         var page = await Playwright.Browser!.NewPageAsync();
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         var isVisible = await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -48,7 +48,7 @@ public class EditorTests : PlaywrightTestBase
             await route.ContinueAsync();
         });
 
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -79,7 +79,7 @@ public class EditorTests : PlaywrightTestBase
     {
         var page = await Playwright.Browser!.NewPageAsync();
 
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -100,7 +100,7 @@ public class EditorTests : PlaywrightTestBase
 
         var readyAwaiter = interceptor.AwaitForMessage("HostEditorReady");
 
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         var found = await readyAwaiter;
 
@@ -115,21 +115,21 @@ public class EditorTests : PlaywrightTestBase
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
 
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
 
         await page.DispatchMessage(new
         {
-            type = "setWorkspace",
-            workspace = new
+            type = "OpenProject",
+            project = new
             {
                 files = new[]
                 {
                     new {
-                        name = "Program.cs",
-                        text="Console.WriteLine(\"New Project\")"
+                        relativeFilePath = "Program.cs",
+                        content = "Console.WriteLine(\"New Project\")"
                     }
                 }
             }
@@ -146,21 +146,21 @@ public class EditorTests : PlaywrightTestBase
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
         var randomValue = Guid.NewGuid().ToString("N");
         await page.DispatchMessage(new
         {
-            type = "setWorkspace",
-            workspace = new
+            type = "OpenProject",
+            project = new
             {
                 files = new[]
                 {
                     new {
-                        name = "Program.cs",
-                        text=$@"Console.WriteLine(""{randomValue}"");"
+                        relativeFilePath = "Program.cs",
+                        content = $@"Console.WriteLine(""{randomValue}"");"
                     }
                 }
             }
@@ -191,7 +191,7 @@ public class EditorTests : PlaywrightTestBase
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.TestScreenShotAsync();
         var minimap = page.Locator("div.minimap");
@@ -230,7 +230,7 @@ public class EditorTests : PlaywrightTestBase
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.DispatchMessage(new
         {
@@ -251,25 +251,33 @@ public class EditorTests : PlaywrightTestBase
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
+        
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
         var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+        
         var randomValue = Guid.NewGuid().ToString("N");
         await page.DispatchMessage(new
         {
-            type = "setWorkspace",
-            workspace = new
+            type = "OpenProject",
+            project = new
             {
-                activeBufferId = "Program.cs",
                 files = new[]
                 {
                     new {
-                        name = "Program.cs",
-                        text=@"Console.WriteLine(""Hello World"");"
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
                     }
                 }
             }
+        });
+        
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
         });
 
 
@@ -303,27 +311,35 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
         var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+        
         var randomValue = Guid.NewGuid().ToString("N");
+        
         await page.DispatchMessage(new
         {
-            type = "setWorkspace",
-            workspace = new
+            type = "OpenProject",
+            project = new
             {
-                activeBufferId = "Program.cs",
                 files = new[]
                 {
                     new {
-                        name = "Program.cs",
-                        text=@"Console.WriteLine(""Hello World"");"
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
                     }
                 }
             }
         });
 
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
+        });
 
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
@@ -354,25 +370,33 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
         var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+        
         var randomValue = Guid.NewGuid().ToString("N");
         await page.DispatchMessage(new
         {
-            type = "setWorkspace",
-            workspace = new
+            type = "OpenProject",
+            project = new
             {
-                activeBufferId = "Program.cs",
                 files = new[]
                 {
                     new {
-                        name = "Program.cs",
-                        text=@"Console.WriteLine(""Hello World"");"
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
                     }
                 }
             }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
         });
 
 
@@ -407,25 +431,33 @@ Console.WriteLine(""{randomValue}b"");".Replace("\r\n", "\n"));
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
 
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
         var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+        
         var randomValue = Guid.NewGuid().ToString("N");
         await page.DispatchMessage(new
         {
-            type = "setWorkspace",
-            workspace = new
+            type = "OpenProject",
+            project = new
             {
-                activeBufferId = "Program.cs",
                 files = new[]
                 {
                     new {
-                        name = "Program.cs",
-                        text=@"Console.WriteLine(""Hello World"");"
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
                     }
                 }
             }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
         });
 
         await documentOpenedAwaiter;

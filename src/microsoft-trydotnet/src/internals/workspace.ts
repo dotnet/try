@@ -3,7 +3,7 @@
 
 import { IMessageBus } from "./messageBus";
 import { IRequestIdGenerator } from "./requestIdGenerator";
-import { areSameFile, Document, DocumentId } from "./document";
+import { Document } from "./document";
 import { IDocument, Region } from "../editableDocument";
 import { Project } from "../project";
 import { ITrydotnetMonacoTextEditor } from "./monacoTextEditor";
@@ -12,6 +12,7 @@ import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import { OpenProject } from "../newContract";
 import { responseFor } from "./responseFor";
 import * as newContract from "../newContract";
+import { areSameFile, DocumentId } from "../documentId";
 
 //todo : this file should go as internal implementation will not user the following types
 interface IWorkspace {

@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { IMessageBus } from "./messageBus";
-import { isMessageOfType, isMessageCorrelatedTo, SERVICE_ERROR_RESPONSE } from "../apiMessages";
+import { SERVICE_ERROR_RESPONSE } from "../apiMessages";
 import { ServiceError } from "../session";
 import { Logger } from "@microsoft/dotnet-interactive";
+import * as newContract from "../newContract";
 
 
 export function responseFor<T>(messageBus: IMessageBus, responseMessageType: string, requestId: string, responseGenerator: (responseMessage: { type: string, requestId?: string, [key: string]: any }) => T): Promise<T> {
@@ -30,14 +31,14 @@ export function responseOrErrorFor<T, E>(messageBus: IMessageBus, responseMessag
         let sub = messageBus.subscribe({
             next: (message) => {
                 const m: { type: string, requestId?: string } = message;
-                if (isMessageOfType(message, responseMessageType) && isMessageCorrelatedTo(m, requestId)) {
+                if (newContract.isMessageOfType(message, responseMessageType) && newContract.isMessageCorrelatedTo(m, requestId)) {
                     Logger.default.info(`---- resolving response awaiter for [${requestId}] and type [${responseMessageType}]`);
                     let result = responseGenerator(message);
                     sub.unsubscribe();
                     resolve(<T>result);
                 }
 
-                else if (isMessageOfType(message, erroreMessageType) && isMessageCorrelatedTo(m, requestId)) {
+                else if (newContract.isMessageOfType(message, erroreMessageType) && newContract.isMessageCorrelatedTo(m, requestId)) {
                     Logger.default.info(`---- rejecting response awaiter for [${requestId}] and type [${responseMessageType}]`);
                     let result = errorGenerator(message);
                     sub.unsubscribe();

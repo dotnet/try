@@ -7,7 +7,7 @@ import { Configuration, createSessionWithProjectAndOpenDocument } from "../src/i
 import { buildSimpleIFrameDom, getEditorIFrame } from "./domUtilities";
 import { notifyEditorReady, registerForOpeDocument, registerForOpenProject } from "./messagingMocks";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
-import { areSameFile } from "../src/internals/document";
+import { areSameFile } from "../src/documentId";
 
 chai.use(chaiAsPromised);
 chai.should();

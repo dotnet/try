@@ -75,6 +75,7 @@ public class Program
                 var kernelEvents = new List<KernelEvent>();
                 await using (var requestBody = request.Body)
                 {
+                    //Debugger.Launch();
                     using var kernel = new CSharpProjectKernel("project-kernel");
                     var body = await new StreamReader(requestBody).ReadToEndAsync();
 
@@ -83,11 +84,11 @@ public class Program
                     kernel.KernelEvents.Subscribe(e => kernelEvents.Add(e));
 
                     var commandEnvelopes = ReadCommands(bundle).ToList();
-                    //if (commandEnvelopes.FirstOrDefault(ce => ce.Command is CompileProject) is not null)
+                    //if (commandEnvelopes.FirstOrDefault(ce => ce.Command is OpenProject) is not null)
                     //{
                     //    Debugger.Launch();
                     //}
-                    
+
                     foreach (var commandEnvelope in commandEnvelopes)
                     {
                         var results = await kernel.SendAsync(commandEnvelope.Command, CancellationToken.None);

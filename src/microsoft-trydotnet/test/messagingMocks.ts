@@ -3,11 +3,11 @@
 
 import { DOMWindow } from "jsdom";
 import { Configuration } from "../src";
-import { ApiMessage, RUN_REQUEST, SET_EDITOR_CODE_REQUEST, HOST_EDITOR_READY_EVENT, HOST_RUN_READY_EVENT, } from "../src/apiMessages";
+import { ApiMessage, RUN_REQUEST, HOST_EDITOR_READY_EVENT, HOST_RUN_READY_EVENT, } from "../src/apiMessages";
 import { wait } from "./wait";
 import * as newContract from "../src/newContract";
 import * as dotnetInteractive from "@microsoft/dotnet-interactive";
-import { DocumentId } from "../src/internals/document";
+import { DocumentId } from "../src/documentId";
 
 export type EditorState = {
     content: string,
@@ -79,13 +79,13 @@ export function registerForEditorMessages(configuration: Configuration, iframe: 
         if (apiMessage.type === dotnetInteractive.OpenDocumentType) {
             editorState.documentId = new DocumentId(<newContract.OpenDocument>(message.data));//?
         }
-        if (apiMessage.type === SET_EDITOR_CODE_REQUEST) {
-            const request = <{ sourceCode: string }>message.data;
-            editorState.content = request.sourceCode;
+        if (apiMessage.type === newContract.SetEditorContentType) {
+            const request = <newContract.SetEditorContent>message.data;
+            editorState.content = request.content;
             editorState;//?
             let response: newContract.EditorContentChanged = {
                 type: newContract.EditorContentChangedType,
-                content: request.sourceCode,
+                content: request.content,
                 relativeFilePath: editorState.documentId.relativeFilePath,
                 regionName: editorState.documentId.regionName,
                 editorId: (<any>apiMessage).editorId,
