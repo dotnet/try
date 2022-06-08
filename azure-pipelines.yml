@@ -120,6 +120,24 @@ stages:
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 5m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+          displayName: Test / Blame
+          workingDirectory: $(Build.SourcesDirectory)
+          condition: ne(variables['SkipTests'], 'true')
+
+        - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
+          displayName: Delete dump files
+          workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+          condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
+
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Test results and Blame dumps
+          inputs:
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+            artifactName: Windows_test_results_and_dumps
+            artifactType: container
+          condition: failed()
+
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
@@ -200,6 +218,24 @@ stages:
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 5m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+          displayName: Test / Blame
+          workingDirectory: $(Build.SourcesDirectory)
+          condition: ne(variables['SkipTests'], 'true')
+
+        - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
+          displayName: Delete dump files
+          workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+          condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
+
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Test results and Blame dumps
+          inputs:
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+            artifactName: Linux_test_results_and_dumps
+            artifactType: container
+          condition: failed()
+          
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
