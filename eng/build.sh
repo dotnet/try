@@ -56,5 +56,5 @@ done
 
 if [[ "$no_dotnet" != true ]]; then
   # invoke regular build script
-  . "$scriptroot/common/build.sh" "/p:Projects=$scriptroot/../TryDotNet.sln" $args
+  . "$scriptroot/common/build.sh" $args
 fi

@@ -39,12 +39,9 @@ try {
         $arguments += "-configuration"
         $arguments += $configuration
 
-        # common paths
-        $solutionFile = (Join-Path $repoRoot "TryDotNet.sln")
-
         # invoke regular build script
         $buildScript = (Join-Path $PSScriptRoot "common\build.ps1")
-        Invoke-Expression "$buildScript -projects $solutionFile $arguments"
+        Invoke-Expression "$buildScript $arguments"
         if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
         }
