@@ -120,7 +120,7 @@ stages:
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
-        - script: dotnet test -l trx --no-build --blame-hang-timeout 5m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')
@@ -218,7 +218,7 @@ stages:
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
-        - script: dotnet test -l trx --no-build --blame-hang-timeout 5m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')

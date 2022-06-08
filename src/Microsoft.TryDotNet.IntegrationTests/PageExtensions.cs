@@ -74,7 +74,7 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
 
     public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor)
     {
-        var awaiter = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(5));
+        var awaiter = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
         await page.DispatchMessage(new
         {
             type = "run"
