@@ -57,10 +57,6 @@ try {
         if ($integrationTest) {
             & $repoRoot\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\$configuration\net6.0\playwright.ps1 install chromium
         }
-
-        if ($test) {
-            & $PSScriptRoot\common\build.ps1 -projects $solutionFile /p:Test=$test /p:IntegrationTest=$integrationTest /p:Configuration=$configuration /p:BinaryLog=$binaryLog
-        }
     }
 }
 catch {
