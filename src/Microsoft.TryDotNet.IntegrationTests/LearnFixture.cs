@@ -19,7 +19,9 @@ public partial class LearnFixture : IDisposable, IAsyncLifetime
 
     public void Dispose()
     {
+        _httpServer?.Kill(true);
         _httpServer?.Dispose();
+        _httpServer = null;
     }
 
 
@@ -56,7 +58,7 @@ public partial class LearnFixture : IDisposable, IAsyncLifetime
 
     public Task DisposeAsync()
     {
-        _httpServer?.Dispose();
+       Dispose();
         return Task.CompletedTask;
     }
 }
