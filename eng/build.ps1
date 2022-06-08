@@ -1,11 +1,8 @@
 [CmdletBinding(PositionalBinding = $false)]
 param (
     [string]$configuration = "Debug",
-    [switch]$build,
-    [switch]$binaryLog,
     [switch]$noDotnet,
     [switch]$test,
-    [switch]$integrationTest,
     [Parameter(ValueFromRemainingArguments = $true)][String[]]$arguments
 )
 
@@ -39,22 +36,21 @@ try {
 
     if (-Not $noDotnet) {
         # promote switches to arguments
-        if ($test) {
-            $integrationTest = $true
-        }
+        $arguments += "-configuration"
+        $arguments += $configuration
 
         # common paths
         $solutionFile = (Join-Path $repoRoot "TryDotNet.sln")
 
         # invoke regular build script
         $buildScript = (Join-Path $PSScriptRoot "common\build.ps1")
-        Invoke-Expression "$buildScript -projects $solutionFile /p:Configuration=$configuration /p:BinaryLog=$binaryLog /p:Build=$build $arguments"
+        Invoke-Expression "$buildScript -projects $solutionFile $arguments"
         if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
         }
 
         # playwright
-        if ($integrationTest) {
+        if ($test) {
             & $repoRoot\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\$configuration\net6.0\playwright.ps1 install chromium
         }
     }
