@@ -37,7 +37,7 @@ internal class MessageInterceptor
         });
     }
 
-    public Task<JsonElement> AwaitForMessage(string messageType)
+    public Task<JsonElement> AwaitForMessage(string messageType, TimeSpan? timeOut = null)
     {
         var cs =  _completionSources.GetOrAdd(messageType, _ => new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously));
 
@@ -46,7 +46,7 @@ internal class MessageInterceptor
             return cs.Task;
         }
 
-        return cs.Task.Timeout(TimeSpan.FromSeconds(60), $"Timeout waiting for message of type {messageType}");
+        return cs.Task.Timeout(timeOut ?? TimeSpan.FromMinutes(1), $"Timeout waiting for message of type {messageType}");
     }
 }
 
