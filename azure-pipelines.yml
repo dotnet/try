@@ -116,7 +116,7 @@ stages:
             -sign
             $(_BuildArgs)
             $(_TestArgs)
-          displayName: Build / Test
+          displayName: Build
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
@@ -214,7 +214,7 @@ stages:
             --configuration $(_BuildConfig)
             --prepareMachine
             $(_TestArgs)
-          displayName: Build / Test
+          displayName: Build
           env:
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
