@@ -51,7 +51,7 @@ describe("trydotnet", () => {
 
             });
 
-            it("opens documetns from OpenDocument and sends response", async () => {
+            it("opens documents from OpenDocument and sends response", async () => {
                 let responses: any[] = [];
                 let service = createApiServiceSimulator("./simulatorConfigurations/apiService/open_document.json");
                 let wasmRunner = createWasmRunnerSimulator();
