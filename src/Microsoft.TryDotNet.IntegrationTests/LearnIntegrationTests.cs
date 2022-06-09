@@ -103,7 +103,7 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
         await documentOpenAwaiter;
         await Task.Delay(1000);
-        var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(5));
+        var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
         await dotnetOnline.ExecuteAsync();
         await run;
         
