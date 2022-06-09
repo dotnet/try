@@ -240,6 +240,7 @@ export class TryDotNetEditor {
     this.getEditor().disableLanguageService();
     this.getEditor().disableTextChangedEvents();
 
+    this._currentDocumentId = null;
     let projectOpened = await dotnetInteractive.submitCommandAndGetResult<dotnetInteractive.ProjectOpened>(
       this.getKernel(), command, dotnetInteractive.ProjectOpenedType); //?
 

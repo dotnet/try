@@ -167,10 +167,12 @@ public class Program
             yield return new ApiContractScenario(
                 "compiles_with_no_warning",
                 new[]
+                {
+                    new KernelCommand[]
                     {
-                        new KernelCommand[]
+                        new OpenProject(new Project(new[]
                         {
-                            new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -179,11 +181,14 @@ public class Program
         #endregion
     }
 }
-") }))
-                        },
-                        new KernelCommand[]
+")
+                        }))
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
                         {
-                            new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -192,12 +197,15 @@ public class Program
         #endregion
     }
 }
-") })),
-                            new OpenDocument("Program.cs", regionName: "test-region")
-                        },
-                        new KernelCommand[]
+")
+                        })),
+                        new OpenDocument("Program.cs", regionName: "test-region")
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
                         {
-                            new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -206,13 +214,14 @@ public class Program
         #endregion
     }
 }
-") })),
-                            new OpenDocument("Program.cs", regionName: "test-region"),
-                            new SubmitCode("System.Console.WriteLine(2);"),
-                            new CompileProject()
-                        }
+")
+                        })),
+                        new OpenDocument("Program.cs", regionName: "test-region"),
+                        new SubmitCode("System.Console.WriteLine(2);"),
+                        new CompileProject()
                     }
-                );
+                }
+            );
 
             yield return new ApiContractScenario(
                 "compiles_with_error",
@@ -220,7 +229,9 @@ public class Program
                 {
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -230,11 +241,14 @@ public class Program
         #endregion
     }
 }
-") }))
+")
+                        }))
                     },
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -244,12 +258,15 @@ public class Program
         #endregion
     }
 }
-") })),
+")
+                        })),
                         new OpenDocument("Program.cs", regionName: "test-region")
                     },
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -259,7 +276,8 @@ public class Program
         #endregion
     }
 }
-") })),
+")
+                        })),
                         new OpenDocument("Program.cs", regionName: "test-region"),
                         new SubmitCode("someInt = \"NaN\";"),
                         new CompileProject()
@@ -271,11 +289,13 @@ public class Program
             MarkupTestFile.GetLineAndColumn(markedCode, out var code, out var line, out var character);
             yield return new ApiContractScenario(
                 "completions_produced_from_regions",
-                new []
+                new[]
                 {
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -285,11 +305,14 @@ public class Program
         #endregion
     }
 }
-") }))
+")
+                        }))
                     },
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -299,13 +322,16 @@ public class Program
         #endregion
     }
 }
-") })),
+")
+                        })),
                         new OpenDocument("Program.cs", regionName: "TEST_REGION")
                     },
 
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -315,7 +341,8 @@ public class Program
         #endregion
     }
 }
-") })),
+")
+                        })),
                         new OpenDocument("Program.cs", regionName: "TEST_REGION"),
                         new RequestCompletions(code, new LinePosition(line, character))
                     }
@@ -325,11 +352,13 @@ public class Program
 
             yield return new ApiContractScenario(
                 "diagnostics_produced_with_errors_in_code",
-                new []
+                new[]
                 {
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -339,11 +368,14 @@ public class Program
         #endregion
     }
 }
-") }))
+")
+                        }))
                     },
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -353,12 +385,15 @@ public class Program
         #endregion
     }
 }
-") })),
+")
+                        })),
                         new OpenDocument("Program.cs", regionName: "test-region")
                     },
                     new KernelCommand[]
                     {
-                        new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
 public class Program
 {
     public static void Main(string[] args)
@@ -368,13 +403,106 @@ public class Program
         #endregion
     }
 }
-") })),
+")
+                        })),
                         new OpenDocument("Program.cs", regionName: "test-region"),
                         new RequestDiagnostics("someInt = \"NaN\";")
                     }
                 }
             );
+
+            yield return new ApiContractScenario(
+                "update_project",
+                new[]
+                {
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("program.cs", @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Globalization;
+using System.Text.RegularExpressions;
+namespace Program {
+    class Program {
+        static void Main(string[] args){
+            #region controller
+            #endregion
         }
+    }
+}")}))
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("program.cs", @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Globalization;
+using System.Text.RegularExpressions;
+namespace Program {
+    class Program {
+        static void Main(string[] args){
+            #region controller
+            #endregion
+        }
+    }
+}")})),
+                        new OpenDocument("program.cs", "controller")
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("program.cs", @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Globalization;
+using System.Text.RegularExpressions;
+namespace Program {
+    class Program {
+        static void Main(string[] args){
+            #region controller
+            Console.WriteLine(123);
+            #endregion
+        }
+    }
+}")}))
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("program.cs", @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Globalization;
+using System.Text.RegularExpressions;
+namespace Program {
+    class Program {
+        static void Main(string[] args){
+            #region controller
+            Console.WriteLine(123);
+            #endregion
+        }
+    }
+}")})),
+                        new OpenDocument("program.cs", "controller")
+                    }
+
+                });
+        }
+
     }
 
 

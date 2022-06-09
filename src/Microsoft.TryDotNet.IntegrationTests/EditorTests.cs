@@ -182,7 +182,50 @@ public class EditorTests : PlaywrightTestBase
         await page.TestScreenShotAsync();
         var text = await page.GetEditorContentAsync();
         text.Should().Contain(randomValue);
+    }
 
+    [Fact]
+    public async Task can_open_document_and_populate_editor_from_region()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
+
+        await page.DispatchMessage(new
+        {
+            type = "OpenProject",
+            project = new
+            {
+                files = new[]
+                {
+                    new {
+                        relativeFilePath = "program.cs",
+                        content = "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\nConsole.WriteLine(123);\n      #endregion\n    }\n  }\n}"
+                    }
+                }
+            }
+        });
+        var projectLoaded = await projectLoadedAwaiter;
+        projectLoaded.Should().NotBeNull();
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "program.cs",
+            regionName ="controller"
+        });
+
+
+        var documentOpened = await documentOpenedAwaiter;
+        documentOpened.Should().NotBeNull();
+        await page.TestScreenShotAsync();
+        var text = await page.GetEditorContentAsync();
+        text.Should().Contain("Console.WriteLine(123);");
     }
 
     [Fact]

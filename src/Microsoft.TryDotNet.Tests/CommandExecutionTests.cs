@@ -91,7 +91,7 @@ public class CommandExecutionTests
                     ""files"": [
                         {
                             ""relativeFilePath"": ""program.cs"",
-                            ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\n\nConsole.WriteLine(123);      #endregion\n    }\n  }\n}""
+                            ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\nConsole.WriteLine(123);\n      #endregion\n    }\n  }\n}""
                         }
                     ]
                 }
@@ -101,7 +101,7 @@ public class CommandExecutionTests
         {
             ""commandType"": ""OpenDocument"",
             ""command"": {
-                ""relativeFilePath"": ""./program.cs"",
+                ""relativeFilePath"": ""program.cs"",
                 ""regionName"": ""controller""
             },
             ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||7""

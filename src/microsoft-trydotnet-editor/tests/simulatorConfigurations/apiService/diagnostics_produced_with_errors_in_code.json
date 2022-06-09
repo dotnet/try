@@ -362,6 +362,51 @@
                 "severity": "error",
                 "code": "CS0029",
                 "message": "(1,11): error CS0029: Cannot implicitly convert type 'string' to 'int'"
+              },
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 16
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 16
+                  }
+                },
+                "severity": "hidden",
+                "code": "CS8933",
+                "message": "The using directive for 'System' appeared previously as global using"
+              },
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 16
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 16
+                  }
+                },
+                "severity": "hidden",
+                "code": "CS8933",
+                "message": "The using directive for 'System' appeared previously as global using"
+              },
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 16
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 16
+                  }
+                },
+                "severity": "error",
+                "code": "CS0029",
+                "message": "Cannot implicitly convert type 'string' to 'int'"
               }
             ],
             "formattedDiagnostics": []

@@ -31,7 +31,7 @@ export class DocumentId {
     public static areEqual(a: DocumentId, b: DocumentId): boolean {
         let ret = a === b;
         if (!ret) {
-            if (a !== undefined && b !== undefined) {
+            if (a && b) {
                 ret = a.equal(b);
             }
 

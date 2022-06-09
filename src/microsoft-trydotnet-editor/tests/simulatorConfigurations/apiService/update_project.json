@@ -1,0 +1,420 @@
+{
+  "requests": [
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./program.cs",
+                  "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./program.cs",
+                "regionNames": [
+                  "controller"
+                ],
+                "regionsContent": {
+                  "controller": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./program.cs",
+                  "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./program.cs",
+            "regionName": "controller",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./program.cs",
+                "regionNames": [
+                  "controller"
+                ],
+                "regionsContent": {
+                  "controller": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./program.cs",
+            "regionName": "controller",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./program.cs",
+              "regionName": "controller",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./program.cs",
+              "regionName": "controller",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./program.cs",
+                  "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./program.cs",
+                "regionNames": [
+                  "controller"
+                ],
+                "regionsContent": {
+                  "controller": "Console.WriteLine(123);"
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./program.cs",
+                  "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./program.cs",
+            "regionName": "controller",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./program.cs",
+                "regionNames": [
+                  "controller"
+                ],
+                "regionsContent": {
+                  "controller": "Console.WriteLine(123);"
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./program.cs",
+                    "content": "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./program.cs",
+            "regionName": "controller",
+            "content": "Console.WriteLine(123);"
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./program.cs",
+              "regionName": "controller",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./program.cs",
+              "regionName": "controller",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

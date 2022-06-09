@@ -374,7 +374,38 @@
         },
         {
           "event": {
-            "diagnostics": [],
+            "diagnostics": [
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 28
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 28
+                  }
+                },
+                "severity": "hidden",
+                "code": "CS8933",
+                "message": "The using directive for 'System' appeared previously as global using"
+              },
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 28
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 28
+                  }
+                },
+                "severity": "hidden",
+                "code": "CS8933",
+                "message": "The using directive for 'System' appeared previously as global using"
+              }
+            ],
             "formattedDiagnostics": []
           },
           "eventType": "DiagnosticsProduced",
