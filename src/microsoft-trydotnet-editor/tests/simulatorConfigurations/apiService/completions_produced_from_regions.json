@@ -1,0 +1,766 @@
+{
+  "requests": [
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "TEST_REGION"
+                ],
+                "regionsContent": {
+                  "TEST_REGION": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "TEST_REGION",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "TEST_REGION"
+                ],
+                "regionsContent": {
+                  "TEST_REGION": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "TEST_REGION",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "TEST_REGION",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "TEST_REGION",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "TEST_REGION",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "RequestCompletions",
+          "command": {
+            "code": "fileInfo.",
+            "linePosition": {
+              "line": 0,
+              "character": 9
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "TEST_REGION"
+                ],
+                "regionsContent": {
+                  "TEST_REGION": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        var fileInfo = new System.IO.FileInfo(\"test.file\");\n        #region TEST_REGION\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "TEST_REGION",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "TEST_REGION",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "TEST_REGION",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "linePositionSpan": null,
+            "completions": [
+              {
+                "displayText": "AppendText",
+                "kind": "Method",
+                "filterText": "AppendText",
+                "sortText": "AppendText",
+                "insertText": "AppendText",
+                "insertTextFormat": null,
+                "documentation": "Creates a System.IO.StreamWriter  that appends text to the file represented by this instance of the System.IO.FileInfo ."
+              },
+              {
+                "displayText": "Attributes",
+                "kind": "Property",
+                "filterText": "Attributes",
+                "sortText": "Attributes",
+                "insertText": "Attributes",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the attributes for the current file or directory."
+              },
+              {
+                "displayText": "CopyTo",
+                "kind": "Method",
+                "filterText": "CopyTo",
+                "sortText": "CopyTo",
+                "insertText": "CopyTo",
+                "insertTextFormat": null,
+                "documentation": "Copies an existing file to a new file, disallowing the overwriting of an existing file."
+              },
+              {
+                "displayText": "Create",
+                "kind": "Method",
+                "filterText": "Create",
+                "sortText": "Create",
+                "insertText": "Create",
+                "insertTextFormat": null,
+                "documentation": "Creates a file."
+              },
+              {
+                "displayText": "CreateAsSymbolicLink",
+                "kind": "Method",
+                "filterText": "CreateAsSymbolicLink",
+                "sortText": "CreateAsSymbolicLink",
+                "insertText": "CreateAsSymbolicLink",
+                "insertTextFormat": null,
+                "documentation": "Creates a symbolic link located in System.IO.FileSystemInfo.FullName  that points to the specified pathToTarget ."
+              },
+              {
+                "displayText": "CreateText",
+                "kind": "Method",
+                "filterText": "CreateText",
+                "sortText": "CreateText",
+                "insertText": "CreateText",
+                "insertTextFormat": null,
+                "documentation": "Creates a System.IO.StreamWriter  that writes a new text file."
+              },
+              {
+                "displayText": "CreationTime",
+                "kind": "Property",
+                "filterText": "CreationTime",
+                "sortText": "CreationTime",
+                "insertText": "CreationTime",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the creation time of the current file or directory."
+              },
+              {
+                "displayText": "CreationTimeUtc",
+                "kind": "Property",
+                "filterText": "CreationTimeUtc",
+                "sortText": "CreationTimeUtc",
+                "insertText": "CreationTimeUtc",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the creation time, in coordinated universal time (UTC), of the current file or directory."
+              },
+              {
+                "displayText": "Decrypt",
+                "kind": "Method",
+                "filterText": "Decrypt",
+                "sortText": "Decrypt",
+                "insertText": "Decrypt",
+                "insertTextFormat": null,
+                "documentation": "Decrypts a file that was encrypted by the current account using the System.IO.FileInfo.Encrypt  method."
+              },
+              {
+                "displayText": "Delete",
+                "kind": "Method",
+                "filterText": "Delete",
+                "sortText": "Delete",
+                "insertText": "Delete",
+                "insertTextFormat": null,
+                "documentation": "Permanently deletes a file."
+              },
+              {
+                "displayText": "Directory",
+                "kind": "Property",
+                "filterText": "Directory",
+                "sortText": "Directory",
+                "insertText": "Directory",
+                "insertTextFormat": null,
+                "documentation": "Gets an instance of the parent directory."
+              },
+              {
+                "displayText": "DirectoryName",
+                "kind": "Property",
+                "filterText": "DirectoryName",
+                "sortText": "DirectoryName",
+                "insertText": "DirectoryName",
+                "insertTextFormat": null,
+                "documentation": "Gets a string representing the directory's full path."
+              },
+              {
+                "displayText": "Encrypt",
+                "kind": "Method",
+                "filterText": "Encrypt",
+                "sortText": "Encrypt",
+                "insertText": "Encrypt",
+                "insertTextFormat": null,
+                "documentation": "Encrypts a file so that only the account used to encrypt the file can decrypt it."
+              },
+              {
+                "displayText": "Equals",
+                "kind": "Method",
+                "filterText": "Equals",
+                "sortText": "Equals",
+                "insertText": "Equals",
+                "insertTextFormat": null,
+                "documentation": "Determines whether the specified object is equal to the current object."
+              },
+              {
+                "displayText": "Exists",
+                "kind": "Property",
+                "filterText": "Exists",
+                "sortText": "Exists",
+                "insertText": "Exists",
+                "insertTextFormat": null,
+                "documentation": "Gets a value indicating whether a file exists."
+              },
+              {
+                "displayText": "Extension",
+                "kind": "Property",
+                "filterText": "Extension",
+                "sortText": "Extension",
+                "insertText": "Extension",
+                "insertTextFormat": null,
+                "documentation": "Gets the extension part of the file name, including the leading dot . even if it is the entire file name, or an empty string if no extension is present."
+              },
+              {
+                "displayText": "FullName",
+                "kind": "Property",
+                "filterText": "FullName",
+                "sortText": "FullName",
+                "insertText": "FullName",
+                "insertTextFormat": null,
+                "documentation": "Gets the full path of the directory or file."
+              },
+              {
+                "displayText": "GetAccessControl",
+                "kind": "ExtensionMethod",
+                "filterText": "GetAccessControl",
+                "sortText": "GetAccessControl",
+                "insertText": "GetAccessControl",
+                "insertTextFormat": null,
+                "documentation": "Returns the security information of a file."
+              },
+              {
+                "displayText": "GetHashCode",
+                "kind": "Method",
+                "filterText": "GetHashCode",
+                "sortText": "GetHashCode",
+                "insertText": "GetHashCode",
+                "insertTextFormat": null,
+                "documentation": "Serves as the default hash function."
+              },
+              {
+                "displayText": "GetLifetimeService",
+                "kind": "Method",
+                "filterText": "GetLifetimeService",
+                "sortText": "GetLifetimeService",
+                "insertText": "GetLifetimeService",
+                "insertTextFormat": null,
+                "documentation": "Retrieves the current lifetime service object that controls the lifetime policy for this instance."
+              },
+              {
+                "displayText": "GetObjectData",
+                "kind": "Method",
+                "filterText": "GetObjectData",
+                "sortText": "GetObjectData",
+                "insertText": "GetObjectData",
+                "insertTextFormat": null,
+                "documentation": "Sets the System.Runtime.Serialization.SerializationInfo  object with the file name and additional exception information."
+              },
+              {
+                "displayText": "GetType",
+                "kind": "Method",
+                "filterText": "GetType",
+                "sortText": "GetType",
+                "insertText": "GetType",
+                "insertTextFormat": null,
+                "documentation": "Gets the System.Type  of the current instance."
+              },
+              {
+                "displayText": "InitializeLifetimeService",
+                "kind": "Method",
+                "filterText": "InitializeLifetimeService",
+                "sortText": "InitializeLifetimeService",
+                "insertText": "InitializeLifetimeService",
+                "insertTextFormat": null,
+                "documentation": "Obtains a lifetime service object to control the lifetime policy for this instance."
+              },
+              {
+                "displayText": "IsReadOnly",
+                "kind": "Property",
+                "filterText": "IsReadOnly",
+                "sortText": "IsReadOnly",
+                "insertText": "IsReadOnly",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets a value that determines if the current file is read only."
+              },
+              {
+                "displayText": "LastAccessTime",
+                "kind": "Property",
+                "filterText": "LastAccessTime",
+                "sortText": "LastAccessTime",
+                "insertText": "LastAccessTime",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the time the current file or directory was last accessed."
+              },
+              {
+                "displayText": "LastAccessTimeUtc",
+                "kind": "Property",
+                "filterText": "LastAccessTimeUtc",
+                "sortText": "LastAccessTimeUtc",
+                "insertText": "LastAccessTimeUtc",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the time, in coordinated universal time (UTC), that the current file or directory was last accessed."
+              },
+              {
+                "displayText": "LastWriteTime",
+                "kind": "Property",
+                "filterText": "LastWriteTime",
+                "sortText": "LastWriteTime",
+                "insertText": "LastWriteTime",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the time when the current file or directory was last written to."
+              },
+              {
+                "displayText": "LastWriteTimeUtc",
+                "kind": "Property",
+                "filterText": "LastWriteTimeUtc",
+                "sortText": "LastWriteTimeUtc",
+                "insertText": "LastWriteTimeUtc",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the time, in coordinated universal time (UTC), when the current file or directory was last written to."
+              },
+              {
+                "displayText": "Length",
+                "kind": "Property",
+                "filterText": "Length",
+                "sortText": "Length",
+                "insertText": "Length",
+                "insertTextFormat": null,
+                "documentation": "Gets the size, in bytes, of the current file."
+              },
+              {
+                "displayText": "LinkTarget",
+                "kind": "Property",
+                "filterText": "LinkTarget",
+                "sortText": "LinkTarget",
+                "insertText": "LinkTarget",
+                "insertTextFormat": null,
+                "documentation": "If this System.IO.FileSystemInfo  instance represents a link, returns the link target's path.\n If a link does not exist in System.IO.FileSystemInfo.FullName , or this instance does not represent a link, returns null."
+              },
+              {
+                "displayText": "MoveTo",
+                "kind": "Method",
+                "filterText": "MoveTo",
+                "sortText": "MoveTo",
+                "insertText": "MoveTo",
+                "insertTextFormat": null,
+                "documentation": "Moves a specified file to a new location, providing the option to specify a new file name."
+              },
+              {
+                "displayText": "Name",
+                "kind": "Property",
+                "filterText": "Name",
+                "sortText": "Name",
+                "insertText": "Name",
+                "insertTextFormat": null,
+                "documentation": "Gets the name of the file."
+              },
+              {
+                "displayText": "Open",
+                "kind": "Method",
+                "filterText": "Open",
+                "sortText": "Open",
+                "insertText": "Open",
+                "insertTextFormat": null,
+                "documentation": "Opens a file in the specified mode."
+              },
+              {
+                "displayText": "OpenRead",
+                "kind": "Method",
+                "filterText": "OpenRead",
+                "sortText": "OpenRead",
+                "insertText": "OpenRead",
+                "insertTextFormat": null,
+                "documentation": "Creates a read-only System.IO.FileStream ."
+              },
+              {
+                "displayText": "OpenText",
+                "kind": "Method",
+                "filterText": "OpenText",
+                "sortText": "OpenText",
+                "insertText": "OpenText",
+                "insertTextFormat": null,
+                "documentation": "Creates a System.IO.StreamReader  with UTF8 encoding that reads from an existing text file."
+              },
+              {
+                "displayText": "OpenWrite",
+                "kind": "Method",
+                "filterText": "OpenWrite",
+                "sortText": "OpenWrite",
+                "insertText": "OpenWrite",
+                "insertTextFormat": null,
+                "documentation": "Creates a write-only System.IO.FileStream ."
+              },
+              {
+                "displayText": "Refresh",
+                "kind": "Method",
+                "filterText": "Refresh",
+                "sortText": "Refresh",
+                "insertText": "Refresh",
+                "insertTextFormat": null,
+                "documentation": "Refreshes the state of the object."
+              },
+              {
+                "displayText": "Replace",
+                "kind": "Method",
+                "filterText": "Replace",
+                "sortText": "Replace",
+                "insertText": "Replace",
+                "insertTextFormat": null,
+                "documentation": "Replaces the contents of a specified file with the file described by the current System.IO.FileInfo  object, deleting the original file, and creating a backup of the replaced file."
+              },
+              {
+                "displayText": "ResolveLinkTarget",
+                "kind": "Method",
+                "filterText": "ResolveLinkTarget",
+                "sortText": "ResolveLinkTarget",
+                "insertText": "ResolveLinkTarget",
+                "insertTextFormat": null,
+                "documentation": "Gets the target of the specified link."
+              },
+              {
+                "displayText": "SetAccessControl",
+                "kind": "ExtensionMethod",
+                "filterText": "SetAccessControl",
+                "sortText": "SetAccessControl",
+                "insertText": "SetAccessControl",
+                "insertTextFormat": null,
+                "documentation": "Changes the security attributes of an existing file."
+              },
+              {
+                "displayText": "ToString",
+                "kind": "Method",
+                "filterText": "ToString",
+                "sortText": "ToString",
+                "insertText": "ToString",
+                "insertTextFormat": null,
+                "documentation": "Returns the path as a string. Use the System.IO.FileInfo.Name  property for the full path."
+              }
+            ]
+          },
+          "eventType": "CompletionsProduced",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "RequestCompletions",
+            "command": {
+              "code": "fileInfo.",
+              "linePosition": {
+                "line": 0,
+                "character": 9
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "RequestCompletions",
+            "command": {
+              "code": "fileInfo.",
+              "linePosition": {
+                "line": 0,
+                "character": 9
+              },
+              "targetKernelName": null,
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@microsoft/trydotnet-styles",
+  "version": "1.0.0",
+  "description": "css for trydotnet",
+  "main": "sass/trydotnet.scss",
+  "scripts": {
+    "css-build": "sass --no-source-map sass/trydotnet.scss css/trydotnet.css",
+    "css-watch": "npm run css-build -- --watch",
+    "start": "npm run build -- --watch",
+    "build": "sass --no-source-map sass/trydotnet.scss ../Microsoft.TryDotNet/wwwroot/css/trydotnet.css",
+    "buildProd": "sass --no-source-map sass/trydotnet.scss ../Microsoft.TryDotNet/wwwroot/css/trydotnet.css",
+    "release": "sass --no-source-map --style=compressed sass/trydotnet.scss",
+    "ciCreateDir": "npx mkdirp ",
+    "ciTest": "echo \"NOOP\""
+  },
+  "author": "Diego Colombo",
+  "license": "MIT",
+  "devDependencies": {
+    "@mdi/font": "6.6.96",
+    "fstream": "1.0.12",
+    "github-markdown-css": "5.1.0",
+    "lodash": "4.17.21",
+    "mkdirp": "1.0.4",
+    "sass": "1.49.11",
+    "tar": "6.1.11"
+  }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Microsoft.TryDotNet.WasmRunner</title>
+    <base href="/wasmrunner/" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="Microsoft.TryDotNet.WasmRunner.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">Loading...</div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        window.setCodeRunner = (runnerAdapter) => {
+            console.log("configuring codeRunner interop.");
+            window.addEventListener("message", e => {
+                if (e.data && e.data.type === "wasmRunner-command") {
+                    runnerAdapter.invokeMethodAsync("RunAssembly", e.data.base64EncodedAssembly)
+                        .then(r => {
+                            if (r !== null) {
+                                window.postAndLog({
+                                    type: "wasmRunner-result",
+                                    result: r
+                                });
+                            }
+                        });
+                }
+            });
+            console.log("codeRunner interop setup completed.");
+            const element = document.createElement("DIV");
+            element.id = "wasmRunner-sentinel";
+            element.style.display = "none";
+            document.body.appendChild(element);
+            window.postAndLog({
+                type: "wasmRunner-configuration",
+                success: true
+            });
+        }
+
+        window.postAndLog = (message) => {
+            if (window.postMessageLogger) {
+                window.postMessageLogger(message);
+            }
+            if (window.parent) {
+                window.parent.postMessage(message, "*");
+                console.log(`[WASM_RUNNER_TO_PARENT_WINDOW] ${JSON.stringify(message)}`);
+            } else {
+                window.postMessage(message, "*");
+                console.log(`[WASM_RUNNER_TO_WINDOW] ${JSON.stringify(message)}`);
+            }
+
+        };
+
+        window.publishCodeRunnerStdOut = (message) => {
+            window.postAndLog({
+                type: 'wasmRunner-stdout',
+                message: message
+            });
+        };
+
+        window.publishCodeRunnerStdError = (message) => {
+            window.postAndLog({
+                type: 'wasmRunner-stderror',
+                message: message
+            });
+        };
+
+
+    </script>
+</body>
+
+</html>

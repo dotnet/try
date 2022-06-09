@@ -378,3 +378,27 @@ docs/\.ionide/
 #Backup files
 *.bak
 NotebookExamples/*/Samples/housing.csv
+
+src/microsoft-trydotnet-editor/test-results/
+
+src/microsoft-trydotnet-editor/dist/
+
+src/microsoft-trydotnet-editor/simulatorGenerator/
+
+src/microsoft-trydotnet-editor/lib/
+
+src/microsoft-trydotnet/test-results/
+
+src/microsoft-trydotnet/dist/
+
+src/microsoft-trydotnet/simulatorGenerator/
+
+src/microsoft-trydotnet/lib/
+
+src/Microsoft.TryDotNet/wwwroot/api/
+
+src/Microsoft.TryDotNet/wwwroot/css/trydotnet.css
+
+src/microsoft-learn-mock/dist/
+
+src/microsoft-learn-mock/site/index.js

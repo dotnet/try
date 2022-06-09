@@ -1,26 +1,55 @@
+[CmdletBinding(PositionalBinding = $false)]
+param (
+    [string]$configuration = "Debug",
+    [switch]$noDotnet,
+    [switch]$test,
+    [Parameter(ValueFromRemainingArguments = $true)][String[]]$arguments
+)
+
 Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
 
-function TestUsingNPM([string] $testPath) {
-    Write-Host "Installing packages"
-    Start-Process -PassThru -WindowStyle Hidden -WorkingDirectory $testPath -Wait npm "i"
-    Write-Host "Testing"
-    $test = Start-Process -PassThru -WindowStyle Hidden -WorkingDirectory $testPath -Wait npm "run ciTest"
-    Write-Host "Done with code $($test.ExitCode)"
-    return $test.ExitCode
-}
-
 try {
-    # invoke regular build/test script
-    . (Join-Path $PSScriptRoot "common\build.ps1") /p:Projects=$PSScriptRoot\..\dotnet-try.sln @args
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
+    $repoRoot = Resolve-Path "$PSScriptRoot\.."
+    $npmDirs = @(
+        "src\microsoft-trydotnet",
+        "src\microsoft-trydotnet-editor",
+        "src\microsoft-trydotnet-styles",
+        "src\microsoft-learn-mock"
+    )
+    foreach ($npmDir in $npmDirs) {
+        Push-Location "$repoRoot\$npmDir"
+        Write-Host "Building NPM in directory $npmDir"
+        npm ci
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        npm run buildProd
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        if ($test) {
+            Write-Host "Testing NPM in directory $npmDir"
+            npm run ciTest
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        }
+
+        Pop-Location
     }
 
-    # directly invoke npm tests
-    if (($null -ne $args) -and ($args.Contains("-test") -or $args.Contains("-t"))) {
-        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.Client"
-        TestUsingNPM "$PSScriptRoot\..\Microsoft.DotNet.Try.js"
+    if (-Not $noDotnet) {
+        # promote switches to arguments
+        $arguments += "-configuration"
+        $arguments += $configuration
+
+        # invoke regular build script
+        $buildScript = (Join-Path $PSScriptRoot "common\build.ps1")
+        Invoke-Expression "$buildScript $arguments"
+        if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+        }
+
+        # playwright
+        if ($test) {
+            & $repoRoot\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\$configuration\net6.0\playwright.ps1 install chromium
+        }
     }
 }
 catch {

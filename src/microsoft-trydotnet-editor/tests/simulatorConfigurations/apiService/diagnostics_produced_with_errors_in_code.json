@@ -1,0 +1,400 @@
+{
+  "requests": [
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "test-region"
+                ],
+                "regionsContent": {
+                  "test-region": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "test-region"
+                ],
+                "regionsContent": {
+                  "test-region": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "RequestDiagnostics",
+          "command": {
+            "code": "someInt = \"NaN\";",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "test-region"
+                ],
+                "regionsContent": {
+                  "test-region": ""
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "test-region",
+            "content": ""
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "test-region",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "diagnostics": [
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 10
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 15
+                  }
+                },
+                "severity": "error",
+                "code": "CS0029",
+                "message": "(1,11): error CS0029: Cannot implicitly convert type 'string' to 'int'"
+              }
+            ],
+            "formattedDiagnostics": []
+          },
+          "eventType": "DiagnosticsProduced",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "RequestDiagnostics",
+            "command": {
+              "code": "someInt = \"NaN\";",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "RequestDiagnostics",
+            "command": {
+              "code": "someInt = \"NaN\";",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
