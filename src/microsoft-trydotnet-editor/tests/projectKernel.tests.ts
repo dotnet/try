@@ -242,8 +242,8 @@ describe("Project kernel", () => {
 
         let diagnostics = eventEnvelopes.find(e => e.eventType === dotnetInteractive.DiagnosticsProducedType)?.event as dotnetInteractive.DiagnosticsProduced;
         expect(diagnostics).not.to.be.undefined;
-        expect(diagnostics.diagnostics.length).to.equal(1);
-        expect(diagnostics.diagnostics[0]).to.deep.equal({
+        expect(diagnostics.diagnostics.length).to.be.greaterThan(0);
+        expect(diagnostics.diagnostics.find(d => d.severity === 'error')).to.deep.equal({
             code: 'CS0029',
             linePositionSpan:
             {
