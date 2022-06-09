@@ -18,7 +18,7 @@ public class CommandExecutionTests
 
         var c = applicationBuilderFactory.CreateDefaultClient();
 
-        var code = @"{
+        var requests = @"{
     ""commands"": [
         {
             ""commandType"": ""OpenProject"",
@@ -57,7 +57,7 @@ public class CommandExecutionTests
     ]
 }";
 
-        var requestBody = JsonContent.Create(JsonDocument.Parse(code).RootElement);
+        var requestBody = JsonContent.Create(JsonDocument.Parse(requests).RootElement);
 
         var response = await c.PostAsync("commands", requestBody);
 
@@ -73,5 +73,56 @@ public class CommandExecutionTests
         assemblyProduced.Should().NotBeNull();
         assemblyProduced!.Assembly
         .Value.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task can_open_document_with_user_code_in_region()
+    {
+        await using var applicationBuilderFactory = new WebApplicationFactory<Program>();
+
+        var c = applicationBuilderFactory.CreateDefaultClient();
+
+        var requests = @"{
+    ""commands"": [
+        {
+            ""commandType"": ""OpenProject"",
+            ""command"": {
+                ""project"": {
+                    ""files"": [
+                        {
+                            ""relativeFilePath"": ""program.cs"",
+                            ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\n\nConsole.WriteLine(123);      #endregion\n    }\n  }\n}""
+                        }
+                    ]
+                }
+            },
+            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||6""
+        },
+        {
+            ""commandType"": ""OpenDocument"",
+            ""command"": {
+                ""relativeFilePath"": ""./program.cs"",
+                ""regionName"": ""controller""
+            },
+            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||7""
+        }
+    ]
+}";
+
+        var requestBody = JsonContent.Create(JsonDocument.Parse(requests).RootElement);
+
+        var response = await c.PostAsync("commands", requestBody);
+
+        var responseJson = JsonDocument.Parse(await response.Content.ReadAsStringAsync(CancellationToken.None)).RootElement;
+
+        var events = responseJson.GetProperty("events").EnumerateArray().Select(KernelEventEnvelope.Deserialize).Select(ee => ee.Event).ToList();
+
+        using var _ = new AssertionScope();
+
+        response.EnsureSuccessStatusCode();
+
+        var documentOpened = events.OfType<DocumentOpened>().SingleOrDefault();
+        documentOpened.Should().NotBeNull();
+        documentOpened!.Content.Should().Contain("Console.WriteLine(123);");
     }
 }

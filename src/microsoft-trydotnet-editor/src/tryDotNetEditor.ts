@@ -268,7 +268,9 @@ export class TryDotNetEditor {
       this.getEditor().disableLanguageService();
       this.getEditor().disableTextChangedEvents();
       this._currentDocument = await dotnetInteractive.submitCommandAndGetResult<dotnetInteractive.DocumentOpened>(
-        this.getKernel(), command, dotnetInteractive.DocumentOpenedType); //?
+        this.getKernel(),
+        command,
+        dotnetInteractive.DocumentOpenedType); //?
       this.getEditor().setCode(this._currentDocument.content);
       this.getEditor().enableTextChangedEvents();
       this.getEditor().enableLanguageService();
