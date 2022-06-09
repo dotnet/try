@@ -41,6 +41,20 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         return editor;
     }
 
+    public static async Task<ILocator> FindEditorContent(this ILocator locator)
+    {
+        var editor = locator.Locator(@"div[role = ""presentation""] .view-lines");
+        await editor.IsVisibleAsync();
+        return editor;
+    }
+
+    public static async Task<ILocator> FindEditorContent(this IFrameLocator iframe)
+    {
+        var editor = iframe.Locator(@"div[role = ""presentation""] .view-lines");
+        await editor.IsVisibleAsync();
+        return editor;
+    }
+
     public static async Task TypeTextInMonacoEditor(this IPage page, string text, float? delay = null)
     {
         var editor = await page.FindEditor();
@@ -60,6 +74,20 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
     {
         var editor = await page.FindEditorContent();
         var text = await editor.TextContentAsync()?? string.Empty;
+        return text;
+    }
+
+    public static async Task<string> GetEditorContentAsync(this ILocator locator)
+    {
+        var editor = await locator.FindEditorContent();
+        var text = await editor.TextContentAsync() ?? string.Empty;
+        return text;
+    }
+
+    public static async Task<string> GetEditorContentAsync(this IFrameLocator iframe)
+    {
+        var editor = await iframe.FindEditorContent();
+        var text = await editor.TextContentAsync() ?? string.Empty;
         return text;
     }
 
