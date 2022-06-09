@@ -183,7 +183,9 @@ describe("Project kernel", () => {
         expect(projectOpened).not.to.be.undefined;
         expect(projectOpened.projectItems).to.not.be.empty;
         expect(projectOpened.projectItems).to.deep.equal([{
-            relativeFilePath: "./Program.cs", regionNames: ["REGION_1", "REGION_2"]
+            regionNames: ['REGION_1', 'REGION_2'],
+            regionsContent: { REGION_1: 'var a = 123;', REGION_2: 'var b = 123;' },
+            relativeFilePath: './Program.cs'
         }]);
     });
 

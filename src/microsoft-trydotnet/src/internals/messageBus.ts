@@ -1,71 +1,40 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { Subscribable, PartialObserver, Unsubscribable, Subject } from "rxjs";
-import {
-    ApiMessage,
-    HOST_EDITOR_READY_EVENT,
-    CODE_CHANGED_EVENT
-} from "./apiMessages";
-import { extractTargetOriginFromIFrame } from "./urlHelpers";
-import {
-    isNullOrUndefinedOrWhitespace,
-    isNullOrUndefined
-} from "../stringExtensions";
+import { Subscribable, Unsubscribable, Subject, Observer } from "rxjs";
+import { ApiMessage } from "../apiMessages";
+import { isNullOrUndefinedOrWhitespace } from "../stringExtensions";
 
-export function tryGetEditorId(
-    iframe: HTMLIFrameElement,
-    defaultEditorId: string
-): string {
-    if (!iframe) {
-        throw new Error("iframe cannot be null");
-    }
-
-    let editorId = iframe.dataset.trydotnetEditorId;
-    if (isNullOrUndefinedOrWhitespace(editorId)) {
-        editorId = defaultEditorId;
-    }
-
-    return editorId;
-}
-export interface IMessageBus extends Subscribable<ApiMessage> {
+export interface IMessageBus extends Subscribable<{
+    type: string; requestId?: string;[key: string]: any
+}> {
     dispose(): void;
-    post(message: ApiMessage): void;
-    id(): string;
+    post(message: { type: string, requestId?: string, [key: string]: any }): void;
 }
 
 export class IFrameMessageBus implements IMessageBus {
     private targetOrigin: string;
-    private internalChannel: Subject<ApiMessage>;
+    private internalChannel: Subject<{
+        type: string; requestId?: string;[key: string]: any
+    }>;
     private processMessageEvent: (event: any) => void;
-    private isConnected: boolean = false;
 
     constructor(
         private iframe: HTMLIFrameElement,
-        private window: Window,
-        private messageBusId: string
+        private window: Window
     ) {
+        this.internalChannel = new Subject<{
+            type: string; requestId?: string;[key: string]: any
+        }>();
         this.processMessageEvent = ((event: any): void => {
             if (event.data && event.data.type) {
-                let message = <ApiMessage>event.data;
-                switch (message.type) {
-                    case HOST_EDITOR_READY_EVENT:
-                    case CODE_CHANGED_EVENT:
-                        if (
-                            isNullOrUndefined(message.editorId) ||
-                            message.editorId === this.messageBusId
-                        ) {
-                            this.internalChannel.next(message);
-                        }
-                        break;
-                    default:
-                        this.internalChannel.next(message);
-                        break;
-                }
+                let message = <{
+                    type: string; requestId?: string;[key: string]: any
+                }>event.data;//?
+                this.internalChannel.next(message);
             }
         }).bind(this);
 
-        this.internalChannel = new Subject<ApiMessage>();
 
         if (!this.window) {
             this.window = this.iframe.contentWindow.parent;
@@ -73,15 +42,10 @@ export class IFrameMessageBus implements IMessageBus {
 
         this.window.addEventListener("message", this.processMessageEvent);
     }
-
-    public subscribe(observer?: PartialObserver<ApiMessage>): Unsubscribable;
-    public subscribe(
-        next?: (value: ApiMessage) => void,
-        error?: (error: any) => void,
-        complete?: () => void
-    ): Unsubscribable;
-    public subscribe(next?: any, error?: any, complete?: any): Unsubscribable {
-        return this.internalChannel.subscribe(next, error, complete);
+    subscribe(observer: Partial<Observer<{
+        type: string; requestId?: string;[key: string]: any
+    }>>): Unsubscribable {
+        return this.internalChannel.subscribe(observer);
     }
 
     public dispose(): void {
@@ -92,15 +56,15 @@ export class IFrameMessageBus implements IMessageBus {
         this.internalChannel.complete();
     }
 
-    public post(message: ApiMessage): void {
+    public post(message: {
+        type: string; requestId?: string;[key: string]: any
+    }): void {
         if (!this.targetOrigin) {
-            this.targetOrigin = extractTargetOriginFromIFrame(this.iframe);
+            this.targetOrigin = "*";// extractTargetOriginFromIFrame(this.iframe);
         }
+        message;//?
+        this.targetOrigin;//?
         this.iframe.contentWindow.postMessage(message, this.targetOrigin);
-    }
-
-    public id(): string {
-        return this.messageBusId;
     }
 
     public targetIframe(): HTMLIFrameElement {

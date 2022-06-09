@@ -6,7 +6,7 @@ import { Subscription } from "rxjs";
 import { ITrydotnetMonacoTextEditor } from "./monacoTextEditor";
 import { ITextEditor, TextChangedEvent } from "../editor";
 import { isNullOrUndefined } from "../stringExtensions";
-
+import { DocumentId } from "../documentId";
 
 export class Document implements IDocument {
 
@@ -15,18 +15,21 @@ export class Document implements IDocument {
     private cursorPosition: number = 0;
 
     public isModified: boolean = false;
-    constructor(private documentId: string, private content: string) {
-        if (!this.documentId) {
+    private _documentId: DocumentId;
+    constructor(documentId: { relativeFilePath: string, regionName?: string }, private content: string) {
+        if (!documentId) {
             throw new Error("documentId cannot be null");
         }
+
+        this._documentId = new DocumentId(documentId);
     }
 
-    id(): string {
-        return this.documentId;
+    id(): DocumentId {
+        return this._documentId;
     }
 
     getContent(): string {
-        return this.content;
+        return this.content;//?
     }
 
     getCursorPosition(): number {
@@ -53,13 +56,12 @@ export class Document implements IDocument {
         this.unbind();
         if (editor) {
             this.editor = editor;
-            await this.editor.setBufferId(this.documentId);
+            await this.editor.setBufferId(this._documentId);
             await this.editor.setContent(this.content);
             let handler = ((event: TextChangedEvent) => {
-                if (event.documentId === this.documentId) {
-                    if(isNullOrUndefined(event.editorId) ||event.editorId === this.editor.id())
-                    {
-                        this.content = event.text;
+                if (DocumentId.areEqual(event.documentId, this._documentId)) {
+                    if (isNullOrUndefined(event.editorId) || event.editorId === this.editor.id()) {
+                        this.content = event.text; //?
                         this.cursorPosition = event.cursor ? event.cursor : 0;
                     }
                 }
@@ -67,11 +69,12 @@ export class Document implements IDocument {
 
             let onComplete = (() => this.unbind()).bind(this);
 
-            this.editorSubscription = editor.textChanges.subscribe(
-                event => handler(event),
-                undefined,
-                () => onComplete()
-            );
+            this.editorSubscription = editor.textChanges.subscribe({
+                next: (event: any) => handler(event),
+                complete: () => onComplete()
+            });
+
+
         }
     }
 

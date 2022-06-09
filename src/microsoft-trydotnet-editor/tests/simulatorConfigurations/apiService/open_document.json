@@ -15,10 +15,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -30,7 +30,11 @@
                 "regionNames": [
                   "REGION_1",
                   "REGION_2"
-                ]
+                ],
+                "regionsContent": {
+                  "REGION_1": "var a = 123;",
+                  "REGION_2": "var b = 123;"
+                }
               }
             ]
           },
@@ -48,10 +52,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -70,10 +74,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]
@@ -93,10 +97,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -105,10 +109,10 @@
           "command": {
             "relativeFilePath": "./Program.cs",
             "regionName": null,
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -120,7 +124,11 @@
                 "regionNames": [
                   "REGION_1",
                   "REGION_2"
-                ]
+                ],
+                "regionsContent": {
+                  "REGION_1": "var a = 123;",
+                  "REGION_2": "var b = 123;"
+                }
               }
             ]
           },
@@ -138,10 +146,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -160,10 +168,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -180,10 +188,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": null,
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -196,10 +204,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": null,
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]

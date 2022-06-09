@@ -4,18 +4,21 @@
 import { TextChangedEvent, IMonacoEditor, Theme, MonacoEditorTheme, MonacoEditorOptions, MonacoEditorConfiguration } from "../editor";
 import { Observable, Subject } from "rxjs";
 import { IMessageBus } from "./messageBus";
-import { CODE_CHANGED_EVENT, SET_EDITOR_CODE_REQUEST, SET_ACTIVE_BUFFER_REQUEST, CONFIGURE_MONACO_REQUEST, DEFINE_THEMES_REQUEST, ApiMessage } from "./apiMessages";
+import { ApiMessage } from "../apiMessages";
 import { IRequestIdGenerator } from "./requestIdGenerator";
 import { isNullOrUndefinedOrWhitespace } from "../stringExtensions";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as newContract from "../newContract";
+import { DocumentId } from "../documentId";
 
 export interface ITrydotnetMonacoTextEditor extends IMonacoEditor {
-    setBufferId(bufferId: string): Promise<void>;
+    setBufferId(bufferId: DocumentId): Promise<void>;
 }
 
 export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
     textChanges: Observable<TextChangedEvent>;
-    private currentbufferId: string;
-    constructor(private editorApimessageBus: IMessageBus, private requestIdGenerator: IRequestIdGenerator, private editorId: string) {
+    private currentbufferId: DocumentId;
+    constructor(private editorApimessageBus: IMessageBus, private requestIdGenerator: IRequestIdGenerator) {
         if (!this.editorApimessageBus) {
             throw new Error("messageBus cannot be null");
         }
@@ -27,43 +30,58 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
         this.textChanges = new Subject<TextChangedEvent>();
 
         let codeChangedHandler = ((message: ApiMessage) => {
-            if (message && message.type === CODE_CHANGED_EVENT) {
-                let event = {
-                    text: message.sourceCode,
-                    documentId: message.bufferId,
-                    editorId: this.editorId
-                };
-                (<Subject<TextChangedEvent>>this.textChanges).next(event);
+
+            const m = <{ type: string }>message;
+            if (m && m.type === newContract.EditorContentChangedType) {
+                dotnetInteractive.Logger.default.info(`[MonacoTextEditor.codeChangedHandler] ${JSON.stringify(m)}`);
+                message;//?
+                const editorContentChanged = <newContract.EditorContentChanged>m;
+                const documentId = new DocumentId({ relativeFilePath: editorContentChanged.relativeFilePath, regionName: editorContentChanged.regionName });
+
+                if (DocumentId.areEqual(documentId, this.currentbufferId)) {
+                    dotnetInteractive.Logger.default.info(`[MonacoTextEditor.codeChangedHandler] handling`);
+                    let event = {
+                        text: editorContentChanged.content,
+                        documentId: this.currentbufferId
+                    }; //?
+
+                    (<Subject<TextChangedEvent>>this.textChanges).next(event);
+                }
             }
         }).bind(this);
-        this.editorApimessageBus.subscribe(codeChangedHandler);
+        this.editorApimessageBus.subscribe({
+            next: (event) => codeChangedHandler(event)
+        });
     }
 
     public id(): string {
-        return this.editorId;
+        return "-0-";
     }
 
     public messageBus() {
         return this.editorApimessageBus;
     }
 
-    public async setBufferId(bufferId: string): Promise<void> {
+    public async setBufferId(bufferId: DocumentId): Promise<void> {
         this.currentbufferId = bufferId;
         let requestId = await this.requestIdGenerator.getNewRequestId();
-        this.editorApimessageBus.post({
-            type: SET_ACTIVE_BUFFER_REQUEST,
+
+        this.editorApimessageBus.post(<any>{
+            type: dotnetInteractive.OpenDocumentType,
             requestId: requestId,
-            bufferId: this.currentbufferId
+            relativeFilePath: this.currentbufferId.relativeFilePath,
+            regionName: this.currentbufferId.regionName
         });
     }
 
     public async setContent(content: string): Promise<void> {
         let requestId = await this.requestIdGenerator.getNewRequestId();
-        this.editorApimessageBus.post({
-            type: SET_EDITOR_CODE_REQUEST,
+        const request: newContract.SetEditorContent = {
+            type: newContract.SetEditorContentType,
             requestId: requestId,
-            sourceCode: content
-        });
+            content: content
+        }
+        this.editorApimessageBus.post(request);
     }
 
     public setTheme(theme: Theme): void {
@@ -78,11 +96,12 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
     };
 
     public setOptions(options: MonacoEditorOptions): void {
-
-        this.editorApimessageBus.post({
-            type: CONFIGURE_MONACO_REQUEST,
+        const request: newContract.CongureMonacoEditor = {
+            type: newContract.ConfigureMonacoEditorType,
             editorOptions: { ...options }
-        });
+        };
+
+        this.editorApimessageBus.post(request);
     }
 
     public configure(configuration: MonacoEditorConfiguration): void {
@@ -92,19 +111,22 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
 
     private _defineTheme(themeName: string, editorTheme: any): void {
         let name = isNullOrUndefinedOrWhitespace(themeName) ? "trydotnetJs" : themeName;
-        this.editorApimessageBus.post({
-            type: DEFINE_THEMES_REQUEST,
+        const request: newContract.DefineMonacoEditorThemes = {
+            type: newContract.DefineMonacoEditorThemesType,
             themes: {
                 [name]: { ...editorTheme }
             }
-        });
+        };
+        this.editorApimessageBus.post(request);
     }
 
     private _setTheme(themeName: string): void {
-        this.editorApimessageBus.post({
-            type: CONFIGURE_MONACO_REQUEST,
+        const request: newContract.CongureMonacoEditor = {
+            type: newContract.ConfigureMonacoEditorType,
             theme: themeName
-        });
+        };
+
+        this.editorApimessageBus.post(request);
     }
 }
 

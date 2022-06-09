@@ -4,12 +4,12 @@
 import { TextChangedEvent, Theme, MonacoEditorOptions, MonacoEditorConfiguration } from "../../src";
 import { Observable, Subject } from "rxjs";
 import { ITrydotnetMonacoTextEditor } from "../../src/internals/monacoTextEditor";
-
+import { DocumentId } from "../../src/documentId";
 export class FakeMonacoTextEditor implements ITrydotnetMonacoTextEditor {
 
     textChanges: Observable<TextChangedEvent> = new Subject<TextChangedEvent>();
     content: string;
-    private currentbufferId: string;
+    private currentbufferId: DocumentId;
     theme: Theme;
     options: MonacoEditorOptions;
 
@@ -23,7 +23,7 @@ export class FakeMonacoTextEditor implements ITrydotnetMonacoTextEditor {
         return this.editorId;
     }
 
-    public async setBufferId(bufferId: string): Promise<void> {
+    public async setBufferId(bufferId: DocumentId): Promise<void> {
         this.currentbufferId = bufferId;
         return Promise.resolve();
     }

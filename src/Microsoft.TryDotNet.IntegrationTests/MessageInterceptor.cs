@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
@@ -12,7 +13,7 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 
 internal class MessageInterceptor
 {
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> _completionSources = new ();
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> _completionSources = new (StringComparer.OrdinalIgnoreCase);
     public List<JsonElement> Messages { get; } = new();
 
     public async Task InstallAsync(IPage page)
@@ -36,10 +37,16 @@ internal class MessageInterceptor
         });
     }
 
-    public Task<JsonElement> AwaitForMessage(string messageType)
+    public Task<JsonElement> AwaitForMessage(string messageType, TimeSpan? timeOut = null)
     {
         var cs =  _completionSources.GetOrAdd(messageType, _ => new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously));
-        return cs.Task.Timeout(TimeSpan.FromSeconds(30));
+
+        if (Debugger.IsAttached)
+        {
+            return cs.Task;
+        }
+
+        return cs.Task.Timeout(timeOut ?? TimeSpan.FromMinutes(1), $"Timeout waiting for message of type {messageType}");
     }
 }
 

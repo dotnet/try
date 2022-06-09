@@ -23,10 +23,6 @@ run_tests=false
 while [[ $# > 0 ]]; do
   opt="$(echo "$1" | awk '{print tolower($0)}')"
   case "$opt" in
-    --ci)
-      is_ci=true
-      args="$args --ci"
-      ;;
     --no-dotnet)
       no_dotnet=true
       ;;
@@ -43,7 +39,8 @@ done
 # build and test NPM
 npmDirs='src/microsoft-trydotnet
          src/microsoft-trydotnet-editor
-         src/microsoft-trydotnet-styles'
+         src/microsoft-trydotnet-styles
+         src/microsoft-learn-mock'
 for npmDir in $npmDirs;
 do
   echo "Building NPM in directory $npmDir"
@@ -58,11 +55,6 @@ do
 done
 
 if [[ "$no_dotnet" != true ]]; then
-  # promote switches to arguments
-  if [[ "$run_tests" == true ]]; then
-    args="$args --test --integrationTest"
-  fi
-
-  # invoke regular build/test script
-  . "$scriptroot/common/build.sh" "/p:Projects=$scriptroot/../TryDotNet.sln" $args
+  # invoke regular build script
+  . "$scriptroot/common/build.sh" $args
 fi

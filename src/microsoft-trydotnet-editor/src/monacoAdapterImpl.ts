@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { DiagnosticsProduced } from '@microsoft/dotnet-interactive';
+import { DiagnosticsProduced, Logger } from '@microsoft/dotnet-interactive';
 import * as monaco from 'monaco-editor';
 import * as rxjs from 'rxjs';
 import * as editorAdapter from './EditorAdapter';
@@ -38,9 +38,8 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         }
 
         monaco.editor.setModelMarkers(model, "trydotnetdiagnostics", markers);
-
-        throw new Error('Method not implemented.');
     }
+
     getPosition(): { line: number; column: number; } {
         const position = this._editor.getPosition() ?? { lineNumber: 1, column: 1 };
 
@@ -52,6 +51,10 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
 
     setPosition(position: { line: number; column: number; }): void {
         this._editor.setPosition({ lineNumber: position.line, column: position.column });
+    }
+
+    focus(): void {
+        this._editor.focus();
     }
 
     private _onDidChangeModelContenEvents: rxjs.Subject<monaco.editor.IModelContentChangedEvent> = new rxjs.Subject<monaco.editor.IModelContentChangedEvent>();
@@ -80,10 +83,13 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
     }
 
     getCode(): string {
-        return this._editor.getValue();
+        const code = this._editor.getValue();
+        Logger.default.info(`[MonacoEditorArapter.getCode]: ${code}`);
+        return code;
     }
 
     setCode(code: string) {
+        Logger.default.info(`[MonacoEditorArapter.setCode]: ${code}`);
         this._editor.setValue(code);
     }
 
@@ -99,25 +105,23 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
     public setLanguage(language: string) {
         monaco.editor.setModelLanguage(this._editor.getModel(), language);
 
-        monaco.languages.registerCompletionItemProvider(language, {
-            provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position, context: monaco.languages.CompletionContext, token: monaco.CancellationToken) => {
+        // monaco.languages.registerCompletionItemProvider(language, {
+        //     provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position, context: monaco.languages.CompletionContext, token: monaco.CancellationToken) => {
+        //         throw new Error('Method not implemented.');
+        //     }
+        // });
 
-                const kernel = this.kernel;
-                throw new Error('Method not implemented.');
-            }
-        });
+        // monaco.languages.registerHoverProvider(language, {
+        //     provideHover: (model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken) => {
+        //         throw new Error('Method not implemented.');
+        //     }
+        // });
 
-        monaco.languages.registerHoverProvider(language, {
-            provideHover: (model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken) => {
-                throw new Error('Method not implemented.');
-            }
-        });
-
-        monaco.languages.registerSignatureHelpProvider(language, {
-            provideSignatureHelp: (model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken, context: monaco.languages.SignatureHelpContext) => {
-                throw new Error('Method not implemented.');
-            }
-        });
+        // monaco.languages.registerSignatureHelpProvider(language, {
+        //     provideSignatureHelp: (model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken, context: monaco.languages.SignatureHelpContext) => {
+        //         throw new Error('Method not implemented.');
+        //     }
+        // });
     }
 
     defineTheme(themes: { [x: string]: monaco.editor.IStandaloneThemeData }) {

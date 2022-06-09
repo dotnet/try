@@ -5,6 +5,9 @@ import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as rxjs from 'rxjs';
 
 export abstract class EditorAdapter {
+
+    private _languageServiceEnabled: boolean;
+    private _textChangedEventsEnabled: boolean;
     abstract getLanguage(): string | undefined;
     public abstract setLanguage(language: string): void;
     abstract defineTheme(themes: { [x: string]: any }): void;
@@ -13,6 +16,7 @@ export abstract class EditorAdapter {
     abstract getPosition(): { line: number, column: number };
     abstract setPosition(position: { line: number, column: number }): void;
     abstract updateOptions(options: any): void;
+    abstract focus(): void;
 
     protected abstract displayDiagnostics(diagnostics: dotnetInteractive.DiagnosticsProduced);
 
@@ -25,10 +29,30 @@ export abstract class EditorAdapter {
             next: handler
         });
 
+        this._languageServiceEnabled = true;
+        this._textChangedEventsEnabled = true;
+    }
+
+    protected get languageServiceEnabled(): boolean {
+        return this._languageServiceEnabled;
+    }
+
+    enableLanguageService() {
+        this._languageServiceEnabled = true;
+    }
+    disableLanguageService() {
+        this._languageServiceEnabled = false;
+    }
+
+    enableTextChangedEvents() {
+        this._textChangedEventsEnabled = true;
+    }
+    disableTextChangedEvents() {
+        this._textChangedEventsEnabled = false;
     }
 
     private handleContentChanged(contentChanged: ContentChangedEvent) {
-        if (this._kernel) {
+        if (this._kernel && this._languageServiceEnabled) {
             this._kernel.send({
                 commandType: dotnetInteractive.RequestDiagnosticsType,
                 command: <dotnetInteractive.RequestDiagnostics>{
@@ -48,7 +72,9 @@ export abstract class EditorAdapter {
     }
 
     protected publishContentChanged(contentChanged: ContentChangedEvent) {
-        this._editorChanges.next(contentChanged);
+        if (this._textChangedEventsEnabled) {
+            this._editorChanges.next(contentChanged);
+        }
     }
 
     configureServices(kernel: dotnetInteractive.Kernel) {
@@ -65,11 +91,6 @@ export abstract class EditorAdapter {
 
     private handleKernelEvent(eventEnvelope: dotnetInteractive.KernelEventEnvelope) {
         switch (<any>eventEnvelope.eventType) {
-
-            case dotnetInteractive.DocumentOpenedType:
-                const DocumentOpened = <dotnetInteractive.DocumentOpened>eventEnvelope.event;
-                this.setCode(DocumentOpened.content);
-                break;
             case dotnetInteractive.DiagnosticsProducedType:
                 this.displayDiagnostics(<dotnetInteractive.DiagnosticsProduced>eventEnvelope.event);
                 break;

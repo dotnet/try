@@ -74,7 +74,7 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
 
     public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor)
     {
-        var awaiter = interceptor.AwaitForMessage("NOTIFY_HOST_RUN_COMPLETED");
+        var awaiter = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
         await page.DispatchMessage(new
         {
             type = "run"
@@ -103,11 +103,10 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         await page.DispatchMessage(new
         {
             type = "wasmRunner-command",
-            base64EncodedAssembly = base64EncodedAssembly
-
+            base64EncodedAssembly
         });
 
-        await ts.Task.Timeout(TimeSpan.FromSeconds(30));
+        await ts.Task.Timeout(TimeSpan.FromSeconds(60),"Timeout waiting for wasmRunner-result");
 
         return messages;
 

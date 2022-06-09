@@ -35,6 +35,7 @@ export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
     getLanguage(): string {
         return this._language;
     }
+
     public setLanguage(language: string) {
         this._language = language;
     }
@@ -57,8 +58,12 @@ export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
         this._options = { ... this._options, ...options };//?
     }
 
+    focus(): void {
+
+    }
+
     public type(text: string) {
-        let newState = modifyText(this._code ?? "", this._position ?? { line: 1, column: 1 }, text ?? "");
+        let newState = modifyText(this._code ?? "", this._position ?? { line: 1, column: 1 }, text ?? "");//?
 
         this._code = newState.newText;//? 
         this._position = { line: newState.line, column: newState.column };//?

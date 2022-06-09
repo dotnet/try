@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import * as chai from "chai";
-import { Configuration, SourceFile, createProject } from "../src/index";
+import { Configuration, createProject } from "../src/index";
 import { JSDOM } from "jsdom";
-import { buildSimpleIFrameDom, getEditorIFrame, buildMultiIFrameDom, getEditorIFrames, buildDoubleIFrameDom } from "./domUtilities";
+import { buildSimpleIFrameDom, getEditorIFrame } from "./domUtilities";
 import * as chaiAsPromised from "chai-as-promised";
-import { registerForRegionFromFile, registerForRequestIdGeneration, registerForEditorMessages, notifyEditorReady, EditorState, trackSetWorkspaceRequests, raiseTextChange } from "./messagingMocks";
+import { registerForEditorMessages, registerForOpeDocument, registerForOpenProject } from "./messagingMocks";
 import { wait } from "./wait";
-import { createReadySession, createReadySessionWithMultipleEditors } from "./sessionFactory";
-import { ApiMessage, SET_WORKSPACE_REQUEST } from "../src/internals/apiMessages";
-import { IWorkspace } from "../src/internals/workspace";
+import { createReadySession } from "./sessionFactory";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+
 import { expect } from "chai";
+import { areSameFile, DocumentId } from "../src/documentId";
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -33,89 +34,245 @@ describe("A user", () => {
         it("can open a document", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+            });
+
             await session.openProject(project);
             let document = await session.openDocument({ fileName: "program.cs" });
 
-            document.id().should.equal("program.cs");
+            document.id().toString().should.equal("program.cs");
             document.getContent().should.equal("file content");
         });
 
         it("creates a empty document when the project does not have a matching file", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+            });
+
             await session.openProject(project);
 
             let document = await session.openDocument({ fileName: "program_two.cs" });
             expect(document).to.not.be.null;
-            document.id().should.equal("program_two.cs");
+            document.id().toString().should.equal("program_two.cs");
             document.getContent().should.equal("");
         });
 
         it("creates a empty document when using region and the project does not have a matching file", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+            });
+
             await session.openProject(project);
 
             let document = await session.openDocument({ fileName: "program_two.cs", region: "controller" });
             expect(document).to.not.be.null;
-            document.id().should.equal("program_two.cs@controller");
+            document.id().toString().should.equal("program_two.cs@controller");
             document.getContent().should.equal("");
         });
 
         it("can open a document with region as identifier", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n//content\n e#endregion\n//post/n" }] });
-            await session.openProject(project);
 
-            registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
-            registerForRegionFromFile(configuration, editorIFrame, dom.window, (files: SourceFile[]) => {
-                if (files) {
-                    return [{ id: "program.cs@controller", content: "//content" }]
+            const items: { [key: string]: dotnetInteractive.ProjectItem } = {};
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                const pi = files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: ["controller"],
+                        regionsContent: {
+                            controller: "//content"
+                        }
+                    };
+                    return item;
+                });
+
+                for (let i of pi) {
+                    items[i.relativeFilePath] = i;
                 }
-                return null;
-            })
+
+                return pi;
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                if (documentId.regionName) {
+                    content = items[documentId.relativeFilePath].regionsContent[documentId.regionName];
+                }
+                return content;
+            });
+
+            await session.openProject(project);
             let document = await session.openDocument({ fileName: "program.cs", region: "controller" });
-            document.id().should.equal("program.cs@controller");
+            document.id().toString().should.equal("program.cs@controller");
             document.getContent().should.equal("//content");
         });
 
-        it("can open a document and bind it immediately to an editor", async () => {
-            let editorState = { content: "", documentId: "" };
+        it("can open a document with region with no content", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let defaultEditor = session.getTextEditor();
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n#endregion\n//post/n" }] });
+
+            const items: { [key: string]: dotnetInteractive.ProjectItem } = {};
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                const pi = files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: ["controller"],
+                        regionsContent: {
+                            controller: undefined
+                        }
+                    };
+                    return item;
+                });
+
+                for (let i of pi) {
+                    items[i.relativeFilePath] = i;
+                }
+
+                return pi;
+            });
+
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                if (documentId.regionName) {
+                    content = items[documentId.relativeFilePath].regionsContent[documentId.regionName];
+                }
+                return content;
+            });
+
+
+            await session.openProject(project);
+            let document = await session.openDocument({ fileName: "program.cs", region: "controller" });
+            document.id().toString().should.equal("program.cs@controller");
+            document.getContent().should.equal("");
+        });
+
+        it("can open a document and bind it immediately to an editor", async () => {
+            let editorState = { content: "", documentId: <DocumentId>undefined };
+            let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-            registerForRequestIdGeneration(configuration, editorIFrame, dom.window, _r => "TestRun0");
+
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                return content;
+            });
+
             await session.openProject(project);
             registerForEditorMessages(configuration, editorIFrame, dom.window, editorState);
-            await session.openDocument({ fileName: "program.cs", editorId: defaultEditor.id() });
+            await session.openDocument({ fileName: "program.cs" });
             await wait(1000);
             editorState.content.should.equal("file content");
-            editorState.documentId.should.equal("program.cs");
+            editorState.documentId.toString().should.equal("program.cs");
         });
-        
-        it("can return the open documents", async() => {
+
+        it("can return the open documents", async () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
-            let defaultEditor = session.getTextEditor();
-            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }]});
+            let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
+            registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                return files.map(f => {
+                    let item: dotnetInteractive.ProjectItem = {
+                        relativeFilePath: f.relativeFilePath,
+                        regionNames: [],
+                        regionsContent: {}
+                    };
+                    return item;
+                });
+            });
+
+            registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                documentId;//?
+                let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                return content;
+            });
+
             await session.openProject(project);
-            await session.openDocument({ fileName: "program.cs", editorId: defaultEditor.id(), content:"i am a document" });
-            let documents = session.getOpenDocuments();
-            documents.should.have.length(1);
-            documents[0].getContent().should.equal("i am a document");
+
+            await session.openDocument({ fileName: "program.cs", content: "i am a document" });
+            let document = session.getOpenDocument();
+            document.should.not.be.null;
+            document.getContent().should.equal("i am a document");
         });
 
         describe("and with a document", () => {
             it("can set the content and affect editor", async () => {
-                let editorState = { content: "", documentId: "" };
+                let editorState = { content: "", documentId: <DocumentId>undefined };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
-                let defaultEditor = session.getTextEditor();
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
-                await session.openProject(project);
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, _r => "TestRun1");
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
+                registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                    documentId;//?
+                    let content = project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content ?? "";
+                    return content;
+                });
 
                 await session.openProject(project);
-                let document = await session.openDocument({ fileName: "program.cs", editorId: defaultEditor.id() });
-                registerForEditorMessages(configuration, editorIFrame, dom.window, editorState);
+                registerForEditorMessages(configuration, editorIFrame, dom.window, editorState); let document = await session.openDocument({ fileName: "program.cs" });
                 await document.setContent("new content");
                 document.getContent().should.equal("new content");
                 await wait(1000);
@@ -123,120 +280,32 @@ describe("A user", () => {
             });
 
             it("can track editor changes", async () => {
-                let editorState = { content: "", documentId: "" };
+                let editorState = { content: "", documentId: <DocumentId>undefined };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
-                let defaultEditor = session.getTextEditor();
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
+
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
+                registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
+                    return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content;
+                });
+
                 await session.openProject(project);
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, _r => "TestRun2");
                 registerForEditorMessages(configuration, editorIFrame, dom.window, editorState);
-                let document = await session.openDocument({ fileName: "program.cs", editorId: defaultEditor.id() });
+                let document = await session.openDocument({ fileName: "program.cs" });
                 let editor = session.getTextEditor();
                 await editor.setContent("new editor content");
                 await wait(1000);
                 document.getContent().should.equal("new editor content");
-            });
-
-            it("can track editor changes with multiple editors", async () => {
-                dom = buildMultiIFrameDom(configuration);
-                let editorIFrames = getEditorIFrames(dom);
-                let editorStates: { [key: string]: EditorState } = {};
-
-                let session = await createReadySessionWithMultipleEditors(configuration, editorIFrames, dom.window);
-
-                let project = await createProject(
-                    {
-                        packageName: "console", files: [
-                            { name: "program.cs", content: "the program" },
-                            { name: "otherFile.cs", content: "other file content" }
-                        ]
-                    });
-
-                await session.openProject(project);
-
-                for (let iframe of editorIFrames) {
-                    editorStates[iframe.dataset.trydotnetEditorId] = { content: "", documentId: "" };
-                    registerForRequestIdGeneration(configuration, iframe, dom.window, _r => "TestRun2");
-                    registerForEditorMessages(configuration, iframe, dom.window, editorStates[iframe.dataset.trydotnetEditorId]);
-                }
-
-                let editorIds = Object.getOwnPropertyNames(editorStates);
-                let lastIndex = editorIds.length - 1;
-                let programDocument = await session.openDocument({ editorId: editorIds[lastIndex], fileName: "program.cs" });
-                let otherFileDocument = await session.openDocument({ editorId: editorIds[0], fileName: "otherFile.cs" });
-
-                raiseTextChange(configuration, dom.window, "new editor content", programDocument.id());
-                raiseTextChange(configuration, dom.window, "new content in the other file!", otherFileDocument.id());
-
-                await wait(1000);
-
-                programDocument.getContent().should.equal("new editor content");
-                otherFileDocument.getContent().should.equal("new content in the other file!");
-            });
-
-            it("can dispatch editor change messages with multiple editors", async () => {
-                dom = buildDoubleIFrameDom(configuration);
-                let editorIFrames = getEditorIFrames(dom);
-                let editorMessageStacks: { [key: string]: ApiMessage[] } = {};
-
-                let session = await createReadySessionWithMultipleEditors(configuration, editorIFrames, dom.window);
-
-                let project = await createProject(
-                    {
-                        packageName: "console", files: [
-                            { name: "program.cs", content: "the program" },
-                            { name: "otherFile.cs", content: "other file content" }
-                        ]
-                    });
-
-                await session.openProject(project);
-
-                for (let iframe of editorIFrames) {
-                    editorMessageStacks[iframe.dataset.trydotnetEditorId] = [];
-                    registerForRequestIdGeneration(configuration, iframe, dom.window, _r => "TestRun2");
-                    trackSetWorkspaceRequests(configuration, iframe, dom.window, editorMessageStacks[iframe.dataset.trydotnetEditorId]);
-                }
-
-                let editorIds = Object.getOwnPropertyNames(editorMessageStacks);
-                let lastIndex = editorIds.length - 1;
-                let programDocument = await session.openDocument({ editorId: editorIds[lastIndex], fileName: "program.cs" });
-                let otherFileDocument = await session.openDocument({ editorId: editorIds[0], fileName: "otherFile.cs" });
-
-                raiseTextChange(configuration, dom.window, "new content in program!", programDocument.id());
-                raiseTextChange(configuration, dom.window, "new content in the other file!", otherFileDocument.id());
-
-                await wait(1100);
-
-                let programEditorMessages = editorMessageStacks[editorIds[lastIndex]];
-                let otherFileEditorMessages = editorMessageStacks[editorIds[0]];
-
-                programEditorMessages.length.should.be.greaterThan(0);
-                otherFileEditorMessages.length.should.be.greaterThan(0);
-
-                let lastProgramEditorMessage = <{
-                    type: typeof SET_WORKSPACE_REQUEST,
-                    workspace: any,
-                    bufferId: string,
-                    requestId: string
-                }>programEditorMessages[programEditorMessages.length - 1];
-
-                let lastOtherFileEditorMessage = <{
-                    type: typeof SET_WORKSPACE_REQUEST,
-                    workspace: any,
-                    bufferId: string,
-                    requestId: string
-                }>otherFileEditorMessages[otherFileEditorMessages.length - 1];
-
-                lastProgramEditorMessage.type.should.equal(SET_WORKSPACE_REQUEST);
-                lastProgramEditorMessage.type.should.equal(lastOtherFileEditorMessage.type);
-
-                lastProgramEditorMessage.workspace.should.deep.equal(lastOtherFileEditorMessage.workspace);
-                lastProgramEditorMessage.bufferId.should.be.equal(programDocument.id());
-                lastOtherFileEditorMessage.bufferId.should.be.equal(otherFileDocument.id());
-
-                lastProgramEditorMessage.workspace.buffers.should.deep.equal(lastOtherFileEditorMessage.workspace.buffers);
-                (<IWorkspace>(lastProgramEditorMessage.workspace)).buffers.find(b => b.id === "program.cs").content.should.be.equal("new content in program!");
-                (<IWorkspace>(lastProgramEditorMessage.workspace)).buffers.find(b => b.id === "otherFile.cs").content.should.be.equal("new content in the other file!");
             });
         });
     });

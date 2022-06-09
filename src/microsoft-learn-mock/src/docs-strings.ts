@@ -1,0 +1,14 @@
+export const loc_clear = "sruff_loc_clear";
+export const loc_dotnetEditor = "sruff_loc_dotnetEditor";
+export const loc_dotnetEditor_acceleratorCtrlSpace = "sruff_loc_dotnetEditor_acceleratorCtrlSpace";
+export const loc_dotnetEditor_acceleratorF1 = "sruff_loc_dotnetEditor_acceleratorF1";
+export const loc_dotnetEditor_acceleratorShiftF10 = "sruff_loc_dotnetEditor_acceleratorShiftF10";
+export const loc_dotnetEditor_commonAcceleratorsAriaLabel = "sruff_loc_dotnetEditor_commonAcceleratorsAriaLabel";
+export const loc_dotnetEditor_exitEditorActionShortcut = "sruff_loc_dotnetEditor_exitEditorActionShortcut";
+export const loc_dotnetEditor_exitEditorActionShortcutMacOS = "sruff_loc_dotnetEditor_exitEditorActionShortcutMacOS";
+export const loc_feedback = "sruff_loc_feedback";
+export const loc_loading = "sruff_loc_loading";
+export const loc_noOutput = "sruff_loc_noOutput";
+export const loc_output = "sruff_loc_output";
+export const loc_run = "sruff_loc_run";
+export const loc_serviceUnavailable = "sruff_loc_serviceUnavailable";

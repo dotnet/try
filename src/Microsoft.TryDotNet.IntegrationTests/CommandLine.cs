@@ -91,13 +91,14 @@ public static class CommandLine
 
     public static async Task<T> Timeout<T>(
         this Task<T> source,
-        TimeSpan timeout)
+        TimeSpan timeout, 
+        string? message = null)
     {
         if (await Task.WhenAny(
                 source,
                 Task.Delay(timeout)) != source)
         {
-            throw new TimeoutException();
+            throw string.IsNullOrWhiteSpace(message) ? new TimeoutException():  new TimeoutException(message);
         }
 
         return await source;
@@ -105,13 +106,14 @@ public static class CommandLine
 
     public static async Task Timeout(
         this Task source,
-        TimeSpan timeout)
+        TimeSpan timeout,
+        string? message = null)
     {
         if (await Task.WhenAny(
                 source,
                 Task.Delay(timeout)) != source)
         {
-            throw new TimeoutException();
+            throw string.IsNullOrWhiteSpace(message) ? new TimeoutException() : new TimeoutException(message);
         }
 
         await source;

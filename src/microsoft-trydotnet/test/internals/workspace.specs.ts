@@ -6,120 +6,300 @@ import { Workspace } from "../../src/internals/workspace";
 import { createProject } from "../../src";
 import { FakeMonacoTextEditor } from "../fakes/fakeMonacoTextEditor";
 import { FakeMessageBus } from "../fakes/fakeMessageBus";
-import { FakeIdGenerator } from "../fakes/fakeIdGenerator";
 import { expect } from "chai";
+import { RequestIdGenerator } from "../../src/internals/requestIdGenerator";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as newContract from "../../src/newContract";
 chai.should();
 
 describe("a workspace", () => {
 
     it("is not marked as modified at creation", () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        let ws = new Workspace(new FakeMessageBus("0"), new RequestIdGenerator());
         ws.isModified().should.be.false;
     });
 
-    it("is marked as modified when propulated from a project", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+    it("is not marked as modified when propulated from a project", async () => {
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
+
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
-        ws.isModified().should.be.true;
+        await ws.fromProject(project);
+        ws.isModified().should.be.false;
     });
 
-    it("is should have default language", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
-        let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
-        ws.isModified().should.be.true;
-        let request = ws.toSetWorkspaceRequests();
-        request.workspace.language.should.be.equal("csharp");
-    });
 
-    it("is retains the language of hte project", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
-        let project = await createProject({ packageName: "console", language: "fsharp", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
-        ws.isModified().should.be.true;
-        let request = ws.toSetWorkspaceRequests();
-        request.workspace.language.should.be.equal("fsharp");
-    });
 
-    it("is marked as modified when a document is opened", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+    it("is is not marked as modified when a document is opened", async () => {
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+                    case dotnetInteractive.OpenDocumentType: {
+                        const res: newContract.DocumentOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
+                            editorId: bus.id(),
+                            content: "the program",
+                            relativeFilePath: "program.cs"
+                        };
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
+        await ws.fromProject(project);
         await ws.openDocument({ fileName: "program.cs" });
-        ws.isModified().should.be.true;
-    });
-
-    it("is not marked as modified when is exported as setWorkspaceRequest object", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
-        let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
-        ws.isModified().should.be.true;
-        ws.toSetWorkspaceRequests();
         ws.isModified().should.be.false;
     });
 
     it("is not marked as modified when a document is opened again", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+                    case dotnetInteractive.OpenDocumentType: {
+                        const res: newContract.DocumentOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
+                            editorId: bus.id(),
+                            content: "the program",
+                            relativeFilePath: "program.cs"
+                        };
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
-        ws.isModified().should.be.true;
+        await ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs" });
-        ws.toSetWorkspaceRequests();
+        ws.toOpenProjectRequests();
         ws.isModified().should.be.false;
         doc = await ws.openDocument({ fileName: "program.cs" });
     });
 
     it("is marked as modified when a document is opened and  the content is changed", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+
+                    case dotnetInteractive.OpenDocumentType: {
+                        const res: newContract.DocumentOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
+                            editorId: bus.id(),
+                            content: "the program",
+                            relativeFilePath: "program.cs"
+                        };
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
+        await ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs" });
         doc.setContent("modified content");
         ws.isModified().should.be.true;
     });
 
-    it("generates set workspace request object", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+    it("generates openProject request object", async () => {
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+                    case dotnetInteractive.OpenDocumentType: {
+                        const res: newContract.DocumentOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
+                            editorId: bus.id(),
+                            content: "the program",
+                            relativeFilePath: "program.cs"
+                        };
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
         let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "the program" }, { name: "otherFile.cs", content: "other file content" }] });
-        ws.fromProject(project);
+        await ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs" });
         doc.setContent("modified content");
-        let wsr = ws.toSetWorkspaceRequests();
-        wsr.should.not.be.null;
-        wsr.workspace.should.not.be.null;
-        wsr.workspace.buffers[0].should.not.be.null;
-    });
-
-    it("generates set workspace request object with active bufferId equal to the document currently open in an editor", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
-        let project = await createProject(
-            {
-                packageName: "console",
-                files:
-                    [
-                        { name: "program.cs", content: "the program" },
-                        { name: "otherFile.cs", content: "other file content" }
-                    ]
-            });
-
-        ws.fromProject(project);
-        let editorZero = new FakeMonacoTextEditor("0");
-        let editorOne = new FakeMonacoTextEditor("1");
-        let programDocument = await ws.openDocument({ fileName: "program.cs", textEditor: editorZero });
-        let otherFileDocument = await ws.openDocument({ fileName: "otherFile.cs", textEditor: editorOne });
-        programDocument.setContent("modified content");
-        let wsr = ws.toSetWorkspaceRequests();
-
-        wsr.workspace.should.not.be.null;
-        wsr.workspace.buffers[0].should.not.be.null;
-        wsr.workspace.buffers[1].should.not.be.null;
-        wsr.bufferIds[editorZero.id()].should.be.equal("program.cs");
-        wsr.bufferIds[editorOne.id()].should.be.equal("otherFile.cs");
+        let opr = ws.toOpenProjectRequests();
+        opr.should.not.be.null;
+        opr.project.should.not.be.null;
+        opr.project.files[0].should.not.be.null;
     });
 
     it("can open a document and set its content", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+                    case dotnetInteractive.OpenDocumentType: {
+                        const res: newContract.DocumentOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
+                            editorId: bus.id(),
+                            content: "the program",
+                            relativeFilePath: "program.cs"
+                        };
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",
@@ -129,14 +309,54 @@ describe("a workspace", () => {
                 ]
             });
 
-        ws.fromProject(project);
+        await ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs", content: "content override" });
         expect(doc).not.to.be.null;
         doc.getContent().should.be.equal("content override");
     });
 
     it("can open a document in the editor and set its content", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
+        const bus = new FakeMessageBus("0");
+
+        bus.requests.subscribe({
+            next: (message) => {
+                message;//?
+                switch (message.type) {
+                    case dotnetInteractive.OpenProjectType: {
+                        const res: newContract.ProjectOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
+                            editorId: bus.id(),
+                            projectItems: [{
+                                relativeFilePath: "program.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            },
+                            {
+                                relativeFilePath: "otherFile.cs",
+                                regionNames: null,
+                                regionsContent: null
+                            }]
+                        }
+                        bus.postResponse(res);
+                    }
+                        break;
+                    case dotnetInteractive.OpenDocumentType: {
+                        const res: newContract.DocumentOpened = {
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
+                            editorId: bus.id(),
+                            content: "the program",
+                            relativeFilePath: "program.cs"
+                        };
+                        bus.postResponse(res);
+                    }
+                        break;
+                }
+            }
+        });
+
+        let ws = new Workspace(bus, new RequestIdGenerator());
         let project = await createProject(
             {
                 packageName: "console",
@@ -147,65 +367,12 @@ describe("a workspace", () => {
             });
 
         let editorZero = new FakeMonacoTextEditor("0");
-        ws.fromProject(project);
+        await ws.fromProject(project);
         let doc = await ws.openDocument({ fileName: "program.cs", textEditor: editorZero, content: "content override" });
         expect(doc).not.to.be.null;
         doc.getContent().should.be.equal("content override");
         doc.currentEditor().should.not.be.null;
         doc.currentEditor().id().should.be.equal("0");
         editorZero.content.should.be.equal(doc.getContent());
-    });
-
-    it("can open a document in one edtior at a time", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
-        let project = await createProject(
-            {
-                packageName: "console",
-                files: [
-                    { name: "program.cs", content: "the program" },
-                    { name: "otherFile.cs", content: "other file content" }
-                ]
-            });
-
-        ws.fromProject(project);
-        let editorZero = new FakeMonacoTextEditor("0");
-        let editorOne = new FakeMonacoTextEditor("1");
-        let doc = await ws.openDocument({ fileName: "program.cs", textEditor: editorZero });
-
-        doc.isActiveInEditor().should.be.true;
-        doc.currentEditor().should.not.be.null;
-        doc.currentEditor().id().should.be.equal("0");
-
-        doc = await ws.openDocument({ fileName: "program.cs", textEditor: editorOne });
-        doc.isActiveInEditor().should.be.true;
-        doc.currentEditor().should.not.be.null;
-        doc.currentEditor().id().should.be.equal("1");
-    });
-
-    it("can open documents in different edtiors at same time", async () => {
-        let ws = new Workspace(new FakeMessageBus("0"), new FakeIdGenerator());
-        let project = await createProject(
-            {
-                packageName: "console",
-                files: [
-                    { name: "program.cs", content: "the program" },
-                    { name: "otherFile.cs", content: "other file content" }
-                ]
-            });
-
-        ws.fromProject(project);
-        let editorZero = new FakeMonacoTextEditor("0");
-        let editorOne = new FakeMonacoTextEditor("1");
-
-        let programDocument = await ws.openDocument({ fileName: "program.cs", textEditor: editorZero });
-        let otherFileDocument = await ws.openDocument({ fileName: "otherFile.cs", textEditor: editorOne });
-
-        programDocument.isActiveInEditor().should.be.true;
-        programDocument.currentEditor().should.not.be.null;
-        programDocument.currentEditor().id().should.be.equal("0");
-
-        otherFileDocument.isActiveInEditor().should.be.true;
-        otherFileDocument.currentEditor().should.not.be.null;
-        otherFileDocument.currentEditor().id().should.be.equal("1");
     });
 });

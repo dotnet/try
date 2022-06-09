@@ -6,17 +6,8 @@ export * from "./sessionFactory";
 export * from "./configuration";
 export * from "./editor";
 export * from "./editableDocument";
-export * from "./completion";
-export * from "./signatureHelp";
 export * from "./diagnostics";
-export * from "./intrumentation";
-export * from "./outputPanel";
 export * from "./textDisplay";
-export * from "./terminal";
 export * from "./htmlDomHelpers";
 export * from "./project";
-export * from "./projectFactories/github";
-export * from "./projectFactories/scaffolding";
-export * from "./domInjection/types";
-export * from "./domInjection/autoEnable";
-export * from "./preOutputPanel";
+

@@ -15,10 +15,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -29,7 +29,10 @@
                 "relativeFilePath": "./Program.cs",
                 "regionNames": [
                   "test-region"
-                ]
+                ],
+                "regionsContent": {
+                  "test-region": ""
+                }
               }
             ]
           },
@@ -47,10 +50,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -69,10 +72,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]
@@ -92,10 +95,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -104,10 +107,10 @@
           "command": {
             "relativeFilePath": "./Program.cs",
             "regionName": "test-region",
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -118,7 +121,10 @@
                 "relativeFilePath": "./Program.cs",
                 "regionNames": [
                   "test-region"
-                ]
+                ],
+                "regionsContent": {
+                  "test-region": ""
+                }
               }
             ]
           },
@@ -136,10 +142,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -158,10 +164,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -178,10 +184,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -194,10 +200,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]
@@ -217,10 +223,10 @@
                 }
               ]
             },
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -229,10 +235,10 @@
           "command": {
             "relativeFilePath": "./Program.cs",
             "regionName": "test-region",
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
@@ -241,20 +247,20 @@
           "command": {
             "code": "System.Console.WriteLine(2);",
             "submissionType": "run",
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         },
         {
           "token": "command-token",
           "id": "command-id",
           "commandType": "CompileProject",
           "command": {
-            "targetKernelName": null
-          },
-          "originUri": "",
-          "destinationUri": ""
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
         }
       ],
       "events": [
@@ -265,7 +271,10 @@
                 "relativeFilePath": "./Program.cs",
                 "regionNames": [
                   "test-region"
-                ]
+                ],
+                "regionsContent": {
+                  "test-region": ""
+                }
               }
             ]
           },
@@ -283,10 +292,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -305,10 +314,10 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -325,10 +334,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -341,10 +350,10 @@
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -357,10 +366,10 @@
             "command": {
               "code": "System.Console.WriteLine(2);",
               "submissionType": "run",
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -374,10 +383,10 @@
             "id": "command-id",
             "commandType": "CompileProject",
             "command": {
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -392,10 +401,10 @@
             "id": "command-id",
             "commandType": "CompileProject",
             "command": {
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         },
         {
@@ -406,10 +415,10 @@
             "id": "command-id",
             "commandType": "CompileProject",
             "command": {
-              "targetKernelName": "project-kernel"
-            },
-            "originUri": "",
-            "destinationUri": ""
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
           }
         }
       ]

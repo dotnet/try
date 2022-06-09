@@ -12,9 +12,9 @@
 
   <ItemGroup>
     <PackageReference Include="Assent" Version="1.7.0" />
-    <PackageReference Include="FluentAssertions" Version="5.10.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.3" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.20.2" />
+    <PackageReference Include="FluentAssertions" Version="6.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.5" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.22.0" />
     <PackageReference Include="coverlet.collector" Version="3.1.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -44,6 +44,10 @@ namespace Microsoft.TryDotNet.IntegrationTests%3b
 public partial class AspNetProcess {
   public const string ToolPublishedPath = @"$(PublishLocation)"%3b
 }
+
+public partial class LearnFixture {
+  public const string SitePath = @"$(MSBuildThisFileDirectory)..\microsoft-learn-mock\site\"%3b
+}
 ]]></GeneratedContent>
     </PropertyGroup>
 
@@ -59,5 +63,14 @@ public partial class AspNetProcess {
   <Target Name="PublishTool" BeforeTargets="CoreCompile">
     <Exec Command="dotnet publish -o $(PublishLocation)" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.TryDotNet" />
   </Target>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
   

@@ -14,11 +14,17 @@ public class ContentGenerator
         var hostUri = new Uri(request.Scheme + "://" +  request.Host.Value, UriKind.Absolute);
         var wasmRunnerUri = new Uri(hostUri, "/wasmrunner");
         var commansdUri = new Uri(hostUri, "/commands");
+        var enableLogging = false;
+        if (request.Query.TryGetValue("enableLogging", out var enableLoggingString))
+        {
+            enableLogging = enableLoggingString.FirstOrDefault()?.ToLowerInvariant() == "true";
+        }
         var configuration = new
         {
             wasmRunnerUrl = wasmRunnerUri.AbsoluteUri,
             commandsUrl = commansdUri.AbsoluteUri,
-            refererUrl = !string.IsNullOrWhiteSpace(referer) ? new Uri(referer, UriKind.Absolute) : null
+            refererUrl = !string.IsNullOrWhiteSpace(referer) ? new Uri(referer, UriKind.Absolute) : null,
+            enableLogging
         };
 
         var configString = JsonSerializer.Serialize(configuration);

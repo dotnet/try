@@ -62,7 +62,17 @@ public class CodeRunner
         {
             try
             {
-                entryPoint.Invoke(null, null);
+                var parameters = entryPoint.GetParameters();
+                if (parameters.Length != 0)
+                {
+                    var parameterValues = parameters.Select(p =>
+                        p.ParameterType.IsValueType ? Activator.CreateInstance(p.ParameterType) : null).ToArray();
+                    entryPoint.Invoke(null, parameterValues);
+                }
+                else
+                {
+                    entryPoint.Invoke(null, null);
+                }
                 success = true;
             }
             catch (Exception e)

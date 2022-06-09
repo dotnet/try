@@ -1,6 +1,6 @@
 [CmdletBinding(PositionalBinding = $false)]
 param (
-    [switch]$ci,
+    [string]$configuration = "Debug",
     [switch]$noDotnet,
     [switch]$test,
     [Parameter(ValueFromRemainingArguments = $true)][String[]]$arguments
@@ -14,7 +14,8 @@ try {
     $npmDirs = @(
         "src\microsoft-trydotnet",
         "src\microsoft-trydotnet-editor",
-        "src\microsoft-trydotnet-styles"
+        "src\microsoft-trydotnet-styles",
+        "src\microsoft-learn-mock"
     )
     foreach ($npmDir in $npmDirs) {
         Push-Location "$repoRoot\$npmDir"
@@ -35,19 +36,19 @@ try {
 
     if (-Not $noDotnet) {
         # promote switches to arguments
-        if ($ci) {
-            $arguments += "-ci"
-        }
-        if ($test) {
-            $arguments += '-test'
-            $arguments += '-integrationTest'
-        }
+        $arguments += "-configuration"
+        $arguments += $configuration
 
-        # invoke regular build/test script
+        # invoke regular build script
         $buildScript = (Join-Path $PSScriptRoot "common\build.ps1")
-        Invoke-Expression "$buildScript -projects ""$PSScriptRoot\..\TryDotNet.sln"" $arguments"
+        Invoke-Expression "$buildScript $arguments"
         if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
+        }
+
+        # playwright
+        if ($test) {
+            & $repoRoot\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\$configuration\net6.0\playwright.ps1 install chromium
         }
     }
 }

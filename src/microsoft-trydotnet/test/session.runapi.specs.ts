@@ -6,10 +6,10 @@ import { Configuration, configureEmbeddableEditorIFrame } from "../src/index";
 import { buildSimpleIFrameDom } from "./domUtilities";
 import { JSDOM } from "jsdom";
 import { Done } from "mocha";
-import { ApiMessage, RUN_RESPONSE, RUN_REQUEST, SERVICE_ERROR_RESPONSE, } from "../src/internals/apiMessages";
-import { registerForRunRequest, registerForRequestIdGeneration, registerForLongRunRequest, notifyEditorReadyWithId, notifyRunReadyWithId } from "./messagingMocks";
+import { ApiMessage, RUN_RESPONSE, RUN_REQUEST, SERVICE_ERROR_RESPONSE, } from "../src/apiMessages";
+import { registerForRunRequest, registerForLongRunRequest, notifyRunReadyWithId, registerForOpenProject } from "./messagingMocks";
 import { createReadySession } from "./sessionFactory";
-
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 chai.should();
 
 describe("a user", () => {
@@ -24,7 +24,7 @@ describe("a user", () => {
             configuration = { hostOrigin: "https://docs.microsoft.com" };
             dom = buildSimpleIFrameDom(configuration);
             let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
-            editorIFrame = configureEmbeddableEditorIFrame(iframe, "0", configuration);
+            editorIFrame = configureEmbeddableEditorIFrame(iframe, configuration);
         });
 
         it("can run the loaded project", (done: Done) => {
@@ -38,7 +38,17 @@ describe("a user", () => {
                     };
                 });
 
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
 
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
 
@@ -54,10 +64,22 @@ describe("a user", () => {
 
         it("will get the current run if requesting one while previous one is inflight", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
-            let count = 0;
+            let count = 1;
             let results = ["", ""];
 
             awaitableSession.then(session => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
+
                 registerForLongRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     count++;
                     return {
@@ -68,13 +90,12 @@ describe("a user", () => {
                     };
                 });
 
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
-
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
 
                 session.run().then(result => {
+                    results;//? 
                     if (result.succeeded) {
-                        results[0] = result.output[0];
+                        results[0] = result.output[0]; //?
                         if (results[0] === results[1]) {
                             done();
                         }
@@ -84,8 +105,9 @@ describe("a user", () => {
                 });
 
                 session.run().then(result => {
+                    results;//? 
                     if (result.succeeded) {
-                        results[1] = result.output[0];
+                        results[1] = result.output[0]; //?
                         if (results[0] === results[1]) {
                             done();
                         }
@@ -99,6 +121,17 @@ describe("a user", () => {
         it("can subscribe to output events", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     return {
                         type: RUN_RESPONSE,
@@ -108,7 +141,6 @@ describe("a user", () => {
                     }
                 });
 
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
 
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
 
@@ -123,6 +155,18 @@ describe("a user", () => {
         it("can run the loaded project and intercept service error", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
+
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     return {
                         type: SERVICE_ERROR_RESPONSE,
@@ -132,7 +176,6 @@ describe("a user", () => {
                     }
                 });
 
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
 
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
 
@@ -147,6 +190,19 @@ describe("a user", () => {
         it("can run the loaded project as instrumented", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
+
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
+
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     return {
                         type: RUN_RESPONSE,
@@ -155,7 +211,6 @@ describe("a user", () => {
                     }
                 });
 
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
 
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
                 session.run({ instrument: true }).then(result => {
@@ -171,8 +226,7 @@ describe("a user", () => {
 
             awaitableSession.then(session => {
                 session.onCanRunChanged(val => {
-                    if (val)
-                    {
+                    if (val) {
                         done()
                     }
                 })
@@ -186,6 +240,18 @@ describe("a user", () => {
         it("can run the loaded project with workflow id", (done: Done) => {
             let awaitableSession = createReadySession(configuration, editorIFrame, dom.window);
             awaitableSession.then(session => {
+                registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
+                    return files.map(f => {
+                        let item: dotnetInteractive.ProjectItem = {
+                            relativeFilePath: f.relativeFilePath,
+                            regionNames: [],
+                            regionsContent: {}
+                        };
+                        return item;
+                    });
+                });
+
+
                 registerForRunRequest(configuration, editorIFrame, dom.window, (request: ApiMessage): ApiMessage => {
                     return {
                         type: RUN_RESPONSE,
@@ -194,7 +260,6 @@ describe("a user", () => {
                     }
                 });
 
-                registerForRequestIdGeneration(configuration, editorIFrame, dom.window, (_rid) => "TestRun");
 
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
                 session.run({ runWorkflowId: "webApi" }).then(result => {
@@ -202,7 +267,7 @@ describe("a user", () => {
                         done();
                     }
                 });
-            });       
+            });
         });
     });
 });

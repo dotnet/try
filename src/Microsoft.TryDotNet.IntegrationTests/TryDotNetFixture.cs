@@ -22,7 +22,7 @@ public class TryDotNetFixture : IDisposable, IAsyncLifetime
 
 
     public Task DisposeAsync()
-    {
+    {             
         _process!.Dispose();
         return Task.CompletedTask;
     }
