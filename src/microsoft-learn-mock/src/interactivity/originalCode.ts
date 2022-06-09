@@ -91,7 +91,8 @@ export class DotNetOnline implements InteractiveComponent {
 	}
 
 	public focus() {
-		window.postMessage({ type: 'focusEditor' }, hostOrigin);
+		let settings = getUrls();
+		this.editor.contentWindow?.postMessage({ type: 'focusEditor' }, settings.trydotnetOrigin);
 		return Promise.resolve();
 	}
 
@@ -175,7 +176,7 @@ export class DotNetOnline implements InteractiveComponent {
 	private async getEditorReady(type: string) {
 		if (this.trydotnet) {
 			let settings = getUrls();
-			//window.postMessage({ type, editorId: "0" }, hostOrigin);
+			window.postMessage({ type, editorId: "0" }, hostOrigin);
 			const configuration: Configuration = { hostOrigin, trydotnetOrigin: settings.trydotnetOrigin, enableLogging: true };
 			const content = scaffoldingMethod.replace('____', '');
 			const fileName: string = 'program.cs';

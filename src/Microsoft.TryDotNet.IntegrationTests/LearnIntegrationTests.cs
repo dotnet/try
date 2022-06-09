@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Playwright;
 using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
@@ -18,7 +19,7 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         Learn = learn;
     }
 
-    [Fact(Skip = "later")]
+    [Fact]
     public async Task loads_trydotnet()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -34,6 +35,13 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
 
         var pageUri = new Uri(QueryHelpers.AddQueryString(new Uri(learnRoot,"DocsHost.html").ToString(), param!));
         await page.GotoAsync(pageUri.ToString());
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var dotnetOnline = new DotNetOnline(page);
+
+        await dotnetOnline.FocusAsync();
+        await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
+        await dotnetOnline.ExecuteAsync();
         throw new NotImplementedException();
     }
 }

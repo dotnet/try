@@ -111,6 +111,4 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         return messages;
 
     }
-
-  
 }

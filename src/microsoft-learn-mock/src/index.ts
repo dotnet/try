@@ -5,6 +5,7 @@ function setup(global: any) {
     if (container) {
         const interactive = new DotNetOnline(container);
         if (global) {
+            console.log("Setting up dotnetOnline on global");
             global.dotnetOnline = interactive;
         }
     }
