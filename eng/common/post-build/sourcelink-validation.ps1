@@ -14,18 +14,10 @@ param(
 $global:RepoFiles = @{}
 
 # Maximum number of jobs to run in parallel
-$MaxParallelJobs = 16
-
-$MaxRetries = 5
-$RetryWaitTimeInSeconds = 30
+$MaxParallelJobs = 6
 
 # Wait time between check for system load
 $SecondsBetweenLoadChecks = 10
-
-if (!$InputPath -or !(Test-Path $InputPath)){
-  Write-Host "No files to validate."
-  ExitWithExitCode 0
-}
 
 $ValidatePackage = {
   param( 
@@ -37,17 +29,14 @@ $ValidatePackage = {
   # Ensure input file exist
   if (!(Test-Path $PackagePath)) {
     Write-Host "Input file does not exist: $PackagePath"
-    return [pscustomobject]@{
-      result = 1
-      packagePath = $PackagePath
-    }
+    return 1
   }
 
   # Extensions for which we'll look for SourceLink information
   # For now we'll only care about Portable & Embedded PDBs
-  $RelevantExtensions = @('.dll', '.exe', '.pdb')
+  $RelevantExtensions = @(".dll", ".exe", ".pdb")
  
-  Write-Host -NoNewLine 'Validating ' ([System.IO.Path]::GetFileName($PackagePath)) '...'
+  Write-Host -NoNewLine "Validating" ([System.IO.Path]::GetFileName($PackagePath)) "... "
 
   $PackageId = [System.IO.Path]::GetFileNameWithoutExtension($PackagePath)
   $ExtractPath = Join-Path -Path $using:ExtractPath -ChildPath $PackageId
@@ -69,11 +58,8 @@ $ValidatePackage = {
           $TargetFile = Join-Path -Path $ExtractPath -ChildPath $FakeName 
 
           # We ignore resource DLLs
-          if ($FileName.EndsWith('.resources.dll')) {
-            return [pscustomobject]@{
-              result = 0
-              packagePath = $PackagePath
-            }
+          if ($FileName.EndsWith(".resources.dll")) {
+            return
           }
 
           [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $TargetFile, $true)
@@ -105,59 +91,36 @@ $ValidatePackage = {
                     $Status = 200
                     $Cache = $using:RepoFiles
 
-                    $attempts = 0
-
-                    while ($attempts -lt $using:MaxRetries) {
-                      if ( !($Cache.ContainsKey($FilePath)) ) {
-                        try {
-                          $Uri = $Link -as [System.URI]
-                        
-                          if ($Link -match "submodules") {
-                            # Skip submodule links until sourcelink properly handles submodules
-                            $Status = 200
-                          }
-                          elseif ($Uri.AbsoluteURI -ne $null -and ($Uri.Host -match 'github' -or $Uri.Host -match 'githubusercontent')) {
-                            # Only GitHub links are valid
-                            $Status = (Invoke-WebRequest -Uri $Link -UseBasicParsing -Method HEAD -TimeoutSec 5).StatusCode
-                          }
-                          else {
-                            # If it's not a github link, we want to break out of the loop and not retry.
-                            $Status = 0
-                            $attempts = $using:MaxRetries
-                          }
+                    if ( !($Cache.ContainsKey($FilePath)) ) {
+                      try {
+                        $Uri = $Link -as [System.URI]
+                      
+                        # Only GitHub links are valid
+                        if ($Uri.AbsoluteURI -ne $null -and ($Uri.Host -match "github" -or $Uri.Host -match "githubusercontent")) {
+                          $Status = (Invoke-WebRequest -Uri $Link -UseBasicParsing -Method HEAD -TimeoutSec 5).StatusCode
                         }
-                        catch {
-                          Write-Host $_
+                        else {
                           $Status = 0
                         }
                       }
+                      catch {
+                        write-host $_
+                        $Status = 0
+                      }
+                    }
 
-                      if ($Status -ne 200) {
-                        $attempts++
-                        
-                        if  ($attempts -lt $using:MaxRetries)
-                        {
-                          $attemptsLeft = $using:MaxRetries - $attempts
-                          Write-Warning "Download failed, $attemptsLeft attempts remaining, will retry in $using:RetryWaitTimeInSeconds seconds"
-                          Start-Sleep -Seconds $using:RetryWaitTimeInSeconds
+                    if ($Status -ne 200) {
+                      if ($NumFailedLinks -eq 0) {
+                        if ($FailedFiles.Value -eq 0) {
+                          Write-Host
                         }
-                        else {
-                          if ($NumFailedLinks -eq 0) {
-                            if ($FailedFiles.Value -eq 0) {
-                              Write-Host
-                            }
-  
-                            Write-Host "`tFile $RealPath has broken links:"
-                          }
-  
-                          Write-Host "`t`tFailed to retrieve $Link"
-  
-                          $NumFailedLinks++
-                        }
+
+                        Write-Host "`tFile $RealPath has broken links:"
                       }
-                      else {
-                        break
-                      }
+
+                      Write-Host "`t`tFailed to retrieve $Link"
+
+                      $NumFailedLinks++
                     }
                   }
               }
@@ -173,45 +136,26 @@ $ValidatePackage = {
         }
   }
   catch {
-    Write-Host $_
+  
   }
   finally {
     $zip.Dispose() 
   }
 
   if ($FailedFiles -eq 0) {
-    Write-Host 'Passed.'
-    return [pscustomobject]@{
-      result = 0
-      packagePath = $PackagePath
-    }
+    Write-Host "Passed."
+    return 0
   }
   else {
-    Write-PipelineTelemetryError -Category 'SourceLink' -Message "$PackagePath has broken SourceLink links."
-    return [pscustomobject]@{
-      result = 1
-      packagePath = $PackagePath
-    }
-  }
-}
-
-function CheckJobResult(
-    $result, 
-    $packagePath,
-    [ref]$ValidationFailures,
-    [switch]$logErrors) {
-  if ($result -ne '0') {
-    if ($logErrors) {
-      Write-PipelineTelemetryError -Category 'SourceLink' -Message "$packagePath has broken SourceLink links."
-    }
-    $ValidationFailures.Value++
+    Write-Host "$PackagePath has broken SourceLink links."
+    return 1
   }
 }
 
 function ValidateSourceLinkLinks {
-  if ($GHRepoName -ne '' -and !($GHRepoName -Match '^[^\s\/]+/[^\s\/]+$')) {
-    if (!($GHRepoName -Match '^[^\s-]+-[^\s]+$')) {
-      Write-PipelineTelemetryError -Category 'SourceLink' -Message "GHRepoName should be in the format <org>/<repo> or <org>-<repo>. '$GHRepoName'"
+  if ($GHRepoName -ne "" -and !($GHRepoName -Match "^[^\s\/]+/[^\s\/]+$")) {
+    if (!($GHRepoName -Match "^[^\s-]+-[^\s]+$")) {
+      Write-PipelineTaskError "GHRepoName should be in the format <org>/<repo> or <org>-<repo>. '$GHRepoName'"
       ExitWithExitCode 1
     }
     else {
@@ -219,14 +163,14 @@ function ValidateSourceLinkLinks {
     }
   }
 
-  if ($GHCommit -ne '' -and !($GHCommit -Match '^[0-9a-fA-F]{40}$')) {
-    Write-PipelineTelemetryError -Category 'SourceLink' -Message "GHCommit should be a 40 chars hexadecimal string. '$GHCommit'"
+  if ($GHCommit -ne "" -and !($GHCommit -Match "^[0-9a-fA-F]{40}$")) {
+    Write-PipelineTaskError "GHCommit should be a 40 chars hexadecimal string. '$GHCommit'"
     ExitWithExitCode 1
   }
 
-  if ($GHRepoName -ne '' -and $GHCommit -ne '') {
-    $RepoTreeURL = -Join('http://api.github.com/repos/', $GHRepoName, '/git/trees/', $GHCommit, '?recursive=1')
-    $CodeExtensions = @('.cs', '.vb', '.fs', '.fsi', '.fsx', '.fsscript')
+  if ($GHRepoName -ne "" -and $GHCommit -ne "") {
+    $RepoTreeURL = -Join("http://api.github.com/repos/", $GHRepoName, "/git/trees/", $GHCommit, "?recursive=1")
+    $CodeExtensions = @(".cs", ".vb", ".fs", ".fsi", ".fsx", ".fsscript")
 
     try {
       # Retrieve the list of files in the repo at that particular commit point and store them in the RepoFiles hash
@@ -244,20 +188,17 @@ function ValidateSourceLinkLinks {
       Write-Host "Problems downloading the list of files from the repo. Url used: $RepoTreeURL . Execution will proceed without caching."
     }
   }
-  elseif ($GHRepoName -ne '' -or $GHCommit -ne '') {
-    Write-Host 'For using the http caching mechanism both GHRepoName and GHCommit should be informed.'
+  elseif ($GHRepoName -ne "" -or $GHCommit -ne "") {
+    Write-Host "For using the http caching mechanism both GHRepoName and GHCommit should be informed."
   }
   
   if (Test-Path $ExtractPath) {
     Remove-Item $ExtractPath -Force -Recurse -ErrorAction SilentlyContinue
   }
 
-  $ValidationFailures = 0
-
   # Process each NuGet package in parallel
   Get-ChildItem "$InputPath\*.symbols.nupkg" |
     ForEach-Object {
-      Write-Host "Starting $($_.FullName)"
       Start-Job -ScriptBlock $ValidatePackage -ArgumentList $_.FullName | Out-Null
       $NumJobs = @(Get-Job -State 'Running').Count
       
@@ -268,25 +209,26 @@ function ValidateSourceLinkLinks {
       }
 
       foreach ($Job in @(Get-Job -State 'Completed')) {
-        $jobResult = Wait-Job -Id $Job.Id | Receive-Job
-        CheckJobResult $jobResult.result $jobResult.packagePath ([ref]$ValidationFailures) -LogErrors
+        Receive-Job -Id $Job.Id
         Remove-Job -Id $Job.Id
       }
     }
 
+  $ValidationFailures = 0
   foreach ($Job in @(Get-Job)) {
     $jobResult = Wait-Job -Id $Job.Id | Receive-Job
-    CheckJobResult $jobResult.result $jobResult.packagePath ([ref]$ValidationFailures)
-    Remove-Job -Id $Job.Id
+    if ($jobResult -ne "0") {
+      $ValidationFailures++
+    }
   }
   if ($ValidationFailures -gt 0) {
-    Write-PipelineTelemetryError -Category 'SourceLink' -Message "$ValidationFailures package(s) failed validation."
+    Write-PipelineTaskError " $ValidationFailures package(s) failed validation."
     ExitWithExitCode 1
   }
 }
 
 function InstallSourcelinkCli {
-  $sourcelinkCliPackageName = 'sourcelink'
+  $sourcelinkCliPackageName = "sourcelink"
 
   $dotnetRoot = InitializeDotNetCli -install:$true
   $dotnet = "$dotnetRoot\dotnet.exe"
@@ -297,7 +239,7 @@ function InstallSourcelinkCli {
   }
   else {
     Write-Host "Installing SourceLink CLI version $sourcelinkCliVersion..."
-    Write-Host 'You may need to restart your command window if this is the first dotnet tool you have installed.'
+    Write-Host "You may need to restart your command window if this is the first dotnet tool you have installed."
     & "$dotnet" tool install $sourcelinkCliPackageName --version $sourcelinkCliVersion --verbosity "minimal" --global 
   }
 }
@@ -305,15 +247,11 @@ function InstallSourcelinkCli {
 try {
   InstallSourcelinkCli
 
-  foreach ($Job in @(Get-Job)) {
-    Remove-Job -Id $Job.Id
-  }
-
   ValidateSourceLinkLinks 
 }
 catch {
+  Write-Host $_
   Write-Host $_.Exception
   Write-Host $_.ScriptStackTrace
-  Write-PipelineTelemetryError -Category 'SourceLink' -Message $_
   ExitWithExitCode 1
 }
