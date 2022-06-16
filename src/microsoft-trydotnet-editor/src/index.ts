@@ -53,7 +53,7 @@ if (window) {
 
 	const mainWindowMessages = new rxjs.Subject<any>();
 	window.addEventListener('message', (message) => {
-		dotnetInteractive.Logger.default.info(`[received in trydotnet-editor] ${JSON.stringify(message.data)}`);
+		dotnetInteractive.Logger.default.info(`[received in trydotnet-editor] ${JSON.stringify(message)}`);
 		const apiMessage = message.data;
 		if (apiMessage) {
 			mainWindowMessages.next(apiMessage);
