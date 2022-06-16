@@ -5,7 +5,12 @@ export const EditorContentChangedType = "EditorContentChanged";
 export const ConfigureMonacoEditorType = "ConfigureMonacoEditor";
 export const DefineMonacoEditorThemesType = "DefineMonacoEditorThemes";
 export const SetEditorContentType = "SetEditorContent";
+export const EnableLoggingType = "EnableLogging";
 
+export interface EnableLogging {
+    type: typeof EnableLoggingType;
+    enableLogging: boolean;
+}
 export interface ProjectOpened {
     type: typeof dotnetInteractive.ProjectOpenedType;
     projectItems: dotnetInteractive.ProjectItem[];

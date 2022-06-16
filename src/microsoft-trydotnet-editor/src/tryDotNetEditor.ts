@@ -8,6 +8,7 @@ import * as monaco from './EditorAdapter';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as newContract from './newContract';
 import { DocumentId } from './documentId';
+import { configureLogging } from './log';
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
   private _currentProject?: { projectItems: dotnetInteractive.ProjectItem[]; };
@@ -23,13 +24,13 @@ export class TryDotNetEditor {
 
   constructor(private _postMessage: (message: any) => void, private _mainWindowMessageBus: rxjs.Subject<any>, private _kernel: projectKernel.ProjectKernel) {
     this.editorId = "-0-";
+
     this._mainWindowMessageBus.subscribe(message => {
       this.handleHostMessage(message);
     });
     // for messaging api backward compatibility
 
     this._kernel.subscribeToKernelEvents((event) => {
-      dotnetInteractive.Logger.default.info(`[kernel events event] : ${JSON.stringify(event)}`);
       if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
         dotnetInteractive.Logger.default.info(`[SubmitCode event] : ${JSON.stringify(event)}`);
         switch (event.eventType) {
@@ -37,36 +38,42 @@ export class TryDotNetEditor {
           case dotnetInteractive.CommandFailedType:
           case dotnetInteractive.CommandCancelledType:
             if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
-
-              this._postMessage({
-                type: event.eventType,
-                ...event
-              });
+              this._postKernelEvent({ event });
               this._postMessage({
                 type: messages.HOST_RUN_READY_EVENT
               });
             }
             break;
           case dotnetInteractive.CodeSubmissionReceivedType:
+            this._postKernelEvent({ event });
             this._postMessage({
               type: messages.NOTIFY_HOST_RUN_BUSY
             });
             break;
           case dotnetInteractive.StandardOutputValueProducedType:
-            this._postMessage({
-              type: dotnetInteractive.StandardOutputValueProducedType,
-              ...event
-            });
-            break;
           case dotnetInteractive.StandardErrorValueProducedType:
-            this._postMessage({
-              type: dotnetInteractive.StandardErrorValueProducedType,
-              ...event
-            });
+          case dotnetInteractive.DisplayedValueProducedType:
+            dotnetInteractive.Logger.default.info(`[kernel event] : ${JSON.stringify(event)}`);
+            this._postKernelEvent({ event });
             break;
         }
       }
     });
+  }
+
+  private _postKernelEvent(arg: { event: dotnetInteractive.KernelEventEnvelope, editorId?: string, requestId?: string }) {
+    let message = {
+      type: arg.event.eventType,
+      ...(arg.event)
+    };
+    if (arg.editorId) {
+      (<any>message).editorId = arg.editorId;
+    }
+
+    if (arg.requestId) {
+      (<any>message).requestId = arg.requestId;
+    }
+    this._postMessage(message);
   }
 
   public get editor(): monaco.EditorAdapter {
@@ -108,6 +115,9 @@ export class TryDotNetEditor {
     const editorId = apiMessage?.editorId;
     dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleHostMessage] : ${JSON.stringify(apiMessage)}`);
     switch (apiMessage.type) {
+      case newContract.EnableLoggingType:
+        configureLogging({ enableLogging: apiMessage.enableLogging });
+        break;
       case newContract.ConfigureMonacoEditorType:
         let options = {};
         if (apiMessage.editorOptions) {

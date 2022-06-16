@@ -64,4 +64,5 @@ export interface ISession {
     subscribeToServiceErrorEvents(handler: ServiceErrorSubscriber): Unsubscribable;
 
     onCanRunChanged(changed: (canRun: boolean) => void): void;
+    enableLogging(enableLogging: boolean): void;
 }

@@ -161,7 +161,7 @@ describe("A user", () => {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: ["controller"],
                         regionsContent: {
-                            controller: undefined
+                            controller: <string><unknown>undefined
                         }
                     };
                     return item;
@@ -192,7 +192,7 @@ describe("A user", () => {
         });
 
         it("can open a document and bind it immediately to an editor", async () => {
-            let editorState = { content: "", documentId: <DocumentId>undefined };
+            let editorState = { content: "", documentId: <DocumentId><unknown>undefined };
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
 
@@ -251,7 +251,7 @@ describe("A user", () => {
 
         describe("and with a document", () => {
             it("can set the content and affect editor", async () => {
-                let editorState = { content: "", documentId: <DocumentId>undefined };
+                let editorState = { content: "", documentId: <DocumentId><unknown>undefined };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
@@ -280,7 +280,7 @@ describe("A user", () => {
             });
 
             it("can track editor changes", async () => {
-                let editorState = { content: "", documentId: <DocumentId>undefined };
+                let editorState = { content: "", documentId: <DocumentId><unknown>undefined };
                 let session = await createReadySession(configuration, editorIFrame, dom.window);
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
 

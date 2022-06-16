@@ -7,8 +7,9 @@ import * as factory from './factory';
 import './index.css';
 import * as rxjs from 'rxjs';
 import * as monacoAdapterImpl from './monacoAdapterImpl';
-import { IServiceError } from './apiService';
+import * as apiService from './apiService';
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import { configureLogging } from './log';
 
 if (window) {
 
@@ -19,22 +20,8 @@ if (window) {
 	const configuration: factory.IConfiguration = JSON.parse(document.getElementById("trydotnet-editor-script").dataset.trydotnetConfiguration);
 
 	console.log(`[trydotnet-editor] configuration: ${JSON.stringify(configuration)}`);
-	if (configuration.enableLogging === true) {
-		dotnetInteractive.Logger.configure("trydotnet-editor", (entry) => {
-			switch (entry.logLevel) {
-				case dotnetInteractive.LogLevel.Info:
-					console.log(`[${entry.source}] ${entry.message}`);
-					break;
-				case dotnetInteractive.LogLevel.Warn:
-					console.warn(`[${entry.source}] ${entry.message}`);
-					break;
-				case dotnetInteractive.LogLevel.Error:
-					console.error(`[${entry.source}] ${entry.message}`);
-					break;
-			}
 
-		});
-	}
+	configureLogging({ enableLogging: configuration.enableLogging });
 
 	const frame = window?.frameElement as HTMLIFrameElement;
 	if (frame) {
@@ -45,16 +32,18 @@ if (window) {
 		}
 	}
 
+	let messageDestination = "";
 	let mainWindowOrParent: Window = window;
 	if (window.parent) {
 		mainWindowOrParent = window.parent;
 		dotnetInteractive.Logger.default.info("editor in iframe setup");
+		messageDestination = `" to hosting window ${window.parent.location.toString()}`;
 	}
 
 	const postAndLog = (message: any) => {
 
 		message.editorId = settings.editorId;
-		dotnetInteractive.Logger.default.info(`[sending from trydotnet-editor] ${JSON.stringify(message)}`);
+		dotnetInteractive.Logger.default.info(`[sending from trydotnet-editor${messageDestination}] ${JSON.stringify(message)}`);
 		const messageLogger = window['postMessageLogger'];
 		if (messageLogger) {
 			messageLogger(message);
@@ -72,7 +61,7 @@ if (window) {
 	}, false);
 
 	const editor = factory.createEditor(document.body);
-	const kernel = factory.createWasmProjectKernel((serviceError: IServiceError) => {
+	const kernel = factory.createWasmProjectKernel((serviceError: apiService.IServiceError) => {
 		postAndLog({
 			type: messages.SERVICE_ERROR_RESPONSE,
 			serviceError: serviceError
