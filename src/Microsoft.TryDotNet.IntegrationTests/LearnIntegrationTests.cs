@@ -75,7 +75,7 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         text.Should().Contain("Console.WriteLine(123);");
     }
 
-    [Fact(Skip = "Flaky")]
+    [Fact]
     public async Task outputs_are_rendered()
     {
         // todo: fix this test

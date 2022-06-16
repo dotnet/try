@@ -37,7 +37,7 @@ if (window) {
 	if (window.parent) {
 		mainWindowOrParent = window.parent;
 		dotnetInteractive.Logger.default.info("editor in iframe setup");
-		messageDestination = `" to hosting window ${window.parent.location.toString()}`;
+		messageDestination = `" to hosting window ${document.referrer}`;
 	}
 
 	const postAndLog = (message: any) => {
