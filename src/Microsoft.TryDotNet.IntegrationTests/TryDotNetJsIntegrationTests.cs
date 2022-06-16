@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.WebUtilities;
@@ -11,17 +12,17 @@ using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
-public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixture>
+public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixture>
 {
     public LearnFixture Learn { get; }
 
-    public LearnIntegrationTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet, LearnFixture learn) : base(playwright, tryDotNet)
+    public TryDotNetJsIntegrationTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet, LearnFixture learn) : base(playwright, tryDotNet)
     {
         Learn = learn;
     }
 
     [Fact]
-    public async Task loads_trydotnet()
+    public async Task loads_trydotnet_editor()
     {
         var page = await Playwright.Browser!.NewPageAsync();
         
@@ -103,9 +104,19 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
         await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
         await documentOpenAwaiter;
-        await Task.Delay(1000);
         var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
-        await dotnetOnline.ExecuteAsync();
+
+        await page.RunAndWaitForConsoleMessageAsync(async () =>
+        {
+            await Task.Delay(1000);
+
+            await dotnetOnline.ExecuteAsync();
+        }, new PageRunAndWaitForConsoleMessageOptions
+        {
+            Timeout = Debugger.IsAttached ? 0.0f: (float) TimeSpan.FromMinutes(10).TotalMilliseconds,
+            Predicate = message => message.Text.Contains("---- resolving response awaiter for") && message.Text.Contains("and type [RunCompleted]")
+        });
+
         await run;
         
         await page.TestScreenShotAsync();
