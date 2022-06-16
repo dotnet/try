@@ -1,11 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 import * as editorAdapter from "../src/EditorAdapter";
 
 export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
-    private _diagnosticsEvents?: dotnetInteractive.Diagnostic[] = [];
     private _language: string;
     private _themes: { [x: string]: any; } = {};
     private _position: {
@@ -16,12 +14,14 @@ export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
     private _options = {};
     private _code: string;
 
-    public get diagnostics(): dotnetInteractive.Diagnostic[] { //? 
-        return this._diagnosticsEvents; //? 
+    private _markers: editorAdapter.IMarkerData[];
+
+    setMarkers(markers: editorAdapter.IMarkerData[]) {
+        this._markers = markers;
     }
 
-    protected displayDiagnostics(diagnostics: dotnetInteractive.DiagnosticsProduced) {
-        this._diagnosticsEvents = JSON.parse(JSON.stringify(diagnostics.diagnostics));//?
+    getMarkers(): editorAdapter.IMarkerData[] {
+        return this._markers;
     }
 
     getPosition(): { line: number; column: number; } {
