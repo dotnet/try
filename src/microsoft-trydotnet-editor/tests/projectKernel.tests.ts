@@ -29,7 +29,7 @@ describe("Project kernel", () => {
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("Project must be opened, send the command 'OpenProject' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Project must be opened, send the command 'OpenProject' first.");
     });
 
     it("cannot request diagnostics if there is no open document", async () => {
@@ -54,7 +54,7 @@ describe("Project kernel", () => {
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot request completions if there is no open document", async () => {
@@ -81,7 +81,7 @@ describe("Project kernel", () => {
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot request signaturehelp if there is no open document", async () => {
@@ -106,7 +106,7 @@ describe("Project kernel", () => {
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot request hovertext if there is no open document", async () => {
@@ -131,7 +131,7 @@ describe("Project kernel", () => {
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot submitCode if there is no open document", async () => {
@@ -156,7 +156,7 @@ describe("Project kernel", () => {
 
         let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<dotnetInteractive.CommandFailed>(commandFailed.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("when opening a project it produces the project manifest", async () => {

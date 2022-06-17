@@ -2,6 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using FluentAssertions;
@@ -289,6 +293,69 @@ public class EditorTests : PlaywrightTestBase
     }
 
     [Fact]
+    public async Task when_user_code_in_editor_diagnostics_are_produced()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+
+        await page.DispatchMessage(new
+        {
+            type = "OpenProject",
+            project = new
+            {
+                files = new[]
+                {
+                    new {
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
+                    }
+                }
+            }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
+        });
+
+        await documentOpenedAwaiter;
+        await page.ClearMonacoEditor();
+
+        var editor = await page.FindEditor();
+        await editor.FocusAsync();
+
+        await page.RunAndWaitForConsoleMessageAsync(async () =>
+        {
+            await editor.TypeAsync($@"/////////////////////////
+int i = ""NaN"";
+/////////////////////////".Replace("\r\n", "\n"));
+        }, new PageRunAndWaitForConsoleMessageOptions()
+        {
+            Predicate = message => message.Text.Contains("[MonacoEditorAdapter.setMarkers]"),
+            Timeout = Debugger.IsAttached ? 0.0f : (float)TimeSpan.FromMinutes(10).TotalMilliseconds
+        });
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        var diagnosticMarker = page.Locator("div .squiggly-error");
+        await diagnosticMarker.IsVisibleAsync();
+        await page.TestScreenShotAsync();
+
+        var markerElementJson = await page.EvaluateAsync<string>("JSON.stringify(trydotnetEditor.getEditor().getMarkers())");
+        var markers = JsonSerializer.Deserialize<EditorMarker[]>(markerElementJson);
+        var expected = new EditorMarker(8, "Program.cs(2,9): error CS0029: Cannot implicitly convert type 'string' to 'int'", 2, 9, 2, 14);
+        markers.Should().ContainSingle(m => m == expected);
+    }
+
+    [Fact]
     public async Task when_user_code_in_editor_is_executed_display_events_are_produced()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -527,4 +594,6 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
             .Should()
             .Contain(randomValue);
     }
+
+    record EditorMarker(int severity, string message, int startLineNumber, int startColumn, int endLineNumber, int endColumn);
 }

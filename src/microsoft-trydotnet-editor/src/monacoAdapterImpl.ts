@@ -1,43 +1,24 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { DiagnosticsProduced, Logger } from '@microsoft/dotnet-interactive';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import { Logger } from '@microsoft/dotnet-interactive';
 import * as monaco from 'monaco-editor';
 import * as rxjs from 'rxjs';
 import * as editorAdapter from './EditorAdapter';
 
+const markerOwnerName: string = 'trydotnetdiagnostics';
+
 export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
-    protected displayDiagnostics(diagnostics: DiagnosticsProduced) {
-        let markers: monaco.editor.IMarkerData[] = [];
+    setMarkers(markers: editorAdapter.IMarkerData[]) {
         const model = this._editor.getModel();
-        for (const diagnostic of diagnostics.diagnostics) {
-            let severity = monaco.MarkerSeverity.Info;
+        monaco.editor.setModelMarkers(model, markerOwnerName, markers);
+        Logger.default.info('[MonacoEditorAdapter.setMarkers]: ' + JSON.stringify(markers));
+    }
 
-            switch (diagnostic.severity) {
-                case 'error':
-                    severity = monaco.MarkerSeverity.Error;
-                    break;
-                case 'warning':
-                    severity = monaco.MarkerSeverity.Warning;
-                    break;
-                case 'info':
-                    severity = monaco.MarkerSeverity.Info;
-                    break;
-
-            }
-
-            markers.push({
-                message: diagnostic.message,
-                severity: diagnostic.severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
-                startLineNumber: diagnostic.linePositionSpan.start.line,
-                startColumn: diagnostic.linePositionSpan.start.character,
-                endLineNumber: diagnostic.linePositionSpan.end.line,
-                endColumn: diagnostic.linePositionSpan.end.character
-
-            });
-        }
-
-        monaco.editor.setModelMarkers(model, "trydotnetdiagnostics", markers);
+    getMarkers(): editorAdapter.IMarkerData[] {
+        const markers = monaco.editor.getModelMarkers({ owner: markerOwnerName });
+        return markers;
     }
 
     getPosition(): { line: number; column: number; } {
@@ -57,16 +38,16 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         this._editor.focus();
     }
 
-    private _onDidChangeModelContenEvents: rxjs.Subject<monaco.editor.IModelContentChangedEvent> = new rxjs.Subject<monaco.editor.IModelContentChangedEvent>();
+    private _onDidChangeModelContentEvents: rxjs.Subject<monaco.editor.IModelContentChangedEvent> = new rxjs.Subject<monaco.editor.IModelContentChangedEvent>();
 
     constructor(private _editor: monaco.editor.IStandaloneCodeEditor) {
         super();
 
         this._editor.onDidChangeModelContent(e => {
-            this._onDidChangeModelContenEvents.next(e);
+            this._onDidChangeModelContentEvents.next(e);
         });
 
-        this._onDidChangeModelContenEvents.pipe(rxjs.debounce(() => rxjs.interval(1000))).subscribe({
+        this._onDidChangeModelContentEvents.pipe(rxjs.debounce(() => rxjs.interval(1000))).subscribe({
             next: async (_contentChanged) => {
                 const code = this._editor.getValue();
                 const position = this._editor.getPosition() ?? { lineNumber: 1, column: 1 };
@@ -84,12 +65,12 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
 
     getCode(): string {
         const code = this._editor.getValue();
-        Logger.default.info(`[MonacoEditorArapter.getCode]: ${code}`);
+        dotnetInteractive.Logger.default.info(`[MonacoEditorArapter.getCode]: ${code}`);
         return code;
     }
 
     setCode(code: string) {
-        Logger.default.info(`[MonacoEditorArapter.setCode]: ${code}`);
+        dotnetInteractive.Logger.default.info(`[MonacoEditorArapter.setCode]: ${code}`);
         this._editor.setValue(code);
     }
 

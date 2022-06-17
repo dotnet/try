@@ -4,6 +4,22 @@
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as rxjs from 'rxjs';
 
+export enum MarkerSeverity {
+    Hint = 1,
+    Info = 2,
+    Warning = 4,
+    Error = 8
+}
+
+export interface IMarkerData {
+    severity: MarkerSeverity;
+    message: string;
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+}
+
 export abstract class EditorAdapter {
 
     private _languageServiceEnabled: boolean;
@@ -18,7 +34,42 @@ export abstract class EditorAdapter {
     abstract updateOptions(options: any): void;
     abstract focus(): void;
 
-    protected abstract displayDiagnostics(diagnostics: dotnetInteractive.DiagnosticsProduced);
+    private _diagnostics: dotnetInteractive.Diagnostic[] = [];
+    abstract setMarkers(markers: IMarkerData[]);
+
+    displayDiagnostics(diagnostics: dotnetInteractive.Diagnostic[]) {
+        const markers: IMarkerData[] = [];
+        for (const diagnostic of diagnostics) {
+            let severity = MarkerSeverity.Info;
+
+            switch (diagnostic.severity) {
+                case 'error':
+                    severity = MarkerSeverity.Error;
+                    break;
+                case 'warning':
+                    severity = MarkerSeverity.Warning;
+                    break;
+                case 'info':
+                    severity = MarkerSeverity.Info;
+                    break;
+
+            }
+
+            // interactive diagnostics are 0-based, monaco is 1-based
+            markers.push({
+                message: diagnostic.message,
+                severity: diagnostic.severity === 'error' ? MarkerSeverity.Error : MarkerSeverity.Warning,
+                startLineNumber: diagnostic.linePositionSpan.start.line + 1,
+                startColumn: diagnostic.linePositionSpan.start.character + 1,
+                endLineNumber: diagnostic.linePositionSpan.end.line + 1,
+                endColumn: diagnostic.linePositionSpan.end.character + 1
+            });
+        }
+
+        this.setMarkers(markers);
+    }
+
+    abstract getMarkers(): IMarkerData[];
 
     private _kernel: dotnetInteractive.Kernel;
     private _editorChanges: rxjs.Subject<ContentChangedEvent> = new rxjs.Subject<ContentChangedEvent>();
@@ -35,6 +86,10 @@ export abstract class EditorAdapter {
 
     protected get languageServiceEnabled(): boolean {
         return this._languageServiceEnabled;
+    }
+
+    public get diagnostics(): dotnetInteractive.Diagnostic[] {
+        return this._diagnostics;
     }
 
     enableLanguageService() {
@@ -92,7 +147,9 @@ export abstract class EditorAdapter {
     private handleKernelEvent(eventEnvelope: dotnetInteractive.KernelEventEnvelope) {
         switch (<any>eventEnvelope.eventType) {
             case dotnetInteractive.DiagnosticsProducedType:
-                this.displayDiagnostics(<dotnetInteractive.DiagnosticsProduced>eventEnvelope.event);
+                const diagnosticsEvent = <dotnetInteractive.DiagnosticsProduced>eventEnvelope.event;
+                this._diagnostics = diagnosticsEvent.diagnostics;
+                this.displayDiagnostics(diagnosticsEvent.diagnostics);
                 break;
         }
     }
