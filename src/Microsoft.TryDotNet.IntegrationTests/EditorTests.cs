@@ -414,6 +414,110 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
     }
 
     [Fact]
+    public async Task user_typing_code_gets_completion()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+        
+        await page.DispatchMessage(new
+        {
+            type = "OpenProject",
+            project = new
+            {
+                files = new[]
+                {
+                    new {
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
+                    }
+                }
+            }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
+        });
+
+
+        await documentOpenedAwaiter;
+        await page.ClearMonacoEditor();
+
+        var editor = await page.FindEditor();
+        await editor.FocusAsync();
+        await editor.TypeAsync($@"using System;
+namespace myApp {{ 
+class Program {{
+static void Main() {{
+Console".Replace("\r\n", "\n"));
+
+        await editor.TypeAsync(@".");
+
+        await page.TestScreenShotAsync();
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public async Task user_typing_code_gets_signatureHelp()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+
+        await page.DispatchMessage(new
+        {
+            type = "OpenProject",
+            project = new
+            {
+                files = new[]
+                {
+                    new {
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
+                    }
+                }
+            }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
+        });
+
+
+        await documentOpenedAwaiter;
+        await page.ClearMonacoEditor();
+
+        var editor = await page.FindEditor();
+        await editor.FocusAsync();
+        await editor.TypeAsync($@"using System;
+namespace myApp {{ 
+class Program {{
+static void Main() {{
+Console".Replace("\r\n", "\n"));
+
+        await editor.TypeAsync(@".WriteLine(");
+
+        await page.TestScreenShotAsync();
+        throw new NotImplementedException();
+    }    
+
+    [Fact]
     public async Task when_user_code_in_editor_is_executed_it_produces_runResult_event()
     {
         var page = await Playwright.Browser!.NewPageAsync();
