@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
+[CollectionDefinition("Chromium Edge", DisableParallelization = true)]
 [Collection("Chromium Edge")]
 public abstract class PlaywrightTestBase : IClassFixture<PlaywrightFixture>, IClassFixture<TryDotNetFixture>
 {
