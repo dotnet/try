@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -461,8 +462,15 @@ Console".Replace("\r\n", "\n"));
 
         await editor.TypeAsync(@".");
 
+        await page.WaitForSelectorAsync(".monaco-list-row");
+
+        var rows = await page.QuerySelectorAllAsync(".monaco-list-row");
+
         await page.TestScreenShotAsync();
-        throw new NotImplementedException();
+
+        var completionItemDisplayText = await Task.WhenAll(rows.Select(r => r.InnerTextAsync()));
+
+        completionItemDisplayText.Should().Contain(new[] { "BackgroundColor", "Beep", "Clear" });
     }
 
     [Fact]
@@ -513,9 +521,22 @@ Console".Replace("\r\n", "\n"));
 
         await editor.TypeAsync(@".WriteLine(");
 
+        await page.WaitForSelectorAsync(".parameter-hints-widget");
+
+        var parameterHint = await page.QuerySelectorAsync(".parameter-hints-widget");
+
         await page.TestScreenShotAsync();
-        throw new NotImplementedException();
-    }    
+
+        var signatureHelpDisplayText = await parameterHint!.InnerTextAsync();
+        signatureHelpDisplayText = signatureHelpDisplayText.Replace("\r", "");
+
+        signatureHelpDisplayText.Should().Be(@"
+01/18
+void Console.WriteLine()
+
+Writes the current line terminator to the standard output stream.
+".Trim().Replace("\r", ""));
+    }
 
     [Fact]
     public async Task when_user_code_in_editor_is_executed_it_produces_runResult_event()
