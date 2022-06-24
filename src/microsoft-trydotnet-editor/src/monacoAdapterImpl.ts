@@ -47,7 +47,7 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
             this._onDidChangeModelContentEvents.next(e);
         });
 
-        this._onDidChangeModelContentEvents.pipe(rxjs.debounce(() => rxjs.interval(1000))).subscribe({
+        this._onDidChangeModelContentEvents.pipe(rxjs.debounce(() => rxjs.interval(500))).subscribe({
             next: async (_contentChanged) => {
                 const code = this._editor.getValue();
                 const position = this._editor.getPosition() ?? { lineNumber: 1, column: 1 };
@@ -89,61 +89,69 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         monaco.languages.registerCompletionItemProvider(language, {
             triggerCharacters: ['.'],
             provideCompletionItems: async (model: monaco.editor.ITextModel, position: monaco.Position, context: monaco.languages.CompletionContext, token: monaco.CancellationToken) => {
-                const command: dotnetInteractive.RequestCompletions = {
-                    code: this.getCode(),
-                    linePosition: {
-                        line: position.lineNumber - 1,
-                        character: position.column - 1,
-                    }
-                };
-                const commandEnvelope: dotnetInteractive.KernelCommandEnvelope = {
-                    commandType: dotnetInteractive.RequestCompletionsType,
-                    command
-                };
-                const completionsProduced = await submitCommandAndGetResult<dotnetInteractive.CompletionsProduced>(this.kernel, commandEnvelope, dotnetInteractive.CompletionsProducedType);
-                const completionList: monaco.languages.CompletionList = {
-                    suggestions: completionsProduced.completions.map(completion => ({
-                        label: completion.displayText,
-                        kind: mapToCompletionItemKind(completion.kind),
-                        insertText: completion.insertText,
-                        documentation: completion.documentation,
-                        range: {
-                            startLineNumber: position.lineNumber,
-                            startColumn: position.column,
-                            endLineNumber: position.lineNumber,
-                            endColumn: position.column,
+                if (this.languageServiceEnabled) {
+                    const command: dotnetInteractive.RequestCompletions = {
+                        code: this.getCode(),
+                        linePosition: {
+                            line: position.lineNumber - 1,
+                            character: position.column - 1,
                         }
-                    })),
-                };
-                return completionList;
+                    };
+                    const commandEnvelope: dotnetInteractive.KernelCommandEnvelope = {
+                        commandType: dotnetInteractive.RequestCompletionsType,
+                        command
+                    };
+                    const completionsProduced = await submitCommandAndGetResult<dotnetInteractive.CompletionsProduced>(this.kernel, commandEnvelope, dotnetInteractive.CompletionsProducedType);
+                    const completionList: monaco.languages.CompletionList = {
+                        suggestions: completionsProduced.completions.map(completion => ({
+                            label: completion.displayText,
+                            kind: mapToCompletionItemKind(completion.kind),
+                            insertText: completion.insertText,
+                            documentation: completion.documentation,
+                            range: {
+                                startLineNumber: position.lineNumber,
+                                startColumn: position.column,
+                                endLineNumber: position.lineNumber,
+                                endColumn: position.column,
+                            }
+                        })),
+                    };
+                    return completionList;
+                } else {
+                    return { suggestions: [] };
+                }
             }
         });
 
         monaco.languages.registerSignatureHelpProvider(language, {
             signatureHelpTriggerCharacters: ['(', ','],
             provideSignatureHelp: async (model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken, context: monaco.languages.SignatureHelpContext) => {
-                const command: dotnetInteractive.RequestSignatureHelp = {
-                    code: this.getCode(),
-                    linePosition: {
-                        line: position.lineNumber - 1,
-                        character: position.column - 1,
-                    }
-                };
-                const commandEnvelope: dotnetInteractive.KernelCommandEnvelope = {
-                    commandType: dotnetInteractive.RequestSignatureHelpType,
-                    command
-                };
-                const signatureHelpProduced = await submitCommandAndGetResult<dotnetInteractive.SignatureHelpProduced>(this.kernel, commandEnvelope, dotnetInteractive.SignatureHelpProducedType);
-                const signatureHelp: monaco.languages.SignatureHelp = {
-                    signatures: signatureHelpProduced.signatures,
-                    activeSignature: signatureHelpProduced.activeSignatureIndex,
-                    activeParameter: signatureHelpProduced.activeParameterIndex,
-                };
-                const signatureHelpResult: monaco.languages.SignatureHelpResult = {
-                    value: signatureHelp,
-                    dispose: () => { },
-                };
-                return signatureHelpResult;
+                if (this.languageServiceEnabled) {
+                    const command: dotnetInteractive.RequestSignatureHelp = {
+                        code: this.getCode(),
+                        linePosition: {
+                            line: position.lineNumber - 1,
+                            character: position.column - 1,
+                        }
+                    };
+                    const commandEnvelope: dotnetInteractive.KernelCommandEnvelope = {
+                        commandType: dotnetInteractive.RequestSignatureHelpType,
+                        command
+                    };
+                    const signatureHelpProduced = await submitCommandAndGetResult<dotnetInteractive.SignatureHelpProduced>(this.kernel, commandEnvelope, dotnetInteractive.SignatureHelpProducedType);
+                    const signatureHelp: monaco.languages.SignatureHelp = {
+                        signatures: signatureHelpProduced.signatures,
+                        activeSignature: signatureHelpProduced.activeSignatureIndex,
+                        activeParameter: signatureHelpProduced.activeParameterIndex,
+                    };
+                    const signatureHelpResult: monaco.languages.SignatureHelpResult = {
+                        value: signatureHelp,
+                        dispose: () => { },
+                    };
+                    return signatureHelpResult;
+                } else {
+                    return { value: undefined, dispose: () => { } };
+                }
             }
         });
     }

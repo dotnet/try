@@ -100,8 +100,9 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         await editor.PressAsync("Delete");
     }
 
-    public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor)
+    public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor, TimeSpan? delayStart = null)
     {
+        await Task.Delay(delayStart ?? TimeSpan.FromSeconds(10));
         var awaiter = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
         await page.DispatchMessage(new
         {

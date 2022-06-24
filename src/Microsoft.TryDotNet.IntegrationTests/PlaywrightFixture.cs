@@ -30,6 +30,7 @@ public class PlaywrightFixture :  IDisposable, IAsyncLifetime
         if (Debugger.IsAttached)
         {
             browserTypeLaunchOptions.Headless = false;
+            browserTypeLaunchOptions.Devtools = true;
         }
 
         Browser = await _playwrightSession.Chromium.LaunchAsync(browserTypeLaunchOptions).Timeout(TimeSpan.FromMinutes(5), "Timeout launching browser");

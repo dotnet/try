@@ -393,9 +393,7 @@ int i = ""NaN"";
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -452,15 +450,13 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
 Console".Replace("\r\n", "\n"));
 
-        await editor.TypeAsync(@".");
+        await page.TypeTextInMonacoEditor(@".");
 
         await page.WaitForSelectorAsync(".monaco-list-row");
 
@@ -511,15 +507,13 @@ Console".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
 Console".Replace("\r\n", "\n"));
 
-        await editor.TypeAsync(@".WriteLine(");
+        await page.TypeTextInMonacoEditor(@".WriteLine(");
 
         await page.WaitForSelectorAsync(".parameter-hints-widget");
 
@@ -577,9 +571,7 @@ Writes the current line terminator to the standard output stream.
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -636,9 +628,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -696,9 +686,7 @@ Console.WriteLine(""{randomValue}b"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -718,5 +706,5 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
             .Contain(randomValue);
     }
 
-    record EditorMarker(int severity, string message, int startLineNumber, int startColumn, int endLineNumber, int endColumn);
+    private record EditorMarker(int severity, string message, int startLineNumber, int startColumn, int endLineNumber, int endColumn);
 }

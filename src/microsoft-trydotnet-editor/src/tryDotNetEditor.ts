@@ -16,8 +16,12 @@ export class TryDotNetEditor {
   private _editorChangesSubscription: rxjs.Subscription;
   private _currentDocumentId?: DocumentId;
   private _currentDocument: dotnetInteractive.DocumentOpened;
+  private _handlingRunRequest: boolean;
 
 
+  public get isHandlingRunRequest(): boolean {
+    return this._handlingRunRequest;
+  }
   public get currentProject(): { projectItems: dotnetInteractive.ProjectItem[] } {
     return this._currentProject;
   }
@@ -31,6 +35,7 @@ export class TryDotNetEditor {
     // for messaging api backward compatibility
 
     this._kernel.subscribeToKernelEvents((event) => {
+      dotnetInteractive.Logger.default.info(`[kernel event] : ${JSON.stringify(event)}`);
       if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
         dotnetInteractive.Logger.default.info(`[SubmitCode event] : ${JSON.stringify(event)}`);
         switch (event.eventType) {
@@ -174,70 +179,91 @@ export class TryDotNetEditor {
       case messages.FOCUS_EDITOR_REQUEST:
         this.getEditor().focus();
         break;
-      case messages.RUN_REQUEST: {
-        const code = this.getEditor().getCode();
-        const command: dotnetInteractive.KernelCommandEnvelope = {
-          commandType: dotnetInteractive.SubmitCodeType,
-          command: <dotnetInteractive.SubmitCode>{
-            code: code
-          }
-        };
-
-        dotnetInteractive.Logger.default.info(`[tryDotNetEditor run request] : ${JSON.stringify(command)}`);
-
-        let events: dotnetInteractive.KernelEventEnvelope[] = [];
-        let sub = this.getKernel().subscribeToKernelEvents(event => {
-          switch (event.eventType) {
-            case dotnetInteractive.CommandSucceededType:
-            case dotnetInteractive.CommandFailedType:
-            case dotnetInteractive.CommandCancelledType:
-              if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
-                sub.dispose();
-                let response: any = {
-                  type: messages.RUN_COMPLETED_EVENT,
-                  requestId: requestId,
-                  outcome: event.eventType === dotnetInteractive.CommandSucceededType ? 'Success' : 'Failed'
-                };
-
-                if (event.eventType === dotnetInteractive.CommandFailedType) {
-                  response.exception = (<dotnetInteractive.CommandFailed>event.event).message;
-                }
-                const stdOutEvents = events.filter(e => e.eventType === dotnetInteractive.StandardOutputValueProducedType).map(e => (<dotnetInteractive.StandardOutputValueProduced>e.event));
-
-                response.output = stdOutEvents.map(e => e.formattedValues[0].value);
-
-                const diagnosticsEvents = events.filter(e => e.eventType === dotnetInteractive.DiagnosticsProducedType).map(e => (<dotnetInteractive.DiagnosticsProduced>e.event));
-
-                response.diagnostics = [];
-                for (let diagnosticsEvent of diagnosticsEvents) {
-                  for (let diagnostic of diagnosticsEvent.diagnostics) {
-                    response.diagnostics.push({
-                      start: diagnostic.linePositionSpan.start,
-                      end: diagnostic.linePositionSpan.end,
-                      severity: diagnostic.severity,
-                      message: diagnostic.message,
-                    });
-                  }
-                }
-                this._postMessage(response);
-                this._postMessage({
-                  type: messages.HOST_RUN_READY_EVENT,
-                  requestId: requestId,
-                });
-              }
-              break;
-            default:
-              events.push(event);
-              break;
-          }
-        });
-        this.getKernel().send(command);
-
-      }
+      case messages.RUN_REQUEST:
+        await this._handleRunRequest(requestId);
+        break;
       default:
         dotnetInteractive.Logger.default.warn(`unhandled message: ${JSON.stringify(apiMessage)}`);
         break;
     }
+  }
+
+  private _handleRunRequest(requestId: string): Promise<void> {
+    this._handlingRunRequest = true;
+    const code = this.getEditor().getCode();
+    const command: dotnetInteractive.KernelCommandEnvelope = {
+      commandType: dotnetInteractive.SubmitCodeType,
+      command: <dotnetInteractive.SubmitCode>{
+        code: code
+      }
+    };
+
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] start`);
+
+    let events: dotnetInteractive.KernelEventEnvelope[] = [];
+    let sub = this.getKernel().subscribeToKernelEvents(event => {
+      dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] kernel event: ${JSON.stringify(event)}`);
+      switch (event.eventType) {
+        case dotnetInteractive.CommandSucceededType:
+        case dotnetInteractive.CommandFailedType:
+        case dotnetInteractive.CommandCancelledType:
+          if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
+            dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(command)}`);
+
+            let response: any = {
+              type: messages.RUN_COMPLETED_EVENT,
+              requestId: requestId,
+              outcome: event.eventType === dotnetInteractive.CommandSucceededType ? 'Success' : 'Failed'
+            };
+
+            try {
+              if (event.eventType === dotnetInteractive.CommandFailedType) {
+                response.exception = (<dotnetInteractive.CommandFailed>event.event).message;
+              }
+              const stdOutEvents = events.filter(e => e.eventType === dotnetInteractive.StandardOutputValueProducedType).map(e => (<dotnetInteractive.StandardOutputValueProduced>e.event));
+
+              response.output = stdOutEvents.map(e => e.formattedValues[0].value);
+
+              const diagnosticsEvents = events.filter(e => e.eventType === dotnetInteractive.DiagnosticsProducedType).map(e => (<dotnetInteractive.DiagnosticsProduced>e.event));
+
+              response.diagnostics = [];
+              for (let diagnosticsEvent of diagnosticsEvents) {
+                for (let diagnostic of diagnosticsEvent.diagnostics) {
+                  response.diagnostics.push({
+                    start: diagnostic.linePositionSpan.start,
+                    end: diagnostic.linePositionSpan.end,
+                    severity: diagnostic.severity,
+                    message: diagnostic.message,
+                  });
+                }
+              }
+            }
+            finally {
+              this._postMessage(response);
+              this._postMessage({
+                type: messages.HOST_RUN_READY_EVENT,
+                requestId: requestId,
+              });
+            }
+          }
+          break;
+        default:
+          if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
+            events.push(event);
+          }
+          break;
+      }
+    });
+
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] sending : ${JSON.stringify(command)}`);
+
+    return this.getKernel()
+      .send(command)
+      .finally(() => {
+        dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest]  disposing event subscription}`);
+        sub.dispose();
+        this._handlingRunRequest = false;
+      });
   }
 
   public async openProject(project: dotnetInteractive.Project) {
