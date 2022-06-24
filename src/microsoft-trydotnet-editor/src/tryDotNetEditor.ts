@@ -210,6 +210,10 @@ export class TryDotNetEditor {
           if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
             dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(command)}`);
 
+            dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest]  disposing event subscription}`);
+            sub.dispose();
+            this._handlingRunRequest = false;
+
             let response: any = {
               type: messages.RUN_COMPLETED_EVENT,
               requestId: requestId,
@@ -258,12 +262,7 @@ export class TryDotNetEditor {
     dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] sending : ${JSON.stringify(command)}`);
 
     return this.getKernel()
-      .send(command)
-      .finally(() => {
-        dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest]  disposing event subscription}`);
-        sub.dispose();
-        this._handlingRunRequest = false;
-      });
+      .send(command);
   }
 
   public async openProject(project: dotnetInteractive.Project) {
