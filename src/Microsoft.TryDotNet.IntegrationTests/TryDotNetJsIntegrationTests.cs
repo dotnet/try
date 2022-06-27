@@ -88,7 +88,6 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
     [Fact]
     public async Task outputs_are_rendered()
     {
-        // todo: fix this test
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
@@ -110,9 +109,19 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         var dotnetOnline = new DotNetOnline(page);
 
         await dotnetOnline.FocusAsync();
-        var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
-        await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
-        await documentOpenAwaiter;
+        
+        await page.RunAndWaitForConsoleMessageAsync(async () =>
+            {
+                var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+                await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
+                await documentOpenAwaiter;
+            },
+            new PageRunAndWaitForConsoleMessageOptions
+            {
+                Predicate = message => message.Text.Contains("[trydotnet-editor] [MonacoEditorArapter.setCode]: Console.WriteLine(123);"),
+                Timeout = Debugger.IsAttached ? 0.0f : (float)TimeSpan.FromMinutes(10).TotalMilliseconds
+            }
+        );
 
         await page.TestScreenShotAsync("before_run");
         var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
