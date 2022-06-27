@@ -113,6 +113,8 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
         await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
         await documentOpenAwaiter;
+
+        await page.TestScreenShotAsync("before_run");
         var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
 
         await page.RunAndWaitForConsoleMessageAsync(async () =>
@@ -126,9 +128,9 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
 
         await run;
         
-        await page.TestScreenShotAsync();
+        await page.TestScreenShotAsync("after_run");
         var outputElement = page.Locator("body > div > div.dotnet-online-editor-section > pre");
-        
+        await page.TestScreenShotAsync("output_grabbed");
         var result = await outputElement.TextContentAsync();
         result.Should().Be("123\n");
     }

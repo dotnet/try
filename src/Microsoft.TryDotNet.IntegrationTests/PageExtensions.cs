@@ -14,9 +14,13 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 
 internal static class PageExtensions
 {
-    public static Task<byte[]> TestScreenShotAsync(this IPage page, int? counter = 0, [CallerMemberName] string? testName = null, [CallerFilePath] string? sourceFilePath = null)
+    public static Task<byte[]> TestScreenShotAsync(this IPage page, string? label = null, [CallerMemberName] string? testName = null, [CallerFilePath] string? sourceFilePath = null)
     {
-        var imageName = $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{testName}_{counter??0}";
+        var imageName = $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{testName}";
+        if (!string.IsNullOrWhiteSpace(label))
+        {
+            imageName = $"{imageName}_{label}";
+        }
         return page.ScreenshotAsync(new PageScreenshotOptions { Path = Path.Combine("playwright_screenshots", $"screenshot_{imageName}.png") });
     }
 
@@ -47,7 +51,6 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         await editor.IsVisibleAsync();
         return editor;
     }
-
     public static async Task<ILocator> FindEditorContent(this IFrameLocator iframe)
     {
         var editor = iframe.Locator(@"div[role = ""presentation""] .view-lines");
