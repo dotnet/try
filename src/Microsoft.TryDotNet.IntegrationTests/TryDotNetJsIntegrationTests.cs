@@ -67,18 +67,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         var dotnetOnline = new DotNetOnline(page);
 
         await dotnetOnline.FocusAsync();
-        await page.RunAndWaitForConsoleMessageAsync(async () =>
-            {
-                var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
-                await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
-                await documentOpenAwaiter;
-            },
-            new PageRunAndWaitForConsoleMessageOptions
-            {
-                Predicate = message => message.Text.Contains("[trydotnet-editor] [MonacoEditorArapter.setCode]: Console.WriteLine(123);"),
-                Timeout = Debugger.IsAttached ? 0.0f : (float)TimeSpan.FromMinutes(10).TotalMilliseconds
-            }
-        );
+        await page.SetCodeUsingTrydotnetJsApi(interceptor, "Console.WriteLine(123);");
 
         await page.TestScreenShotAsync();
         var text = await page.FrameLocator("body > div > div.dotnet-online-editor-section > iframe").GetEditorContentAsync();
@@ -109,19 +98,8 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         var dotnetOnline = new DotNetOnline(page);
 
         await dotnetOnline.FocusAsync();
-        
-        await page.RunAndWaitForConsoleMessageAsync(async () =>
-            {
-                var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
-                await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
-                await documentOpenAwaiter;
-            },
-            new PageRunAndWaitForConsoleMessageOptions
-            {
-                Predicate = message => message.Text.Contains("[trydotnet-editor] [MonacoEditorArapter.setCode]: Console.WriteLine(123);"),
-                Timeout = Debugger.IsAttached ? 0.0f : (float)TimeSpan.FromMinutes(10).TotalMilliseconds
-            }
-        );
+
+        await page.SetCodeUsingTrydotnetJsApi(interceptor, "Console.WriteLine(123);");
 
         await page.TestScreenShotAsync("before_run");
         var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));

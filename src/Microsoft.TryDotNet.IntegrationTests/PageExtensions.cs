@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -113,6 +114,23 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         });
         await awaiter;
         return interceptor.Messages;
+    }
+
+    public static async Task SetCodeUsingTrydotnetJsApi(this IPage page, MessageInterceptor interceptor, string code, TimeSpan? delayStart = null)
+    {
+        await page.RunAndWaitForConsoleMessageAsync(async () =>
+        {
+            var dotnetOnline = new DotNetOnline(page);
+            var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+            await dotnetOnline.SetCodeAsync(code);
+            await documentOpenAwaiter;
+        },
+            new PageRunAndWaitForConsoleMessageOptions
+            {
+                Predicate = message => message.Text.Contains($"[trydotnet-editor] [MonacoEditorArapter.setCode]: {code}"),
+                Timeout = Debugger.IsAttached ? 0.0f : (float)TimeSpan.FromMinutes(10).TotalMilliseconds
+            }
+        );
     }
 
 
