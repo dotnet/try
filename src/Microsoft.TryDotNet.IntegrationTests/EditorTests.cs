@@ -333,9 +333,12 @@ public class EditorTests : PlaywrightTestBase
 
         await page.RunAndWaitForConsoleMessageAsync(async () =>
         {
-            await editor.TypeAsync($@"/////////////////////////
+            await editor.TypeAsync(@"/////////////////////////
 int i = ""NaN"";
 /////////////////////////".Replace("\r\n", "\n"));
+
+            await editor.PressAsync("Enter", new LocatorPressOptions { Delay = 0.5f });
+            
         }, new PageRunAndWaitForConsoleMessageOptions()
         {
             Predicate = message => message.Text.Contains("[MonacoEditorAdapter.setMarkers]"),
@@ -503,7 +506,6 @@ Console.".Replace("\r\n", "\n"));
             type = "OpenDocument",
             relativeFilePath = "Program.cs"
         });
-
 
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();

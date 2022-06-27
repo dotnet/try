@@ -70,7 +70,6 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         {
             await editor.TypeAsync(text);
         }
-        await editor.PressAsync("Escape", new LocatorPressOptions{ Delay = 0.5f});
     }
 
     public static async Task<string> GetEditorContentAsync(this IPage page)
