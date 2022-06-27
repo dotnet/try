@@ -3,6 +3,7 @@
 
 import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as rxjs from 'rxjs';
+import { DebouncingKernel } from './decouncingKernel';
 
 export enum MarkerSeverity {
     Hint = 1,
@@ -58,7 +59,7 @@ export abstract class EditorAdapter {
             // interactive diagnostics are 0-based, monaco is 1-based
             markers.push({
                 message: diagnostic.message,
-                severity: diagnostic.severity === 'error' ? MarkerSeverity.Error : MarkerSeverity.Warning,
+                severity: severity,
                 startLineNumber: diagnostic.linePositionSpan.start.line + 1,
                 startColumn: diagnostic.linePositionSpan.start.character + 1,
                 endLineNumber: diagnostic.linePositionSpan.end.line + 1,
@@ -71,7 +72,7 @@ export abstract class EditorAdapter {
 
     abstract getMarkers(): IMarkerData[];
 
-    private _kernel: dotnetInteractive.Kernel;
+    private _kernel: DebouncingKernel;
     private _editorChanges: rxjs.Subject<ContentChangedEvent> = new rxjs.Subject<ContentChangedEvent>();
 
     constructor() {
@@ -122,7 +123,7 @@ export abstract class EditorAdapter {
         return this._editorChanges;
     }
 
-    protected get kernel(): dotnetInteractive.Kernel {
+    protected get kernel(): DebouncingKernel {
         return this._kernel;
     }
 
@@ -132,7 +133,7 @@ export abstract class EditorAdapter {
         }
     }
 
-    configureServices(kernel: dotnetInteractive.Kernel) {
+    configureServices(kernel: DebouncingKernel) {
         this._kernel = kernel;
         if (!this._kernel) {
             throw new Error('kernel is null');

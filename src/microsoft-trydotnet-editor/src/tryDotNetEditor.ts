@@ -9,6 +9,8 @@ import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as newContract from './newContract';
 import { DocumentId } from './documentId';
 import { configureLogging } from './log';
+import { DebouncingKernel } from './decouncingKernel';
+
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
   private _currentProject?: { projectItems: dotnetInteractive.ProjectItem[]; };
@@ -17,6 +19,7 @@ export class TryDotNetEditor {
   private _currentDocumentId?: DocumentId;
   private _currentDocument: dotnetInteractive.DocumentOpened;
   private _handlingRunRequest: boolean;
+  private _kernel: DebouncingKernel;
 
 
   public get isHandlingRunRequest(): boolean {
@@ -26,9 +29,10 @@ export class TryDotNetEditor {
     return this._currentProject;
   }
 
-  constructor(private _postMessage: (message: any) => void, private _mainWindowMessageBus: rxjs.Subject<any>, private _kernel: projectKernel.ProjectKernel) {
+  constructor(private _postMessage: (message: any) => void, private _mainWindowMessageBus: rxjs.Subject<any>, kernel: projectKernel.ProjectKernel) {
     this.editorId = "-0-";
 
+    this._kernel = new DebouncingKernel(kernel);
     this._mainWindowMessageBus.subscribe(message => {
       this.handleHostMessage(message);
     });
@@ -277,7 +281,7 @@ export class TryDotNetEditor {
 
     this._currentDocumentId = null;
     let projectOpened = await dotnetInteractive.submitCommandAndGetResult<dotnetInteractive.ProjectOpened>(
-      this.getKernel(), command, dotnetInteractive.ProjectOpenedType); //?
+      this.getKernel().asInteractiveKernel(), command, dotnetInteractive.ProjectOpenedType); //?
 
     this.getEditor().enableTextChangedEvents();
     this.getEditor().enableLanguageService();
@@ -304,7 +308,7 @@ export class TryDotNetEditor {
       this.getEditor().disableLanguageService();
       this.getEditor().disableTextChangedEvents();
       this._currentDocument = await dotnetInteractive.submitCommandAndGetResult<dotnetInteractive.DocumentOpened>(
-        this.getKernel(),
+        this.getKernel().asInteractiveKernel(),
         command,
         dotnetInteractive.DocumentOpenedType); //?
       this.getEditor().setCode(this._currentDocument.content);
@@ -326,7 +330,7 @@ export class TryDotNetEditor {
     }
   }
 
-  private getKernel(): projectKernel.ProjectKernel {
+  private getKernel(): DebouncingKernel {
     if (this._kernel) {
       return this._kernel;
     } else {

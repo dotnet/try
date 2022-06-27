@@ -101,7 +101,7 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
                         commandType: dotnetInteractive.RequestCompletionsType,
                         command
                     };
-                    const completionsProduced = await submitCommandAndGetResult<dotnetInteractive.CompletionsProduced>(this.kernel, commandEnvelope, dotnetInteractive.CompletionsProducedType);
+                    const completionsProduced = await submitCommandAndGetResult<dotnetInteractive.CompletionsProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, dotnetInteractive.CompletionsProducedType);
                     const completionList: monaco.languages.CompletionList = {
                         suggestions: completionsProduced.completions.map(completion => ({
                             label: completion.displayText,
@@ -138,7 +138,7 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
                         commandType: dotnetInteractive.RequestSignatureHelpType,
                         command
                     };
-                    const signatureHelpProduced = await submitCommandAndGetResult<dotnetInteractive.SignatureHelpProduced>(this.kernel, commandEnvelope, dotnetInteractive.SignatureHelpProducedType);
+                    const signatureHelpProduced = await submitCommandAndGetResult<dotnetInteractive.SignatureHelpProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, dotnetInteractive.SignatureHelpProducedType);
                     const signatureHelp: monaco.languages.SignatureHelp = {
                         signatures: signatureHelpProduced.signatures,
                         activeSignature: signatureHelpProduced.activeSignatureIndex,

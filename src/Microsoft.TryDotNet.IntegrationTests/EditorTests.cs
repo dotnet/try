@@ -458,7 +458,10 @@ Console".Replace("\r\n", "\n"));
 
         await page.TypeTextInMonacoEditor(@".");
 
-        await page.WaitForSelectorAsync(".monaco-list-row");
+        await page.WaitForSelectorAsync(".monaco-list-row", new PageWaitForSelectorOptions
+        {
+            Timeout = (float)(TimeSpan.FromMinutes(10).TotalMilliseconds)
+        });
 
         var rows = await page.QuerySelectorAllAsync(".monaco-list-row");
 
@@ -515,7 +518,10 @@ Console".Replace("\r\n", "\n"));
 
         await page.TypeTextInMonacoEditor(@".WriteLine(");
 
-        await page.WaitForSelectorAsync(".parameter-hints-widget");
+        await page.WaitForSelectorAsync(".parameter-hints-widget", new PageWaitForSelectorOptions
+        {
+            Timeout = (float)(TimeSpan.FromMinutes(10).TotalMilliseconds)
+        });
 
         var parameterHint = await page.QuerySelectorAsync(".parameter-hints-widget");
 

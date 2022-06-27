@@ -117,8 +117,6 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
 
         await page.RunAndWaitForConsoleMessageAsync(async () =>
         {
-            await Task.Delay(1000);
-
             await dotnetOnline.ExecuteAsync();
         }, new PageRunAndWaitForConsoleMessageOptions
         {
@@ -130,6 +128,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         
         await page.TestScreenShotAsync();
         var outputElement = page.Locator("body > div > div.dotnet-online-editor-section > pre");
+        
         var result = await outputElement.TextContentAsync();
         result.Should().Be("123\n");
     }
