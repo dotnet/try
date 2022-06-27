@@ -23,7 +23,6 @@ internal static class PageExtensions
     public static async Task DispatchMessage<T>(this IPage page, T data)
     {
         await page.EvaluateAsync(@"(request) => {
-console.log(JSON.stringify(request));
 window.dispatchEvent(new MessageEvent(""message"", { data: request }));
 }", data);
     }
