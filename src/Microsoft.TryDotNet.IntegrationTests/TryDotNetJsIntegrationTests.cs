@@ -39,6 +39,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         var pageUri = new Uri(QueryHelpers.AddQueryString(new Uri(learnRoot,"DocsHost.html").ToString(), param!));
         await page.GotoAsync(pageUri.ToString());
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
         
         await page.FindEditor();
     }
@@ -67,8 +68,8 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         var dotnetOnline = new DotNetOnline(page);
 
         await dotnetOnline.FocusAsync();
-        await page.SetCodeUsingTrydotnetJsApi(interceptor, "Console.WriteLine(123);");
-
+        await page.SetCodeUsingTryDotNetJsApi(interceptor, "Console.WriteLine(123);");
+   
         await page.TestScreenShotAsync();
         var text = await page.FrameLocator("body > div > div.dotnet-online-editor-section > iframe").GetEditorContentAsync();
         text.Should().Contain("Console.WriteLine(123);");
@@ -99,7 +100,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
 
         await dotnetOnline.FocusAsync();
 
-        await page.SetCodeUsingTrydotnetJsApi(interceptor, "Console.WriteLine(123);");
+        await page.SetCodeUsingTryDotNetJsApi(interceptor, "Console.WriteLine(123);");
 
         await page.TestScreenShotAsync("before_run");
         var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));

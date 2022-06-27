@@ -116,7 +116,7 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         return interceptor.Messages;
     }
 
-    public static async Task SetCodeUsingTrydotnetJsApi(this IPage page, MessageInterceptor interceptor, string code, TimeSpan? delayStart = null)
+    public static async Task SetCodeUsingTryDotNetJsApi(this IPage page, MessageInterceptor interceptor, string code, TimeSpan? delayStart = null)
     {
         await page.RunAndWaitForConsoleMessageAsync(async () =>
         {
