@@ -450,13 +450,11 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        await page.TypeTextInMonacoEditor($@"using System;
+        await page.TypeTextInMonacoEditor(@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
-Console".Replace("\r\n", "\n"));
-
-        await page.TypeTextInMonacoEditor(@".");
+Console.".Replace("\r\n", "\n"));
 
         await page.WaitForSelectorAsync(".monaco-list-row", new PageWaitForSelectorOptions
         {
@@ -514,9 +512,8 @@ Console".Replace("\r\n", "\n"));
 namespace myApp {{ 
 class Program {{
 static void Main() {{
-Console".Replace("\r\n", "\n"));
-
-        await page.TypeTextInMonacoEditor(@".WriteLine(");
+Console.WriteLine(".Replace("\r\n", "\n"));
+        
 
         await page.WaitForSelectorAsync(".parameter-hints-widget", new PageWaitForSelectorOptions
         {
