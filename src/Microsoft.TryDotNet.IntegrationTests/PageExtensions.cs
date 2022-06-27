@@ -14,9 +14,9 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 
 internal static class PageExtensions
 {
-    public static Task<byte[]> TestScreenShotAsync(this IPage page, [CallerMemberName] string? testName = null, [CallerFilePath] string? sourceFilePath = null)
+    public static Task<byte[]> TestScreenShotAsync(this IPage page, int? counter = 0, [CallerMemberName] string? testName = null, [CallerFilePath] string? sourceFilePath = null)
     {
-        var imageName = $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{testName}";
+        var imageName = $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{testName}_{counter??0}";
         return page.ScreenshotAsync(new PageScreenshotOptions { Path = Path.Combine("playwright_screenshots", $"screenshot_{imageName}.png") });
     }
 
