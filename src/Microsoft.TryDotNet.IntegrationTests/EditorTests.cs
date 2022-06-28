@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
@@ -334,9 +333,12 @@ public class EditorTests : PlaywrightTestBase
 
         await page.RunAndWaitForConsoleMessageAsync(async () =>
         {
-            await editor.TypeAsync($@"/////////////////////////
+            await editor.TypeAsync(@"/////////////////////////
 int i = ""NaN"";
 /////////////////////////".Replace("\r\n", "\n"));
+
+            await editor.PressAsync("Enter", new LocatorPressOptions { Delay = 0.5f });
+            
         }, new PageRunAndWaitForConsoleMessageOptions()
         {
             Predicate = message => message.Text.Contains("[MonacoEditorAdapter.setMarkers]"),
@@ -394,9 +396,7 @@ int i = ""NaN"";
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -413,6 +413,128 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
             .GetRawText()
             .Should()
             .Contain(randomValue);
+    }
+
+    [Fact]
+    public async Task user_typing_code_gets_completion()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+        
+        await page.DispatchMessage(new
+        {
+            type = "OpenProject",
+            project = new
+            {
+                files = new[]
+                {
+                    new {
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
+                    }
+                }
+            }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
+        });
+
+
+        await documentOpenedAwaiter;
+        await page.ClearMonacoEditor();
+
+        await page.TypeTextInMonacoEditor(@"using System;
+namespace myApp {{ 
+class Program {{
+static void Main() {{
+Console.".Replace("\r\n", "\n"));
+
+        await page.WaitForSelectorAsync(".monaco-list-row", new PageWaitForSelectorOptions
+        {
+            Timeout = (float)(TimeSpan.FromMinutes(10).TotalMilliseconds)
+        });
+
+        var rows = await page.QuerySelectorAllAsync(".monaco-list-row");
+
+        await page.TestScreenShotAsync();
+
+        var completionItemDisplayText = await Task.WhenAll(rows.Select(r => r.InnerTextAsync()));
+
+        completionItemDisplayText.Should().Contain(new[] { "BackgroundColor", "Beep", "Clear" });
+    }
+
+    [Fact]
+    public async Task user_typing_code_gets_signatureHelp()
+    {
+        var page = await Playwright.Browser!.NewPageAsync();
+        var interceptor = new MessageInterceptor();
+        await interceptor.InstallAsync(page);
+        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
+        var documentOpenedAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+
+        await page.DispatchMessage(new
+        {
+            type = "OpenProject",
+            project = new
+            {
+                files = new[]
+                {
+                    new {
+                        relativeFilePath = "Program.cs",
+                        content = @"Console.WriteLine(""Hello World"");"
+                    }
+                }
+            }
+        });
+
+        await projectLoadedAwaiter;
+        await page.DispatchMessage(new
+        {
+            type = "OpenDocument",
+            relativeFilePath = "Program.cs"
+        });
+
+        await documentOpenedAwaiter;
+        await page.ClearMonacoEditor();
+
+        await page.TypeTextInMonacoEditor($@"using System;
+namespace myApp {{ 
+class Program {{
+static void Main() {{
+Console.WriteLine(".Replace("\r\n", "\n"));
+        
+
+        await page.WaitForSelectorAsync(".parameter-hints-widget", new PageWaitForSelectorOptions
+        {
+            Timeout = (float)(TimeSpan.FromMinutes(10).TotalMilliseconds)
+        });
+
+        var parameterHint = await page.QuerySelectorAsync(".parameter-hints-widget");
+
+        await page.TestScreenShotAsync();
+
+        var signatureHelpDisplayText = await parameterHint!.InnerTextAsync();
+        signatureHelpDisplayText = signatureHelpDisplayText.Replace("\r", "");
+
+        signatureHelpDisplayText.Should().Be(@"
+01/18
+void Console.WriteLine()
+
+Writes the current line terminator to the standard output stream.
+".Trim().Replace("\r", ""));
     }
 
     [Fact]
@@ -454,9 +576,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -513,9 +633,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -573,9 +691,7 @@ Console.WriteLine(""{randomValue}b"");".Replace("\r\n", "\n"));
         await documentOpenedAwaiter;
         await page.ClearMonacoEditor();
 
-        var editor = await page.FindEditor();
-        await editor.FocusAsync();
-        await editor.TypeAsync($@"using System;
+        await page.TypeTextInMonacoEditor($@"using System;
 namespace myApp {{ 
 class Program {{
 static void Main() {{
@@ -595,5 +711,5 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
             .Contain(randomValue);
     }
 
-    record EditorMarker(int severity, string message, int startLineNumber, int startColumn, int endLineNumber, int endColumn);
+    private record EditorMarker(int severity, string message, int startLineNumber, int startColumn, int endLineNumber, int endColumn);
 }

@@ -14,6 +14,7 @@ import { Project } from "../project";
 import { debounceTime, Subject, Unsubscribable } from "rxjs";
 import { isNullOrUndefined } from "../stringExtensions";
 import { ServiceError, ISession, OutputEventSubscriber, ServiceErrorSubscriber, OpenDocumentParameters, RunConfiguration, RunResult } from "../session";
+import * as newContract from "../newContract";
 
 export type DocumentObject = { fileName: string, region: Region, content: string };
 
@@ -87,6 +88,13 @@ export class Session implements ISession {
                 textChangedHandler(event);
             }
         });
+    }
+    enableLogging(enableLogging: boolean): void {
+        const request: newContract.EnableLogging = {
+            type: newContract.EnableLoggingType,
+            enableLogging: enableLogging
+        };
+        this.messageBus.post(request);
     }
 
     private areBussesReady(): boolean {

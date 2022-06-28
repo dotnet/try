@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.WebUtilities;
@@ -11,17 +12,17 @@ using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
-public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixture>
+public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixture>
 {
     public LearnFixture Learn { get; }
 
-    public LearnIntegrationTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet, LearnFixture learn) : base(playwright, tryDotNet)
+    public TryDotNetJsIntegrationTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet, LearnFixture learn) : base(playwright, tryDotNet)
     {
         Learn = learn;
     }
 
     [Fact]
-    public async Task loads_trydotnet()
+    public async Task loads_trydotnet_editor()
     {
         var page = await Playwright.Browser!.NewPageAsync();
         
@@ -38,6 +39,7 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         var pageUri = new Uri(QueryHelpers.AddQueryString(new Uri(learnRoot,"DocsHost.html").ToString(), param!));
         await page.GotoAsync(pageUri.ToString());
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
         
         await page.FindEditor();
     }
@@ -66,19 +68,16 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         var dotnetOnline = new DotNetOnline(page);
 
         await dotnetOnline.FocusAsync();
-        var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
-        await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
-        await documentOpenAwaiter;
-       
+        await page.SetCodeUsingTryDotNetJsApi(interceptor, "Console.WriteLine(123);");
+   
         await page.TestScreenShotAsync();
         var text = await page.FrameLocator("body > div > div.dotnet-online-editor-section > iframe").GetEditorContentAsync();
         text.Should().Contain("Console.WriteLine(123);");
     }
 
-    [Fact(Skip = "Flaky")]
+    [Fact]
     public async Task outputs_are_rendered()
     {
-        // todo: fix this test
         var page = await Playwright.Browser!.NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
@@ -100,16 +99,26 @@ public class LearnIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixt
         var dotnetOnline = new DotNetOnline(page);
 
         await dotnetOnline.FocusAsync();
-        var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
-        await dotnetOnline.SetCodeAsync("Console.WriteLine(123);");
-        await documentOpenAwaiter;
-        await Task.Delay(1000);
+
+        await page.SetCodeUsingTryDotNetJsApi(interceptor, "Console.WriteLine(123);");
+
+        await page.TestScreenShotAsync("before_run");
         var run = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
-        await dotnetOnline.ExecuteAsync();
+
+        await page.RunAndWaitForConsoleMessageAsync(async () =>
+        {
+            await dotnetOnline.ExecuteAsync();
+        }, new PageRunAndWaitForConsoleMessageOptions
+        {
+            Timeout = Debugger.IsAttached ? 0.0f: (float) TimeSpan.FromMinutes(10).TotalMilliseconds,
+            Predicate = message => message.Text.Contains("---- resolving response awaiter for") && message.Text.Contains("and type [RunCompleted]")
+        });
+
         await run;
         
-        await page.TestScreenShotAsync();
+        await page.TestScreenShotAsync("after_run");
         var outputElement = page.Locator("body > div > div.dotnet-online-editor-section > pre");
+        await page.TestScreenShotAsync("output_grabbed");
         var result = await outputElement.TextContentAsync();
         result.Should().Be("123\n");
     }

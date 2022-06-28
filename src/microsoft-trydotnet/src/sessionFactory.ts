@@ -8,24 +8,12 @@ import { IFrameMessageBus } from "./internals/messageBus";
 import { configureEmbeddableEditorIFrame, configureEmbeddableEditorIFrameWithPackage } from "./htmlDomHelpers";
 import { Project } from "./project";
 import { Logger, LogLevel } from "@microsoft/dotnet-interactive";
+import { configureLogging } from "./log";
 
 async function _createSession(configuration: Configuration, editorIFrame: HTMLIFrameElement, window: Window, initialState: InitialSessionState, configureEmbeddableEditorIFrameCallBack: (editorIFrame: HTMLIFrameElement, configuration: Configuration) => void): Promise<ISession> {
-  if (configuration?.enableLogging) {
-    Logger.configure("trydotnet-js", (entry) => {
-      switch (entry.logLevel) {
-        case LogLevel.Info:
-          console.log(`[${entry.source}] ${entry.message}`);
-          break;
-        case LogLevel.Warn:
-          console.warn(`[${entry.source}] ${entry.message}`);
-          break;
-        case LogLevel.Error:
-          console.error(`[${entry.source}] ${entry.message}`);
-          break;
-      }
 
-    });
-  }
+
+  configureLogging({ enableLogging: configuration?.enableLogging === true });
 
   let messageBus = new IFrameMessageBus(editorIFrame, window);
   let session = new Session(messageBus);
@@ -38,6 +26,7 @@ async function _createSession(configuration: Configuration, editorIFrame: HTMLIF
   Logger.default.info("----  start createSession");
   await session.configureAndInitialize(configuration, initialState);
   Logger.default.info("----  end createSession");
+  session.enableLogging(configuration?.enableLogging === true);
   return session;
 }
 

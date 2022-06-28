@@ -45,13 +45,7 @@ module.exports = {
 			},
 			{
 				test: /\.(woff|woff2|eot|ttf|otf)$/i,
-				type: 'asset/resource',
-				use: [{
-					loader: 'file-loader',
-					options: {
-						name: 'trydotnet__[name].[ext]',
-					}
-				}]
+				type: 'asset/resource'
 			}
 		]
 	},

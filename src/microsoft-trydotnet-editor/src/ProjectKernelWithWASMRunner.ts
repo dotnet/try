@@ -162,7 +162,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
           },
           command: commandInvocation.commandEnvelope
         };
-        dotnetInteractive.Logger.default.info("handleSubmitCode - publish event");
+        dotnetInteractive.Logger.default.info(`[ProjectKernelWithWASMRunner] handleSubmitCode - publish output event from wasm runner ${JSON.stringify(event)}`);
         commandInvocation.context.publish(event);
       },
       onError: (error: string) => {
@@ -176,11 +176,11 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
           },
           command: commandInvocation.commandEnvelope
         };
-        dotnetInteractive.Logger.default.info("handleSubmitCode - publish event");
+        dotnetInteractive.Logger.default.info(`[ProjectKernelWithWASMRunner] handleSubmitCode - publish error event from was runnerm ${JSON.stringify(event)}`);
         commandInvocation.context.publish(event);
       }
     });
-    dotnetInteractive.Logger.default.info("handleSubmitCode - done");
+    dotnetInteractive.Logger.default.info("[ProjectKernelWithWASMRunner] handleSubmitCode - done");
   }
 
   private forwardEvents(eventEnvelopes: Array<dotnetInteractive.KernelEventEnvelope>, rootCommand: dotnetInteractive.KernelCommandEnvelope, invocationContext: dotnetInteractive.KernelInvocationContext) {
@@ -203,7 +203,9 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       }
       else if (eventEnvelope.command.commandType === rootCommand.commandType && eventEnvelope.command.token === rootCommand.token) {
         // todo: do we need processing this?
-        invocationContext.publish({ ...eventEnvelope, command: rootCommand });
+        const event = { ...eventEnvelope, command: rootCommand };
+        dotnetInteractive.Logger.default.info(`[ProjectKernelWithWASMRunner.forwardEvents] forwarding event from ApiService ${JSON.stringify(event)}`);
+        invocationContext.publish(event);
       }
     }
   }

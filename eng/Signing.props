@@ -48,6 +48,7 @@
 
     <FileSignInfo Include="materialdesignicons-webfont.ttf" CertificateName="None" />
     <FileSignInfo Include="9648f5fce667f351b0ca.ttf" CertificateName="None" />
+    <FileSignInfo Include="ade705761eb7e702770d.ttf" CertificateName="None" />
     <FileSignInfo Include="trydotnet__codicon.ttf" CertificateName="None" />
   </ItemGroup>
 

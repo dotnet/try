@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -14,15 +15,19 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 
 internal static class PageExtensions
 {
-    public static Task<byte[]> TestScreenShotAsync(this IPage page, [CallerMemberName] string testName = null!)
+    public static Task<byte[]> TestScreenShotAsync(this IPage page, string? label = null, [CallerMemberName] string? testName = null, [CallerFilePath] string? sourceFilePath = null)
     {
-        return page.ScreenshotAsync(new PageScreenshotOptions { Path = Path.Combine("playwright_screenshots", $"screenshot_{testName}.png") });
+        var imageName = $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{testName}";
+        if (!string.IsNullOrWhiteSpace(label))
+        {
+            imageName = $"{imageName}_{label}";
+        }
+        return page.ScreenshotAsync(new PageScreenshotOptions { Path = Path.Combine("playwright_screenshots", $"screenshot_{imageName}.png") });
     }
 
     public static async Task DispatchMessage<T>(this IPage page, T data)
     {
         await page.EvaluateAsync(@"(request) => {
-console.log(JSON.stringify(request));
 window.dispatchEvent(new MessageEvent(""message"", { data: request }));
 }", data);
     }
@@ -47,7 +52,6 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         await editor.IsVisibleAsync();
         return editor;
     }
-
     public static async Task<ILocator> FindEditorContent(this IFrameLocator iframe)
     {
         var editor = iframe.Locator(@"div[role = ""presentation""] .view-lines");
@@ -67,7 +71,6 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         {
             await editor.TypeAsync(text);
         }
-        await editor.PressAsync("Escape", new LocatorPressOptions{ Delay = 0.5f});
     }
 
     public static async Task<string> GetEditorContentAsync(this IPage page)
@@ -100,8 +103,9 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         await editor.PressAsync("Delete");
     }
 
-    public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor)
+    public static async Task<List<JsonElement>> RequestRunAsync(this IPage page, MessageInterceptor interceptor, TimeSpan? delayStart = null)
     {
+        await Task.Delay(delayStart ?? TimeSpan.FromSeconds(10));
         var awaiter = interceptor.AwaitForMessage("RunCompleted", TimeSpan.FromMinutes(10));
         await page.DispatchMessage(new
         {
@@ -110,6 +114,23 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         });
         await awaiter;
         return interceptor.Messages;
+    }
+
+    public static async Task SetCodeUsingTryDotNetJsApi(this IPage page, MessageInterceptor interceptor, string code, TimeSpan? delayStart = null)
+    {
+        await page.RunAndWaitForConsoleMessageAsync(async () =>
+        {
+            var dotnetOnline = new DotNetOnline(page);
+            var documentOpenAwaiter = interceptor.AwaitForMessage("DocumentOpened");
+            await dotnetOnline.SetCodeAsync(code);
+            await documentOpenAwaiter;
+        },
+            new PageRunAndWaitForConsoleMessageOptions
+            {
+                Predicate = message => message.Text.Contains($"[trydotnet-editor] [MonacoEditorArapter.setCode]: {code}"),
+                Timeout = Debugger.IsAttached ? 0.0f : (float)TimeSpan.FromMinutes(10).TotalMilliseconds
+            }
+        );
     }
 
 
