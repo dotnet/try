@@ -45,10 +45,11 @@ stages:
       - job: Windows_NT
         pool:
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-            vmImage: windows-2019
+            name: NetCore1ESPool-Public
+            demands: windows.vs2022.amd64.open
           ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
             name: NetCore1ESPool-Internal
-            demands: ImageOverride -equals Build.windows.10.amd64.vs2019
+            demands: ImageOverride -equals windows.vs2022.amd64
         variables:
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
