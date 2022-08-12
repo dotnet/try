@@ -15,12 +15,12 @@
   </ItemGroup>
 
   <!-- Appends the extension `.renamed` to the dotnet-* packages to force the glob `*.nupkg` to not pick it up. -->
-  <Target Name="RenameDotNetTryOutputPackage" BeforeTargets="PackageReleasePackages">
+  <Target Name="RenameDotNetTryOutputPackage" BeforeTargets="PackageReleasePackages" Condition="@(StableVersionPackages->Count()) &gt; 0">
     <Move SourceFiles="%(StableVersionPackages.FullPath)" DestinationFiles="%(StableVersionPackages.FullPath).renamed" />
   </Target>
 
   <!-- Removes the `.renamed` extension from the dotnet-* packages. -->
-  <Target Name="RestoreDotNetTryOutputPackage" AfterTargets="PackageReleasePackages">
+  <Target Name="RestoreDotNetTryOutputPackage" AfterTargets="PackageReleasePackages" Condition="@(StableVersionPackages->Count()) &gt; 0">
     <Move SourceFiles="%(StableVersionPackages.FullPath).renamed" DestinationFiles="%(StableVersionPackages.FullPath)" />
   </Target>
 

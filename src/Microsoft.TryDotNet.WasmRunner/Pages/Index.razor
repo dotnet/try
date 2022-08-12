@@ -1,0 +1,21 @@
+﻿@page "/"
+@inject IJSRuntime JS
+<PageTitle>WasmRunner 9000 </PageTitle>
+
+@code
+{
+    private CodeRunnerAdapter? _runner;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            _runner = new CodeRunnerAdapter(new CodeRunner(), JS);
+
+            var runnerReference = DotNetObjectReference.Create(_runner);
+
+            await JS.InvokeVoidAsync("setCodeRunner", runnerReference);
+        }
+    }
+}

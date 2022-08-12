@@ -1,0 +1,216 @@
+{
+  "requests": [
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "REGION_1",
+                  "REGION_2"
+                ],
+                "regionsContent": {
+                  "REGION_1": "var a = 123;",
+                  "REGION_2": "var b = 123;"
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "commands": [
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenProject",
+          "command": {
+            "project": {
+              "files": [
+                {
+                  "relativeFilePath": "./Program.cs",
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+                }
+              ]
+            },
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        },
+        {
+          "token": "command-token",
+          "id": "command-id",
+          "commandType": "OpenDocument",
+          "command": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "REGION_2",
+            "targetKernelName": null,
+            "originUri": null,
+            "destinationUri": null
+          }
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "projectItems": [
+              {
+                "relativeFilePath": "./Program.cs",
+                "regionNames": [
+                  "REGION_1",
+                  "REGION_2"
+                ],
+                "regionsContent": {
+                  "REGION_1": "var a = 123;",
+                  "REGION_2": "var b = 123;"
+                }
+              }
+            ]
+          },
+          "eventType": "ProjectOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenProject",
+            "command": {
+              "project": {
+                "files": [
+                  {
+                    "relativeFilePath": "./Program.cs",
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
+                  }
+                ]
+              },
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {
+            "relativeFilePath": "./Program.cs",
+            "regionName": "REGION_2",
+            "content": "var b = 123;"
+          },
+          "eventType": "DocumentOpened",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "REGION_2",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        },
+        {
+          "event": {},
+          "eventType": "CommandSucceeded",
+          "command": {
+            "token": "command-token",
+            "id": "command-id",
+            "commandType": "OpenDocument",
+            "command": {
+              "relativeFilePath": "./Program.cs",
+              "regionName": "REGION_2",
+              "targetKernelName": "project-kernel",
+              "originUri": null,
+              "destinationUri": null
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

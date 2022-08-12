@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Microsoft.TryDotNet.SimulatorGenerator": {
+      "commandName": "Project",
+      "commandLineArgs": "--destination-folder \"$(MSBuildThisFileDirectory)../microsoft-trydotnet-editor/tests/simulatorConfigurations/apiService\""
+    }
+  }
+}

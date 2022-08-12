@@ -1,0 +1,13 @@
+{
+    "requests": [
+        {
+            "assembly": "AABBCC",
+            "events": [
+                {
+                    "source": "stdOut",
+                    "value": "2"
+                }
+            ]
+        }
+    ]
+}

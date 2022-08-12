@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 source="${BASH_SOURCE[0]}"
 
 # resolve $source until the file is no longer a symlink
@@ -12,34 +14,47 @@ while [[ -h "$source" ]]; do
 done
 scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
+# parse args
 args=""
+no_dotnet=false
 run_tests=false
 
-# scan for `--test` or `-t`
+# scan for `--test` or `--ci` switches
 while [[ $# > 0 ]]; do
   opt="$(echo "$1" | awk '{print tolower($0)}')"
   case "$opt" in
+    --no-dotnet)
+      no_dotnet=true
+      ;;
     --test|-t)
       run_tests=true
       ;;
+    *)
+      args="$args $1"
+      ;;
   esac
-  args="$args $1"
   shift
 done
 
-function TestUsingNPM() {
-    test_path=$1
-    pushd "$test_path"
-    npm i
+# build and test NPM
+npmDirs='src/microsoft-trydotnet
+         src/microsoft-trydotnet-editor
+         src/microsoft-trydotnet-styles
+         src/microsoft-learn-mock'
+for npmDir in $npmDirs;
+do
+  echo "Building NPM in directory $npmDir"
+  pushd $npmDir
+  npm ci
+  npm run buildProd
+  if [[ "$run_tests" == true ]]; then
+    echo "Testing NPM in directory $npmDir"
     npm run ciTest
-    popd
-}
+  fi
+  popd
+done
 
-# invoke regular build/test script
-. "$scriptroot/common/build.sh" /p:Projects=$scriptroot/../dotnet-try.sln $args
-
-# directly invoke npm tests
-if [[ "$run_tests" == "true" ]]; then
-    TestUsingNPM "$scriptroot/../Microsoft.DotNet.Try.Client"
-    TestUsingNPM "$scriptroot/../Microsoft.DotNet.Try.js"
+if [[ "$no_dotnet" != true ]]; then
+  # invoke regular build script
+  . "$scriptroot/common/build.sh" $args
 fi

@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"extendedDiagnostics": true,
+		"forceConsistentCasingInFileNames": true,
+		"importHelpers": true,
+		"lib": [
+			"dom",
+			"es2020"
+		],
+		"module": "commonjs",
+		"moduleResolution": "node",
+		// "noImplicitAny": true,
+		// "noImplicitReturns": true,
+		// "noImplicitThis": true,
+		// "noUnusedLocals": true,
+		// "noUnusedParameters": true,
+		// "outDir": "dist",
+		// "resolveJsonModule": true,
+		"strict": true,
+		"target": "es2020",
+		"typeRoots": [
+			"./@types"
+		]
+	},
+	"include": [
+		"src"
+	]
+}
