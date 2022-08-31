@@ -30,7 +30,7 @@ variables:
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
   - name: RunIntegrationTests
-    value: false
+    value: true
 
 stages:
 - stage: build
