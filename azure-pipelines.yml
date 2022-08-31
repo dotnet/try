@@ -29,6 +29,8 @@ variables:
     value: '16.13.0'
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
+  - name: RunIntegrationTests
+    value: false
 
 stages:
 - stage: build
@@ -146,6 +148,7 @@ stages:
             artifactName: Windows_playwright_screenshots
             artifactType: container
           condition: always()
+          continueOnError: true
 
         - task: PublishBuildArtifacts@1
           displayName: Publish packages to artifacts container
@@ -236,7 +239,7 @@ stages:
             artifactName: Linux_test_results_and_dumps
             artifactType: container
           condition: failed()
-          
+
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
@@ -244,6 +247,7 @@ stages:
             artifactName: Linux_playwright_screenshots
             artifactType: container
           condition: always()
+          continueOnError: true
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #
