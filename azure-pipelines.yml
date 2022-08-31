@@ -127,6 +127,8 @@ stages:
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')
+          env:
+            RunIntegrationTests: $(RunIntegrationTests)
 
         - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
           displayName: Delete dump files
@@ -226,6 +228,8 @@ stages:
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')
+          env:
+            RunIntegrationTests: $(RunIntegrationTests)
 
         - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
           displayName: Delete dump files
