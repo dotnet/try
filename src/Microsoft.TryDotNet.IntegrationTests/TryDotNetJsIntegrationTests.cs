@@ -21,7 +21,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         Learn = learn;
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task loads_trydotnet_editor()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -44,7 +44,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         await page.FindEditor();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_load_code()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -75,7 +75,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<Lea
         text.Should().Contain("Console.WriteLine(123);");
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task outputs_are_rendered()
     {
         var page = await Playwright.Browser!.NewPageAsync();

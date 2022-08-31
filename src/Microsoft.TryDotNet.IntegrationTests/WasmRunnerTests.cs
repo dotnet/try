@@ -14,7 +14,7 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 public class WasmRunnerTests : PlaywrightTestBase
 {
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_load_wasmrunner()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -25,7 +25,7 @@ public class WasmRunnerTests : PlaywrightTestBase
         await page.TestScreenShotAsync();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_run_assembly()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -45,7 +45,7 @@ public class WasmRunnerTests : PlaywrightTestBase
             .result!.success.Should().Be(true);
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_run_assembly_2()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -65,7 +65,7 @@ public class WasmRunnerTests : PlaywrightTestBase
             .result!.success.Should().Be(true);
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_run_assembly_and_produce_output()
     {
         var page = await Playwright.Browser!.NewPageAsync();

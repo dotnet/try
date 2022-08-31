@@ -22,7 +22,7 @@ public class EditorTests : PlaywrightTestBase
 
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_load_monaco_editor()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -35,7 +35,7 @@ public class EditorTests : PlaywrightTestBase
         
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_load_the_wasm_runner()
     {
         var wasmRunnerLoaded = false;
@@ -60,7 +60,7 @@ public class EditorTests : PlaywrightTestBase
         wasmRunnerLoaded.Should().BeTrue();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task wasm_runner_is_not_visible_to_screenReaders()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -77,7 +77,7 @@ public class EditorTests : PlaywrightTestBase
 
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task wasm_runner_is_not_part_of_tab_navigation()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -94,7 +94,7 @@ public class EditorTests : PlaywrightTestBase
 
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task notifies_when_editor_is_ready()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -111,7 +111,7 @@ public class EditorTests : PlaywrightTestBase
         found.Should().NotBeNull();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_open_project()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -143,7 +143,7 @@ public class EditorTests : PlaywrightTestBase
         projectLoaded.Should().NotBeNull();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_open_document()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -187,7 +187,7 @@ public class EditorTests : PlaywrightTestBase
         text.Should().Contain(randomValue);
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_open_document_and_populate_editor_from_region()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -231,7 +231,7 @@ public class EditorTests : PlaywrightTestBase
         text.Should().Contain("Console.WriteLine(123);");
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task minimap_is_not_visible()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -245,7 +245,7 @@ public class EditorTests : PlaywrightTestBase
         isHidden.Should().BeTrue();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_show_minimap()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -270,7 +270,7 @@ public class EditorTests : PlaywrightTestBase
         isVisible.Should().BeTrue();
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task can_configure_theme()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -291,7 +291,7 @@ public class EditorTests : PlaywrightTestBase
         classAttribute.Should().Contain("vs-dark");
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task when_user_code_in_editor_diagnostics_are_produced()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -357,7 +357,7 @@ int i = ""NaN"";
         markers.Should().ContainSingle(m => m == expected);
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task when_user_code_in_editor_is_executed_display_events_are_produced()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -415,7 +415,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
             .Contain(randomValue);
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task user_typing_code_gets_completion()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -473,7 +473,7 @@ Console.".Replace("\r\n", "\n"));
         completionItemDisplayText.Should().Contain(new[] { "BackgroundColor", "Beep", "Clear" });
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task user_typing_code_gets_signatureHelp()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -537,7 +537,7 @@ Writes the current line terminator to the standard output stream.
 ".Trim().Replace("\r", ""));
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task when_user_code_in_editor_is_executed_it_produces_runResult_event()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -594,7 +594,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
             .Contain("Success");
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task when_user_code_in_editor_is_executed_it_produces_runResult_event_with_outputs()
     {
         var page = await Playwright.Browser!.NewPageAsync();
@@ -653,7 +653,7 @@ Console.WriteLine(""{randomValue}b"");".Replace("\r\n", "\n"));
             .Contain($"[\"{randomValue}\\n\",\"{randomValue}a\\n\",\"{randomValue}b\\n\"]");
     }
 
-    [Fact]
+    [IntegrationTestFact]
     public async Task user_code_in_editor_is_executed()
     {
         var page = await Playwright.Browser!.NewPageAsync();
