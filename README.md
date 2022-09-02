@@ -4,7 +4,7 @@
 ![Try_.NET Enabled](https://img.shields.io/badge/Try_.NET-Enabled-501078.svg)
 
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/try/try-ci?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=495&branchName=main)
+[![Build Status](https://dev.azure.com/dnceng-public/public/_apis/build/status/dotnet/try/try-ci?branchName=main)](https://dev.azure.com/dnceng-public/public/_build?definitionId=62&branchName=main)
 
 ## Welcome to the Try .NET repo.
 
