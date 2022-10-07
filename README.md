@@ -49,3 +49,7 @@ Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tu
 **NCache Live by Alachisoft**  
 
 [NCache Live](https://www.alachisoft.com/blogs/try-ncache-anywhere-anytime-with-ncache-live/) uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to let the user experience NCache APIs with the help of executable and editable .NET code in the browser.
+
+**Metalama by PostSharp Technologies**
+
+[Metalama.Try](https://try.metalama.net) uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to let C# developers experience the features of [Metalama](http://www.metalama.net) meta-programming framework in the browser.
