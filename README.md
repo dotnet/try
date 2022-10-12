@@ -52,4 +52,4 @@ Microsoft Docs uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tu
 
 **Metalama by PostSharp Technologies**
 
-[Metalama.Try](https://try.metalama.net) uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to let C# developers experience the features of [Metalama](http://www.metalama.net) meta-programming framework in the browser.
+[Metalama Sandbox](https://try.metalama.net) uses [Try .NET](https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/intro-to-csharp/hello-world) to let C# developers experience the features of [Metalama](http://www.metalama.net) meta-programming framework in the browser.
