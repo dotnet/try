@@ -24,7 +24,7 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: DotNetSdkVersion
-    value: '6.0.101'
+    value: '6.0.402'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
