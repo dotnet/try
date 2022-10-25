@@ -152,6 +152,7 @@ interface IWasmRunnerMessage {
 }
 
 export interface IConfiguration {
+  editorContainer?: string;
   wasmRunnerUrl: string,
   refererUrl: string,
   commandsUrl: string,
