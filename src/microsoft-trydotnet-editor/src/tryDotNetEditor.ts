@@ -192,9 +192,9 @@ export class TryDotNetEditor {
     }
   }
 
-  private _handleRunRequest(requestId: string): Promise<void> {
-    this._handlingRunRequest = true;
+  public run(): Promise<void> {
     const code = this.getEditor().getCode();
+
     const command: dotnetInteractive.KernelCommandEnvelope = {
       commandType: dotnetInteractive.SubmitCodeType,
       command: <dotnetInteractive.SubmitCode>{
@@ -202,17 +202,30 @@ export class TryDotNetEditor {
       }
     };
 
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.run] sending : ${JSON.stringify(command)}`);
+
+    return this.getKernel()
+      .send(command);
+  }
+
+  public subscribeToKernelEvents(observer: dotnetInteractive.KernelEventEnvelopeObserver): dotnetInteractive.DisposableSubscription {
+    return this.getKernel().subscribeToKernelEvents(observer);
+  }
+
+  private _handleRunRequest(requestId: string): Promise<void> {
+    this._handlingRunRequest = true;
+
     dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] start`);
 
     let events: dotnetInteractive.KernelEventEnvelope[] = [];
-    let sub = this.getKernel().subscribeToKernelEvents(event => {
+    let sub = this.subscribeToKernelEvents(event => {
       dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] kernel event: ${JSON.stringify(event)}`);
       switch (event.eventType) {
         case dotnetInteractive.CommandSucceededType:
         case dotnetInteractive.CommandFailedType:
         case dotnetInteractive.CommandCancelledType:
           if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
-            dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(command)}`);
+            dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(event.command)}`);
 
             dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest]  disposing event subscription}`);
             sub.dispose();
@@ -263,10 +276,7 @@ export class TryDotNetEditor {
       }
     });
 
-    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] sending : ${JSON.stringify(command)}`);
-
-    return this.getKernel()
-      .send(command);
+    return this.run();
   }
 
   public async openProject(project: dotnetInteractive.Project) {

@@ -60,7 +60,8 @@ if (window) {
 		}
 	}, false);
 
-	const editor = factory.createEditor(document.body);
+	const container = configuration.editorContainer ? document.getElementById(configuration.editorContainer) : document.body;
+	const editor = factory.createEditor(container ?? document.body);
 	const kernel = factory.createWasmProjectKernel((serviceError: apiService.IServiceError) => {
 		postAndLog({
 			type: messages.SERVICE_ERROR_RESPONSE,
