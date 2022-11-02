@@ -31,6 +31,8 @@ variables:
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
   - name: RunIntegrationTests
     value: true
+  - name: Codeql.Enabled
+    value: true
 
 stages:
 - stage: build
