@@ -54,7 +54,7 @@
     "webpack-cli": "4.10.0"
   },
   "dependencies": {
-    "@microsoft/dotnet-interactive": "1.0.351001",
+    "@microsoft/dotnet-interactive": "1.0.357301",
     "monaco-editor": "0.33.0",
     "rxjs": "7.5.5"
   },

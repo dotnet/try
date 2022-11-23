@@ -24,7 +24,7 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: DotNetSdkVersion
-    value: '6.0.101'
+    value: '7.0.100'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
@@ -148,7 +148,7 @@ stages:
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net6.0\playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net7.0\playwright_screenshots
             artifactName: Windows_playwright_screenshots
             artifactType: container
           condition: always()
@@ -249,7 +249,7 @@ stages:
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net6.0/playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net7.0/playwright_screenshots
             artifactName: Linux_playwright_screenshots
             artifactType: container
           condition: always()
