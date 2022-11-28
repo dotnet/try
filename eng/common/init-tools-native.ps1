@@ -39,7 +39,7 @@ or break the build if a native tool is not found on the path (on a local dev mac
 #>
 [CmdletBinding(PositionalBinding=$false)]
 Param (
-  [string] $BaseUri = 'https://netcorenativeassets.blob.core.windows.net/resource-packages/external',
+  [string] $BaseUri = "https://netcorenativeassets.blob.core.windows.net/resource-packages/external",
   [string] $InstallDirectory,
   [switch] $Clean = $False,
   [switch] $Force = $False,
@@ -50,27 +50,26 @@ Param (
 )
 
 if (!$GlobalJsonFile) {
-  $GlobalJsonFile = Join-Path (Get-Item $PSScriptRoot).Parent.Parent.FullName 'global.json'
+  $GlobalJsonFile = Join-Path (Get-Item $PSScriptRoot).Parent.Parent.FullName "global.json"
 }
 
 Set-StrictMode -version 2.0
-$ErrorActionPreference='Stop'
+$ErrorActionPreference="Stop"
 
-. $PSScriptRoot\pipeline-logging-functions.ps1
-Import-Module -Name (Join-Path $PSScriptRoot 'native\CommonLibrary.psm1')
+Import-Module -Name (Join-Path $PSScriptRoot "native\CommonLibrary.psm1")
 
 try {
   # Define verbose switch if undefined
-  $Verbose = $VerbosePreference -Eq 'Continue'
+  $Verbose = $VerbosePreference -Eq "Continue"
 
-  $EngCommonBaseDir = Join-Path $PSScriptRoot 'native\'
+  $EngCommonBaseDir = Join-Path $PSScriptRoot "native\"
   $NativeBaseDir = $InstallDirectory
   if (!$NativeBaseDir) {
     $NativeBaseDir = CommonLibrary\Get-NativeInstallDirectory
   }
   $Env:CommonLibrary_NativeInstallDir = $NativeBaseDir
-  $InstallBin = Join-Path $NativeBaseDir 'bin'
-  $InstallerPath = Join-Path $EngCommonBaseDir 'install-tool.ps1'
+  $InstallBin = Join-Path $NativeBaseDir "bin"
+  $InstallerPath = Join-Path $EngCommonBaseDir "install-tool.ps1"
 
   # Process tools list
   Write-Host "Processing $GlobalJsonFile"
@@ -80,7 +79,7 @@ try {
   }
   $NativeTools = Get-Content($GlobalJsonFile) -Raw |
                     ConvertFrom-Json |
-                    Select-Object -Expand 'native-tools' -ErrorAction SilentlyContinue
+                    Select-Object -Expand "native-tools" -ErrorAction SilentlyContinue
   if ($NativeTools) {
     if ($PathPromotion -eq $True) {
       if ($env:SYSTEM_TEAMPROJECT) { # check to see if we're in an Azure pipelines build
@@ -98,12 +97,11 @@ try {
               Write-Error "Arcade tools directory '$ArcadeToolsDirectory' was not found; artifacts were not properly installed."
               exit 1
             }
-            $ToolDirectories = (Get-ChildItem -Path "$ArcadeToolsDirectory" -Filter "$ToolName-$ToolVersion*" | Sort-Object -Descending)
-            if ($ToolDirectories -eq $null) {
+            $ToolDirectory = (Get-ChildItem -Path "$ArcadeToolsDirectory" -Filter "$ToolName-$ToolVersion*" | Sort-Object -Descending)[0]
+            if ([string]::IsNullOrWhiteSpace($ToolDirectory)) {
               Write-Error "Unable to find directory for $ToolName $ToolVersion; please make sure the tool is installed on this image."
               exit 1
             }
-            $ToolDirectory = $ToolDirectories[0]
             $BinPathFile = "$($ToolDirectory.FullName)\binpath.txt"
             if (-not (Test-Path -Path "$BinPathFile")) {
               Write-Error "Unable to find binpath.txt in '$($ToolDirectory.FullName)' ($ToolName $ToolVersion); artifact is either installed incorrectly or is not a bootstrappable tool."
@@ -166,22 +164,18 @@ try {
               }
               $toolInstallationFailure = $true
           } else {
-              # We cannot change this to Write-PipelineTelemetryError because of https://github.com/dotnet/arcade/issues/4482
-              Write-Host $errMsg
+              Write-Error $errMsg
               exit 1
           }
         }
       }
   
       if ((Get-Variable 'toolInstallationFailure' -ErrorAction 'SilentlyContinue') -and $toolInstallationFailure) {
-          # We cannot change this to Write-PipelineTelemetryError because of https://github.com/dotnet/arcade/issues/4482
-          Write-Host 'Native tools bootstrap failed'
           exit 1
       }
     }
-  }
-  else {
-    Write-Host 'No native tools defined in global.json'
+  } else {
+    Write-Host "No native tools defined in global.json"
     exit 0
   }
 
@@ -189,18 +183,17 @@ try {
     exit 0
   }
   if (Test-Path $InstallBin) {
-    Write-Host 'Native tools are available from ' (Convert-Path -Path $InstallBin)
+    Write-Host "Native tools are available from" (Convert-Path -Path $InstallBin)
     Write-Host "##vso[task.prependpath]$(Convert-Path -Path $InstallBin)"
-    return $InstallBin
   }
   elseif (-not ($PathPromotion)) {
-    Write-PipelineTelemetryError -Category 'NativeToolsBootstrap' -Message 'Native tools install directory does not exist, installation failed'
+    Write-Error "Native tools install directory does not exist, installation failed"
     exit 1
   }
   exit 0
 }
 catch {
-  Write-Host $_.ScriptStackTrace
-  Write-PipelineTelemetryError -Category 'NativeToolsBootstrap' -Message $_
-  ExitWithExitCode 1
+  Write-Host $_
+  Write-Host $_.Exception
+  exit 1
 }
