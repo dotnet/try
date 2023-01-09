@@ -50,7 +50,7 @@ stages:
         displayName: Enable cross-org publishing
         inputs:
           filePath: eng\common\enable-cross-org-publishing.ps1
-          arguments: -token $(dn-bot-dnceng-artifact-feeds-rw)
+          arguments: -token $(dn-bot-all-orgs-artifact-feeds-rw)
 
       - task: PowerShell@2
         displayName: Publish
@@ -109,7 +109,7 @@ stages:
         displayName: Enable cross-org publishing
         inputs:
           filePath: eng\common\enable-cross-org-publishing.ps1
-          arguments: -token $(dn-bot-dnceng-artifact-feeds-rw)
+          arguments: -token $(dn-bot-all-orgs-artifact-feeds-rw)
 
       - task: PowerShell@2
         displayName: Publish Assets
