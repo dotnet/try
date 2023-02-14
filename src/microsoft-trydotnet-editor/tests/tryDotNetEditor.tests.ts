@@ -7,7 +7,7 @@ import { describe } from "mocha";
 import * as tryDotNetEditor from "../src/tryDotNetEditor";
 import * as monacoEditorSimulator from "./monacoEditorSimulator";
 import * as rxjs from 'rxjs';
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
 import * as CSharpProjectKernelWithWASMRunner from "../src/ProjectKernelWithWASMRunner";
 import { createApiServiceSimulator } from "./apiServiceSimulator";
 import { createWasmRunnerSimulator } from "./wasmRunnerSimulator";
@@ -16,7 +16,7 @@ import { delay } from "./testHelpers";
 describe("trydotnet", () => {
     describe("when loading workspace", () => {
         before(() => {
-            dotnetInteractive.Logger.configure("debug", (_entry) => {
+            polyglotNotebooks.Logger.configure("debug", (_entry) => {
                 //     console.log(_entry.message);
             });
         });
@@ -29,7 +29,7 @@ describe("trydotnet", () => {
             let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
             tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
-            let project = <dotnetInteractive.Project>{
+            let project = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./Program.cs",
                     content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
@@ -49,7 +49,7 @@ describe("trydotnet", () => {
             let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
             tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
-            let project = <dotnetInteractive.Project>{
+            let project = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./Program.cs",
                     content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
@@ -69,7 +69,7 @@ describe("trydotnet", () => {
             let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
             tdn.editor = new monacoEditorSimulator.MonacoEditorSimulator();
 
-            let Originalproject = <dotnetInteractive.Project>{
+            let Originalproject = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./program.cs",
                     content: "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            #endregion\n        }\n    }\n}"
@@ -80,7 +80,7 @@ describe("trydotnet", () => {
 
             expect(tdn.editor.getCode()).to.equal("");
 
-            let newProject = <dotnetInteractive.Project>{
+            let newProject = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./program.cs",
                     content: "\nusing System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\nnamespace Program {\n    class Program {\n        static void Main(string[] args){\n            #region controller\n            Console.WriteLine(123);\n            #endregion\n        }\n    }\n}"
@@ -103,7 +103,7 @@ describe("trydotnet", () => {
             let editor = new monacoEditorSimulator.MonacoEditorSimulator();
             tdn.editor = editor;
 
-            let project = <dotnetInteractive.Project>{
+            let project = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./Program.cs",
                     content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region REGION_1\n        var a = 123;\n        #endregion\n\n        #region REGION_2\n        var b = 123;\n        #endregion\n    }\n}"
@@ -132,7 +132,7 @@ describe("trydotnet", () => {
             let editor = new monacoEditorSimulator.MonacoEditorSimulator();
             tdn.editor = editor;
 
-            let project = <dotnetInteractive.Project>{
+            let project = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./Program.cs",
                     content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
@@ -172,7 +172,7 @@ describe("trydotnet", () => {
             let editor = new monacoEditorSimulator.MonacoEditorSimulator();
             tdn.editor = editor;
 
-            let project = <dotnetInteractive.Project>{
+            let project = <polyglotNotebooks.Project>{
                 files: [{
                     relativeFilePath: "./Program.cs",
                     content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"

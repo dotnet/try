@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import * as wasmRunner from "../src/wasmRunner";
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
 import * as rx from 'rxjs';
 
 interface ISimulatorConfiguration {
@@ -27,12 +27,12 @@ class Simulator {
     constructor(private _configuration?: ISimulatorConfiguration) { }
 
     public async processRequest(request: {
-        assembly?: dotnetInteractive.Base64EncodedAssembly,
+        assembly?: polyglotNotebooks.Base64EncodedAssembly,
         onOutput: (output: string) => void,
         onError: (error: string) => void,
     }): Promise<void> {
         if (this._configuration) {
-            let requestConfiguration = this._configuration.requests.find(r => r.assembly === request.assembly.value);
+            let requestConfiguration = this._configuration.requests.find(r => r.assembly === request.assembly!.value);
             if (requestConfiguration) {
                 let events = requestConfiguration.events;
                 for (let i = 0; i < events.length; i++) {

@@ -21,7 +21,7 @@ describe("a message bus", () => {
         let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
         iframe = configureEmbeddableEditorIFrame(iframe, defaultConfiguration);
 
-        iframe.contentWindow.addEventListener("message", (message: any) => {
+        iframe.contentWindow!.addEventListener("message", (message: any) => {
             if (message.data.type === RUN_REQUEST) {
                 done();
             }
@@ -38,7 +38,7 @@ describe("a message bus", () => {
         let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
         iframe = configureEmbeddableEditorIFrame(iframe, defaultConfiguration);
 
-        dom.window.postMessage({ type: RUN_RESPONSE }, defaultConfiguration.hostOrigin);
+        dom.window.postMessage({ type: RUN_RESPONSE }, defaultConfiguration.hostOrigin!);
 
         let bus = new IFrameMessageBus(iframe, <Window><any>dom.window);
 
@@ -55,7 +55,7 @@ describe("a message bus", () => {
         let iframe = <HTMLIFrameElement>(dom.window.document.querySelector("iframe"));
         iframe = configureEmbeddableEditorIFrame(iframe, defaultConfiguration);
 
-        dom.window.postMessage({ type: HOST_EDITOR_READY_EVENT }, defaultConfiguration.hostOrigin);
+        dom.window.postMessage({ type: HOST_EDITOR_READY_EVENT }, defaultConfiguration.hostOrigin!);
 
         let bus = new IFrameMessageBus(iframe, <Window><any>dom.window);
 
