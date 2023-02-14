@@ -9,7 +9,7 @@ import { Done } from "mocha";
 import { ApiMessage, RUN_RESPONSE, RUN_REQUEST, SERVICE_ERROR_RESPONSE, } from "../src/apiMessages";
 import { registerForRunRequest, registerForLongRunRequest, notifyRunReadyWithId, registerForOpenProject } from "./messagingMocks";
 import { createReadySession } from "./sessionFactory";
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
 chai.should();
 
 describe("a user", () => {
@@ -40,7 +40,7 @@ describe("a user", () => {
 
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: dotnetInteractive.ProjectItem = {
+                        let item: polyglotNotebooks.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -70,7 +70,7 @@ describe("a user", () => {
             awaitableSession.then(session => {
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: dotnetInteractive.ProjectItem = {
+                        let item: polyglotNotebooks.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -95,7 +95,7 @@ describe("a user", () => {
                 session.run().then(result => {
                     results;//? 
                     if (result.succeeded) {
-                        results[0] = result.output[0]; //?
+                        results[0] = result.output![0]; //?
                         if (results[0] === results[1]) {
                             done();
                         }
@@ -107,7 +107,7 @@ describe("a user", () => {
                 session.run().then(result => {
                     results;//? 
                     if (result.succeeded) {
-                        results[1] = result.output[0]; //?
+                        results[1] = result.output![0]; //?
                         if (results[0] === results[1]) {
                             done();
                         }
@@ -123,7 +123,7 @@ describe("a user", () => {
             awaitableSession.then(session => {
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: dotnetInteractive.ProjectItem = {
+                        let item: polyglotNotebooks.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -145,7 +145,7 @@ describe("a user", () => {
                 session.openProject({ package: "console", files: [{ name: "program.cs", content: "" }] });
 
                 let subscriptions = session.subscribeToOutputEvents((event) => {
-                    event.stdout.should.be.deep.equal(["line one", "line two"]);
+                    event.stdout!.should.be.deep.equal(["line one", "line two"]);
                     done();
                 });
                 session.run();
@@ -158,7 +158,7 @@ describe("a user", () => {
 
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: dotnetInteractive.ProjectItem = {
+                        let item: polyglotNotebooks.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -193,7 +193,7 @@ describe("a user", () => {
 
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: dotnetInteractive.ProjectItem = {
+                        let item: polyglotNotebooks.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -207,7 +207,7 @@ describe("a user", () => {
                     return {
                         type: RUN_RESPONSE,
                         requestId: request.type === RUN_REQUEST ? request.requestId : undefined,
-                        outcome: request.type === RUN_REQUEST && request.parameters["instrument"] ? "Success" : "Exception"
+                        outcome: request.type === RUN_REQUEST && request.parameters!["instrument"] ? "Success" : "Exception"
                     }
                 });
 
@@ -242,7 +242,7 @@ describe("a user", () => {
             awaitableSession.then(session => {
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: dotnetInteractive.ProjectItem = {
+                        let item: polyglotNotebooks.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -256,7 +256,7 @@ describe("a user", () => {
                     return {
                         type: RUN_RESPONSE,
                         requestId: request.type === RUN_REQUEST ? request.requestId : undefined,
-                        outcome: request.type === RUN_REQUEST && request.parameters["runWorkflowId"] === "webApi" ? "Success" : "Exception"
+                        outcome: request.type === RUN_REQUEST && request.parameters!["runWorkflowId"] === "webApi" ? "Success" : "Exception"
                     }
                 });
 

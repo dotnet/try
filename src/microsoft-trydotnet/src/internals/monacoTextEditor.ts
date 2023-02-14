@@ -7,7 +7,7 @@ import { IMessageBus } from "./messageBus";
 import { ApiMessage } from "../apiMessages";
 import { IRequestIdGenerator } from "./requestIdGenerator";
 import { isNullOrUndefinedOrWhitespace } from "../stringExtensions";
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
 import * as newContract from "../newContract";
 import { DocumentId } from "../documentId";
 
@@ -33,13 +33,13 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
 
             const m = <{ type: string }>message;
             if (m && m.type === newContract.EditorContentChangedType) {
-                dotnetInteractive.Logger.default.info(`[MonacoTextEditor.codeChangedHandler] ${JSON.stringify(m)}`);
+                polyglotNotebooks.Logger.default.info(`[MonacoTextEditor.codeChangedHandler] ${JSON.stringify(m)}`);
                 message;//?
                 const editorContentChanged = <newContract.EditorContentChanged>m;
                 const documentId = new DocumentId({ relativeFilePath: editorContentChanged.relativeFilePath, regionName: editorContentChanged.regionName });
 
                 if (DocumentId.areEqual(documentId, this.currentbufferId)) {
-                    dotnetInteractive.Logger.default.info(`[MonacoTextEditor.codeChangedHandler] handling`);
+                    polyglotNotebooks.Logger.default.info(`[MonacoTextEditor.codeChangedHandler] handling`);
                     let event = {
                         text: editorContentChanged.content,
                         documentId: this.currentbufferId
@@ -67,7 +67,7 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
         let requestId = await this.requestIdGenerator.getNewRequestId();
 
         this.editorApimessageBus.post(<any>{
-            type: dotnetInteractive.OpenDocumentType,
+            type: polyglotNotebooks.OpenDocumentType,
             requestId: requestId,
             relativeFilePath: this.currentbufferId.relativeFilePath,
             regionName: this.currentbufferId.regionName

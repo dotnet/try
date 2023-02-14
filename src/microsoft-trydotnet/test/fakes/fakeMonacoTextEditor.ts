@@ -48,7 +48,11 @@ export class FakeMonacoTextEditor implements ITrydotnetMonacoTextEditor {
     }
 
     public configure(configuration: MonacoEditorConfiguration): void {
-        this.setOptions(configuration.options);
-        this.setTheme(configuration.theme);
+        if (configuration.options) {
+            this.setOptions(configuration.options);
+        }
+        if (configuration.theme) {
+            this.setTheme(configuration.theme);
+        }
     }
 }

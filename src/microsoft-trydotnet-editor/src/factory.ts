@@ -8,7 +8,7 @@ import { ProjectKernelWithWASMRunner } from './ProjectKernelWithWASMRunner';
 import { ProjectKernel } from "./projectKernel";
 import { IWasmRunner } from './wasmRunner';
 import { createApiService, IServiceError } from './apiService';
-import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 
 export function createWasmProjectKernel(onServiceError: (serviceError: IServiceError) => void): ProjectKernel {
 
@@ -31,7 +31,7 @@ export function createWasmProjectKernel(onServiceError: (serviceError: IServiceE
     window.addEventListener('message', (message) => {
       const messageType = message.data.type as string;
       if (messageType && messageType.startsWith("wasmRunner-")) {
-        dotnetInteractive.Logger.default.info(`[received from WASM runner] ${JSON.stringify(message)}`);
+        polyglotNotebooks.Logger.default.info(`[received from WASM runner] ${JSON.stringify(message)}`);
         const wasmRunnerMessage = message.data;
         if (wasmRunnerMessage) {
           wasmIframeMessages.next(wasmRunnerMessage);
@@ -40,7 +40,7 @@ export function createWasmProjectKernel(onServiceError: (serviceError: IServiceE
     }, false);
 
     const postAndLogToWasmRunner = (message: any) => {
-      dotnetInteractive.Logger.default.info(`[to WASM runner] ${JSON.stringify(message)}`);
+      polyglotNotebooks.Logger.default.info(`[to WASM runner] ${JSON.stringify(message)}`);
       const targetWindow = wasmRunnerHostingWindow;
       const messageLogger = window['postMessageLogger'];
       if (typeof (messageLogger) === 'function') {
@@ -99,21 +99,21 @@ class WasmRunner {
   }
 
   public run(runRequest: {
-    assembly: dotnetInteractive.Base64EncodedAssembly,
+    assembly: polyglotNotebooks.Base64EncodedAssembly,
     onOutput: (output: string) => void,
     onError: (error: string) => void,
   }): Promise<void> {
-    dotnetInteractive.Logger.default.info("WasmRunner.run starting");
-    let completionSource = new dotnetInteractive.PromiseCompletionSource<IWasmRunnerMessage>();
+    polyglotNotebooks.Logger.default.info("WasmRunner.run starting");
+    let completionSource = new polyglotNotebooks.PromiseCompletionSource<IWasmRunnerMessage>();
 
     let sub = this._wasmIframeMessages.subscribe({
       next: (wasmRunnerMessage) => {
-        dotnetInteractive.Logger.default.info(`WasmRunner message ${JSON.stringify(wasmRunnerMessage)}`);
+        polyglotNotebooks.Logger.default.info(`WasmRunner message ${JSON.stringify(wasmRunnerMessage)}`);
         let type = wasmRunnerMessage.type;
         if (type) {
           switch (type) {
             case "wasmRunner-result":
-              dotnetInteractive.Logger.default.info("WasmRunner execution completed");
+              polyglotNotebooks.Logger.default.info("WasmRunner execution completed");
               completionSource.resolve(wasmRunnerMessage);
               break;
             case "wasmRunner-stdout":
@@ -134,7 +134,7 @@ class WasmRunner {
 
     return completionSource.promise.then(r => {
       sub.unsubscribe();
-      dotnetInteractive.Logger.default.info("WasmRunner.run completed");
+      polyglotNotebooks.Logger.default.info("WasmRunner.run completed");
     });
 
   }

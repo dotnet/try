@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import * as apiService from "../src/apiService";
-import * as dotnetInteractive from "@microsoft/dotnet-interactive";
+import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
 
 interface ISimulatorConfiguration {
     requests: {
-        commands: dotnetInteractive.KernelCommandEnvelope[];
-        events: dotnetInteractive.KernelEventEnvelope[];
+        commands: polyglotNotebooks.KernelCommandEnvelope[];
+        events: polyglotNotebooks.KernelEventEnvelope[];
     }[]
 }
 export function createApiServiceSimulator(configurationPath?: string): apiService.IApiService {
@@ -24,12 +24,12 @@ class Simulator {
 
     constructor(private _configuration?: ISimulatorConfiguration) { }
 
-    public async processRequest(commands: dotnetInteractive.KernelCommandEnvelope[]): Promise<dotnetInteractive.KernelEventEnvelope[]> {
+    public async processRequest(commands: polyglotNotebooks.KernelCommandEnvelope[]): Promise<polyglotNotebooks.KernelEventEnvelope[]> {
         if (this._configuration) {
             let requestConfiguration = this._configuration.requests.find(request => areEquivalentCommandSequences(commands, request.commands));
             if (requestConfiguration) {
                 let events = patchEvents(requestConfiguration.events, commands);
-                return new Promise<dotnetInteractive.KernelEventEnvelope[]>((resolve, _reject) => {
+                return new Promise<polyglotNotebooks.KernelEventEnvelope[]>((resolve, _reject) => {
                     resolve(events);
                 });
             }
@@ -41,14 +41,14 @@ class Simulator {
     }
 }
 
-function patchEvents(events: dotnetInteractive.KernelEventEnvelope[], commands: dotnetInteractive.KernelCommandEnvelope[]): dotnetInteractive.KernelEventEnvelope[] {
-    let patchedEvents: dotnetInteractive.KernelEventEnvelope[] = [];
+function patchEvents(events: polyglotNotebooks.KernelEventEnvelope[], commands: polyglotNotebooks.KernelCommandEnvelope[]): polyglotNotebooks.KernelEventEnvelope[] {
+    let patchedEvents: polyglotNotebooks.KernelEventEnvelope[] = [];
     for (let i = 0; i < events.length; i++) {
         let event = events[i];
-        var sourceCommand = commands.find(command => command.commandType === event.command.commandType);
+        var sourceCommand = commands.find(command => command.commandType === event.command!.commandType);
         let patchedEvent = { ...event };
-        patchedEvent.command.id = sourceCommand.id;
-        patchedEvent.command.token = sourceCommand.token;
+        patchedEvent.command!.id = sourceCommand!.id;
+        patchedEvent.command!.token = sourceCommand!.token;
 
         patchedEvents.push(patchedEvent);
     }
@@ -57,7 +57,7 @@ function patchEvents(events: dotnetInteractive.KernelEventEnvelope[], commands: 
 }
 
 
-function areEquivalentCommandSequences(actual: dotnetInteractive.KernelCommandEnvelope[], expected: dotnetInteractive.KernelCommandEnvelope[]): boolean {
+function areEquivalentCommandSequences(actual: polyglotNotebooks.KernelCommandEnvelope[], expected: polyglotNotebooks.KernelCommandEnvelope[]): boolean {
     if (actual.length !== expected.length) {
         return false;
     }
@@ -71,7 +71,7 @@ function areEquivalentCommandSequences(actual: dotnetInteractive.KernelCommandEn
     return true;
 }
 
-function areEquivalentCommands(actual: dotnetInteractive.KernelCommandEnvelope, expected: dotnetInteractive.KernelCommandEnvelope): boolean {
+function areEquivalentCommands(actual: polyglotNotebooks.KernelCommandEnvelope, expected: polyglotNotebooks.KernelCommandEnvelope): boolean {
     if (actual.commandType !== expected.commandType) {
         return false;
     }

@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 
-export abstract class ProjectKernel extends dotnetInteractive.Kernel {
-  private _project: dotnetInteractive.Project;
-  private _openDocument?: dotnetInteractive.OpenDocument;
+export abstract class ProjectKernel extends polyglotNotebooks.Kernel {
+  private _project: polyglotNotebooks.Project;
+  private _openDocument?: polyglotNotebooks.OpenDocument;
 
   protected get openProject() {
     return this._project;
@@ -23,8 +23,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
 
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.SubmitCodeType,
-      handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.SubmitCodeType,
+      handle: (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
 
         this.throwIfProjectIsNotOpened();
         this.throwIffDocumentIsNotOpened();
@@ -33,20 +33,20 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     });
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.OpenProjectType,
-      handle: async (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.OpenProjectType,
+      handle: async (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
         await this.handleOpenProject(commandInvocation);
-        let command = <dotnetInteractive.OpenProject>commandInvocation.commandEnvelope.command;
+        let command = <polyglotNotebooks.OpenProject>commandInvocation.commandEnvelope.command;
         this._project = JSON.parse(JSON.stringify(command.project));
       }
     });
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.OpenDocumentType,
-      handle: async (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.OpenDocumentType,
+      handle: async (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
         this.throwIfProjectIsNotOpened();
         await this.handleOpenDocument(commandInvocation);
-        let command = <dotnetInteractive.OpenDocument>commandInvocation.commandEnvelope.command;
+        let command = <polyglotNotebooks.OpenDocument>commandInvocation.commandEnvelope.command;
         this._openDocument = {
           relativeFilePath: command.relativeFilePath
         };
@@ -58,8 +58,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     });
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.RequestDiagnosticsType,
-      handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.RequestDiagnosticsType,
+      handle: (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
         this.throwIfProjectIsNotOpened();
         this.throwIffDocumentIsNotOpened();
         return this.handleRequestDiagnostics(commandInvocation);
@@ -67,8 +67,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     });
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.RequestCompletionsType,
-      handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.RequestCompletionsType,
+      handle: (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
         this.throwIfProjectIsNotOpened();
         this.throwIffDocumentIsNotOpened();
         return this.handleRequestCompletions(commandInvocation);
@@ -76,8 +76,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     });
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.RequestHoverTextType,
-      handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.RequestHoverTextType,
+      handle: (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
         this.throwIfProjectIsNotOpened();
         this.throwIffDocumentIsNotOpened();
         return this.handleRequestHoverText(commandInvocation);
@@ -85,8 +85,8 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
     });
 
     this.registerCommandHandler({
-      commandType: dotnetInteractive.RequestSignatureHelpType,
-      handle: (commandInvocation: dotnetInteractive.IKernelCommandInvocation) => {
+      commandType: polyglotNotebooks.RequestSignatureHelpType,
+      handle: (commandInvocation: polyglotNotebooks.IKernelCommandInvocation) => {
         this.throwIfProjectIsNotOpened();
         this.throwIffDocumentIsNotOpened();
         return this.handleRequestSignatureHelp(commandInvocation);
@@ -97,22 +97,22 @@ export abstract class ProjectKernel extends dotnetInteractive.Kernel {
   protected throwIfProjectIsNotOpened() {
     if (!this._project) {
       // todo : align error message with .NET
-      throw new Error(`Project must be opened, send the command '${dotnetInteractive.OpenProjectType}' first.`);
+      throw new Error(`Project must be opened, send the command '${polyglotNotebooks.OpenProjectType}' first.`);
     }
   }
 
   protected throwIffDocumentIsNotOpened() {
     if (!this._openDocument) {
       // todo : align error message with .NET
-      throw new Error(`Document must be opened, send the command '${dotnetInteractive.OpenDocumentType}' first.`);
+      throw new Error(`Document must be opened, send the command '${polyglotNotebooks.OpenDocumentType}' first.`);
     }
   }
 
-  protected abstract handleOpenProject(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
-  protected abstract handleRequestDiagnostics(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
-  protected abstract handleRequestCompletions(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
-  protected abstract handleRequestHoverText(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
-  protected abstract handleRequestSignatureHelp(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
-  protected abstract handleSubmitCode(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
-  protected abstract handleOpenDocument(commandInvocation: dotnetInteractive.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleOpenProject(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleRequestDiagnostics(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleRequestCompletions(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleRequestHoverText(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleRequestSignatureHelp(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleSubmitCode(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
+  protected abstract handleOpenDocument(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void>;
 }
