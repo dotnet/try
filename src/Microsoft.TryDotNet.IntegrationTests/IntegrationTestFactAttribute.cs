@@ -1,7 +1,11 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using FluentAssertions.Execution;
+
 using System;
+using System.Runtime.InteropServices;
+
 using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests
@@ -10,13 +14,17 @@ namespace Microsoft.TryDotNet.IntegrationTests
     {
         private const string EnvironmentVariableName = "RunIntegrationTests";
 
-        public IntegrationTestFactAttribute()
+        public IntegrationTestFactAttribute(string? reason = null)
         {
             var variableValue = Environment.GetEnvironmentVariable(EnvironmentVariableName) ?? "false";
             switch (variableValue.ToLowerInvariant())
             {
                 case "1":
                 case "true":
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        Skip = string.IsNullOrWhiteSpace(reason) ? "Ignored on Linux" : reason;
+                    }
                     break;
                 default:
                     Skip = $"Skipping integration tests because environment variable '{EnvironmentVariableName}' was not 'true' or '1'.";
