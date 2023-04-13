@@ -22,7 +22,8 @@
     <SystemDiagnosticsProcessVersion>4.3.0</SystemDiagnosticsProcessVersion>
     <SystemReactiveVersion>4.3.2</SystemReactiveVersion>
     <SystemRuntimeExtensionsVersion>4.3.0</SystemRuntimeExtensionsVersion>
-    <MicrosoftCodeAnalysisCommonVersion>4.4.0</MicrosoftCodeAnalysisCommonVersion>
-    <MicrosoftCodeAnalysisWorkspacesCommonVersion>4.4.0</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <MicrosoftCodeAnalysisCommonVersion>4.5.0</MicrosoftCodeAnalysisCommonVersion>
+    <MicrosoftCodeAnalysisWorkspacesCommonVersion>4.5.0</MicrosoftCodeAnalysisWorkspacesCommonVersion>
+    <SystemDrawingCommonVersion>7.0.0</SystemDrawingCommonVersion>
   </PropertyGroup>
 </Project>
