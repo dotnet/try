@@ -5,7 +5,7 @@ var existingOnlyOption = new Option<DirectoryInfo>("--destination-folder")
 {
     Description = "Location to write the simulator files",
     IsRequired = true
-}.AcceptExistingOnly();
+}.ExistingOnly();
 
 var command = new RootCommand
 {
