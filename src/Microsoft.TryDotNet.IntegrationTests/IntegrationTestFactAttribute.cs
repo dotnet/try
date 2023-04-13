@@ -24,7 +24,7 @@ namespace Microsoft.TryDotNet.IntegrationTests
                 case "true":
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {
-                        Skip = string.IsNullOrWhiteSpace(reason) ? "Ignored on Linux" : reason;
+                        Skip = string.IsNullOrWhiteSpace(skipReason) ? "Ignored on Linux" : skipReason;
                     }
                     break;
                 default:
