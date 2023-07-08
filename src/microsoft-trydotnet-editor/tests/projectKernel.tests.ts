@@ -4,14 +4,14 @@
 import { expect } from "chai";
 import { describe } from "mocha";
 
-import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 import * as CSharpProjectKernelWithWASMRunner from "../src/ProjectKernelWithWASMRunner";
 import { createApiServiceSimulator } from "./apiServiceSimulator";
 import { createWasmRunnerSimulator } from "./wasmRunnerSimulator";
 
 describe("Project kernel", () => {
     beforeEach(() => {
-        polyglotNotebooks.Logger.configure("debug", (entry) => {
+        dotnetInteractive.Logger.configure("debug", (entry) => {
             //  console.log(entry.message);
         });
     });
@@ -21,15 +21,15 @@ describe("Project kernel", () => {
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: polyglotNotebooks.OpenDocumentType, command: <polyglotNotebooks.OpenDocument>{ relativeFilePath: "./Program.cs" } });
+        await kernel.send({ commandType: dotnetInteractive.OpenDocumentType, command: <dotnetInteractive.OpenDocument>{ relativeFilePath: "./Program.cs" } });
 
-        let commandFailed = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.CommandFailedType);
+        let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<polyglotNotebooks.CommandFailed>(commandFailed!.event)).message).to.equal("Project must be opened, send the command 'OpenProject' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Project must be opened, send the command 'OpenProject' first.");
     });
 
     it("cannot request diagnostics if there is no open document", async () => {
@@ -46,15 +46,15 @@ describe("Project kernel", () => {
                 }]
             });
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: polyglotNotebooks.RequestDiagnosticsType, command: <polyglotNotebooks.RequestDiagnostics>{ code: "Console.WriteLine(1);" } });
+        await kernel.send({ commandType: dotnetInteractive.RequestDiagnosticsType, command: <dotnetInteractive.RequestDiagnostics>{ code: "Console.WriteLine(1);" } });
 
-        let commandFailed = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.CommandFailedType);
+        let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<polyglotNotebooks.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot request completions if there is no open document", async () => {
@@ -71,17 +71,17 @@ describe("Project kernel", () => {
                 }]
             });
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
 
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
 
-        await kernel.send({ commandType: polyglotNotebooks.RequestCompletionsType, command: <polyglotNotebooks.RequestCompletions>{ code: "Console.WriteLine(1);", linePosition: { character: 1, line: 1 } } });
+        await kernel.send({ commandType: dotnetInteractive.RequestCompletionsType, command: <dotnetInteractive.RequestCompletions>{ code: "Console.WriteLine(1);", linePosition: { character: 1, line: 1 } } });
 
-        let commandFailed = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.CommandFailedType);
+        let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<polyglotNotebooks.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot request signaturehelp if there is no open document", async () => {
@@ -98,15 +98,15 @@ describe("Project kernel", () => {
                 }]
             });
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: polyglotNotebooks.RequestSignatureHelpType, command: <polyglotNotebooks.RequestSignatureHelp>{ code: "Console.WriteLine(1);", linePosition: { character: 1, line: 1 } } });
+        await kernel.send({ commandType: dotnetInteractive.RequestSignatureHelpType, command: <dotnetInteractive.RequestSignatureHelp>{ code: "Console.WriteLine(1);", linePosition: { character: 1, line: 1 } } });
 
-        let commandFailed = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.CommandFailedType);
+        let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<polyglotNotebooks.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot request hovertext if there is no open document", async () => {
@@ -123,15 +123,15 @@ describe("Project kernel", () => {
                 }]
             });
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: polyglotNotebooks.RequestHoverTextType, command: <polyglotNotebooks.RequestHoverText>{ code: "Console.WriteLine(1);", linePosition: { character: 1, line: 1 } } });
+        await kernel.send({ commandType: dotnetInteractive.RequestHoverTextType, command: <dotnetInteractive.RequestHoverText>{ code: "Console.WriteLine(1);", linePosition: { character: 1, line: 1 } } });
 
-        let commandFailed = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.CommandFailedType);
+        let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<polyglotNotebooks.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("cannot submitCode if there is no open document", async () => {
@@ -148,15 +148,15 @@ describe("Project kernel", () => {
                 }]
             });
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: polyglotNotebooks.SubmitCodeType, command: <polyglotNotebooks.SubmitCode>{ code: "Console.WriteLine(1);" } });
+        await kernel.send({ commandType: dotnetInteractive.SubmitCodeType, command: <dotnetInteractive.SubmitCode>{ code: "Console.WriteLine(1);" } });
 
-        let commandFailed = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.CommandFailedType);
+        let commandFailed = eventEnvelopes.find(e => e.eventType === dotnetInteractive.CommandFailedType);
         expect(commandFailed).not.to.be.undefined;
-        expect((<polyglotNotebooks.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
+        expect((<dotnetInteractive.CommandFailed>(commandFailed!.event)).message).to.equal("Document must be opened, send the command 'OpenDocument' first.");
     });
 
     it("when opening a project it produces the project manifest", async () => {
@@ -164,12 +164,12 @@ describe("Project kernel", () => {
         let wasmRunner = createWasmRunnerSimulator();
         let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
         await kernel.send({
-            commandType: polyglotNotebooks.OpenProjectType, command: <polyglotNotebooks.OpenProject>{
+            commandType: dotnetInteractive.OpenProjectType, command: <dotnetInteractive.OpenProject>{
                 project: {
                     files: [{
                         relativeFilePath: "./Program.cs",
@@ -179,7 +179,7 @@ describe("Project kernel", () => {
             }
         });
 
-        let projectOpened = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.ProjectOpenedType)?.event as polyglotNotebooks.ProjectOpened;
+        let projectOpened = eventEnvelopes.find(e => e.eventType === dotnetInteractive.ProjectOpenedType)?.event as dotnetInteractive.ProjectOpened;
         expect(projectOpened).not.to.be.undefined;
         expect(projectOpened.projectItems).to.not.be.empty;
         expect(projectOpened.projectItems).to.deep.equal([{
@@ -205,13 +205,13 @@ describe("Project kernel", () => {
                 ]
             });
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
-        await kernel.send({ commandType: polyglotNotebooks.OpenDocumentType, command: <polyglotNotebooks.OpenDocument>{ relativeFilePath: "./Program.cs", regionName: "REGION_2" } });
+        await kernel.send({ commandType: dotnetInteractive.OpenDocumentType, command: <dotnetInteractive.OpenDocument>{ relativeFilePath: "./Program.cs", regionName: "REGION_2" } });
 
-        let documentOpen = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.DocumentOpenedType)?.event as polyglotNotebooks.DocumentOpened;
+        let documentOpen = eventEnvelopes.find(e => e.eventType === dotnetInteractive.DocumentOpenedType)?.event as dotnetInteractive.DocumentOpened;
         expect(documentOpen).not.to.be.undefined;
         expect(documentOpen.relativeFilePath).to.equal("./Program.cs");
         expect(documentOpen.content).to.equal("var b = 123;");
@@ -233,14 +233,14 @@ describe("Project kernel", () => {
             "./Program.cs",
             "test-region");
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
 
-        await kernel.send({ commandType: polyglotNotebooks.RequestDiagnosticsType, command: <polyglotNotebooks.RequestDiagnostics>{ code: "someInt = \"NaN\";" } });
+        await kernel.send({ commandType: dotnetInteractive.RequestDiagnosticsType, command: <dotnetInteractive.RequestDiagnostics>{ code: "someInt = \"NaN\";" } });
 
-        let diagnostics = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.DiagnosticsProducedType)?.event as polyglotNotebooks.DiagnosticsProduced;
+        let diagnostics = eventEnvelopes.find(e => e.eventType === dotnetInteractive.DiagnosticsProducedType)?.event as dotnetInteractive.DiagnosticsProduced;
         expect(diagnostics).not.to.be.undefined;
         expect(diagnostics.diagnostics.length).to.be.greaterThan(0);
         expect(diagnostics.diagnostics.find(d => d.severity === 'error')).to.deep.equal({
@@ -271,35 +271,35 @@ describe("Project kernel", () => {
             "./Program.cs",
             "test-region");
 
-        let eventEnvelopes: polyglotNotebooks.KernelEventEnvelope[] = [];
+        let eventEnvelopes: dotnetInteractive.KernelEventEnvelope[] = [];
         kernel.subscribeToKernelEvents(e => {
             eventEnvelopes.push(e);
         });
 
-        await kernel.send({ commandType: polyglotNotebooks.SubmitCodeType, command: <polyglotNotebooks.SubmitCode>{ code: "System.Console.WriteLine(2);" } });
+        await kernel.send({ commandType: dotnetInteractive.SubmitCodeType, command: <dotnetInteractive.SubmitCode>{ code: "System.Console.WriteLine(2);" } });
 
-        let standardOutputValueProduced = eventEnvelopes.find(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType)?.event as polyglotNotebooks.StandardOutputValueProduced;
+        let standardOutputValueProduced = eventEnvelopes.find(e => e.eventType === dotnetInteractive.StandardOutputValueProducedType)?.event as dotnetInteractive.StandardOutputValueProduced;
         expect(standardOutputValueProduced).not.to.be.undefined;
         expect(standardOutputValueProduced.formattedValues[0].value).to.equal("2");
 
     });
 });
 
-export function openProject(kernel: polyglotNotebooks.Kernel, project: polyglotNotebooks.Project): Promise<void> {
+export function openProject(kernel: dotnetInteractive.Kernel, project: dotnetInteractive.Project): Promise<void> {
     return kernel.send({
-        commandType: polyglotNotebooks.OpenProjectType,
-        command: <polyglotNotebooks.OpenProject>{
+        commandType: dotnetInteractive.OpenProjectType,
+        command: <dotnetInteractive.OpenProject>{
             project: project
         }
     });
 }
 
-export async function openProjectAndDocument(kernel: polyglotNotebooks.Kernel, project: polyglotNotebooks.Project, relativeFilePath: string, regionName?: string): Promise<void> {
+export async function openProjectAndDocument(kernel: dotnetInteractive.Kernel, project: dotnetInteractive.Project, relativeFilePath: string, regionName?: string): Promise<void> {
     await openProject(kernel, project);
 
     await kernel.send({
-        commandType: polyglotNotebooks.OpenDocumentType,
-        command: <polyglotNotebooks.OpenDocument>{
+        commandType: dotnetInteractive.OpenDocumentType,
+        command: <dotnetInteractive.OpenDocument>{
             relativeFilePath: relativeFilePath,
             regionName: regionName
         }

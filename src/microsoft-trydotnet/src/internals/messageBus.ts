@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { Subscribable, Unsubscribable, Subject, Observer } from "rxjs";
+import { ApiMessage } from "../apiMessages";
+import { isNullOrUndefinedOrWhitespace } from "../stringExtensions";
 
 export interface IMessageBus extends Subscribable<{
     type: string; requestId?: string;[key: string]: any

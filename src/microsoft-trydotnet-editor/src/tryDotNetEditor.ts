@@ -5,7 +5,7 @@ import * as messages from './legacyTryDotNetMessages';
 import * as rxjs from 'rxjs';
 import * as projectKernel from './projectKernel';
 import * as monaco from './EditorAdapter';
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as newContract from './newContract';
 import { DocumentId } from './documentId';
 import { configureLogging } from './log';
@@ -13,11 +13,11 @@ import { DebouncingKernel } from './decouncingKernel';
 
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
-  private _currentProject?: { projectItems: polyglotNotebooks.ProjectItem[]; };
+  private _currentProject?: { projectItems: dotnetInteractive.ProjectItem[]; };
   editorId: string;
   private _editorChangesSubscription: rxjs.Subscription;
   private _currentDocumentId?: DocumentId;
-  private _currentDocument: polyglotNotebooks.DocumentOpened;
+  private _currentDocument: dotnetInteractive.DocumentOpened;
   private _handlingRunRequest: boolean;
   private _kernel: DebouncingKernel;
 
@@ -25,7 +25,7 @@ export class TryDotNetEditor {
   public get isHandlingRunRequest(): boolean {
     return this._handlingRunRequest;
   }
-  public get currentProject(): { projectItems: polyglotNotebooks.ProjectItem[] } {
+  public get currentProject(): { projectItems: dotnetInteractive.ProjectItem[] } {
     return this._currentProject;
   }
 
@@ -39,30 +39,30 @@ export class TryDotNetEditor {
     // for messaging api backward compatibility
 
     this._kernel.subscribeToKernelEvents((event) => {
-      polyglotNotebooks.Logger.default.info(`[kernel event] : ${JSON.stringify(event)}`);
-      if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
-        polyglotNotebooks.Logger.default.info(`[SubmitCode event] : ${JSON.stringify(event)}`);
+      dotnetInteractive.Logger.default.info(`[kernel event] : ${JSON.stringify(event)}`);
+      if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
+        dotnetInteractive.Logger.default.info(`[SubmitCode event] : ${JSON.stringify(event)}`);
         switch (event.eventType) {
-          case polyglotNotebooks.CommandSucceededType:
-          case polyglotNotebooks.CommandFailedType:
-          case polyglotNotebooks.CommandCancelledType:
-            if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
+          case dotnetInteractive.CommandSucceededType:
+          case dotnetInteractive.CommandFailedType:
+          case dotnetInteractive.CommandCancelledType:
+            if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
               this._postKernelEvent({ event });
               this._postMessage({
                 type: messages.HOST_RUN_READY_EVENT
               });
             }
             break;
-          case polyglotNotebooks.CodeSubmissionReceivedType:
+          case dotnetInteractive.CodeSubmissionReceivedType:
             this._postKernelEvent({ event });
             this._postMessage({
               type: messages.NOTIFY_HOST_RUN_BUSY
             });
             break;
-          case polyglotNotebooks.StandardOutputValueProducedType:
-          case polyglotNotebooks.StandardErrorValueProducedType:
-          case polyglotNotebooks.DisplayedValueProducedType:
-            polyglotNotebooks.Logger.default.info(`[kernel event] : ${JSON.stringify(event)}`);
+          case dotnetInteractive.StandardOutputValueProducedType:
+          case dotnetInteractive.StandardErrorValueProducedType:
+          case dotnetInteractive.DisplayedValueProducedType:
+            dotnetInteractive.Logger.default.info(`[kernel event] : ${JSON.stringify(event)}`);
             this._postKernelEvent({ event });
             break;
         }
@@ -70,7 +70,7 @@ export class TryDotNetEditor {
     });
   }
 
-  private _postKernelEvent(arg: { event: polyglotNotebooks.KernelEventEnvelope, editorId?: string, requestId?: string }) {
+  private _postKernelEvent(arg: { event: dotnetInteractive.KernelEventEnvelope, editorId?: string, requestId?: string }) {
     let message = {
       type: arg.event.eventType,
       ...(arg.event)
@@ -93,7 +93,7 @@ export class TryDotNetEditor {
     this._editor = value;
     this._editorChangesSubscription?.unsubscribe();
     if (this._editor) {
-      polyglotNotebooks.Logger.default.info('configuring editor');
+      dotnetInteractive.Logger.default.info('configuring editor');
       if (this._kernel) {
         this._editor.configureServices(this._kernel);
         // todo : this should be coming from the kernelInfo
@@ -101,7 +101,7 @@ export class TryDotNetEditor {
       }
       this._editorChangesSubscription = this._editor.editorChanges.subscribe({
         next: (change) => {
-          polyglotNotebooks.Logger.default.info(`[editor changes] : ${JSON.stringify(change)}`);
+          dotnetInteractive.Logger.default.info(`[editor changes] : ${JSON.stringify(change)}`);
 
           const editorContentChanged: newContract.EditorContentChanged = {
             type: newContract.EditorContentChangedType,
@@ -122,7 +122,7 @@ export class TryDotNetEditor {
   }) {
     const requestId = apiMessage?.requestId;
     const editorId = apiMessage?.editorId;
-    polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.handleHostMessage] : ${JSON.stringify(apiMessage)}`);
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleHostMessage] : ${JSON.stringify(apiMessage)}`);
     switch (apiMessage.type) {
       case newContract.EnableLoggingType:
         configureLogging({ enableLogging: apiMessage.enableLogging });
@@ -145,11 +145,11 @@ export class TryDotNetEditor {
       case newContract.DefineMonacoEditorThemesType:
         this.getEditor().defineTheme(apiMessage.themes);
         break;
-      case polyglotNotebooks.OpenProjectType:
+      case dotnetInteractive.OpenProjectType:
         {
-          await this.openProject(<polyglotNotebooks.Project><any>(apiMessage.project));
+          await this.openProject(<dotnetInteractive.Project><any>(apiMessage.project));
           const message: newContract.ProjectOpened = {
-            type: polyglotNotebooks.ProjectOpenedType,
+            type: dotnetInteractive.ProjectOpenedType,
             projectItems: this._currentProject?.projectItems,
             requestId,
             editorId
@@ -157,7 +157,7 @@ export class TryDotNetEditor {
           this._postMessage(message);
         }
         break;
-      case polyglotNotebooks.OpenDocumentType:
+      case dotnetInteractive.OpenDocumentType:
         {
           const request = <newContract.OpenDocument>apiMessage;
 
@@ -166,7 +166,7 @@ export class TryDotNetEditor {
           let documentOpened = await this.openDocument(documentId);
 
           const message: newContract.DocumentOpened = {
-            type: polyglotNotebooks.DocumentOpenedType,
+            type: dotnetInteractive.DocumentOpenedType,
             relativeFilePath: documentOpened.relativeFilePath,
             content: documentOpened.content,
             requestId,
@@ -187,7 +187,7 @@ export class TryDotNetEditor {
         await this._handleRunRequest(requestId);
         break;
       default:
-        polyglotNotebooks.Logger.default.warn(`unhandled message: ${JSON.stringify(apiMessage)}`);
+        dotnetInteractive.Logger.default.warn(`unhandled message: ${JSON.stringify(apiMessage)}`);
         break;
     }
   }
@@ -195,57 +195,57 @@ export class TryDotNetEditor {
   public run(): Promise<void> {
     const code = this.getEditor().getCode();
 
-    const command: polyglotNotebooks.KernelCommandEnvelope = {
-      commandType: polyglotNotebooks.SubmitCodeType,
-      command: <polyglotNotebooks.SubmitCode>{
+    const command: dotnetInteractive.KernelCommandEnvelope = {
+      commandType: dotnetInteractive.SubmitCodeType,
+      command: <dotnetInteractive.SubmitCode>{
         code: code
       }
     };
 
-    polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.run] sending : ${JSON.stringify(command)}`);
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.run] sending : ${JSON.stringify(command)}`);
 
     return this.getKernel()
       .send(command);
   }
 
-  public subscribeToKernelEvents(observer: polyglotNotebooks.KernelEventEnvelopeObserver): polyglotNotebooks.DisposableSubscription {
+  public subscribeToKernelEvents(observer: dotnetInteractive.KernelEventEnvelopeObserver): dotnetInteractive.DisposableSubscription {
     return this.getKernel().subscribeToKernelEvents(observer);
   }
 
   private _handleRunRequest(requestId: string): Promise<void> {
     this._handlingRunRequest = true;
 
-    polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.handleRunRequest] start`);
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] start`);
 
-    let events: polyglotNotebooks.KernelEventEnvelope[] = [];
+    let events: dotnetInteractive.KernelEventEnvelope[] = [];
     let sub = this.subscribeToKernelEvents(event => {
-      polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.handleRunRequest] kernel event: ${JSON.stringify(event)}`);
+      dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] kernel event: ${JSON.stringify(event)}`);
       switch (event.eventType) {
-        case polyglotNotebooks.CommandSucceededType:
-        case polyglotNotebooks.CommandFailedType:
-        case polyglotNotebooks.CommandCancelledType:
-          if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
-            polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(event.command)}`);
+        case dotnetInteractive.CommandSucceededType:
+        case dotnetInteractive.CommandFailedType:
+        case dotnetInteractive.CommandCancelledType:
+          if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
+            dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(event.command)}`);
 
-            polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.handleRunRequest]  disposing event subscription}`);
+            dotnetInteractive.Logger.default.info(`[tryDotNetEditor.handleRunRequest]  disposing event subscription}`);
             sub.dispose();
             this._handlingRunRequest = false;
 
             let response: any = {
               type: messages.RUN_COMPLETED_EVENT,
               requestId: requestId,
-              outcome: event.eventType === polyglotNotebooks.CommandSucceededType ? 'Success' : 'Failed'
+              outcome: event.eventType === dotnetInteractive.CommandSucceededType ? 'Success' : 'Failed'
             };
 
             try {
-              if (event.eventType === polyglotNotebooks.CommandFailedType) {
-                response.exception = (<polyglotNotebooks.CommandFailed>event.event).message;
+              if (event.eventType === dotnetInteractive.CommandFailedType) {
+                response.exception = (<dotnetInteractive.CommandFailed>event.event).message;
               }
-              const stdOutEvents = events.filter(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType).map(e => (<polyglotNotebooks.StandardOutputValueProduced>e.event));
+              const stdOutEvents = events.filter(e => e.eventType === dotnetInteractive.StandardOutputValueProducedType).map(e => (<dotnetInteractive.StandardOutputValueProduced>e.event));
 
               response.output = stdOutEvents.map(e => e.formattedValues[0].value);
 
-              const diagnosticsEvents = events.filter(e => e.eventType === polyglotNotebooks.DiagnosticsProducedType).map(e => (<polyglotNotebooks.DiagnosticsProduced>e.event));
+              const diagnosticsEvents = events.filter(e => e.eventType === dotnetInteractive.DiagnosticsProducedType).map(e => (<dotnetInteractive.DiagnosticsProduced>e.event));
 
               response.diagnostics = [];
               for (let diagnosticsEvent of diagnosticsEvents) {
@@ -269,7 +269,7 @@ export class TryDotNetEditor {
           }
           break;
         default:
-          if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
+          if (event.command.commandType === dotnetInteractive.SubmitCodeType) {
             events.push(event);
           }
           break;
@@ -279,10 +279,10 @@ export class TryDotNetEditor {
     return this.run();
   }
 
-  public async openProject(project: polyglotNotebooks.Project) {
-    const command: polyglotNotebooks.KernelCommandEnvelope = {
-      commandType: polyglotNotebooks.OpenProjectType,
-      command: <polyglotNotebooks.OpenProject>{
+  public async openProject(project: dotnetInteractive.Project) {
+    const command: dotnetInteractive.KernelCommandEnvelope = {
+      commandType: dotnetInteractive.OpenProjectType,
+      command: <dotnetInteractive.OpenProject>{
         project: project
       }
     };//?
@@ -290,22 +290,22 @@ export class TryDotNetEditor {
     this.getEditor().disableTextChangedEvents();
 
     this._currentDocumentId = null;
-    let projectOpened = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.ProjectOpened>(
-      this.getKernel().asInteractiveKernel(), command, polyglotNotebooks.ProjectOpenedType); //?
+    let projectOpened = await dotnetInteractive.submitCommandAndGetResult<dotnetInteractive.ProjectOpened>(
+      this.getKernel().asInteractiveKernel(), command, dotnetInteractive.ProjectOpenedType); //?
 
     this.getEditor().enableTextChangedEvents();
     this.getEditor().enableLanguageService();
     this._currentProject = { ...projectOpened };
-    polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.openProject] : ${JSON.stringify(projectOpened)}`);
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.openProject] : ${JSON.stringify(projectOpened)}`);
     return projectOpened.projectItems;//?
 
   }
 
   public async openDocument(document: { relativeFilePath: string, regionName?: string }) {
     const documentId = new DocumentId(document);
-    const command: polyglotNotebooks.KernelCommandEnvelope = {
-      commandType: polyglotNotebooks.OpenDocumentType,
-      command: <polyglotNotebooks.OpenDocument>{
+    const command: dotnetInteractive.KernelCommandEnvelope = {
+      commandType: dotnetInteractive.OpenDocumentType,
+      command: <dotnetInteractive.OpenDocument>{
         relativeFilePath: document.relativeFilePath,
         regionName: document.regionName
       }
@@ -317,10 +317,10 @@ export class TryDotNetEditor {
 
       this.getEditor().disableLanguageService();
       this.getEditor().disableTextChangedEvents();
-      this._currentDocument = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.DocumentOpened>(
+      this._currentDocument = await dotnetInteractive.submitCommandAndGetResult<dotnetInteractive.DocumentOpened>(
         this.getKernel().asInteractiveKernel(),
         command,
-        polyglotNotebooks.DocumentOpenedType); //?
+        dotnetInteractive.DocumentOpenedType); //?
       this.getEditor().setCode(this._currentDocument.content);
       this.getEditor().enableTextChangedEvents();
       this.getEditor().enableLanguageService();
@@ -328,7 +328,7 @@ export class TryDotNetEditor {
       this._currentDocument.content = this.getEditor().getCode();
     }
 
-    polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.openDocument] : ${JSON.stringify(this._currentDocument)}`);
+    dotnetInteractive.Logger.default.info(`[tryDotNetEditor.openDocument] : ${JSON.stringify(this._currentDocument)}`);
     return this._currentDocument;//?
   }
 

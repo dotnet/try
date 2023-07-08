@@ -7,7 +7,7 @@ import { Session, InitialSessionState, Document, DocumentObject } from "./intern
 import { IFrameMessageBus } from "./internals/messageBus";
 import { configureEmbeddableEditorIFrame, configureEmbeddableEditorIFrameWithPackage } from "./htmlDomHelpers";
 import { Project } from "./project";
-import { Logger } from "@microsoft/polyglot-notebooks";
+import { Logger, LogLevel } from "@microsoft/dotnet-interactive";
 import { configureLogging } from "./log";
 
 async function _createSession(configuration: Configuration, editorIFrame: HTMLIFrameElement, window: Window, initialState: InitialSessionState, configureEmbeddableEditorIFrameCallBack: (editorIFrame: HTMLIFrameElement, configuration: Configuration) => void): Promise<ISession> {

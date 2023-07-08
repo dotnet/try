@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import * as rxjs from 'rxjs';
 import { DebouncingKernel } from './decouncingKernel';
 
@@ -35,10 +35,10 @@ export abstract class EditorAdapter {
     abstract updateOptions(options: any): void;
     abstract focus(): void;
 
-    private _diagnostics: polyglotNotebooks.Diagnostic[] = [];
+    private _diagnostics: dotnetInteractive.Diagnostic[] = [];
     abstract setMarkers(markers: IMarkerData[]);
 
-    displayDiagnostics(diagnostics: polyglotNotebooks.Diagnostic[]) {
+    displayDiagnostics(diagnostics: dotnetInteractive.Diagnostic[]) {
         const markers: IMarkerData[] = [];
         for (const diagnostic of diagnostics) {
             let severity = MarkerSeverity.Info;
@@ -89,7 +89,7 @@ export abstract class EditorAdapter {
         return this._languageServiceEnabled;
     }
 
-    public get diagnostics(): polyglotNotebooks.Diagnostic[] {
+    public get diagnostics(): dotnetInteractive.Diagnostic[] {
         return this._diagnostics;
     }
 
@@ -110,8 +110,8 @@ export abstract class EditorAdapter {
     private handleContentChanged(contentChanged: ContentChangedEvent) {
         if (this._kernel && this._languageServiceEnabled) {
             this._kernel.send({
-                commandType: polyglotNotebooks.RequestDiagnosticsType,
-                command: <polyglotNotebooks.RequestDiagnostics>{
+                commandType: dotnetInteractive.RequestDiagnosticsType,
+                command: <dotnetInteractive.RequestDiagnostics>{
                     code: contentChanged.code
                 }
             });
@@ -145,10 +145,10 @@ export abstract class EditorAdapter {
         });
     }
 
-    private handleKernelEvent(eventEnvelope: polyglotNotebooks.KernelEventEnvelope) {
+    private handleKernelEvent(eventEnvelope: dotnetInteractive.KernelEventEnvelope) {
         switch (<any>eventEnvelope.eventType) {
-            case polyglotNotebooks.DiagnosticsProducedType:
-                const diagnosticsEvent = <polyglotNotebooks.DiagnosticsProduced>eventEnvelope.event;
+            case dotnetInteractive.DiagnosticsProducedType:
+                const diagnosticsEvent = <dotnetInteractive.DiagnosticsProduced>eventEnvelope.event;
                 this._diagnostics = diagnosticsEvent.diagnostics;
                 this.displayDiagnostics(diagnosticsEvent.diagnostics);
                 break;

@@ -6,7 +6,7 @@ import * as chaiAsPromised from "chai-as-promised";
 import { Configuration, createSessionWithProjectAndOpenDocument } from "../src/index";
 import { buildSimpleIFrameDom, getEditorIFrame } from "./domUtilities";
 import { notifyEditorReady, registerForOpeDocument, registerForOpenProject } from "./messagingMocks";
-import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 import { areSameFile } from "../src/documentId";
 
 chai.use(chaiAsPromised);
@@ -35,7 +35,7 @@ describe("a user", () => {
 
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
@@ -72,7 +72,7 @@ describe("a user", () => {
 
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}

@@ -1,10 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import { PromiseCompletionSource } from '@microsoft/dotnet-interactive';
 
 class CommandOperation {
-    constructor(public readonly kernelCommandEnvelope: polyglotNotebooks.KernelCommandEnvelope, public readonly completionSource: polyglotNotebooks.PromiseCompletionSource<void>) {
+    constructor(public readonly kernelCommandEnvelope: dotnetInteractive.KernelCommandEnvelope, public readonly completionSource: dotnetInteractive.PromiseCompletionSource<void>) {
 
     }
     complete() {
@@ -25,37 +26,37 @@ export class DebouncingKernel {
     private _commandOperations: CommandOperation[] = [];
     private _running: boolean = false;
 
-    constructor(private _kernel: polyglotNotebooks.Kernel) {
+    constructor(private _kernel: dotnetInteractive.Kernel) {
         if (!_kernel) {
             throw new Error("kernel is null");
         }
     }
 
-    public asInteractiveKernel(): polyglotNotebooks.Kernel {
-        return <polyglotNotebooks.Kernel><any>this;
+    public asInteractiveKernel(): dotnetInteractive.Kernel {
+        return <dotnetInteractive.Kernel><any>this;
     }
 
-    get kernelInfo(): polyglotNotebooks.KernelInfo {
+    get kernelInfo(): dotnetInteractive.KernelInfo {
         return this._kernel.kernelInfo;
     }
 
-    public subscribeToKernelEvents(observer: polyglotNotebooks.KernelEventEnvelopeObserver): polyglotNotebooks.DisposableSubscription {
+    public subscribeToKernelEvents(observer: dotnetInteractive.KernelEventEnvelopeObserver): dotnetInteractive.DisposableSubscription {
         return this._kernel.subscribeToKernelEvents(observer);
     }
 
-    public send(commandEnvelope: polyglotNotebooks.KernelCommandEnvelope): Promise<void> {
-        const newOperation: CommandOperation = new CommandOperation(commandEnvelope, new polyglotNotebooks.PromiseCompletionSource());
+    public send(commandEnvelope: dotnetInteractive.KernelCommandEnvelope): Promise<void> {
+        const newOperation: CommandOperation = new CommandOperation(commandEnvelope, new PromiseCompletionSource());
         switch (commandEnvelope.commandType) {
-            case polyglotNotebooks.RequestCompletionsType:
-            case polyglotNotebooks.RequestHoverTextType:
-            case polyglotNotebooks.RequestSignatureHelpType:
+            case dotnetInteractive.RequestCompletionsType:
+            case dotnetInteractive.RequestHoverTextType:
+            case dotnetInteractive.RequestSignatureHelpType:
                 this._langiageServicesCommandOperation?.cancel();
                 this._langiageServicesCommandOperation = newOperation;
                 break;
-            case polyglotNotebooks.RequestDiagnosticsType:
+            case dotnetInteractive.RequestDiagnosticsType:
                 if (this._langiageServicesCommandOperation) {
                     switch (this._langiageServicesCommandOperation.kernelCommandEnvelope.commandType) {
-                        case polyglotNotebooks.RequestDiagnosticsType:
+                        case dotnetInteractive.RequestDiagnosticsType:
                             this._langiageServicesCommandOperation?.cancel();
                             this._langiageServicesCommandOperation = newOperation;
                             break;

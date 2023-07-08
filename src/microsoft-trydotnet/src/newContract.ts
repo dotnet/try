@@ -1,6 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 export const EditorContentChangedType = "EditorContentChanged";
 export const ConfigureMonacoEditorType = "ConfigureMonacoEditor";
 export const DefineMonacoEditorThemesType = "DefineMonacoEditorThemes";
@@ -12,21 +12,21 @@ export interface EnableLogging {
     enableLogging: boolean;
 }
 export interface ProjectOpened {
-    type: typeof polyglotNotebooks.ProjectOpenedType;
-    projectItems: polyglotNotebooks.ProjectItem[];
+    type: typeof dotnetInteractive.ProjectOpenedType;
+    projectItems: dotnetInteractive.ProjectItem[];
     requestId: string;
     editorId: string;
 }
 
 export interface OpenProject {
-    type: typeof polyglotNotebooks.OpenProjectType;
+    type: typeof dotnetInteractive.OpenProjectType;
     requestId: string;
     editorId?: string;
-    project: polyglotNotebooks.Project
+    project: dotnetInteractive.Project
 }
 
 export interface DocumentOpened {
-    type: typeof polyglotNotebooks.DocumentOpenedType;
+    type: typeof dotnetInteractive.DocumentOpenedType;
     requestId: string;
     editorId: string;
     content: string;
@@ -43,7 +43,7 @@ export interface EditorContentChanged {
 }
 
 export interface OpenDocument {
-    type: typeof polyglotNotebooks.OpenDocumentType;
+    type: typeof dotnetInteractive.OpenDocumentType;
     relativeFilePath: string;
     regionName?: string;
     editorId?: string;
