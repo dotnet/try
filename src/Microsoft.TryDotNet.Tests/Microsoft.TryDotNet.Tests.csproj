@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
