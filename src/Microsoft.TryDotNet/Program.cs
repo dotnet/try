@@ -81,6 +81,8 @@ public class Program
 
                     var bundle = JsonDocument.Parse(body).RootElement;
 
+                    kernel.KernelEvents.Subscribe(e => kernelEvents.Add(e));
+
                     var commandEnvelopes = ReadCommands(bundle).ToList();
                     //if (commandEnvelopes.FirstOrDefault(ce => ce.Command is OpenProject) is not null)
                     //{
@@ -90,7 +92,6 @@ public class Program
                     foreach (var commandEnvelope in commandEnvelopes)
                     {
                         var results = await kernel.SendAsync(commandEnvelope.Command, CancellationToken.None);
-                        kernelEvents.AddRange(results.Events);
                     }
                 }
 
