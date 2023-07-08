@@ -9,7 +9,7 @@ import * as chaiAsPromised from "chai-as-promised";
 import { registerForEditorMessages, registerForOpeDocument, registerForOpenProject } from "./messagingMocks";
 import { wait } from "./wait";
 import { createReadySession } from "./sessionFactory";
-import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 
 import { expect } from "chai";
 import { areSameFile, DocumentId } from "../src/documentId";
@@ -36,7 +36,7 @@ describe("A user", () => {
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
@@ -62,7 +62,7 @@ describe("A user", () => {
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
@@ -89,7 +89,7 @@ describe("A user", () => {
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
@@ -115,10 +115,10 @@ describe("A user", () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n//content\n e#endregion\n//post/n" }] });
 
-            const items: { [key: string]: polyglotNotebooks.ProjectItem } = {};
+            const items: { [key: string]: dotnetInteractive.ProjectItem } = {};
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 const pi = files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: ["controller"],
                         regionsContent: {
@@ -154,10 +154,10 @@ describe("A user", () => {
             let session = await createReadySession(configuration, editorIFrame, dom.window);
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "//pre\n#region controller\n#endregion\n//post/n" }] });
 
-            const items: { [key: string]: polyglotNotebooks.ProjectItem } = {};
+            const items: { [key: string]: dotnetInteractive.ProjectItem } = {};
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 const pi = files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: ["controller"],
                         regionsContent: {
@@ -198,7 +198,7 @@ describe("A user", () => {
 
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
@@ -226,7 +226,7 @@ describe("A user", () => {
             let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
             registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                 return files.map(f => {
-                    let item: polyglotNotebooks.ProjectItem = {
+                    let item: dotnetInteractive.ProjectItem = {
                         relativeFilePath: f.relativeFilePath,
                         regionNames: [],
                         regionsContent: {}
@@ -256,7 +256,7 @@ describe("A user", () => {
                 let project = await createProject({ packageName: "console", files: [{ name: "program.cs", content: "file content" }] });
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: polyglotNotebooks.ProjectItem = {
+                        let item: dotnetInteractive.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -286,7 +286,7 @@ describe("A user", () => {
 
                 registerForOpenProject(configuration, editorIFrame, dom.window, (files) => {
                     return files.map(f => {
-                        let item: polyglotNotebooks.ProjectItem = {
+                        let item: dotnetInteractive.ProjectItem = {
                             relativeFilePath: f.relativeFilePath,
                             regionNames: [],
                             regionsContent: {}
@@ -296,7 +296,7 @@ describe("A user", () => {
                 });
 
                 registerForOpeDocument(configuration, editorIFrame, dom.window, (documentId) => {
-                    return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content || "";
+                    return project.files.find(f => areSameFile(f.name, documentId.relativeFilePath))?.content;
                 });
 
                 await session.openProject(project);

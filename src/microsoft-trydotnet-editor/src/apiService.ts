@@ -1,7 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+
+
+
 
 export interface IServiceError {
     statusCode: string;
@@ -20,7 +23,7 @@ export function createApiService(configuration: IApiServiceConfiguration): IApiS
     return createApiServiceWithConfiguration(configuration);
 }
 export interface IApiService {
-    (commands: polyglotNotebooks.KernelCommandEnvelope[]): Promise<polyglotNotebooks.KernelEventEnvelope[]>
+    (commands: dotnetInteractive.KernelCommandEnvelope[]): Promise<dotnetInteractive.KernelEventEnvelope[]>
 }
 
 
@@ -42,7 +45,7 @@ function createApiServiceWithConfiguration(configuration: IApiServiceConfigurati
             body: bodyContent
         });
 
-        polyglotNotebooks.Logger.default.info(`[ApiService.request] ${bodyContent}`);
+        dotnetInteractive.Logger.default.info(`[ApiService.request] ${bodyContent}`);
 
         if (!response.ok) {
             configuration.onServiceError({
@@ -54,7 +57,7 @@ function createApiServiceWithConfiguration(configuration: IApiServiceConfigurati
 
         let json = await response.json();
 
-        polyglotNotebooks.Logger.default.info(`[ApiService.response] ${JSON.stringify(json)}`);
+        dotnetInteractive.Logger.default.info(`[ApiService.response] ${JSON.stringify(json)}`);
         return json.events;
     };
 

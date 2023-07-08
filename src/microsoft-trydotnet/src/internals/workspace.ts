@@ -8,7 +8,7 @@ import { IDocument, Region } from "../editableDocument";
 import { Project } from "../project";
 import { ITrydotnetMonacoTextEditor } from "./monacoTextEditor";
 import { isNullOrUndefined, isNullOrUndefinedOrWhitespace } from "../stringExtensions";
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import { OpenProject } from "../newContract";
 import { responseFor } from "./responseFor";
 import * as newContract from "../newContract";
@@ -45,7 +45,7 @@ export type SetWorkspaceRequests = {
 };
 
 export class Workspace {
-    private _projectItems: polyglotNotebooks.ProjectItem[];
+    private _projectItems: dotnetInteractive.ProjectItem[];
     private workspace: IWorkspace;
     private _currentOpenDocument: Document;
 
@@ -88,14 +88,14 @@ export class Workspace {
         if (prjr.project) { // && wsr.workspace.buffers && wsr.workspace.buffers.length > 0) {
 
             let request: newContract.OpenProject = {
-                type: polyglotNotebooks.OpenProjectType,
+                type: dotnetInteractive.OpenProjectType,
                 requestId: requestId,
                 project: prjr.project,
             }
             let messageBus = this.projectApiMessageBus;
 
 
-            let projectOpenedPromise = responseFor<newContract.ProjectOpened>(messageBus, polyglotNotebooks.ProjectOpenedType, requestId, response => {
+            let projectOpenedPromise = responseFor<newContract.ProjectOpened>(messageBus, dotnetInteractive.ProjectOpenedType, requestId, response => {
 
                 return <newContract.ProjectOpened>response;
             });
@@ -164,12 +164,12 @@ export class Workspace {
     private async createAndOpenDocument(fileName: string, region: Region, content: string): Promise<Document> {
 
         const requestId = await this.requestIdGenerator.getNewRequestId();
-        let openDocumentResponse = responseFor<newContract.DocumentOpened>(this.projectApiMessageBus, polyglotNotebooks.DocumentOpenedType, requestId, reponse => {
+        let openDocumentResponse = responseFor<newContract.DocumentOpened>(this.projectApiMessageBus, dotnetInteractive.DocumentOpenedType, requestId, reponse => {
             const od: newContract.DocumentOpened = <newContract.DocumentOpened><any>reponse;
             return od;
         });
         const openDocumentRequest: newContract.OpenDocument = {
-            type: polyglotNotebooks.OpenDocumentType,
+            type: dotnetInteractive.OpenDocumentType,
             relativeFilePath: fileName,
             regionName: region,
             requestId: requestId
@@ -254,9 +254,9 @@ export class Workspace {
         }
 
         let request: OpenProject = {
-            type: polyglotNotebooks.OpenProjectType,
-            project: <polyglotNotebooks.Project>{
-                files: this.workspace.files.map<polyglotNotebooks.ProjectFile>(f => ({ relativeFilePath: f.name, content: f.text })),
+            type: dotnetInteractive.OpenProjectType,
+            project: <dotnetInteractive.Project>{
+                files: this.workspace.files.map<dotnetInteractive.ProjectFile>(f => ({ relativeFilePath: f.name, content: f.text })),
             },
             requestId: "",
             editorId: ""
@@ -265,7 +265,7 @@ export class Workspace {
         return request;
     }
 
-    setProjectItems(projectItems: polyglotNotebooks.ProjectItem[]) {
+    setProjectItems(projectItems: dotnetInteractive.ProjectItem[]) {
         this._projectItems = projectItems ? [...projectItems] : []//?
     }
 }

@@ -1,7 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
+import { Logger, submitCommandAndGetResult } from '@microsoft/dotnet-interactive';
 import * as monaco from 'monaco-editor';
 import * as rxjs from 'rxjs';
 import * as editorAdapter from './EditorAdapter';
@@ -12,7 +13,7 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
     setMarkers(markers: editorAdapter.IMarkerData[]) {
         const model = this._editor.getModel();
         monaco.editor.setModelMarkers(model, markerOwnerName, markers);
-        polyglotNotebooks.Logger.default.info('[MonacoEditorAdapter.setMarkers]: ' + JSON.stringify(markers));
+        Logger.default.info('[MonacoEditorAdapter.setMarkers]: ' + JSON.stringify(markers));
     }
 
     getMarkers(): editorAdapter.IMarkerData[] {
@@ -64,12 +65,12 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
 
     getCode(): string {
         const code = this._editor.getValue();
-        polyglotNotebooks.Logger.default.info(`[MonacoEditorArapter.getCode]: ${code}`);
+        dotnetInteractive.Logger.default.info(`[MonacoEditorArapter.getCode]: ${code}`);
         return code;
     }
 
     setCode(code: string) {
-        polyglotNotebooks.Logger.default.info(`[MonacoEditorArapter.setCode]: ${code}`);
+        dotnetInteractive.Logger.default.info(`[MonacoEditorArapter.setCode]: ${code}`);
         this._editor.setValue(code);
     }
 
@@ -89,18 +90,18 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
             triggerCharacters: ['.'],
             provideCompletionItems: async (model: monaco.editor.ITextModel, position: monaco.Position, context: monaco.languages.CompletionContext, token: monaco.CancellationToken) => {
                 if (this.languageServiceEnabled) {
-                    const command: polyglotNotebooks.RequestCompletions = {
+                    const command: dotnetInteractive.RequestCompletions = {
                         code: this.getCode(),
                         linePosition: {
                             line: position.lineNumber - 1,
                             character: position.column - 1,
                         }
                     };
-                    const commandEnvelope: polyglotNotebooks.KernelCommandEnvelope = {
-                        commandType: polyglotNotebooks.RequestCompletionsType,
+                    const commandEnvelope: dotnetInteractive.KernelCommandEnvelope = {
+                        commandType: dotnetInteractive.RequestCompletionsType,
                         command
                     };
-                    const completionsProduced = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.CompletionsProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, polyglotNotebooks.CompletionsProducedType);
+                    const completionsProduced = await submitCommandAndGetResult<dotnetInteractive.CompletionsProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, dotnetInteractive.CompletionsProducedType);
                     const completionList: monaco.languages.CompletionList = {
                         suggestions: completionsProduced.completions.map(completion => ({
                             label: completion.displayText,
@@ -126,18 +127,18 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
             signatureHelpTriggerCharacters: ['(', ','],
             provideSignatureHelp: async (model: monaco.editor.ITextModel, position: monaco.Position, token: monaco.CancellationToken, context: monaco.languages.SignatureHelpContext) => {
                 if (this.languageServiceEnabled) {
-                    const command: polyglotNotebooks.RequestSignatureHelp = {
+                    const command: dotnetInteractive.RequestSignatureHelp = {
                         code: this.getCode(),
                         linePosition: {
                             line: position.lineNumber - 1,
                             character: position.column - 1,
                         }
                     };
-                    const commandEnvelope: polyglotNotebooks.KernelCommandEnvelope = {
-                        commandType: polyglotNotebooks.RequestSignatureHelpType,
+                    const commandEnvelope: dotnetInteractive.KernelCommandEnvelope = {
+                        commandType: dotnetInteractive.RequestSignatureHelpType,
                         command
                     };
-                    const signatureHelpProduced = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.SignatureHelpProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, polyglotNotebooks.SignatureHelpProducedType);
+                    const signatureHelpProduced = await submitCommandAndGetResult<dotnetInteractive.SignatureHelpProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, dotnetInteractive.SignatureHelpProducedType);
                     const signatureHelp: monaco.languages.SignatureHelp = {
                         signatures: signatureHelpProduced.signatures,
                         activeSignature: signatureHelpProduced.activeSignatureIndex,
@@ -214,7 +215,7 @@ function mapToCompletionItemKind(kind: string): monaco.languages.CompletionItemK
             return monaco.languages.CompletionItemKind.TypeParameter;
 
         default:
-            polyglotNotebooks.Logger.default.warn(`[MonacoEditorAdapter.mapToCompletionItemKind] Unhandled completion item kind: ${kind}`);
+            Logger.default.warn(`[MonacoEditorAdapter.mapToCompletionItemKind] Unhandled completion item kind: ${kind}`);
             return monaco.languages.CompletionItemKind.Variable;
     }
 }

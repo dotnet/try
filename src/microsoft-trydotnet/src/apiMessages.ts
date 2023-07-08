@@ -24,11 +24,11 @@ export const SHOW_EDITOR_REQUEST = "showEditor";
 export type ApiMessage =
     {
         type: typeof RUN_REQUEST,
-        requestId?: string,
+        requestId: string,
         parameters?: { [key: string]: any }
     } | {
         type: typeof RUN_RESPONSE,
-        requestId?: string,
+        requestId: string,
         outcome: "Success" | "Exception" | "CompilationError",
         [key: string]: any
     } | {
@@ -45,5 +45,5 @@ export type ApiMessage =
         type: typeof SERVICE_ERROR_RESPONSE,
         statusCode: string,
         message: string,
-        requestId?: string,
+        requestId: string,
     };

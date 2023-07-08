@@ -8,7 +8,7 @@ import { FakeMonacoTextEditor } from "../fakes/fakeMonacoTextEditor";
 import { FakeMessageBus } from "../fakes/fakeMessageBus";
 import { expect } from "chai";
 import { RequestIdGenerator } from "../../src/internals/requestIdGenerator";
-import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 import * as newContract from "../../src/newContract";
 chai.should();
 
@@ -26,20 +26,20 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
@@ -65,29 +65,29 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
                     }
                         break;
-                    case polyglotNotebooks.OpenDocumentType: {
+                    case dotnetInteractive.OpenDocumentType: {
                         const res: newContract.DocumentOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.DocumentOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
                             editorId: bus.id(),
                             content: "the program",
                             relativeFilePath: "program.cs"
@@ -113,29 +113,29 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
                     }
                         break;
-                    case polyglotNotebooks.OpenDocumentType: {
+                    case dotnetInteractive.OpenDocumentType: {
                         const res: newContract.DocumentOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.DocumentOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
                             editorId: bus.id(),
                             content: "the program",
                             relativeFilePath: "program.cs"
@@ -163,30 +163,30 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
                     }
                         break;
 
-                    case polyglotNotebooks.OpenDocumentType: {
+                    case dotnetInteractive.OpenDocumentType: {
                         const res: newContract.DocumentOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.DocumentOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
                             editorId: bus.id(),
                             content: "the program",
                             relativeFilePath: "program.cs"
@@ -213,29 +213,29 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
                     }
                         break;
-                    case polyglotNotebooks.OpenDocumentType: {
+                    case dotnetInteractive.OpenDocumentType: {
                         const res: newContract.DocumentOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.DocumentOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
                             editorId: bus.id(),
                             content: "the program",
                             relativeFilePath: "program.cs"
@@ -265,29 +265,29 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
                     }
                         break;
-                    case polyglotNotebooks.OpenDocumentType: {
+                    case dotnetInteractive.OpenDocumentType: {
                         const res: newContract.DocumentOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.DocumentOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
                             editorId: bus.id(),
                             content: "the program",
                             relativeFilePath: "program.cs"
@@ -322,29 +322,29 @@ describe("a workspace", () => {
             next: (message) => {
                 message;//?
                 switch (message.type) {
-                    case polyglotNotebooks.OpenProjectType: {
+                    case dotnetInteractive.OpenProjectType: {
                         const res: newContract.ProjectOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.ProjectOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.ProjectOpenedType,
                             editorId: bus.id(),
                             projectItems: [{
                                 relativeFilePath: "program.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             },
                             {
                                 relativeFilePath: "otherFile.cs",
-                                regionNames: [],
-                                regionsContent: {}
+                                regionNames: null,
+                                regionsContent: null
                             }]
                         }
                         bus.postResponse(res);
                     }
                         break;
-                    case polyglotNotebooks.OpenDocumentType: {
+                    case dotnetInteractive.OpenDocumentType: {
                         const res: newContract.DocumentOpened = {
-                            requestId: message.requestId!,
-                            type: polyglotNotebooks.DocumentOpenedType,
+                            requestId: message.requestId,
+                            type: dotnetInteractive.DocumentOpenedType,
                             editorId: bus.id(),
                             content: "the program",
                             relativeFilePath: "program.cs"

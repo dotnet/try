@@ -51,9 +51,9 @@
     "ciMinify": "uglifyjs dist/trydotnet.js --source-map"
   },
   "dependencies": {
-    "@microsoft/polyglot-notebooks": "1.0.411302",
     "es6-promise": "4.2.8",
-    "rxjs": "7.5.5"
+    "rxjs": "7.5.5",
+    "@microsoft/dotnet-interactive": "1.0.357301"
   },
   "mocha": {
     "ui": "bdd",

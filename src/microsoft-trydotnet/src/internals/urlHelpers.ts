@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
+import * as dotnetInteractive from "@microsoft/dotnet-interactive";
 import { Configuration } from "../configuration";
 
 export function generateEditorUrl(configuration: Configuration, packageName?: string): string {
-    polyglotNotebooks.Logger.default.info(`${JSON.stringify(configuration)}`);
+    dotnetInteractive.Logger.default.info(`${JSON.stringify(configuration)}`);
     const host = configuration.trydotnetOrigin ? configuration.trydotnetOrigin : "https://try.dot.net";
     let url = new URL(host);
     url.pathname = "/editor";

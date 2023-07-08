@@ -8,7 +8,7 @@ import './index.css';
 import * as rxjs from 'rxjs';
 import * as monacoAdapterImpl from './monacoAdapterImpl';
 import * as apiService from './apiService';
-import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
+import * as dotnetInteractive from '@microsoft/dotnet-interactive';
 import { configureLogging } from './log';
 
 if (window) {
@@ -36,14 +36,14 @@ if (window) {
 	let mainWindowOrParent: Window = window;
 	if (window.parent) {
 		mainWindowOrParent = window.parent;
-		polyglotNotebooks.Logger.default.info("editor in iframe setup");
+		dotnetInteractive.Logger.default.info("editor in iframe setup");
 		messageDestination = `" to hosting window ${document.referrer}`;
 	}
 
 	const postAndLog = (message: any) => {
 
 		message.editorId = settings.editorId;
-		polyglotNotebooks.Logger.default.info(`[sending from trydotnet-editor${messageDestination}] ${JSON.stringify(message)}`);
+		dotnetInteractive.Logger.default.info(`[sending from trydotnet-editor${messageDestination}] ${JSON.stringify(message)}`);
 		const messageLogger = window['postMessageLogger'];
 		if (messageLogger) {
 			messageLogger(message);
@@ -53,7 +53,7 @@ if (window) {
 
 	const mainWindowMessages = new rxjs.Subject<any>();
 	window.addEventListener('message', (message) => {
-		polyglotNotebooks.Logger.default.info(`[received in trydotnet-editor] ${JSON.stringify(message)}`);
+		dotnetInteractive.Logger.default.info(`[received in trydotnet-editor] ${JSON.stringify(message)}`);
 		const apiMessage = message.data;
 		if (apiMessage) {
 			mainWindowMessages.next(apiMessage);
