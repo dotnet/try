@@ -109,12 +109,12 @@ export abstract class EditorAdapter {
 
     private handleContentChanged(contentChanged: ContentChangedEvent) {
         if (this._kernel && this._languageServiceEnabled) {
-            this._kernel.send({
-                commandType: polyglotNotebooks.RequestDiagnosticsType,
-                command: <polyglotNotebooks.RequestDiagnostics>{
+            this._kernel.send(new polyglotNotebooks.KernelCommandEnvelope(
+                polyglotNotebooks.RequestDiagnosticsType,
+                <polyglotNotebooks.RequestDiagnostics>{
                     code: contentChanged.code
                 }
-            });
+            ));
         }
     }
 

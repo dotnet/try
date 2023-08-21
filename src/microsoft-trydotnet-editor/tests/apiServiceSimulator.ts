@@ -6,8 +6,8 @@ import * as polyglotNotebooks from "@microsoft/polyglot-notebooks";
 
 interface ISimulatorConfiguration {
     requests: {
-        commands: polyglotNotebooks.KernelCommandEnvelope[];
-        events: polyglotNotebooks.KernelEventEnvelope[];
+        commands: polyglotNotebooks.KernelCommandEnvelopeModel[];
+        events: polyglotNotebooks.KernelEventEnvelopeModel[];
     }[]
 }
 export function createApiServiceSimulator(configurationPath?: string): apiService.IApiService {
@@ -26,7 +26,8 @@ class Simulator {
 
     public async processRequest(commands: polyglotNotebooks.KernelCommandEnvelope[]): Promise<polyglotNotebooks.KernelEventEnvelope[]> {
         if (this._configuration) {
-            let requestConfiguration = this._configuration.requests.find(request => areEquivalentCommandSequences(commands, request.commands));
+            let commandModels = commands.map(command => command.toJson());
+            let requestConfiguration = this._configuration.requests.find(request => areEquivalentCommandSequences(commandModels, request.commands));
             if (requestConfiguration) {
                 let events = patchEvents(requestConfiguration.events, commands);
                 return new Promise<polyglotNotebooks.KernelEventEnvelope[]>((resolve, _reject) => {
@@ -41,23 +42,24 @@ class Simulator {
     }
 }
 
-function patchEvents(events: polyglotNotebooks.KernelEventEnvelope[], commands: polyglotNotebooks.KernelCommandEnvelope[]): polyglotNotebooks.KernelEventEnvelope[] {
-    let patchedEvents: polyglotNotebooks.KernelEventEnvelope[] = [];
+function patchEvents(events: polyglotNotebooks.KernelEventEnvelopeModel[], commands: polyglotNotebooks.KernelCommandEnvelope[]): polyglotNotebooks.KernelEventEnvelope[] {
+    let patchedEvents: polyglotNotebooks.KernelEventEnvelopeModel[] = [];
     for (let i = 0; i < events.length; i++) {
         let event = events[i];
         var sourceCommand = commands.find(command => command.commandType === event.command!.commandType);
         let patchedEvent = { ...event };
         patchedEvent.command!.id = sourceCommand!.id;
-        patchedEvent.command!.token = sourceCommand!.token;
+        patchedEvent.command!.token = sourceCommand!.getOrCreateToken();
 
         patchedEvents.push(patchedEvent);
     }
 
-    return patchedEvents;
+    const eventsToReturn = patchedEvents.map(patchedEvent => polyglotNotebooks.KernelEventEnvelope.fromJson(patchedEvent));
+    return eventsToReturn;
 }
 
 
-function areEquivalentCommandSequences(actual: polyglotNotebooks.KernelCommandEnvelope[], expected: polyglotNotebooks.KernelCommandEnvelope[]): boolean {
+function areEquivalentCommandSequences(actual: polyglotNotebooks.KernelCommandEnvelopeModel[], expected: polyglotNotebooks.KernelCommandEnvelopeModel[]): boolean {
     if (actual.length !== expected.length) {
         return false;
     }
@@ -71,7 +73,7 @@ function areEquivalentCommandSequences(actual: polyglotNotebooks.KernelCommandEn
     return true;
 }
 
-function areEquivalentCommands(actual: polyglotNotebooks.KernelCommandEnvelope, expected: polyglotNotebooks.KernelCommandEnvelope): boolean {
+function areEquivalentCommands(actual: polyglotNotebooks.KernelCommandEnvelopeModel, expected: polyglotNotebooks.KernelCommandEnvelopeModel): boolean {
     if (actual.commandType !== expected.commandType) {
         return false;
     }

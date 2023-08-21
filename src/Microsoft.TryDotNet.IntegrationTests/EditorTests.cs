@@ -430,7 +430,7 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
         await page.DispatchMessage(new
         {
             type = "OpenProject",
-            project = new
+            project = new 
             {
                 files = new[]
                 {

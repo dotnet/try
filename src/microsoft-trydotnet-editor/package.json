@@ -54,7 +54,7 @@
     "webpack-cli": "4.10.0"
   },
   "dependencies": {
-    "@microsoft/polyglot-notebooks": "1.0.411302",
+    "@microsoft/polyglot-notebooks": "1.0.441801",
     "monaco-editor": "0.33.0",
     "rxjs": "7.5.5"
   },
