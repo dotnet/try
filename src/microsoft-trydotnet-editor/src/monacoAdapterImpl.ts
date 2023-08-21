@@ -96,10 +96,10 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
                             character: position.column - 1,
                         }
                     };
-                    const commandEnvelope: polyglotNotebooks.KernelCommandEnvelope = {
+                    const commandEnvelope = polyglotNotebooks.KernelCommandEnvelope.fromJson({
                         commandType: polyglotNotebooks.RequestCompletionsType,
                         command
-                    };
+                    });
                     const completionsProduced = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.CompletionsProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, polyglotNotebooks.CompletionsProducedType);
                     const completionList: monaco.languages.CompletionList = {
                         suggestions: completionsProduced.completions.map(completion => ({
@@ -133,10 +133,11 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
                             character: position.column - 1,
                         }
                     };
-                    const commandEnvelope: polyglotNotebooks.KernelCommandEnvelope = {
+                    const commandEnvelope = polyglotNotebooks.KernelCommandEnvelope.fromJson({
                         commandType: polyglotNotebooks.RequestSignatureHelpType,
                         command
-                    };
+                    });
+
                     const signatureHelpProduced = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.SignatureHelpProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, polyglotNotebooks.SignatureHelpProducedType);
                     const signatureHelp: monaco.languages.SignatureHelp = {
                         signatures: signatureHelpProduced.signatures,

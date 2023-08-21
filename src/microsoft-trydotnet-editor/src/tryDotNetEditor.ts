@@ -45,7 +45,6 @@ export class TryDotNetEditor {
         switch (event.eventType) {
           case polyglotNotebooks.CommandSucceededType:
           case polyglotNotebooks.CommandFailedType:
-          case polyglotNotebooks.CommandCancelledType:
             if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
               this._postKernelEvent({ event });
               this._postMessage({
@@ -195,12 +194,12 @@ export class TryDotNetEditor {
   public run(): Promise<void> {
     const code = this.getEditor().getCode();
 
-    const command: polyglotNotebooks.KernelCommandEnvelope = {
+    const command = polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.SubmitCodeType,
       command: <polyglotNotebooks.SubmitCode>{
         code: code
       }
-    };
+    });
 
     polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.run] sending : ${JSON.stringify(command)}`);
 
@@ -223,7 +222,6 @@ export class TryDotNetEditor {
       switch (event.eventType) {
         case polyglotNotebooks.CommandSucceededType:
         case polyglotNotebooks.CommandFailedType:
-        case polyglotNotebooks.CommandCancelledType:
           if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
             polyglotNotebooks.Logger.default.info(`[tryDotNetEditor.handleRunRequest] completed : ${JSON.stringify(event.command)}`);
 
@@ -280,12 +278,12 @@ export class TryDotNetEditor {
   }
 
   public async openProject(project: polyglotNotebooks.Project) {
-    const command: polyglotNotebooks.KernelCommandEnvelope = {
+    const command = polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.OpenProjectType,
       command: <polyglotNotebooks.OpenProject>{
         project: project
       }
-    };//?
+    });//?
     this.getEditor().disableLanguageService();
     this.getEditor().disableTextChangedEvents();
 
@@ -303,13 +301,13 @@ export class TryDotNetEditor {
 
   public async openDocument(document: { relativeFilePath: string, regionName?: string }) {
     const documentId = new DocumentId(document);
-    const command: polyglotNotebooks.KernelCommandEnvelope = {
+    const command = polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.OpenDocumentType,
       command: <polyglotNotebooks.OpenDocument>{
         relativeFilePath: document.relativeFilePath,
         regionName: document.regionName
       }
-    };//?
+    });//?
 
     const shouldChaneEditor = !DocumentId.areEqual(documentId, this._currentDocumentId);
     if (shouldChaneEditor) {

@@ -25,12 +25,12 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     let commands: Array<polyglotNotebooks.KernelCommandEnvelope> = [];
 
-    commands.push({
+    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.OpenProjectType,
       command: <polyglotNotebooks.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName },
       token: this.deriveToken(rootCommand),
 
-    });
+    }));
 
     commands.push(rootCommand);
 
@@ -44,16 +44,16 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     let commands: Array<polyglotNotebooks.KernelCommandEnvelope> = [];
 
-    commands.push({
+    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.OpenProjectType,
       command: <polyglotNotebooks.OpenProject>{
         project: { ... this.openProject },
         targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(rootCommand)
-    });
+    }));
 
-    commands.push({
+    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.OpenDocumentType,
       command: <polyglotNotebooks.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
@@ -61,7 +61,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
         targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(rootCommand)
-    });
+    }));
 
     commands.push(rootCommand);
 
@@ -89,32 +89,34 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
   protected async handleSubmitCode(commandInvocation: polyglotNotebooks.IKernelCommandInvocation): Promise<void> {
 
     polyglotNotebooks.Logger.default.info("[ProjectKernelWithWASMRunner] handleSubmitCode - start");
-    commandInvocation.context.publish({
-      eventType: polyglotNotebooks.CodeSubmissionReceivedType,
-      event: { code: (<polyglotNotebooks.SubmitCode>commandInvocation.commandEnvelope.command).code },
-      command: commandInvocation.commandEnvelope
-    });
+    const event = new polyglotNotebooks.KernelEventEnvelope(
+      polyglotNotebooks.CodeSubmissionReceivedType,
+      { code: (<polyglotNotebooks.SubmitCode>commandInvocation.commandEnvelope.command).code },
+      commandInvocation.commandEnvelope
+
+    );
+    commandInvocation.context.publish(event);
 
     // original submitcode command
     let rootCommand = commandInvocation.commandEnvelope;
 
-    let compileCommand: polyglotNotebooks.KernelCommandEnvelope = {
+    let compileCommand = polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.CompileProjectType,
       command: <polyglotNotebooks.CompileProject>{
         targetKernelName: rootCommand.command.targetKernelName
       },
-      token: rootCommand.token
-    };
+      token: rootCommand.getOrCreateToken()
+    });
 
     let commands: Array<polyglotNotebooks.KernelCommandEnvelope> = [];
 
-    commands.push({
+    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: polyglotNotebooks.OpenProjectType,
       command: <polyglotNotebooks.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName },
       token: this.deriveToken(compileCommand)
-    });
+    }));
 
-    commands.push({
+    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: <polyglotNotebooks.KernelCommandType>polyglotNotebooks.OpenDocumentType,
       command: <polyglotNotebooks.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
@@ -122,16 +124,16 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
         targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(compileCommand)
-    });
+    }));
 
-    commands.push({
+    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
       commandType: <polyglotNotebooks.KernelCommandType>polyglotNotebooks.SubmitCodeType,
       command: <polyglotNotebooks.SubmitCode>{
         code: (<polyglotNotebooks.SubmitCode>rootCommand.command).code,
         targetKernelName: rootCommand.command.targetKernelName
       },
       token: this.deriveToken(compileCommand)
-    });
+    }));
 
     commands.push(compileCommand);
 
@@ -151,30 +153,29 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     await this._wasmRunner({
       assembly: assembly,
       onOutput: (output: string) => {
-        const event: polyglotNotebooks.KernelEventEnvelope = {
-          eventType: polyglotNotebooks.StandardOutputValueProducedType,
-          event: <polyglotNotebooks.StandardOutputValueProduced>{
+        const event = new polyglotNotebooks.KernelEventEnvelope(
+          polyglotNotebooks.StandardOutputValueProducedType,
+          <polyglotNotebooks.StandardOutputValueProduced>{
             formattedValues: [{
               mimeType: "text/plain",
               value: output
             }]
           },
-          command: commandInvocation.commandEnvelope
-        };
+          commandInvocation.commandEnvelope
+        );
         polyglotNotebooks.Logger.default.info(`[ProjectKernelWithWASMRunner] handleSubmitCode - publish output event from wasm runner ${JSON.stringify(event)}`);
         commandInvocation.context.publish(event);
       },
       onError: (error: string) => {
-        const event: polyglotNotebooks.KernelEventEnvelope = {
-          eventType: polyglotNotebooks.StandardErrorValueProducedType,
-          event: <polyglotNotebooks.StandardErrorValueProduced>{
+        const event = new polyglotNotebooks.KernelEventEnvelope(
+          polyglotNotebooks.StandardErrorValueProducedType,
+          <polyglotNotebooks.StandardErrorValueProduced>{
             formattedValues: [{
               mimeType: "text/plain",
               value: error
             }]
-          },
-          command: commandInvocation.commandEnvelope
-        };
+          }, commandInvocation.commandEnvelope
+        );
         polyglotNotebooks.Logger.default.info(`[ProjectKernelWithWASMRunner] handleSubmitCode - publish error event from was runnerm ${JSON.stringify(event)}`);
         commandInvocation.context.publish(event);
       }
@@ -188,11 +189,8 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
         polyglotNotebooks.Logger.default.error(`[ProjectKernelWithWASMRunner] command failed: ${JSON.stringify(eventEnvelope)}`);
         throw new Error((<polyglotNotebooks.CommandFailed>(eventEnvelope.event)).message);
       }
-      else if (eventEnvelope.eventType === polyglotNotebooks.CommandCancelledType) {
-        throw new Error("Command cancelled");
-      }
       else if (eventEnvelope.eventType === polyglotNotebooks.CommandSucceededType
-        && eventEnvelope.command.token === rootCommand.token) {
+        && eventEnvelope.command.getOrCreateToken() === rootCommand.getOrCreateToken()) {
         if (eventEnvelope.command.commandType === rootCommand.commandType) {
           break;
         }
@@ -200,9 +198,13 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
           continue;
         }
       }
-      else if (eventEnvelope.command.commandType === rootCommand.commandType && eventEnvelope.command.token === rootCommand.token) {
+      else if (eventEnvelope.command.commandType === rootCommand.commandType && eventEnvelope.command.getOrCreateToken() === rootCommand.getOrCreateToken()) {
         // todo: do we need processing this?
-        const event = { ...eventEnvelope, command: rootCommand };
+        const event = polyglotNotebooks.KernelEventEnvelope.fromJson({
+          ...eventEnvelope.toJson
+            (),
+          command: rootCommand.toJson()
+        });
         polyglotNotebooks.Logger.default.info(`[ProjectKernelWithWASMRunner.forwardEvents] forwarding event from ApiService ${JSON.stringify(event)}`);
         invocationContext.publish(event);
       }
@@ -210,7 +212,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
   }
 
   private deriveToken(originalCommand: polyglotNotebooks.KernelCommandEnvelope) {
-    return `${originalCommand.token}||${this._tokenSeed++}`;
+    return `${originalCommand.getOrCreateToken()}||${this._tokenSeed++}`;
   }
 
   constructor(kernelName: string, private _wasmRunner: runner.IWasmRunner, private _apiService: apiService.IApiService) {
