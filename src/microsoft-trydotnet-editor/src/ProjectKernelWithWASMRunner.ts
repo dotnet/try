@@ -185,20 +185,27 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
   private forwardEvents(eventEnvelopes: Array<polyglotNotebooks.KernelEventEnvelope>, rootCommand: polyglotNotebooks.KernelCommandEnvelope, invocationContext: polyglotNotebooks.KernelInvocationContext) {
     for (let eventEnvelope of eventEnvelopes) {
-      if (eventEnvelope.eventType === polyglotNotebooks.CommandFailedType) {
+      const eventType = eventEnvelope.eventType;
+      const eventCommandType = eventEnvelope.command.commandType;
+      const eventCommandToken = eventEnvelope.command.getOrCreateToken();
+
+      const rootCommandType = rootCommand.commandType;
+      const rootCommandToken = rootCommand.getOrCreateToken();
+
+      if (eventType === polyglotNotebooks.CommandFailedType) {
         polyglotNotebooks.Logger.default.error(`[ProjectKernelWithWASMRunner] command failed: ${JSON.stringify(eventEnvelope)}`);
         throw new Error((<polyglotNotebooks.CommandFailed>(eventEnvelope.event)).message);
       }
-      else if (eventEnvelope.eventType === polyglotNotebooks.CommandSucceededType
-        && eventEnvelope.command.getOrCreateToken() === rootCommand.getOrCreateToken()) {
-        if (eventEnvelope.command.commandType === rootCommand.commandType) {
+      else if (eventType === polyglotNotebooks.CommandSucceededType
+        && eventCommandToken === rootCommandToken) {
+        if (eventCommandType === rootCommandType) {
           break;
         }
         else {
           continue;
         }
       }
-      else if (eventEnvelope.command.commandType === rootCommand.commandType && eventEnvelope.command.getOrCreateToken() === rootCommand.getOrCreateToken()) {
+      else if (eventCommandType === rootCommandType && eventCommandToken === rootCommandToken) {
         // todo: do we need processing this?
         const event = polyglotNotebooks.KernelEventEnvelope.fromJson({
           ...eventEnvelope.toJson

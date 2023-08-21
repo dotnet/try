@@ -25,4 +25,8 @@
     <ProjectReference Include="..\Microsoft.TryDotNet.WasmRunner\Microsoft.TryDotNet.WasmRunner.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\api\editor\" />
+  </ItemGroup>
+
 </Project>

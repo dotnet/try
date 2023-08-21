@@ -27,7 +27,7 @@ export interface IApiService {
 function createApiServiceWithConfiguration(configuration: IApiServiceConfiguration): IApiService {
     let service: IApiService = async (commands) => {
         let bodyContent = JSON.stringify({
-            commands: commands
+            commands: commands.map(command => command.toJson())
         });
         let headers = {
             'Content-Type': 'application/json'
@@ -55,7 +55,9 @@ function createApiServiceWithConfiguration(configuration: IApiServiceConfigurati
         let json = await response.json();
 
         polyglotNotebooks.Logger.default.info(`[ApiService.response] ${JSON.stringify(json)}`);
-        return json.events;
+
+        const srcEvents = json.events as polyglotNotebooks.KernelEventEnvelopeModel[];
+        return srcEvents.map(srcEvent => polyglotNotebooks.KernelEventEnvelope.fromJson(srcEvent));
     };
 
     return service;
