@@ -25,12 +25,10 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     let commands: Array<polyglotNotebooks.KernelCommandEnvelope> = [];
 
-    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: polyglotNotebooks.OpenProjectType,
-      command: <polyglotNotebooks.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName },
-      token: this.deriveToken(rootCommand),
-
-    }));
+    commands.push(new polyglotNotebooks.KernelCommandEnvelope(
+      polyglotNotebooks.OpenProjectType,
+      <polyglotNotebooks.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName }
+    ));
 
     commands.push(rootCommand);
 
@@ -44,24 +42,22 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
 
     let commands: Array<polyglotNotebooks.KernelCommandEnvelope> = [];
 
-    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: polyglotNotebooks.OpenProjectType,
-      command: <polyglotNotebooks.OpenProject>{
+    commands.push(new polyglotNotebooks.KernelCommandEnvelope(
+      polyglotNotebooks.OpenProjectType,
+      <polyglotNotebooks.OpenProject>{
         project: { ... this.openProject },
         targetKernelName: rootCommand.command.targetKernelName
-      },
-      token: this.deriveToken(rootCommand)
-    }));
+      }
+    ));
 
-    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: polyglotNotebooks.OpenDocumentType,
-      command: <polyglotNotebooks.OpenDocument>{
+    commands.push(new polyglotNotebooks.KernelCommandEnvelope(
+      polyglotNotebooks.OpenDocumentType,
+      <polyglotNotebooks.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
         regionName: this.openDocument.regionName,
         targetKernelName: rootCommand.command.targetKernelName
-      },
-      token: this.deriveToken(rootCommand)
-    }));
+      }
+    ));
 
     commands.push(rootCommand);
 
@@ -100,40 +96,35 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
     // original submitcode command
     let rootCommand = commandInvocation.commandEnvelope;
 
-    let compileCommand = polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: polyglotNotebooks.CompileProjectType,
-      command: <polyglotNotebooks.CompileProject>{
+    let compileCommand = new polyglotNotebooks.KernelCommandEnvelope(
+      polyglotNotebooks.CompileProjectType,
+      <polyglotNotebooks.CompileProject>{
         targetKernelName: rootCommand.command.targetKernelName
-      },
-      token: rootCommand.getOrCreateToken()
-    });
+      });
 
     let commands: Array<polyglotNotebooks.KernelCommandEnvelope> = [];
 
-    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: polyglotNotebooks.OpenProjectType,
-      command: <polyglotNotebooks.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName },
-      token: this.deriveToken(compileCommand)
-    }));
+    commands.push(new polyglotNotebooks.KernelCommandEnvelope(
+      polyglotNotebooks.OpenProjectType,
+      <polyglotNotebooks.OpenProject>{ project: { ... this.openProject }, targetKernelName: rootCommand.command.targetKernelName }
+    ));
 
-    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: <polyglotNotebooks.KernelCommandType>polyglotNotebooks.OpenDocumentType,
-      command: <polyglotNotebooks.OpenDocument>{
+    commands.push(new polyglotNotebooks.KernelCommandEnvelope(
+      <polyglotNotebooks.KernelCommandType>polyglotNotebooks.OpenDocumentType,
+      <polyglotNotebooks.OpenDocument>{
         relativeFilePath: this.openDocument.relativeFilePath,
         regionName: this.openDocument.regionName,
         targetKernelName: rootCommand.command.targetKernelName
-      },
-      token: this.deriveToken(compileCommand)
-    }));
+      }
+    ));
 
-    commands.push(polyglotNotebooks.KernelCommandEnvelope.fromJson({
-      commandType: <polyglotNotebooks.KernelCommandType>polyglotNotebooks.SubmitCodeType,
-      command: <polyglotNotebooks.SubmitCode>{
+    commands.push(new polyglotNotebooks.KernelCommandEnvelope(
+      <polyglotNotebooks.KernelCommandType>polyglotNotebooks.SubmitCodeType,
+      <polyglotNotebooks.SubmitCode>{
         code: (<polyglotNotebooks.SubmitCode>rootCommand.command).code,
         targetKernelName: rootCommand.command.targetKernelName
-      },
-      token: this.deriveToken(compileCommand)
-    }));
+      }
+    ));
 
     commands.push(compileCommand);
 
@@ -196,16 +187,10 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
         polyglotNotebooks.Logger.default.error(`[ProjectKernelWithWASMRunner] command failed: ${JSON.stringify(eventEnvelope)}`);
         throw new Error((<polyglotNotebooks.CommandFailed>(eventEnvelope.event)).message);
       }
-      else if (eventType === polyglotNotebooks.CommandSucceededType
-        && eventCommandToken === rootCommandToken) {
-        if (eventCommandType === rootCommandType) {
-          break;
-        }
-        else {
-          continue;
-        }
+      else if (eventType === polyglotNotebooks.CommandSucceededType) {
+        continue;
       }
-      else if (eventCommandType === rootCommandType && eventCommandToken === rootCommandToken) {
+      else if (eventCommandType === rootCommandType) {
         // todo: do we need processing this?
         const event = polyglotNotebooks.KernelEventEnvelope.fromJson({
           ...eventEnvelope.toJson
@@ -216,10 +201,6 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
         invocationContext.publish(event);
       }
     }
-  }
-
-  private deriveToken(originalCommand: polyglotNotebooks.KernelCommandEnvelope) {
-    return `${originalCommand.getOrCreateToken()}||${this._tokenSeed++}`;
   }
 
   constructor(kernelName: string, private _wasmRunner: runner.IWasmRunner, private _apiService: apiService.IApiService) {
