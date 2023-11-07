@@ -26,7 +26,7 @@ describe("A user", () => {
     let editorIFrame: HTMLIFrameElement;
 
     beforeEach(() => {
-        configuration = { hostOrigin: "https://docs.microsoft.com" };
+        configuration = { hostOrigin: "https://learn.microsoft.com" };
         dom = buildSimpleIFrameDom(configuration);
         editorIFrame = getEditorIFrame(dom);
     });

@@ -16,7 +16,7 @@ describe("a user", () => {
     let configuration: Configuration;
 
     beforeEach(() => {
-        configuration = { hostOrigin: "https://docs.microsoft.com" };
+        configuration = { hostOrigin: "https://learn.microsoft.com" };
     });
     describe("with single iframe", () => {
         it("can create a session with initial project", async () => {
