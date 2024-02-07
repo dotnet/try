@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
     <NoWarn>$(NoWarn);NU5100</NoWarn><!-- don't complain about assemblies not in the `lib/` subdirectory -->
   </PropertyGroup>
 
