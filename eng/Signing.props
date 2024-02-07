@@ -10,7 +10,6 @@
     <FileSignInfo Include="System.Data.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Drawing.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="System.Drawing.Common.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.IO.Compression.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.IO.Compression.FileSystem.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Linq.dll" CertificateName="3PartySHA2" />
@@ -45,6 +44,12 @@
     <FileSignInfo Include="Serilog.Sinks.RollingFileAlternate.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="XPlot.Plotly.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="MessagePack.Annotations.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="FluentAssertions.dll" CertificateName="None" />
+    <FileSignInfo Include="Markdig.Signed.dll" CertificateName="None" />
+    <FileSignInfo Include="Swashbuckle.AspNetCore.Swagger.dll" CertificateName="None" />
+    <FileSignInfo Include="Swashbuckle.AspNetCore.SwaggerGen.dll" CertificateName="None" />
+    <FileSignInfo Include="Swashbuckle.AspNetCore.SwaggerUI.dll" CertificateName="None" />
+    <FileSignInfo Include="System.Drawing.Common.dll" CertificateName="None" />
 
     <FileSignInfo Include="materialdesignicons-webfont.ttf" CertificateName="None" />
     <FileSignInfo Include="9648f5fce667f351b0ca.ttf" CertificateName="None" />
