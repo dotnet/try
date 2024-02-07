@@ -11,8 +11,6 @@ using FluentAssertions;
 
 using Microsoft.Playwright;
 
-using Xunit;
-
 namespace Microsoft.TryDotNet.IntegrationTests;
 
 public class EditorTests : PlaywrightTestBase
