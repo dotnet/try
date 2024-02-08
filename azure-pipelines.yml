@@ -161,6 +161,20 @@ stages:
             artifactName: packages
             artifactType: container
 
+        - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+          - task: NuGetAuthenticate@1
+            displayName: 'Authenticate dotnet-tool feed'
+  
+          - task: NuGetCommand@2
+            displayName: Publish public Nuget packages to dotnet-tools
+            inputs:
+              command: push
+              packagesToPush: '$(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)\Shipping\Microsoft.TryDotNet*.nupkg'
+              nuGetFeedType: internal
+              allowPackageConflicts: true
+              publishVstsFeed: 'public/dotnet-tools'
+
+
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
       enableMicrobuild: true
