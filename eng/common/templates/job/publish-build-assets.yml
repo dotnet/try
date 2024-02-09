@@ -74,6 +74,12 @@ jobs:
     
     - task: NuGetAuthenticate@1
 
+    - task: PowerShell@2 
+      displayName: Enable cross-org NuGet feed authentication 
+      inputs: 
+        filePath: $(Build.SourcesDirectory)/eng/common/enable-cross-org-publishing.ps1 
+        arguments: -token $(dn-bot-all-orgs-artifact-feeds-rw) 
+
     - task: PowerShell@2
       displayName: Publish Build Assets
       inputs:
