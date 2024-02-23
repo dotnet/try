@@ -13,6 +13,9 @@ public class ContentGenerator
         var referer = request.Headers.Referer.FirstOrDefault();
 
         // This allows us to specify when running in specific environments (i.e. containers) what scheme to use
+        //   The enviromental variable is useful when running behind a reverse proxy that terminates SSL
+        //   request.Scheme should be used when running in a development environment or as a normal website.
+        //   "http" is the default if no other scheme is specified.
         var scheme = Environment.GetEnvironmentVariable("TRY_DOT_NET_REQUEST_SCHEME") 
                     ?? request.Scheme 
                     ?? "http";
