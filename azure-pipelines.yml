@@ -148,7 +148,7 @@ stages:
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net7.0\playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net8.0\playwright_screenshots
             artifactName: Windows_playwright_screenshots
             artifactType: container
           condition: always()
@@ -249,7 +249,7 @@ stages:
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net7.0/playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net8.0/playwright_screenshots
             artifactName: Linux_playwright_screenshots
             artifactType: container
           condition: always()
