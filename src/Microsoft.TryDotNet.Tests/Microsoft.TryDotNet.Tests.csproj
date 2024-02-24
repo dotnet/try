@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PlaywrightPlatform>all</PlaywrightPlatform>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

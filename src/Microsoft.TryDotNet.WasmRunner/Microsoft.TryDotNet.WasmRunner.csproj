@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>wasmrunner</StaticWebAssetBasePath>
     <PublishTrimmed>false</PublishTrimmed>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
 

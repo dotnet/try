@@ -8,6 +8,7 @@
     <GeneratedFileName>GeneratedLocation.cs</GeneratedFileName>
     <PublishLocation>$(MSBuildThisFileDirectory)bin\$(Configuration)\tool</PublishLocation>
     <IsPackable>false</IsPackable>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

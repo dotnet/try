@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>true</IsPackable>
     <NoWarn>$(NoWarn);NU5100</NoWarn><!-- don't complain about assemblies not in the `lib/` subdirectory -->
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
