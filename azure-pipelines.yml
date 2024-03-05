@@ -74,9 +74,9 @@ extends:
           imageName: 1ESPT-Windows2022
       
       - template: /eng/pipelines/templates/jobs/build.yml
-          parameters:
-            jobName: linux
-            displayName: Build/Test Linux
-            poolOs: linux
-            poolName: AzurePipelines-EO
-            imageName: 1ESPT-Mariner2.0
+        parameters:
+          jobName: linux
+          displayName: Build/Test Linux
+          poolOs: linux
+          poolName: AzurePipelines-EO
+          imageName: 1ESPT-Mariner2.0

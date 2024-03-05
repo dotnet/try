@@ -17,55 +17,50 @@ jobs:
     - output: pipelineArtifact
       targetPath: $(Build.ArtifactStagingDirectory)
       artifactName: ${{ parameters.poolOs }}
-  variables:
-    # Enable signing for internal, non-PR builds
-    #- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    # else
-    #- ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-    steps:
-    - script: git config --global core.longpaths true
-      displayName: Enable `git clean` to handle long paths
+  steps:
+  - script: git config --global core.longpaths true
+    displayName: Enable `git clean` to handle long paths
 
-    - checkout: self
-      clean: true
+  - checkout: self
+    clean: true
 
-    - task: NodeTool@0
-      displayName: Add NodeJS/npm
-      inputs:
-        versionSpec: $(NodeJSVersion)
+  - task: NodeTool@0
+    displayName: Add NodeJS/npm
+    inputs:
+      versionSpec: $(NodeJSVersion)
 
-    - task: UseDotNet@2
-      displayName: Add dotnet
-      inputs:
-        packageType: sdk
-        version: $(DotNetSdkVersion)
-        installationPath: $(Agent.ToolsDirectory)\dotnet
-    
-    - pwsh: mkdir -p "$(ArtifactsDirectory)"
-      displayName: Create Artifacts directory
+  - task: UseDotNet@2
+    displayName: Add dotnet
+    inputs:
+      packageType: sdk
+      version: $(DotNetSdkVersion)
+      installationPath: $(Agent.ToolsDirectory)\dotnet
+  
+  - pwsh: mkdir -p "$(ArtifactsDirectory)"
+    displayName: Create Artifacts directory
 
-    - pwsh: ./eng/build.ps1 -noDotnet -configuration $(_BuildConfig)
-      displayName: Build Javascript Libraries
+  - pwsh: ./eng/build.ps1 -noDotnet -configuration $(_BuildConfig)
+    displayName: Build Javascript Libraries
 
-    - pwsh: dotnet restore -c $(_BuildConfig) --packages $(TryDotNetPackagesPath) --configfile ./NuGet.config ./TryDotNet.sln
-      displayName: Restore Dotnet files
+  - pwsh: dotnet restore -c $(_BuildConfig) --packages $(TryDotNetPackagesPath) --configfile ./NuGet.config ./TryDotNet.sln
+    displayName: Restore Dotnet files
 
-    - pwsh: dotnet publish -c $(_BuildConfig) -o $(ArtifactsDirectory) ./TryDotNet.sln
-      displayName: Build Dotnet files
+  - pwsh: dotnet publish -c $(_BuildConfig) -o $(ArtifactsDirectory) ./TryDotNet.sln
+    displayName: Build Dotnet files
 
-    - pwsh: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(ArtifactsDirectory)/TestResults/$(_BuildConfig)
-      displayName: Test / Blame
-      workingDirectory: $(Build.SourcesDirectory)
-      condition: ne(variables['SkipTests'], 'true')
-      env:
-        RunIntegrationTests: $(RunIntegrationTests)
+  - pwsh: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(ArtifactsDirectory)/TestResults/$(_BuildConfig)
+    displayName: Test / Blame
+    workingDirectory: $(Build.SourcesDirectory)
+    condition: ne(variables['SkipTests'], 'true')
+    env:
+      RunIntegrationTests: $(RunIntegrationTests)
 
-    - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
-      displayName: Delete dump files
-      workingDirectory: $(ArtifactsDirectory)/TestResults/$(_BuildConfig)
-      condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
+  - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
+    displayName: Delete dump files
+    workingDirectory: $(ArtifactsDirectory)/TestResults/$(_BuildConfig)
+    condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
-    - pwsh: Copy-Item -Path $(ArtifactsDirectory)/* -Recurse -Destination $(Build.ArtifactStagingDirectory)
-      displayName: Copy files to artifact staging directory
-      condition: always()
-      continueOnError: true
+  - pwsh: Copy-Item -Path $(ArtifactsDirectory)/* -Recurse -Destination $(Build.ArtifactStagingDirectory)
+    displayName: Copy files to artifact staging directory
+    condition: always()
+    continueOnError: true
