@@ -1,0 +1,65 @@
+###############################################################################
+# Set default behavior to:
+#   automatically normalize line endings on check-in, and
+#   convert to Windows-style line endings on check-out
+###############################################################################
+* text=auto encoding=UTF-8
+*.sh text eol=lf
+
+###############################################################################
+# Set file behavior to:
+#   treat as text, and
+#   diff as C# source code
+###############################################################################
+*.cs        		text		diff=csharp
+
+###############################################################################
+# Set file behavior to:
+#   treat as text
+###############################################################################
+*.cmd       		text
+*.config    		text
+*.csproj    		text
+*.groovy			text
+*.json      		text
+*.lss       		text
+*.md        		text
+*.nuspec			text
+*.pkgdef			text
+*.proj				text
+*.projitems			text
+*.props     		text
+*.ps1       		text
+*.resx				text
+*.ruleset			text
+*.shproj			text
+*.sln       		text
+*.targets   		text
+*.vb				text
+*.vbproj			text
+*.vcxproj			text
+*.vcxproj.filters	text
+*.vsct				text
+*.vsixmanifest		text
+
+###############################################################################
+# Set file behavior to:
+#   treat as binary
+###############################################################################
+*.png				binary
+*.snk       		binary
+
+
+###############################################################################
+# Set file behavior to:
+#   treat as text, lf line endings
+###############################################################################
+changelog text eol=lf
+control text eol=lf
+copyright text eol=lf
+rules text eol=lf
+format text eol=lf
+compat text eol=lf
+*.bats text eol=lf
+*.1 text eol=lf
+*.plist text eol=lf
