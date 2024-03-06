@@ -1,0 +1,284 @@
+parameters:
+- name: SkipTests
+  displayName: Skip Tests
+  type: boolean
+  default: false
+
+# CI and PR triggers
+trigger:
+- main
+- feature/*
+- release/*
+pr:
+- main
+- feature/*
+- release/*
+
+resources:
+  repositories:
+  - repository: 1esPipelines
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+
+variables:
+  - name: _TeamName
+    value: DotNetTry
+  - name: _BuildConfig
+    value: Release
+  - name: _PublishUsingPipelines
+    value: true
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: DotNetSdkVersion
+    value: '8.0.101'
+  - name: NodeJSVersion
+    value: '16.13.0'
+  - name: TryDotNetPackagesPath
+    value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
+  - name: RunIntegrationTests
+    value: true
+  - name: Codeql.Enabled
+    value: true
+
+extends:
+  # The pipeline extends the 1ES PT which will inject different SDL and compliance tasks.
+  # For non-production pipelines, use "Unofficial" as defined below.
+  # For productions pipelines, use "Official".
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    # Update the pool with your team's 1ES hosted pool.
+    pool:
+      name: NetCore1ESPool-Internal  # Name of your hosted pool
+      image: windows.vs2022.amd64  # Name of the image in your pool. If not specified, first image of the pool is used
+      os: windows  # OS of the image. This value cannot be a variable. Allowed values: windows, linux, macOS
+    stages:
+    - stage: build
+      displayName: Build and Test
+      jobs:
+      - template: /eng/common/templates-official/jobs/jobs.yml
+        parameters:
+          enableMicrobuild: true
+          enablePublishBuildArtifacts: true
+          enablePublishTestResults: true
+          enablePublishBuildAssets: true
+          enablePublishUsingPipelines: $(_PublishUsingPipelines)
+          jobs:
+          - job: Windows_NT
+            pool:
+              name: NetCore1ESPool-Internal
+              demands: ImageOverride -equals windows.vs2022.amd64
+              os: windows
+            variables:
+            # Enable signing for internal, non-PR builds
+            - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+              - group: DotNet-Blob-Feed
+              - group: DotNet-Symbol-Server-Pats
+              - name: _SignType
+                value: Real
+              - name: _DotNetPublishToBlobFeed
+                value: true
+              - name: _BuildArgs
+                value: /p:SignType=$(_SignType)
+                      /p:DotNetSignType=$(_SignType)
+                      /p:MicroBuild_SigningEnabled=true
+                      /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                      /p:TeamName=$(_TeamName)
+                      /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                      /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                      /p:DotNetPublishToBlobFeed=true
+                      /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+                      /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+                      /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                      /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                      /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+                      /p:PublishToSymbolServer=true
+            # else
+            - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+              - name: _SignType
+                value: Test
+              - name: _BuildArgs
+                value: /p:SignType=$(_SignType)
+            steps:
+            - script: git config --global core.longpaths true
+              displayName: Enable `git clean` to handle long paths
+
+            - checkout: self
+              clean: true
+
+            - task: NodeTool@0
+              displayName: Add NodeJS/npm
+              inputs:
+                versionSpec: $(NodeJSVersion)
+
+            - task: UseDotNet@2
+              displayName: Add dotnet
+              inputs:
+                packageType: sdk
+                version: $(DotNetSdkVersion)
+                installationPath: $(Agent.ToolsDirectory)\dotnet
+
+            - script: |
+                robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
+                :: robocopy return codes are terrible; 1 means files were copied
+                if "%errorlevel%" == "1" exit /b 0
+                exit /b 1
+              displayName: Prevent test directory crawling
+
+            - pwsh: |
+                $testArg = if ($env:SKIPTESTS -ne "true") { "-test" } else { "" }
+                Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
+              displayName: Promote variables
+
+            - script: eng\CIBuild.cmd
+                -configuration $(_BuildConfig)
+                -prepareMachine
+                -sign
+                $(_BuildArgs)
+                $(_TestArgs)
+              displayName: Build
+              env:
+                TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+            - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+              displayName: Test / Blame
+              workingDirectory: $(Build.SourcesDirectory)
+              condition: ne(variables['SkipTests'], 'true')
+              env:
+                RunIntegrationTests: $(RunIntegrationTests)
+
+            - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
+              displayName: Delete dump files
+              workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+              condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Test results and Blame dumps
+              inputs:
+                pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+                artifactName: Windows_test_results_and_dumps
+                artifactType: container
+              condition: failed()
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Playwright screen shots
+              inputs:
+                pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net8.0\playwright_screenshots
+                artifactName: Windows_playwright_screenshots
+                artifactType: container
+              condition: always()
+              continueOnError: true
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish packages to artifacts container
+              inputs:
+                pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
+                artifactName: packages
+                artifactType: container
+
+      - template: /eng/common/templates-official/jobs/jobs.yml
+        parameters:
+          enableMicrobuild: true
+          enablePublishBuildArtifacts: true
+          enablePublishTestResults: true
+          enablePublishBuildAssets: false
+          enablePublishUsingPipelines: false
+          jobs:
+          - job: Linux
+            pool:
+              vmImage: ubuntu-20.04
+              os: linux
+            variables:
+            # Enable signing for internal, non-PR builds
+            - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+              - name: _SignType
+                value: Test
+              - name: _BuildArgs
+                value: /p:SignType=$(_SignType)
+                  /p:DotNetSignType=$(_SignType)
+                  /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                  /p:TeamName=$(_TeamName)
+                  /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+            # else
+            - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+              - name: _SignType
+                value: Test
+              - name: _BuildArgs
+                value: /p:SignType=$(_SignType)
+            steps:
+            - script: git config --global core.longpaths true
+              displayName: Enable `git clean` to handle long paths
+
+            - checkout: self
+              clean: true
+
+            - task: NodeTool@0
+              displayName: Add NodeJS/npm
+              inputs:
+                versionSpec: $(NodeJSVersion)
+
+            - task: UseDotNet@2
+              displayName: Add dotnet
+              inputs:
+                packageType: sdk
+                version: $(DotNetSdkVersion)
+                installationPath: $(Agent.ToolsDirectory)/dotnet
+
+            - script: |
+                mkdir -p "$(Build.SourcesDirectory)/artifacts"
+                cp eng/resources/* "$(Build.SourcesDirectory)/artifacts"
+              displayName: Prevent test directory crawling
+
+            - pwsh: |
+                $testArg = if ($env:SKIPTESTS -ne "true") { "--test" } else { "" }
+                Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
+              displayName: Promote variables
+
+            - script: ./eng/cibuild.sh
+                --configuration $(_BuildConfig)
+                --prepareMachine
+                $(_TestArgs)
+              displayName: Build
+              env:
+                TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+
+            - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+              displayName: Test / Blame
+              workingDirectory: $(Build.SourcesDirectory)
+              condition: ne(variables['SkipTests'], 'true')
+              env:
+                RunIntegrationTests: $(RunIntegrationTests)
+
+            - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
+              displayName: Delete dump files
+              workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+              condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Test results and Blame dumps
+              inputs:
+                pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+                artifactName: Linux_test_results_and_dumps
+                artifactType: container
+              condition: failed()
+
+            - task: PublishBuildArtifacts@1
+              displayName: Publish Playwright screen shots
+              inputs:
+                pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net8.0/playwright_screenshots
+                artifactName: Linux_playwright_screenshots
+                artifactType: container
+              condition: always()
+              continueOnError: true
+
+    #---------------------------------------------------------------------------------------------------------------------#
+    #                                                    Post Build                                                       #
+    #---------------------------------------------------------------------------------------------------------------------#
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - template: eng/common/templates-official/post-build/post-build.yml
+        parameters:
+          publishingInfraVersion: 3
+          # Symbol validation is not entirely reliable as of yet, so should be turned off until https://github.com/dotnet/arcade/issues/2871 is resolved.
+          enableSymbolValidation: false
+          # SourceLink improperly looks for generated files.  See https://github.com/dotnet/arcade/issues/3069
+          enableSourceLinkValidation: false
