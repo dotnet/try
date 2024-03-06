@@ -66,7 +66,7 @@ extends:
     - stage: build
       displayName: Build and Test
       jobs:
-      - template: /eng/common/templates-official/jobs/jobs.yml
+      - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
           enableMicrobuild: true
           enablePublishBuildArtifacts: true
@@ -183,7 +183,7 @@ extends:
               condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
 
-      - template: /eng/common/templates-official/jobs/jobs.yml
+      - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
           enableMicrobuild: true
           enablePublishBuildArtifacts: true
@@ -280,7 +280,7 @@ extends:
     #                                                    Post Build                                                       #
     #---------------------------------------------------------------------------------------------------------------------#
     - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-      - template: eng/common/templates-official/post-build/post-build.yml
+      - template: /eng/common/templates-official/post-build/post-build.yml@self
         parameters:
           publishingInfraVersion: 3
           # Symbol validation is not entirely reliable as of yet, so should be turned off until https://github.com/dotnet/arcade/issues/2871 is resolved.
