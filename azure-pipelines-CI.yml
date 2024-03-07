@@ -76,6 +76,7 @@ extends:
           jobs:
           - job: Windows_NT
             pool:
+              # TODO: Can we use latest or equivalent?
               name: NetCore1ESPool-Internal
               demands: ImageOverride -equals windows.vs2022.amd64
               os: windows
@@ -94,10 +95,11 @@ extends:
                 displayName: Publish Playwright screen shots
                 condition: always()
                 continueOnError: true
-              - output: pipelineArtifact
-                targetPath: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)
-                artifactName: packages
-                displayName: Publish packages to artifacts container
+              # Packages are not being generated
+              # - output: pipelineArtifact
+              #   targetPath: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)
+              #   artifactName: packages
+              #   displayName: Publish packages to artifacts container
 
             variables:
             # Enable signing for internal, non-PR builds
