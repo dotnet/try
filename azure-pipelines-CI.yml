@@ -69,7 +69,7 @@ extends:
     - stage: build
       displayName: Build and Test
       jobs:
-      - template: /eng/common/templates-official/jobs/jobs.yml
+      - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
           enableMicrobuild: true
           enablePublishBuildArtifacts: true
@@ -188,7 +188,7 @@ extends:
               condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
 
-      - template: /eng/common/templates-official/jobs/jobs.yml
+      - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
           enableMicrobuild: true
           enablePublishBuildArtifacts: true
