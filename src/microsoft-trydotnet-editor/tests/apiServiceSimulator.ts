@@ -48,7 +48,6 @@ function patchEvents(events: polyglotNotebooks.KernelEventEnvelopeModel[], comma
         let event = events[i];
         var sourceCommand = commands.find(command => command.commandType === event.command!.commandType);
         let patchedEvent = { ...event };
-        patchedEvent.command!.id = sourceCommand!.id;
         patchedEvent.command!.token = sourceCommand!.getOrCreateToken();
 
         patchedEvents.push(patchedEvent);

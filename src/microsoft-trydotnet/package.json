@@ -53,7 +53,8 @@
   "dependencies": {
     "@microsoft/polyglot-notebooks": "1.0.441801",
     "es6-promise": "4.2.8",
-    "rxjs": "7.5.5"
+    "rxjs": "7.5.5",
+    "uuid": "^7.0.0"
   },
   "mocha": {
     "ui": "bdd",
