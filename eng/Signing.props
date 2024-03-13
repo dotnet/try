@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <!-- mono binaries from blazor -->
-    <FileSignInfo Include="Mono.Security.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="mscorlib.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="netstandard.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="Newtonsoft.Json.dll" CertificateName="3PartySHA2" />
@@ -17,39 +16,17 @@
     <FileSignInfo Include="System.Net.Http.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Numerics.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Runtime.Serialization.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="System.ServiceModel.Internals.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Transactions.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="System.Web.Services.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Xml.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="System.Xml.Linq.dll" CertificateName="3PartySHA2" />
 
     <!-- other 3rd party assemblies -->
-    <FileSignInfo Include="AsyncIO.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Buildalyzer.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Buildalyzer.Logger.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="MsBuildPipeLogger.Logger.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Buildalyzer.Workspaces.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Clockwise.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="HtmlAgilityPack.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Markdig.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="MessagePack.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Mono.Cecil.Mdb.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Mono.Cecil.Pdb.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Mono.Cecil.Rocks.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Mono.Cecil.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="StructuredLogger.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="MsBuildPipeLogger.Server.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="NetMQ.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Octokit.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Serilog.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="Serilog.Sinks.RollingFileAlternate.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="XPlot.Plotly.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="MessagePack.Annotations.dll" CertificateName="3PartySHA2" />
 
     <FileSignInfo Include="materialdesignicons-webfont.ttf" CertificateName="None" />
-    <FileSignInfo Include="9648f5fce667f351b0ca.ttf" CertificateName="None" />
     <FileSignInfo Include="ade705761eb7e702770d.ttf" CertificateName="None" />
-    <FileSignInfo Include="trydotnet__codicon.ttf" CertificateName="None" />
   </ItemGroup>
 
 </Project>
