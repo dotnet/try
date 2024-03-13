@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="Assent" />
-    <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.Playwright" />
     <PackageReference Include="coverlet.collector" >
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,6 +23,12 @@
     </PackageReference>
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -62,20 +67,9 @@ public partial class LearnFixture {
       <Compile Include="$(IntermediateOutputPath)\$(GeneratedFileName)" />
     </ItemGroup>
   </Target>
-  <Target Name="PublishTool" BeforeTargets="CoreCompile">
+  <Target Name="PublishTool" BeforeTargets="CoreCompile" Condition="'$(DisableArcade)' != '1'">
     <Exec Command="dotnet publish -o $(PublishLocation)" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.TryDotNet" />
   </Target>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NET.Test.Sdk" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="xunit" />
-  </ItemGroup>
+
 </Project>
   
