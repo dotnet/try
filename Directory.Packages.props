@@ -4,7 +4,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.23430.1" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24154.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
