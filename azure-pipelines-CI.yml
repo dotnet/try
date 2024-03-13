@@ -22,24 +22,25 @@ resources:
     ref: refs/tags/release
 
 variables:
-  - name: _TeamName
-    value: DotNetTry
-  - name: _BuildConfig
-    value: Release
-  - name: _PublishUsingPipelines
-    value: true
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: DotNetSdkVersion
-    value: '8.0.101'
-  - name: NodeJSVersion
-    value: '16.13.0'
-  - name: TryDotNetPackagesPath
-    value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
-  - name: RunIntegrationTests
-    value: true
-  - name: Codeql.Enabled
-    value: true
+- template: /eng/common/templates/variables/pool-providers.yml@self
+- name: _TeamName
+  value: DotNetTry
+- name: _BuildConfig
+  value: Release
+- name: _PublishUsingPipelines
+  value: true
+- name: _DotNetArtifactsCategory
+  value: .NETCore
+- name: DotNetSdkVersion
+  value: '8.0.101'
+- name: NodeJSVersion
+  value: '16.13.0'
+- name: TryDotNetPackagesPath
+  value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
+- name: RunIntegrationTests
+  value: true
+- name: Codeql.Enabled
+  value: true
 
 extends:
   # The pipeline extends the 1ES PT which will inject different SDL and compliance tasks.
@@ -49,8 +50,8 @@ extends:
   parameters:
     # Update the pool with your team's 1ES hosted pool.
     pool:
-      name: NetCore1ESPool-Internal  # Name of your hosted pool
-      image: windows.vs2022.amd64  # Name of the image in your pool. If not specified, first image of the pool is used
+      name: $(DncEngInternalBuildPool)  # Name of your hosted pool
+      image: 1es-windows-2022-pt  # Name of the image in your pool. If not specified, first image of the pool is used
       os: windows  # OS of the image. This value cannot be a variable. Allowed values: windows, linux, macOS
 
     # Build Tags
@@ -61,9 +62,6 @@ extends:
     sdl:
       git:
         longpaths: true
-      psscriptanalyzer:  # Allowed values: credscan, binskim, antimalwareScan, psscriptanalyzer, eslint, roslyn, bandit, prefast
-        enabled: false
-        justificationForDisabling: "Waiting on updated dotnet/arcade so psscriptanalyzer doesn't fail on dependent files."
 
     stages:
     - stage: build
@@ -80,8 +78,8 @@ extends:
           - job: Windows_NT
             pool:
               # TODO: Can we use latest or equivalent?
-              name: NetCore1ESPool-Internal
-              demands: ImageOverride -equals windows.vs2022.amd64
+              name: $(DncEngInternalBuildPool)
+              demands: ImageOverride -equals 1es-windows-2022-pt
               os: windows
             templateContext:
               # This enables SDL scanning to be run once across all artifacts
@@ -198,8 +196,9 @@ extends:
           jobs:
           - job: Linux
             pool:
-              vmImage: ubuntu-20.04
+              name: $(DncEngInternalBuildPool)
               os: linux
+              demands: ImageOverride -equals 1es-mariner-2-pt
             templateContext:
               # This enables SDL scanning to be run once across all artifacts
               outputParentDirectory: $(Build.SourcesDirectory)/artifacts
