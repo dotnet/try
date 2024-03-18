@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -14,6 +14,8 @@
   <ItemGroup>
     <PackageReference Include="Assent" />
     <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="peaky.client" />
+    <PackageReference Include="peaky.xunit" />
     <PackageReference Include="coverlet.collector" >
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
