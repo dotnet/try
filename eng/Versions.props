@@ -4,6 +4,7 @@
     <UsingToolSourceLink>false</UsingToolSourceLink>
     <!-- opt-in properties -->
     <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
+    <UsingToolXUnit>false</UsingToolXUnit>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
   </PropertyGroup>

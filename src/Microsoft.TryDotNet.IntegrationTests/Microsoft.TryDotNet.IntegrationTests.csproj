@@ -25,12 +25,15 @@
     </PackageReference>
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(DisableArcade)' == '1'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,14 +41,6 @@
   </ItemGroup>
 
   <Target Name="DoSomethingElse" BeforeTargets="maybe">
-    <!--<ItemGroup>
-      <GeneratedLines Remove="*" />
-      <GeneratedLines Include="namespace Microsoft.TryDotNet.IntegrationTests%3b"/>
-      <GeneratedLines Include="public partial class AspNetProcess {"/>
-      <GeneratedLines Include="public const string ToolPublishedPath = @&quot;$(PublishLocation)&quot;%3b"/>
-      <GeneratedLines Include="}"/>
-    </ItemGroup>-->
-
     <PropertyGroup>
       <GeneratedContent>
         <![CDATA[

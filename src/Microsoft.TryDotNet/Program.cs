@@ -41,6 +41,7 @@ public class Program
 
         EnvironmentSettings environmentSettings;
 
+        // FIX: (CreateWebApplication) 
         // if (builder.Environment.IsProduction())
         // {
             builder.Services.AddProductionEnvironmentSettings(out environmentSettings);
