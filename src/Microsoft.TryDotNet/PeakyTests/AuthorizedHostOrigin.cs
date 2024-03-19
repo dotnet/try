@@ -3,6 +3,8 @@
 
 using Microsoft.Extensions.Primitives;
 
+#nullable disable
+
 namespace Microsoft.TryDotNet.PeakyTests;
 
 public class AuthorizedHostOrigin

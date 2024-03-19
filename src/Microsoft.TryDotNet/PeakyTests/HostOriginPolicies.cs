@@ -4,6 +4,8 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 
+#nullable disable
+
 namespace Microsoft.TryDotNet.PeakyTests;
 
 public class HostOriginPolicies

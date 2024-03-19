@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Pocket;
+using static Pocket.Logger<Microsoft.TryDotNet.PeakyTests.HostOriginAuthenticationHandler>;
 
 namespace Microsoft.TryDotNet.PeakyTests;
 
@@ -17,8 +18,7 @@ public class HostOriginAuthenticationHandler : AuthenticationHandler<HostOriginA
         IOptionsMonitor<HostOriginAuthenticationOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
-        HostOriginPolicies configuration) : base(options, logger, encoder, clock)
+        HostOriginPolicies configuration) : base(options, logger, encoder)
     {
         _policies = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
@@ -35,7 +35,7 @@ public class HostOriginAuthenticationHandler : AuthenticationHandler<HostOriginA
                 new Claim("HostOriginDomain", hostOrigin.AuthorizedDomain)
             });
 
-            Pocket.Logger<HostOriginAuthenticationHandler>.Log.Event("HostOriginAuthenticationHandler.HostOriginDomain", ("HostOrigin", hostOrigin.AuthorizedDomain));
+            Log.Event("HostOriginAuthenticationHandler.HostOriginDomain", ("HostOrigin", hostOrigin.AuthorizedDomain));
 
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), "HostOrigin");
 
@@ -43,7 +43,7 @@ public class HostOriginAuthenticationHandler : AuthenticationHandler<HostOriginA
         }
         else
         {
-            Pocket.Logger<HostOriginAuthenticationHandler>.Log.Event("HostOriginAuthenticationHandler.HostOriginDomain", ("HostOrigin", "none"));
+            Log.Event("HostOriginAuthenticationHandler.HostOriginDomain", ("HostOrigin", "none"));
 
             return Task.FromResult(AuthenticateResult.NoResult());
         }
