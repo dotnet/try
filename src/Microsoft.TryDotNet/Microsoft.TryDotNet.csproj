@@ -25,10 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Microsoft.TryDotNet.Tests" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.TryDotNet.WasmRunner\Microsoft.TryDotNet.WasmRunner.csproj" />
   </ItemGroup>
 
