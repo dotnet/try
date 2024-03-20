@@ -14,9 +14,9 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
     <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24168.2" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.41.2" />
-    <PackageVersion Include="peaky.client" Version="4.0.70" />
-    <PackageVersion Include="peaky.xunit" Version="4.0.70" />
-    <PackageVersion Include="Peaky" Version="4.0.73-beta" />
+    <PackageVersion Include="peaky.client" Version="4.0.73" />
+    <PackageVersion Include="peaky.xunit" Version="4.0.73" />
+    <PackageVersion Include="Peaky" Version="4.0.77-beta" />
     <PackageVersion Include="PocketLogger" Version="0.8.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
