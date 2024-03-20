@@ -7,12 +7,12 @@
 
 **What is Try .NET?**: Try .NET is an interactive documentation generator for .NET Core.
 
-## Experiences 
- Use Try .NET to create executable C# snippets for your websites, or interactive markdown files that users can run on their machine. 
+## Experiences
+ Use Try .NET to create executable C# snippets for your websites, or interactive markdown files that users can run on their machine.
 
 ### Online, powered by Blazor
 
-Microsoft Docs uses Try .NET to create interactive documentation. Users can run and edit code all in the browser.
+Microsoft Learn uses Try .NET to create interactive documentation. Users can run and edit code all in the browser.
 
 _**Please Note**: At the moment, the Try .NET online experience only works with C# documentation._
 
@@ -21,7 +21,7 @@ _**Please Note**: At the moment, the Try .NET online experience only works with 
 ### Interactive .NET documentation
 
 Try .NET enables .NET developers to create interactive markdown files.
-To make your markdown files interactive, you will need to use [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0), the dotnet try global tool and [Visual Studio](https://visualstudio.microsoft.com/) / [VS Code](https://code.visualstudio.com/) (or any other editor of your choice). 
+To make your markdown files interactive, you will need to use [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0), the dotnet try global tool and [Visual Studio](https://visualstudio.microsoft.com/) / [VS Code](https://code.visualstudio.com/) (or any other editor of your choice).
 
 <img src ="https://user-images.githubusercontent.com/2546640/57158389-47a2c780-6db1-11e9-96ad-8c6e9ab52853.png" width = "80%">
 

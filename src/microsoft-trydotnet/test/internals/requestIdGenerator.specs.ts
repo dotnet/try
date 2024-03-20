@@ -12,7 +12,7 @@ chai.should();
 
 describe("a request id generator", () => {
 
-    const defaultConfiguration: trydotnet.Configuration = { hostOrigin: "https://docs.microsoft.com" };
+    const defaultConfiguration: trydotnet.Configuration = { hostOrigin: "https://learn.microsoft.com" };
 
     it("uses local generator ", async () => {
         var dom = buildSimpleIFrameDom(defaultConfiguration);
