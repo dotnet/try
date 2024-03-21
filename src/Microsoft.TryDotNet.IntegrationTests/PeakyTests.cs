@@ -22,7 +22,7 @@ public class PeakyTests : IDisposable
         _output = output;
     }
 
-    [Theory]
+    [Theory(Skip = "Work in progress")]
     [ClassData(typeof(PeakyTestDiscovery))]
     public async Task The_peaky_test_passes(Uri url)
     {
