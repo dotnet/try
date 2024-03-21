@@ -10,15 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.Interactive.CSharpProject" />
+    <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
+    <PackageReference Include="Microsoft.DotNet.Interactive.CSharpProject" />
+    <PackageReference Include="Peaky" />
+    <PackageReference Include="pocketlogger">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="System.Drawing.Common" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="Microsoft.TryDotNet.Tests" />
   </ItemGroup>
 
   <ItemGroup>
