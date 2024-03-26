@@ -12,7 +12,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24168.2" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24176.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.41.2" />
     <PackageVersion Include="peaky.client" Version="4.0.73" />
     <PackageVersion Include="peaky.xunit" Version="4.0.73" />
