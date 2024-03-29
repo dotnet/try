@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
-public class PeakyTests : IDisposable
+public class PeakyTests
 {
     private readonly ITestOutputHelper _output;
 
@@ -32,6 +32,4 @@ public class PeakyTests : IDisposable
 
         result.Passed.Should().BeTrue();
     }
-
-    public void Dispose() => _peakyClient.Dispose();
 }

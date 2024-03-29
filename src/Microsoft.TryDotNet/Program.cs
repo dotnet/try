@@ -14,9 +14,10 @@ namespace Microsoft.TryDotNet;
 
 public class Program
 {
-    public static void Main(string[] args)
+    private static Package _consolePackage;
     {
         var app = CreateWebApplication(new WebApplicationOptions { Args = args });
+        var app = await CreateWebApplicationAsync(new WebApplicationOptions { Args = args });
 
         app.Run();
     }
@@ -32,45 +33,36 @@ public class Program
         }
     }
 
-    public static WebApplication CreateWebApplication(WebApplicationOptions options)
+    public static async Task<WebApplication> CreateWebApplicationAsync(WebApplicationOptions options)
     {
         var builder = WebApplication.CreateBuilder(options);
 
         builder.Services.AddCors(
             opts => opts.AddPolicy("trydotnet", policy => policy.AllowAnyOrigin()));
 
-        EnvironmentSettings environmentSettings;
+        _consolePackage = await Package.GetOrCreateConsolePackageAsync(enableBuild: false);
 
-        // FIX: (CreateWebApplication) 
-        // if (builder.Environment.IsProduction())
-        // {
-            builder.Services.AddProductionEnvironmentSettings(out environmentSettings);
-
-            builder.Services.AddHostOriginAuth(new HostOriginPolicies(HostOriginPolicies.ForProduction));
-        // }
-        // else
-        // {
-        //     builder.Services.AddLocalEnvironmentSettings(out environmentSettings);
-        //
-        //     builder.Services.AddHostOriginAuth(new HostOriginPolicies(HostOriginPolicies.ForLocal));
-        //
-        //     builder.Services.AddDataProtection();
-        // }
-
-        builder.Services.AddPeakyTests(registry =>
-                                           registry.Add(
-                                               "production",
-                                               "trydotnet",
-                                               new Uri(environmentSettings.HostOrigin)));
-
-        builder.Services.AddTransient<ITestPageRenderer>(_ => new TestPageRenderer("/peaky.js", styleSheets: new[] { new PathString("/peaky.css") }));
+        builder.Services.AddPeakyTests(tests =>
+        {
+            tests.Add(
+                "Development",
+                "trydotnet",
+                new Uri(EnvironmentSettings.ForLocal.HostOrigin));
+            tests.Add(
+                "Staging",
+                "trydotnet",
+                new Uri(EnvironmentSettings.ForPreProduction.HostOrigin));
+            tests.Add(
+                "Production",
+                "trydotnet",
+                new Uri(EnvironmentSettings.ForProduction.HostOrigin));
+        });
 
         CSharpProjectKernel.RegisterEventsAndCommands();
 
         var app = builder.Build();
 
-        // FIX: (CreateWebApplication) why is this commented out?
-        // app.UseHttpsRedirection();
+        app.UseHttpsRedirection();
         app.UseCors("trydotnet");
         app.UseBlazorFrameworkFiles("/wasmrunner");
         app.UsePeaky();
@@ -91,7 +83,8 @@ public class Program
 
                await using (var requestBody = request.Body)
                {
-                   using var kernel = new CSharpProjectKernel("project-kernel");
+                   using var kernel = await CreateKernelAsync();
+
                    var body = await new StreamReader(requestBody).ReadToEndAsync();
 
                    var bundle = JsonDocument.Parse(body).RootElement;
@@ -113,5 +106,9 @@ public class Program
         app.MapGet("/sensors/version", (HttpResponse response) => response.WriteAsJsonAsync(VersionSensor.Version()));
 
         return app;
+    }
+    internal static async Task<CSharpProjectKernel> CreateKernelAsync()
+    {
+        return new CSharpProjectKernel("csharp.console", PackageFinder.Create(() => Task.FromResult(_consolePackage)));
     }
 }
