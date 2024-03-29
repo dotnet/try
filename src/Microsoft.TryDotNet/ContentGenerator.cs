@@ -38,22 +38,24 @@ public class ContentGenerator
 
         var configString = JsonSerializer.Serialize(configuration);
 
-        var value =$@"<!doctype html>
-<html>
-<head>
-    <meta charset=""utf-8"">
-    <title>TryDotNet Editor</title>
-    <meta name=""viewport"" content=""width=device-width,initial-scale=1"">
-    <script defer=""defer"" src=""api/editor/app.bundle.js"" id=""trydotnet-editor-script"" data-trydotnet-configuration=""{HttpUtility.HtmlAttributeEncode(configString)}""></script>
-    <script defer=""defer"" src=""api/editor/editor.worker.bundle.js""></script>
-    <script defer=""defer"" src=""api/editor/json.worker.bundle.js""></script>
-    <script defer=""defer"" src=""api/editor/css.worker.bundle.js""></script>
-    <script defer=""defer"" src=""api/editor/html.worker.bundle.js""></script>
-    <script defer=""defer"" src=""api/editor/ts.worker.bundle.js""></script>
-</head>
-<body>
-</body>
-</html>";
+        var value =$"""
+            <!doctype html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>TryDotNet Editor</title>
+                <meta name="viewport" content="width=device-width,initial-scale=1">
+                <script defer="defer" src="api/editor/app.bundle.js" id="trydotnet-editor-script" data-trydotnet-configuration="{HttpUtility.HtmlAttributeEncode(configString)}"></script>
+                <script defer="defer" src="api/editor/editor.worker.bundle.js"></script>
+                <script defer="defer" src="api/editor/json.worker.bundle.js"></script>
+                <script defer="defer" src="api/editor/css.worker.bundle.js"></script>
+                <script defer="defer" src="api/editor/html.worker.bundle.js"></script>
+                <script defer="defer" src="api/editor/ts.worker.bundle.js"></script>
+            </head>
+            <body>
+            </body>
+            </html>
+            """;
 
         return Task.FromResult(value);
     }

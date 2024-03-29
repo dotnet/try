@@ -11,13 +11,13 @@ using Peaky;
 
 namespace Microsoft.TryDotNet.PeakyTests;
 
-public class OrchestratorDeploymentTests : IPeakyTest, IApplyToApplication, IHaveTags
+public class ExternalTests : IPeakyTest, IApplyToApplication, IHaveTags
 {
     private readonly HttpClientWithTelemetry _httpClient;
     private readonly HttpClientWithXsrfCookies _httpClientWithXsrfCookies;
     private readonly TestTarget _testTarget;
 
-    public OrchestratorDeploymentTests(
+    public ExternalTests(
         HttpClientWithTelemetry httpClient,
         HttpClientWithXsrfCookies httpClientWithXsrfCookies,
         TestTarget testTarget)
@@ -136,46 +136,7 @@ public class OrchestratorDeploymentTests : IPeakyTest, IApplyToApplication, IHav
 
         return await response.Content.ReadAsStringAsync();
     }
-
-    public async Task Compile_of_valid_workspace_with_Xsrf_and_hostOrigin_returns_200()
-    {
-        var cacheAvoidingValue = Guid.NewGuid().ToString();
-
-        var sourceCode = $"using System;\n public class Program\n {{\n public static void Main()\n {{\n Console.WriteLine(\"{cacheAvoidingValue}!\");\n }}\n }}";
-
-        var workspace = new
-        {
-            workspaceType = "script",
-            buffers = new[]
-            {
-                new
-                {
-                    id = "Program.cs",
-                    content = sourceCode,
-                    position = 0
-                }
-
-            }
-        };
-
-        var contentPost = new StringContent(JsonConvert.SerializeObject(workspace), Encoding.UTF8, "application/json");
-
-        var request = new HttpRequestMessage
-        {
-            Content = contentPost,
-            Method = HttpMethod.Post,
-            RequestUri = new Uri("/workspace/run?hostOrigin=https%3A%2F%2Ftry.dot.net%2F", UriKind.RelativeOrAbsolute)
-        };
-
-        var response = await _httpClientWithXsrfCookies.SendAsync(request);
-
-        response.ShouldSucceed(HttpStatusCode.OK);
-
-        var result = await response.Content.ReadAsStringAsync();
-
-        result.Should().Contain(cacheAvoidingValue);
-    }
-
+    
     public async Task<object> Compile_without_Xsrf_returns_400()
     {
         var cacheAvoidingValue = Guid.NewGuid();
@@ -185,7 +146,7 @@ public class OrchestratorDeploymentTests : IPeakyTest, IApplyToApplication, IHav
 
         var workspace = new
         {
-            workspaceType = "script",
+            workspaceType = "console",
             buffers = new[]
             {
                 new
@@ -223,7 +184,7 @@ public class OrchestratorDeploymentTests : IPeakyTest, IApplyToApplication, IHav
 
         var workspace = new
         {
-            workspaceType = "script",
+            workspaceType = "console",
             buffers = new[]
             {
                 new

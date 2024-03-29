@@ -11,51 +11,53 @@ namespace Microsoft.TryDotNet.Tests;
 
 public class CommandExecutionTests
 {
-    [Fact(Skip = "Failing in CI")]
+    [Fact]
     public async Task can_compile_projects_with_user_code_in_region()
     {
         await using var applicationBuilderFactory = new WebApplicationFactory<Program>();
 
         var c = applicationBuilderFactory.CreateDefaultClient();
 
-        var requests = @"{
-    ""commands"": [
-        {
-            ""commandType"": ""OpenProject"",
-            ""command"": {
-                ""project"": {
-                    ""files"": [
-                        {
-                            ""relativeFilePath"": ""program.cs"",
-                            ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\n\n      #endregion\n    }\n  }\n}""
-                        }
-                    ]
-                }
-            },
-            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||6""
-        },
-        {
-            ""commandType"": ""OpenDocument"",
-            ""command"": {
-                ""relativeFilePath"": ""./program.cs"",
-                ""regionName"": ""controller""
-            },
-            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||7""
-        },
-        {
-            ""commandType"": ""SubmitCode"",
-            ""command"": {
-                ""code"": ""var a = 123;""
-            },
-            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||8""
-        },
-        {
-            ""commandType"": ""CompileProject"",
-            ""command"": {},
-            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22""
-        }
-    ]
-}";
+        var requests = """
+            {
+                "commands": [
+                    {
+                        "commandType": "OpenProject",
+                        "command": {
+                            "project": {
+                                "files": [
+                                    {
+                                        "relativeFilePath": "program.cs",
+                                        "content": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\n\n      #endregion\n    }\n  }\n}"
+                                    }
+                                ]
+                            }
+                        },
+                        "token": "595d327c-b14f-5ad7-7da0-2579cbfa9961::22||6"
+                    },
+                    {
+                        "commandType": "OpenDocument",
+                        "command": {
+                            "relativeFilePath": "./program.cs",
+                            "regionName": "controller"
+                        },
+                        "token": "595d327c-b14f-5ad7-7da0-2579cbfa9961::22||7"
+                    },
+                    {
+                        "commandType": "SubmitCode",
+                        "command": {
+                            "code": "var a = 123;"
+                        },
+                        "token": "595d327c-b14f-5ad7-7da0-2579cbfa9961::22||8"
+                    },
+                    {
+                        "commandType": "CompileProject",
+                        "command": {},
+                        "token": "595d327c-b14f-5ad7-7da0-2579cbfa9961::22"
+                    }
+                ]
+            }
+            """;
 
         var requestBody = JsonContent.Create(JsonDocument.Parse(requests).RootElement);
 
@@ -82,32 +84,34 @@ public class CommandExecutionTests
 
         var c = applicationBuilderFactory.CreateDefaultClient();
 
-        var requests = @"{
-    ""commands"": [
-        {
-            ""commandType"": ""OpenProject"",
-            ""command"": {
-                ""project"": {
-                    ""files"": [
-                        {
-                            ""relativeFilePath"": ""program.cs"",
-                            ""content"": ""using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\nConsole.WriteLine(123);\n      #endregion\n    }\n  }\n}""
-                        }
-                    ]
-                }
-            },
-            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||6""
-        },
-        {
-            ""commandType"": ""OpenDocument"",
-            ""command"": {
-                ""relativeFilePath"": ""program.cs"",
-                ""regionName"": ""controller""
-            },
-            ""token"": ""595d327c-b14f-5ad7-7da0-2579cbfa9961::22||7""
-        }
-    ]
-}";
+        var requests = """
+            {
+                "commands": [
+                    {
+                        "commandType": "OpenProject",
+                        "command": {
+                            "project": {
+                                "files": [
+                                    {
+                                        "relativeFilePath": "program.cs",
+                                        "content": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\nusing System.Text;\nusing System.Globalization;\nusing System.Text.RegularExpressions;\n\nnamespace Program\n{\n  class Program\n  {\n    static void Main(string[] args)\n    {\n      #region controller\nConsole.WriteLine(123);\n      #endregion\n    }\n  }\n}"
+                                    }
+                                ]
+                            }
+                        },
+                        "token": "595d327c-b14f-5ad7-7da0-2579cbfa9961::22||6"
+                    },
+                    {
+                        "commandType": "OpenDocument",
+                        "command": {
+                            "relativeFilePath": "program.cs",
+                            "regionName": "controller"
+                        },
+                        "token": "595d327c-b14f-5ad7-7da0-2579cbfa9961::22||7"
+                    }
+                ]
+            }
+            """;
 
         var requestBody = JsonContent.Create(JsonDocument.Parse(requests).RootElement);
 

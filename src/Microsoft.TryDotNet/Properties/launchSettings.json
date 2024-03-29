@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "Microsoft.TryDotNet": {
+    "TryDotNet-Development": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "editor",
@@ -19,6 +19,29 @@
       "applicationUrl": "https://localhost:7061;http://localhost:5061",
       "dotnetRunMessages": true
     },
+    
+    "TryDotNet-Staging": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "editor",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Staging"
+      },
+      "applicationUrl": "https://localhost:7061;http://localhost:5061",
+      "dotnetRunMessages": true
+    },
+
+    "TryDotNet-Production": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "editor",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "applicationUrl": "https://localhost:7061;http://localhost:5061",
+      "dotnetRunMessages": true
+    },
+
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
