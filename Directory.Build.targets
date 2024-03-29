@@ -2,17 +2,6 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" Condition="'$(DisableArcade)' != '1'" />
 
-  <!--
-  Arcade normally auto-adds the appropriate test packages, but in non-arcade scenarios they must be re-added.
-
-  Not doing this in each project because duplicate PackageReferences causes an Arcade build failure.
-  -->
-  <ItemGroup Condition="($(MSBuildProjectName.EndsWith('.Tests')) OR $(MSBuildProjectName.EndsWith('.IntegrationTests'))) AND '$(DisableArcade)' == '1'">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
-  </ItemGroup>
-
   <!-- Consolidate FSharp package versions -->
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="7.0.200" />
