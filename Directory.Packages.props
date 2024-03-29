@@ -3,7 +3,6 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="Assent" Version="2.3.2" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
@@ -12,7 +11,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="2.0.0" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24177.2" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.41.2" />
     <PackageVersion Include="peaky.client" Version="4.0.79" />
     <PackageVersion Include="peaky.xunit" Version="4.0.79" />
@@ -27,9 +26,7 @@
     <PackageVersion Include="xunit" Version="2.7.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
   </ItemGroup>
-  
   <ItemGroup Condition="'$(DisableArcade)' == '1'">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
   </ItemGroup>
-  
 </Project>

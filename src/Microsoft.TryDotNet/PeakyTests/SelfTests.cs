@@ -33,7 +33,7 @@ public class SelfTests : IPeakyTest, IHaveTags, IApplyToApplication
 
     public async Task Can_get_signature_help()
     {
-        using var kernel = await Program.CreateKernelAsync();
+        using var kernel = Program.CreateKernel();
 
         await kernel.SendAsync(new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"// content will be replaced") })));
         await kernel.SendAsync(new OpenDocument("Program.cs"));

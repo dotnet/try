@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.CSharpProject;
+using Microsoft.DotNet.Interactive.CSharpProject.Build;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.TryDotNet.PeakyTests;
 using Peaky;
@@ -14,15 +15,18 @@ namespace Microsoft.TryDotNet;
 
 public class Program
 {
-    private static Package _consolePackage;
+    private static Package? _consolePackage;
+
+    public static async Task Main(string[] args)
     {
-        var app = CreateWebApplication(new WebApplicationOptions { Args = args });
+        await EnsurePrebuildPackageIsReadyAsync();
+
         var app = await CreateWebApplicationAsync(new WebApplicationOptions { Args = args });
 
-        app.Run();
+        await app.RunAsync();
     }
 
-    public static IEnumerable<IKernelCommandEnvelope> ReadCommands(JsonElement bundle)
+    private static IEnumerable<IKernelCommandEnvelope> ReadCommands(JsonElement bundle)
     {
         foreach (var commandEnvelope in bundle.GetProperty("commands").EnumerateArray())
         {
@@ -83,7 +87,7 @@ public class Program
 
                await using (var requestBody = request.Body)
                {
-                   using var kernel = await CreateKernelAsync();
+                   using var kernel = CreateKernel();
 
                    var body = await new StreamReader(requestBody).ReadToEndAsync();
 
@@ -107,8 +111,13 @@ public class Program
 
         return app;
     }
-    internal static async Task<CSharpProjectKernel> CreateKernelAsync()
+
+    private static async Task EnsurePrebuildPackageIsReadyAsync()
     {
-        return new CSharpProjectKernel("csharp.console", PackageFinder.Create(() => Task.FromResult(_consolePackage)));
+        var package = await Package.GetOrCreateConsolePackageAsync(true);
+        await package.EnsureReadyAsync();
     }
+
+    internal static CSharpProjectKernel CreateKernel() => 
+        new("csharp.console", PackageFinder.Create(() => Task.FromResult(_consolePackage)));
 }
