@@ -66,7 +66,7 @@ public class Program
 
         var app = builder.Build();
 
-        app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
         app.UseCors("trydotnet");
         app.UseBlazorFrameworkFiles("/wasmrunner");
         app.UsePeaky();
