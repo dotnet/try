@@ -19,6 +19,9 @@ public partial class AspNetProcess : IDisposable
         var completionSource = new TaskCompletionSource<Uri>();
         var buffer = new StringBuilder();
         var uriFound = false;
+
+        var allOutput = new StringBuilder();
+
         _process = CommandLine.StartProcess(
             "dotnet",
             """
@@ -27,6 +30,8 @@ public partial class AspNetProcess : IDisposable
             new DirectoryInfo(ToolPublishedPath),
             output: output =>
             {
+                allOutput.Append(output);
+
                 if (!uriFound)
                 {
                     buffer.AppendLine(output);
@@ -41,6 +46,13 @@ public partial class AspNetProcess : IDisposable
             },
             error: error =>
             {
+                error = $"""
+                    {allOutput}
+                    
+                    ERROR:
+                    ------
+                    {error}
+                    """;
                 completionSource.TrySetException(new Exception(error));
             });
 
