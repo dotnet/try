@@ -208,12 +208,6 @@ extends:
                 artifactName: Linux_test_results_and_dumps
                 displayName: Publish Test results and Blame dumps
                 condition: failed()
-              - output: pipelineArtifact
-                targetPath: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/$(_BuildConfig)/net8.0/playwright_screenshots
-                artifactName: Linux_playwright_screenshots
-                displayName: Publish Playwright screen shots
-                condition: always()
-                continueOnError: true
             variables:
             # Enable signing for internal, non-PR builds
             - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
