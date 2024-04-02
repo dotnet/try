@@ -17,7 +17,6 @@ public class EditorTests : PlaywrightTestBase
 {
     public EditorTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
     {
-
     }
 
     [IntegrationTestFact]
