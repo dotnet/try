@@ -13,7 +13,7 @@ chai.should();
 
 describe("a message bus", () => {
 
-    const defaultConfiguration: trydotnet.Configuration = { hostOrigin: "https://docs.microsoft.com" };
+    const defaultConfiguration: trydotnet.Configuration = { hostOrigin: "https://learn.microsoft.com" };
 
     it("can post message to iframe", (done: Done) => {
         var dom = buildSimpleIFrameDom(defaultConfiguration);
