@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Playwright;
 using Xunit;
 
-[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly,DisableTestParallelization = true)]
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true)]
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 

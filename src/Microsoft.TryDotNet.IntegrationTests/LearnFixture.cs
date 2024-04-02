@@ -7,7 +7,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
 using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
@@ -15,6 +14,7 @@ namespace Microsoft.TryDotNet.IntegrationTests;
 public partial class LearnFixture : IDisposable, IAsyncLifetime
 {
     private Process? _httpServer;
+
     public Uri? Url { get; private set; }
 
     public void Dispose()
@@ -23,7 +23,6 @@ public partial class LearnFixture : IDisposable, IAsyncLifetime
         _httpServer?.Dispose();
         _httpServer = null;
     }
-
 
     public async Task InitializeAsync()
     {
@@ -34,13 +33,12 @@ public partial class LearnFixture : IDisposable, IAsyncLifetime
             var uriFound = false;
             _httpServer = CommandLine.StartProcess("pwsh", "-c npx http-server --cors", new DirectoryInfo(SitePath), (output) =>
             {
-
                 if (!uriFound)
                 {
                     buffer.AppendLine(output);
                     var allText = buffer.ToString();
                     var match = Regex.Match(allText, @".*(?<uri>http://\d+\.\d+\.\d+\.\d+:\d+).*",
-                        RegexOptions.Multiline);
+                                            RegexOptions.Multiline);
                     if (match.Success)
                     {
                         if (Uri.TryCreate(match.Groups["uri"].Value, UriKind.Absolute, out var uri))
@@ -58,16 +56,7 @@ public partial class LearnFixture : IDisposable, IAsyncLifetime
 
     public Task DisposeAsync()
     {
-       Dispose();
+        Dispose();
         return Task.CompletedTask;
-    }
-}
-
-internal static class UriExtensions
-{
-    public static Uri ToLocalHost(this Uri source)
-    {
-        var root = new Uri($"{source.Scheme}://127.0.0.1:{source.Port}");
-        return new Uri(root,source.PathAndQuery);
     }
 }

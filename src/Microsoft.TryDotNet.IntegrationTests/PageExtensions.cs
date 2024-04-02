@@ -59,6 +59,7 @@ window.dispatchEvent(new MessageEvent(""message"", { data: request }));
         return editor;
     }
 
+    [Obsolete]
     public static async Task TypeTextInMonacoEditor(this IPage page, string text, float? delay = null)
     {
         var editor = await page.FindEditor();

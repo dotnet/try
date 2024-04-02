@@ -24,7 +24,7 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: DotNetSdkVersion
-    value: '7.0.100'
+    value: '8.0.101'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: TryDotNetPackagesPath
@@ -148,18 +148,19 @@ stages:
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net7.0\playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net8.0\playwright_screenshots
             artifactName: Windows_playwright_screenshots
             artifactType: container
           condition: always()
           continueOnError: true
 
-        - task: PublishBuildArtifacts@1
-          displayName: Publish packages to artifacts container
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
-            artifactName: packages
-            artifactType: container
+        # Packages are not being generated
+        # - task: PublishBuildArtifacts@1
+        #   displayName: Publish packages to artifacts container
+        #   inputs:
+        #     pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
+        #     artifactName: packages
+        #     artifactType: container
 
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
@@ -249,7 +250,7 @@ stages:
         - task: PublishBuildArtifacts@1
           displayName: Publish Playwright screen shots
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net7.0/playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net8.0/playwright_screenshots
             artifactName: Linux_playwright_screenshots
             artifactType: container
           condition: always()

@@ -1,28 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
     <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
     <GeneratedFileName>GeneratedLocation.cs</GeneratedFileName>
     <PublishLocation>$(MSBuildThisFileDirectory)bin\$(Configuration)\tool</PublishLocation>
     <IsPackable>false</IsPackable>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Assent" Version="1.7.0" />
-    <PackageReference Include="FluentAssertions" Version="6.10.0" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.30.0" />
-    <PackageReference Include="coverlet.collector" Version="3.1.2">
+    <PackageReference Include="Assent" />
+    <PackageReference Include="Microsoft.Playwright" />
+    <PackageReference Include="peaky.client" />
+    <PackageReference Include="peaky.xunit" />
+    <PackageReference Include="coverlet.collector" >
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="PocketLogger" Version="0.4.1">
+    <PackageReference Include="PocketLogger" >
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(DisableArcade)' == '1'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,14 +41,6 @@
   </ItemGroup>
 
   <Target Name="DoSomethingElse" BeforeTargets="maybe">
-    <!--<ItemGroup>
-      <GeneratedLines Remove="*" />
-      <GeneratedLines Include="namespace Microsoft.TryDotNet.IntegrationTests%3b"/>
-      <GeneratedLines Include="public partial class AspNetProcess {"/>
-      <GeneratedLines Include="public const string ToolPublishedPath = @&quot;$(PublishLocation)&quot;%3b"/>
-      <GeneratedLines Include="}"/>
-    </ItemGroup>-->
-
     <PropertyGroup>
       <GeneratedContent>
         <![CDATA[
@@ -61,20 +64,9 @@ public partial class LearnFixture {
       <Compile Include="$(IntermediateOutputPath)\$(GeneratedFileName)" />
     </ItemGroup>
   </Target>
-  <Target Name="PublishTool" BeforeTargets="CoreCompile">
+  <Target Name="PublishTool" BeforeTargets="CoreCompile" Condition="'$(DisableArcade)' != '1'">
     <Exec Command="dotnet publish -o $(PublishLocation)" WorkingDirectory="$(MSBuildThisFileDirectory)..\Microsoft.TryDotNet" />
   </Target>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="xunit.runner.visualstudio" Version="2.4.5">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="xunit" Version="2.4.2" />
-  </ItemGroup>
+
 </Project>
   
