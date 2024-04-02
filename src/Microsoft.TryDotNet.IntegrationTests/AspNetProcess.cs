@@ -21,7 +21,9 @@ public partial class AspNetProcess : IDisposable
         var uriFound = false;
         _process = CommandLine.StartProcess(
             "dotnet",
-            @"Microsoft.TryDotNet.dll  --urls=""http://127.0.0.1:0""",
+            """
+                Microsoft.TryDotNet.dll  --urls="http://127.0.0.1:0"
+                """,
             new DirectoryInfo(ToolPublishedPath),
             output: output =>
             {
@@ -39,7 +41,7 @@ public partial class AspNetProcess : IDisposable
             },
             error: error =>
             {
-                completionSource.SetException(new Exception(error));
+                completionSource.TrySetException(new Exception(error));
             });
 
         return (await completionSource.Task.Timeout(TimeSpan.FromMinutes(1), $"ASP.NET Process failed to start.  Output =\n{buffer})")).ToLocalHost();
