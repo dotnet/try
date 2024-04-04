@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using Microsoft.Playwright;
+using Pocket.For.Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
+[LogToPocketLogger(FileNameEnvironmentVariable = "POCKETLOGGER_LOG_PATH")]
 public class EditorTests : PlaywrightTestBase
 {
     public EditorTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
