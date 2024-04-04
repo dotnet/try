@@ -12,21 +12,18 @@
     <div class="dotnet-online">
         <div class="dotnet-online-editor-section">
             <div class="dotnet-online-header flex-wrap-wrap flex-wrap-none-tablet">
-                <h3>${escape(loc_dotnetEditor)}</h3>
-                <div
-                    class="display-flex align-self-baseline flex-grow-1 margin-top-xxs margin-left-xs margin-left-none-tablet has-line-height-reset">
-                    ${exitEditorActionShortcut}</div>
+                <h3>DotnetEditor</h3>
                 <div
                     class="buttons margin-left-xs margin-top-xxs margin-top-none-desktop margin-bottom-none margin-right-xs display-flex justify-content-flex-start flex-grow-1 flex-grow-0-tablet">
                     <button class="button button-sm button-filled is-radiusless has-inner-focus"
                         data-bi-name="tutorial-clear-csharp">
                         <span class="docon docon-delete" role="presentation"></span>
-                        <span>${escape(loc_clear)}</span>
+                        <span>Clear</span>
                     </button>
                     <button class="button button-sm button-success button-filled is-radiusless has-inner-focus"
                         data-bi-name="tutorial-run-csharp">
                         <span class="docon docon-play" role="presentation"></span>
-                        <span>${escape(loc_run)}</span>
+                        <span>Run</span>
                     </button>
                     <details class="popover popover-right margin-left-xs">
                         <summary class="button button-sm is-radiusless has-inner-focus border"
@@ -54,12 +51,7 @@
             <iframe width="700" height="700" title="${loc_dotnetEditor}" class="dotnet-online-editor">
             </iframe>
             <div class="dotnet-online-header">
-                <h3>${escape(loc_output)}</h3>
-                <a class="button button-clear is-radiusless has-inner-focus" data-bi-name="feedback"
-                    href="https://github.com/dotnet/try">
-                    <span class="docon docon-feedback-positive-outline" role="presentation"></span>
-                    <span class="visually-hidden">${escape(loc_feedback)}</span>
-                </a>
+                <h3>Output</h3>
             </div>
             <pre class="dotnet-online-output" aria-live="polite"></pre>
         </div>
