@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Playwright;
+using Pocket.For.Xunit;
 using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
+[LogToPocketLogger(FileNameEnvironmentVariable = "POCKETLOGGER_LOG_PATH")]
 public class TryDotNetJsIntegrationTests : PlaywrightTestBase, IClassFixture<LearnFixture>
 {
     public LearnFixture Learn { get; }

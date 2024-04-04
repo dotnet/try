@@ -27,6 +27,8 @@ variables:
     value: '8.0.101'
   - name: NodeJSVersion
     value: '16.13.0'
+  - name: PocketLoggerLogPath
+    value: $(Build.SourcesDirectory)/artifacts/log    
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
   - name: RunIntegrationTests
@@ -123,6 +125,7 @@ stages:
             $(_TestArgs)
           displayName: Build
           env:
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
         - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
@@ -225,6 +228,7 @@ stages:
             $(_TestArgs)
           displayName: Build
           env:
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
         - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)

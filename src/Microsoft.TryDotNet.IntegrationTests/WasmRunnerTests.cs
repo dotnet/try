@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 using FluentAssertions;
 
 using Microsoft.Playwright;
+using Pocket.For.Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
+[LogToPocketLogger(FileNameEnvironmentVariable = "POCKETLOGGER_LOG_PATH")]
 public class WasmRunnerTests : PlaywrightTestBase
 {
+    public WasmRunnerTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
+    {
+    }
 
     [IntegrationTestFact]
     public async Task can_load_wasmrunner()
@@ -81,11 +86,5 @@ public class WasmRunnerTests : PlaywrightTestBase
             .ContainSingle(m => m.type == "wasmRunner-stdout")
             .Which
             .message.Should().Be("Hello World!\n");
-
-    }
-
-
-    public WasmRunnerTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
-    {
     }
 }
