@@ -86,21 +86,10 @@ extends:
               outputParentDirectory: $(Build.SourcesDirectory)/artifacts
               outputs:
               - output: pipelineArtifact
-                targetPath: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-                artifactName: Windows_test_results_and_dumps
-                displayName: Publish Test results and Blame dumps
-                condition: failed()
-              - output: pipelineArtifact
-                targetPath: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/$(_BuildConfig)/net8.0/playwright_screenshots
-                artifactName: Windows_playwright_screenshots
-                displayName: Publish Playwright screen shots
+                targetPath: $(Build.SourcesDirectory)/artifacts
+                artifactName: Windows_artifacts
+                displayName: Publish Windows artifacts
                 condition: always()
-                continueOnError: true
-              # Packages are not being generated
-              # - output: pipelineArtifact
-              #   targetPath: $(Build.SourcesDirectory)/artifacts/packages/$(_BuildConfig)
-              #   artifactName: packages
-              #   displayName: Publish packages to artifacts container
 
             variables:
             - name: RunIntegrationTests
@@ -207,10 +196,10 @@ extends:
               outputParentDirectory: $(Build.SourcesDirectory)/artifacts
               outputs:
               - output: pipelineArtifact
-                targetPath: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-                artifactName: Linux_test_results_and_dumps
-                displayName: Publish Test results and Blame dumps
-                condition: failed()
+                targetPath: $(Build.SourcesDirectory)/artifacts
+                artifactName: Linux_artifacts
+                displayName: Publish Linux artifacts
+                condition: always()
             variables:
             # Enable signing for internal, non-PR builds
             - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
