@@ -5,12 +5,23 @@ using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.CSharpProject.Events;
+using Pocket;
+using Pocket.For.Xunit;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.TryDotNet.Tests;
 
-public class CommandExecutionTests
+[LogToPocketLogger(FileNameEnvironmentVariable = "POCKETLOGGER_LOG_PATH")]
+public class CommandExecutionTests : IDisposable
 {
+    private readonly CompositeDisposable _disposables = new();
+
+    public CommandExecutionTests(ITestOutputHelper output)
+    {
+        _disposables.Add(output.SubscribeToPocketLogger());
+    }
+
     [Fact]
     public async Task can_compile_projects_with_user_code_in_region()
     {
@@ -73,8 +84,7 @@ public class CommandExecutionTests
 
         var assemblyProduced = events.OfType<AssemblyProduced>().SingleOrDefault();
         assemblyProduced.Should().NotBeNull();
-        assemblyProduced!.Assembly
-        .Value.Should().NotBeNullOrWhiteSpace();
+        assemblyProduced!.Assembly.Value.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -129,4 +139,6 @@ public class CommandExecutionTests
         documentOpened.Should().NotBeNull();
         documentOpened!.Content.Should().Contain("Console.WriteLine(123);");
     }
+
+    public void Dispose() => _disposables.Dispose();
 }

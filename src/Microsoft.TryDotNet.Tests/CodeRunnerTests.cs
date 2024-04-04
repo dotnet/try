@@ -50,7 +50,6 @@ public class CodeRunnerTests
 
         outputs.Select(o => o.Trim()).Should().BeEquivalentTo(
             "123");
-
     }
 
 
