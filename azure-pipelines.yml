@@ -31,8 +31,6 @@ variables:
     value: $(Build.SourcesDirectory)/artifacts/log    
   - name: TryDotNetPackagesPath
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
-  - name: RunIntegrationTests
-    value: true
   - name: Codeql.Enabled
     value: true
 
@@ -57,6 +55,8 @@ stages:
             name: NetCore1ESPool-Internal
             demands: ImageOverride -equals windows.vs2022.amd64
         variables:
+        - name: RunIntegrationTests
+          value: true
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - group: DotNet-Blob-Feed
@@ -250,15 +250,6 @@ stages:
             artifactName: Linux_test_results_and_dumps
             artifactType: container
           condition: failed()
-
-        - task: PublishBuildArtifacts@1
-          displayName: Publish Playwright screen shots
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net8.0/playwright_screenshots
-            artifactName: Linux_playwright_screenshots
-            artifactType: container
-          condition: always()
-          continueOnError: true
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #

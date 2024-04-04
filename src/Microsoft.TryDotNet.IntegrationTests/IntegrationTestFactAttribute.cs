@@ -13,7 +13,6 @@ namespace Microsoft.TryDotNet.IntegrationTests
         private const string EnvironmentVariableName = "RunIntegrationTests";
 
         public IntegrationTestFactAttribute(string? skipReason = null)
-
         {
             var variableValue = Environment.GetEnvironmentVariable(EnvironmentVariableName) ?? "false";
             switch (variableValue.ToLowerInvariant())
