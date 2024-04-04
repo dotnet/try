@@ -39,8 +39,6 @@ variables:
   value: $(Build.SourcesDirectory)/artifacts/log
 - name: TryDotNetPackagesPath
   value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
-- name: RunIntegrationTests
-  value: true
 - name: Codeql.Enabled
   value: true
 
@@ -105,6 +103,8 @@ extends:
               #   displayName: Publish packages to artifacts container
 
             variables:
+            - name: RunIntegrationTests
+              value: true
             # Enable signing for internal, non-PR builds
             - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
               - group: DotNet-Blob-Feed
