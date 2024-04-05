@@ -198,10 +198,10 @@ public static class CommandLine
         [CallerMemberName] string? operationName = null)
     {
         return new ConfirmationLogger(
-            operationName: operationName,
+            operationName: operationName ?? "",
             category: Log.Category,
             message: "> {command} {args}",
-            args: new[] { command, args },
+            args: [command, args],
             logOnStart: true);
     }
 

@@ -5,7 +5,6 @@ using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.CSharpProject;
