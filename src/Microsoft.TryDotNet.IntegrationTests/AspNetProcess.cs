@@ -7,6 +7,8 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Pocket;
+using static Pocket.Logger;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
@@ -16,8 +18,9 @@ public partial class AspNetProcess : IDisposable
 
     public async Task<Uri> Start()
     {
+        using var operation = Log.OnEnterAndConfirmOnExit();
+
         var completionSource = new TaskCompletionSource<Uri>();
-        var buffer = new StringBuilder();
         var uriFound = false;
 
         var allOutput = new StringBuilder();
@@ -30,11 +33,11 @@ public partial class AspNetProcess : IDisposable
             new DirectoryInfo(ToolPublishedPath),
             output: output =>
             {
+                operation.Info(output);
                 allOutput.Append(output);
 
                 if (!uriFound)
                 {
-                    buffer.AppendLine(output);
                     var matches = Regex.Match(output, @"listening on:\s*(?<URI>http(s)?://(\d+\.){3}(\d+)(:\d+)?)");
                     if (matches.Success)
                     {
@@ -46,17 +49,28 @@ public partial class AspNetProcess : IDisposable
             },
             error: error =>
             {
-                error = $"""
-                    {allOutput}
-                    
-                    ERROR:
-                    ------
-                    {error}
-                    """;
-                completionSource.TrySetException(new Exception(error));
+                var outputAndError = $"""
+                                      {allOutput}
+
+                                      ERROR:
+                                      ------
+                                      {error}
+                                      """;
+
+                operation.Fail(message: error);
+
+                completionSource.TrySetException(new Exception(outputAndError));
             });
 
-        return (await completionSource.Task.Timeout(TimeSpan.FromMinutes(1), $"ASP.NET Process failed to start.  Output =\n{buffer})")).ToLocalHost();
+        var timeout = Debugger.IsAttached ? TimeSpan.FromDays(1) : TimeSpan.FromMinutes(1);
+
+        var readyAtUrl = await completionSource.Task.Timeout(timeout, $"ASP.NET process not ready within {timeout.TotalSeconds}s.  Output =\n{allOutput})");
+
+        var localHostUrl = readyAtUrl.ToLocalHost();
+
+        operation.Succeed();
+
+        return localHostUrl;
     }
 
     public void Dispose()

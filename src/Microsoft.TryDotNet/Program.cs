@@ -2,14 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Net.Mime;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Interactive;
 using Microsoft.DotNet.Interactive.Connection;
 using Microsoft.DotNet.Interactive.CSharpProject;
 using Microsoft.DotNet.Interactive.CSharpProject.Build;
+using Microsoft.DotNet.Interactive.Documents;
 using Microsoft.DotNet.Interactive.Events;
 using Microsoft.TryDotNet.PeakyTests;
 using Peaky;
+using Pocket;
+using Serilog.Sinks.RollingFileAlternate;
+using static Pocket.Logger<Microsoft.TryDotNet.Program>;
+using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace Microsoft.TryDotNet;
 
@@ -19,6 +27,8 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+        StartLogging();
+
         await EnsurePrebuildPackageIsReadyAsync();
 
         var app = await CreateWebApplicationAsync(new WebApplicationOptions { Args = args });
@@ -118,6 +128,43 @@ public class Program
         await package.EnsureReadyAsync();
     }
 
-    internal static CSharpProjectKernel CreateKernel() => 
+    internal static CSharpProjectKernel CreateKernel() =>
         new("csharp.console", PackageFinder.Create(() => Task.FromResult(_consolePackage)));
+
+
+    private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs =
+    [
+        typeof(Program).Assembly, // Microsoft.TryDotNet.dll
+        typeof(Kernel).Assembly, // Microsoft.DotNet.Interactive.dll
+        typeof(CSharpProjectKernel).Assembly, // Microsoft.DotNet.Interactive.CSharpProject.dll
+        typeof(InteractiveDocument).Assembly // Microsoft.DotNet.Interactive.Documents.dll
+    ];
+
+    private static void StartLogging()
+    {
+        if (Environment.GetEnvironmentVariable("POCKETLOGGER_LOG_PATH") is { } logFile)
+        {
+            var logPath = new FileInfo(logFile).Directory;
+
+            if (logPath is not null)
+            {
+                logPath = logPath.CreateSubdirectory("Try .NET logs");
+
+                var log = new SerilogLoggerConfiguration()
+                          .WriteTo
+                          .RollingFileAlternate(logPath.FullName, outputTemplate: "{Message}{NewLine}")
+                          .CreateLogger();
+
+                LogEvents.Subscribe(
+                    e => log.Information(e.ToLogString()),
+                    _assembliesEmittingPocketLoggerLogs);
+            }
+        }
+
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            Log.Warning($"{nameof(TaskScheduler.UnobservedTaskException)}", args.Exception);
+            args.SetObserved();
+        };
+    }
 }
