@@ -11,23 +11,25 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24177.2" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.41.2" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24205.1" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.42.0" />
     <PackageVersion Include="peaky.client" Version="4.0.79" />
     <PackageVersion Include="peaky.xunit" Version="4.0.79" />
     <PackageVersion Include="Peaky" Version="4.0.79-beta" />
     <PackageVersion Include="Pocket.Disposable" Version="1.2.0" />
-    <PackageVersion Include="PocketLogger" Version="0.8.2" />
-    <PackageVersion Include="PocketLogger.For.Xunit" Version="0.6.1" />
-    <PackageVersion Include="PocketLogger.Subscribe" Version="0.8.0" />
+    <PackageVersion Include="PocketLogger.For.Xunit" Version="0.9.0" />
+    <PackageVersion Include="PocketLogger.Subscribe" Version="0.9.0" />
+    <PackageVersion Include="PocketLogger" Version="0.9.0" />
+    <PackageVersion Include="Serilog.Sinks.RollingFileAlternate" Version="2.0.9" />
+    <PackageVersion Include="Serilog" Version="2.10.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Drawing.Common" Version="8.0.3" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
     <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
-    <PackageVersion Include="xunit" Version="2.7.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
+    <PackageVersion Include="xunit" Version="2.7.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(DisableArcade)' == '1'">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
