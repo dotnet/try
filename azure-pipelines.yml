@@ -141,29 +141,12 @@ stages:
           condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
         - task: PublishBuildArtifacts@1
-          displayName: Publish Test results and Blame dumps
+          displayName: Publish Windows artifacts
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-            artifactName: Windows_test_results_and_dumps
-            artifactType: container
-          condition: failed()
-
-        - task: PublishBuildArtifacts@1
-          displayName: Publish Playwright screen shots
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net8.0\playwright_screenshots
-            artifactName: Windows_playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/
+            artifactName: Windows_artifacts
             artifactType: container
           condition: always()
-          continueOnError: true
-
-        # Packages are not being generated
-        # - task: PublishBuildArtifacts@1
-        #   displayName: Publish packages to artifacts container
-        #   inputs:
-        #     pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
-        #     artifactName: packages
-        #     artifactType: container
 
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
