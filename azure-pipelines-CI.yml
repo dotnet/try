@@ -36,7 +36,7 @@ variables:
 - name: NodeJSVersion
   value: '16.13.0'
 - name: PocketLoggerLogPath
-  value: $(Build.SourcesDirectory)/artifacts/log
+  value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
 - name: TryDotNetPackagesPath
   value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 - name: Codeql.Enabled
