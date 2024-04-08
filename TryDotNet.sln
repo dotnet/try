@@ -17,6 +17,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.Simulat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.TryDotNet.IntegrationTests", "src\Microsoft.TryDotNet.IntegrationTests\Microsoft.TryDotNet.IntegrationTests.csproj", "{C8F85960-8E0B-404D-8E73-6C7EEBF727BB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D0F8011-2504-432D-BA70-3D92656747D3}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines-CI.yml = azure-pipelines-CI.yml
+		azure-pipelines.yml = azure-pipelines.yml
+		Directory.Packages.props = Directory.Packages.props
+		Dockerfile = Dockerfile
+		global.json = global.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
