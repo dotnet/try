@@ -113,8 +113,6 @@ extends:
                       /p:DotNetPublishToBlobFeed=true
                       /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
                       /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
-                      /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-                      /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                       /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
             # else
             - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
