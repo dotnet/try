@@ -22,7 +22,11 @@ internal static class PageExtensions
         {
             imageName = $"{imageName}_{label}";
         }
-        return page.ScreenshotAsync(new PageScreenshotOptions { Path = Path.Combine("playwright_screenshots", $"screenshot_{imageName}.png") });
+        return page.ScreenshotAsync(new PageScreenshotOptions
+        {
+            Path = Path.Combine("playwright_screenshots", $"screenshot_{imageName}.png"),
+            FullPage = true
+        });
     }
 
     public static async Task DispatchMessage<T>(this IPage page, T data)
