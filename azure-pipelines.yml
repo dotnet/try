@@ -79,7 +79,6 @@ stages:
                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                    /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-                   /p:PublishToSymbolServer=true
         # else
         - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
