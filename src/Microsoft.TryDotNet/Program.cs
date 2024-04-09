@@ -141,9 +141,11 @@ public class Program
 
     private static void StartLogging()
     {
-        if (true /* Environment.GetEnvironmentVariable("POCKETLOGGER_LOG_PATH") is { } logFile */ )
+        if (Environment.GetEnvironmentVariable("POCKETLOGGER_LOG_PATH") is { } logFile)
         {
             var logPath = new FileInfo(logFile).Directory;
+
+            Console.WriteLine($"Logging to: {logPath}");
 
             if (logPath is not null)
             {
