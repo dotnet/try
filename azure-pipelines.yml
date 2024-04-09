@@ -33,6 +33,8 @@ variables:
     value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
   - name: Codeql.Enabled
     value: true
+  - name: system.debug
+    value: true
 
 stages:
 - stage: build
@@ -131,6 +133,7 @@ stages:
           condition: ne(variables['SkipTests'], 'true')
           env:
             RunIntegrationTests: $(RunIntegrationTests)
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
 
         - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
           displayName: Delete dump files
