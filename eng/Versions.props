@@ -6,7 +6,7 @@
     <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
     <UsingToolXUnit>false</UsingToolXUnit>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
-    <UsingToolPdbConverter>false</UsingToolPdbConverter>
+    <UsingToolPdbConverter>true</UsingToolPdbConverter>
     <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
   </PropertyGroup>
   <PropertyGroup>
