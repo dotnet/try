@@ -145,6 +145,8 @@ public class Program
         {
             var logPath = new FileInfo(logFile).Directory;
 
+            Console.WriteLine($"Logging to: {logPath}");
+
             if (logPath is not null)
             {
                 logPath = logPath.CreateSubdirectory("Try .NET logs");
