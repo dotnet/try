@@ -33,6 +33,8 @@ variables:
     value: $(Build.SourcesDirectory)\artifacts\.trydotnet\packages
   - name: Codeql.Enabled
     value: true
+  - name: system.debug
+    value: true
 
 stages:
 - stage: build
