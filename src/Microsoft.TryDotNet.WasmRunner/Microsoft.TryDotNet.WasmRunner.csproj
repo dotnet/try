@@ -6,9 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>wasmrunner</StaticWebAssetBasePath>
     <PublishTrimmed>false</PublishTrimmed>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
