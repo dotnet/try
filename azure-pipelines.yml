@@ -79,7 +79,7 @@ stages:
                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                    /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-                   /p:PublishToSymbolServer=false
+                   /p:PublishToSymbolServer=true
                    /p:POCKETLOGGER_LOG_PATH=$(PocketLoggerLogPath)
                    /p:TRYDOTNET_PACKAGES_PATH=$(TryDotNetPackagesPath)
         # else
@@ -88,6 +88,9 @@ stages:
             value: Test
           - name: _BuildArgs
             value: /p:SignType=$(_SignType)
+                   /p:PublishToSymbolServer=false
+                   /p:POCKETLOGGER_LOG_PATH=$(PocketLoggerLogPath)
+                   /p:TRYDOTNET_PACKAGES_PATH=$(TryDotNetPackagesPath)
         steps:
         - script: git config --global core.longpaths true
           displayName: Enable `git clean` to handle long paths
