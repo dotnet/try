@@ -76,7 +76,12 @@ stages:
                    /p:DotNetPublishToBlobFeed=true
                    /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
                    /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+                   /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                   /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                    /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+                   /p:PublishToSymbolServer=false
+                   /p:POCKETLOGGER_LOG_PATH=$(PocketLoggerLogPath)
+                   /p:TRYDOTNET_PACKAGES_PATH=$(TryDotNetPackagesPath)
         # else
         - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
@@ -121,9 +126,6 @@ stages:
             $(_BuildArgs)
             $(_TestArgs)
           displayName: Build
-          env:
-            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
         - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
           displayName: Test / Blame
