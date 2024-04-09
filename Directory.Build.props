@@ -10,7 +10,8 @@
     <!-- private repo, don't do source-link -->
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <EnableSourceLink>false</EnableSourceLink>
-
+    <PublishWindowsPdb>false</PublishWindowsPdb>
+    
     <!-- NuGet: A stable release of a package should not have a prerelease dependency. -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
