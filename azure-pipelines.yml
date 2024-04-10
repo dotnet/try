@@ -105,8 +105,12 @@ stages:
             installationPath: $(Agent.ToolsDirectory)\dotnet
 
         - pwsh: |
-            [System.Environment]::SetEnvironmentVariable('POCKETLOGGER_LOG_PATH', '$(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log', [System.EnvironmentVariableTarget]::Process)
-          displayName: 'Set POCKETLOGGER_LOG_PATH system environment variable'
+            $path = "$(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log"
+            Write-Host "Attempting to set POCKETLOGGER_LOG_PATH to: $path"
+            [System.Environment]::SetEnvironmentVariable('POCKETLOGGER_LOG_PATH', $path, [System.EnvironmentVariableTarget]::Process)
+            $envValue = [System.Environment]::GetEnvironmentVariable('POCKETLOGGER_LOG_PATH', [System.EnvironmentVariableTarget]::Process)
+            Write-Host "Read back and print the environment variable value POCKETLOGGER_LOG_PATH to verified it was set: $envValue"
+          displayName: 'Set, Verify, and Print POCKETLOGGER_LOG_PATH'
 
         - script: |
             robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
@@ -131,6 +135,31 @@ stages:
             POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
             TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
 
+        - pwsh: |
+            Get-ChildItem -Path "$(Build.SourcesDirectory)\artifacts\bin" | ForEach-Object { Write-Host $_.Name }
+          displayName: 'List Contents of Artifacts Folder'
+
+        - script: |
+            $(Build.SourcesDirectory)\artifacts\bin\DummyTest\Release\net8.0\DummyTest.exe
+          displayName: 'a. Run DummyTest.exe'
+
+        - script: |
+            set POCKETLOGGER_LOG_PATH=$(PocketLoggerLogPath)
+            $(Build.SourcesDirectory)\artifacts\bin\DummyTest\Release\net8.0\DummyTest.exe
+          displayName: 'b. Run DummyTest.exe'
+          env:
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
+
+        - script: |
+            $(Build.SourcesDirectory)\artifacts\bin\DummyTest\Release\net8.0\DummyTest.exe
+          displayName: 'c. Run DummyTest.exe'
+          env:
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
+
+        - pwsh: |
+            Write-Host "POCKETLOGGER_LOG_PATH from PowerShell: $env:POCKETLOGGER_LOG_PATH"
+          displayName: 'Print POCKETLOGGER_LOG_PATH from PowerShell'
+
         - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
@@ -150,92 +179,6 @@ stages:
             artifactName: Windows_artifacts
             artifactType: container
           condition: always()
-
-  - template: /eng/common/templates/jobs/jobs.yml
-    parameters:
-      enableMicrobuild: true
-      enablePublishBuildArtifacts: true
-      enablePublishTestResults: true
-      enablePublishBuildAssets: false
-      enablePublishUsingPipelines: false
-      jobs:
-      - job: Linux
-        pool:
-          vmImage: ubuntu-20.04
-        variables:
-        # Enable signing for internal, non-PR builds
-        - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-          - name: _SignType
-            value: Test
-          - name: _BuildArgs
-            value: /p:SignType=$(_SignType)
-              /p:DotNetSignType=$(_SignType)
-              /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-              /p:TeamName=$(_TeamName)
-              /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-        # else
-        - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-          - name: _SignType
-            value: Test
-          - name: _BuildArgs
-            value: /p:SignType=$(_SignType)
-        steps:
-        - script: git config --global core.longpaths true
-          displayName: Enable `git clean` to handle long paths
-
-        - checkout: self
-          clean: true
-
-        - task: NodeTool@0
-          displayName: Add NodeJS/npm
-          inputs:
-            versionSpec: $(NodeJSVersion)
-
-        - task: UseDotNet@2
-          displayName: Add dotnet
-          inputs:
-            packageType: sdk
-            version: $(DotNetSdkVersion)
-            installationPath: $(Agent.ToolsDirectory)/dotnet
-
-        - script: |
-            mkdir -p "$(Build.SourcesDirectory)/artifacts"
-            cp eng/resources/* "$(Build.SourcesDirectory)/artifacts"
-          displayName: Prevent test directory crawling
-
-        - pwsh: |
-            $testArg = if ($env:SKIPTESTS -ne "true") { "--test" } else { "" }
-            Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
-          displayName: Promote variables
-
-        - script: ./eng/cibuild.sh
-            --configuration $(_BuildConfig)
-            --prepareMachine
-            $(_TestArgs)
-          displayName: Build
-          env:
-            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
-
-        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-          displayName: Test / Blame
-          workingDirectory: $(Build.SourcesDirectory)
-          condition: ne(variables['SkipTests'], 'true')
-          env:
-            RunIntegrationTests: $(RunIntegrationTests)
-
-        - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
-          displayName: Delete dump files
-          workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-          condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
-
-        - task: PublishBuildArtifacts@1
-          displayName: Publish Test results and Blame dumps
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-            artifactName: Linux_test_results_and_dumps
-            artifactType: container
-          condition: failed()
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #
