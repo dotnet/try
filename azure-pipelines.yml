@@ -162,7 +162,7 @@ stages:
           vmImage: ubuntu-20.04
         variables:
         - name: POCKETLOGGER_LOG_PATH
-          value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log
+          value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
@@ -207,6 +207,8 @@ stages:
             $testArg = if ($env:SKIPTESTS -ne "true") { "--test" } else { "" }
             Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
           displayName: Promote variables
+
+        - bash: echo $(POCKETLOGGER_LOG_PATH)
 
         - script: ./eng/cibuild.sh
             --configuration $(_BuildConfig)
