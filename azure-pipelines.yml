@@ -104,6 +104,10 @@ stages:
             version: $(DotNetSdkVersion)
             installationPath: $(Agent.ToolsDirectory)\dotnet
 
+        - pwsh: |
+            [System.Environment]::SetEnvironmentVariable('POCKETLOGGER_LOG_PATH', '$(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log', [System.EnvironmentVariableTarget]::Process)
+          displayName: 'Set POCKETLOGGER_LOG_PATH system environment variable'
+
         - script: |
             robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
             :: robocopy return codes are terrible; 1 means files were copied
