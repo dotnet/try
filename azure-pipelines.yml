@@ -132,6 +132,10 @@ stages:
           env:
             RunIntegrationTests: $(RunIntegrationTests)
 
+        - script: taskkill /f /im dotnet.exe
+          displayName: Cleaning up any stale dotnet.exe processes so log collection is possible.
+          condition: ne(variables['SkipTests'], 'true')
+
         - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
           displayName: Delete dump files
           workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
@@ -219,18 +223,30 @@ stages:
           env:
             RunIntegrationTests: $(RunIntegrationTests)
 
+        - pwsh: Stop-Process -Name dotnet -Force
+          displayName: Cleaning up any stale dotnet processes so log collection is possible.
+          condition: ne(variables['SkipTests'], 'true')
+
         - pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
           displayName: Delete dump files
           workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
           condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
+        # - task: PublishBuildArtifacts@1
+        #   displayName: Publish Test results and Blame dumps
+        #   inputs:
+        #     pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+        #     artifactName: Linux_test_results_and_dumps
+        #     artifactType: container
+        #   condition: failed()
+
         - task: PublishBuildArtifacts@1
-          displayName: Publish Test results and Blame dumps
+          displayName: Publish Linux artifacts
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-            artifactName: Linux_test_results_and_dumps
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/
+            artifactName: Linux_artifacts
             artifactType: container
-          condition: failed()
+          condition: always()
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #
