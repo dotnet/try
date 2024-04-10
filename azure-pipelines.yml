@@ -57,6 +57,8 @@ stages:
         variables:
         - name: RunIntegrationTests
           value: true
+        - name: POCKETLOGGER_LOG_PATH
+          value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log  
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - group: DotNet-Blob-Feed
@@ -159,6 +161,8 @@ stages:
         pool:
           vmImage: ubuntu-20.04
         variables:
+        - name: POCKETLOGGER_LOG_PATH
+          value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
