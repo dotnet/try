@@ -51,12 +51,11 @@
       <GeneratedContent>
         <![CDATA[
 namespace Microsoft.TryDotNet.IntegrationTests%3b
-public partial class AspNetProcess {
-  public const string ToolPublishedPath = @"$(PublishLocation)"%3b
-}
 
-public partial class LearnFixture {
-  public const string SitePath = @"$(MSBuildThisFileDirectory)..\microsoft-learn-mock\site\"%3b
+public static class BuildProperties
+{
+  public const string TryDotNetPublishLocation = @"$(PublishLocation)"%3b
+  public const string LearnMockSitePath = @"$(MSBuildThisFileDirectory)..\microsoft-learn-mock\site\"%3b
 }
 ]]></GeneratedContent>
     </PropertyGroup>

@@ -8,29 +8,36 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Pocket;
-using static Pocket.Logger;
+using static Pocket.Logger<Microsoft.TryDotNet.IntegrationTests.TryDotNetServer>;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
-public partial class AspNetProcess : IDisposable
+public class TryDotNetServer : IDisposable
 {
     private Process? _process;
 
-    public async Task<Uri> Start()
+    private TryDotNetServer(Process process, Uri url)
+    {
+        Url = url;
+        _process = process;
+    }
+
+    public Uri Url { get; }
+
+    public static async Task<TryDotNetServer> StartAsync()
     {
         using var operation = Log.OnEnterAndConfirmOnExit();
 
-        var completionSource = new TaskCompletionSource<Uri>();
         var uriFound = false;
-
         var allOutput = new StringBuilder();
+        var completionSource = new TaskCompletionSource<Uri>();
 
-        _process = CommandLine.StartProcess(
+        var process = CommandLine.StartProcess(
             "dotnet",
             """
-                Microsoft.TryDotNet.dll  --urls="http://127.0.0.1:0"
-                """,
-            new DirectoryInfo(ToolPublishedPath),
+            Microsoft.TryDotNet.dll --urls="http://127.0.0.1:0"
+            """,
+            new DirectoryInfo(BuildProperties.TryDotNetPublishLocation),
             output: output =>
             {
                 operation.Info(output);
@@ -43,7 +50,7 @@ public partial class AspNetProcess : IDisposable
                     {
                         uriFound = true;
                         var result = new Uri(matches.Groups["URI"].Value, UriKind.Absolute);
-                        completionSource.SetResult(result);
+                        completionSource.SetResult(result.ToLocalHost());
                     }
                 }
             },
@@ -62,22 +69,26 @@ public partial class AspNetProcess : IDisposable
                 completionSource.TrySetException(new Exception(outputAndError));
             });
 
+        operation.Info(("Process ID", process.Id), ("Process Name", process.ProcessName));
+
         var timeout = Debugger.IsAttached ? TimeSpan.FromDays(1) : TimeSpan.FromMinutes(1);
 
-        var readyAtUrl = await completionSource.Task.Timeout(timeout, $"ASP.NET process not ready within {timeout.TotalSeconds}s.  Output =\n{allOutput})");
-
-        var localHostUrl = readyAtUrl.ToLocalHost();
+        var url = await completionSource.Task.Timeout(timeout, $"ASP.NET process not ready within {timeout.TotalSeconds}s.  Output =\n{allOutput})");
 
         operation.Succeed();
 
-        return localHostUrl;
+        return new TryDotNetServer(process, url);
     }
 
     public void Dispose()
     {
-        var process = _process;
-        _process = null;
-        process?.Kill(true);
-        process?.Dispose();
+        if (_process is { } process)
+        {
+            using var operation = Log.OnEnterAndConfirmOnExit(arg: ("Process ID", process.Id));
+            _process = null;
+            process.Kill(true);
+            process.Dispose();
+            operation.Succeed();
+        }
     }
 }

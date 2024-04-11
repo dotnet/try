@@ -1,11 +1,11 @@
 {
   "sdk": {
-    "version": "8.0.202",
+    "version": "8.0.204",
     "allowPrerelease": true,
     "rollForward": "latestMinor"
   },
   "tools": {
-    "dotnet": "8.0.202",
+    "dotnet": "8.0.204",
     "rollForward": "latestMinor"
   },
   "msbuild-sdks": {

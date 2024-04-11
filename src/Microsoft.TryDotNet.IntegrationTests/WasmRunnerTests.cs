@@ -7,21 +7,23 @@ using FluentAssertions;
 
 using Microsoft.Playwright;
 using Pocket.For.Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
 [LogToPocketLogger(FileNameEnvironmentVariable = "POCKETLOGGER_LOG_PATH")]
 public class WasmRunnerTests : PlaywrightTestBase
 {
-    public WasmRunnerTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
+    public WasmRunnerTests(IntegratedServicesFixture services, ITestOutputHelper output) : base(services, output)
     {
+
     }
 
     [IntegrationTestFact]
     public async Task can_load_wasmrunner()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
-        await page.GotoAsync(TryDotNet.Url + "wasmrunner");
+        var page = await NewPageAsync();
+        await page.GotoAsync(await TryDotNetUrlAsync() + "wasmrunner");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator(@"id=wasmRunner-sentinel").IsHiddenAsync();
 
@@ -31,8 +33,8 @@ public class WasmRunnerTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_run_assembly()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
-        await page.GotoAsync(TryDotNet.Url + "wasmrunner");
+        var page = await NewPageAsync();
+        await page.GotoAsync(await TryDotNetUrlAsync() + "wasmrunner");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator(@"id=wasmRunner-sentinel").IsHiddenAsync();
 
@@ -51,8 +53,8 @@ public class WasmRunnerTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_run_assembly_2()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
-        await page.GotoAsync(TryDotNet.Url + "wasmrunner");
+        var page = await NewPageAsync();
+        await page.GotoAsync(await TryDotNetUrlAsync() + "wasmrunner");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator(@"id=wasmRunner-sentinel").IsHiddenAsync();
 
@@ -71,8 +73,8 @@ public class WasmRunnerTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_run_assembly_and_produce_output()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
-        await page.GotoAsync(TryDotNet.Url + "wasmrunner");
+        var page = await NewPageAsync();
+        await page.GotoAsync(await TryDotNetUrlAsync() + "wasmrunner");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator(@"id=wasmRunner-sentinel").IsHiddenAsync();
 

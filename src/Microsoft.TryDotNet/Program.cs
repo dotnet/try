@@ -139,7 +139,7 @@ public class Program
         typeof(InteractiveDocument).Assembly // Microsoft.DotNet.Interactive.Documents.dll
     ];
 
-    private static void StartLogging()
+    public static void StartLogging(Assembly[]? assembliesToSubscribe = null)
     {
         if (Environment.GetEnvironmentVariable("POCKETLOGGER_LOG_PATH") is { } logFile)
         {
@@ -158,7 +158,7 @@ public class Program
 
                 LogEvents.Subscribe(
                     e => log.Information(e.ToLogString()),
-                    _assembliesEmittingPocketLoggerLogs);
+                    assembliesToSubscribe ?? _assembliesEmittingPocketLoggerLogs);
             }
         }
 
