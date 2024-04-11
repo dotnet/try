@@ -27,8 +27,6 @@ variables:
     value: '8.0.101'
   - name: NodeJSVersion
     value: '16.13.0'
-  - name: TryDotNetPackagesPath
-    value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
   - name: Codeql.Enabled
     value: true
 
@@ -55,6 +53,8 @@ stages:
         variables:
         - name: RunIntegrationTests
           value: true
+        - name: TryDotNetPrebuildsPath
+          value: $(Build.SourcesDirectory)\artifacts\trydotnet-prebuilds          
         - name: POCKETLOGGER_LOG_PATH
           value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log  
         # Enable signing for internal, non-PR builds
@@ -125,7 +125,7 @@ stages:
           displayName: Build
           env:
             POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPrebuildsPath)
 
         - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig) --diag $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)/diag.txt
           displayName: Test / Blame
@@ -159,6 +159,8 @@ stages:
         pool:
           vmImage: ubuntu-20.04
         variables:
+        - name: TryDotNetPrebuildsPath
+          value: $(Build.SourcesDirectory)/artifacts/trydotnet-prebuilds   
         - name: POCKETLOGGER_LOG_PATH
           value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
         # Enable signing for internal, non-PR builds
@@ -213,7 +215,7 @@ stages:
           displayName: Build
           env:
             POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPrebuildsPath)
 
         - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig) --diag $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)/diag.txt
           displayName: Test / Blame
