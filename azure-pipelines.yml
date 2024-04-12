@@ -24,7 +24,7 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: DotNetSdkVersion
-    value: '8.0.101'
+    value: '8.0.204'
   - name: NodeJSVersion
     value: '16.13.0'
   - name: Codeql.Enabled

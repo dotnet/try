@@ -32,13 +32,9 @@ variables:
 - name: _DotNetArtifactsCategory
   value: .NETCore
 - name: DotNetSdkVersion
-  value: '8.0.101'
+  value: '8.0.204'
 - name: NodeJSVersion
   value: '16.13.0'
-- name: PocketLoggerLogPath
-  value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
-- name: TryDotNetPackagesPath
-  value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
 - name: Codeql.Enabled
   value: true
 
@@ -92,6 +88,10 @@ extends:
                 condition: always()
 
             variables:
+            - name: TRYDOTNET_PREBUILDS_PATH
+              value: $(Build.SourcesDirectory)\artifacts\trydotnet-prebuilds   
+            - name: POCKETLOGGER_LOG_PATH
+              value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log
             - name: RunIntegrationTests
               value: true
             # Enable signing for internal, non-PR builds
@@ -162,7 +162,7 @@ extends:
               displayName: Build
               env:
                 POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-                TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPackagesPath)
+                TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPrebuildsPath)
 
             - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
               displayName: Test / Blame
@@ -200,6 +200,10 @@ extends:
                 displayName: Publish Linux artifacts
                 condition: always()
             variables:
+            - name: TRYDOTNET_PREBUILDS_PATH
+              value: $(Build.SourcesDirectory)/artifacts/trydotnet-prebuilds   
+            - name: POCKETLOGGER_LOG_PATH
+              value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
             # Enable signing for internal, non-PR builds
             - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
               - name: _SignType
@@ -252,7 +256,7 @@ extends:
               displayName: Build
               env:
                 POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-                TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPackagesPath)
+                TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPrebuildsPath)
 
             - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
               displayName: Test / Blame
