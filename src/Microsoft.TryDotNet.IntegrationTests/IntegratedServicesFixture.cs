@@ -1,14 +1,15 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Interactive.CSharpProject.Build;
 using Pocket;
+using Xunit;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
-public class IntegratedServicesFixture : IDisposable
+public class IntegratedServicesFixture : IAsyncLifetime
 {
     private static readonly CompositeDisposable _disposables = new();
 
@@ -22,6 +23,12 @@ public class IntegratedServicesFixture : IDisposable
         _lazyTryDotNetServer = new AsyncLazy<TryDotNetServer>(StartTryDotNetServer);
         _lazyLearnServer = new AsyncLazy<LearnServer>(StartLearnServer);
         _lazyPlaywright = new AsyncLazy<PlaywrightSession>(StartPlaywright);
+    }
+
+    public async Task InitializeAsync()
+    {
+        var consolePrebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(true);
+        await consolePrebuild.EnsureReadyAsync();
     }
 
     public IntegratedServicesFixture()
@@ -56,5 +63,9 @@ public class IntegratedServicesFixture : IDisposable
 
     public Task<PlaywrightSession> GetPlaywrightAsync() => _lazyPlaywright.ValueAsync();
 
-    public void Dispose() => _disposables.Dispose();
+    public Task DisposeAsync()
+    {
+        _disposables.Dispose();
+        return Task.CompletedTask;
+    }
 }

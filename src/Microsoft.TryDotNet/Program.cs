@@ -22,13 +22,13 @@ namespace Microsoft.TryDotNet;
 
 public class Program
 {
-    private static Package? _consolePackage;
+    private static Prebuild? _consolePrebuild;
 
     public static async Task Main(string[] args)
     {
         StartLogging();
 
-        await EnsurePrebuildPackageIsReadyAsync();
+        await EnsurePrebuildPrebuildIsReadyAsync();
 
         var app = await CreateWebApplicationAsync(new WebApplicationOptions { Args = args });
 
@@ -53,7 +53,7 @@ public class Program
         builder.Services.AddCors(
             opts => opts.AddPolicy("trydotnet", policy => policy.AllowAnyOrigin()));
 
-        _consolePackage = await Package.GetOrCreateConsolePackageAsync(enableBuild: false);
+        _consolePrebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);
 
         builder.Services.AddPeakyTests(tests =>
         {
@@ -121,14 +121,14 @@ public class Program
         return app;
     }
 
-    private static async Task EnsurePrebuildPackageIsReadyAsync()
+    private static async Task EnsurePrebuildPrebuildIsReadyAsync()
     {
-        var package = await Package.GetOrCreateConsolePackageAsync(true);
-        await package.EnsureReadyAsync();
+        var prebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(true);
+        await prebuild.EnsureReadyAsync();
     }
 
     internal static CSharpProjectKernel CreateKernel() =>
-        new("csharp.console", PackageFinder.Create(() => Task.FromResult(_consolePackage)));
+        new("csharp.console", PrebuildFinder.Create(() => Task.FromResult(_consolePrebuild)));
 
 
     private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs =

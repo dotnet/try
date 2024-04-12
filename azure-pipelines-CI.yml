@@ -162,7 +162,7 @@ extends:
               displayName: Build
               env:
                 POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-                TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+                TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPackagesPath)
 
             - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
               displayName: Test / Blame
@@ -252,7 +252,7 @@ extends:
               displayName: Build
               env:
                 POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
-                TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+                TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPackagesPath)
 
             - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
               displayName: Test / Blame

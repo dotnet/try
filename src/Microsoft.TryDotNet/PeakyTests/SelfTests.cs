@@ -16,19 +16,19 @@ namespace Microsoft.TryDotNet.PeakyTests;
 
 public class SelfTests : IPeakyTest, IHaveTags, IApplyToApplication
 {
-    public async Task<Package> Console_package_is_prebuilt()
+    public async Task<Prebuild> Console_prebuild_is_ready()
     {
-        var package = await Package.GetOrCreateConsolePackageAsync(enableBuild: false);
+        var prebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);
 
-        package.Directory.Exists.Should().BeTrue();
+        prebuild.Directory.Exists.Should().BeTrue();
 
-        var subdirectories = package.Directory.GetDirectories();
+        var subdirectories = prebuild.Directory.GetDirectories();
 
         subdirectories.Should().Contain(d => d.Name == "bin");
         subdirectories.Should().Contain(d => d.Name == "obj");
-        package.Directory.GetFiles().Should().Contain(f => f.Name == "console.csproj.interactive.workspaceData.cache");
+        prebuild.Directory.GetFiles().Should().Contain(f => f.Name == "console.csproj.interactive.workspaceData.cache");
 
-        return package;
+        return prebuild;
     }
 
     public async Task Can_get_signature_help()
