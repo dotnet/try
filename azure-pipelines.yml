@@ -29,6 +29,8 @@ variables:
     value: '16.13.0'
   - name: Codeql.Enabled
     value: true
+  - name: system.debug
+    value: true
 
 stages:
 - stage: build
@@ -53,7 +55,7 @@ stages:
         variables:
         - name: RunIntegrationTests
           value: true
-        - name: TryDotNetPrebuildsPath
+        - name: TRYDOTNET_PREBUILDS_PATH
           value: $(Build.SourcesDirectory)\artifacts\trydotnet-prebuilds          
         - name: POCKETLOGGER_LOG_PATH
           value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log  
@@ -159,7 +161,7 @@ stages:
         pool:
           vmImage: ubuntu-20.04
         variables:
-        - name: TryDotNetPrebuildsPath
+        - name: TRYDOTNET_PREBUILDS_PATH
           value: $(Build.SourcesDirectory)/artifacts/trydotnet-prebuilds   
         - name: POCKETLOGGER_LOG_PATH
           value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
