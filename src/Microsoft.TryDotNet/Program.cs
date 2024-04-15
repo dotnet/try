@@ -28,7 +28,7 @@ public class Program
     {
         StartLogging();
 
-        await EnsurePrebuildPrebuildIsReadyAsync();
+        await EnsurePrebuildIsReadyAsync();
 
         var app = await CreateWebApplicationAsync(new WebApplicationOptions { Args = args });
 
@@ -121,7 +121,7 @@ public class Program
         return app;
     }
 
-    private static async Task EnsurePrebuildPrebuildIsReadyAsync()
+    private static async Task EnsurePrebuildIsReadyAsync()
     {
         var prebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(true);
         await prebuild.EnsureReadyAsync();
