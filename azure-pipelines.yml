@@ -129,7 +129,7 @@ stages:
             POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
             TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPrebuildsPath)
 
-        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig) --diag $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)/diag.txt
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig) --diag $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)/diag.txt -p:m=1
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')
