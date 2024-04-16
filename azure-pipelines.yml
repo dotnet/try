@@ -18,7 +18,7 @@ variables:
   - name: _TeamName
     value: DotNetTry
   - name: _BuildConfig
-    value: Release
+    value: Debug
   - name: _PublishUsingPipelines
     value: true
   - name: _DotNetArtifactsCategory
