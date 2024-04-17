@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
-    <Deterministic Condition="'$(NCrunch)' == '1'">false</Deterministic>
     <GeneratedFileName>GeneratedLocation.cs</GeneratedFileName>
     <PublishLocation>$(MSBuildThisFileDirectory)bin\$(Configuration)\tool</PublishLocation>
     <IsPackable>false</IsPackable>
@@ -16,12 +15,19 @@
     <PackageReference Include="Microsoft.Playwright" />
     <PackageReference Include="peaky.client" />
     <PackageReference Include="peaky.xunit" />
-    <PackageReference Include="coverlet.collector" >
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PackageReference Include="Pocket.Disposable">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="PocketLogger" >
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="PocketLogger.For.Xunit">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="PocketLogger.Subscribe">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" />
@@ -45,12 +51,11 @@
       <GeneratedContent>
         <![CDATA[
 namespace Microsoft.TryDotNet.IntegrationTests%3b
-public partial class AspNetProcess {
-  public const string ToolPublishedPath = @"$(PublishLocation)"%3b
-}
 
-public partial class LearnFixture {
-  public const string SitePath = @"$(MSBuildThisFileDirectory)..\microsoft-learn-mock\site\"%3b
+public static class BuildProperties
+{
+  public const string TryDotNetPublishLocation = @"$(PublishLocation)"%3b
+  public const string LearnMockSitePath = @"$(MSBuildThisFileDirectory)..\microsoft-learn-mock\site\"%3b
 }
 ]]></GeneratedContent>
     </PropertyGroup>

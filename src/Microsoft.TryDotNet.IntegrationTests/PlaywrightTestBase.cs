@@ -1,21 +1,55 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
+using System;
+using System.Threading.Tasks;
+using Microsoft.Playwright;
+using Pocket;
 using Xunit;
+using Xunit.Abstractions;
+
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true)]
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
-[CollectionDefinition("Chromium Edge", DisableParallelization = true)]
-[Collection("Chromium Edge")]
-public abstract class PlaywrightTestBase : IClassFixture<PlaywrightFixture>, IClassFixture<TryDotNetFixture>
+[Collection(nameof(IntegratedServicesFixture))]
+public abstract class PlaywrightTestBase : IDisposable
 {
-    public PlaywrightFixture Playwright { get; }
-    public TryDotNetFixture TryDotNet { get; }
+    private readonly CompositeDisposable _disposables = new();
 
-    protected PlaywrightTestBase(PlaywrightFixture playwright, TryDotNetFixture tryDotNet)
+    protected PlaywrightTestBase(
+        IntegratedServicesFixture services,
+        ITestOutputHelper output)
     {
-        Playwright = playwright;
-        TryDotNet = tryDotNet;
+        Services = services;
+        Output = output;
+    }
+
+    public IntegratedServicesFixture Services { get; }
+
+    public ITestOutputHelper Output { get; }
+
+    protected async Task<IPage> NewPageAsync()
+    {
+        var playwright = await Services.GetPlaywrightAsync();
+        return await playwright.Browser.NewPageAsync();
+    }
+
+    protected async Task<Uri> TryDotNetUrlAsync()
+    {
+        var server = await Services.GetTryDotNetServerAsync();
+        return server.Url;
+    }
+
+    protected async Task<Uri> LearnUrlAsync()
+    {
+        var server = await Services.GetLearnServerAsync();
+        return server.Url;
+    }
+
+    public void Dispose()
+    {
+        _disposables.Dispose();
     }
 }
+

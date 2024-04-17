@@ -8,23 +8,24 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 using FluentAssertions;
-
 using Microsoft.Playwright;
+using Pocket.For.Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
 
+[LogToPocketLogger(FileNameEnvironmentVariable = "POCKETLOGGER_LOG_PATH")]
 public class EditorTests : PlaywrightTestBase
 {
-    public EditorTests(PlaywrightFixture playwright, TryDotNetFixture tryDotNet) : base(playwright, tryDotNet)
+    public EditorTests(IntegratedServicesFixture services, ITestOutputHelper output) : base(services, output)
     {
-
     }
 
     [IntegrationTestFact]
     public async Task can_load_monaco_editor()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        var page = await NewPageAsync();
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         var isVisible = await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -37,7 +38,7 @@ public class EditorTests : PlaywrightTestBase
     public async Task can_load_the_wasm_runner()
     {
         var wasmRunnerLoaded = false;
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
 
         await page.RouteAsync("**/*", async route =>
         {
@@ -49,7 +50,7 @@ public class EditorTests : PlaywrightTestBase
             await route.ContinueAsync();
         });
 
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -61,9 +62,9 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task wasm_runner_is_not_visible_to_screenReaders()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
 
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -78,9 +79,9 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task wasm_runner_is_not_part_of_tab_navigation()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
 
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.Locator("div[role = \"code\"]").IsVisibleAsync();
 
@@ -92,16 +93,17 @@ public class EditorTests : PlaywrightTestBase
 
     }
 
+
     [IntegrationTestFact]
     public async Task notifies_when_editor_is_ready()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
 
         var readyAwaiter = interceptor.AwaitForMessage("HostEditorReady");
 
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         var found = await readyAwaiter;
 
@@ -112,11 +114,11 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_open_project()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
 
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -144,10 +146,10 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_open_document()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -188,10 +190,10 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_open_document_and_populate_editor_from_region()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -232,10 +234,10 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task minimap_is_not_visible()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.TestScreenShotAsync();
         var minimap = page.Locator("div.minimap");
@@ -246,10 +248,10 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_show_minimap()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.DispatchMessage(new
         {
@@ -271,10 +273,10 @@ public class EditorTests : PlaywrightTestBase
     [IntegrationTestFact]
     public async Task can_configure_theme()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         await page.DispatchMessage(new
         {
@@ -293,10 +295,10 @@ public class EditorTests : PlaywrightTestBase
     [Obsolete]
     public async Task when_user_code_in_editor_diagnostics_are_produced()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -360,10 +362,10 @@ int i = ""NaN"";
     [Obsolete]
     public async Task when_user_code_in_editor_is_executed_display_events_are_produced()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -419,10 +421,10 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
     [Obsolete]
     public async Task user_typing_code_gets_completion()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -478,10 +480,10 @@ Console.".Replace("\r\n", "\n"));
     [Obsolete]
     public async Task user_typing_code_gets_signatureHelp()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -543,10 +545,10 @@ Writes the current line terminator to the standard output stream.
     [Obsolete]
     public async Task when_user_code_in_editor_is_executed_it_produces_runResult_event()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -601,10 +603,10 @@ Console.WriteLine(""{randomValue}"");".Replace("\r\n", "\n"));
     [Obsolete]
     public async Task when_user_code_in_editor_is_executed_it_produces_runResult_event_with_outputs()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");
@@ -661,10 +663,10 @@ Console.WriteLine(""{randomValue}b"");".Replace("\r\n", "\n"));
     [Obsolete]
     public async Task user_code_in_editor_is_executed()
     {
-        var page = await Playwright.Browser!.NewPageAsync();
+        var page = await NewPageAsync();
         var interceptor = new MessageInterceptor();
         await interceptor.InstallAsync(page);
-        await page.GotoAsync(TryDotNet.Url + "editor?enableLogging=true");
+        await page.GotoAsync((await Services.GetTryDotNetServerAsync()).Url + "editor?enableLogging=true");
 
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         var projectLoadedAwaiter = interceptor.AwaitForMessage("ProjectOpened");

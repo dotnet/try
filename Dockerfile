@@ -39,7 +39,6 @@ COPY --from=build-env /App/out .
 
 # Set up to run and expose app on port 80
 EXPOSE 80
-ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://*:80/
 
 # This is a workaround for the fact that the Try .NET website is not yet container-aware

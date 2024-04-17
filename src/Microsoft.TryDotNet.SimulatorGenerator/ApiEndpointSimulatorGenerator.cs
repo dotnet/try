@@ -508,7 +508,6 @@ namespace Program {
 
     private static async Task<string> ExecuteScenario(ApiContractScenario scenario)
     {
-
         await using var applicationBuilderFactory = new WebApplicationFactory<Program>();
 
         var c = applicationBuilderFactory.CreateDefaultClient();

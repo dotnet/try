@@ -18,20 +18,18 @@ variables:
   - name: _TeamName
     value: DotNetTry
   - name: _BuildConfig
-    value: Release
+    value: Debug
   - name: _PublishUsingPipelines
     value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: DotNetSdkVersion
-    value: '8.0.101'
+    value: '8.0.204'
   - name: NodeJSVersion
     value: '16.13.0'
-  - name: TryDotNetPackagesPath
-    value: $(Build.SourcesDirectory)/artifacts/.trydotnet/packages
-  - name: RunIntegrationTests
-    value: true
   - name: Codeql.Enabled
+    value: true
+  - name: system.debug
     value: true
 
 stages:
@@ -55,6 +53,12 @@ stages:
             name: NetCore1ESPool-Internal
             demands: ImageOverride -equals windows.vs2022.amd64
         variables:
+        - name: RunIntegrationTests
+          value: true
+        - name: TRYDOTNET_PREBUILDS_PATH
+          value: $(Build.SourcesDirectory)\artifacts\trydotnet-prebuilds          
+        - name: POCKETLOGGER_LOG_PATH
+          value: $(Build.SourcesDirectory)\artifacts\logs\pocketlogger.log  
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - group: DotNet-Blob-Feed
@@ -77,7 +81,6 @@ stages:
                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                    /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-                   /p:PublishToSymbolServer=true
         # else
         - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
@@ -123,9 +126,10 @@ stages:
             $(_TestArgs)
           displayName: Build
           env:
-            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
+            TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPrebuildsPath)
 
-        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig) --diag $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)/diag.txt -p:m=1
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')
@@ -138,29 +142,12 @@ stages:
           condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
         - task: PublishBuildArtifacts@1
-          displayName: Publish Test results and Blame dumps
+          displayName: Publish Windows artifacts
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-            artifactName: Windows_test_results_and_dumps
-            artifactType: container
-          condition: failed()
-
-        - task: PublishBuildArtifacts@1
-          displayName: Publish Playwright screen shots
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)\artifacts\bin\Microsoft.TryDotNet.IntegrationTests\Release\net8.0\playwright_screenshots
-            artifactName: Windows_playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/
+            artifactName: Windows_artifacts
             artifactType: container
           condition: always()
-          continueOnError: true
-
-        # Packages are not being generated
-        # - task: PublishBuildArtifacts@1
-        #   displayName: Publish packages to artifacts container
-        #   inputs:
-        #     pathToPublish: $(Build.SourcesDirectory)\artifacts\packages\$(_BuildConfig)
-        #     artifactName: packages
-        #     artifactType: container
 
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
@@ -174,6 +161,10 @@ stages:
         pool:
           vmImage: ubuntu-20.04
         variables:
+        - name: TRYDOTNET_PREBUILDS_PATH
+          value: $(Build.SourcesDirectory)/artifacts/trydotnet-prebuilds   
+        - name: POCKETLOGGER_LOG_PATH
+          value: $(Build.SourcesDirectory)/artifacts/logs/pocketlogger.log
         # Enable signing for internal, non-PR builds
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
           - name: _SignType
@@ -225,9 +216,10 @@ stages:
             $(_TestArgs)
           displayName: Build
           env:
-            TRYDOTNET_PACKAGES_PATH: $(TryDotNetPackagesPath)
+            POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
+            TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPrebuildsPath)
 
-        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
+        - script: dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c $(_BuildConfig) --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig) --diag $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)/diag.txt
           displayName: Test / Blame
           workingDirectory: $(Build.SourcesDirectory)
           condition: ne(variables['SkipTests'], 'true')
@@ -240,21 +232,12 @@ stages:
           condition: and(ne(variables['KeepDumps'], 'true'), ne(variables['SkipTests'], 'true'))
 
         - task: PublishBuildArtifacts@1
-          displayName: Publish Test results and Blame dumps
+          displayName: Publish Linux artifacts
           inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/TestResults/$(_BuildConfig)
-            artifactName: Linux_test_results_and_dumps
-            artifactType: container
-          condition: failed()
-
-        - task: PublishBuildArtifacts@1
-          displayName: Publish Playwright screen shots
-          inputs:
-            pathToPublish: $(Build.SourcesDirectory)/artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net8.0/playwright_screenshots
-            artifactName: Linux_playwright_screenshots
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/
+            artifactName: Linux_artifacts
             artifactType: container
           condition: always()
-          continueOnError: true
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #
