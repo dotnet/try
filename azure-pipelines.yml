@@ -1,3 +1,4 @@
+# azure-pipelines.yml
 parameters:
 - name: SkipTests
   displayName: Skip Tests
@@ -15,20 +16,9 @@ pr:
 - release/*
 
 variables:
-  - name: _TeamName
-    value: DotNetTry
-  - name: _BuildConfig
-    value: Debug
-  - name: _PublishUsingPipelines
-    value: true
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: DotNetSdkVersion
-    value: '8.0.204'
-  - name: NodeJSVersion
-    value: '16.13.0'
-  - name: Codeql.Enabled
-    value: true
+  - template: /eng/templates/variables-template.yml
+    parameters:
+      buildConfig: 'Debug'
   - name: system.debug
     value: true
 
