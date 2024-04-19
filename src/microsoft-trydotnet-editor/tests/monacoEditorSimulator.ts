@@ -4,6 +4,7 @@
 import * as editorAdapter from "../src/EditorAdapter";
 
 export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
+
     private _language: string;
     private _themes: { [x: string]: any; } = {};
     private _position: {
@@ -13,8 +14,13 @@ export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
 
     private _options = {};
     private _code: string;
+    private _size?: { width: number; height: number; }
 
     private _markers: editorAdapter.IMarkerData[];
+
+    layout(size?: { width: number; height: number; } | undefined): void {
+        this._size = size;
+    }
 
     setMarkers(markers: editorAdapter.IMarkerData[]) {
         this._markers = markers;

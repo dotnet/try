@@ -37,6 +37,10 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         this._editor.focus();
     }
 
+    layout(size: { width: number, height: number }): void {
+        this._editor.layout(size);
+    }
+
     private _onDidChangeModelContentEvents: rxjs.Subject<monaco.editor.IModelContentChangedEvent> = new rxjs.Subject<monaco.editor.IModelContentChangedEvent>();
 
     constructor(private _editor: monaco.editor.IStandaloneCodeEditor) {

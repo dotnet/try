@@ -3,6 +3,7 @@
 import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 export const EditorContentChangedType = "EditorContentChanged";
 export const ConfigureMonacoEditorType = "ConfigureMonacoEditor";
+export const SetMonacoEditorSizeType = "SetMonacoEditorSize";
 export const DefineMonacoEditorThemesType = "DefineMonacoEditorThemes";
 export const SetEditorContentType = "SetEditorContent";
 export const EnableLoggingType = "EnableLogging";
@@ -48,6 +49,14 @@ export interface OpenDocument {
     regionName?: string;
     editorId?: string;
     requestId: string;
+}
+
+export interface SetMonacoEditorSize {
+    type: typeof SetMonacoEditorSizeType;
+    size: {
+        width: number,
+        height: number
+    }
 }
 
 export interface CongureMonacoEditor {

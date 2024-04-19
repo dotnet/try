@@ -9,6 +9,7 @@ import { configureEmbeddableEditorIFrame, configureEmbeddableEditorIFrameWithPac
 import { Project } from "./project";
 import { Logger } from "@microsoft/polyglot-notebooks";
 import { configureLogging } from "./log";
+import { IMonacoEditor } from "./editor";
 
 async function _createSession(configuration: Configuration, editorIFrame: HTMLIFrameElement, window: Window, initialState: InitialSessionState, configureEmbeddableEditorIFrameCallBack: (editorIFrame: HTMLIFrameElement, configuration: Configuration) => void): Promise<ISession> {
 
@@ -17,6 +18,22 @@ async function _createSession(configuration: Configuration, editorIFrame: HTMLIF
 
   let messageBus = new IFrameMessageBus(editorIFrame, window);
   let session = new Session(messageBus);
+
+  // listen for size and visibility changes
+
+  const resizeObserver = new ResizeObserver((entries, _observer) => {
+    for (const entry of entries) {
+      const { width, height } = entry.contentRect;
+      let editor = <IMonacoEditor>(session.getTextEditor());
+      editor.setSize({ width, height });
+    }
+  });
+
+  resizeObserver.observe(editorIFrame);
+
+  editorIFrame.addEventListener("load", () => {
+    configureEmbeddableEditorIFrameCallBack(editorIFrame, configuration);
+  });
 
   let src = editorIFrame.getAttribute("src");
   if (!src) {

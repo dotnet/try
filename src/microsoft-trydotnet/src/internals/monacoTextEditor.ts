@@ -104,6 +104,15 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
         this.editorApimessageBus.post(request);
     }
 
+    public setSize(size: { width: number, height: number }): void {
+        const request: newContract.SetMonacoEditorSize = {
+            type: newContract.SetMonacoEditorSizeType,
+            size: size
+        };
+
+        this.editorApimessageBus.post(request);
+    }
+
     public configure(configuration: MonacoEditorConfiguration): void {
         this.setOptions(configuration.options);
         this.setTheme(configuration.theme);
