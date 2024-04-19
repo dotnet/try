@@ -17,8 +17,6 @@ pr:
 
 variables:
   - template: /eng/templates/variables-template.yml@self
-    parameters:
-      buildConfig: 'Debug'
   - name: system.debug
     value: true
   - name: additionalWindowsArgs

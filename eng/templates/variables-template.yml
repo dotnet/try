@@ -1,13 +1,10 @@
 # variables-template.yml
-parameters:
-- name: buildConfig
-  default: 'Release'
 
 variables:
   - name: _TeamName
     value: DotNetTry
   - name: _BuildConfig
-    value: ${{ parameters.buildConfig }}
+    value: Release
   - name: _PublishUsingPipelines
     value: true
   - name: _DotNetArtifactsCategory

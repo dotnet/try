@@ -25,8 +25,6 @@ resources:
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self
 - template: /eng/templates/variables-template.yml@self
-  parameters:
-    buildConfig: 'Release'
 - name: additionalWindowsArgs
   value: ''
 - name: additionalLinuxArgs
