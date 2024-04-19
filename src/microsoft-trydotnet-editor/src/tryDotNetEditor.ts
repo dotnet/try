@@ -126,6 +126,10 @@ export class TryDotNetEditor {
       case newContract.EnableLoggingType:
         configureLogging({ enableLogging: apiMessage.enableLogging });
         break;
+      case newContract.SetMonacoEditorSizeType:
+        let size = (<newContract.SetMonacoEditorSize>apiMessage).size;
+        this.getEditor().layout(size);
+        break;
       case newContract.ConfigureMonacoEditorType:
         let options = {};
         if (apiMessage.editorOptions) {
