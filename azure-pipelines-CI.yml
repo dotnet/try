@@ -24,7 +24,7 @@ resources:
 
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self
-- template: /eng/templates/variables-template.yml
+- template: /eng/templates/variables-template.yml@self
   parameters:
     buildConfig: 'Release'
 - name: additionalWindowsArgs
@@ -117,13 +117,12 @@ extends:
               - name: _BuildArgs
                 value: /p:SignType=$(_SignType)
             steps:
-            - template: /eng/templates/build-and-test-job-windows-templates.yml
+            - template: /eng/templates/build-and-test-job-windows-templates.yml@self
               parameters:
                 buildConfig: $(_BuildConfig)
                 skipTests: $(SkipTests)
                 buildArgs: $(_BuildArgs)
                 additionalArgs: $(additionalWindowsArgs)
-                publishArtifacts: false
 
       - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
@@ -169,12 +168,11 @@ extends:
               - name: _BuildArgs
                 value: /p:SignType=$(_SignType)
             steps:
-            - template: /eng/templates/build-and-test-job-linux-templates.yml
+            - template: /eng/templates/build-and-test-job-linux-templates.yml@self
           parameters:
             buildConfig: $(_BuildConfig)
             skipTests: $(SkipTests)
             additionalArgs: $(additionalLinuxArgs)
-            publishArtifacts: false
 
     #---------------------------------------------------------------------------------------------------------------------#
     #                                                    Post Build                                                       #

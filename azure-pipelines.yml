@@ -16,7 +16,7 @@ pr:
 - release/*
 
 variables:
-  - template: /eng/templates/variables-template.yml
+  - template: /eng/templates/variables-template.yml@self
     parameters:
       buildConfig: 'Debug'
   - name: system.debug
@@ -82,13 +82,20 @@ stages:
           - name: _BuildArgs
             value: /p:SignType=$(_SignType)
         steps:
-        - template: /eng/templates/build-and-test-job-windows-templates.yml
+        - template: /eng/templates/build-and-test-job-windows-templates.yml@self
           parameters:
             buildConfig: $(_BuildConfig)
             skipTests: $(SkipTests)
             buildArgs: $(_BuildArgs)
             additionalArgs: $(additionalWindowsArgs)
-            publishArtifacts: true
+
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Windows artifacts
+          inputs:
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/
+            artifactName: Windows_artifacts
+            artifactType: container
+          condition: always()
 
   - template: /eng/common/templates/jobs/jobs.yml
     parameters:
@@ -123,12 +130,19 @@ stages:
           - name: _BuildArgs
             value: /p:SignType=$(_SignType)
         steps:
-        - template: /eng/templates/build-and-test-job-linux-templates.yml
+        - template: /eng/templates/build-and-test-job-linux-templates.yml@self
           parameters:
             buildConfig: $(_BuildConfig)
             skipTests: $(SkipTests)
             additionalArgs: $(additionalLinuxArgs)
-            publishArtifacts: true
+
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Linux artifacts
+          inputs:
+            pathToPublish: $(Build.SourcesDirectory)/artifacts/
+            artifactName: Linux_artifacts
+            artifactType: container
+          condition: always()
 
 #---------------------------------------------------------------------------------------------------------------------#
 #                                                    Post Build                                                       #

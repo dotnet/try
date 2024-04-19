@@ -3,11 +3,10 @@ parameters:
   buildConfig: 'Release'
   buildArgs: ''
   skipTests: false
-  publishArtifacts: false
-  enableDiagnosticsAndParallelism: false
   additionalArgs: ''       # Additional arguments to pass to the test command
+
 steps:
-- template: setup-template.yml
+- template: /eng/templates/setup-template.yml@self
 
 - script: |
     mkdir -p "$(Build.SourcesDirectory)/artifacts"
@@ -40,11 +39,3 @@ steps:
   displayName: Delete dump files
   workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/${{ parameters.buildConfig }}
   condition: and(ne(variables['KeepDumps'], 'true'), ne('${{ parameters.skipTests }}', 'true'))
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish Linux artifacts
-  inputs:
-    pathToPublish: $(Build.SourcesDirectory)/artifacts/
-    artifactName: Linux_artifacts
-    artifactType: container
-  condition: ${{ parameters.publishArtifacts }}

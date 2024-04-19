@@ -3,11 +3,10 @@ parameters:
   buildConfig: 'Release'   # Pass build configuration as a parameter
   buildArgs: ''            # Pass additional arguments to the build script
   skipTests: false         # Default is not skipping tests
-  publishArtifacts: false  # Default is to publish artifacts
   additionalArgs: ''       # Additional arguments to pass to the test command
 
 steps:
-- template: setup-template.yml
+- template: /eng/templates/setup-template.yml@self
 
 - script: |
     robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
@@ -44,11 +43,3 @@ steps:
   displayName: Delete dump files
   workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/${{ parameters.buildConfig }}
   condition: and(ne(variables['KeepDumps'], 'true'), ne('${{ parameters.skipTests }}', 'true'))
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish Windows artifacts
-  inputs:
-    pathToPublish: $(Build.SourcesDirectory)/artifacts/
-    artifactName: Windows_artifacts
-    artifactType: container
-  condition: ${{ parameters.publishArtifacts }}
