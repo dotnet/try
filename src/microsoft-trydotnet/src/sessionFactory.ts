@@ -20,16 +20,19 @@ async function _createSession(configuration: Configuration, editorIFrame: HTMLIF
   let session = new Session(messageBus);
 
   // listen for size and visibility changes
+  try {
+    const resizeObserver = new ResizeObserver((entries, _observer) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        let editor = <IMonacoEditor>(session.getTextEditor());
+        editor.setSize({ width, height });
+      }
+    });
 
-  const resizeObserver = new ResizeObserver((entries, _observer) => {
-    for (const entry of entries) {
-      const { width, height } = entry.contentRect;
-      let editor = <IMonacoEditor>(session.getTextEditor());
-      editor.setSize({ width, height });
-    }
-  });
-
-  resizeObserver.observe(editorIFrame);
+    resizeObserver.observe(editorIFrame);
+  } catch (e) {
+    Logger.default.error("Error creating ResizeObserver");
+  }
 
   editorIFrame.addEventListener("load", () => {
     configureEmbeddableEditorIFrameCallBack(editorIFrame, configuration);
