@@ -1,0 +1,19 @@
+# setup-template.yml
+steps:
+- script: git config --global core.longpaths true
+  displayName: Enable `git clean` to handle long paths
+
+- checkout: self
+  clean: true
+
+- task: NodeTool@0
+  displayName: Add NodeJS/npm
+  inputs:
+    versionSpec: $(NodeJSVersion)
+
+- task: UseDotNet@2
+  displayName: Add dotnet
+  inputs:
+    packageType: sdk
+    version: $(DotNetSdkVersion)
+    installationPath: $(Agent.ToolsDirectory)/dotnet
