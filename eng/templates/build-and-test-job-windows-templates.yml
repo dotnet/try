@@ -20,7 +20,7 @@ steps:
     Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
   displayName: Promote variables
 
-- script: eng\CIBuild.cmd
+- script: $(Build.SourcesDirectory)\eng\CIBuild.cmd
     -configuration ${{ parameters.buildConfig }}
     -prepareMachine
     -sign
