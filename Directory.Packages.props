@@ -16,7 +16,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="peaky.client" Version="4.0.79" />
     <PackageVersion Include="peaky.xunit" Version="4.0.79" />
-    <PackageVersion Include="Peaky" Version="4.0.79-beta" />
+    <PackageVersion Include="Peaky" Version="4.0.81-beta" />
     <PackageVersion Include="Pocket.Disposable" Version="1.2.0" />
     <PackageVersion Include="PocketLogger.For.Xunit" Version="0.9.0" />
     <PackageVersion Include="PocketLogger.Subscribe" Version="0.9.0" />
