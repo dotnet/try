@@ -1,0 +1,10 @@
+# delete-dump-files-template.yml
+parameters:
+  buildConfig: ''
+  skipTests: false
+
+steps:
+- pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
+  displayName: Delete dump files
+  workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/${{ parameters.buildConfig }}
+  condition: and(ne(variables['KeepDumps'], 'true'), ne('${{ parameters.skipTests }}', 'true'))

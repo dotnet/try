@@ -39,7 +39,7 @@ steps:
   env:
     RunIntegrationTests: $(RunIntegrationTests)
 
-- pwsh: Get-ChildItem *.dmp -Recurse | Remove-Item
-  displayName: Delete dump files
-  workingDirectory: $(Build.SourcesDirectory)/artifacts/TestResults/${{ parameters.buildConfig }}
-  condition: and(ne(variables['KeepDumps'], 'true'), ne('${{ parameters.skipTests }}', 'true'))
+- template: /eng/templates/delete-dump-files-template.yml@self
+  parameters:
+    buildConfig: ${{ parameters.buildConfig }}
+    skipTests: ${{ parameters.skipTests }}
