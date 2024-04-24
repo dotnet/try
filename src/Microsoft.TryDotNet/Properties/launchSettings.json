@@ -12,7 +12,7 @@
     "TryDotNet-Development": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "editor",
+      "launchUrl": "tests",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

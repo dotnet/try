@@ -11,13 +11,13 @@ using Peaky;
 
 namespace Microsoft.TryDotNet.PeakyTests;
 
-public class ExternalTests : IPeakyTest, IApplyToApplication, IHaveTags
+internal class OutsideInTests : IPeakyTest, IApplyToApplication, IHaveTags
 {
     private readonly HttpClientWithTelemetry _httpClient;
     private readonly HttpClientWithXsrfCookies _httpClientWithXsrfCookies;
     private readonly TestTarget _testTarget;
 
-    public ExternalTests(
+    public OutsideInTests(
         HttpClientWithTelemetry httpClient,
         HttpClientWithXsrfCookies httpClientWithXsrfCookies,
         TestTarget testTarget)
@@ -27,7 +27,7 @@ public class ExternalTests : IPeakyTest, IApplyToApplication, IHaveTags
         _testTarget = testTarget;
     }
 
-    public string[] Tags => new[] { "deployment" };
+    public string[] Tags => ["deployment"];
     
     public async Task<string> Version_sensor_returns_200()
     {
