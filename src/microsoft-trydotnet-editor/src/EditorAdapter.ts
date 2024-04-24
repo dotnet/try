@@ -34,6 +34,8 @@ export abstract class EditorAdapter {
     abstract setPosition(position: { line: number, column: number }): void;
     abstract updateOptions(options: any): void;
     abstract focus(): void;
+    abstract layout(size: { width: number, height: number }): void;
+
 
     private _diagnostics: polyglotNotebooks.Diagnostic[] = [];
     abstract setMarkers(markers: IMarkerData[]);

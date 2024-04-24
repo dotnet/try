@@ -18,6 +18,9 @@ export class FakeMonacoTextEditor implements ITrydotnetMonacoTextEditor {
             this.editorId = "0";
         }
     }
+    setSize(size: { width: number; height: number; }): void {
+
+    }
 
     public id(): string {
         return this.editorId;

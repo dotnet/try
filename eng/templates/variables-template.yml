@@ -1,0 +1,17 @@
+# variables-template.yml
+
+variables:
+  - name: _TeamName
+    value: DotNetTry
+  - name: _BuildConfig
+    value: Release
+  - name: _PublishUsingPipelines
+    value: true
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: DotNetSdkVersion
+    value: '8.0.204'
+  - name: NodeJSVersion
+    value: '16.13.0'
+  - name: Codeql.Enabled
+    value: true

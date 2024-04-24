@@ -38,4 +38,5 @@ export interface IMonacoEditor extends ITextEditor {
     setTheme(theme: Theme): void;
     setOptions(options: MonacoEditorOptions): void;
     configure(configuration: MonacoEditorConfiguration): void;
+    setSize(size: { width: number, height: number }): void;
 }
