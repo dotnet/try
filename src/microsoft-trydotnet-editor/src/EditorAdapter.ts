@@ -42,6 +42,7 @@ export abstract class EditorAdapter {
 
     displayDiagnostics(diagnostics: polyglotNotebooks.Diagnostic[]) {
         const markers: IMarkerData[] = [];
+
         for (const diagnostic of diagnostics) {
             let severity = MarkerSeverity.Info;
 

@@ -76,10 +76,10 @@ public class CommandExecutionTests : IDisposable
 
         var responseJson = JsonDocument.Parse(await response.Content.ReadAsStringAsync(CancellationToken.None)).RootElement;
 
-        var events = responseJson.GetProperty("events").EnumerateArray().Select(KernelEventEnvelope.Deserialize).Select(ee=>ee.Event).ToList();
+        var events = responseJson.GetProperty("events").EnumerateArray().Select(KernelEventEnvelope.Deserialize).Select(ee => ee.Event).ToList();
 
         using var _ = new AssertionScope();
-        
+
         response.EnsureSuccessStatusCode();
 
         var assemblyProduced = events.OfType<AssemblyProduced>().SingleOrDefault();

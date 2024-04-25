@@ -16,6 +16,8 @@ public class HostOriginPolicies
 
     static HostOriginPolicies()
     {
+        // FIX: (HostOriginPolicies) clean up
+
         var productionPolicies = new Dictionary<string, HostOriginPolicy>
         {
             // Microsoft
