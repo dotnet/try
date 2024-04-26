@@ -41,11 +41,11 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
         this._editor.layout(size);
     }
 
-    private _onDidChangeModelContentEvents: rxjs.Subject<monaco.editor.IModelContentChangedEvent> = new rxjs.Subject<monaco.editor.IModelContentChangedEvent>();
+    private _onDidChangeModelContentEvents: rxjs.Subject<monaco.editor.IModelContentChangedEvent>;
 
     constructor(private _editor: monaco.editor.IStandaloneCodeEditor) {
         super();
-
+        this._onDidChangeModelContentEvents = new rxjs.Subject<monaco.editor.IModelContentChangedEvent>();
         this._editor.onDidChangeModelContent(e => {
             this._onDidChangeModelContentEvents.next(e);
         });
@@ -223,3 +223,4 @@ function mapToCompletionItemKind(kind: string): monaco.languages.CompletionItemK
             return monaco.languages.CompletionItemKind.Variable;
     }
 }
+

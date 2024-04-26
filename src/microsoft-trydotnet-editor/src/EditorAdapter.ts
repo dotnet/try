@@ -80,7 +80,8 @@ export abstract class EditorAdapter {
 
     constructor() {
         const handler = this.handleContentChanged.bind(this);
-        this._editorChanges.subscribe({
+        // debounce editor events
+        this._editorChanges.pipe(rxjs.debounce(() => rxjs.interval(500))).subscribe({
             next: handler
         });
 
