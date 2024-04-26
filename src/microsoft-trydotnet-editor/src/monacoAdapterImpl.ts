@@ -50,7 +50,7 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
             this._onDidChangeModelContentEvents.next(e);
         });
 
-        this._onDidChangeModelContentEvents.pipe(rxjs.debounce(() => rxjs.interval(500))).subscribe({
+        this._onDidChangeModelContentEvents.pipe(rxjs.debounceTime(500)).subscribe({
             next: async (_contentChanged) => {
                 const code = this._editor.getValue();
                 const position = this._editor.getPosition() ?? { lineNumber: 1, column: 1 };
