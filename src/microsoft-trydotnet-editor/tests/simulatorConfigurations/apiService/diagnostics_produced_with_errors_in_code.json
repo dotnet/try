@@ -4,7 +4,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -18,7 +17,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -39,7 +39,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -50,18 +49,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -72,11 +79,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     },
@@ -84,7 +98,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -98,11 +111,11 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenDocument",
           "command": {
             "relativeFilePath": "./Program.cs",
@@ -110,7 +123,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -131,7 +145,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -142,18 +155,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -164,11 +185,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -179,32 +207,46 @@
           "eventType": "DocumentOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     },
@@ -212,7 +254,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -226,11 +267,11 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenDocument",
           "command": {
             "relativeFilePath": "./Program.cs",
@@ -238,18 +279,19 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "RequestDiagnostics",
           "command": {
             "code": "someInt = \"NaN\";",
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -270,7 +312,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -281,18 +322,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -303,11 +352,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -318,32 +374,46 @@
           "eventType": "DocumentOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "test-region",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -374,36 +444,6 @@
                     "character": 16
                   }
                 },
-                "severity": "hidden",
-                "code": "CS8933",
-                "message": "The using directive for 'System' appeared previously as global using"
-              },
-              {
-                "linePositionSpan": {
-                  "start": {
-                    "line": 0,
-                    "character": 16
-                  },
-                  "end": {
-                    "line": 0,
-                    "character": 16
-                  }
-                },
-                "severity": "hidden",
-                "code": "CS8933",
-                "message": "The using directive for 'System' appeared previously as global using"
-              },
-              {
-                "linePositionSpan": {
-                  "start": {
-                    "line": 0,
-                    "character": 16
-                  },
-                  "end": {
-                    "line": 0,
-                    "character": 16
-                  }
-                },
                 "severity": "error",
                 "code": "CS0029",
                 "message": "Cannot implicitly convert type 'string' to 'int'"
@@ -414,30 +454,44 @@
           "eventType": "DiagnosticsProduced",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "RequestDiagnostics",
             "command": {
               "code": "someInt = \"NaN\";",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "RequestDiagnostics",
             "command": {
               "code": "someInt = \"NaN\";",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     }
