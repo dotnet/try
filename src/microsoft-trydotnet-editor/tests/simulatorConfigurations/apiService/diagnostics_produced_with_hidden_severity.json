@@ -10,7 +10,7 @@
               "files": [
                 {
                   "relativeFilePath": "./Program.cs",
-                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                 }
               ]
             },
@@ -45,7 +45,7 @@
                 "files": [
                   {
                     "relativeFilePath": "./Program.cs",
-                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                   }
                 ]
               },
@@ -75,7 +75,7 @@
                 "files": [
                   {
                     "relativeFilePath": "./Program.cs",
-                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                   }
                 ]
               },
@@ -104,7 +104,7 @@
               "files": [
                 {
                   "relativeFilePath": "./Program.cs",
-                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                 }
               ]
             },
@@ -151,7 +151,7 @@
                 "files": [
                   {
                     "relativeFilePath": "./Program.cs",
-                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                   }
                 ]
               },
@@ -181,7 +181,7 @@
                 "files": [
                   {
                     "relativeFilePath": "./Program.cs",
-                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                   }
                 ]
               },
@@ -260,7 +260,7 @@
               "files": [
                 {
                   "relativeFilePath": "./Program.cs",
-                  "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                  "content": "\nusing System.Linq;\nusing System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                 }
               ]
             },
@@ -284,19 +284,9 @@
         },
         {
           "token": "command-token",
-          "commandType": "SubmitCode",
+          "commandType": "RequestDiagnostics",
           "command": {
-            "code": "System.Console.WriteLine(2);",
-            "targetKernelName": null,
-            "originUri": null,
-            "destinationUri": null
-          },
-          "routingSlip": []
-        },
-        {
-          "token": "command-token",
-          "commandType": "CompileProject",
-          "command": {
+            "code": "someInt = 4;",
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
@@ -328,7 +318,7 @@
                 "files": [
                   {
                     "relativeFilePath": "./Program.cs",
-                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                    "content": "\nusing System.Linq;\nusing System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                   }
                 ]
               },
@@ -358,7 +348,7 @@
                 "files": [
                   {
                     "relativeFilePath": "./Program.cs",
-                    "content": "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        #region test-region\n        #endregion\n    }\n}\n"
+                    "content": "\nusing System.Linq;\nusing System;\n\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
                   }
                 ]
               },
@@ -427,61 +417,31 @@
         },
         {
           "event": {
-            "executionOrder": 0
-          },
-          "eventType": "CommandSucceeded",
-          "command": {
-            "token": "command-token",
-            "commandType": "SubmitCode",
-            "command": {
-              "code": "System.Console.WriteLine(2);",
-              "targetKernelName": "csharp.console",
-              "originUri": null,
-              "destinationUri": null
-            },
-            "routingSlip": [
-              "kernel://local/csharp.console?tag=arrived",
-              "kernel://local/csharp.console"
-            ]
-          },
-          "routingSlip": [
-            "kernel://local/csharp.console"
-          ]
-        },
-        {
-          "event": {
-            "diagnostics": [],
+            "diagnostics": [
+              {
+                "linePositionSpan": {
+                  "start": {
+                    "line": 0,
+                    "character": 12
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 12
+                  }
+                },
+                "severity": "hidden",
+                "code": "CS0219",
+                "message": "The variable 'someInt' is assigned but its value is never used"
+              }
+            ],
             "formattedDiagnostics": []
           },
           "eventType": "DiagnosticsProduced",
           "command": {
             "token": "command-token",
-            "commandType": "CompileProject",
+            "commandType": "RequestDiagnostics",
             "command": {
-              "targetKernelName": "csharp.console",
-              "originUri": null,
-              "destinationUri": null
-            },
-            "routingSlip": [
-              "kernel://local/csharp.console?tag=arrived",
-              "kernel://local/csharp.console"
-            ]
-          },
-          "routingSlip": [
-            "kernel://local/csharp.console"
-          ]
-        },
-        {
-          "event": {
-            "assembly": {
-              "value": "AABBCC"
-            }
-          },
-          "eventType": "AssemblyProduced",
-          "command": {
-            "token": "command-token",
-            "commandType": "CompileProject",
-            "command": {
+              "code": "someInt = 4;",
               "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
@@ -502,8 +462,9 @@
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "commandType": "CompileProject",
+            "commandType": "RequestDiagnostics",
             "command": {
+              "code": "someInt = 4;",
               "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null

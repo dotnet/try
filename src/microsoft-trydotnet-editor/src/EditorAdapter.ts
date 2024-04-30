@@ -46,6 +46,10 @@ export abstract class EditorAdapter {
         for (const diagnostic of diagnostics) {
             let severity = MarkerSeverity.Info;
 
+            if (diagnostic.severity === 'hidden') {
+                continue;
+            }
+
             switch (diagnostic.severity) {
                 case 'error':
                     severity = MarkerSeverity.Error;
@@ -56,7 +60,6 @@ export abstract class EditorAdapter {
                 case 'info':
                     severity = MarkerSeverity.Info;
                     break;
-
             }
 
             // interactive diagnostics are 0-based, monaco is 1-based

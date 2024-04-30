@@ -412,6 +412,70 @@ public class Program
             );
 
             yield return new ApiContractScenario(
+                "diagnostics_produced_with_hidden_severity",
+                new[]
+                {
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        int someInt = 1;
+        #region test-region
+        #endregion
+    }
+}
+")
+                        }))
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        int someInt = 1;
+        #region test-region
+        #endregion
+    }
+}
+")
+                        })),
+                        new OpenDocument("Program.cs", regionName: "test-region")
+                    },
+                    new KernelCommand[]
+                    {
+                        new OpenProject(new Project(new[]
+                        {
+                            new ProjectFile("Program.cs", @"
+using System.Linq;
+using System;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        int someInt = 1;
+        #region test-region
+        #endregion
+    }
+}
+")
+                        })),
+                        new OpenDocument("Program.cs", regionName: "test-region"),
+                        new RequestDiagnostics("someInt = 4;")
+                    }
+                }
+            );
+
+            yield return new ApiContractScenario(
                 "update_project",
                 new[]
                 {

@@ -4,7 +4,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -18,7 +17,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -41,7 +41,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -52,18 +51,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -74,11 +81,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     },
@@ -86,7 +100,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -100,11 +113,11 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenDocument",
           "command": {
             "relativeFilePath": "./Program.cs",
@@ -112,7 +125,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -135,7 +149,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -146,18 +159,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -168,11 +189,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -183,32 +211,46 @@
           "eventType": "DocumentOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "REGION_2",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "REGION_2",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     }
