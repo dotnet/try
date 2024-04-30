@@ -180,7 +180,6 @@ export class TryDotNetEditor {
             message.regionName = documentOpened.regionName;
           }
           this._postMessage(message);
-
         }
         break;
       case messages.FOCUS_EDITOR_REQUEST:
@@ -240,14 +239,21 @@ export class TryDotNetEditor {
             };
 
             try {
+
+              const stdOutEvents = events
+                .filter(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType)
+                .map(e => (<polyglotNotebooks.StandardOutputValueProduced>e.event));
+
+              const diagnosticsEvents = events
+                .filter(e => e.eventType === polyglotNotebooks.DiagnosticsProducedType)
+                .map(e => (<polyglotNotebooks.DiagnosticsProduced>e.event));
+
+              response.output = [stdOutEvents.map(e => e.formattedValues[0].value).join('')];
+
               if (event.eventType === polyglotNotebooks.CommandFailedType) {
                 response.exception = (<polyglotNotebooks.CommandFailed>event.event).message;
+                response.output.push([...diagnosticsEvents.map(e => e.formattedDiagnostics)]);
               }
-              const stdOutEvents = events.filter(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType).map(e => (<polyglotNotebooks.StandardOutputValueProduced>e.event));
-
-              response.output = stdOutEvents.map(e => e.formattedValues[0].value);
-
-              const diagnosticsEvents = events.filter(e => e.eventType === polyglotNotebooks.DiagnosticsProducedType).map(e => (<polyglotNotebooks.DiagnosticsProduced>e.event));
 
               response.diagnostics = [];
               for (let diagnosticsEvent of diagnosticsEvents) {

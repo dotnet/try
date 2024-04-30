@@ -13,7 +13,7 @@ enum executionServiceStates {
     ready,
     running
 }
-export class executionService implements Subscribable<OutputEvent>{
+export class executionService implements Subscribable<OutputEvent> {
     private state: executionServiceStates = executionServiceStates.ready;
     private outputEventChannel: Subject<OutputEvent> = new Subject<OutputEvent>();
     private currentRun: { requestId: string, request: Promise<RunResult> };
