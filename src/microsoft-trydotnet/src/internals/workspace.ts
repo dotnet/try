@@ -92,8 +92,8 @@ export class Workspace {
                 requestId: requestId,
                 project: prjr.project,
             }
-            let messageBus = this.projectApiMessageBus;
 
+            let messageBus = this.projectApiMessageBus;
 
             let projectOpenedPromise = responseFor<newContract.ProjectOpened>(messageBus, polyglotNotebooks.ProjectOpenedType, requestId, response => {
 
@@ -181,7 +181,6 @@ export class Workspace {
         if (document) {
             this._currentOpenDocument = document;
         }
-
 
         return document;
     }
