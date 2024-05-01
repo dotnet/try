@@ -259,6 +259,9 @@ export class TryDotNetEditor {
                   });
                 }
               }
+              if (response.exception.length === 0) {
+                response.exception = null;
+              }
             }
             finally {
               this._postMessage(response);
