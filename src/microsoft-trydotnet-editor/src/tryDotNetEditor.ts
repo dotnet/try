@@ -240,9 +240,7 @@ export class TryDotNetEditor {
             };
 
             try {
-              if (event.eventType === polyglotNotebooks.CommandFailedType) {
-                response.exception = (<polyglotNotebooks.CommandFailed>event.event).message;
-              }
+              response.exception = [];
               const stdOutEvents = events.filter(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType).map(e => (<polyglotNotebooks.StandardOutputValueProduced>e.event));
 
               response.output = stdOutEvents.map(e => e.formattedValues[0].value);
@@ -252,6 +250,7 @@ export class TryDotNetEditor {
               response.diagnostics = [];
               for (let diagnosticsEvent of diagnosticsEvents) {
                 for (let diagnostic of diagnosticsEvent.diagnostics) {
+                  response.exception.push(diagnostic.message);
                   response.diagnostics.push({
                     start: diagnostic.linePositionSpan.start,
                     end: diagnostic.linePositionSpan.end,
@@ -271,9 +270,7 @@ export class TryDotNetEditor {
           }
           break;
         default:
-          if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
-            events.push(event);
-          }
+          events.push(event);
           break;
       }
     });
