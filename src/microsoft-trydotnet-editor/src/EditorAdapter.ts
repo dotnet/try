@@ -3,7 +3,7 @@
 
 import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 import * as rxjs from 'rxjs';
-import { DebouncingKernel } from './decouncingKernel';
+import { DebouncingKernel } from './debouncingKernel';
 
 export enum MarkerSeverity {
     Hint = 1,

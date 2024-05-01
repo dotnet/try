@@ -177,11 +177,6 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
   private forwardEvents(eventEnvelopes: Array<polyglotNotebooks.KernelEventEnvelope>, rootCommand: polyglotNotebooks.KernelCommandEnvelope, invocationContext: polyglotNotebooks.KernelInvocationContext) {
     for (let eventEnvelope of eventEnvelopes) {
       const eventType = eventEnvelope.eventType;
-      const eventCommandType = eventEnvelope.command.commandType;
-      const eventCommandToken = eventEnvelope.command.getOrCreateToken();
-
-      const rootCommandType = rootCommand.commandType;
-      const rootCommandToken = rootCommand.getOrCreateToken();
 
       if (eventType === polyglotNotebooks.CommandFailedType) {
         polyglotNotebooks.Logger.default.error(`[ProjectKernelWithWASMRunner] command failed: ${JSON.stringify(eventEnvelope)}`);
@@ -190,7 +185,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       else if (eventType === polyglotNotebooks.CommandSucceededType) {
         continue;
       }
-      else if (eventCommandType === rootCommandType) {
+      else {
         // todo: do we need processing this?
         const event = polyglotNotebooks.KernelEventEnvelope.fromJson({
           ...eventEnvelope.toJson

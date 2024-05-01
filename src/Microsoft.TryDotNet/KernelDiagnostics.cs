@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using Microsoft.DotNet.Interactive;
+using Microsoft.DotNet.Interactive.Formatting;
 using Pocket;
 
 namespace Microsoft.TryDotNet;
@@ -34,9 +35,10 @@ internal static class KernelDiagnostics
             disposables.Add(
                 k.KernelEvents.Subscribe(e =>
                 {
-                    Logger.Log.Info("{kernel}: {event}",
-                                    k.Name,
-                                    e);
+                    Logger.Log.Info("{kernel}: {event} ({details})",
+                                        k.Name,
+                                        e,
+                                        e.ToDisplayString("text/plain"));
                 }));
         });
 

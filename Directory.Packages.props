@@ -11,12 +11,12 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.3" />
-    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24224.2" />
+    <PackageVersion Include="Microsoft.DotNet.Interactive.CSharpProject" Version="1.0.0-beta.24229.3" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.42.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="peaky.client" Version="4.0.79" />
     <PackageVersion Include="peaky.xunit" Version="4.0.79" />
-    <PackageVersion Include="Peaky" Version="4.0.81-beta" />
+    <PackageVersion Include="Peaky" Version="4.0.83-beta" />
     <PackageVersion Include="Pocket.Disposable" Version="1.2.0" />
     <PackageVersion Include="PocketLogger.For.Xunit" Version="0.9.0" />
     <PackageVersion Include="PocketLogger.Subscribe" Version="0.9.0" />

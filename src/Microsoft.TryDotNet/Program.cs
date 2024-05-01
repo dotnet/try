@@ -56,11 +56,6 @@ public class Program
 
         _consolePrebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);
 
-        builder.Services.AddTransient<ITestPageRenderer>(provider =>
-        {
-            return new PeakyTestPageRenderer(provider);
-        });
-
         switch (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
         {
             case "Development":
