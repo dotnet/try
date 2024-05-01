@@ -190,7 +190,7 @@ export class ProjectKernelWithWASMRunner extends projectKernel.ProjectKernel {
       else if (eventType === polyglotNotebooks.CommandSucceededType) {
         continue;
       }
-      else if (eventCommandType === rootCommandType) {
+      else {
         // todo: do we need processing this?
         const event = polyglotNotebooks.KernelEventEnvelope.fromJson({
           ...eventEnvelope.toJson
