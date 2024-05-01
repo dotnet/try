@@ -21,7 +21,7 @@ class CommandOperation {
 
 export class DebouncingKernel {
 
-    private _langiageServicesCommandOperation: CommandOperation = null;
+    private _languageServicesCommandOperation: CommandOperation = null;
     private _commandOperations: CommandOperation[] = [];
     private _running: boolean = false;
 
@@ -49,22 +49,22 @@ export class DebouncingKernel {
             case polyglotNotebooks.RequestCompletionsType:
             case polyglotNotebooks.RequestHoverTextType:
             case polyglotNotebooks.RequestSignatureHelpType:
-                this._langiageServicesCommandOperation?.cancel();
-                this._langiageServicesCommandOperation = newOperation;
+                this._languageServicesCommandOperation?.cancel();
+                this._languageServicesCommandOperation = newOperation;
                 break;
             case polyglotNotebooks.RequestDiagnosticsType:
-                if (this._langiageServicesCommandOperation) {
-                    switch (this._langiageServicesCommandOperation.kernelCommandEnvelope.commandType) {
+                if (this._languageServicesCommandOperation) {
+                    switch (this._languageServicesCommandOperation.kernelCommandEnvelope.commandType) {
                         case polyglotNotebooks.RequestDiagnosticsType:
-                            this._langiageServicesCommandOperation?.cancel();
-                            this._langiageServicesCommandOperation = newOperation;
+                            this._languageServicesCommandOperation?.cancel();
+                            this._languageServicesCommandOperation = newOperation;
                             break;
                         default:
                             this._commandOperations.push(newOperation);
                             break;
                     }
                 } else {
-                    this._langiageServicesCommandOperation = newOperation;
+                    this._languageServicesCommandOperation = newOperation;
                 }
                 break;
             default:
@@ -81,11 +81,11 @@ export class DebouncingKernel {
     async executionLoop() {
         this._running = true;
 
-        while (this._langiageServicesCommandOperation || this._commandOperations.length > 0) {
+        while (this._languageServicesCommandOperation || this._commandOperations.length > 0) {
             {
-                if (this._langiageServicesCommandOperation) {
-                    const local = this._langiageServicesCommandOperation;
-                    this._langiageServicesCommandOperation = null;
+                if (this._languageServicesCommandOperation) {
+                    const local = this._languageServicesCommandOperation;
+                    this._languageServicesCommandOperation = null;
                     await this._kernel.send(local.kernelCommandEnvelope).then(() => {
                         local.complete();
                     }).catch(r => local.completionSource.reject(r));

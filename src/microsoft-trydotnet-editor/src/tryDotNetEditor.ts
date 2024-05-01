@@ -9,7 +9,7 @@ import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 import * as newContract from './newContract';
 import { DocumentId } from './documentId';
 import { configureLogging } from './log';
-import { DebouncingKernel } from './decouncingKernel';
+import { DebouncingKernel } from './debouncingKernel';
 
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
@@ -252,7 +252,7 @@ export class TryDotNetEditor {
 
               if (event.eventType === polyglotNotebooks.CommandFailedType) {
                 response.exception = (<polyglotNotebooks.CommandFailed>event.event).message;
-                response.output.push([...diagnosticsEvents.map(e => e.formattedDiagnostics)]);
+                response.output.push(...(diagnosticsEvents.flatMap(e => e.formattedDiagnostics.flatMap(d => d.value))));
               }
 
               response.diagnostics = [];
