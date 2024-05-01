@@ -656,7 +656,7 @@ Console.WriteLine(""{randomValue}b"");".Replace("\r\n", "\n"));
             .GetProperty("output")
             .GetRawText()
             .Should()
-            .Contain($"[\"{randomValue}\\n\",\"{randomValue}a\\n\",\"{randomValue}b\\n\"]");
+            .Contain($"{randomValue}\\n{randomValue}a\\n{randomValue}b\\n");
     }
 
     [IntegrationTestFact]
