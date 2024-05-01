@@ -254,7 +254,9 @@ export class TryDotNetEditor {
               response.diagnostics = [];
               for (let diagnosticsEvent of diagnosticsEvents) {
                 for (let diagnostic of diagnosticsEvent.diagnostics) {
-                  response.exception.push(diagnostic.message);
+                  if (diagnostic.severity !== polyglotNotebooks.DiagnosticSeverity.Hidden) {
+                    response.exception.push(diagnostic.message);
+                  }
                   response.diagnostics.push({
                     start: diagnostic.linePositionSpan.start,
                     end: diagnostic.linePositionSpan.end,
