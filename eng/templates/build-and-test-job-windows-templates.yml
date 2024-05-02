@@ -1,0 +1,45 @@
+# build-and-test-job-windows-template.yml
+parameters:
+  buildConfig: 'Release'   # Pass build configuration as a parameter
+  buildArgs: ''            # Pass additional arguments to the build script
+  skipTests: false         # Default is not skipping tests
+  additionalArgs: ''       # Additional arguments to pass to the test command
+
+steps:
+- template: /eng/templates/setup-template.yml@self
+
+- script: |
+    robocopy "eng\resources" "$(Build.SourcesDirectory)\artifacts"
+    :: robocopy return codes are terrible; 1 means files were copied
+    if "%errorlevel%" == "1" exit /b 0
+    exit /b 1
+  displayName: Prevent test directory crawling
+
+- pwsh: |
+    $testArg = if ($env:SKIPTESTS -ne "true") { "-test" } else { "" }
+    Write-Host "##vso[task.setvariable variable=_TestArgs]$testArg"
+  displayName: Promote variables
+
+- script: $(Build.SourcesDirectory)\eng\CIBuild.cmd
+    -configuration ${{ parameters.buildConfig }}
+    -prepareMachine
+    -sign
+    ${{ parameters.buildArgs }}
+    $(_TestArgs)
+  displayName: Build
+  env:
+    POCKETLOGGER_LOG_PATH: $(PocketLoggerLogPath)
+    TRYDOTNET_PREBUILDS_PATH: $(TryDotNetPrebuildsPath)
+
+- script: |
+    dotnet test -l trx --no-build --blame-hang-timeout 15m --blame-hang-dump-type full -c ${{ parameters.buildConfig }} --results-directory $(Build.SourcesDirectory)/artifacts/TestResults/${{ parameters.buildConfig }} ${{ parameters.additionalArgs }}
+  displayName: Test / Blame
+  workingDirectory: $(Build.SourcesDirectory)
+  condition: ne('${{ parameters.skipTests }}', 'true')
+  env:
+    RunIntegrationTests: $(RunIntegrationTests)
+
+- template: /eng/templates/delete-dump-files-template.yml@self
+  parameters:
+    buildConfig: ${{ parameters.buildConfig }}
+    skipTests: ${{ parameters.skipTests }}

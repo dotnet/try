@@ -3,7 +3,7 @@
 
 import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 import * as rxjs from 'rxjs';
-import { DebouncingKernel } from './decouncingKernel';
+import { DebouncingKernel } from './debouncingKernel';
 
 export enum MarkerSeverity {
     Hint = 1,
@@ -42,8 +42,13 @@ export abstract class EditorAdapter {
 
     displayDiagnostics(diagnostics: polyglotNotebooks.Diagnostic[]) {
         const markers: IMarkerData[] = [];
+
         for (const diagnostic of diagnostics) {
             let severity = MarkerSeverity.Info;
+
+            if (diagnostic.severity === 'hidden') {
+                continue;
+            }
 
             switch (diagnostic.severity) {
                 case 'error':
@@ -55,7 +60,6 @@ export abstract class EditorAdapter {
                 case 'info':
                     severity = MarkerSeverity.Info;
                     break;
-
             }
 
             // interactive diagnostics are 0-based, monaco is 1-based
@@ -79,7 +83,8 @@ export abstract class EditorAdapter {
 
     constructor() {
         const handler = this.handleContentChanged.bind(this);
-        this._editorChanges.subscribe({
+        // debounce editor events
+        this._editorChanges.pipe(rxjs.debounceTime(500)).subscribe({
             next: handler
         });
 

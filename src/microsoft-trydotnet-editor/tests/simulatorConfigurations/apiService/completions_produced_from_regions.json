@@ -4,7 +4,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -18,7 +17,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -39,7 +39,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -50,18 +49,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -72,11 +79,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     },
@@ -84,7 +98,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -98,11 +111,11 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenDocument",
           "command": {
             "relativeFilePath": "./Program.cs",
@@ -110,7 +123,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -131,7 +145,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -142,18 +155,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -164,11 +185,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -179,32 +207,46 @@
           "eventType": "DocumentOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     },
@@ -212,7 +254,6 @@
       "commands": [
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenProject",
           "command": {
             "project": {
@@ -226,11 +267,11 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "OpenDocument",
           "command": {
             "relativeFilePath": "./Program.cs",
@@ -238,11 +279,11 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         },
         {
           "token": "command-token",
-          "id": "command-id",
           "commandType": "RequestCompletions",
           "command": {
             "code": "fileInfo.",
@@ -253,7 +294,8 @@
             "targetKernelName": null,
             "originUri": null,
             "destinationUri": null
-          }
+          },
+          "routingSlip": []
         }
       ],
       "events": [
@@ -274,7 +316,6 @@
           "eventType": "ProjectOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -285,18 +326,26 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenProject",
             "command": {
               "project": {
@@ -307,11 +356,18 @@
                   }
                 ]
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -322,32 +378,46 @@
           "eventType": "DocumentOpened",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "OpenDocument",
             "command": {
               "relativeFilePath": "./Program.cs",
               "regionName": "TEST_REGION",
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
           "event": {
@@ -507,15 +577,6 @@
                 "documentation": "Gets the full path of the directory or file."
               },
               {
-                "displayText": "GetAccessControl",
-                "kind": "ExtensionMethod",
-                "filterText": "GetAccessControl",
-                "sortText": "GetAccessControl",
-                "insertText": "GetAccessControl",
-                "insertTextFormat": null,
-                "documentation": "Returns the security information of a file."
-              },
-              {
                 "displayText": "GetHashCode",
                 "kind": "Method",
                 "filterText": "GetHashCode",
@@ -532,15 +593,6 @@
                 "insertText": "GetLifetimeService",
                 "insertTextFormat": null,
                 "documentation": "Retrieves the current lifetime service object that controls the lifetime policy for this instance."
-              },
-              {
-                "displayText": "GetObjectData",
-                "kind": "Method",
-                "filterText": "GetObjectData",
-                "sortText": "GetObjectData",
-                "insertText": "GetObjectData",
-                "insertTextFormat": null,
-                "documentation": "Sets the System.Runtime.Serialization.SerializationInfo  object with the file name and additional exception information."
               },
               {
                 "displayText": "GetType",
@@ -621,7 +673,7 @@
                 "sortText": "LinkTarget",
                 "insertText": "LinkTarget",
                 "insertTextFormat": null,
-                "documentation": "If this System.IO.FileSystemInfo  instance represents a link, returns the link target's path.\n If a link does not exist in System.IO.FileSystemInfo.FullName , or this instance does not represent a link, returns null."
+                "documentation": "Gets the target path of the link located in System.IO.FileSystemInfo.FullName , or null if this System.IO.FileSystemInfo  instance doesn't represent a link."
               },
               {
                 "displayText": "MoveTo",
@@ -705,29 +757,28 @@
                 "documentation": "Gets the target of the specified link."
               },
               {
-                "displayText": "SetAccessControl",
-                "kind": "ExtensionMethod",
-                "filterText": "SetAccessControl",
-                "sortText": "SetAccessControl",
-                "insertText": "SetAccessControl",
-                "insertTextFormat": null,
-                "documentation": "Changes the security attributes of an existing file."
-              },
-              {
                 "displayText": "ToString",
                 "kind": "Method",
                 "filterText": "ToString",
                 "sortText": "ToString",
                 "insertText": "ToString",
                 "insertTextFormat": null,
-                "documentation": "Returns the path as a string. Use the System.IO.FileInfo.Name  property for the full path."
+                "documentation": "Returns the original path. Use the System.IO.FileSystemInfo.FullName  or System.IO.FileSystemInfo.Name  properties for the full path or file/directory name."
+              },
+              {
+                "displayText": "UnixFileMode",
+                "kind": "Property",
+                "filterText": "UnixFileMode",
+                "sortText": "UnixFileMode",
+                "insertText": "UnixFileMode",
+                "insertTextFormat": null,
+                "documentation": "Gets or sets the Unix file mode for the current file or directory."
               }
             ]
           },
           "eventType": "CompletionsProduced",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "RequestCompletions",
             "command": {
               "code": "fileInfo.",
@@ -735,18 +786,26 @@
                 "line": 0,
                 "character": 9
               },
-              "targetKernelName": "project-kernel",
+              "targetKernelName": "csharp.console",
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": [
+              "kernel://local/csharp.console?tag=arrived",
+              "kernel://local/csharp.console"
+            ]
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         },
         {
-          "event": {},
+          "event": {
+            "executionOrder": 0
+          },
           "eventType": "CommandSucceeded",
           "command": {
             "token": "command-token",
-            "id": "command-id",
             "commandType": "RequestCompletions",
             "command": {
               "code": "fileInfo.",
@@ -757,8 +816,12 @@
               "targetKernelName": null,
               "originUri": null,
               "destinationUri": null
-            }
-          }
+            },
+            "routingSlip": []
+          },
+          "routingSlip": [
+            "kernel://local/csharp.console"
+          ]
         }
       ]
     }

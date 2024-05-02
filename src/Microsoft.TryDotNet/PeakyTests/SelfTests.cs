@@ -16,6 +16,8 @@ namespace Microsoft.TryDotNet.PeakyTests;
 
 public class SelfTests : IPeakyTest, IHaveTags, IApplyToApplication
 {
+    public string[] Tags => ["self"];
+
     public async Task<Prebuild> Console_prebuild_is_ready()
     {
         var prebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);
@@ -96,8 +98,6 @@ public class SelfTests : IPeakyTest, IHaveTags, IApplyToApplication
                     })
             });
     }
-
-    public string[] Tags => new[] { "kernel" };
 
     public bool AppliesToApplication(string application) => application == "trydotnet";
 }

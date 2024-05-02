@@ -23,6 +23,7 @@ namespace Microsoft.TryDotNet;
 public class Program
 {
     private static Prebuild? _consolePrebuild;
+    private static bool _loggingEnabled;
 
     public static async Task Main(string[] args)
     {
@@ -55,27 +56,44 @@ public class Program
 
         _consolePrebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);
 
-        builder.Services.AddPeakyTests(tests =>
+        switch (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
         {
-            tests.Add(
-                "Development",
-                "trydotnet",
-                new Uri(EnvironmentSettings.ForLocal.HostOrigin));
-            tests.Add(
-                "Staging",
-                "trydotnet",
-                new Uri(EnvironmentSettings.ForPreProduction.HostOrigin));
-            tests.Add(
-                "Production",
-                "trydotnet",
-                new Uri(EnvironmentSettings.ForProduction.HostOrigin));
-        });
+            case "Development":
+                builder.Services.AddPeakyTests(tests =>
+                {
+                    tests.Add(
+                        "Development",
+                        "trydotnet",
+                        new Uri(EnvironmentSettings.ForLocal.HostOrigin));
+                });
+                break;
+
+            case "Staging":
+                builder.Services.AddPeakyTests(tests =>
+                {
+                    tests.Add(
+                        "Staging",
+                        "trydotnet",
+                        new Uri(EnvironmentSettings.ForPreProduction.HostOrigin));
+                });
+                break;
+
+            case "Production":
+            default:
+                builder.Services.AddPeakyTests(tests =>
+                {
+                    tests.Add(
+                        "Production",
+                        "trydotnet",
+                        new Uri(EnvironmentSettings.ForProduction.HostOrigin));
+                });
+                break;
+        }
 
         CSharpProjectKernel.RegisterEventsAndCommands();
 
         var app = builder.Build();
-
-        // app.UseHttpsRedirection();
+    
         app.UseCors("trydotnet");
         app.UseBlazorFrameworkFiles("/wasmrunner");
         app.UsePeaky();
@@ -127,9 +145,18 @@ public class Program
         await prebuild.EnsureReadyAsync();
     }
 
-    internal static CSharpProjectKernel CreateKernel() =>
-        new("csharp.console", PrebuildFinder.Create(() => Task.FromResult(_consolePrebuild)));
+    internal static CSharpProjectKernel CreateKernel()
+    {
+        var kernel = new CSharpProjectKernel("csharp.console", PrebuildFinder.Create(() => Task.FromResult(_consolePrebuild)));
 
+        if (_loggingEnabled)
+        {
+            kernel.LogCommandsToPocketLogger();
+            kernel.LogEventsToPocketLogger();
+        }
+
+        return kernel;
+    }
 
     private static readonly Assembly[] _assembliesEmittingPocketLoggerLogs =
     [
@@ -143,6 +170,8 @@ public class Program
     {
         if (Environment.GetEnvironmentVariable("POCKETLOGGER_LOG_PATH") is { } logFile)
         {
+            _loggingEnabled = true;
+
             var logPath = new FileInfo(logFile).Directory;
 
             Console.WriteLine($"Logging to: {logPath}");

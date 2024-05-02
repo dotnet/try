@@ -162,9 +162,9 @@ describe("trydotnet", () => {
 
         });
 
-        it("diagnostic events set markers on editor", async () => {
+        it("diagnostic events with hidden severity are not set markers on editor", async () => {
 
-            let service = createApiServiceSimulator("./simulatorConfigurations/apiService/diagnostics_produced_with_errors_in_code.json");
+            let service = createApiServiceSimulator("./simulatorConfigurations/apiService/diagnostics_produced_with_hidden_severity.json");
             let wasmRunner = createWasmRunnerSimulator();
             let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
 
@@ -182,24 +182,57 @@ describe("trydotnet", () => {
             await tdn.openProject(project);
             await tdn.openDocument({ relativeFilePath: "./Program.cs", regionName: "test-region" });
 
-            const userContent = "someInt = \"NaN\";";
+            const userContent = "someInt = 4;";
 
             editor.type(userContent);
 
             await delay(1000);
 
-            const markers = editor.getMarkers();
+            const markers = editor.getMarkers(); //?
 
-            expect(markers).not.to.be.empty;
-            expect(markers[0]).to.deep.equal({
-                "endColumn": 16,
-                "endLineNumber": 1,
-                "message": "(1,11): error CS0029: Cannot implicitly convert type 'string' to 'int'",
-                "severity": 8,
-                "startColumn": 11,
-                "startLineNumber": 1,
-            });
+            expect(markers).to.be.empty;
+
 
         });
+    });
+
+    it("diagnostic events set markers on editor", async () => {
+
+        let service = createApiServiceSimulator("./simulatorConfigurations/apiService/diagnostics_produced_with_errors_in_code.json");
+        let wasmRunner = createWasmRunnerSimulator();
+        let kernel = new CSharpProjectKernelWithWASMRunner.ProjectKernelWithWASMRunner('csharpProject', wasmRunner, service);
+
+        let tdn = new tryDotNetEditor.TryDotNetEditor((_) => { }, new rxjs.Subject<any>(), kernel);
+        let editor = new monacoEditorSimulator.MonacoEditorSimulator();
+        tdn.editor = editor;
+
+        let project = <polyglotNotebooks.Project>{
+            files: [{
+                relativeFilePath: "./Program.cs",
+                content: "\npublic class Program\n{\n    public static void Main(string[] args)\n    {\n        int someInt = 1;\n        #region test-region\n        #endregion\n    }\n}\n"
+            }]
+        };
+
+        await tdn.openProject(project);
+        await tdn.openDocument({ relativeFilePath: "./Program.cs", regionName: "test-region" });
+
+        const userContent = "someInt = \"NaN\";";
+
+        editor.type(userContent);
+
+        await delay(1000);
+
+        const markers = editor.getMarkers();
+
+        expect(markers).not.to.be.empty;
+        expect(markers[0]).to.deep.equal({
+            "endColumn": 16,
+            "endLineNumber": 1,
+            "message": "(1,11): error CS0029: Cannot implicitly convert type 'string' to 'int'",
+            "severity": 8,
+            "startColumn": 11,
+            "startLineNumber": 1,
+        });
+
     });
 });

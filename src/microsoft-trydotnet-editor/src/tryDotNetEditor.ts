@@ -9,7 +9,7 @@ import * as polyglotNotebooks from '@microsoft/polyglot-notebooks';
 import * as newContract from './newContract';
 import { DocumentId } from './documentId';
 import { configureLogging } from './log';
-import { DebouncingKernel } from './decouncingKernel';
+import { DebouncingKernel } from './debouncingKernel';
 
 export class TryDotNetEditor {
   private _editor?: monaco.EditorAdapter;
@@ -180,7 +180,6 @@ export class TryDotNetEditor {
             message.regionName = documentOpened.regionName;
           }
           this._postMessage(message);
-
         }
         break;
       case messages.FOCUS_EDITOR_REQUEST:
@@ -240,18 +239,24 @@ export class TryDotNetEditor {
             };
 
             try {
-              if (event.eventType === polyglotNotebooks.CommandFailedType) {
-                response.exception = (<polyglotNotebooks.CommandFailed>event.event).message;
-              }
-              const stdOutEvents = events.filter(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType).map(e => (<polyglotNotebooks.StandardOutputValueProduced>e.event));
+              response.exception = [];
 
-              response.output = stdOutEvents.map(e => e.formattedValues[0].value);
+              const stdOutEvents = events
+                .filter(e => e.eventType === polyglotNotebooks.StandardOutputValueProducedType)
+                .map(e => (<polyglotNotebooks.StandardOutputValueProduced>e.event));
 
-              const diagnosticsEvents = events.filter(e => e.eventType === polyglotNotebooks.DiagnosticsProducedType).map(e => (<polyglotNotebooks.DiagnosticsProduced>e.event));
+              const diagnosticsEvents = events
+                .filter(e => e.eventType === polyglotNotebooks.DiagnosticsProducedType)
+                .map(e => (<polyglotNotebooks.DiagnosticsProduced>e.event));
+
+              response.output = [stdOutEvents.map(e => e.formattedValues[0].value).join('')];
 
               response.diagnostics = [];
               for (let diagnosticsEvent of diagnosticsEvents) {
                 for (let diagnostic of diagnosticsEvent.diagnostics) {
+                  if (diagnostic.severity !== polyglotNotebooks.DiagnosticSeverity.Hidden) {
+                    response.exception.push(diagnostic.message);
+                  }
                   response.diagnostics.push({
                     start: diagnostic.linePositionSpan.start,
                     end: diagnostic.linePositionSpan.end,
@@ -259,6 +264,10 @@ export class TryDotNetEditor {
                     message: diagnostic.message,
                   });
                 }
+              }
+
+              if (response.exception.length === 0) {
+                response.exception = null;
               }
             }
             finally {
@@ -271,9 +280,7 @@ export class TryDotNetEditor {
           }
           break;
         default:
-          if (event.command.commandType === polyglotNotebooks.SubmitCodeType) {
-            events.push(event);
-          }
+          events.push(event);
           break;
       }
     });

@@ -16,7 +16,7 @@ export class MonacoEditorSimulator extends editorAdapter.EditorAdapter {
     private _code: string;
     private _size?: { width: number; height: number; }
 
-    private _markers: editorAdapter.IMarkerData[];
+    private _markers: editorAdapter.IMarkerData[] = [];
 
     layout(size: { width: number; height: number; } | undefined): void {
         this._size = size;
