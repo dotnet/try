@@ -54,6 +54,11 @@ public class Program
         builder.Services.AddCors(
             opts => opts.AddPolicy("trydotnet", policy => policy.AllowAnyOrigin()));
 
+        builder.Services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+        });
+
         _consolePrebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);
 
         switch (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
@@ -99,6 +104,7 @@ public class Program
         app.UsePeaky();
         app.UseStaticFiles();
         app.MapFallbackToFile("/wasmrunner/{*path:nonfile}", "wasmrunner/index.html");
+        app.UseResponseCompression();
 
         app.MapGet("/editor", async (HttpRequest request, HttpResponse response) =>
         {
