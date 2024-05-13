@@ -33,6 +33,39 @@ public class SelfTests : IPeakyTest, IHaveTags, IApplyToApplication
         return prebuild;
     }
 
+    public async Task<object> Can_get_completions()
+    {
+         using var kernel = Program.CreateKernel();
+
+        await kernel.SendAsync(new OpenProject(new Project(new[] { new ProjectFile("Program.cs", @"// content will be replaced") })));
+        await kernel.SendAsync(new OpenDocument("Program.cs"));
+
+        var code =  """
+                    using System;
+                    using System.Collections.Generic;
+                    using System.Linq;
+                    using System.Text;
+                    using System.Globalization;
+                    using System.Text.RegularExpressions;
+                    
+                    C|
+                    """;
+
+        var result = await kernel.SendAsync(new RequestCompletions(code.Replace("|", ""), new LinePosition(7, 1)));
+
+        result.Events.Should().ContainSingle(e => e is CompletionsProduced);
+        
+        var completionsProduced = result.Events.OfType<CompletionsProduced>().Single();
+
+        completionsProduced.Completions.Should().NotBeEmpty();
+
+        return new
+        {
+            Count = completionsProduced.Completions.Count(),
+            CompletionsProduced = completionsProduced
+        };
+    }
+
     public async Task Can_get_signature_help()
     {
         using var kernel = Program.CreateKernel();

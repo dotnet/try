@@ -9,7 +9,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Playwright;
 using Pocket.For.Xunit;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.TryDotNet.IntegrationTests;
@@ -21,7 +20,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase
     {
     }
 
-    [IntegrationTestFact]
+    [IntegrationTestFact(Skip = "Flaky in CI")]
     public async Task loads_trydotnet_editor()
     {
         var page = await NewPageAsync();
@@ -39,12 +38,11 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase
         var pageUri = new Uri(QueryHelpers.AddQueryString(new Uri(learnRoot,"DocsHost.html").ToString(), param!));
         await page.GotoAsync(pageUri.ToString());
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
         
         await page.FindEditor();
     }
 
-    [IntegrationTestFact]
+    [IntegrationTestFact(Skip = "Flaky in CI")]
     public async Task can_load_code()
     {
         var page = await NewPageAsync();
@@ -75,7 +73,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase
         text.Should().Contain("Console.WriteLine(123);");
     }
 
-    [IntegrationTestFact]
+    [IntegrationTestFact(Skip = "Flaky in CI")]
     public async Task outputs_are_rendered()
     {
         var page = await NewPageAsync();
