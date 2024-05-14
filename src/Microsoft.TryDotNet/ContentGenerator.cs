@@ -22,16 +22,18 @@ public class ContentGenerator
 
         var hostUri = new Uri($"{scheme}://{request.Host.Value}", UriKind.Absolute);
         var wasmRunnerUri = new Uri(hostUri, "/wasmrunner");
-        var commansdUri = new Uri(hostUri, "/commands");
+        var commandsUri = new Uri(hostUri, "/commands");
+
         var enableLogging = false;
         if (request.Query.TryGetValue("enableLogging", out var enableLoggingString))
         {
             enableLogging = enableLoggingString.FirstOrDefault()?.ToLowerInvariant() == "true";
         }
+
         var configuration = new
         {
             wasmRunnerUrl = wasmRunnerUri.AbsoluteUri,
-            commandsUrl = commansdUri.AbsoluteUri,
+            commandsUrl = commandsUri.AbsoluteUri,
             refererUrl = !string.IsNullOrWhiteSpace(referer) ? new Uri(referer, UriKind.Absolute) : null,
             enableLogging
         };
