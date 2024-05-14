@@ -21,6 +21,7 @@ public class HostOriginPolicies
             { "microsoft.com", _authorizedPools, false },
             { "asp.net", _authorizedPools },
             { "dot.net", _authorizedPools },
+            { "int-dot.net", _authorizedPools },
             { "visualstudio.com", _authorizedPools },
         };
 
