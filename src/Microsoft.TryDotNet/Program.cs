@@ -116,13 +116,16 @@ public class Program
         app.MapFallbackToFile("/wasmrunner/{*path:nonfile}", "wasmrunner/index.html");
         app.UseResponseCompression();
 
-        app.MapGet("/editor", async (HttpRequest request, HttpResponse response) =>
+        Func<HttpRequest, HttpResponse, Task<IResult>> editorHandler = async (request, response) =>
         {
             var html = await ContentGenerator.GenerateEditorPageAsync(request);
             response.ContentType = MediaTypeNames.Text.Html;
             response.ContentLength = Encoding.UTF8.GetByteCount(html);
             return Results.Content(html);
-        });
+        };
+
+        app.MapGet("/editor", editorHandler);
+        app.MapGet("/editor/v2", editorHandler);
 
         app.MapPost("/commands", async (HttpRequest request) =>
            {
@@ -131,12 +134,13 @@ public class Program
                await using (var requestBody = request.Body)
                {
                    using var kernel = CreateKernel();
+                   using var streamReader = new StreamReader(requestBody);
 
-                   var body = await new StreamReader(requestBody).ReadToEndAsync();
+                   var body = await streamReader.ReadToEndAsync();
 
                    var bundle = JsonDocument.Parse(body).RootElement;
 
-                   var commandEnvelopes = ReadCommands(bundle).ToList();
+                   var commandEnvelopes = ReadCommands(bundle);
 
                    foreach (var commandEnvelope in commandEnvelopes)
                    {
