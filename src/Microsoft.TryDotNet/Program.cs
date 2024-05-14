@@ -52,11 +52,21 @@ public class Program
         var builder = WebApplication.CreateBuilder(options);
 
         builder.Services.AddCors(
-            opts => opts.AddPolicy("trydotnet", policy => policy.AllowAnyOrigin()));
+            opts =>
+            {
+                opts.AddPolicy("trydotnet",
+                               policy =>
+                               {
+                                   policy
+                                       .AllowAnyHeader()
+                                       .AllowAnyMethod()
+                                       .AllowAnyOrigin();
+                               });
+            });
 
-        builder.Services.AddResponseCompression(options =>
+        builder.Services.AddResponseCompression(compressionOptions =>
         {
-            options.EnableForHttps = true;
+            compressionOptions.EnableForHttps = true;
         });
 
         _consolePrebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(enableBuild: false);

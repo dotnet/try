@@ -16,46 +16,12 @@ public class HostOriginPolicies
 
     static HostOriginPolicies()
     {
-        // FIX: (HostOriginPolicies) clean up
-
         var productionPolicies = new Dictionary<string, HostOriginPolicy>
         {
-            // Microsoft
             { "microsoft.com", _authorizedPools, false },
             { "asp.net", _authorizedPools },
             { "dot.net", _authorizedPools },
-            { "trydotnet-eastus.azurewebsites.net", _authorizedPools },
-            { "trydotnet-westus.azurewebsites.net", _authorizedPools },
-            { "trydotnet-monitoring.azurewebsites.net", _authorizedPools },
             { "visualstudio.com", _authorizedPools },
-            { "netlandingpage-staging-trydotnet.azurewebsites.net", _authorizedPools },
-            { "netlandingpage.azurewebsites.net", _authorizedPools },
-            { "netlandingpage-ppe.azurewebsites.net", _authorizedPools },
-            { "qadevblogs.wpengine.com", _authorizedPools },
-
-            // Bellevue College
-            { "bc.instructure.com", _authorizedPools },
-            { "bcconted.instructure.com", _authorizedPools },
-
-            // AI School
-            { "standard-learning-paths-dev.azurewebsites.net", _authorizedPools },
-            { "standard-learning-paths-test.azurewebsites.net", _authorizedPools },
-            { "ai-school-ppe.ai-platforms.p.azurewebsites.net", _authorizedPools },
-            { "aischool.microsoft.com", _authorizedPools },
-            { "iot-school-dev.azurewebsites.net", _authorizedPools },
-            { "iot-school-test.azurewebsites.net", _authorizedPools },
-
-            // nodatime
-            { "nodatime.org", _authorizedPools },
-            { "test.nodatime.org", _authorizedPools },
-
-            // nuget.org 
-            { "nuget.org", _authorizedPools, false },
-            { "nugettest.org", _authorizedPools, false },
-
-            //build demo
-            { "interactivedotnet.azurewebsites.net", _authorizedPools, false },
-            { "trialinteractivedotnet.azurewebsites.net", _authorizedPools, false }
         };
 
         var localPolicies = new Dictionary<string, HostOriginPolicy>(productionPolicies)
@@ -70,13 +36,13 @@ public class HostOriginPolicies
         ForLocal = localPolicies.ToReadOnly();
     }
 
-    public IReadOnlyDictionary<string, HostOriginPolicy> PolicyForHostOrigin { get; }
-
     public HostOriginPolicies(IReadOnlyDictionary<string, HostOriginPolicy> configurationForHostOrigin)
     {
         PolicyForHostOrigin = new ReadOnlyDictionary<string, HostOriginPolicy>(
             new Dictionary<string, HostOriginPolicy>(configurationForHostOrigin));
     }
+
+    public IReadOnlyDictionary<string, HostOriginPolicy> PolicyForHostOrigin { get; }
 
     public static IReadOnlyDictionary<string, HostOriginPolicy> ForProduction { get; }
 

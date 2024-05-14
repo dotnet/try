@@ -24,5 +24,6 @@ public class HostOriginPolicy
     public string HostingDomain { get; }
 
     public uint MaxAgentReassignmentsPerRequest { get; }
+
     public bool EnableBranding { get; }
 }
