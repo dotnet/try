@@ -54,7 +54,7 @@ public class Program
         builder.Services.AddCors(
             opts =>
             {
-                opts.AddPolicy("trydotnet",
+                opts.AddDefaultPolicy(
                                policy =>
                                {
                                    policy
@@ -108,12 +108,14 @@ public class Program
         CSharpProjectKernel.RegisterEventsAndCommands();
 
         var app = builder.Build();
-    
-        app.UseCors("trydotnet");
+
+        app.UseCors();
+
         app.UseBlazorFrameworkFiles("/wasmrunner");
-        app.UsePeaky();
         app.UseStaticFiles();
         app.MapFallbackToFile("/wasmrunner/{*path:nonfile}", "wasmrunner/index.html");
+
+        app.UsePeaky();
         app.UseResponseCompression();
 
         Func<HttpRequest, HttpResponse, Task<IResult>> editorHandler = async (request, response) =>
