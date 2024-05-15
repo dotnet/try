@@ -20,7 +20,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase
     {
     }
 
-    [IntegrationTestFact(Skip = "Flaky in CI")]
+    [IntegrationTestFact]
     public async Task loads_trydotnet_editor()
     {
         var page = await NewPageAsync();
@@ -42,7 +42,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase
         await page.FindEditor();
     }
 
-    [IntegrationTestFact(Skip = "Flaky in CI")]
+    [IntegrationTestFact]
     public async Task can_load_code()
     {
         var page = await NewPageAsync();
@@ -73,7 +73,7 @@ public class TryDotNetJsIntegrationTests : PlaywrightTestBase
         text.Should().Contain("Console.WriteLine(123);");
     }
 
-    [IntegrationTestFact(Skip = "Flaky in CI")]
+    [IntegrationTestFact]
     public async Task outputs_are_rendered()
     {
         var page = await NewPageAsync();
