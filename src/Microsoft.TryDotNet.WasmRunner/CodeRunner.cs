@@ -77,6 +77,7 @@ public class CodeRunner
             }
             catch (Exception e)
             {
+                onOutput(e.ToString());
                 switch (e.InnerException)
                 {
                     case TypeLoadException:
