@@ -114,6 +114,9 @@ class WasmRunner {
           switch (type) {
             case "wasmRunner-result":
               polyglotNotebooks.Logger.default.info("WasmRunner execution completed");
+              if (wasmRunnerMessage.result && !wasmRunnerMessage.result.success) {
+                runRequest.onOutput(wasmRunnerMessage.result.error || wasmRunnerMessage.result.runnerError);
+              }
               completionSource.resolve(wasmRunnerMessage);
               break;
             case "wasmRunner-stdout":
