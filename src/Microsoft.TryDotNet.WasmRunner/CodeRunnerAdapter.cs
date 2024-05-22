@@ -24,7 +24,7 @@ internal class CodeRunnerAdapter
             error => _jsInterop.InvokeAsync<object>("publishCodeRunnerStdError", error)
             );
 
-        return new SerializableCodeRunnerResult(result.Succeeded, result.Exception?.Message, result.RunnerException?.Message);
+        return new SerializableCodeRunnerResult(result.Succeeded, result.Exception?.ToString(), result.RunnerException?.ToString());
     }
 }
 
