@@ -24,8 +24,24 @@ async function _createSession(configuration: Configuration, editorIFrame: HTMLIF
     const resizeObserver = new ResizeObserver((entries, _observer) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
+
+        const computedStyle = window.getComputedStyle(editorIFrame);
+
+        const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+        const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+        const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+
+        const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+        const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+        const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+        const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+
+        const adjustedWidth = width - paddingLeft - paddingRight - borderLeft - borderRight;
+        const adjustedHeight = height - paddingTop - paddingBottom - borderTop - borderBottom;
+
         let editor = <IMonacoEditor>(session.getTextEditor());
-        editor.setSize({ width, height });
+        editor.setSize({ width: adjustedWidth, height: adjustedHeight });
       }
     });
 
