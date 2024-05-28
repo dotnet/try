@@ -27,10 +27,10 @@ async function _createSession(configuration: Configuration, editorIFrame: HTMLIF
 
         const computedStyle = window.getComputedStyle(editorIFrame);
 
-        const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
-        const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
-        const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
-        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+        const paddingLeft = parseFloat(computedStyle.paddingLeft) || 2;
+        const paddingRight = parseFloat(computedStyle.paddingRight) || 2;
+        const paddingTop = parseFloat(computedStyle.paddingTop) || 2;
+        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 2;
 
         const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
         const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
