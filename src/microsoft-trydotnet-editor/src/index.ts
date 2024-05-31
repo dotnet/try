@@ -72,6 +72,7 @@ if (window) {
 
 	tdnEditor.editor = new monacoAdapterImpl.MonacoEditorAdapter(editor);
 	tdnEditor.editorId = settings.editorId;
+    document.body.classList.add('monaco-editor-background');
 
 	window['trydotnetEditor'] = tdnEditor;
 
