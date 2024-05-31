@@ -7,3 +7,7 @@ body {
 .monaco-editor {
 	padding: 0.5rem;
 }
+
+iframe[role="wasm-runner"] {
+    opacity: 0;
+}
