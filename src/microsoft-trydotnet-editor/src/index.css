@@ -2,6 +2,7 @@ body {
 	width: auto;
 	height: auto;
 	margin: 0;
+	overflow: hidden;
 }
 
 .monaco-editor {
