@@ -100,23 +100,29 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
                             character: position.column - 1,
                         }
                     };
+
                     const commandEnvelope = polyglotNotebooks.KernelCommandEnvelope.fromJson({
                         commandType: polyglotNotebooks.RequestCompletionsType,
                         command
                     });
+
                     const completionsProduced = await polyglotNotebooks.submitCommandAndGetResult<polyglotNotebooks.CompletionsProduced>(this.kernel.asInteractiveKernel(), commandEnvelope, polyglotNotebooks.CompletionsProducedType);
+
+                    let lineWithSelection = this.getTextOfLine(command.code, position.lineNumber - 1);
+
+                    let range = new monaco.Range(
+                        position.lineNumber,
+                        this.getStartOfWordBeforePos(lineWithSelection, position.column - 1) + 1,
+                        position.lineNumber,
+                        position.column);
+
                     const completionList: monaco.languages.CompletionList = {
                         suggestions: completionsProduced.completions.map(completion => ({
                             label: completion.displayText,
                             kind: mapToCompletionItemKind(completion.kind),
                             insertText: completion.insertText,
                             documentation: completion.documentation,
-                            range: {
-                                startLineNumber: position.lineNumber,
-                                startColumn: position.column,
-                                endLineNumber: position.lineNumber,
-                                endColumn: position.column,
-                            }
+                            range: range,
                         })),
                     };
                     return completionList;
@@ -166,6 +172,19 @@ export class MonacoEditorAdapter extends editorAdapter.EditorAdapter {
                 monaco.editor.defineTheme(key, themes[key]);
             }
         }
+    }
+
+    private getTextOfLine(text: string, lineNumber: number) {
+        let lines = text.split("\n");
+        return lines[lineNumber];
+    }
+
+    private getStartOfWordBeforePos(text: string, pos: number) {
+        let i = pos;
+        while (i >= 0 && text[i] !== " " && text[i] !== ".") {
+            i--;
+        }
+        return i + 1;
     }
 }
 
