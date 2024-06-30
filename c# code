@@ -1,0 +1,53 @@
+
+string studentName = "Sophia Johnson";
+string course1Name = "English 101";
+string course2Name = "Algebra 101";
+string course3Name = "Biology 101";
+string course4Name = "Computer Science I";
+string course5Name = "Psychology 101";
+
+// Define credit hours for each course
+int course1Credit = 3;
+int course2Credit = 3;
+int course3Credit = 4;
+int course4Credit = 4;
+int course5Credit = 3;
+
+// Define grade values (assuming A = 4, B = 3)
+int gradeA = 4;
+int gradeB = 3;
+
+// Assign grades to each course
+int course1Grade = gradeA;
+int course2Grade = gradeB;
+int course3Grade = gradeB;
+int course4Grade = gradeB;
+int course5Grade = gradeA;
+
+// Initialize total credit hours and total grade points
+int totalCreditHours = 0;
+int totalGradePoints = 0;
+
+// Calculate total credit hours
+totalCreditHours += course1Credit;
+totalCreditHours += course2Credit;
+totalCreditHours += course3Credit;
+totalCreditHours += course4Credit;
+totalCreditHours += course5Credit;
+
+// Calculate total grade points
+totalGradePoints += course1Credit * course1Grade;
+totalGradePoints += course2Credit * course2Grade;
+totalGradePoints += course3Credit * course3Grade;
+totalGradePoints += course4Credit * course4Grade;
+totalGradePoints += course5Credit * course5Grade;
+
+// Display the results for verification
+Console.WriteLine($"{totalGradePoints} {totalCreditHours}");
+
+// Display each course information
+Console.WriteLine($"{course1Name} {course1Grade} {course1Credit}");
+Console.WriteLine($"{course2Name} {course2Grade} {course2Credit}");
+Console.WriteLine($"{course3Name} {course3Grade} {course3Credit}");
+Console.WriteLine($"{course4Name} {course4Grade} {course4Credit}");
+Console.WriteLine($"{course5Name} {course5Grade} {course5Credit}");
