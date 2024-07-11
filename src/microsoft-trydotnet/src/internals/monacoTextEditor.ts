@@ -113,6 +113,12 @@ export class MonacoTextEditor implements ITrydotnetMonacoTextEditor {
         this.editorApimessageBus.post(request);
     }
 
+    public fitToContainer(container: HTMLElement): void {
+        const offsetWidth = 2;
+        const offsetHeight = 2;
+        this.setSize({ width: container.clientWidth - offsetWidth, height: container.clientHeight - offsetHeight})
+    }
+
     public configure(configuration: MonacoEditorConfiguration): void {
         this.setOptions(configuration.options);
         this.setTheme(configuration.theme);
