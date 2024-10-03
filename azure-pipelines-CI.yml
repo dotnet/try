@@ -50,6 +50,10 @@ extends:
     sdl:
       git:
         longpaths: true
+      tsa:
+        enabled: true
+      policheck:
+        enabled: true
 
     stages:
     - stage: build
