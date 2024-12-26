@@ -50,6 +50,20 @@ extends:
     sdl:
       git:
         longpaths: true
+      tsa:
+        enabled: true
+        config:
+          repositoryName: 'dotnet-try'
+          codebaseName: 'dotnet-try'
+          instanceUrl: 'https://devdiv.visualstudio.com/'
+          projectName: 'DEVDIV'
+          iterationPath: 'DevDiv\\Future Backlog'
+          areaPath: 'DevDiv\\NET Developer Experience\\VS Testing\\Interactive'
+          notificationAliases: ['dotnetInteractive@microsoft.com']
+          serviceTreeID: 'ab4d58de-beb3-4714-866c-1b46a48ea002'
+          allTools: true
+      policheck:
+        enabled: true
 
     stages:
     - stage: build
