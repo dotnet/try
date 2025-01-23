@@ -132,7 +132,10 @@ extends:
                 skipTests: $(SkipTests)
                 buildArgs: $(_BuildArgs)
                 additionalArgs: $(additionalWindowsArgs)
-
+            - task: UseDotNet@2
+              inputs:
+                packageType: sdk
+                useGlobalJson: true
       - template: /eng/common/templates-official/jobs/jobs.yml@self
         parameters:
           enableMicrobuild: true

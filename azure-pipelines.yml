@@ -83,7 +83,10 @@ stages:
             skipTests: $(SkipTests)
             buildArgs: $(_BuildArgs)
             additionalArgs: $(additionalWindowsArgs)
-
+        - task: UseDotNet@2
+          inputs:
+            packageType: sdk
+            useGlobalJson: true
         - task: PublishBuildArtifacts@1
           displayName: Publish Windows artifacts
           inputs:
