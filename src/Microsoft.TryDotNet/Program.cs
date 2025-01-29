@@ -20,6 +20,7 @@ using SerilogLoggerConfiguration = Serilog.LoggerConfiguration;
 
 namespace Microsoft.TryDotNet;
 
+// Some comments
 public class Program
 {
     private static Prebuild? _consolePrebuild;
@@ -29,7 +30,7 @@ public class Program
     {
         StartLogging();
 
-        await EnsurePrebuildIsReadyAsync();
+        await RenamedEnsurePrebuildIsReadyAsync();
 
         var app = await CreateWebApplicationAsync(new WebApplicationOptions { Args = args });
 
@@ -161,7 +162,7 @@ public class Program
         return app;
     }
 
-    private static async Task EnsurePrebuildIsReadyAsync()
+    private static async Task RenamedEnsurePrebuildIsReadyAsync()
     {
         var prebuild = await Prebuild.GetOrCreateConsolePrebuildAsync(true);
         await prebuild.EnsureReadyAsync();
