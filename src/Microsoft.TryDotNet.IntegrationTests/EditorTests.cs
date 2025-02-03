@@ -534,7 +534,7 @@ Console.WriteLine(".Replace("\r\n", "\n"));
         signatureHelpDisplayText = signatureHelpDisplayText.Replace("\r", "");
 
         signatureHelpDisplayText.Should().Be(@"
-01/18
+01/19
 void Console.WriteLine()
 
 Writes the current line terminator to the standard output stream.
