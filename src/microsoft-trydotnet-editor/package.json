@@ -39,7 +39,7 @@
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.5.0",
     "jsdom": "20.0.0",
-    "mocha": "10.0.0",
+    "mocha": "10.8.2",
     "mocha-multi-reporters": "1.5.1",
     "mocha-trx-reporter": "3.3.1",
     "monaco-editor-webpack-plugin": "7.0.1",
