@@ -1,0 +1,9 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+        "file": "artifacts/bin/Microsoft.TryDotNet.IntegrationTests/Release/net9.0/.playwright/package/ThirdPartyNotices.txt",
+        "_justification": "This file is a third party notice text file, but not a real issue, and not one we distribute"
+        }
+    ]
+}
