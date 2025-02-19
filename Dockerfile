@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-cbl-mariner2.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:9.0-azurelinux3.0 AS build-env
 WORKDIR /App
 
 # Copy everything
@@ -23,7 +23,7 @@ RUN dotnet restore --configfile /App/NuGet.config /App/TryDotNet.sln
 RUN dotnet publish -c Release -o out /App/src/Microsoft.TryDotNet
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/sdk:8.0-cbl-mariner2.0
+FROM mcr.microsoft.com/dotnet/sdk:9.0-azurelinux3.0
 ARG TRY_DOT_NET_BUILD_ID
 WORKDIR /App
 
