@@ -64,6 +64,9 @@ extends:
           allTools: true
       policheck:
         enabled: true
+      credscan:
+        enabled: true
+        suppressionsFile: $(Build.SourcesDirectory)/.config/credscan/Suppressions.json
 
     stages:
     - stage: build
