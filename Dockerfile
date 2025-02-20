@@ -11,6 +11,7 @@ CMD ["bash"]
 RUN tdnf install gawk -y
 # This is Node v16.  For 18, use nodejs18.
 RUN tdnf install nodejs -y
+RUN tdnf install npm -y
 RUN tdnf clean all
 
 # Build javascript library
