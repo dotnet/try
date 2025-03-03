@@ -114,7 +114,7 @@ extends:
                 value: /p:SignType=$(_SignType)
                       /p:DotNetSignType=$(_SignType)
                       /p:MicroBuild_SigningEnabled=true
-                      /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                      /p:OverridePackageSource=https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json
                       /p:TeamName=$(_TeamName)
                       /p:DotNetPublishToBlobFeed=false
                       /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
@@ -174,7 +174,7 @@ extends:
               - name: _BuildArgs
                 value: /p:SignType=$(_SignType)
                   /p:DotNetSignType=$(_SignType)
-                  /p:OverridePackageSource=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+                  /p:OverridePackageSource=https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json
                   /p:TeamName=$(_TeamName)
                   /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
             # else
