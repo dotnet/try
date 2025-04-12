@@ -4,14 +4,13 @@ about: Create a report to help us improve
 title: ''
 labels: ''
 assignees: ''
+
 ---
 
 #### Describe the bug
 Please provide as much information as you can.
 
-#### Did this error occur while using `dotnet try` or online?
-- [ ] `dotnet-try`
-- [ ] online
+#### What is the URL where you saw the error?
 
 #### What kind of error was it?
 - [ ] User Interface (UI):  For example the output never displayed 
@@ -23,7 +22,7 @@ If applicable, add screenshots to help explain your problem.
 
 #### Please complete the following:
  - OS
-    - [ ] Windows 10
+    - [ ] Windows
     - [ ] macOS
     - [ ] Linux (Please specify distro)
     - [ ] iOS
@@ -31,4 +30,5 @@ If applicable, add screenshots to help explain your problem.
  - Browser 
     - [ ] Chrome
     - [ ] Edge
+    - [ ] Firefox
     - [ ] Safari
