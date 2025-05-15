@@ -7,7 +7,7 @@ pipelines:
         credscan:
           lastModifiedDate: 2024-03-13
         binskim:
-          lastModifiedDate: 2024-03-13
+          lastModifiedDate: 2025-01-14
         spotbugs:
           lastModifiedDate: 2024-03-13
       source:
@@ -19,3 +19,5 @@ pipelines:
           lastModifiedDate: 2024-03-13
         armory:
           lastModifiedDate: 2024-03-13
+        policheck:
+          lastModifiedDate: 2024-10-03
