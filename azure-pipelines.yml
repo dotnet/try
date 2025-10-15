@@ -106,7 +106,7 @@ stages:
       jobs:
       - job: Linux
         pool:
-          vmImage: ubuntu-20.04
+          vmImage: ubuntu-22.04
         variables:
         - name: TRYDOTNET_PREBUILDS_PATH
           value: $(Build.SourcesDirectory)/artifacts/trydotnet-prebuilds   
